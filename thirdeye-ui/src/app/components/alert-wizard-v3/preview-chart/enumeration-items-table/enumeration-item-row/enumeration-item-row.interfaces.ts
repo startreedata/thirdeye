@@ -21,4 +21,5 @@ export interface EnumerationItemRowProps {
     onDeleteClick?: () => void;
     timezone: string | undefined;
     hideTime: boolean;
+    showOnlyActivity?: boolean;
 }

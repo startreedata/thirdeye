@@ -28,13 +28,16 @@ export const AlertTypeSelection: FunctionComponent<AlertTypeSelectionProps> = ({
     onAlertPropertyChange,
     onSelectionComplete,
     alertTemplates,
+    isMultiDimensionAlert,
 }) => {
     const { t } = useTranslation();
 
     const handleAlgorithmClick = (algorithmOption: AlgorithmOption): void => {
         onAlertPropertyChange({
             template: {
-                name: algorithmOption.alertTemplate,
+                name: isMultiDimensionAlert
+                    ? algorithmOption.alertTemplateForMultidimension
+                    : algorithmOption.alertTemplate,
             },
         });
         onSelectionComplete();
@@ -43,6 +46,10 @@ export const AlertTypeSelection: FunctionComponent<AlertTypeSelectionProps> = ({
     const options = useMemo(() => {
         return generateAvailableAlgorithmOptions(
             alertTemplates.map((a) => a.name)
+        ).filter((option) =>
+            isMultiDimensionAlert
+                ? option.hasMultidimension
+                : option.hasAlertTemplate
         );
     }, [alertTemplates]);
 

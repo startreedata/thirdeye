@@ -19,6 +19,7 @@ export interface AlertTypeSelectionProps {
     onAlertPropertyChange: (contents: Partial<EditableAlert>) => void;
     onSelectionComplete: () => void;
     alertTemplates: AlertTemplate[];
+    isMultiDimensionAlert: boolean;
 }
 
 export interface AlgorithmOption {

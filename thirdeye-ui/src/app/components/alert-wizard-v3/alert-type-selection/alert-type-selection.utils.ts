@@ -76,10 +76,11 @@ export const generateOptions = (): AlgorithmOption[] => {
 };
 
 export const filterOptionWithTemplateNames = (
-    options: AvailableAlgorithmOption[]
+    options: AvailableAlgorithmOption[],
+    filterForMultiDimension: boolean
 ): AvailableAlgorithmOption[] => {
-    return options.filter(
-        (c) => c.hasAlertTemplate || c.hasPercentile || c.hasMultidimension
+    return options.filter((c) =>
+        filterForMultiDimension ? c.hasMultidimension : c.hasAlertTemplate
     );
 };
 

@@ -83,6 +83,10 @@ export const CreateAlertGuidedPage: FunctionComponent = () => {
 
     const [shouldShowStepper, setShouldShowStepper] = useState(true);
 
+    const [isMultiDimensionAlert, setIsMultiDimensionAlert] = useState(() => {
+        return alert?.templateProperties.enumerationItems !== undefined;
+    });
+
     // Ensure to filter for what is available on the server
     const alertTypeOptions = useMemo(() => {
         if (!alertTemplateOptions) {
@@ -96,18 +100,12 @@ export const CreateAlertGuidedPage: FunctionComponent = () => {
     }, [alertTemplateOptions]);
 
     const stepsToDisplay = useMemo(() => {
-        const matchingDimensionExploration = alertTypeOptions.find(
-            (c) =>
-                c.algorithmOption.alertTemplateForMultidimension ===
-                alert.template?.name
-        );
-
-        if (matchingDimensionExploration) {
-            return [STEPS[0], MULTI_DIMENSION_SELECT_STEP, ...STEPS.slice(1)];
+        if (isMultiDimensionAlert) {
+            return [MULTI_DIMENSION_SELECT_STEP, ...STEPS];
         }
 
         return [...STEPS];
-    }, [alert]);
+    }, [isMultiDimensionAlert]);
 
     const activeStep = useMemo(() => {
         const activeStepDefinition = stepsToDisplay.find((candidate) =>
@@ -210,6 +208,9 @@ export const CreateAlertGuidedPage: FunctionComponent = () => {
                             getAlertInsightStatus,
 
                             setShouldShowStepper,
+
+                            isMultiDimensionAlert,
+                            setIsMultiDimensionAlert,
                         }}
                     />
                 </Box>

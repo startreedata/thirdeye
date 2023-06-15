@@ -46,4 +46,6 @@ export interface AlertCreatedGuidedPageOutletContext {
     getAlertInsightStatus: ActionStatus;
 
     setShouldShowStepper: (flag: boolean) => void;
+    isMultiDimensionAlert: boolean;
+    setIsMultiDimensionAlert: (flag: boolean) => void;
 }

@@ -19,4 +19,5 @@ export interface EnumerationItemsTableProps {
     onDeleteClick: (detectionEvaluation: DetectionEvaluation) => void;
     timezone: string | undefined;
     hideTime: boolean;
+    showOnlyActivity?: boolean;
 }

@@ -45,10 +45,14 @@ export const SetupDimensionGroupsPage: FunctionComponent = () => {
     const { cohortsResponse, getCohorts, status, errorMessages } =
         useGetCohort();
 
-    const { alert, onAlertPropertyChange } =
+    const { alert, onAlertPropertyChange, setIsMultiDimensionAlert } =
         useOutletContext<AlertCreatedGuidedPageOutletContext>();
 
     const [selectedCohorts, setSelectedCohorts] = useState<CohortResult[]>([]);
+
+    useEffect(() => {
+        setIsMultiDimensionAlert(true);
+    }, []);
 
     useEffect(() => {
         notifyIfErrors(
@@ -99,7 +103,7 @@ export const SetupDimensionGroupsPage: FunctionComponent = () => {
             },
         });
 
-        navigate(`../${AppRouteRelative.WELCOME_CREATE_ALERT_TUNE_ALERT}`);
+        navigate(`../${AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_METRIC}`);
     };
 
     return (

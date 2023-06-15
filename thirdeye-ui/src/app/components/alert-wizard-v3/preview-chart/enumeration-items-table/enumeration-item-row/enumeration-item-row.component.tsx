@@ -43,6 +43,7 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
     onDeleteClick,
     timezone,
     hideTime,
+    showOnlyActivity,
 }) => {
     const { t } = useTranslation();
     const [expandedChartHeight, setExpandedChartHeight] =
@@ -53,11 +54,14 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
 
     const tsData = generateChartOptionsForAlert(
         detectionEvaluation,
-        anomalies,
+        showOnlyActivity ? [] : anomalies,
         t,
         undefined,
         timezone,
-        hideTime
+        hideTime,
+        showOnlyActivity,
+        false,
+        showOnlyActivity
     );
     const tsDataForExpanded = {
         ...tsData,

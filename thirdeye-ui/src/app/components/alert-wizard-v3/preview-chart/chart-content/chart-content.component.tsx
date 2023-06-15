@@ -15,9 +15,12 @@
 import { Box, Button, Grid } from "@material-ui/core";
 import RefreshIcon from "@material-ui/icons/Refresh";
 import { Alert } from "@material-ui/lab";
-import React, { FunctionComponent, useMemo } from "react";
+import { isEqual } from "lodash";
+import React, { FunctionComponent, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ReactComponent as ChartSkeleton } from "../../../../../assets/images/chart-skeleton.svg";
+import { EnumerationItemConfig } from "../../../../rest/dto/alert.interfaces";
+import { DetectionEvaluation } from "../../../../rest/dto/detection.interfaces";
 import {
     determineTimezoneFromAlertInEvaluation,
     extractDetectionEvaluation,
@@ -36,6 +39,8 @@ export const ChartContent: FunctionComponent<ChartContentProps> = ({
     showLoadButton,
     onReloadClick,
     showOnlyActivity,
+    onAlertPropertyChange,
+    alert,
 }) => {
     const sharedWizardClasses = useAlertWizardV2Styles();
     const previewChartClasses = usePreviewChartStyles();
@@ -49,14 +54,20 @@ export const ChartContent: FunctionComponent<ChartContentProps> = ({
         return [];
     }, [alertEvaluation]);
 
+    const [workingDetectionEvaluations, setWorkingDetectionEvaluations] =
+        useState(detectionEvaluations);
+
     const firstTimeSeriesOptions = useMemo(() => {
-        if (!detectionEvaluations || detectionEvaluations.length === 0) {
+        if (
+            !workingDetectionEvaluations ||
+            workingDetectionEvaluations.length === 0
+        ) {
             return null;
         }
 
         const timeseriesConfiguration = generateChartOptionsForAlert(
-            detectionEvaluations[0],
-            showOnlyActivity ? [] : detectionEvaluations[0].anomalies,
+            workingDetectionEvaluations[0],
+            showOnlyActivity ? [] : workingDetectionEvaluations[0].anomalies,
             t,
             undefined,
             determineTimezoneFromAlertInEvaluation(
@@ -77,7 +88,35 @@ export const ChartContent: FunctionComponent<ChartContentProps> = ({
         }
 
         return timeseriesConfiguration;
-    }, [detectionEvaluations]);
+    }, [workingDetectionEvaluations]);
+
+    const handleDeleteEnumerationItemClick = (
+        detectionEvaluation: DetectionEvaluation
+    ): void => {
+        const currentEnumerations: EnumerationItemConfig[] = alert
+            .templateProperties.enumerationItems as EnumerationItemConfig[];
+        onAlertPropertyChange({
+            templateProperties: {
+                ...alert.templateProperties,
+                enumerationItems: currentEnumerations.filter((c) => {
+                    return !isEqual(
+                        c.params,
+                        detectionEvaluation?.enumerationItem?.params
+                    );
+                }),
+            },
+        });
+
+        workingDetectionEvaluations &&
+            setWorkingDetectionEvaluations((current) =>
+                current.filter((c) => {
+                    return !isEqual(
+                        c.enumerationItem,
+                        detectionEvaluation?.enumerationItem
+                    );
+                })
+            );
+    };
 
     return (
         <>
@@ -131,29 +170,34 @@ export const ChartContent: FunctionComponent<ChartContentProps> = ({
                     </Box>
                 )}
 
-                {detectionEvaluations?.length === 1 && firstTimeSeriesOptions && (
-                    <Box marginTop={1}>
-                        <TimeSeriesChart
-                            height={300}
-                            {...firstTimeSeriesOptions}
-                        />
-                    </Box>
-                )}
+                {workingDetectionEvaluations?.length === 1 &&
+                    firstTimeSeriesOptions && (
+                        <Box marginTop={1}>
+                            <TimeSeriesChart
+                                height={300}
+                                {...firstTimeSeriesOptions}
+                            />
+                        </Box>
+                    )}
 
-                {detectionEvaluations && detectionEvaluations.length > 1 && (
-                    <Box marginTop={1}>
-                        <EnumerationItemsTable
-                            detectionEvaluations={detectionEvaluations}
-                            hideTime={shouldHideTimeInDatetimeFormat(
-                                alertEvaluation?.alert.template
-                            )}
-                            timezone={determineTimezoneFromAlertInEvaluation(
-                                alertEvaluation?.alert.template
-                            )}
-                            onDeleteClick={() => null}
-                        />
-                    </Box>
-                )}
+                {workingDetectionEvaluations &&
+                    workingDetectionEvaluations.length > 1 && (
+                        <Box marginTop={1}>
+                            <EnumerationItemsTable
+                                showOnlyActivity
+                                detectionEvaluations={
+                                    workingDetectionEvaluations
+                                }
+                                hideTime={shouldHideTimeInDatetimeFormat(
+                                    alertEvaluation?.alert.template
+                                )}
+                                timezone={determineTimezoneFromAlertInEvaluation(
+                                    alertEvaluation?.alert.template
+                                )}
+                                onDeleteClick={handleDeleteEnumerationItemClick}
+                            />
+                        </Box>
+                    )}
             </Box>
         </>
     );

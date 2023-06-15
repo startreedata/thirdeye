@@ -50,6 +50,7 @@ export const SelectTypePage: FunctionComponent<SelectTypePageProps> = ({
         alertTemplates,
         selectedAlgorithmOption,
         alert,
+        isMultiDimensionAlert,
     } = useOutletContext<AlertCreatedGuidedPageOutletContext>();
 
     useEffect(() => {
@@ -134,12 +135,15 @@ export const SelectTypePage: FunctionComponent<SelectTypePageProps> = ({
                             </PageContentsCardV1>
                         }
                         isEmpty={
-                            filterOptionWithTemplateNames(alertTypeOptions)
-                                .length === 0
+                            filterOptionWithTemplateNames(
+                                alertTypeOptions,
+                                isMultiDimensionAlert
+                            ).length === 0
                         }
                     >
                         <AlertTypeSelection
                             alertTemplates={alertTemplates}
+                            isMultiDimensionAlert={isMultiDimensionAlert}
                             onAlertPropertyChange={onAlertPropertyChange}
                             onSelectionComplete={handleAlgorithmSelection}
                         />

@@ -49,6 +49,7 @@ import {
 import { AlertCreatedGuidedPageOutletContext } from "../alerts-create-guided-page.interfaces";
 
 const ALERT_TEMPLATE_FOR_EVALUATE = "startree-threshold";
+const ALERT_TEMPLATE_FOR_EVALUATE_DX = "startree-threshold-dx";
 
 const PROPERTIES_TO_COPY = [
     "dataSource",
@@ -56,6 +57,7 @@ const PROPERTIES_TO_COPY = [
     "aggregationColumn",
     "aggregationFunction",
     "monitoringGranularity",
+    "enumerationItems",
 ];
 
 export const SetupMetricPage: FunctionComponent = () => {
@@ -78,6 +80,7 @@ export const SetupMetricPage: FunctionComponent = () => {
         alertInsight,
         getAlertInsight,
         getAlertInsightStatus,
+        isMultiDimensionAlert,
     } = useOutletContext<AlertCreatedGuidedPageOutletContext>();
 
     const {
@@ -99,10 +102,14 @@ export const SetupMetricPage: FunctionComponent = () => {
     }, [getEvaluationStatus]);
 
     const alertTemplateForEvaluate = useMemo(() => {
+        const alertTemplateToFind = isMultiDimensionAlert
+            ? ALERT_TEMPLATE_FOR_EVALUATE_DX
+            : ALERT_TEMPLATE_FOR_EVALUATE;
+
         return alertTemplates.find((alertTemplateCandidate) => {
-            return alertTemplateCandidate.name === ALERT_TEMPLATE_FOR_EVALUATE;
+            return alertTemplateCandidate.name === alertTemplateToFind;
         });
-    }, [alertTemplates, alert]);
+    }, [alertTemplates, alert, isMultiDimensionAlert]);
 
     const [alertConfigForPreview, setAlertConfigForPreview] =
         useState<EditableAlert>(() => {
@@ -280,8 +287,12 @@ export const SetupMetricPage: FunctionComponent = () => {
                             >
                                 <ChartContent
                                     showOnlyActivity
+                                    alert={alert}
                                     alertEvaluation={evaluation}
                                     showLoadButton={shouldShowLoadButton}
+                                    onAlertPropertyChange={
+                                        onAlertPropertyChange
+                                    }
                                     onReloadClick={handleReloadPreviewClick}
                                 />
                             </LoadingErrorStateSwitch>
@@ -291,7 +302,11 @@ export const SetupMetricPage: FunctionComponent = () => {
             </PageContentsGridV1>
 
             <WizardBottomBar
-                backBtnLink="../"
+                backBtnLink={
+                    isMultiDimensionAlert
+                        ? `../${AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_DIMENSION_EXPLORATION}`
+                        : "../"
+                }
                 nextBtnLink={`../${
                     AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE
                 }?${searchParams.toString()}`}

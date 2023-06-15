@@ -14,6 +14,8 @@
 package ai.startree.thirdeye.plugins.datasource.pinot;
 
 import static ai.startree.thirdeye.spi.Constants.DEFAULT_CHRONOLOGY;
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.plugins.datasource.pinot.restclient.PinotControllerRestClient;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
@@ -34,6 +36,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.spi.data.DateTimeFieldSpec;
 import org.apache.pinot.spi.data.DateTimeFieldSpec.TimeFormat;
 import org.apache.pinot.spi.data.DateTimeFormatSpec;
@@ -155,9 +158,12 @@ public class PinotDatasetOnboarder {
 
     final List<DatasetConfigDTO> onboarded = new ArrayList<>();
     for (final String tableName : allTables) {
-      final DatasetConfigDTO datasetConfigDTO = onboardTable(tableName, dataSourceName);
-      if (datasetConfigDTO != null) {
-        onboarded.add(datasetConfigDTO);
+      try {
+        final DatasetConfigDTO datasetConfigDTO = onboardTable(tableName, dataSourceName);
+        onboarded.add(requireNonNull(datasetConfigDTO, "Dataset config is null"));
+      } catch (final Exception e) {
+        // Catch the exception and continue to onboard other tables
+        LOG.error("Failed to onboard table: " + tableName, e);
       }
     }
     return onboarded;
@@ -166,24 +172,22 @@ public class PinotDatasetOnboarder {
   public DatasetConfigDTO onboardTable(final String tableName, final String dataSourceName)
       throws IOException {
     final Schema schema = pinotControllerRestClient.getSchemaFromPinot(tableName);
-    if (schema == null) {
-      LOG.error("schema not found for pinot table: " + tableName);
-      return null;
-    }
+    requireNonNull(schema, "Onboarding Error: schema is null for pinot table: " + tableName);
+    checkArgument(!StringUtils.isBlank(schema.getSchemaName()),
+        "Onboarding Error: schema name is blank for pinot table: " + tableName);
 
     final JsonNode tableConfigJson = pinotControllerRestClient
         .getTableConfigFromPinotEndpoint(tableName);
-    if (tableConfigJson == null || tableConfigJson.isNull()) {
-      LOG.error("table config is null for pinot table: " + tableName);
-      return null;
-    }
+    checkArgument(tableConfigJson != null && !tableConfigJson.isNull(),
+        "Onboarding Error: table config is null for pinot table: " + tableName);
 
     final String timeColumnName = pinotControllerRestClient
         .extractTimeColumnFromPinotTable(tableConfigJson);
-    if (!pinotControllerRestClient.verifySchemaCorrectness(schema, timeColumnName)) {
-      LOG.info("Incorrect schema in pinot table: " + tableName);
-      return null;
-    }
+    // rewrite above if to throw exception instead of returning null
+    checkArgument(timeColumnName != null,
+        "Onboarding Error: time column is null for pinot table: " + tableName);
+    checkArgument(schema.getSpecForTimeColumn(timeColumnName) != null,
+        "Onboarding Error: unable to get time column spec in schema for pinot table: " + tableName);
 
     final Map<String, String> pinotCustomProperties = pinotControllerRestClient
         .extractCustomConfigsFromPinotTable(tableConfigJson);

@@ -29,10 +29,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -138,16 +136,6 @@ public class PinotControllerRestClient {
       schemaRes.close();
     }
     return schema;
-  }
-
-  /**
-   * Verify schema name and presence of field spec for time column
-   */
-  public boolean verifySchemaCorrectness(final Schema schema,
-      @Nullable final String timeColumnName) {
-    return !StringUtils.isBlank(schema.getSchemaName())
-        && timeColumnName != null
-        && schema.getSpecForTimeColumn(timeColumnName) != null;
   }
 
   public JsonNode getTableConfigFromPinotEndpoint(final String dataset) throws IOException {

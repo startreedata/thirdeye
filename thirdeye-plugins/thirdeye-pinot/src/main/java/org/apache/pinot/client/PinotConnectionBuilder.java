@@ -14,7 +14,9 @@
 package org.apache.pinot.client;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.singletonList;
+import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSourceConfig;
 import java.security.NoSuchAlgorithmException;
@@ -37,8 +39,11 @@ public class PinotConnectionBuilder {
       connection = ConnectionFactory.fromHostList(singletonList(brokerUrl), transport);
       LOG.info("Created pinot transport with brokers [{}]", brokerUrl);
     } else {
+      final String zookeeperUrl = requireNonNull(config.getZookeeperUrl(),
+          "zookeeperUrl is required if brokerUrl is not provided").trim();
+      checkArgument(zookeeperUrl.length() > 0, "if provided, zookeeperUrl cannot be empty");
       connection = ConnectionFactory.fromZookeeper(String.format("%s/%s",
-          config.getZookeeperUrl(),
+          zookeeperUrl,
           config.getClusterName()), transport);
       LOG.info("Created pinot transport with controller {}:{}",
           config.getControllerHost(),
@@ -83,5 +88,4 @@ public class PinotConnectionBuilder {
 
     return factory.buildTransport();
   }
-
 }

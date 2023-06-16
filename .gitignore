@@ -30,3 +30,6 @@ release.properties
 
 # helm cached charts
 kubernetes/helm/charts
+
+# maven wrapper jar
+.mvn/wrapper/maven-wrapper.jar

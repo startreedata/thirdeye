@@ -179,7 +179,7 @@ public class HappyPathTest {
     assertThat(evaluatePath.get("post")
         .get("requestBody")
         .get("content")
-        .get("*/*")
+        .get("application/json")
         .get("schema")
         .get("$ref")
         .textValue()).isEqualTo("#/components/schemas/AlertEvaluationApi");

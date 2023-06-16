@@ -34,11 +34,8 @@ import {
 import { createDefaultAlertTemplates } from "../../../rest/alert-templates/alert-templates.rest";
 import { AppRouteRelative } from "../../../utils/routes/routes.util";
 import { AlertCreatedGuidedPageOutletContext } from "../alerts-create-guided-page.interfaces";
-import { SelectTypePageProps } from "./select-type-page.interface";
 
-export const SelectTypePage: FunctionComponent<SelectTypePageProps> = ({
-    hideCurrentlySelected,
-}) => {
+export const SelectTypePage: FunctionComponent = () => {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const { t } = useTranslation();
@@ -143,7 +140,7 @@ export const SelectTypePage: FunctionComponent<SelectTypePageProps> = ({
                 </Grid>
             </PageContentsGridV1>
 
-            {!hideCurrentlySelected && selectedAlgorithmOption && (
+            {selectedAlgorithmOption && (
                 <WizardBottomBar
                     backBtnLink={`../${
                         AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_METRIC

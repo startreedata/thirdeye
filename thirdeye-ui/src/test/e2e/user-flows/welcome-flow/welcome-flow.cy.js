@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { PREVIEW_CHART_TEST_IDS } from "../../../../app/components/alert-wizard-v2/alert-template/preview-chart/preview-chart.interfaces";
+import { SELECT_ALERT_CATEGORY_TEST_IDS } from "../../../../app/pages/alerts-create-guided-page/select-alert-category/select-alert-category-page.interface";
 import { ONBOARD_DATASETS_TEST_IDS } from "../../../../app/pages/welcome-page/create-datasource/onboard-datasets/onboard-datasets-page.interface";
 import { ADD_NEW_DATASOURCE } from "../../../../app/pages/welcome-page/create-datasource/onboard-datasource/onboard-datasource-page.utils";
 
@@ -89,8 +91,11 @@ describe("newly launched ThirdEye welcome flow", () => {
         cy.visit("http://localhost:7004/welcome");
 
         cy.getByDataTestId("create-alert-btn").click();
-        cy.get("#startree-mean-variance-basic-btn").click();
+        cy.getByDataTestId(
+            SELECT_ALERT_CATEGORY_TEST_IDS.BASIC_ALERT_BTN
+        ).click();
 
+        /** Select metric page **/
         // Ensure preview button is disabled
         cy.getByDataTestId("preview-chart-button").should(
             "have.class",
@@ -103,15 +108,10 @@ describe("newly launched ThirdEye welcome flow", () => {
 
         // Open the metric autocomplete dropdown
         cy.getByDataTestId("metric-select").click();
-
         cy.get('.MuiAutocomplete-popper li[data-option-index="2"]').click();
 
-        // Make sure input value is propagated
-        // eslint-disable-next-line cypress/no-unnecessary-waiting
-        cy.wait(100);
-
         // Ensure preview button is enabled
-        cy.getByDataTestId("preview-chart-button").should(
+        cy.getByDataTestId(PREVIEW_CHART_TEST_IDS.PREVIEW_BUTTON).should(
             "not.have.class",
             "Mui-disabled"
         );
@@ -122,7 +122,37 @@ describe("newly launched ThirdEye welcome flow", () => {
         );
 
         // Click on button to initiate API call for chart data
-        cy.getByDataTestId("preview-chart-button").click();
+        cy.getByDataTestId(PREVIEW_CHART_TEST_IDS.PREVIEW_BUTTON).click();
+
+        cy.wait("@getChartData")
+            .its(
+                "response.body.detectionEvaluations.output_AnomalyDetectorResult_0.anomalies"
+            )
+            .should("have.length.gt", 10);
+
+        cy.get("#next-bottom-bar-btn").click();
+
+        /** Select alert type page **/
+        // Click the 4th option
+        cy.getByDataTestId("threshold-select-btn").click();
+        // Ensure option is labeled as selected
+        cy.getByDataTestId("threshold-select-btn")
+            .contains("Selected")
+            .should("exist");
+        cy.getByDataTestId("mean-variance-rule-select-btn").click();
+        cy.getByDataTestId("mean-variance-rule-select-btn")
+            .contains("Selected")
+            .should("exist");
+        cy.get("#next-bottom-bar-btn").click();
+
+        /** Tune alert page **/
+        // Ensure preview button is enabled
+        cy.getByDataTestId(PREVIEW_CHART_TEST_IDS.PREVIEW_BUTTON).should(
+            "not.have.class",
+            "Mui-disabled"
+        );
+        // Click on button to initiate API call for chart data
+        cy.getByDataTestId(PREVIEW_CHART_TEST_IDS.PREVIEW_BUTTON).click();
 
         cy.wait("@getChartData")
             .its(
@@ -133,10 +163,12 @@ describe("newly launched ThirdEye welcome flow", () => {
         // Take user to filters page
         cy.get("#next-bottom-bar-btn").click();
 
+        /** Filters page **/
         // Take user to alert details page
         cy.get("#next-bottom-bar-btn").click();
 
-        // Take create an alert
+        /** Details and notifications page **/
+        // create the alert
         cy.get("#next-bottom-bar-btn").click();
 
         // User is take to home page where modal flag is in url

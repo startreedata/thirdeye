@@ -40,16 +40,21 @@ export const WizardBottomBar: FunctionComponent<WizardBottomBarProps> = ({
 
                 <Grid item>
                     {handleBackClick && (
-                        <Button color="secondary" onClick={handleBackClick}>
+                        <Button
+                            color="primary"
+                            variant="outlined"
+                            onClick={handleBackClick}
+                        >
                             {backButtonLabel || t("label.back")}
                         </Button>
                     )}
                     {backBtnLink && (
                         <Button
-                            color="secondary"
+                            color="primary"
                             component={RouterLink}
                             id="back-bottom-bar-btn"
                             to={backBtnLink}
+                            variant="outlined"
                         >
                             {backButtonLabel || t("label.back")}
                         </Button>

@@ -16,3 +16,8 @@
 export interface SelectAlertCategoryPageProps {
     hideBottomBar?: boolean;
 }
+
+export const SELECT_ALERT_CATEGORY_TEST_IDS = {
+    BASIC_ALERT_BTN: "basic-alert-btn",
+    MULTIDIMENSION_ALERT_BTN: "multidimension-alert-btn",
+};

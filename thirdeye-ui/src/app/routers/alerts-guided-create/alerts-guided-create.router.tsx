@@ -77,7 +77,6 @@ export const AlertsCreateGuidedRouter: FunctionComponent<AlertsGuidedCreateRoute
     ({
         createLabel,
         inProgressLabel,
-        hideCurrentlySelected,
         hideBottomBarForAlertCategorySelection,
     }) => {
         return (
@@ -123,11 +122,7 @@ export const AlertsCreateGuidedRouter: FunctionComponent<AlertsGuidedCreateRoute
                                         AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE
                                     }
                                 >
-                                    <SelectTypePage
-                                        hideCurrentlySelected={
-                                            hideCurrentlySelected
-                                        }
-                                    />
+                                    <SelectTypePage />
                                 </CancelAPICallsOnPageUnload>
                             }
                             path={

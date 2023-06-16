@@ -15,6 +15,7 @@
 
 import { PREVIEW_CHART_TEST_IDS } from "../../../../app/components/alert-wizard-v2/alert-template/preview-chart/preview-chart.interfaces";
 import { ALERT_CREATION_NAVIGATE_DROPDOWN_TEST_IDS } from "../../../../app/components/alert-wizard-v3/navigate-alert-creation-flows-dropdown/navigate-alert-creation-flows-dropdown.interface";
+import { SELECT_ALERT_CATEGORY_TEST_IDS } from "../../../../app/pages/alerts-create-guided-page/select-alert-category/select-alert-category-page.interface";
 import { SETUP_DETAILS_TEST_IDS } from "../../../../app/pages/alerts-create-guided-page/setup-details/setup-details-page.interface";
 import { DEFAULT_ALERT_CONFIG } from "../../support/load-alert-and-anomalies.command";
 
@@ -37,8 +38,11 @@ describe("alert create flows", () => {
     it("user can create alert from the simple flow", () => {
         cy.get("a").contains("Create").click();
 
-        cy.get("#startree-mean-variance-basic-btn").click();
+        cy.getByDataTestId(
+            SELECT_ALERT_CATEGORY_TEST_IDS.BASIC_ALERT_BTN
+        ).click();
 
+        /** Select metric page **/
         // Open the dataset autocomplete dropdown
         cy.getByDataTestId("datasource-select").click();
         cy.getByDataTestId("usstoresalesorderdata-datasource-option").click();
@@ -67,8 +71,39 @@ describe("alert create flows", () => {
             )
             .should("have.length.gt", 10);
 
-        // Take user to filters page and can fiddle around
         cy.get("#next-bottom-bar-btn").click();
+
+        /** Select alert type page **/
+        // Click the 4th option
+        cy.getByDataTestId("threshold-select-btn").click();
+        // Ensure option is labeled as selected
+        cy.getByDataTestId("threshold-select-btn")
+            .contains("Selected")
+            .should("exist");
+        cy.getByDataTestId("mean-variance-rule-select-btn").click();
+        cy.getByDataTestId("mean-variance-rule-select-btn")
+            .contains("Selected")
+            .should("exist");
+        cy.get("#next-bottom-bar-btn").click();
+
+        /** Tune alert page **/
+        // Ensure preview button is enabled
+        cy.getByDataTestId(PREVIEW_CHART_TEST_IDS.PREVIEW_BUTTON).should(
+            "not.have.class",
+            "Mui-disabled"
+        );
+        // Click on button to initiate API call for chart data
+        cy.getByDataTestId(PREVIEW_CHART_TEST_IDS.PREVIEW_BUTTON).click();
+
+        cy.wait("@getChartData")
+            .its(
+                "response.body.detectionEvaluations.output_AnomalyDetectorResult_0.anomalies"
+            )
+            .should("have.length.gt", 10);
+
+        cy.get("#next-bottom-bar-btn").click();
+
+        /** Select filters page **/
         cy.get("button").contains("Filters & sensitivity").click();
         cy.getByDataTestId("timeOfWeek-switch").click();
         [
@@ -126,6 +161,9 @@ describe("alert create flows", () => {
 
     it("user can create alert from the advanced flow", () => {
         cy.get("a").contains("Create").click();
+        cy.getByDataTestId(
+            SELECT_ALERT_CATEGORY_TEST_IDS.BASIC_ALERT_BTN
+        ).click();
 
         cy.getByDataTestId(
             ALERT_CREATION_NAVIGATE_DROPDOWN_TEST_IDS.DROPDOWN_CONTAINER
@@ -165,6 +203,9 @@ describe("alert create flows", () => {
 
     it("user can create alert from the json editor flow", () => {
         cy.get("a").contains("Create").click();
+        cy.getByDataTestId(
+            SELECT_ALERT_CATEGORY_TEST_IDS.BASIC_ALERT_BTN
+        ).click();
 
         cy.getByDataTestId(
             ALERT_CREATION_NAVIGATE_DROPDOWN_TEST_IDS.DROPDOWN_CONTAINER
@@ -205,6 +246,9 @@ describe("alert create flows", () => {
 
     it("user can switch among the editors and the same alert configuration state is maintained", () => {
         cy.get("a").contains("Create").click();
+        cy.getByDataTestId(
+            SELECT_ALERT_CATEGORY_TEST_IDS.BASIC_ALERT_BTN
+        ).click();
 
         cy.getByDataTestId(
             ALERT_CREATION_NAVIGATE_DROPDOWN_TEST_IDS.DROPDOWN_CONTAINER
@@ -234,17 +278,24 @@ describe("alert create flows", () => {
             ALERT_CREATION_NAVIGATE_DROPDOWN_TEST_IDS.DROPDOWN_CONTAINER
         ).click();
         cy.get("li").contains("Simple").click();
-        cy.getByDataTestId("datasource-select")
-            .find("input[value='USStoreSalesOrderData']")
-            .should("exist");
-        cy.getByDataTestId("metric-select")
-            .find("input[value='UnitCost']")
-            .should("exist");
+
+        /** Should be at tune alert page **/
         cy.getByDataTestId("seasonalityPeriod-container")
             .find("input[value='P1D']")
             .should("exist");
         cy.getByDataTestId("lookback-container")
             .find("input[value='P14D']")
+            .should("exist");
+
+        // Got to the metric selection page (double back)
+        cy.get("#back-bottom-bar-btn").click();
+        cy.get("#back-bottom-bar-btn").click();
+
+        cy.getByDataTestId("datasource-select")
+            .find("input[value='USStoreSalesOrderData']")
+            .should("exist");
+        cy.getByDataTestId("metric-select")
+            .find("input[value='UnitCost']")
             .should("exist");
 
         // Switching to Advanced mode retains same values

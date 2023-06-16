@@ -39,7 +39,10 @@ import {
     getAlertsAllPath,
 } from "../../../utils/routes/routes.util";
 import { AlertCreatedGuidedPageOutletContext } from "../alerts-create-guided-page.interfaces";
-import { SelectAlertCategoryPageProps } from "./select-alert-category-page.interface";
+import {
+    SelectAlertCategoryPageProps,
+    SELECT_ALERT_CATEGORY_TEST_IDS,
+} from "./select-alert-category-page.interface";
 
 const OutlineCardComponent: FunctionComponent<CardProps> = (props) => {
     return <Card variant="outlined" {...props} />;
@@ -151,6 +154,9 @@ export const SelectAlertCategoryPage: FunctionComponent<SelectAlertCategoryPageP
                                                             <Button
                                                                 color="primary"
                                                                 component={Link}
+                                                                data-testid={
+                                                                    SELECT_ALERT_CATEGORY_TEST_IDS.BASIC_ALERT_BTN
+                                                                }
                                                                 to={
                                                                     AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_METRIC
                                                                 }
@@ -221,6 +227,9 @@ export const SelectAlertCategoryPage: FunctionComponent<SelectAlertCategoryPageP
                                                             <Button
                                                                 color="primary"
                                                                 component={Link}
+                                                                data-testid={
+                                                                    SELECT_ALERT_CATEGORY_TEST_IDS.MULTIDIMENSION_ALERT_BTN
+                                                                }
                                                                 disabled={
                                                                     !hasMultiDimension
                                                                 }

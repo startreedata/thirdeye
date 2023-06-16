@@ -93,7 +93,7 @@ export const AppRouteRelative = {
     ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_INVESTIGATE: `investigate`,
     RCA_WHAT_WHERE: "what-where-page",
     RCA_HEATMAP: "heatmap",
-    RCA_TOP_CONTRIBUTORS: "top-contributors",
+    RCA_TOP_CONTRIBUTORS: "top-contributors-page",
     RCA_DIMENSION_ANALYSIS: "dimension-analysis",
     RCA_EVENTS: "events",
     RCA_REVIEW_SHARE: "review-share",

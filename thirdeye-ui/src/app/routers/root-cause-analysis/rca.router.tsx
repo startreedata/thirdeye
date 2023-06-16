@@ -51,10 +51,10 @@ const WhatWherePage = lazy(() =>
     ).then((module) => ({ default: module.WhatWherePage }))
 );
 
-const TopContributors = lazy(() =>
+const TopContributorsPage = lazy(() =>
     import(
-        /* webpackChunkName: "top-contributors" */ "../../pages/rca/top-contributors/top-contributors.component"
-    ).then((module) => ({ default: module.TopContributors }))
+        /* webpackChunkName: "top-contributors-page" */ "../../pages/rca/top-contributors-page/top-contributors-page.component"
+    ).then((module) => ({ default: module.TopContributorsPage }))
 );
 
 const PageNotFoundPage = lazy(() =>
@@ -127,7 +127,7 @@ export const RootCauseAnalysisRouter: FunctionComponent = () => {
                             }
                         />
                         <Route
-                            element={<TopContributors />}
+                            element={<TopContributorsPage />}
                             path={AppRouteRelative.RCA_TOP_CONTRIBUTORS}
                         />
                         <Route path={AppRouteRelative.RCA_HEATMAP} />

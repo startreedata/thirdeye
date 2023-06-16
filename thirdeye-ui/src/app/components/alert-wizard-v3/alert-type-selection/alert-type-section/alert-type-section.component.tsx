@@ -36,7 +36,7 @@ export const AlertTypeSection: FunctionComponent<AlertTypeSectionProps> = ({
                     alignItems="center"
                     justifyContent="space-between"
                 >
-                    <Grid item>
+                    <Grid item lg md sm xs>
                         <Typography
                             gutterBottom
                             color={selected ? "primary" : undefined}
@@ -49,15 +49,19 @@ export const AlertTypeSection: FunctionComponent<AlertTypeSectionProps> = ({
                             {option.algorithmOption.description}
                         </Typography>
                     </Grid>
-                    <Grid item>
-                        <Button
-                            color="primary"
-                            data-testid={dataTestId}
-                            variant="outlined"
-                            onClick={() => onClick(option.algorithmOption)}
-                        >
-                            {selected ? t("label.selected") : t("label.select")}
-                        </Button>
+                    <Grid item lg={2} md={2} sm={2} xs={12}>
+                        <Box textAlign="right">
+                            <Button
+                                color="primary"
+                                data-testid={dataTestId}
+                                variant="outlined"
+                                onClick={() => onClick(option.algorithmOption)}
+                            >
+                                {selected
+                                    ? t("label.selected")
+                                    : t("label.select")}
+                            </Button>
+                        </Box>
                     </Grid>
                 </Grid>
             </Grid>

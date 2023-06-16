@@ -59,6 +59,7 @@ import javax.ws.rs.core.Response;
 @SecurityScheme(name = "oauth", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER, paramName = HttpHeaders.AUTHORIZATION)
 @Singleton
 @Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
 public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDTO> {
 
   private final DataSourceService dataSourceService;

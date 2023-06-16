@@ -59,6 +59,7 @@ import org.slf4j.LoggerFactory;
 @SecurityScheme(name = "oauth", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER, paramName = HttpHeaders.AUTHORIZATION)
 @Singleton
 @Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
 public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
 
   private static final Logger LOG = LoggerFactory.getLogger(AlertResource.class);

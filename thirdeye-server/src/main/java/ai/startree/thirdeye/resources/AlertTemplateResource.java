@@ -47,6 +47,7 @@ import javax.ws.rs.core.Response;
 @SecurityScheme(name = "oauth", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER, paramName = HttpHeaders.AUTHORIZATION)
 @Singleton
 @Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
 public class AlertTemplateResource extends CrudResource<AlertTemplateApi, AlertTemplateDTO> {
 
   private final AlertTemplateService alertTemplateService;

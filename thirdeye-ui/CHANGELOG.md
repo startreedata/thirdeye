@@ -3,11 +3,7 @@
 
 ### Features
 
-* [TE-1578](https://cortexdata.atlassian.net/browse/TE-1578) address feedback ([6d167d4fe](https://github.com/startreedata/thirdeye/commit/6d167d4fed8faac8c1e40b044171c37ee99a5f0e))
-* [TE-1578](https://cortexdata.atlassian.net/browse/TE-1578) address feedback 2 ([ef212c578](https://github.com/startreedata/thirdeye/commit/ef212c5784073bad9598701220cb93dc57545772))
-* [TE-1578](https://cortexdata.atlassian.net/browse/TE-1578) select alert type page ([e1a57f850](https://github.com/startreedata/thirdeye/commit/e1a57f8500ef085563b02483b8d1a6094e58dcb2))
-* [TE-1578](https://cortexdata.atlassian.net/browse/TE-1578) select metrics page ([657785a35](https://github.com/startreedata/thirdeye/commit/657785a352819e051715aecdf9e2ceb491abadab))
-* [TE-1578](https://cortexdata.atlassian.net/browse/TE-1578) support multidimension create alert flow ([d49d6d79a](https://github.com/startreedata/thirdeye/commit/d49d6d79af327d855db6b53a5068871934413c12))
+* [TE-1578](https://cortexdata.atlassian.net/browse/TE-1578) reflow create alert page simple mode ([6d167d4fe](https://github.com/startreedata/thirdeye/commit/6d167d4fed8faac8c1e40b044171c37ee99a5f0e))
 
 
 ### Bug Fixes

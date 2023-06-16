@@ -24,7 +24,7 @@ import { ParentSize } from "@visx/responsive";
 import { scaleLinear } from "@visx/scale";
 import { useTooltip } from "@visx/tooltip";
 import { HierarchyNode, HierarchyRectangularNode } from "d3-hierarchy";
-import React, { MouseEvent } from "react";
+import React, { MouseEvent, useEffect } from "react";
 import { TooltipV1 } from "../../../platform/components";
 import { checkIfOtherDimension } from "../../../utils/visualization/visualization.util";
 import { TooltipWithBounds } from "../tooltip-with-bounds/tooltip-with-bounds.component";
@@ -39,7 +39,7 @@ import { useTreemapStyles } from "./treemap.styles";
 
 // #TODO move to a constants file
 const RIGHT_BOUNDS_PADDING = 30;
-const DEFAULT_TREEMAP_HEIGHT = 60;
+const DEFAULT_TREEMAP_HEIGHT = 40;
 const margin = {
     left: 10,
     top: 10,
@@ -90,6 +90,10 @@ function TreemapInternal<Data>({
     colorChangeValueAccessor = (d) => d.size,
     ...props
 }: TreemapPropsInternal<Data>): JSX.Element {
+    useEffect(() => {
+        props.onHeightChange && props.onHeightChange(height);
+    }, [height]);
+
     const xMax = Math.abs(width) - margin.left - margin.right;
     const yMax = Math.abs(height) - margin.top - margin.bottom;
     const theme = useTheme();
@@ -185,9 +189,6 @@ function TreemapInternal<Data>({
                                         key={`node-${i}`}
                                         margin={margin}
                                         node={node}
-                                        shouldTruncateText={
-                                            props.shouldTruncateText
-                                        }
                                         onDimensionClickHandler={
                                             props.onDimensionClickHandler
                                         }

@@ -26,6 +26,7 @@ export interface TreemapProps<Data> {
     height?: number;
     tooltipElement?: React.FunctionComponent<TreemapData<Data>>;
     colorChangeValueAccessor?: (node: TreemapData<Data>) => number;
+    onHeightChange?: (height: number) => void;
 }
 
 export interface TreemapData<Data> {

@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Button, Grid, TextField } from "@material-ui/core";
+import { Box, Button, ButtonGroup, Grid, TextField } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
 import React, { FunctionComponent, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -88,60 +88,53 @@ export const BaselineOffsetSelection: FunctionComponent<BaselineOffsetSelectionP
                     </Box>
                 </Grid>
                 <Grid item>
-                    <Grid
-                        container
-                        alignItems="center"
-                        direction="row"
-                        justifyContent="flex-start"
-                    >
-                        <Grid item xs={3}>
-                            <TextField
-                                required
-                                size="small"
-                                type="number"
-                                value={offsetValue}
-                                onChange={(e) =>
-                                    setOffsetValue(Number(e.target.value))
-                                }
-                            />
-                        </Grid>
-                        <Grid item xs={5}>
-                            <Autocomplete<{ key: string; label: string }>
-                                autoSelect
-                                classes={{
-                                    inputRoot: classes.input,
-                                }}
-                                getOptionLabel={(option) => option.label}
-                                options={availableOptions}
-                                renderInput={(params) => (
-                                    <TextField
-                                        {...params}
-                                        InputProps={{
-                                            ...params.InputProps,
-                                        }}
-                                        variant="outlined"
-                                    />
-                                )}
-                                value={{
-                                    key: offsetUnit,
-                                    label: OFFSET_TO_HUMAN_READABLE[offsetUnit],
-                                }}
-                                onChange={(_, selected) =>
-                                    selected && setOffsetUnit(selected.key)
-                                }
-                            />
-                        </Grid>
-                        <Grid item>
-                            <Button
-                                color="primary"
-                                disabled={isSetButtonDisabled}
-                                variant="outlined"
-                                onClick={handleSetClick}
-                            >
-                                {t("label.reload")}
-                            </Button>
-                        </Grid>
-                    </Grid>
+                    <ButtonGroup color="primary">
+                        <TextField
+                            required
+                            inputProps={{ style: { maxWidth: "50px" } }}
+                            size="small"
+                            type="number"
+                            value={offsetValue}
+                            onChange={(e) =>
+                                setOffsetValue(Number(e.target.value))
+                            }
+                        />
+                        <Autocomplete<{ key: string; label: string }>
+                            autoSelect
+                            classes={{
+                                inputRoot: classes.input,
+                            }}
+                            getOptionLabel={(option) => option.label}
+                            options={availableOptions}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    inputProps={{
+                                        ...params.inputProps,
+                                        style: {
+                                            minWidth: "50px",
+                                        },
+                                    }}
+                                    variant="outlined"
+                                />
+                            )}
+                            value={{
+                                key: offsetUnit,
+                                label: OFFSET_TO_HUMAN_READABLE[offsetUnit],
+                            }}
+                            onChange={(_, selected) =>
+                                selected && setOffsetUnit(selected.key)
+                            }
+                        />
+                        <Button
+                            color="primary"
+                            disabled={isSetButtonDisabled}
+                            variant="outlined"
+                            onClick={handleSetClick}
+                        >
+                            {t("label.reload")}
+                        </Button>
+                    </ButtonGroup>
                 </Grid>
             </Grid>
         );

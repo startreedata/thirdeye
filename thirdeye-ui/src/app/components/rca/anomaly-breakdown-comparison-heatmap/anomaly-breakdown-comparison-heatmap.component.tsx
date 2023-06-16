@@ -282,6 +282,12 @@ export const AnomalyBreakdownComparisonHeatmap: FunctionComponent<AnomalyBreakdo
                                                         option.value ||
                                                         EMPTY_STRING_DISPLAY
                                                     }`}
+                                                    size="small"
+                                                    style={{
+                                                        marginTop: 0,
+                                                        marginBottom: 0,
+                                                        marginRight: 3,
+                                                    }}
                                                     onDelete={() =>
                                                         handleNodeFilterOnDelete(
                                                             option

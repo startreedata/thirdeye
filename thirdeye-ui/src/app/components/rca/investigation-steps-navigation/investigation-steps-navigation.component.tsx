@@ -50,7 +50,7 @@ export const InvestigationStepsNavigation: FunctionComponent = () => {
     }, [location]);
 
     return (
-        <ButtonGroup fullWidth variant="contained">
+        <ButtonGroup fullWidth variant="outlined">
             {stepItems.map((btnConfig) => {
                 return (
                     <Button

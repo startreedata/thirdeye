@@ -15,7 +15,10 @@
 import { Box, Button, CircularProgress, Grid } from "@material-ui/core";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNotificationProviderV1 } from "../../../../platform/components";
+import {
+    SkeletonV1,
+    useNotificationProviderV1,
+} from "../../../../platform/components";
 import { ActionStatus } from "../../../../rest/actions.interfaces";
 import { useGetEvaluation } from "../../../../rest/alerts/alerts.actions";
 import { getAlertEvaluation } from "../../../../rest/alerts/alerts.rest";
@@ -212,6 +215,15 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                     isLoading={
                         getEvaluationRequestStatus === ActionStatus.Working ||
                         getEvaluationRequestStatus === ActionStatus.Initial
+                    }
+                    loadingState={
+                        <Box pb={2} pt={2}>
+                            <SkeletonV1
+                                animation="pulse"
+                                height={300}
+                                variant="rect"
+                            />
+                        </Box>
                     }
                 >
                     {!!timeSeriesOptions && (

@@ -12,19 +12,23 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { AutocompleteProps } from "@material-ui/lab";
-import { AutocompletePaper } from "../../components/autocomplete-paper-v1/autocomplete-paper-v1.component";
+import { makeStyles } from "@material-ui/core";
 
-// Material UI theme property overrides for Autocomplete
-export const autocompletePropsV1: Partial<
-    AutocompleteProps<
-        unknown,
-        boolean | undefined,
-        boolean | undefined,
-        boolean | undefined
-    >
-> = {
-    clearOnBlur: true,
-    noOptionsText: "",
-    PaperComponent: AutocompletePaper,
-};
+export const useDimensionHeatmapTooltipStyles = makeStyles((theme) => ({
+    spaceBottom: {
+        marginBottom: theme.spacing(1),
+    },
+    dataDisplayList: {
+        minWidth: "300px;",
+    },
+    dataDisplayItem: {
+        marginTop: 0,
+        marginBottom: 0,
+        paddingTop: 1,
+        paddingBottom: 1,
+    },
+    dataDisplayText: {
+        marginTop: 0,
+        marginBottom: 0,
+    },
+}));

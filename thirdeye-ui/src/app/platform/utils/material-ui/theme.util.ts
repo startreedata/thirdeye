@@ -14,10 +14,7 @@
  */
 import { createTheme, Theme } from "@material-ui/core";
 import { alertClassesV1, alertPropsV1 } from "./alert.util";
-import {
-    autocompleteClassesV1,
-    autocompletePropsV1,
-} from "./autocomplete.util";
+import { autocompletePropsV1 } from "./autocomplete.util";
 import { buttonPropsV1 } from "./button.util";
 import { cardClassesV1, cardContentClassesV1, cardPropsV1 } from "./card.util";
 import { chipClassesV1, chipPropsV1 } from "./chip.util";
@@ -65,7 +62,6 @@ export const lightV1: Theme = createTheme({
     },
     overrides: {
         MuiAlert: alertClassesV1,
-        MuiAutocomplete: autocompleteClassesV1,
         MuiCard: cardClassesV1,
         MuiCardContent: cardContentClassesV1,
         MuiCssBaseline: cssBaselineClassesV1,

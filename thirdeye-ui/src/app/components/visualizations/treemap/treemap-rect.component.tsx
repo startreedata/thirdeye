@@ -29,7 +29,6 @@ function TreemapRect<Data>({
     colorScale,
     onDimensionClickHandler,
     colorChangeValueAccessor,
-    shouldTruncateText,
     onMouseMove,
     onMouseLeave,
     margin,
@@ -107,13 +106,11 @@ function TreemapRect<Data>({
                         x={10}
                         y={nodeHeight / 2}
                     >
-                        {shouldTruncateText
-                            ? getShortText(
-                                  node.data.data.label,
-                                  nodeWidth,
-                                  nodeHeight
-                              )
-                            : node.data.data.label}
+                        {getShortText(
+                            node.data.data.label,
+                            nodeWidth,
+                            nodeHeight
+                        )}
                     </Text>
                 </>
             )}

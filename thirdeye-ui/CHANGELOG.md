@@ -1,3 +1,10 @@
+## [2.26.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.25.0...thirdeye-ui-2.26.0) (2023-06-19)
+
+
+### Features
+
+* [TE-1421](https://cortexdata.atlassian.net/browse/TE-1421) heat map page for rca v2 ([b8c5482e8](https://github.com/startreedata/thirdeye/commit/b8c5482e82ebf08e4f8941dc871de3753a435d37))
+
 ## [2.25.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.24.0...thirdeye-ui-2.25.0) (2023-06-16)
 
 

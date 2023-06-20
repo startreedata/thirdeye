@@ -46,6 +46,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
     anomaly,
     dimensionCombinations,
     alertInsight,
+    events,
     children,
 }) => {
     const { t } = useTranslation();
@@ -228,6 +229,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                 >
                     {!!timeSeriesOptions && (
                         <TimeSeriesChart
+                            events={events}
                             height={300}
                             {...timeSeriesOptions}
                             brush={false}

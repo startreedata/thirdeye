@@ -15,10 +15,12 @@
 
 import { AlertInsight } from "../../../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../../../rest/dto/anomaly.interfaces";
+import { Event } from "../../../../rest/dto/event.interfaces";
 import { AnomalyFilterOption } from "../../anomaly-dimension-analysis/anomaly-dimension-analysis.interfaces";
 
 export interface PreviewChartProps {
     alertInsight: AlertInsight | null;
     anomaly: Anomaly;
     dimensionCombinations: AnomalyFilterOption[][];
+    events?: Event[];
 }

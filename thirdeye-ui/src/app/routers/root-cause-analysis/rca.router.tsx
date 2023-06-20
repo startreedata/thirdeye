@@ -63,6 +63,12 @@ const HeatMapPage = lazy(() =>
     ).then((module) => ({ default: module.HeatMapPage }))
 );
 
+const EventsPage = lazy(() =>
+    import(
+        /* webpackChunkName: "events-page" */ "../../pages/rca/events-page/events-page.component"
+    ).then((module) => ({ default: module.EventsPage }))
+);
+
 const PageNotFoundPage = lazy(() =>
     import(
         /* webpackChunkName: "page-not-found-page" */ "../../pages/page-not-found-page/page-not-found-page.component"
@@ -142,7 +148,10 @@ export const RootCauseAnalysisRouter: FunctionComponent = () => {
                         />
                         <Route path={AppRouteRelative.RCA_DIMENSION_ANALYSIS} />
                     </Route>
-                    <Route path={AppRouteRelative.RCA_EVENTS} />
+                    <Route
+                        element={<EventsPage />}
+                        path={AppRouteRelative.RCA_EVENTS}
+                    />
                     <Route path={AppRouteRelative.RCA_REVIEW_SHARE} />
                     <Route element={<PageNotFoundPage />} path="*" />
                 </Route>

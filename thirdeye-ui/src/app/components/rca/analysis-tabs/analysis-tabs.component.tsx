@@ -14,7 +14,6 @@
  */
 import {
     Box,
-    Button,
     Card,
     CardContent,
     Divider,
@@ -32,10 +31,8 @@ import {
     PageContentsCardV1,
     SearchInputV1,
     SkeletonV1,
-    useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../../platform/components";
-import { DialogType } from "../../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { formatDateAndTimeV1, formatDateV1 } from "../../../platform/utils";
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
@@ -48,7 +45,7 @@ import {
 import { createEmptyEvent } from "../../../utils/events/events.util";
 import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
 import { getErrorMessages } from "../../../utils/rest/rest.util";
-import { EventsWizard } from "../../event-wizard/event-wizard.component";
+import { EventsWizardModal } from "../../events-wizard-modal/event-wizard-modal.component";
 import { AnomalyBreakdownComparisonHeatmap } from "../anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.component";
 import { AnomalyDimensionAnalysis } from "../anomaly-dimension-analysis/anomaly-dimension-analysis.component";
 import { EventsTab } from "../events-tab/event-tab.component";
@@ -71,7 +68,6 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
 }) => {
     const { notify } = useNotificationProviderV1();
     const [searchParams, setSearchParams] = useSearchParams();
-    const { showDialog, hideDialog } = useDialogProviderV1();
     const { t } = useTranslation();
     const [selectedTabIndex, setSelectedTabIndex] = useState(() => {
         if (searchParams.has(ANALYSIS_TAB_IDX_KEY)) {
@@ -82,6 +78,14 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
     });
     const [eventsSearchValue, setEventsSearchValue] = useState("");
     const [triggerUpdateEvents, setTriggerUpdateEvents] = useState(false);
+
+    const newEventObject = useMemo(() => {
+        const event = createEmptyEvent();
+        event.startTime = anomaly?.startTime as number;
+        event.endTime = anomaly?.endTime as number;
+
+        return event;
+    }, [anomaly]);
 
     const [comparisonOffset, setComparisonOffset] = useState(() => {
         return searchParams.get(ANALYSIS_TAB_OFFSET) ?? "P1W";
@@ -103,52 +107,28 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
         setSearchParams(searchParams);
     };
 
-    const handleAddEventClick = (): void => {
-        const event = createEmptyEvent();
-        event.startTime = anomaly?.startTime as number;
-        event.endTime = anomaly?.endTime as number;
-
-        showDialog({
-            width: "md",
-            type: DialogType.CUSTOM,
-            contents: (
-                <EventsWizard
-                    fullWidth
-                    showCancel
-                    event={event}
-                    onCancel={hideDialog}
-                    onSubmit={(newEvent: EditableEvent) => {
-                        createEvent(newEvent)
-                            .then((event: Event): void => {
-                                notify(
-                                    NotificationTypeV1.Success,
-                                    t("message.create-success", {
-                                        entity: t("label.event"),
-                                    })
-                                );
-                                onEventSelectionChange([
-                                    ...selectedEvents,
-                                    event,
-                                ]);
-                                setTriggerUpdateEvents(!triggerUpdateEvents);
-                                hideDialog();
-                            })
-                            .catch((error: AxiosError): void => {
-                                notifyIfErrors(
-                                    ActionStatus.Error,
-                                    getErrorMessages(error),
-                                    notify,
-                                    t("message.create-error", {
-                                        entity: t("label.event"),
-                                    })
-                                );
-                            });
-                    }}
-                />
-            ),
-            hideCancelButton: true,
-            hideOkButton: true,
-        });
+    const handleAddEventSubmit = (newEvent: EditableEvent): void => {
+        createEvent(newEvent)
+            .then((event: Event): void => {
+                notify(
+                    NotificationTypeV1.Success,
+                    t("message.create-success", {
+                        entity: t("label.event"),
+                    })
+                );
+                onEventSelectionChange([...selectedEvents, event]);
+                setTriggerUpdateEvents(!triggerUpdateEvents);
+            })
+            .catch((error: AxiosError): void => {
+                notifyIfErrors(
+                    ActionStatus.Error,
+                    getErrorMessages(error),
+                    notify,
+                    t("message.create-error", {
+                        entity: t("label.event"),
+                    })
+                );
+            });
     };
 
     if (isLoading) {
@@ -185,34 +165,28 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                             />
                         </Grid>
                     ) : (
-                        <Grid
-                            container
-                            item
-                            justifyContent="flex-end"
-                            md={7}
-                            sm={6}
-                            xs={12}
-                        >
-                            <Grid item>
-                                <Button
-                                    color="primary"
-                                    variant="outlined"
-                                    onClick={handleAddEventClick}
-                                >
-                                    {t("label.add-entity", {
-                                        entity: t("label.event"),
-                                    })}
-                                </Button>
-                            </Grid>
+                        <Grid item md={7} sm={6} xs={12}>
+                            <Grid
+                                container
+                                alignItems="center"
+                                justifyContent="flex-end"
+                            >
+                                <Grid item>
+                                    <EventsWizardModal
+                                        event={newEventObject}
+                                        onSubmit={handleAddEventSubmit}
+                                    />
+                                </Grid>
 
-                            <Grid item>
-                                <SearchInputV1
-                                    fullWidth
-                                    placeholder={t("label.search-entity", {
-                                        entity: t("label.event"),
-                                    })}
-                                    onChange={setEventsSearchValue}
-                                />
+                                <Grid item>
+                                    <SearchInputV1
+                                        fullWidth
+                                        placeholder={t("label.search-entity", {
+                                            entity: t("label.event"),
+                                        })}
+                                        onChange={setEventsSearchValue}
+                                    />
+                                </Grid>
                             </Grid>
                         </Grid>
                     )}

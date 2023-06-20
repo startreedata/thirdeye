@@ -107,34 +107,34 @@ export const EventsWizard: FunctionComponent<EventWizardProps> = ({
     return (
         <>
             <PageContentsGridV1>
-                <Grid
-                    container
-                    item
-                    noValidate
-                    component="form"
-                    id={FORM_ID_EVENT_PROPERTIES}
-                    xs={12}
-                    onSubmit={handleSubmit(onSubmitEventsPropertiesForm)}
-                >
-                    <Grid item xs={12}>
-                        <PageContentsCardV1>
-                            {/* The useForm functions handles sending data up */}
-                            <EventPropertiesForm
-                                formControl={control}
-                                formErrors={errors}
-                                formRegister={register}
-                                fullWidth={fullWidth}
-                            />
-                        </PageContentsCardV1>
-                    </Grid>
+                <Grid xs={12}>
+                    <Grid
+                        container
+                        noValidate
+                        component="form"
+                        id={FORM_ID_EVENT_PROPERTIES}
+                        onSubmit={handleSubmit(onSubmitEventsPropertiesForm)}
+                    >
+                        <Grid item xs={12}>
+                            <PageContentsCardV1>
+                                {/* The useForm functions handles sending data up */}
+                                <EventPropertiesForm
+                                    formControl={control}
+                                    formErrors={errors}
+                                    formRegister={register}
+                                    fullWidth={fullWidth}
+                                />
+                            </PageContentsCardV1>
+                        </Grid>
 
-                    <Grid item xs={12}>
-                        <PageContentsCardV1>
-                            <EventMetadataForm
-                                initialPropertiesData={propertiesData}
-                                onChange={setPropertiesData}
-                            />
-                        </PageContentsCardV1>
+                        <Grid item xs={12}>
+                            <PageContentsCardV1>
+                                <EventMetadataForm
+                                    initialPropertiesData={propertiesData}
+                                    onChange={setPropertiesData}
+                                />
+                            </PageContentsCardV1>
+                        </Grid>
                     </Grid>
                 </Grid>
             </PageContentsGridV1>
@@ -144,7 +144,11 @@ export const EventsWizard: FunctionComponent<EventWizardProps> = ({
                     <Grid container justifyContent="flex-end">
                         {showCancel && (
                             <Grid item>
-                                <Button color="secondary" onClick={onCancel}>
+                                <Button
+                                    color="secondary"
+                                    variant="outlined"
+                                    onClick={onCancel}
+                                >
                                     {t("label.cancel")}
                                 </Button>
                             </Grid>

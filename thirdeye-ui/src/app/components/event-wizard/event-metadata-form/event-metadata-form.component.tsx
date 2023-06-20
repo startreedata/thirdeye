@@ -70,7 +70,7 @@ export const EventMetadataForm: FunctionComponent<EventMetadataFormProps> = ({
     };
 
     return (
-        <Grid container alignItems="center">
+        <Grid container>
             <Grid item xs={12}>
                 <Box marginBottom={2}>
                     <Typography variant="h5">
@@ -82,17 +82,25 @@ export const EventMetadataForm: FunctionComponent<EventMetadataFormProps> = ({
                 </Box>
             </Grid>
 
-            <Grid item xs={6}>
-                <Box paddingBottom={1}>{t("label.property-name")}</Box>
-            </Grid>
-            <Grid item xs={6}>
-                <Box paddingBottom={1}>{t("label.property-value")}</Box>
+            <Grid item xs={12}>
+                <Grid container justifyContent="space-between">
+                    <Grid item xs={5}>
+                        <Box paddingBottom={1}>{t("label.property-name")}</Box>
+                    </Grid>
+                    <Grid item xs={5}>
+                        <Box paddingBottom={1}>{t("label.property-value")}</Box>
+                    </Grid>
+                </Grid>
             </Grid>
 
             <Grid item xs={12}>
                 {propertiesData.map((item, idx) => {
                     return (
-                        <Grid container item key={idx.toString()} xs={12}>
+                        <Grid
+                            container
+                            justifyContent="space-between"
+                            key={idx.toString()}
+                        >
                             <Grid item xs={5}>
                                 <TextField
                                     fullWidth
@@ -113,7 +121,6 @@ export const EventMetadataForm: FunctionComponent<EventMetadataFormProps> = ({
                                     }
                                 />
                             </Grid>
-                            <Grid item xs={1} />
                             <Grid item xs={5}>
                                 <Autocomplete
                                     freeSolo
@@ -173,7 +180,11 @@ export const EventMetadataForm: FunctionComponent<EventMetadataFormProps> = ({
                     );
                 })}
                 <Grid item xs={12}>
-                    <Button variant="contained" onClick={handleAddListItem}>
+                    <Button
+                        color="primary"
+                        variant="outlined"
+                        onClick={handleAddListItem}
+                    >
                         {t("label.add-metadata-entry")}
                     </Button>
                 </Grid>

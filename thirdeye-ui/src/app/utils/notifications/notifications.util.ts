@@ -27,7 +27,9 @@ export const notifyIfErrors = (
     }
 
     if (!isEmpty(errorMessages)) {
-        errorMessages?.map((msg) => notify(NotificationTypeV1.Error, msg));
+        errorMessages
+            ?.reverse() // First in first shown
+            .map((msg) => notify(NotificationTypeV1.Error, msg));
     } else {
         notify(NotificationTypeV1.Error, fallbackMsg);
     }

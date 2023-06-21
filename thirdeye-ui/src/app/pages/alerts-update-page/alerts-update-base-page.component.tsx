@@ -12,16 +12,20 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { Box } from "@material-ui/core";
 import { AxiosError } from "axios";
 import { differenceBy, isEmpty, some, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
+import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { validateSubscriptionGroup } from "../../components/subscription-group-wizard/subscription-group-wizard.utils";
 import {
     AppLoadingIndicatorV1,
+    NotificationDisplayV1,
     NotificationTypeV1,
+    PageV1,
     useNotificationProviderV1,
 } from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
@@ -144,7 +148,7 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
             : getAlertErrorMessages.map((err) =>
                   notify(NotificationTypeV1.Error, err)
               );
-    }, [getAlertErrorMessages]);
+    }, [getAlertErrorMessages, getAlertStatus]);
 
     useEffect(() => {
         if (getSubscriptionGroupStatus !== ActionStatus.Error) {
@@ -161,7 +165,7 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
             : getSubscriptionGroupsErrorMessages.map((err) =>
                   notify(NotificationTypeV1.Error, err)
               );
-    }, [getSubscriptionGroupsErrorMessages]);
+    }, [getSubscriptionGroupsErrorMessages, getSubscriptionGroupStatus]);
 
     const handleUpdatingSubscriptionGroups = async (
         alert: Alert
@@ -300,6 +304,17 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
 
     return (
         <LoadingErrorStateSwitch
+            wrapInCard
+            wrapInGrid
+            wrapInGridContainer
+            errorState={
+                <PageV1>
+                    <NotificationDisplayV1 />
+                    <Box pb={20} pt={20}>
+                        <NoDataIndicator />
+                    </Box>
+                </PageV1>
+            }
             isError={getAlertStatus === ActionStatus.Error}
             isLoading={loading}
             loadingState={<AppLoadingIndicatorV1 />}

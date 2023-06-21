@@ -24,5 +24,5 @@ export interface ChartContentProps {
     showOnlyActivity?: boolean;
     hideCallToActionPrompt?: boolean;
     alert: EditableAlert;
-    onAlertPropertyChange: (contents: Partial<EditableAlert>) => void;
+    onAlertPropertyChange?: (contents: Partial<EditableAlert>) => void;
 }

@@ -22,4 +22,5 @@ export interface EnumerationItemRowProps {
     timezone: string | undefined;
     hideTime: boolean;
     showOnlyActivity?: boolean;
+    hideDelete?: boolean;
 }

@@ -20,4 +20,5 @@ export interface EnumerationItemsTableProps {
     timezone: string | undefined;
     hideTime: boolean;
     showOnlyActivity?: boolean;
+    hideDelete?: boolean;
 }

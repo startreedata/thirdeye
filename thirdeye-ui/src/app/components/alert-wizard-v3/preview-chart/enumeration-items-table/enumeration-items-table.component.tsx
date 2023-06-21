@@ -25,6 +25,7 @@ export const EnumerationItemsTable: FunctionComponent<EnumerationItemsTableProps
         timezone,
         hideTime,
         showOnlyActivity,
+        hideDelete,
     }) => {
         return (
             <Card variant="outlined">
@@ -35,6 +36,7 @@ export const EnumerationItemsTable: FunctionComponent<EnumerationItemsTableProps
                                 <EnumerationItemRow
                                     anomalies={detectionEvaluation.anomalies}
                                     detectionEvaluation={detectionEvaluation}
+                                    hideDelete={hideDelete}
                                     hideTime={hideTime}
                                     key={generateNameForDetectionResult(
                                         detectionEvaluation

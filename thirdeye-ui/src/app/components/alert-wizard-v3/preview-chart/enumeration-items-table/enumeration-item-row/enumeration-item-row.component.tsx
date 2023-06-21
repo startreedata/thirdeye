@@ -44,6 +44,7 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
     timezone,
     hideTime,
     showOnlyActivity,
+    hideDelete,
 }) => {
     const { t } = useTranslation();
     const [expandedChartHeight, setExpandedChartHeight] =
@@ -108,24 +109,26 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
                             </Grid>
                         )}
                         <Grid item sm={1} xs={6}>
-                            <Box textAlign="right">
-                                <TooltipV1
-                                    delay={0}
-                                    title={
-                                        t(
-                                            "message.remove-item-from-configuration"
-                                        ) as string
-                                    }
-                                >
-                                    <IconButton
-                                        color="primary"
-                                        size="small"
-                                        onClick={onDeleteClick}
+                            {!hideDelete && (
+                                <Box textAlign="right">
+                                    <TooltipV1
+                                        delay={0}
+                                        title={
+                                            t(
+                                                "message.remove-item-from-configuration"
+                                            ) as string
+                                        }
                                     >
-                                        <DeleteIcon />
-                                    </IconButton>
-                                </TooltipV1>
-                            </Box>
+                                        <IconButton
+                                            color="primary"
+                                            size="small"
+                                            onClick={onDeleteClick}
+                                        >
+                                            <DeleteIcon />
+                                        </IconButton>
+                                    </TooltipV1>
+                                </Box>
+                            )}
                         </Grid>
                         <Grid item sm={1} xs={6}>
                             <Box textAlign="right">

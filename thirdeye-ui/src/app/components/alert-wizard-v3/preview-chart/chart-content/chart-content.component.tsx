@@ -96,17 +96,18 @@ export const ChartContent: FunctionComponent<ChartContentProps> = ({
     ): void => {
         const currentEnumerations: EnumerationItemConfig[] = alert
             .templateProperties.enumerationItems as EnumerationItemConfig[];
-        onAlertPropertyChange({
-            templateProperties: {
-                ...alert.templateProperties,
-                enumerationItems: currentEnumerations.filter((c) => {
-                    return !isEqual(
-                        c.params,
-                        detectionEvaluation?.enumerationItem?.params
-                    );
-                }),
-            },
-        });
+        !!onAlertPropertyChange &&
+            onAlertPropertyChange({
+                templateProperties: {
+                    ...alert.templateProperties,
+                    enumerationItems: currentEnumerations.filter((c) => {
+                        return !isEqual(
+                            c.params,
+                            detectionEvaluation?.enumerationItem?.params
+                        );
+                    }),
+                },
+            });
 
         workingDetectionEvaluations &&
             setWorkingDetectionEvaluations((current) =>
@@ -194,6 +195,7 @@ export const ChartContent: FunctionComponent<ChartContentProps> = ({
                                 detectionEvaluations={
                                     workingDetectionEvaluations
                                 }
+                                hideDelete={onAlertPropertyChange === undefined}
                                 hideTime={shouldHideTimeInDatetimeFormat(
                                     alertEvaluation?.alert.template
                                 )}

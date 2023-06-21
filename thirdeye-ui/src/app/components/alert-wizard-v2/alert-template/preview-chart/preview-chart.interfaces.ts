@@ -18,6 +18,10 @@ export interface PreviewChartProps {
     alert: EditableAlert;
     onChartDataLoadSuccess?: () => void;
     hideCallToActionPrompt?: boolean;
+    onAlertPropertyChange: (
+        contents: Partial<EditableAlert>,
+        isTotalReplace?: boolean
+    ) => void;
 }
 
 export const PREVIEW_CHART_TEST_IDS = {

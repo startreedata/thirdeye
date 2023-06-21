@@ -24,11 +24,11 @@ import { TemplatePropertiesObject } from "../../../rest/dto/alert.interfaces";
 import { MetricAggFunction } from "../../../rest/dto/metric.interfaces";
 import { STAR_COLUMN } from "../../../utils/datasources/datasources.util";
 import { AlertJsonEditorModal } from "../../alert-json-editor-modal/alert-json-editor-modal.component";
+import { PreviewChart } from "../../alert-wizard-v2/alert-template/preview-chart/preview-chart.component";
 import { useAlertWizardV2Styles } from "../../alert-wizard-v2/alert-wizard-v2.styles";
 import { InputSection } from "../../form-basics/input-section/input-section.component";
 import { ParseMarkdown } from "../../parse-markdown/parse-markdown.component";
 import { NavigateAlertCreationFlowsDropdown } from "../navigate-alert-creation-flows-dropdown/navigate-alert-creation-flows-dropdown";
-import { PreviewChart } from "../preview-chart/preview-chart.component";
 import { SpecificPropertiesRenderer } from "./specific-properties-renderer/specific-properties-renderer.component";
 import { ThresholdSetupProps } from "./threshold-setup.interfaces";
 import { generateInputFieldConfigsForAlertTemplate } from "./threshold-setup.utils";
@@ -258,7 +258,7 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
                     </Grid>
 
                     <PreviewChart
-                        showLoadButton
+                        hideCallToActionPrompt
                         alert={alert}
                         onAlertPropertyChange={onAlertPropertyChange}
                     />

@@ -240,8 +240,9 @@ function AlertTemplate({
                         alert={alert}
                         hideCallToActionPrompt={
                             !!selectedAlertTemplate &&
-                            !isRequiredPropertyValuesSet
+                            isRequiredPropertyValuesSet
                         }
+                        onAlertPropertyChange={onAlertPropertyChange}
                         onChartDataLoadSuccess={onChartDataLoadSuccess}
                     />
                 </Grid>

@@ -52,6 +52,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
     alert,
     onChartDataLoadSuccess,
     hideCallToActionPrompt,
+    onAlertPropertyChange,
 }) => {
     const { t } = useTranslation();
     const [searchParams, setSearchParams] = useSearchParams();
@@ -252,7 +253,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                     alert={alert}
                     alertEvaluation={evaluation}
                     hideCallToActionPrompt={hideCallToActionPrompt}
-                    onAlertPropertyChange={() => null}
+                    onAlertPropertyChange={onAlertPropertyChange}
                     onReloadClick={handleAutoRangeClick}
                 />
             </LoadingErrorStateSwitch>

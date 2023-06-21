@@ -71,6 +71,7 @@ export const AlertsUpdateJSONPage: FunctionComponent = () => {
                         <Box>
                             <PreviewChart
                                 alert={alert}
+                                onAlertPropertyChange={onAlertPropertyChange}
                                 onChartDataLoadSuccess={() => {
                                     setIsSubmitBtnEnabled(true);
                                     setSubmitBtnLabel(

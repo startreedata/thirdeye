@@ -125,7 +125,7 @@ export const ChartContent: FunctionComponent<ChartContentProps> = ({
                 {!alertEvaluation && (
                     <Box marginTop={1} position="relative">
                         <Box className={previewChartClasses.alertContainer}>
-                            {hideCallToActionPrompt !== false && (
+                            {hideCallToActionPrompt !== true && (
                                 <Box position="absolute" width="100%">
                                     <Grid
                                         container
@@ -191,13 +191,13 @@ export const ChartContent: FunctionComponent<ChartContentProps> = ({
                     workingDetectionEvaluations.length > 1 && (
                         <Box marginTop={1}>
                             <EnumerationItemsTable
-                                showOnlyActivity
                                 detectionEvaluations={
                                     workingDetectionEvaluations
                                 }
                                 hideTime={shouldHideTimeInDatetimeFormat(
                                     alertEvaluation?.alert.template
                                 )}
+                                showOnlyActivity={showOnlyActivity}
                                 timezone={determineTimezoneFromAlertInEvaluation(
                                     alertEvaluation?.alert.template
                                 )}

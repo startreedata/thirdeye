@@ -289,6 +289,9 @@ export const SetupMetricPage: FunctionComponent = () => {
                                     showOnlyActivity
                                     alert={alert}
                                     alertEvaluation={evaluation}
+                                    hideCallToActionPrompt={
+                                        shouldShowLoadButton
+                                    }
                                     showLoadButton={shouldShowLoadButton}
                                     onAlertPropertyChange={
                                         onAlertPropertyChange

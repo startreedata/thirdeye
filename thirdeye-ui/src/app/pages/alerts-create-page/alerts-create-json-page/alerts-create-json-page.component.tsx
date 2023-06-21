@@ -79,7 +79,8 @@ export const AlertsCreateJSONPage: FunctionComponent = () => {
                         <Box>
                             <PreviewChart
                                 alert={alert}
-                                hideCallToActionPrompt={!areBasicFieldsFilled}
+                                hideCallToActionPrompt={areBasicFieldsFilled}
+                                onAlertPropertyChange={onAlertPropertyChange}
                             />
                         </Box>
                     </PageContentsCardV1>

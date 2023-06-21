@@ -80,7 +80,7 @@ public class PlanNodeFactory {
     try {
       // TODO spyne this interface needs enhancement. We should not need to instantiate the class
       type = c.getDeclaredConstructor().newInstance().getType();
-    } catch (ReflectiveOperationException e) {
+    } catch (final ReflectiveOperationException e) {
       throw new RuntimeException("Failed to initialize PlanNode: " + c.getSimpleName(), e);
     }
     checkState(!typeVsPlanNodeClassMap.containsKey(type),
@@ -106,7 +106,10 @@ public class PlanNodeFactory {
     try {
       return build(planNodeClass, context);
     } catch (final Exception e) {
-      throw new IllegalArgumentException("Failed to initialize the plan node: type - " + type, e);
+      final String msg = String.format("Failed to initialize node name: %s Error Msg: %s",
+          planNodeBean.getName(),
+          e.getMessage());
+      throw new IllegalArgumentException(msg, e);
     }
   }
 }

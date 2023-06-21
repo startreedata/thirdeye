@@ -22,6 +22,7 @@ export interface ChartContentProps {
     onReloadClick: () => void;
     showLoadButton: boolean;
     showOnlyActivity?: boolean;
+    hideCallToActionPrompt?: boolean;
     alert: EditableAlert;
     onAlertPropertyChange: (contents: Partial<EditableAlert>) => void;
 }

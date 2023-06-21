@@ -12,22 +12,11 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import {
-    Box,
-    Button,
-    FormControl,
-    Grid,
-    MenuItem,
-    Select,
-    Typography,
-} from "@material-ui/core";
-import RefreshIcon from "@material-ui/icons/Refresh";
-import { Alert } from "@material-ui/lab";
+import { Box } from "@material-ui/core";
 import { isEqual } from "lodash";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
-import { ReactComponent as ChartSkeleton } from "../../../../../assets/images/chart-skeleton.svg";
 import {
     SkeletonV1,
     useNotificationProviderV1,
@@ -50,28 +39,20 @@ import {
 } from "../../../../utils/alerts/alerts.util";
 import { generateNameForDetectionResult } from "../../../../utils/enumeration-items/enumeration-items.util";
 import { notifyIfErrors } from "../../../../utils/notifications/notifications.util";
+import { ChartContent } from "../../../alert-wizard-v3/preview-chart/chart-content/chart-content.component";
+import { PreviewChartHeader } from "../../../alert-wizard-v3/preview-chart/header/preview-chart-header.component";
+import { NoDataIndicator } from "../../../no-data-indicator/no-data-indicator.component";
 import { LoadingErrorStateSwitch } from "../../../page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { generateChartOptionsForAlert } from "../../../rca/anomaly-time-series-card/anomaly-time-series-card.utils";
-import { TimeRangeButtonWithContext } from "../../../time-range/time-range-button-with-context/time-range-button.component";
 import { TimeRangeQueryStringKey } from "../../../time-range/time-range-provider/time-range-provider.interfaces";
-import { TimeSeriesChart } from "../../../visualizations/time-series-chart/time-series-chart.component";
 import { TimeSeriesChartProps } from "../../../visualizations/time-series-chart/time-series-chart.interfaces";
-import { useAlertWizardV2Styles } from "../../alert-wizard-v2.styles";
-import {
-    MessageDisplayState,
-    PreviewChartProps,
-    PREVIEW_CHART_TEST_IDS,
-} from "./preview-chart.interfaces";
-import { usePreviewChartStyles } from "./preview-chart.styles";
+import { PreviewChartProps } from "./preview-chart.interfaces";
 
 export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
     alert,
-    displayState,
-    subtitle,
     onChartDataLoadSuccess,
+    hideCallToActionPrompt,
 }) => {
-    const sharedWizardClasses = useAlertWizardV2Styles();
-    const previewChartClasses = usePreviewChartStyles();
     const { t } = useTranslation();
     const [searchParams, setSearchParams] = useSearchParams();
     const [startTime, endTime] = useMemo(
@@ -98,8 +79,11 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
         status: getEvaluationStatus,
     } = useGetEvaluation();
 
-    const { getAlertInsight, status: getAlertInsightStatus } =
-        useGetAlertInsight();
+    const {
+        alertInsight,
+        getAlertInsight,
+        status: getAlertInsightStatus,
+    } = useGetAlertInsight();
 
     const fetchAlertEvaluation = async (
         start: number,
@@ -223,252 +207,55 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
     };
 
     return (
-        <LoadingErrorStateSwitch
-            isError={false}
-            isLoading={
-                getEvaluationStatus === ActionStatus.Working ||
-                getAlertInsightStatus === ActionStatus.Working
-            }
-            loadingState={
-                <SkeletonV1
-                    animation="pulse"
-                    delayInMS={0}
-                    height={300}
-                    variant="rect"
-                />
-            }
-        >
+        <>
             {/** Header Section **/}
-            <Grid container alignItems="center" justifyContent="space-between">
-                <Grid item>
-                    <Typography variant="h6">
-                        {t("label.alert-preview")}
-                    </Typography>
-                    <Typography variant="body2">{subtitle}</Typography>
-                </Grid>
-                {!isEqual(alertForCurrentEvaluation, alert) &&
-                    timeSeriesOptions && (
-                        <Grid item>
-                            <Alert severity="warning" variant="outlined">
-                                {t("message.chart-data-not-reflective")}
-                            </Alert>
-                        </Grid>
-                    )}
-                <Grid item>
-                    <Button
-                        color="primary"
-                        disabled={
-                            displayState !== MessageDisplayState.GOOD_TO_PREVIEW
-                        }
-                        variant="outlined"
-                        onClick={() => {
-                            if (timeSeriesOptions) {
-                                fetchAlertEvaluation(startTime, endTime);
-                            } else {
-                                handleAutoRangeClick();
-                            }
-                        }}
-                    >
-                        <RefreshIcon fontSize="small" />
-                        {t("label.reload-preview")}
-                    </Button>
-                </Grid>
-            </Grid>
-
-            <Grid item xs={12}>
-                {/** When user has not selected alert template yet **/}
-                {displayState === MessageDisplayState.SELECT_TEMPLATE && (
-                    <Box marginTop={1} position="relative">
-                        <Box className={previewChartClasses.alertContainer}>
-                            <Grid container justifyContent="space-around">
-                                <Grid item>
-                                    <Alert
-                                        className={
-                                            sharedWizardClasses.infoAlert
-                                        }
-                                        severity="info"
-                                    >
-                                        {t(
-                                            "message.select-a-template-to-preview"
-                                        )}
-                                    </Alert>
-                                </Grid>
-                            </Grid>
-                        </Box>
-                        <Box width="100%">
-                            <ChartSkeleton />
-                        </Box>
+            <PreviewChartHeader
+                alertInsight={alertInsight}
+                getEvaluationStatus={getEvaluationStatus}
+                showConfigurationNotReflective={
+                    !isEqual(alertForCurrentEvaluation, alert) &&
+                    !!timeSeriesOptions
+                }
+                onReloadClick={handleAutoRangeClick}
+                onStartEndChange={(newStart, newEnd) => {
+                    fetchAlertEvaluation(newStart, newEnd);
+                }}
+            />
+            <LoadingErrorStateSwitch
+                errorState={
+                    <Box pb={20} pt={20}>
+                        <NoDataIndicator>
+                            {t(
+                                "message.experienced-issues-loading-chart-data-try"
+                            )}
+                        </NoDataIndicator>
                     </Box>
-                )}
-
-                {/** When user has needs to fill out the required fields **/}
-                {displayState ===
-                    MessageDisplayState.FILL_TEMPLATE_PROPERTY_VALUES && (
-                    <Box marginTop={1} position="relative">
-                        <Box className={previewChartClasses.alertContainer}>
-                            <Grid container justifyContent="space-around">
-                                <Grid item>
-                                    <Alert
-                                        className={
-                                            sharedWizardClasses.warningAlert
-                                        }
-                                        severity="warning"
-                                    >
-                                        {t(
-                                            "message.complete-missing-information-to-see-preview"
-                                        )}
-                                    </Alert>
-                                </Grid>
-                            </Grid>
-                        </Box>
-                        <Box width="100%">
-                            <ChartSkeleton />
-                        </Box>
+                }
+                isError={getEvaluationStatus === ActionStatus.Error}
+                isLoading={
+                    getEvaluationStatus === ActionStatus.Working ||
+                    getAlertInsightStatus === ActionStatus.Working
+                }
+                loadingState={
+                    <Box paddingTop={1}>
+                        <SkeletonV1
+                            animation="pulse"
+                            delayInMS={0}
+                            height={300}
+                            variant="rect"
+                        />
                     </Box>
-                )}
-
-                {/** Prompt use to preview the chart **/}
-                {displayState === MessageDisplayState.GOOD_TO_PREVIEW && (
-                    <Box marginTop={1} minHeight={100} position="relative">
-                        {/** When there is no data at all **/}
-                        {!detectionEvaluations && !timeSeriesOptions && (
-                            <Box marginTop={1} position="relative">
-                                <Box
-                                    className={
-                                        previewChartClasses.alertContainer
-                                    }
-                                >
-                                    <Grid
-                                        container
-                                        alignItems="center"
-                                        className={
-                                            previewChartClasses.heightWholeContainer
-                                        }
-                                        justifyContent="space-around"
-                                    >
-                                        <Grid item>
-                                            <Button
-                                                color="primary"
-                                                data-testid={
-                                                    PREVIEW_CHART_TEST_IDS.PREVIEW_BUTTON
-                                                }
-                                                variant="text"
-                                                onClick={handleAutoRangeClick}
-                                            >
-                                                <RefreshIcon fontSize="large" />
-                                            </Button>
-                                        </Grid>
-                                    </Grid>
-                                </Box>
-                                <Box width="100%">
-                                    <ChartSkeleton />
-                                </Box>
-                            </Box>
-                        )}
-
-                        {timeSeriesOptions && (
-                            <Grid
-                                container
-                                item
-                                justifyContent="space-between"
-                                xs={12}
-                            >
-                                <Grid item>
-                                    <Grid
-                                        container
-                                        alignItems="center"
-                                        justifyContent="flex-start"
-                                    >
-                                        {!!detectionEvaluations &&
-                                            detectionEvaluations.length > 1 && (
-                                                <>
-                                                    <Grid item>
-                                                        <span>
-                                                            {t(
-                                                                "label.dimension-expression"
-                                                            )}
-                                                            :
-                                                        </span>
-                                                    </Grid>
-                                                    <Grid item>
-                                                        <FormControl>
-                                                            <Select
-                                                                disableUnderline
-                                                                inputProps={{
-                                                                    className:
-                                                                        previewChartClasses.selected,
-                                                                }}
-                                                                value={
-                                                                    selectedEvaluationToDisplay
-                                                                }
-                                                                onChange={(
-                                                                    event
-                                                                ) =>
-                                                                    setSelectedEvaluationToDisplay(
-                                                                        event
-                                                                            .target
-                                                                            .value as unknown as string
-                                                                    )
-                                                                }
-                                                            >
-                                                                {detectionEvaluations.map(
-                                                                    (
-                                                                        detectionEvaluation
-                                                                    ) => {
-                                                                        const name =
-                                                                            generateNameForDetectionResult(
-                                                                                detectionEvaluation
-                                                                            );
-
-                                                                        return (
-                                                                            <MenuItem
-                                                                                key={
-                                                                                    name
-                                                                                }
-                                                                                value={
-                                                                                    name
-                                                                                }
-                                                                            >
-                                                                                {
-                                                                                    name
-                                                                                }
-                                                                            </MenuItem>
-                                                                        );
-                                                                    }
-                                                                )}
-                                                            </Select>
-                                                        </FormControl>
-                                                    </Grid>
-                                                </>
-                                            )}
-                                    </Grid>
-                                </Grid>
-                                <Grid item>
-                                    <TimeRangeButtonWithContext
-                                        timezone={determineTimezoneFromAlertInEvaluation(
-                                            evaluation?.alert.template
-                                        )}
-                                        onTimeRangeChange={(start, end) =>
-                                            displayState ===
-                                                MessageDisplayState.GOOD_TO_PREVIEW &&
-                                            fetchAlertEvaluation(start, end)
-                                        }
-                                    />
-                                </Grid>
-                            </Grid>
-                        )}
-
-                        {timeSeriesOptions && (
-                            <Box marginTop={1}>
-                                <TimeSeriesChart
-                                    height={300}
-                                    {...timeSeriesOptions}
-                                />
-                            </Box>
-                        )}
-                    </Box>
-                )}
-            </Grid>
-        </LoadingErrorStateSwitch>
+                }
+            >
+                <ChartContent
+                    showLoadButton
+                    alert={alert}
+                    alertEvaluation={evaluation}
+                    hideCallToActionPrompt={hideCallToActionPrompt}
+                    onAlertPropertyChange={() => null}
+                    onReloadClick={handleAutoRangeClick}
+                />
+            </LoadingErrorStateSwitch>
+        </>
     );
 };

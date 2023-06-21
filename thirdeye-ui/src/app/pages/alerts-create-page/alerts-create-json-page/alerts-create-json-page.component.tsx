@@ -13,7 +13,7 @@
  * the License.
  */
 import { Box, Divider, Grid } from "@material-ui/core";
-import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
+import React, { FunctionComponent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useOutletContext } from "react-router-dom";
 import { AlertJson } from "../../../components/alert-wizard-v2/alert-json/alert-json.component";
@@ -23,7 +23,6 @@ import {
     hasRequiredPropertyValuesSet,
 } from "../../../components/alert-wizard-v2/alert-template/alert-template.utils";
 import { PreviewChart } from "../../../components/alert-wizard-v2/alert-template/preview-chart/preview-chart.component";
-import { MessageDisplayState } from "../../../components/alert-wizard-v2/alert-template/preview-chart/preview-chart.interfaces";
 import { Portal } from "../../../components/portal/portal.component";
 import { WizardBottomBar } from "../../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import {
@@ -37,8 +36,6 @@ import {
 
 export const AlertsCreateJSONPage: FunctionComponent = () => {
     const { t } = useTranslation();
-    const [isRequiredPropertyValuesSet, setIsRequiredPropertyValuesSet] =
-        useState(false);
     const {
         alert,
         handleAlertPropertyChange: onAlertPropertyChange,
@@ -57,16 +54,15 @@ export const AlertsCreateJSONPage: FunctionComponent = () => {
         return [];
     }, [selectedAlertTemplate]);
 
-    useEffect(() => {
-        const isValid =
+    const areBasicFieldsFilled = useMemo(() => {
+        return (
             !!selectedAlertTemplate &&
             hasRequiredPropertyValuesSet(
                 availableFields,
                 alert.templateProperties
-            );
-
-        setIsRequiredPropertyValuesSet(isValid);
-    }, [selectedAlertTemplate, alert]);
+            )
+        );
+    }, [availableFields, alert]);
 
     return (
         <>
@@ -83,16 +79,7 @@ export const AlertsCreateJSONPage: FunctionComponent = () => {
                         <Box>
                             <PreviewChart
                                 alert={alert}
-                                displayState={
-                                    selectedAlertTemplate
-                                        ? isRequiredPropertyValuesSet
-                                            ? MessageDisplayState.GOOD_TO_PREVIEW
-                                            : MessageDisplayState.FILL_TEMPLATE_PROPERTY_VALUES
-                                        : MessageDisplayState.SELECT_TEMPLATE
-                                }
-                                subtitle={t(
-                                    "message.configure-or-input-template-to-preview-alert"
-                                )}
+                                hideCallToActionPrompt={!areBasicFieldsFilled}
                             />
                         </Box>
                     </PageContentsCardV1>

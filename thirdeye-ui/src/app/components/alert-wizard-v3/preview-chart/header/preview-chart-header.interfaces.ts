@@ -21,4 +21,5 @@ export interface PreviewChartHeaderProps {
 
     onReloadClick: () => void;
     onStartEndChange: (start: number, end: number) => void;
+    showConfigurationNotReflective?: boolean;
 }

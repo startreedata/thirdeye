@@ -14,6 +14,7 @@
  */
 import { Button, Grid } from "@material-ui/core";
 import RefreshIcon from "@material-ui/icons/Refresh";
+import { Alert } from "@material-ui/lab";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { ActionStatus } from "../../../../rest/actions.interfaces";
@@ -26,6 +27,7 @@ export const PreviewChartHeader: FunctionComponent<PreviewChartHeaderProps> = ({
     getEvaluationStatus,
     onReloadClick,
     onStartEndChange,
+    showConfigurationNotReflective,
 }) => {
     const { t } = useTranslation();
 
@@ -47,6 +49,13 @@ export const PreviewChartHeader: FunctionComponent<PreviewChartHeaderProps> = ({
                             {t("label.reload-preview")}
                         </Button>
                     </Grid>
+                    {showConfigurationNotReflective && (
+                        <Grid item>
+                            <Alert severity="warning" variant="outlined">
+                                {t("message.chart-data-not-reflective")}
+                            </Alert>
+                        </Grid>
+                    )}
                     <Grid item>
                         <TimeRangeButtonWithContext
                             hideQuickExtend

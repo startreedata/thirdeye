@@ -41,6 +41,7 @@ export const ChartContent: FunctionComponent<ChartContentProps> = ({
     showOnlyActivity,
     onAlertPropertyChange,
     alert,
+    hideCallToActionPrompt,
 }) => {
     const sharedWizardClasses = useAlertWizardV2Styles();
     const previewChartClasses = usePreviewChartStyles();
@@ -124,22 +125,28 @@ export const ChartContent: FunctionComponent<ChartContentProps> = ({
                 {!alertEvaluation && (
                     <Box marginTop={1} position="relative">
                         <Box className={previewChartClasses.alertContainer}>
-                            <Box position="absolute" width="100%">
-                                <Grid container justifyContent="space-around">
-                                    <Grid item>
-                                        <Alert
-                                            className={
-                                                sharedWizardClasses.infoAlert
-                                            }
-                                            severity="info"
-                                        >
-                                            {t(
-                                                "message.please-complete-the-missing-information-to-see-preview"
-                                            )}
-                                        </Alert>
+                            {hideCallToActionPrompt !== false && (
+                                <Box position="absolute" width="100%">
+                                    <Grid
+                                        container
+                                        justifyContent="space-around"
+                                    >
+                                        <Grid item>
+                                            <Alert
+                                                className={
+                                                    sharedWizardClasses.infoAlert
+                                                }
+                                                severity="info"
+                                            >
+                                                {t(
+                                                    "message.please-complete-the-missing-information-to-see-preview"
+                                                )}
+                                            </Alert>
+                                        </Grid>
                                     </Grid>
-                                </Grid>
-                            </Box>
+                                </Box>
+                            )}
+
                             <Grid
                                 container
                                 alignItems="center"

@@ -13,17 +13,12 @@
  * the License.
  */
 import { Box, Divider, Grid } from "@material-ui/core";
-import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useOutletContext } from "react-router-dom";
 import { AlertJson } from "../../components/alert-wizard-v2/alert-json/alert-json.component";
 import { AlertNotifications } from "../../components/alert-wizard-v2/alert-notifications/alert-notifications.component";
-import {
-    determinePropertyFieldConfiguration,
-    hasRequiredPropertyValuesSet,
-} from "../../components/alert-wizard-v2/alert-template/alert-template.utils";
 import { PreviewChart } from "../../components/alert-wizard-v2/alert-template/preview-chart/preview-chart.component";
-import { MessageDisplayState } from "../../components/alert-wizard-v2/alert-template/preview-chart/preview-chart.interfaces";
 import { Portal } from "../../components/portal/portal.component";
 import { WizardBottomBar } from "../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import {
@@ -37,8 +32,7 @@ import {
 
 export const AlertsUpdateJSONPage: FunctionComponent = () => {
     const { t } = useTranslation();
-    const [isRequiredPropertyValuesSet, setIsRequiredPropertyValuesSet] =
-        useState(false);
+
     const [submitBtnLabel, setSubmitBtnLabel] = useState<string>(
         t("label.update-entity", {
             entity: t("label.alert"),
@@ -50,30 +44,10 @@ export const AlertsUpdateJSONPage: FunctionComponent = () => {
         handleAlertPropertyChange: onAlertPropertyChange,
         selectedSubscriptionGroups,
         handleSubscriptionGroupChange: onSubscriptionGroupsChange,
-        selectedAlertTemplate,
         isEditRequestInFlight,
         handleSubmitAlertClick,
         onPageExit,
     } = useOutletContext<AlertsSimpleAdvancedJsonContainerPageOutletContextProps>();
-
-    const availableFields = useMemo(() => {
-        if (selectedAlertTemplate) {
-            return determinePropertyFieldConfiguration(selectedAlertTemplate);
-        }
-
-        return [];
-    }, [selectedAlertTemplate]);
-
-    useEffect(() => {
-        const isValid =
-            !!selectedAlertTemplate &&
-            hasRequiredPropertyValuesSet(
-                availableFields,
-                alert.templateProperties
-            );
-
-        setIsRequiredPropertyValuesSet(isValid);
-    }, [selectedAlertTemplate, alert]);
 
     useEffect(() => {
         setIsSubmitBtnEnabled(false);
@@ -97,16 +71,6 @@ export const AlertsUpdateJSONPage: FunctionComponent = () => {
                         <Box>
                             <PreviewChart
                                 alert={alert}
-                                displayState={
-                                    selectedAlertTemplate
-                                        ? isRequiredPropertyValuesSet
-                                            ? MessageDisplayState.GOOD_TO_PREVIEW
-                                            : MessageDisplayState.FILL_TEMPLATE_PROPERTY_VALUES
-                                        : MessageDisplayState.SELECT_TEMPLATE
-                                }
-                                subtitle={t(
-                                    "message.configure-or-input-template-to-preview-alert"
-                                )}
                                 onChartDataLoadSuccess={() => {
                                     setIsSubmitBtnEnabled(true);
                                     setSubmitBtnLabel(

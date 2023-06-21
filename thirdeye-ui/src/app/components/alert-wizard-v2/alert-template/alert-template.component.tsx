@@ -21,13 +21,7 @@ import {
     Typography,
 } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
-import React, {
-    MouseEvent,
-    useCallback,
-    useEffect,
-    useMemo,
-    useState,
-} from "react";
+import React, { MouseEvent, useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { PageContentsCardV1 } from "../../../platform/components";
 import { AlertTemplate as AlertTemplateType } from "../../../rest/dto/alert-template.interfaces";
@@ -43,7 +37,6 @@ import {
     hasRequiredPropertyValuesSet,
 } from "./alert-template.utils";
 import { PreviewChart } from "./preview-chart/preview-chart.component";
-import { MessageDisplayState } from "./preview-chart/preview-chart.interfaces";
 
 function AlertTemplate({
     alert,
@@ -56,9 +49,6 @@ function AlertTemplate({
     const [alertTemplateProperties, setAlertTemplateProperties] =
         useState<TemplatePropertiesObject>(alert.templateProperties || {});
 
-    const [isRequiredPropertyValuesSet, setIsRequiredPropertyValuesSet] =
-        useState(false);
-
     const availableInputFields = useMemo(() => {
         if (selectedAlertTemplate) {
             return determinePropertyFieldConfiguration(selectedAlertTemplate);
@@ -67,19 +57,18 @@ function AlertTemplate({
         return [];
     }, [selectedAlertTemplate]);
 
-    const { t } = useTranslation();
-    const classes = useAlertWizardV2Styles();
-
-    useEffect(() => {
-        const isValid =
+    const isRequiredPropertyValuesSet = useMemo(() => {
+        return (
             !!selectedAlertTemplate &&
             hasRequiredPropertyValuesSet(
                 availableInputFields,
                 alertTemplateProperties
-            );
+            )
+        );
+    }, [availableInputFields, alertTemplateProperties]);
 
-        setIsRequiredPropertyValuesSet(isValid);
-    }, [selectedAlertTemplate, alertTemplateProperties]);
+    const { t } = useTranslation();
+    const classes = useAlertWizardV2Styles();
 
     const handlePropertyValueChange = (
         newChanges: TemplatePropertiesObject
@@ -249,14 +238,10 @@ function AlertTemplate({
                 <Grid item xs={12}>
                     <PreviewChart
                         alert={alert}
-                        displayState={
-                            selectedAlertTemplate
-                                ? isRequiredPropertyValuesSet
-                                    ? MessageDisplayState.GOOD_TO_PREVIEW
-                                    : MessageDisplayState.FILL_TEMPLATE_PROPERTY_VALUES
-                                : MessageDisplayState.SELECT_TEMPLATE
+                        hideCallToActionPrompt={
+                            !!selectedAlertTemplate &&
+                            !isRequiredPropertyValuesSet
                         }
-                        subtitle={t("message.select-template-to-preview-alert")}
                         onChartDataLoadSuccess={onChartDataLoadSuccess}
                     />
                 </Grid>

@@ -24,7 +24,7 @@ import {
 } from "@material-ui/core";
 import FilterListIcon from "@material-ui/icons/FilterList";
 import { Skeleton } from "@material-ui/lab";
-import { reduce } from "lodash";
+import { isEqual, reduce } from "lodash";
 import {
     default as React,
     FunctionComponent,
@@ -357,6 +357,12 @@ export const SetupAnomaliesFilterPage: FunctionComponent<SetupAnomaliesFilterPag
                                                 getEvaluationStatus={
                                                     getEvaluationWithFilterChangesStatus
                                                 }
+                                                showConfigurationNotReflective={
+                                                    !isEqual(
+                                                        alertConfigurationWithFilterChanges,
+                                                        alertConfigurationBeforeFilterChanges
+                                                    )
+                                                }
                                                 onReloadClick={
                                                     handleReloadPreviewClick
                                                 }
@@ -462,21 +468,27 @@ export const SetupAnomaliesFilterPage: FunctionComponent<SetupAnomaliesFilterPag
 
                 {!hideCurrentlySelected && selectedAlgorithmOption && (
                     <WizardBottomBar
-                        backBtnLink={`../${AppRouteRelative.WELCOME_CREATE_ALERT_TUNE_ALERT}`}
+                        backBtnLink={`../${
+                            AppRouteRelative.WELCOME_CREATE_ALERT_TUNE_ALERT
+                        }?${searchParams.toString()}`}
                         handleNextClick={() => {
                             onAlertPropertyChange({
                                 templateProperties:
                                     alertConfigurationWithFilterChanges.templateProperties,
                             });
                             navigate(
-                                `../${AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_DETAILS}`
+                                `../${
+                                    AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_DETAILS
+                                }?${searchParams.toString()}`
                             );
                         }}
                         nextButtonLabel={t("label.next")}
                     >
                         <Button
                             component={RouterLink}
-                            to={`../${AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_DETAILS}`}
+                            to={`../${
+                                AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_DETAILS
+                            }?${searchParams.toString()}`}
                         >
                             {t("label.skip")}
                         </Button>

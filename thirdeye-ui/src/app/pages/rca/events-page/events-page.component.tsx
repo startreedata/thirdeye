@@ -298,9 +298,7 @@ export const EventsPage: FunctionComponent = () => {
                                             handleAddEventsToInvestigationClick
                                         }
                                     >
-                                        {t(
-                                            "label.add-dimensions-to-investigation"
-                                        )}
+                                        {t("label.add-events-to-investigation")}
                                     </Button>
                                 </PreviewChart>
                             </Box>

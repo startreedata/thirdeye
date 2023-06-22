@@ -73,16 +73,9 @@ export const TuneAlertPage: FunctionComponent = () => {
             />
 
             <WizardBottomBar
-                backBtnLink={
-                    selectedAlgorithmOption.algorithmOption
-                        .alertTemplateForMultidimension === alert.template?.name
-                        ? `../${
-                              AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_DIMENSION_EXPLORATION
-                          }?${searchParams.toString()}`
-                        : `../${
-                              AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE
-                          }?${searchParams.toString()}`
-                }
+                backBtnLink={`../${
+                    AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE
+                }?${searchParams.toString()}`}
                 nextBtnLink={`../${
                     AppRouteRelative.WELCOME_CREATE_ALERT_ANOMALIES_FILTER
                 }?${searchParams.toString()}`}

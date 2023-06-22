@@ -190,7 +190,7 @@ export const ChartContent: FunctionComponent<ChartContentProps> = ({
 
                 {workingDetectionEvaluations &&
                     workingDetectionEvaluations.length > 1 && (
-                        <Box>
+                        <Box marginTop={1}>
                             <EnumerationItemsTable
                                 detectionEvaluations={
                                     workingDetectionEvaluations

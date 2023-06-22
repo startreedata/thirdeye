@@ -63,6 +63,12 @@ const HeatMapPage = lazy(() =>
     ).then((module) => ({ default: module.HeatMapPage }))
 );
 
+const DimensionAnalysisDrillsPage = lazy(() =>
+    import(
+        /* webpackChunkName: "dimension-analysis-drills" */ "../../pages/rca/dimension-analysis-drills-page/dimension-analysis-drills-page.component"
+    ).then((module) => ({ default: module.DimensionAnalysisDrillsPage }))
+);
+
 const EventsPage = lazy(() =>
     import(
         /* webpackChunkName: "events-page" */ "../../pages/rca/events-page/events-page.component"
@@ -146,7 +152,10 @@ export const RootCauseAnalysisRouter: FunctionComponent = () => {
                             element={<HeatMapPage />}
                             path={AppRouteRelative.RCA_HEATMAP}
                         />
-                        <Route path={AppRouteRelative.RCA_DIMENSION_ANALYSIS} />
+                        <Route
+                            element={<DimensionAnalysisDrillsPage />}
+                            path={AppRouteRelative.RCA_DIMENSION_ANALYSIS}
+                        />
                     </Route>
                     <Route
                         element={<EventsPage />}

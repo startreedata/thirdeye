@@ -22,7 +22,6 @@ import { LoadingErrorStateSwitch } from "../../../components/page-states/loading
 import { BaselineOffsetSelection } from "../../../components/rca/analysis-tabs/baseline-offset-selection/baseline-offset-selection.component";
 import { AnomalyFilterOption } from "../../../components/rca/anomaly-dimension-analysis/anomaly-dimension-analysis.interfaces";
 import { DimensionSearchAutocomplete } from "../../../components/rca/heat-map/dimension-search-automcomplete/dimension-search-autocomplete.component";
-import { HeatMap } from "../../../components/rca/heat-map/heat-map.component";
 import { formatDimensionOptions } from "../../../components/rca/heat-map/heat-map.utils";
 import { PreviewChart } from "../../../components/rca/top-contributors-table/preview-chart/preview-chart.component";
 import {
@@ -47,23 +46,18 @@ import {
 import { RootCauseAnalysisForAnomalyPageParams } from "../../root-cause-analysis-for-anomaly-page/root-cause-analysis-for-anomaly-page.interfaces";
 import { InvestigationContext } from "../investigation-state-tracker-container-page/investigation-state-tracker.interfaces";
 
-const HEATMAP_FILTERS_URL_KEY = "heatmapFilters";
+const QUERY_PARAM_KEY = "dimensionAnalysisFilters";
 
-export const HeatMapPage: FunctionComponent = () => {
+export const DimensionAnalysisDrillsPage: FunctionComponent = () => {
     const { notify } = useNotificationProviderV1();
     const { t } = useTranslation();
     const [searchParams, setSearchParams] = useSearchParams();
     const { id: anomalyId } =
         useParams<RootCauseAnalysisForAnomalyPageParams>();
 
-    // Keep track of last height to use as loading state height
-    const [lastTreemapHeight, setLastTreemapHeight] = useState(300);
-
     const [anomalyFilters, setAnomalyFilters] = useState<AnomalyFilterOption[]>(
         () => {
-            const heatmapFilterQueryParams = searchParams.get(
-                HEATMAP_FILTERS_URL_KEY
-            );
+            const heatmapFilterQueryParams = searchParams.get(QUERY_PARAM_KEY);
 
             return heatmapFilterQueryParams
                 ? deserializeKeyValuePair(heatmapFilterQueryParams)
@@ -86,9 +80,7 @@ export const HeatMapPage: FunctionComponent = () => {
 
     // Sync the anomaly filters if the search params changed
     useEffect(() => {
-        const currentQueryFilterSearchQuery = searchParams.get(
-            HEATMAP_FILTERS_URL_KEY
-        );
+        const currentQueryFilterSearchQuery = searchParams.get(QUERY_PARAM_KEY);
 
         if (
             currentQueryFilterSearchQuery &&
@@ -160,10 +152,10 @@ export const HeatMapPage: FunctionComponent = () => {
 
     const handleFilterChange = (newFilters: AnomalyFilterOption[]): void => {
         if (newFilters.length === 0) {
-            searchParams.delete(HEATMAP_FILTERS_URL_KEY);
+            searchParams.delete(QUERY_PARAM_KEY);
         } else {
             searchParams.set(
-                HEATMAP_FILTERS_URL_KEY,
+                QUERY_PARAM_KEY,
                 serializeKeyValuePair(newFilters)
             );
         }
@@ -175,11 +167,11 @@ export const HeatMapPage: FunctionComponent = () => {
         <>
             <Grid container>
                 <Grid item xs={12}>
-                    <Typography variant="h4">{t("label.heatmap")}</Typography>
+                    <Typography variant="h4">
+                        Dimension analysis & drills
+                    </Typography>
                     <Typography variant="body1">
-                        {t(
-                            "message.represents-the-frequency-and-severity-of-a-change"
-                        )}
+                        Manual filter for dimensions analysis.
                     </Typography>
                 </Grid>
                 <Grid item xs={12}>
@@ -233,7 +225,7 @@ export const HeatMapPage: FunctionComponent = () => {
                                         <Box pb={2} pt={2}>
                                             <SkeletonV1
                                                 animation="pulse"
-                                                height={lastTreemapHeight}
+                                                height={300}
                                                 variant="rect"
                                             />
                                         </Box>
@@ -261,43 +253,32 @@ export const HeatMapPage: FunctionComponent = () => {
                                             )
                                         }
                                     >
-                                        <HeatMap
-                                            anomalyFilters={anomalyFilters}
-                                            heatMapData={
-                                                heatMapData as AnomalyBreakdown
-                                            }
-                                            onFilterChange={handleFilterChange}
-                                            onHeightChange={
-                                                setLastTreemapHeight
-                                            }
-                                        />
-                                    </EmptyStateSwitch>
-
-                                    <Box pt={2}>
-                                        <PreviewChart
-                                            alertInsight={alertInsight}
-                                            anomaly={anomaly}
-                                            dimensionCombinations={
-                                                isEmpty(anomalyFilters)
-                                                    ? []
-                                                    : [anomalyFilters]
-                                            }
-                                        >
-                                            <Button
-                                                color="primary"
-                                                disabled={isEmpty([
-                                                    anomalyFilters,
-                                                ])}
-                                                onClick={
-                                                    handleAddDimensionsToInvestigationClick
+                                        <Box pt={2}>
+                                            <PreviewChart
+                                                alertInsight={alertInsight}
+                                                anomaly={anomaly}
+                                                dimensionCombinations={
+                                                    isEmpty(anomalyFilters)
+                                                        ? []
+                                                        : [anomalyFilters]
                                                 }
                                             >
-                                                {t(
-                                                    "label.add-dimensions-to-investigation"
-                                                )}
-                                            </Button>
-                                        </PreviewChart>
-                                    </Box>
+                                                <Button
+                                                    color="primary"
+                                                    disabled={isEmpty([
+                                                        anomalyFilters,
+                                                    ])}
+                                                    onClick={
+                                                        handleAddDimensionsToInvestigationClick
+                                                    }
+                                                >
+                                                    {t(
+                                                        "label.add-dimensions-to-investigation"
+                                                    )}
+                                                </Button>
+                                            </PreviewChart>
+                                        </Box>
+                                    </EmptyStateSwitch>
                                 </LoadingErrorStateSwitch>
                             </Grid>
                         </Grid>

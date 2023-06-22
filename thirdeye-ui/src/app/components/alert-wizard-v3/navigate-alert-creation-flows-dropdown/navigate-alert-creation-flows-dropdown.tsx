@@ -16,7 +16,7 @@ import { Box, Grid, TextField } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
 import React, { FunctionComponent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { AppRouteRelative } from "../../../utils/routes/routes.util";
 import { ALERT_CREATION_NAVIGATE_DROPDOWN_TEST_IDS } from "./navigate-alert-creation-flows-dropdown.interface";
 import { useNavigateAlertCreationFlowsDropdownStyles } from "./navigate-alert-creation-flows-dropdown.styles";
@@ -26,6 +26,7 @@ export const NavigateAlertCreationFlowsDropdown: FunctionComponent = () => {
     const classes = useNavigateAlertCreationFlowsDropdownStyles();
     const navigate = useNavigate();
     const location = useLocation();
+    const [searchParams] = useSearchParams();
 
     /**
      * `/alerts/73/update/simple`
@@ -116,7 +117,11 @@ export const NavigateAlertCreationFlowsDropdown: FunctionComponent = () => {
                     size="small"
                     value={currentPage}
                     onChange={(_, selectedValue) => {
-                        navigate(`${routePathPrefix}/${selectedValue.navLink}`);
+                        navigate(
+                            `${routePathPrefix}/${
+                                selectedValue.navLink
+                            }?${searchParams.toString()}`
+                        );
                     }}
                 />
             </Grid>

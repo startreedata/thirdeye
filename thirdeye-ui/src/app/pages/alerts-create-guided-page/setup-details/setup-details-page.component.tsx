@@ -20,7 +20,11 @@ import {
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useOutletContext } from "react-router-dom";
+import {
+    useNavigate,
+    useOutletContext,
+    useSearchParams,
+} from "react-router-dom";
 import { AlertFrequency } from "../../../components/alert-wizard-v2/alert-details/alert-frequency/alert-frequency.component";
 import { NavigateAlertCreationFlowsDropdown } from "../../../components/alert-wizard-v3/navigate-alert-creation-flows-dropdown/navigate-alert-creation-flows-dropdown";
 import { NotificationConfiguration } from "../../../components/alert-wizard-v3/notification-configuration/notification-configuration.component";
@@ -44,6 +48,7 @@ export const SetupDetailsPage: FunctionComponent<SetupDetailsPageProps> = ({
 }) => {
     const navigate = useNavigate();
     const { t } = useTranslation();
+    const [searchParams] = useSearchParams();
 
     const {
         alert,
@@ -257,7 +262,9 @@ export const SetupDetailsPage: FunctionComponent<SetupDetailsPageProps> = ({
             </PageContentsGridV1>
 
             <WizardBottomBar
-                backBtnLink={`../${AppRouteRelative.WELCOME_CREATE_ALERT_ANOMALIES_FILTER}`}
+                backBtnLink={`../${
+                    AppRouteRelative.WELCOME_CREATE_ALERT_ANOMALIES_FILTER
+                }?${searchParams.toString()}`}
                 handleNextClick={() => handleCreateAlertClick(alert)}
                 nextButtonIsDisabled={isCreatingAlert}
                 nextButtonLabel={

@@ -122,9 +122,9 @@ export const ChartContent: FunctionComponent<ChartContentProps> = ({
 
     return (
         <>
-            <Box marginTop={1} minHeight={100} position="relative">
+            <Box minHeight={100} position="relative">
                 {!alertEvaluation && (
-                    <Box marginTop={1} position="relative">
+                    <Box position="relative">
                         <Box className={previewChartClasses.alertContainer}>
                             {hideCallToActionPrompt !== true && (
                                 <Box position="absolute" width="100%">
@@ -180,7 +180,7 @@ export const ChartContent: FunctionComponent<ChartContentProps> = ({
 
                 {workingDetectionEvaluations?.length === 1 &&
                     firstTimeSeriesOptions && (
-                        <Box marginTop={1}>
+                        <Box>
                             <TimeSeriesChart
                                 height={300}
                                 {...firstTimeSeriesOptions}
@@ -190,7 +190,7 @@ export const ChartContent: FunctionComponent<ChartContentProps> = ({
 
                 {workingDetectionEvaluations &&
                     workingDetectionEvaluations.length > 1 && (
-                        <Box marginTop={1}>
+                        <Box>
                             <EnumerationItemsTable
                                 detectionEvaluations={
                                     workingDetectionEvaluations

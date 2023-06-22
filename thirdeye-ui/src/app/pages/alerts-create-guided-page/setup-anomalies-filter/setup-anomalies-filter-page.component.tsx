@@ -261,6 +261,7 @@ export const SetupAnomaliesFilterPage: FunctionComponent<SetupAnomaliesFilterPag
                                     <Grid item>
                                         <Typography variant="h5">
                                             <LoadingErrorStateSwitch
+                                                errorState={<></>}
                                                 isError={
                                                     getEvaluationWithoutFilterChangesStatus ===
                                                     ActionStatus.Error
@@ -299,12 +300,12 @@ export const SetupAnomaliesFilterPage: FunctionComponent<SetupAnomaliesFilterPag
                                                             )
                                                         </Typography>
                                                     )}
+                                                <Typography variant="body2">
+                                                    {t(
+                                                        "message.anomalies-are-detected-within-the-date-range"
+                                                    )}
+                                                </Typography>
                                             </LoadingErrorStateSwitch>
-                                        </Typography>
-                                        <Typography variant="body2">
-                                            {t(
-                                                "message.anomalies-are-detected-within-the-date-range"
-                                            )}
                                         </Typography>
                                     </Grid>
                                     <Grid item>
@@ -338,7 +339,9 @@ export const SetupAnomaliesFilterPage: FunctionComponent<SetupAnomaliesFilterPag
                                                 <Button
                                                     color="primary"
                                                     component={RouterLink}
-                                                    to={`../${AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_DETAILS}`}
+                                                    to={`../${
+                                                        AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_DETAILS
+                                                    }?${searchParams.toString()}`}
                                                 >
                                                     {t("label.next")}
                                                 </Button>
@@ -399,7 +402,9 @@ export const SetupAnomaliesFilterPage: FunctionComponent<SetupAnomaliesFilterPag
                                                                     component={
                                                                         RouterLink
                                                                     }
-                                                                    to={`../${AppRouteRelative.WELCOME_CREATE_ALERT_TUNE_ALERT}`}
+                                                                    to={`../${
+                                                                        AppRouteRelative.WELCOME_CREATE_ALERT_TUNE_ALERT
+                                                                    }?${searchParams.toString()}`}
                                                                 >
                                                                     {t(
                                                                         "label.go-back"

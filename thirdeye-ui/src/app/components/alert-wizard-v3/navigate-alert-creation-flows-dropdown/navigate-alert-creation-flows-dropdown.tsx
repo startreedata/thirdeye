@@ -31,6 +31,8 @@ export const NavigateAlertCreationFlowsDropdown: FunctionComponent = () => {
      * `/alerts/73/update/simple`
      * `/alerts/create/new/advanced`
      * `/alerts/create/new/new-user/select-type`
+     * `/alerts/create/copy/69689/json-editor`
+     * `/alerts/create/copy/69689/new-user/select-type`
      * `/welcome/create-alert/simple`
      * `/welcome/create-alert/new-user/select-type`
      */
@@ -39,6 +41,14 @@ export const NavigateAlertCreationFlowsDropdown: FunctionComponent = () => {
 
         if (location.pathname.includes(AppRouteRelative.WELCOME)) {
             endIdx = 3;
+        }
+
+        if (
+            location.pathname.includes(
+                AppRouteRelative.ALERTS_CREATE_COPY.replace("/:id", "")
+            )
+        ) {
+            endIdx = 5;
         }
 
         return location.pathname.split("/").slice(0, endIdx).join("/");

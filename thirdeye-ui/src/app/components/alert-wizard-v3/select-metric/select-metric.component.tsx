@@ -47,7 +47,14 @@ export const SelectMetric: FunctionComponent<SelectMetricProps> = ({
     );
     const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
     const [selectedAggregationFunction, setSelectedAggregationFunction] =
-        useState<MetricAggFunction>(MetricAggFunction.SUM);
+        useState<MetricAggFunction>(() => {
+            if (alert?.templateProperties?.aggregationFunction) {
+                return alert.templateProperties
+                    .aggregationFunction as MetricAggFunction;
+            }
+
+            return MetricAggFunction.SUM;
+        });
 
     const selectedGranularity = useMemo(() => {
         let selected = undefined;

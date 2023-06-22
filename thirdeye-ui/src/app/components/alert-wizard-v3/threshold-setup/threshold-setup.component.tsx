@@ -46,7 +46,14 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
         useState<TemplatePropertiesObject>(alert.templateProperties);
 
     const [selectedAggregationFunction, setSelectedAggregationFunction] =
-        useState<MetricAggFunction>(MetricAggFunction.SUM);
+        useState<MetricAggFunction>(() => {
+            if (alert?.templateProperties?.aggregationFunction) {
+                return alert.templateProperties
+                    .aggregationFunction as MetricAggFunction;
+            }
+
+            return MetricAggFunction.SUM;
+        });
 
     const inputFieldConfigs = useMemo(() => {
         if (alertTemplate) {

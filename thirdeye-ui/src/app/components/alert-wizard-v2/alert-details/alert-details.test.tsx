@@ -24,6 +24,7 @@ jest.mock("react-i18next", () => ({
 }));
 
 jest.mock("react-router-dom", () => ({
+    useSearchParams: jest.fn().mockReturnValue([jest.fn()]),
     useNavigate: jest.fn().mockReturnValue(jest.fn()),
     useLocation: jest.fn().mockReturnValue({
         pathname: "randomPath",

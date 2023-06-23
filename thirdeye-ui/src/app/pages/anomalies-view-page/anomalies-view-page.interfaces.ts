@@ -12,9 +12,11 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { ActionStatus } from "../../rest/actions.interfaces";
 import { AlertInsight } from "../../rest/dto/alert.interfaces";
 import { Anomaly, AnomalyFeedback } from "../../rest/dto/anomaly.interfaces";
 import { EnumerationItem } from "../../rest/dto/enumeration-item.interfaces";
+import { Investigation } from "../../rest/dto/rca.interfaces";
 
 export const OFFSET_REGEX_EXTRACT = /[pP](-?\d+)([DWMY])/;
 
@@ -34,4 +36,6 @@ export interface AnomalyViewContainerPageOutletContext {
     handleFeedbackUpdateSuccess: (feedback: AnomalyFeedback) => void;
     enumerationItem?: EnumerationItem;
     alertInsight: AlertInsight | null;
+    getInvestigationsRequestStatus: ActionStatus;
+    investigations: Investigation[];
 }

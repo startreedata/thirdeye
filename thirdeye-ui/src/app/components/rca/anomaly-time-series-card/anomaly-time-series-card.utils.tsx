@@ -16,7 +16,7 @@ import { Box, Typography } from "@material-ui/core";
 import { Orientation } from "@visx/axis";
 import { Group } from "@visx/group";
 import { Bar, Circle, Line, LinePath } from "@visx/shape";
-import { flatten, isEqual } from "lodash";
+import { flatten } from "lodash";
 import React from "react";
 import { NavigateFunction } from "react-router";
 import {
@@ -58,6 +58,41 @@ export const CHART_SIZE_OPTIONS = [
     ["L", 1100],
 ];
 
+export const generateSeriesForFilteredEvaluations = (
+    filteredAlertEvaluations: [AlertEvaluation, AnomalyFilterOption[]][]
+): Series[] => {
+    const filteredTimeSeriesData: Series[] = [];
+
+    filteredAlertEvaluations.forEach((alertEvalAndFilters) => {
+        const [filteredAlertEvaluation, filterOptions] = alertEvalAndFilters;
+        const filteredAlertEvaluationTimeSeriesData: DetectionData =
+            extractDetectionEvaluation(filteredAlertEvaluation)[0].data;
+
+        const timestamps = filteredAlertEvaluationTimeSeriesData.timestamp;
+
+        filteredTimeSeriesData.push({
+            name: filterOptions
+                .map((item) => concatKeyValueWithEqual(item, false))
+                .join(" & "),
+            type: SeriesType.LINE,
+            data: filteredAlertEvaluationTimeSeriesData.current
+                .map((value, idx) => {
+                    return {
+                        y: value,
+                        x: timestamps[idx],
+                    };
+                })
+                .filter((d) => Number.isFinite(d.y)),
+            tooltip: {
+                valueFormatter: formatLargeNumberV1,
+            },
+            strokeWidth: Dimension.WIDTH_VISUALIZATION_STROKE_BASELINE,
+        });
+    });
+
+    return filteredTimeSeriesData;
+};
+
 export const generateSeriesDataForDetectionEvaluation = (
     detectionEvaluation: DetectionEvaluation,
     filteredAlertEvaluations: [AlertEvaluation, AnomalyFilterOption[]][],
@@ -66,57 +101,8 @@ export const generateSeriesDataForDetectionEvaluation = (
     hideActivity?: boolean,
     hidePredicted?: boolean
 ): Series[] => {
-    const filteredTimeSeriesData: Series[] = [];
-
-    filteredAlertEvaluations.forEach((alertEvalAndFilters) => {
-        const [filteredAlertEvaluation, filterOptions] = alertEvalAndFilters;
-        let filteredAlertEvaluationTimeSeriesData: DetectionData | undefined =
-            undefined;
-
-        if (detectionEvaluation.enumerationItem !== undefined) {
-            const matchingDetectionEvaluationForEnumerationItem =
-                extractDetectionEvaluation(filteredAlertEvaluation).find(
-                    (candidate) => {
-                        return isEqual(
-                            candidate.enumerationItem,
-                            detectionEvaluation.enumerationItem
-                        );
-                    }
-                );
-
-            if (matchingDetectionEvaluationForEnumerationItem) {
-                filteredAlertEvaluationTimeSeriesData =
-                    matchingDetectionEvaluationForEnumerationItem.data;
-            }
-        } else {
-            filteredAlertEvaluationTimeSeriesData = extractDetectionEvaluation(
-                filteredAlertEvaluation
-            )[0].data;
-        }
-
-        if (filteredAlertEvaluationTimeSeriesData) {
-            const timestamps = filteredAlertEvaluationTimeSeriesData.timestamp;
-
-            filteredTimeSeriesData.push({
-                name: filterOptions
-                    .map((item) => concatKeyValueWithEqual(item, false))
-                    .join(" & "),
-                type: SeriesType.LINE,
-                data: filteredAlertEvaluationTimeSeriesData.current
-                    .map((value, idx) => {
-                        return {
-                            y: value,
-                            x: timestamps[idx],
-                        };
-                    })
-                    .filter((d) => Number.isFinite(d.y)),
-                tooltip: {
-                    valueFormatter: formatLargeNumberV1,
-                },
-                strokeWidth: Dimension.WIDTH_VISUALIZATION_STROKE_BASELINE,
-            });
-        }
-    });
+    const filteredTimeSeriesData: Series[] =
+        generateSeriesForFilteredEvaluations(filteredAlertEvaluations);
 
     const timeSeriesData = detectionEvaluation.data;
 
@@ -307,7 +293,8 @@ export const generateSeriesForAnomalies = (
     valuesToTrackAgainst: number[],
     navigate?: NavigateFunction,
     timezone?: string,
-    hideTime?: boolean
+    hideTime?: boolean,
+    hideAnomalyTrend?: boolean
 ): Series => {
     const granularityBestGuess = determineGranularity(timestamps);
     const dateFormatter = hideTime ? formatDateV1 : formatDateAndTimeV1;
@@ -466,13 +453,17 @@ export const generateSeriesForAnomalies = (
                                     />
                                 );
                             })}
-                        <LinePath<DataPoint>
-                            data={anomalySeriesData}
-                            stroke={Palette.COLOR_VISUALIZATION_STROKE_ANOMALY}
-                            strokeWidth={2}
-                            x={(d) => xScale(d.x) || 0}
-                            y={(d) => yScale(d.y) || 0}
-                        />
+                        {!hideAnomalyTrend && (
+                            <LinePath<DataPoint>
+                                data={anomalySeriesData}
+                                stroke={
+                                    Palette.COLOR_VISUALIZATION_STROKE_ANOMALY
+                                }
+                                strokeWidth={2}
+                                x={(d) => xScale(d.x) || 0}
+                                y={(d) => yScale(d.y) || 0}
+                            />
+                        )}
                         {anomalySeriesData.map((d) => (
                             <>
                                 <Line
@@ -492,16 +483,18 @@ export const generateSeriesForAnomalies = (
                                         y: yScale(maxYValue),
                                     }}
                                 />
-                                <Circle
-                                    cx={xScale(d.x)}
-                                    cy={yScale(d.y)}
-                                    fill={
-                                        Palette.COLOR_VISUALIZATION_STROKE_ANOMALY
-                                    }
-                                    r={
-                                        Dimension.RADIUS_VISUALIZATION_ANOMALY_MARKER
-                                    }
-                                />
+                                {!hideAnomalyTrend && (
+                                    <Circle
+                                        cx={xScale(d.x)}
+                                        cy={yScale(d.y)}
+                                        fill={
+                                            Palette.COLOR_VISUALIZATION_STROKE_ANOMALY
+                                        }
+                                        r={
+                                            Dimension.RADIUS_VISUALIZATION_ANOMALY_MARKER
+                                        }
+                                    />
+                                )}
                             </>
                         ))}
                     </Group>

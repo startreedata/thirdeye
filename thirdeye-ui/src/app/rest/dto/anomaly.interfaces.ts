@@ -51,6 +51,27 @@ export interface AnomalyFeedback {
     id?: number;
     type: AnomalyFeedbackType;
     comment: string;
+    causes?: AnomalyCause[];
+    // The fields below should exist with feedback created after April 2023
+    createdBy?: {
+        principal: string;
+    };
+    created?: number;
+    updatedBy?: {
+        principal: string;
+    };
+    updated?: number;
+}
+
+export enum AnomalyCause {
+    HOLIDAY_EFFECT = "HOLIDAY_EFFECT",
+    USER_ERROR = "USER_ERROR",
+    SOFTWARE_FAILURE = "SOFTWARE_FAILURE",
+    ENVIRONMENTAL_FACTOR = "ENVIRONMENTAL_FACTOR",
+    FRAUD = "FRAUD",
+    PLATFORM_UPGRADE = "PLATFORM_UPGRADE",
+    EXTERNAL_EVENT = "EXTERNAL_EVENT",
+    OTHER = "OTHER",
 }
 
 export enum AnomalyType {

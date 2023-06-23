@@ -36,7 +36,7 @@ export const Legend: FunctionComponent<LegendProps> = ({
 }) => {
     const handleOnClick = (seriesData: Series): void => {
         const idx = series.findIndex((s) => s === seriesData);
-        onSeriesClick && onSeriesClick(idx);
+        onSeriesClick && onSeriesClick(idx, !seriesData.enabled);
     };
 
     return (

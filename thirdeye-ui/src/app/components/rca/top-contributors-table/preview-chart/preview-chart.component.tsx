@@ -99,7 +99,9 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
         }
 
         getEvaluation(
-            createAlertEvaluation(anomaly.alert.id, startTime, endTime)
+            createAlertEvaluation(anomaly.alert.id, startTime, endTime),
+            undefined,
+            anomaly?.enumerationItem
         );
     };
 
@@ -121,7 +123,8 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
 
             return getAlertEvaluation(
                 createAlertEvaluation(anomaly.alert.id, startTime, endTime),
-                filters
+                filters,
+                anomaly?.enumerationItem
             );
         });
         setIsFilteredDataFetching(true);

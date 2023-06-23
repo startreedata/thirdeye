@@ -122,11 +122,15 @@ export const RCAChartLegend: FunctionComponent<RCAChartLegendProps> = ({
                                             filterSet={filterSet}
                                             key={idx}
                                             series={series}
-                                            onCheckBoxClick={() => {
+                                            onCheckBoxClick={(
+                                                _: unknown,
+                                                checked: boolean
+                                            ): void => {
                                                 onSeriesClick &&
                                                     onSeriesClick(
                                                         idx +
-                                                            OTHER_TIME_SERIES_IDX_OFFSET
+                                                            OTHER_TIME_SERIES_IDX_OFFSET,
+                                                        !checked
                                                     );
                                             }}
                                             onRemoveBtnClick={() =>

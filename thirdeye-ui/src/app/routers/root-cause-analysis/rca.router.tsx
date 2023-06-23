@@ -13,7 +13,7 @@
  * the License.
  */
 import React, { FunctionComponent, lazy, Suspense } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useSearchParams } from "react-router-dom";
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
 import { RedirectValidation } from "../../utils/routes/redirect-validation/redirect-validation.component";
@@ -82,6 +82,8 @@ const PageNotFoundPage = lazy(() =>
 );
 
 export const RootCauseAnalysisRouter: FunctionComponent = () => {
+    const [searchParams] = useSearchParams();
+
     return (
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
             <Routes>
@@ -127,7 +129,9 @@ export const RootCauseAnalysisRouter: FunctionComponent = () => {
                         element={
                             <Navigate
                                 replace
-                                to={AppRouteRelative.RCA_WHAT_WHERE}
+                                to={`${
+                                    AppRouteRelative.RCA_WHAT_WHERE
+                                }?${searchParams.toString()}`}
                             />
                         }
                     />
@@ -140,7 +144,9 @@ export const RootCauseAnalysisRouter: FunctionComponent = () => {
                             element={
                                 <Navigate
                                     replace
-                                    to={AppRouteRelative.RCA_TOP_CONTRIBUTORS}
+                                    to={`${
+                                        AppRouteRelative.RCA_TOP_CONTRIBUTORS
+                                    }?${searchParams.toString()}`}
                                 />
                             }
                         />

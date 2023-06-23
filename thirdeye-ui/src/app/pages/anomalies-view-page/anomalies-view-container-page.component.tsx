@@ -27,6 +27,7 @@ import { useGetAlertInsight } from "../../rest/alerts/alerts.actions";
 import { useGetAnomaly } from "../../rest/anomalies/anomaly.actions";
 import { Anomaly, AnomalyFeedback } from "../../rest/dto/anomaly.interfaces";
 import { useGetEnumerationItem } from "../../rest/enumeration-items/enumeration-items.actions";
+import { useGetInvestigations } from "../../rest/rca/rca.actions";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { AnomaliesViewPageParams } from "./anomalies-view-page.interfaces";
@@ -40,6 +41,11 @@ export const AnomaliesViewContainerPage: FunctionComponent = () => {
         status: anomalyRequestStatus,
         errorMessages: anomalyRequestErrors,
     } = useGetAnomaly();
+    const {
+        investigations,
+        getInvestigations,
+        status: getInvestigationsRequestStatus,
+    } = useGetInvestigations();
     const { alertInsight, getAlertInsight } = useGetAlertInsight();
     const [currentAnomaly, setCurrentAnomaly] = useState<Anomaly>();
     const { notify } = useNotificationProviderV1();
@@ -58,6 +64,7 @@ export const AnomaliesViewContainerPage: FunctionComponent = () => {
                     anomaly && setCurrentAnomaly(anomaly);
                 }
             );
+        anomalyId && getInvestigations(Number(anomalyId));
     }, [anomalyId]);
 
     useEffect(() => {
@@ -126,6 +133,8 @@ export const AnomaliesViewContainerPage: FunctionComponent = () => {
                     enumerationItem,
                     handleFeedbackUpdateSuccess,
                     alertInsight,
+                    getInvestigationsRequestStatus,
+                    investigations,
                 }}
             />
         </LoadingErrorStateSwitch>

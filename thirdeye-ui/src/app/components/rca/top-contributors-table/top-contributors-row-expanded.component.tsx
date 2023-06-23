@@ -155,12 +155,15 @@ export const TopContributorsRowExpanded: FunctionComponent<TopContributorsRowExp
             );
 
             getNonFilteredEvaluation(
-                createAlertEvaluation(alertId, start, end)
+                createAlertEvaluation(alertId, start, end),
+                undefined,
+                anomaly?.enumerationItem
             );
 
             getFilteredEvaluation(
                 createAlertEvaluation(alertId, start, end),
-                filters
+                filters,
+                anomaly?.enumerationItem
             );
         };
 

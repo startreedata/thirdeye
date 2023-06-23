@@ -12,18 +12,14 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import {
-    AnomalyCause,
-    AnomalyFeedback,
-} from "../../rest/dto/anomaly.interfaces";
+import { AnomalyFilterOption } from "../../anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.interfaces";
 
-export interface AnomalyFeedbackProps {
-    anomalyId: number;
-    anomalyFeedback: AnomalyFeedback;
-    hideComment?: boolean;
-}
-
-export interface AnomalyFeedbackReasonOption {
-    label: string;
-    serverValue: AnomalyCause;
+export interface DimensionsSummaryProps {
+    availableDimensionCombinations: AnomalyFilterOption[][];
+    selectedDimensionCombinations: Set<string>;
+    onDeleteClick: (dimensionCombination: AnomalyFilterOption[]) => void;
+    onCheckBoxClick: (
+        dimensionCombination: AnomalyFilterOption[],
+        shouldAdd: boolean
+    ) => void;
 }

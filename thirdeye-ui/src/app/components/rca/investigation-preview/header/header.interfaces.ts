@@ -12,18 +12,10 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import {
-    AnomalyCause,
-    AnomalyFeedback,
-} from "../../rest/dto/anomaly.interfaces";
 
-export interface AnomalyFeedbackProps {
-    anomalyId: number;
-    anomalyFeedback: AnomalyFeedback;
-    hideComment?: boolean;
-}
+import { ChartType } from "../investigation-preview.interfaces";
 
-export interface AnomalyFeedbackReasonOption {
-    label: string;
-    serverValue: AnomalyCause;
+export interface HeaderProps {
+    selectedChartType: ChartType;
+    onOptionClick: (option: ChartType) => void;
 }

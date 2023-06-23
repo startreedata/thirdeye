@@ -26,6 +26,7 @@ import React, {
 import { useTranslation } from "react-i18next";
 import { useOutletContext } from "react-router-dom";
 import { EventsWizardModal } from "../../../components/events-wizard-modal/event-wizard-modal.component";
+import { EmptyStateSwitch } from "../../../components/page-states/empty-state-switch/empty-state-switch.component";
 import { LoadingErrorStateSwitch } from "../../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { PreviewChart } from "../../../components/rca/top-contributors-table/preview-chart/preview-chart.component";
 import {
@@ -34,6 +35,7 @@ import {
     DataGridV1,
     NotificationTypeV1,
     PageContentsCardV1,
+    SkeletonV1,
     useNotificationProviderV1,
 } from "../../../platform/components";
 import { formatDateAndTimeV1 } from "../../../platform/utils";
@@ -269,39 +271,73 @@ export const EventsPage: FunctionComponent = () => {
                                 status === ActionStatus.Working ||
                                 status === ActionStatus.Initial
                             }
+                            loadingState={
+                                <>
+                                    <Box pb={2} pt={2}>
+                                        <SkeletonV1
+                                            animation="pulse"
+                                            height={300}
+                                            variant="rect"
+                                        />
+                                    </Box>
+                                    <Box pb={2} pt={2}>
+                                        <SkeletonV1
+                                            animation="pulse"
+                                            height={300}
+                                            variant="rect"
+                                        />
+                                    </Box>
+                                </>
+                            }
                         >
-                            <DataGridV1<Event>
-                                hideBorder
-                                hideToolbar
-                                columns={eventColumns}
-                                data={events as Event[]}
-                                rowKey="id"
-                                scroll={DataGridScrollV1.Body}
-                                searchPlaceholder={t("label.search-entity", {
-                                    entity: t("label.event"),
-                                })}
-                                selectionModel={selectionModel}
-                                onSelectionChange={onSelectionChange}
-                            />
-
-                            <Box pt={2}>
-                                <PreviewChart
-                                    alertInsight={alertInsight}
-                                    anomaly={anomaly}
-                                    dimensionCombinations={[]}
-                                    events={selectedEvents}
-                                >
-                                    <Button
-                                        color="primary"
-                                        disabled={isEmpty([selectedEvents])}
-                                        onClick={
-                                            handleAddEventsToInvestigationClick
+                            <EmptyStateSwitch
+                                emptyState={
+                                    <Box p={2} textAlign="center" width="100%">
+                                        {t(
+                                            "message.no-events-available-for-anomaly-time-period"
+                                        )}
+                                    </Box>
+                                }
+                                isEmpty={isEmpty(events)}
+                            >
+                                <DataGridV1<Event>
+                                    hideBorder
+                                    hideToolbar
+                                    columns={eventColumns}
+                                    data={events as Event[]}
+                                    rowKey="id"
+                                    scroll={DataGridScrollV1.Body}
+                                    searchPlaceholder={t(
+                                        "label.search-entity",
+                                        {
+                                            entity: t("label.event"),
                                         }
+                                    )}
+                                    selectionModel={selectionModel}
+                                    onSelectionChange={onSelectionChange}
+                                />
+
+                                <Box pt={2}>
+                                    <PreviewChart
+                                        alertInsight={alertInsight}
+                                        anomaly={anomaly}
+                                        dimensionCombinations={[]}
+                                        events={selectedEvents}
                                     >
-                                        {t("label.add-events-to-investigation")}
-                                    </Button>
-                                </PreviewChart>
-                            </Box>
+                                        <Button
+                                            color="primary"
+                                            disabled={isEmpty([selectedEvents])}
+                                            onClick={
+                                                handleAddEventsToInvestigationClick
+                                            }
+                                        >
+                                            {t(
+                                                "label.add-events-to-investigation"
+                                            )}
+                                        </Button>
+                                    </PreviewChart>
+                                </Box>
+                            </EmptyStateSwitch>
                         </LoadingErrorStateSwitch>
                     </Box>
                 </PageContentsCardV1>

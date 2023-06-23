@@ -51,7 +51,7 @@ import { TooltipMarkers } from "./tooltip/tooltip-markers.component";
 import { TooltipPopover } from "./tooltip/tooltip-popover.component";
 import { determineXPointForHover } from "./tooltip/tooltip.utils";
 
-const MIN_DATA_POINTS_TO_DISPLAY = 30;
+const MIN_DATA_POINTS_TO_DISPLAY = 14;
 const CHART_SEPARATION = 30;
 const CHART_MARGINS = {
     top: 20,
@@ -138,10 +138,13 @@ export const TimeSeriesChartInternal: FunctionComponent<TimeSeriesChartInternalP
         LegendComponent = Legend,
         margins = CHART_MARGINS,
         svgContainerUseAuto,
+        // Zoom override takes precedence
+        zoomOverride,
+        tooltipPositionOverride,
     }) => {
         const { t } = useTranslation();
         const [currentZoom, setCurrentZoom] = useState<ZoomDomain | undefined>(
-            initialZoom
+            initialZoom || zoomOverride
         );
         const [processedMainChartSeries, setProcessedMainChartSeries] =
             useState<NormalizedSeries[]>(normalizeSeries(series, currentZoom));
@@ -286,62 +289,83 @@ export const TimeSeriesChartInternal: FunctionComponent<TimeSeriesChartInternalP
         /**
          * Flip the enabled flag and force a re-render by creating a new array
          */
-        const handleSeriesClickFromLegend = (idx: number): void => {
-            const copied = [...enabledDisabledSeriesMapping];
-            copied[idx] = !copied[idx];
-            setEnabledDisabledSeriesMapping([...copied]);
-        };
-
-        const handleBrushChange = (domain: ZoomDomain | null): void => {
-            if (!domain) {
-                return;
-            }
-
-            let { x0, x1 } = domain;
-            // Ensure a minimum of 7 data points are in view
-            while (
-                bestGuessGranularity &&
-                x0 > minMaxValues[0] &&
-                x1 < minMaxValues[1] &&
-                (x1 - x0) / bestGuessGranularity < MIN_DATA_POINTS_TO_DISPLAY
-            ) {
-                x0 = x0 - bestGuessGranularity;
-                x1 = x1 + bestGuessGranularity;
-            }
-
-            const seriesDataCopy = series.map((seriesData, idx) => {
-                const copied = { ...seriesData, data: [...seriesData.data] };
-                copied.data = copied.data.filter((d) => {
-                    const x = d.x;
-
-                    return x > x0 && x < x1;
-                });
-                copied.enabled = enabledDisabledSeriesMapping[idx];
+        const handleSeriesClickFromLegend = (
+            idx: number,
+            flagToSet: boolean
+        ): void => {
+            setEnabledDisabledSeriesMapping((current) => {
+                const copied = [...current];
+                copied[idx] = flagToSet;
 
                 return copied;
             });
+        };
+
+        const handleBrushChange = (domain: ZoomDomain | null): void => {
+            const seriesDataCopy = series.map((seriesData) => {
+                return {
+                    ...seriesData,
+                    data: [...seriesData.data],
+                };
+            });
+
+            if (domain) {
+                let { x0, x1 } = domain;
+                // Ensure a minimum of 14 data points are in view
+                while (
+                    bestGuessGranularity &&
+                    x0 > minMaxValues[0] &&
+                    x1 < minMaxValues[1] &&
+                    (x1 - x0) / bestGuessGranularity <
+                        MIN_DATA_POINTS_TO_DISPLAY
+                ) {
+                    x0 = x0 - bestGuessGranularity;
+                    x1 = x1 + bestGuessGranularity;
+                }
+
+                seriesDataCopy.forEach((seriesData, idx) => {
+                    seriesData.data = seriesData.data.filter((d) => {
+                        const x = d.x;
+
+                        return x > x0 && x < x1;
+                    });
+                    seriesData.enabled = enabledDisabledSeriesMapping[idx];
+                });
+            }
+
             setProcessedMainChartSeries(normalizeSeries(seriesDataCopy));
-            setCurrentZoom({ x0, x1 });
+            setCurrentZoom(
+                domain ? { x0: domain.x0, x1: domain.x1 } : undefined
+            );
 
             if (chartEvents && chartEvents.onZoomChange) {
                 chartEvents.onZoomChange(domain);
             }
         };
 
+        // If zoomOverride changes, sync it with current
+        useEffect(() => {
+            handleBrushChange(zoomOverride ? zoomOverride : null);
+        }, [zoomOverride]);
+
         const handleResetZoom = (): void => {
-            const seriesDataCopy = series.map((seriesData, idx) => {
-                const copied = { ...seriesData };
-                copied.enabled = enabledDisabledSeriesMapping[idx];
-
-                return copied;
-            });
-
-            setProcessedMainChartSeries(normalizeSeries(seriesDataCopy));
-            setCurrentZoom(undefined);
-
-            if (chartEvents && chartEvents.onZoomChange) {
-                chartEvents.onZoomChange(null);
+            let shouldContinue: boolean | undefined = true;
+            /**
+             * If chart `onZoomReset` exists, determine whether to continue
+             * changing the zoom window by the value returned by `onZoomReset`
+             *
+             * Falsey will prevent the zoom window change and truthy will
+             * continue the window change
+             */
+            if (chartEvents?.onZoomReset) {
+                shouldContinue = chartEvents.onZoomReset();
             }
+
+            if (!shouldContinue) {
+                return;
+            }
+
+            handleBrushChange(null);
         };
 
         // Open the tooltip
@@ -378,14 +402,42 @@ export const TimeSeriesChartInternal: FunctionComponent<TimeSeriesChartInternalP
                 return;
             }
 
+            let shouldContinue: boolean | undefined = true;
+
+            if (chartEvents?.onPositionTooltipChange) {
+                shouldContinue = chartEvents.onPositionTooltipChange([
+                    xValue,
+                    coords.y,
+                ]);
+            }
+
+            shouldContinue && handleTooltipPositionChange([xValue, coords.y]);
+        };
+
+        const handleTooltipPositionChange = (
+            xValueYPosition: [number, number] | undefined
+        ): void => {
+            if (!xValueYPosition) {
+                hideTooltip();
+
+                return;
+            }
+
+            const [xValue, yPosition] = xValueYPosition;
+
             showTooltip({
                 tooltipLeft: dateScaleForHandleMouseOver(xValue),
-                tooltipTop: coords.y - margins.top,
+                tooltipTop: yPosition - margins.top,
                 tooltipData: {
-                    xValue: xValue,
+                    xValue,
                 },
             });
         };
+
+        // If tooltipPositionOverride changes, sync it with current
+        useEffect(() => {
+            handleTooltipPositionChange(tooltipPositionOverride);
+        }, [tooltipPositionOverride]);
 
         const shouldRenderSelectionComponent =
             isZoomEnabled || chartEvents?.onRangeSelection;
@@ -452,6 +504,7 @@ export const TimeSeriesChartInternal: FunctionComponent<TimeSeriesChartInternalP
                                             <ChartZoom
                                                 colorScale={colorScale}
                                                 height={topChartHeight}
+                                                key={`${currentZoom?.toString()}`}
                                                 margins={margins}
                                                 series={
                                                     processedMainChartSeries

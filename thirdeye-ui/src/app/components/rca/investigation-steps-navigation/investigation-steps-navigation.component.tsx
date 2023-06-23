@@ -15,12 +15,13 @@
 import { Button, ButtonGroup } from "@material-ui/core";
 import React, { FunctionComponent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { AppRouteRelative } from "../../../utils/routes/routes.util";
 
 export const InvestigationStepsNavigation: FunctionComponent = () => {
     const { t } = useTranslation();
     const location = useLocation();
+    const [searchParams] = useSearchParams();
 
     const stepItems = [
         {
@@ -61,7 +62,7 @@ export const InvestigationStepsNavigation: FunctionComponent = () => {
                         }
                         component={Link}
                         key={btnConfig.text}
-                        to={btnConfig.navLink}
+                        to={`${btnConfig.navLink}?${searchParams.toString()}`}
                     >
                         {btnConfig.text}
                     </Button>

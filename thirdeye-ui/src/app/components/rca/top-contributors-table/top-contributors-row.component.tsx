@@ -82,7 +82,8 @@ export const TopContributorsRow: FunctionComponent<TopContributorsRowProps> = ({
         metric,
         dataset,
         dimensionColumns,
-        t
+        t,
+        true
     );
     const parentRowClasses = [classes.root];
 

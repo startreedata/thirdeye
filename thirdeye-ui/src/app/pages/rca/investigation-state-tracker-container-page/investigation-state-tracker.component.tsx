@@ -23,6 +23,7 @@ import { AnomalyCard } from "../../../components/entity-cards/anomaly-card/anoma
 import { PageHeader } from "../../../components/page-header/page-header.component";
 import { LoadingErrorStateSwitch } from "../../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { InvestigationOptions } from "../../../components/rca/investigation-options/investigation-options.component";
+import { InvestigationPreview } from "../../../components/rca/investigation-preview/investigation-preview.component";
 import { InvestigationStepsNavigation } from "../../../components/rca/investigation-steps-navigation/investigation-steps-navigation.component";
 import {
     AppLoadingIndicatorV1,
@@ -369,6 +370,14 @@ export const InvestigationStateTracker: FunctionComponent = () => {
                                 alert,
                                 alertInsight,
                             }}
+                        />
+                    </Grid>
+
+                    <Grid item xs={12}>
+                        <InvestigationPreview
+                            alertInsight={alertInsight}
+                            anomaly={anomaly}
+                            investigation={localInvestigation}
                         />
                     </Grid>
                 </PageContentsGridV1>

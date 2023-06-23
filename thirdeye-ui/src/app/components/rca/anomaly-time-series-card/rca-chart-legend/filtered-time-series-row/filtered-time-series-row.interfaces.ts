@@ -13,13 +13,17 @@
  * the License.
  */
 import { ScaleOrdinal } from "d3-scale";
+import * as React from "react";
 import { Series } from "../../../../visualizations/time-series-chart/time-series-chart.interfaces";
 import { AnomalyFilterOption } from "../../../anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.interfaces";
 
 export interface FilteredTimeSeriesProps {
     filterSet: AnomalyFilterOption[];
     onRemoveBtnClick: () => void;
-    onCheckBoxClick: () => void;
+    onCheckBoxClick: (
+        event: React.ChangeEvent<HTMLInputElement>,
+        checked: boolean
+    ) => void;
     series: Series[];
     colorScale: ScaleOrdinal<string, string, never>;
 }

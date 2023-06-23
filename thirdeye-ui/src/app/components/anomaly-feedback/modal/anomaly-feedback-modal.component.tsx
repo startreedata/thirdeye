@@ -14,7 +14,6 @@
  */
 import {
     Button,
-    Checkbox,
     Dialog,
     DialogActions,
     DialogContent,
@@ -22,14 +21,12 @@ import {
     FormControl,
     FormControlLabel,
     Grid,
-    ListItemText,
-    MenuItem,
     Radio,
     RadioGroup,
-    Select,
     TextField,
     Typography,
 } from "@material-ui/core";
+import { Autocomplete } from "@material-ui/lab";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -39,6 +36,7 @@ import {
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { useUpdateAnomalyFeedback } from "../../../rest/anomalies/anomaly.actions";
 import {
+    AnomalyCause,
     AnomalyFeedback,
     AnomalyFeedbackType,
 } from "../../../rest/dto/anomaly.interfaces";
@@ -47,7 +45,11 @@ import {
     ANOMALY_OPTIONS_TO_DESCRIPTIONS,
 } from "../../../utils/anomalies/anomalies.util";
 import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
-import { AnomalyFeedbackModalProps } from "./anomaly-feedback-modal.interfaces";
+import { AnomalyFeedbackReasonOption } from "../anomaly-feedback.interfaces";
+import {
+    AnomalyFeedbackModalProps,
+    ANOMALY_FEEDBACK_TEST_IDS,
+} from "./anomaly-feedback-modal.interfaces";
 import { REASONS } from "./anomaly-feedback-modal.utils";
 
 export const AnomalyFeedbackModal: FunctionComponent<AnomalyFeedbackModalProps> =
@@ -82,19 +84,33 @@ export const AnomalyFeedbackModal: FunctionComponent<AnomalyFeedbackModalProps> 
             return "";
         });
 
-        const [reasons, setReasons] = useState<string[]>(() => {
-            if (anomalyFeedback) {
-                try {
-                    const parsed = JSON.parse(anomalyFeedback.comment);
+        const [reasons, setReasons] = useState<AnomalyFeedbackReasonOption[]>(
+            () => {
+                if (anomalyFeedback) {
+                    // This uses a stop gap solution using comment field as json string storage
+                    try {
+                        const parsed = JSON.parse(anomalyFeedback.comment);
 
-                    return parsed.reasons;
-                } catch {
-                    return [];
+                        const reasonObjects: AnomalyFeedbackReasonOption[] = [];
+
+                        parsed.reasons.forEach((reason: AnomalyCause) => {
+                            const objectWithSameEnum = REASONS.find(
+                                (candidate) => candidate.serverValue === reason
+                            );
+
+                            objectWithSameEnum &&
+                                reasonObjects.push(objectWithSameEnum);
+                        });
+
+                        return reasonObjects;
+                    } catch {
+                        return [];
+                    }
                 }
-            }
 
-            return [];
-        });
+                return [];
+            }
+        );
 
         useEffect(() => {
             if (status === ActionStatus.Done) {
@@ -120,10 +136,11 @@ export const AnomalyFeedbackModal: FunctionComponent<AnomalyFeedbackModalProps> 
 
         const handleSaveClick = (): void => {
             const feedbackObject: AnomalyFeedback = {
+                ...anomalyFeedback,
                 type: selectedFeedbackOption,
                 comment: JSON.stringify({
                     comment: localComment,
-                    reasons: reasons,
+                    reasons: reasons.map((reason) => reason.serverValue),
                 }),
             };
 
@@ -192,42 +209,27 @@ export const AnomalyFeedbackModal: FunctionComponent<AnomalyFeedbackModalProps> 
                             </Grid>
                             <Grid item lg={8} md={8} sm={12} xs={12}>
                                 <FormControl fullWidth variant="outlined">
-                                    <Select
-                                        autoWidth
-                                        displayEmpty
+                                    <Autocomplete
+                                        fullWidth
                                         multiple
-                                        renderValue={(selected) =>
-                                            (selected as string[]).length > 0
-                                                ? (selected as string[]).join(
-                                                      ", "
-                                                  )
-                                                : t(
-                                                      "message.click-to-select-reasons"
-                                                  )
+                                        getOptionLabel={(option) =>
+                                            option.label
                                         }
+                                        options={REASONS}
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                placeholder={t(
+                                                    "message.click-to-select-reasons"
+                                                )}
+                                                variant="outlined"
+                                            />
+                                        )}
                                         value={reasons}
-                                        onChange={(
-                                            event: React.ChangeEvent<{
-                                                value: unknown;
-                                            }>
-                                        ) => {
-                                            setReasons(
-                                                event.target.value as string[]
-                                            );
+                                        onChange={(_, selected) => {
+                                            setReasons(selected || []);
                                         }}
-                                    >
-                                        {REASONS.map((name) => (
-                                            <MenuItem key={name} value={name}>
-                                                <Checkbox
-                                                    checked={
-                                                        reasons.indexOf(name) >
-                                                        -1
-                                                    }
-                                                />
-                                                <ListItemText primary={name} />
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
+                                    />
                                 </FormControl>
                             </Grid>
                         </Grid>
@@ -244,6 +246,9 @@ export const AnomalyFeedbackModal: FunctionComponent<AnomalyFeedbackModalProps> 
                                 <TextField
                                     fullWidth
                                     multiline
+                                    data-testid={
+                                        ANOMALY_FEEDBACK_TEST_IDS.COMMENT_INPUT
+                                    }
                                     defaultValue={localComment}
                                     minRows={3}
                                     onChange={(e) =>
@@ -263,6 +268,7 @@ export const AnomalyFeedbackModal: FunctionComponent<AnomalyFeedbackModalProps> 
                         </Button>
                         <Button
                             color="primary"
+                            data-testid={ANOMALY_FEEDBACK_TEST_IDS.SUBMIT_BTN}
                             disabled={status === ActionStatus.Working}
                             onClick={handleSaveClick}
                         >

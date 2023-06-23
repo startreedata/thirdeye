@@ -71,13 +71,13 @@ export const TopContributorsTable: FunctionComponent<TopContributorsTableProps> 
                     <TableRow>
                         <TableCell width="20px" />
                         <TableCell width="20px">
-                            <strong>Details</strong>
+                            <strong>{t("label.details")}</strong>
                         </TableCell>
                         <TableCell>
-                            <strong>Dimension Combination</strong>
+                            <strong>{t("label.dimension-combination")}</strong>
                         </TableCell>
                         <TableCell>
-                            <strong>Impact %</strong>
+                            <strong>{t("label.impact-percentage")}</strong>
                         </TableCell>
                     </TableRow>
                 </TableHead>

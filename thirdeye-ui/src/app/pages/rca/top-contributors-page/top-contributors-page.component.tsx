@@ -26,6 +26,7 @@ import { PreviewChart } from "../../../components/rca/top-contributors-table/pre
 import { TopContributorsTable } from "../../../components/rca/top-contributors-table/top-contributors-table.component";
 import {
     PageContentsCardV1,
+    SkeletonV1,
     useNotificationProviderV1,
 } from "../../../platform/components";
 import { ActionStatus } from "../../../rest/actions.interfaces";
@@ -192,6 +193,15 @@ export const TopContributorsPage: FunctionComponent = () => {
                                             ActionStatus.Initial ||
                                         anomalyDimensionAnalysisReqStatus ===
                                             ActionStatus.Working
+                                    }
+                                    loadingState={
+                                        <Box pb={2} pt={2}>
+                                            <SkeletonV1
+                                                animation="pulse"
+                                                height={300}
+                                                variant="rect"
+                                            />
+                                        </Box>
                                     }
                                 >
                                     <EmptyStateSwitch

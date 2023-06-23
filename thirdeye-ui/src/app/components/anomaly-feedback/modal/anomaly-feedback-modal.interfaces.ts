@@ -22,3 +22,9 @@ export interface AnomalyFeedbackModalProps {
     showNo?: boolean;
     onFeedbackUpdate: (feedback: AnomalyFeedback) => void;
 }
+
+export const ANOMALY_FEEDBACK_TEST_IDS = {
+    REASON_SELECTION: "reason-selection",
+    SUBMIT_BTN: "submit-btn",
+    COMMENT_INPUT: "comment-input",
+};

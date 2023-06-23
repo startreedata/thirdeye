@@ -151,13 +151,18 @@ export interface TimeSeriesChartProps {
     height?: number;
     chartEvents?: {
         onZoomChange?: (domain: ZoomDomain | null) => void;
+        onZoomReset?: () => boolean | undefined;
         /**
          * Return true to continue the default behavior (chart zoom)
          * otherwise falsey
          */
         onRangeSelection?: (domain: ZoomDomain | null) => boolean | undefined;
+        onPositionTooltipChange?: (
+            xValueYPosition: [number, number] | undefined
+        ) => boolean | undefined;
     };
     initialZoom?: ZoomDomain;
+    zoomOverride?: ZoomDomain;
     events?: Event[];
     margins?: {
         left: number;
@@ -166,6 +171,7 @@ export interface TimeSeriesChartProps {
         bottom: number;
     };
     svgContainerUseAuto?: boolean;
+    tooltipPositionOverride?: [number, number];
 }
 
 export interface ZoomDomain {
@@ -180,7 +186,7 @@ export interface TimeSeriesChartInternalProps extends TimeSeriesChartProps {
 
 export interface LegendProps {
     series: Series[];
-    onSeriesClick?: (idx: number) => void;
+    onSeriesClick?: (idx: number, newVisibleState: boolean) => void;
     colorScale: ScaleOrdinal<string, string, never>;
     events: EventWithChartState[];
     onEventsStateChange: (events: EventWithChartState[]) => void;

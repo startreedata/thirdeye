@@ -127,7 +127,9 @@ export const AnomalyTimeSeriesCard: FunctionComponent<AnomalyTimeSeriesCardProps
             }
 
             getEvaluation(
-                createAlertEvaluation(anomaly.alert.id, startTime, endTime)
+                createAlertEvaluation(anomaly.alert.id, startTime, endTime),
+                undefined,
+                anomaly?.enumerationItem
             ).then((fetchedEvaluation) => {
                 fetchedEvaluation && setAlertEvaluation(fetchedEvaluation);
                 fetchedEvaluation &&
@@ -150,7 +152,8 @@ export const AnomalyTimeSeriesCard: FunctionComponent<AnomalyTimeSeriesCardProps
 
                 return getAlertEvaluation(
                     createAlertEvaluation(anomaly.alert.id, startTime, endTime),
-                    filters
+                    filters,
+                    anomaly?.enumerationItem
                 );
             });
 
@@ -276,7 +279,7 @@ export const AnomalyTimeSeriesCard: FunctionComponent<AnomalyTimeSeriesCardProps
         const debouncedChangeSearchParamsForDomain = useCallback(
             debounce(
                 (
-                    domain: ZoomDomain | null,
+                    domain: ZoomDomain | null | undefined,
                     searchParamsProp: URLSearchParams,
                     setSearchParamFunc: (
                         newSearchParams: URLSearchParams,
@@ -304,7 +307,9 @@ export const AnomalyTimeSeriesCard: FunctionComponent<AnomalyTimeSeriesCardProps
             []
         );
 
-        const handleZoomChange = (domain: ZoomDomain | null): void => {
+        const handleZoomChange = (
+            domain: ZoomDomain | undefined | null
+        ): void => {
             debouncedChangeSearchParamsForDomain(
                 domain,
                 searchParams,

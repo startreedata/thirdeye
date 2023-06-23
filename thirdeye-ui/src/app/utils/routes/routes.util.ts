@@ -89,7 +89,7 @@ export const AppRouteRelative = {
     METRICS_UPDATE: `update/id/${PLACEHOLDER_ROUTE_ID}`,
     ROOT_CAUSE_ANALYSIS: `root-cause-analysis`,
     ROOT_CAUSE_ANALYSIS_FOR_ANOMALY: `anomaly/${PLACEHOLDER_ROUTE_ID}`,
-    ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_V2: `/v2/anomaly/${PLACEHOLDER_ROUTE_ID}`,
+    ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_V2: `v2/anomaly/${PLACEHOLDER_ROUTE_ID}`,
     ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_INVESTIGATE: `investigate`,
     RCA_WHAT_WHERE: "what-where-page",
     RCA_HEATMAP: "heatmap",
@@ -189,6 +189,9 @@ export const AppRoute = {
     ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_INVESTIGATE:
         `/${AppRouteRelative.ROOT_CAUSE_ANALYSIS}/` +
         `${AppRouteRelative.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY}/${AppRouteRelative.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_INVESTIGATE}`,
+    ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_INVESTIGATE_V2:
+        `/${AppRouteRelative.ROOT_CAUSE_ANALYSIS}/` +
+        `${AppRouteRelative.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_V2}`,
     EVENTS_ALL: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.EVENTS}/${AppRouteRelative.EVENTS_ALL}`,
     EVENTS_CREATE: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.EVENTS}/${AppRouteRelative.EVENTS_CREATE}`,
     EVENTS_VIEW: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.EVENTS}/${AppRouteRelative.EVENTS_VIEW}`,
@@ -539,6 +542,15 @@ export const getRootCauseAnalysisForAnomalyInvestigatePath = (
     id: number
 ): string => {
     let path: string = AppRoute.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_INVESTIGATE;
+    path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
+
+    return path;
+};
+
+export const getRootCauseAnalysisForAnomalyInvestigateV2Path = (
+    id: number
+): string => {
+    let path: string = AppRoute.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_INVESTIGATE_V2;
     path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
 
     return path;

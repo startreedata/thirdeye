@@ -37,6 +37,7 @@ import {
 } from "../../visualizations/time-series-chart/time-series-chart.interfaces";
 import { AnomalyFilterOption } from "../anomaly-dimension-analysis/anomaly-dimension-analysis.interfaces";
 import { generateAnomalyPointsForStartEnd } from "../anomaly-time-series-card/anomaly-time-series-card.utils";
+import { getColorForDimensionCombo } from "../investigation-preview/investigation-preview.utils";
 import { ExtraDataForAnomalyDimensionAnalysisData } from "./top-contributors-table.interfaces";
 
 export const SERVER_VALUE_FOR_OTHERS = "(ALL_OTHERS)";
@@ -50,7 +51,8 @@ export const generateName = (
     metric: string,
     dataset: string,
     dimensionColumns: string[],
-    translation: TFunction
+    translation: TFunction,
+    shouldColor?: boolean
 ): JSX.Element => {
     const chips: JSX.Element[] = [];
 
@@ -67,6 +69,15 @@ export const generateName = (
         );
     }
 
+    const color = getColorForDimensionCombo(
+        rowData.names.map((dimensionValue: string, idx: number) => {
+            return {
+                key: dimensionColumns[idx],
+                value: dimensionValue,
+            };
+        })
+    );
+
     rowData.names.forEach((dimensionValue: string, idx: number) => {
         let displayValue = dimensionValue;
 
@@ -77,6 +88,21 @@ export const generateName = (
 
         if (displayValue === "") {
             displayValue = EMPTY_STRING_DISPLAY;
+        }
+
+        if (shouldColor) {
+            return chips.push(
+                <Grid item>
+                    <Chip
+                        label={`${dimensionColumns[idx]}=${displayValue}`}
+                        size="small"
+                        style={{
+                            color: color,
+                            borderColor: color,
+                        }}
+                    />
+                </Grid>
+            );
         }
 
         return chips.push(

@@ -13,8 +13,9 @@
  * the License.
  */
 import { Icon } from "@iconify/react";
-import { Box, Button, Grid, Link } from "@material-ui/core";
+import { Box, Button, Card, CardContent, Grid, Link } from "@material-ui/core";
 import { Alert } from "@material-ui/lab";
+import { isEmpty } from "lodash";
 import React, { FunctionComponent, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -30,6 +31,7 @@ import { Crumb } from "../../components/breadcrumbs/breadcrumbs.interfaces";
 import { AnomalyCard } from "../../components/entity-cards/anomaly-card/anomaly-card.component";
 import { anomaliesInvestigateBasicHelpCards } from "../../components/help-drawer-v1/help-drawer-card-contents.utils";
 import { HelpDrawerV1 } from "../../components/help-drawer-v1/help-drawer-v1.component";
+import { InvestigationsList } from "../../components/investigations-list-v2/investigations-list.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import {
     NotificationTypeV1,
@@ -76,6 +78,8 @@ export const AnomaliesViewInformationPage: FunctionComponent = () => {
         anomaly,
         handleFeedbackUpdateSuccess,
         enumerationItem,
+        getInvestigationsRequestStatus,
+        investigations,
     } = containerContext;
 
     const [showV1Link, setShowV1Link] = useState(true);
@@ -182,7 +186,6 @@ export const AnomaliesViewInformationPage: FunctionComponent = () => {
                                 <Button
                                     color="primary"
                                     component="button"
-                                    size="small"
                                     variant="outlined"
                                     onClick={handleOpen}
                                 >
@@ -235,10 +238,33 @@ export const AnomaliesViewInformationPage: FunctionComponent = () => {
                 )}
                 {anomaly.feedback && (
                     <Grid item xs={12}>
-                        <FeedbackCard
-                            anomaly={anomaly}
-                            onFeedbackUpdate={handleFeedbackUpdateSuccess}
-                        />
+                        <Card>
+                            <CardContent>
+                                <Grid container>
+                                    <Grid item xs={12}>
+                                        <FeedbackCard
+                                            anomaly={anomaly}
+                                            onFeedbackUpdate={
+                                                handleFeedbackUpdateSuccess
+                                            }
+                                        />
+                                    </Grid>
+                                    <Grid
+                                        item
+                                        hidden={isEmpty(investigations)}
+                                        xs={12}
+                                    >
+                                        <InvestigationsList
+                                            anomalyId={anomaly.id}
+                                            getInvestigationsRequestStatus={
+                                                getInvestigationsRequestStatus
+                                            }
+                                            investigations={investigations}
+                                        />
+                                    </Grid>
+                                </Grid>
+                            </CardContent>
+                        </Card>
                     </Grid>
                 )}
                 <Grid item xs={12}>

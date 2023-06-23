@@ -12,13 +12,41 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-export const REASONS = [
-    "Holiday effect",
-    "User error",
-    "Software failure",
-    "Environmental factors (like Storm, EQ ... )",
-    "Fraudulent activities",
-    "Platform upgrades",
-    "External events (Ex: Campaigns, Price changes etc)",
-    "Others",
+
+import { AnomalyCause } from "../../../rest/dto/anomaly.interfaces";
+import { AnomalyFeedbackReasonOption } from "../anomaly-feedback.interfaces";
+
+export const REASONS: AnomalyFeedbackReasonOption[] = [
+    {
+        label: "Holiday effect",
+        serverValue: AnomalyCause.HOLIDAY_EFFECT,
+    },
+    {
+        label: "User error",
+        serverValue: AnomalyCause.USER_ERROR,
+    },
+    {
+        label: "Software failure",
+        serverValue: AnomalyCause.SOFTWARE_FAILURE,
+    },
+    {
+        label: "Environmental factors (like Storm, EQ ... )",
+        serverValue: AnomalyCause.ENVIRONMENTAL_FACTOR,
+    },
+    {
+        label: "Fraudulent activities",
+        serverValue: AnomalyCause.FRAUD,
+    },
+    {
+        label: "Platform upgrades",
+        serverValue: AnomalyCause.PLATFORM_UPGRADE,
+    },
+    {
+        label: "External events (Ex: Campaigns, Price changes etc)",
+        serverValue: AnomalyCause.EXTERNAL_EVENT,
+    },
+    {
+        label: "Others",
+        serverValue: AnomalyCause.OTHER,
+    },
 ];

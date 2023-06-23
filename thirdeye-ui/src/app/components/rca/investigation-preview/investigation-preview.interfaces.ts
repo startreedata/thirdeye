@@ -12,18 +12,17 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import {
-    AnomalyCause,
-    AnomalyFeedback,
-} from "../../rest/dto/anomaly.interfaces";
+import { AlertInsight } from "../../../rest/dto/alert.interfaces";
+import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
+import { Investigation } from "../../../rest/dto/rca.interfaces";
 
-export interface AnomalyFeedbackProps {
-    anomalyId: number;
-    anomalyFeedback: AnomalyFeedback;
-    hideComment?: boolean;
+export interface InvestigationPreviewProps {
+    investigation: Investigation | null;
+    alertInsight: AlertInsight | null;
+    anomaly: Anomaly | null;
 }
 
-export interface AnomalyFeedbackReasonOption {
-    label: string;
-    serverValue: AnomalyCause;
+export enum ChartType {
+    ONE = "one",
+    MULTI = "multi",
 }

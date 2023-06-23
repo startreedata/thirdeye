@@ -12,18 +12,11 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import {
-    AnomalyCause,
-    AnomalyFeedback,
-} from "../../rest/dto/anomaly.interfaces";
+import { ActionStatus } from "../../rest/actions.interfaces";
+import { Investigation } from "../../rest/dto/rca.interfaces";
 
-export interface AnomalyFeedbackProps {
+export interface InvestigationsListProps {
+    investigations: Investigation[] | null;
+    getInvestigationsRequestStatus: ActionStatus;
     anomalyId: number;
-    anomalyFeedback: AnomalyFeedback;
-    hideComment?: boolean;
-}
-
-export interface AnomalyFeedbackReasonOption {
-    label: string;
-    serverValue: AnomalyCause;
 }

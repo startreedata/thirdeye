@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.spi.detection;
 
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
+import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import java.util.List;
 import java.util.Map;
 
@@ -22,7 +23,9 @@ public interface Enumerator {
   List<EnumerationItemDTO> enumerate(Context context);
 
   class Context {
+
     private Map<String, Object> params;
+    private Map<String, OperatorResult> inputMap;
 
     public Map<String, Object> getParams() {
       return params;
@@ -30,6 +33,15 @@ public interface Enumerator {
 
     public Context setParams(final Map<String, Object> params) {
       this.params = params;
+      return this;
+    }
+
+    public Map<String, OperatorResult> getInputMap() {
+      return inputMap;
+    }
+
+    public Context setInputMap(final Map<String, OperatorResult> inputMap) {
+      this.inputMap = inputMap;
       return this;
     }
   }

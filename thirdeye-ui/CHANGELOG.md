@@ -1,3 +1,21 @@
+## [2.27.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.26.0...thirdeye-ui-2.27.0) (2023-06-26)
+
+
+### Features
+
+* [TE-1423](https://cortexdata.atlassian.net/browse/TE-1423) rca 2 events page ([746d9d242](https://github.com/startreedata/thirdeye/commit/746d9d24242feb8af3e997433f906d107a095fab))
+* [TE-1667](https://cortexdata.atlassian.net/browse/TE-1667) dimension analysis and drills page for rca 2 ([2f3a00bea](https://github.com/startreedata/thirdeye/commit/2f3a00bea44d2974b4c8900dd43e46e15dfaea09))
+
+
+### Bug Fixes
+
+* [TE-1620](https://cortexdata.atlassian.net/browse/TE-1620) ensure query strings carry over ([d1eedbe45](https://github.com/startreedata/thirdeye/commit/d1eedbe4509061682ee37006e19af46f0fa0f682))
+* [TE-1620](https://cortexdata.atlassian.net/browse/TE-1620) show date range selector when preview chart fails when creating alert ([fb5bd90b8](https://github.com/startreedata/thirdeye/commit/fb5bd90b82ad82363eed022dd4cecb7be363743d))
+* alert duplicate flow should work with e2e test case ([bf79b254d](https://github.com/startreedata/thirdeye/commit/bf79b254de426a60fc3c1e21a8708908bffa4ca1))
+* ensure aggregation function is defaulted with what is set in the alert configuration ([f99c80b9c](https://github.com/startreedata/thirdeye/commit/f99c80b9c9ea38ad9bd835c9b6d33e2bcee859d3))
+* start and end should be maintained when navigating across all pages in create flow ([a91dde973](https://github.com/startreedata/thirdeye/commit/a91dde973e9df13ba030054a352a41881ff0741e))
+* when editing/creating multidimension alert the back button should goto select type from tune alert ([8737fc863](https://github.com/startreedata/thirdeye/commit/8737fc863727e472b6d846ee48a3d388e6379654))
+
 ## [2.26.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.25.0...thirdeye-ui-2.26.0) (2023-06-19)
 
 

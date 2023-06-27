@@ -27,7 +27,7 @@ public class PercentileTemplateCreator {
   public static final String PARAMS_QUERY_KEY = "component.query";
 
   public static AlertTemplateApi createPercentileVariant(final AlertTemplateApi template) {
-    if (template.getNodes() == null || template.getName().contains("-percentile")) {
+    if (!canCreatePercentileVariant(template)) {
       // skip
       return null;
     }
@@ -46,6 +46,12 @@ public class PercentileTemplateCreator {
     return percentileVariant
         .setName(variantName)
         .setDescription(variantDescription);
+  }
+
+  private static boolean canCreatePercentileVariant(final AlertTemplateApi template) {
+    return template.getNodes() != null &&
+        !template.getName().contains("-percentile") &&
+        !template.getName().contains("-drift");
   }
 
   // attempt to update the node to create a percentile variant, and returns true if the node was updated

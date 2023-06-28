@@ -354,10 +354,7 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
                                 fullWidth
                                 options={[
                                     MetricAggFunction.SUM,
-                                    MetricAggFunction.AVG,
                                     MetricAggFunction.COUNT,
-                                    MetricAggFunction.MIN,
-                                    MetricAggFunction.MAX,
                                 ]}
                                 renderInput={(params) => (
                                     <TextField

@@ -141,14 +141,6 @@ export const SetupDimensionGroupsPage: FunctionComponent = () => {
                             "message.automatically-detects-dimensions-based-on-your-selection"
                         )}
                         title={t("label.cohort-recommender")}
-                        onAggregationFunctionSelect={(aggFunc) => {
-                            onAlertPropertyChange({
-                                templateProperties: {
-                                    ...alert.templateProperties,
-                                    aggregationFunction: aggFunc,
-                                },
-                            });
-                        }}
                         onMetricSelect={(
                             metric,
                             dataset,

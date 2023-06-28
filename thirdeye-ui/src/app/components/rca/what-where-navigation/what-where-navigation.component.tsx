@@ -15,12 +15,13 @@
 import { Box, Tab, Tabs } from "@material-ui/core";
 import React, { FunctionComponent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { AppRouteRelative } from "../../../utils/routes/routes.util";
 
 export const WhatWhereNavigation: FunctionComponent = () => {
     const { t } = useTranslation();
     const location = useLocation();
+    const [searchParams] = useSearchParams();
 
     const stepItems = [
         {
@@ -58,7 +59,9 @@ export const WhatWhereNavigation: FunctionComponent = () => {
                             component={Link}
                             key={tableConfig.navLink}
                             label={tableConfig.text}
-                            to={tableConfig.navLink}
+                            to={`${
+                                tableConfig.navLink
+                            }?${searchParams.toString()}`}
                             value={tableConfig.navLink}
                         />
                     );

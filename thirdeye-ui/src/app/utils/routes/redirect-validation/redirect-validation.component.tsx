@@ -13,7 +13,12 @@
  * the License.
  */
 import React, { FunctionComponent, useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import {
+    Outlet,
+    useNavigate,
+    useOutletContext,
+    useSearchParams,
+} from "react-router-dom";
 import { RedirectValidationProps } from "./redirect-validation.interfaces";
 
 /**
@@ -23,16 +28,19 @@ import { RedirectValidationProps } from "./redirect-validation.interfaces";
  * @param {string} to - Path to redirect to
  * @param {string[]} queryParams - Keys to check if they exist in the search params
  * @param {boolean} replace - Indicates to replace the history entry with the new path
+ * @param {boolean} useOutlet - Indicates to return outlet component or not when valid
  */
 export const RedirectValidation: FunctionComponent<RedirectValidationProps> = ({
     to,
     queryParams,
     replace = true,
+    useOutlet,
     ...props
 }) => {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const [isValid, setIsValid] = useState(false);
+    const context = useOutletContext();
 
     useEffect(() => {
         let validSoFar = true;
@@ -54,6 +62,15 @@ export const RedirectValidation: FunctionComponent<RedirectValidationProps> = ({
     }, [searchParams]);
 
     if (isValid) {
+        if (useOutlet) {
+            return (
+                <>
+                    {props.children}
+                    <Outlet context={context} />
+                </>
+            );
+        }
+
         return <>{props.children}</>;
     }
 

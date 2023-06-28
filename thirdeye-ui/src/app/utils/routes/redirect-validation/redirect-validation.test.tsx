@@ -23,6 +23,9 @@ jest.mock("react-router-dom", () => ({
     useSearchParams: jest.fn().mockImplementation(() => {
         return [mockSearchParams];
     }),
+    useOutletContext: jest.fn().mockImplementation(() => {
+        return undefined;
+    }),
 }));
 
 describe("Redirect Validation", () => {

@@ -24,7 +24,6 @@ import { PageHeader } from "../../../components/page-header/page-header.componen
 import { LoadingErrorStateSwitch } from "../../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { InvestigationOptions } from "../../../components/rca/investigation-options/investigation-options.component";
 import { InvestigationPreview } from "../../../components/rca/investigation-preview/investigation-preview.component";
-import { InvestigationStepsNavigation } from "../../../components/rca/investigation-steps-navigation/investigation-steps-navigation.component";
 import {
     AppLoadingIndicatorV1,
     NotificationTypeV1,
@@ -292,13 +291,17 @@ export const InvestigationStateTracker: FunctionComponent = () => {
                     getInvestigationRequestStatus === ActionStatus.Working
                 }
                 loadingState={
-                    <Card variant="outlined">
-                        <CardContent>
-                            <Box padding={20}>
-                                <AppLoadingIndicatorV1 />
-                            </Box>
-                        </CardContent>
-                    </Card>
+                    <PageContentsGridV1>
+                        <Grid item xs={12}>
+                            <Card variant="outlined">
+                                <CardContent>
+                                    <Box padding={20}>
+                                        <AppLoadingIndicatorV1 />
+                                    </Box>
+                                </CardContent>
+                            </Card>
+                        </Grid>
+                    </PageContentsGridV1>
                 }
             >
                 <PageHeader
@@ -353,9 +356,6 @@ export const InvestigationStateTracker: FunctionComponent = () => {
                         />
                     </Grid>
 
-                    <Grid item xs={12}>
-                        <InvestigationStepsNavigation />
-                    </Grid>
                     <Grid item xs={12}>
                         <Outlet
                             context={{

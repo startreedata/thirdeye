@@ -191,7 +191,7 @@ export const AppRoute = {
         `${AppRouteRelative.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY}/${AppRouteRelative.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_INVESTIGATE}`,
     ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_INVESTIGATE_V2:
         `/${AppRouteRelative.ROOT_CAUSE_ANALYSIS}/` +
-        `${AppRouteRelative.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_V2}`,
+        `${AppRouteRelative.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_V2}/${AppRouteRelative.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_INVESTIGATE}`,
     EVENTS_ALL: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.EVENTS}/${AppRouteRelative.EVENTS_ALL}`,
     EVENTS_CREATE: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.EVENTS}/${AppRouteRelative.EVENTS_CREATE}`,
     EVENTS_VIEW: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.EVENTS}/${AppRouteRelative.EVENTS_VIEW}`,

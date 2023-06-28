@@ -77,6 +77,10 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
     }, [alertInsight]);
 
     const [startTime, endTime] = useMemo(() => {
+        if (!anomaly) {
+            return [0, 0];
+        }
+
         const padding = granularity
             ? baselineOffsetToMilliseconds(granularity) * 14
             : 0;

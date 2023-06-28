@@ -12,8 +12,10 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { Box } from "@material-ui/core";
 import React, { FunctionComponent, lazy, Suspense } from "react";
 import { Navigate, Route, Routes, useSearchParams } from "react-router-dom";
+import { InvestigationStepsNavigation } from "../../components/rca/investigation-steps-navigation/investigation-steps-navigation.component";
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
 import { RedirectValidation } from "../../utils/routes/redirect-validation/redirect-validation.component";
@@ -43,6 +45,12 @@ const InvestigationStateTrackerV2 = lazy(() =>
     import(
         /* webpackChunkName: "investigation-state-tracker-container-page-v2" */ "../../pages/rca/investigation-state-tracker-container-page/investigation-state-tracker.component"
     ).then((module) => ({ default: module.InvestigationStateTracker }))
+);
+
+const IndexPage = lazy(() =>
+    import(
+        /* webpackChunkName: "index-page" */ "../../pages/rca/index-page/index-page.component"
+    ).then((module) => ({ default: module.IndexPage }))
 );
 
 const WhatWherePage = lazy(() =>
@@ -124,50 +132,72 @@ export const RootCauseAnalysisRouter: FunctionComponent = () => {
                     path={`/${AppRouteRelative.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_V2}/*`}
                 >
                     {/* Root cause for an anomaly index path. */}
+                    <Route index element={<IndexPage />} />
+
+                    {/* Root cause for an anomaly path */}
                     <Route
-                        index
                         element={
-                            <Navigate
-                                replace
-                                to={`${
-                                    AppRouteRelative.RCA_WHAT_WHERE
-                                }?${searchParams.toString()}`}
-                            />
+                            <RedirectValidation
+                                useOutlet
+                                queryParams={[
+                                    TimeRangeQueryStringKey.START_TIME,
+                                    TimeRangeQueryStringKey.END_TIME,
+                                ]}
+                                to=".."
+                            >
+                                <Box pb={2}>
+                                    <InvestigationStepsNavigation />
+                                </Box>
+                            </RedirectValidation>
                         }
-                    />
-                    <Route
-                        element={<WhatWherePage />}
-                        path={AppRouteRelative.RCA_WHAT_WHERE}
+                        path={`${AppRouteRelative.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_INVESTIGATE}/*`}
                     >
+                        {/* Root cause for an anomaly index path. */}
                         <Route
                             index
                             element={
                                 <Navigate
                                     replace
                                     to={`${
-                                        AppRouteRelative.RCA_TOP_CONTRIBUTORS
+                                        AppRouteRelative.RCA_WHAT_WHERE
                                     }?${searchParams.toString()}`}
                                 />
                             }
                         />
                         <Route
-                            element={<TopContributorsPage />}
-                            path={AppRouteRelative.RCA_TOP_CONTRIBUTORS}
-                        />
+                            element={<WhatWherePage />}
+                            path={AppRouteRelative.RCA_WHAT_WHERE}
+                        >
+                            <Route
+                                index
+                                element={
+                                    <Navigate
+                                        replace
+                                        to={`${
+                                            AppRouteRelative.RCA_TOP_CONTRIBUTORS
+                                        }?${searchParams.toString()}`}
+                                    />
+                                }
+                            />
+                            <Route
+                                element={<TopContributorsPage />}
+                                path={AppRouteRelative.RCA_TOP_CONTRIBUTORS}
+                            />
+                            <Route
+                                element={<HeatMapPage />}
+                                path={AppRouteRelative.RCA_HEATMAP}
+                            />
+                            <Route
+                                element={<DimensionAnalysisDrillsPage />}
+                                path={AppRouteRelative.RCA_DIMENSION_ANALYSIS}
+                            />
+                        </Route>
                         <Route
-                            element={<HeatMapPage />}
-                            path={AppRouteRelative.RCA_HEATMAP}
+                            element={<EventsPage />}
+                            path={AppRouteRelative.RCA_EVENTS}
                         />
-                        <Route
-                            element={<DimensionAnalysisDrillsPage />}
-                            path={AppRouteRelative.RCA_DIMENSION_ANALYSIS}
-                        />
+                        <Route path={AppRouteRelative.RCA_REVIEW_SHARE} />
                     </Route>
-                    <Route
-                        element={<EventsPage />}
-                        path={AppRouteRelative.RCA_EVENTS}
-                    />
-                    <Route path={AppRouteRelative.RCA_REVIEW_SHARE} />
                     <Route element={<PageNotFoundPage />} path="*" />
                 </Route>
 

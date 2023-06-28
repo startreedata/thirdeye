@@ -98,7 +98,7 @@ export const AnomalyFiltersSelection: FunctionComponent<AnomalyFiltersSelectionP
                 []
             );
             setPreference(
-                UserPreferencesKeys.ANOMALIES_LIST_DEFAULT_SUBSCRIPTION_FILTERS,
+                UserPreferencesKeys.ANOMALIES_LIST_DEFAULT_ALERT_FILTERS,
                 []
             );
         };

@@ -84,10 +84,22 @@ export const AnomalyFeedbackModal: FunctionComponent<AnomalyFeedbackModalProps> 
             return "";
         });
 
-        const [reasons, setReasons] = useState<AnomalyFeedbackReasonOption[]>(
-            () => {
+        const [reason, setReason] =
+            useState<AnomalyFeedbackReasonOption | null>(() => {
                 if (anomalyFeedback) {
-                    // This uses a stop gap solution using comment field as json string storage
+                    if (anomalyFeedback.cause) {
+                        return (
+                            REASONS.find(
+                                (candidate) =>
+                                    candidate.serverValue ===
+                                    anomalyFeedback.cause
+                            ) || null
+                        );
+                    }
+                    /**
+                     * This uses a stop gap solution using comment field as json string storage
+                     * It used to be an array
+                     */
                     try {
                         const parsed = JSON.parse(anomalyFeedback.comment);
 
@@ -102,15 +114,14 @@ export const AnomalyFeedbackModal: FunctionComponent<AnomalyFeedbackModalProps> 
                                 reasonObjects.push(objectWithSameEnum);
                         });
 
-                        return reasonObjects;
+                        return reasonObjects[0];
                     } catch {
-                        return [];
+                        return null;
                     }
                 }
 
-                return [];
-            }
-        );
+                return null;
+            });
 
         useEffect(() => {
             if (status === ActionStatus.Done) {
@@ -138,11 +149,12 @@ export const AnomalyFeedbackModal: FunctionComponent<AnomalyFeedbackModalProps> 
             const feedbackObject: AnomalyFeedback = {
                 ...anomalyFeedback,
                 type: selectedFeedbackOption,
-                comment: JSON.stringify({
-                    comment: localComment,
-                    reasons: reasons.map((reason) => reason.serverValue),
-                }),
+                comment: localComment,
             };
+
+            if (reason) {
+                feedbackObject.cause = reason.serverValue;
+            }
 
             if (anomalyFeedback?.id) {
                 feedbackObject.id = anomalyFeedback.id;
@@ -211,7 +223,6 @@ export const AnomalyFeedbackModal: FunctionComponent<AnomalyFeedbackModalProps> 
                                 <FormControl fullWidth variant="outlined">
                                     <Autocomplete
                                         fullWidth
-                                        multiple
                                         getOptionLabel={(option) =>
                                             option.label
                                         }
@@ -225,9 +236,9 @@ export const AnomalyFeedbackModal: FunctionComponent<AnomalyFeedbackModalProps> 
                                                 variant="outlined"
                                             />
                                         )}
-                                        value={reasons}
+                                        value={reason}
                                         onChange={(_, selected) => {
-                                            setReasons(selected || []);
+                                            setReason(selected);
                                         }}
                                     />
                                 </FormControl>

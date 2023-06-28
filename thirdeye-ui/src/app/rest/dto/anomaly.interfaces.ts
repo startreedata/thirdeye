@@ -51,7 +51,7 @@ export interface AnomalyFeedback {
     id?: number;
     type: AnomalyFeedbackType;
     comment: string;
-    causes?: AnomalyCause[];
+    cause?: AnomalyCause;
     // The fields below should exist with feedback created after April 2023
     createdBy?: {
         principal: string;

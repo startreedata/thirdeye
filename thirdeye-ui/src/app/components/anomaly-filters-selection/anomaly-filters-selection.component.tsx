@@ -92,6 +92,15 @@ export const AnomalyFiltersSelection: FunctionComponent<AnomalyFiltersSelectionP
             searchParams.delete(AnomalyFilterQueryStringKey.ALERT);
             searchParams.delete(AnomalyFilterQueryStringKey.SUBSCRIPTION_GROUP);
             setSearchParams(searchParams);
+
+            setPreference(
+                UserPreferencesKeys.ANOMALIES_LIST_DEFAULT_SUBSCRIPTION_FILTERS,
+                []
+            );
+            setPreference(
+                UserPreferencesKeys.ANOMALIES_LIST_DEFAULT_SUBSCRIPTION_FILTERS,
+                []
+            );
         };
 
         return (

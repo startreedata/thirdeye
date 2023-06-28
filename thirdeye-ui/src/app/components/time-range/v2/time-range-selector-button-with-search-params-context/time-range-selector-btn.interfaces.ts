@@ -12,18 +12,11 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { TimeRangeDuration } from "../../time-range-provider/time-range-provider.interfaces";
 
-export interface TimeRangeSelectorButtonProps {
-    start: number;
-    end: number;
-    recentCustomTimeRangeDurations?: TimeRangeDuration[];
-    onChange?: (start: number, end: number) => void;
-    maxDate?: number;
-    minDate?: number;
-    btnGroupColor?: "secondary" | "inherit" | "primary" | "default";
-    fullWidth?: boolean;
-    placeholder?: string;
-    btnVariant?: "text" | "outlined" | "contained" | undefined;
-    timezone?: string;
+import { TimeRangeSelectorButtonProps } from "../time-range-selector-button/time-range-selector-button.interfaces";
+
+export interface TimeRangeSelectorButtonWithSearchParamsContextProps
+    extends Partial<TimeRangeSelectorButtonProps> {
+    start?: number;
+    end?: number;
 }

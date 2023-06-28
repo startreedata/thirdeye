@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Card, CardContent } from "@material-ui/core";
+import { Box, Card, CardContent, IconButton } from "@material-ui/core";
+import RefreshIcon from "@material-ui/icons/Refresh";
 import { Orientation } from "@visx/axis";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -40,7 +41,8 @@ import {
 } from "../../../../utils/params/params.util";
 import { getErrorMessages } from "../../../../utils/rest/rest.util";
 import { LoadingErrorStateSwitch } from "../../../page-states/loading-error-state-switch/loading-error-state-switch.component";
-import { TimeRangeButtonWithContext } from "../../../time-range/time-range-button-with-context/time-range-button.component";
+import { TimeRangeQueryStringKey } from "../../../time-range/time-range-provider/time-range-provider.interfaces";
+import { TimeRangeSelectorButtonWithSearchParamsContext } from "../../../time-range/v2/time-range-selector-button-with-search-params-context/time-range-selector-btn.component";
 import { TimeSeriesChart } from "../../../visualizations/time-series-chart/time-series-chart.component";
 import {
     Series,
@@ -71,7 +73,7 @@ export const ChartSection: FunctionComponent<ChartSectionProps> = ({
     const { ref, inView } = useInView({
         triggerOnce: true,
         delay: 200,
-        threshold: 1,
+        threshold: 0,
     });
     const [searchParams] = useSearchParams();
 
@@ -123,15 +125,11 @@ export const ChartSection: FunctionComponent<ChartSectionProps> = ({
     }, [alertInsight]);
 
     const [startTime, endTime] = useMemo(
-        // () => [
-        //     Number(searchParams.get(TimeRangeQueryStringKey.START_TIME)),
-        //     Number(searchParams.get(TimeRangeQueryStringKey.END_TIME)),
-        // ],
         () => [
-            Number(alertInsight?.defaultStartTime),
-            Number(alertInsight?.defaultEndTime),
+            Number(searchParams.get(TimeRangeQueryStringKey.START_TIME)),
+            Number(searchParams.get(TimeRangeQueryStringKey.END_TIME)),
         ],
-        [searchParams, alertInsight]
+        [searchParams]
     );
 
     const fetchAlertEvaluation = (): void => {
@@ -268,11 +266,21 @@ export const ChartSection: FunctionComponent<ChartSectionProps> = ({
         <Card innerRef={ref}>
             <CardContent>
                 <Box textAlign="right">
-                    <TimeRangeButtonWithContext
-                        timezone={determineTimezoneFromAlertInEvaluation(
-                            alertInsight?.templateWithProperties
-                        )}
+                    <TimeRangeSelectorButtonWithSearchParamsContext
+                        btnGroupColor="primary"
+                        btnVariant="text"
+                        timezone={timezone}
                     />
+                    <IconButton
+                        color="primary"
+                        size="small"
+                        onClick={() => {
+                            fetchAlertEvaluation();
+                            fetchFilteredAlertEvaluations();
+                        }}
+                    >
+                        <RefreshIcon />
+                    </IconButton>
                 </Box>
             </CardContent>
             <CardContent>

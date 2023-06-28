@@ -28,8 +28,10 @@ export const TimeRangeSelectorButton: FunctionComponent<TimeRangeSelectorButtonP
         maxDate,
         minDate,
         btnGroupColor = "secondary",
+        btnVariant = "outlined",
         fullWidth,
         placeholder,
+        timezone,
     }) => {
         const [
             timeRangeSelectorAnchorElement,
@@ -52,10 +54,12 @@ export const TimeRangeSelectorButton: FunctionComponent<TimeRangeSelectorButtonP
                     color={btnGroupColor}
                     fullWidth={fullWidth}
                     startIcon={<CalendarTodayIcon />}
-                    variant="outlined"
+                    variant={btnVariant}
                     onClick={handleTimeRangeSelectorClick}
                 >
-                    {start && end && formatStartAndEndDuration(start, end)}
+                    {start &&
+                        end &&
+                        formatStartAndEndDuration(start, end, timezone)}
                     {!start && !end && placeholder}
                 </Button>
                 {/* Time range selector */}

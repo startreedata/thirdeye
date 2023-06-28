@@ -21,6 +21,7 @@ import {
 } from "react-router-dom";
 import { TimeRangeQueryStringKey } from "../../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { AppLoadingIndicatorV1 } from "../../../platform/components";
+import { baselineOffsetToMilliseconds } from "../../../utils/anomaly-breakdown/anomaly-breakdown.util";
 import { getRootCauseAnalysisForAnomalyInvestigateV2Path } from "../../../utils/routes/routes.util";
 import { WEEK_IN_MILLISECONDS } from "../../../utils/time/time.util";
 import { InvestigationContext } from "../investigation-state-tracker-container-page/investigation-state-tracker.interfaces";
@@ -28,17 +29,31 @@ import { InvestigationContext } from "../investigation-state-tracker-container-p
 export const IndexPage: FunctionComponent = () => {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
-    const { investigation, anomaly } = useOutletContext<InvestigationContext>();
+    const { anomaly, alertInsight } = useOutletContext<InvestigationContext>();
 
     useEffect(() => {
-        if (anomaly) {
+        if (anomaly && alertInsight) {
+            let startTime = anomaly.startTime - WEEK_IN_MILLISECONDS * 2;
+            let endTime = anomaly.endTime + WEEK_IN_MILLISECONDS * 2;
+
+            if (alertInsight?.templateWithProperties?.metadata?.granularity) {
+                const granularity =
+                    alertInsight?.templateWithProperties?.metadata?.granularity;
+                const padding = granularity
+                    ? baselineOffsetToMilliseconds(granularity) * 14
+                    : 0;
+
+                startTime = Number(anomaly.startTime) - padding;
+                endTime = Number(anomaly.endTime) + padding;
+            }
+
             searchParams.set(
                 TimeRangeQueryStringKey.START_TIME,
-                (anomaly.startTime - WEEK_IN_MILLISECONDS * 2).toString()
+                startTime.toString()
             );
             searchParams.set(
                 TimeRangeQueryStringKey.END_TIME,
-                (anomaly.endTime + WEEK_IN_MILLISECONDS * 2).toString()
+                endTime.toString()
             );
 
             navigate(
@@ -50,7 +65,7 @@ export const IndexPage: FunctionComponent = () => {
                 }
             );
         }
-    }, [anomaly, investigation]);
+    }, [anomaly, alertInsight]);
 
     return <AppLoadingIndicatorV1 />;
 };

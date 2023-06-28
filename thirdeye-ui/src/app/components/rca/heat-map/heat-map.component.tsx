@@ -92,7 +92,7 @@ export const HeatMap: FunctionComponent<HeatMapProps> = ({
 
     return (
         <>
-            <Box pb={2} pt={2}>
+            <Box pt={2}>
                 {React.Children.toArray(
                     breakdownComparisonData &&
                         breakdownComparisonData.map((data) => (

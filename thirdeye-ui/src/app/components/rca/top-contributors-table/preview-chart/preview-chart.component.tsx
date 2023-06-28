@@ -12,9 +12,11 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Button, CircularProgress, Grid } from "@material-ui/core";
+import { Box, Grid, IconButton } from "@material-ui/core";
+import RefreshIcon from "@material-ui/icons/Refresh";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
 import {
     SkeletonV1,
     useNotificationProviderV1,
@@ -30,12 +32,13 @@ import {
     shouldHideTimeInDatetimeFormat,
 } from "../../../../utils/alerts/alerts.util";
 import { createAlertEvaluation } from "../../../../utils/anomalies/anomalies.util";
-import { baselineOffsetToMilliseconds } from "../../../../utils/anomaly-breakdown/anomaly-breakdown.util";
 import { notifyIfErrors } from "../../../../utils/notifications/notifications.util";
 import { concatKeyValueWithEqual } from "../../../../utils/params/params.util";
 import { getErrorMessages } from "../../../../utils/rest/rest.util";
 import { NoDataIndicator } from "../../../no-data-indicator/no-data-indicator.component";
 import { LoadingErrorStateSwitch } from "../../../page-states/loading-error-state-switch/loading-error-state-switch.component";
+import { TimeRangeQueryStringKey } from "../../../time-range/time-range-provider/time-range-provider.interfaces";
+import { TimeRangeSelectorButtonWithSearchParamsContext } from "../../../time-range/v2/time-range-selector-button-with-search-params-context/time-range-selector-btn.component";
 import { TimeSeriesChart } from "../../../visualizations/time-series-chart/time-series-chart.component";
 import { TimeSeriesChartProps } from "../../../visualizations/time-series-chart/time-series-chart.interfaces";
 import { AnomalyFilterOption } from "../../anomaly-dimension-analysis/anomaly-dimension-analysis.interfaces";
@@ -51,6 +54,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
 }) => {
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
+    const [searchParams] = useSearchParams();
     const {
         evaluation: evaluationForAnomaly,
         getEvaluation,
@@ -63,8 +67,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
     const [filteredAlertEvaluation, setFilteredAlertEvaluation] = useState<
         [AlertEvaluation, AnomalyFilterOption[]][]
     >([]);
-    const [isFilteredDataFetching, setIsFilteredDataFetching] = useState(false);
-    const [hideTime, timezone, granularity] = useMemo(() => {
+    const [hideTime, timezone] = useMemo(() => {
         return [
             shouldHideTimeInDatetimeFormat(
                 alertInsight?.templateWithProperties
@@ -72,24 +75,16 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
             determineTimezoneFromAlertInEvaluation(
                 alertInsight?.templateWithProperties
             ),
-            alertInsight?.templateWithProperties?.metadata?.granularity,
         ];
     }, [alertInsight]);
 
-    const [startTime, endTime] = useMemo(() => {
-        if (!anomaly) {
-            return [0, 0];
-        }
-
-        const padding = granularity
-            ? baselineOffsetToMilliseconds(granularity) * 14
-            : 0;
-
-        return [
-            Number(anomaly.startTime) - padding,
-            Number(anomaly.endTime) + padding,
-        ];
-    }, [anomaly, granularity]);
+    const [startTime, endTime] = useMemo(
+        () => [
+            Number(searchParams.get(TimeRangeQueryStringKey.START_TIME)),
+            Number(searchParams.get(TimeRangeQueryStringKey.END_TIME)),
+        ],
+        [searchParams]
+    );
 
     const fetchAlertEvaluation = (): void => {
         if (
@@ -131,7 +126,6 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                 anomaly?.enumerationItem
             );
         });
-        setIsFilteredDataFetching(true);
         Promise.all(dataRequests)
             .then((dataFromRequests) => {
                 setFilteredAlertEvaluation(
@@ -150,9 +144,6 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                         entity: t("label.chart-data"),
                     })
                 );
-            })
-            .finally(() => {
-                setIsFilteredDataFetching(false);
             });
     };
 
@@ -179,11 +170,11 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
 
     useEffect(() => {
         fetchAlertEvaluation();
-    }, [anomaly, startTime, endTime]);
+    }, [alertInsight, anomaly, startTime, endTime]);
 
     useEffect(() => {
         fetchFilteredAlertEvaluations();
-    }, [anomaly, dimensionCombinations]);
+    }, [alertInsight, anomaly, startTime, endTime, dimensionCombinations]);
 
     return (
         <Grid container>
@@ -195,20 +186,21 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                 >
                     <Grid item>{children}</Grid>
                     <Grid item>
-                        {isFilteredDataFetching ||
-                        getEvaluationRequestStatus === ActionStatus.Working ? (
-                            <CircularProgress size={20} />
-                        ) : (
-                            <Button
-                                color="primary"
-                                onClick={() => {
-                                    fetchAlertEvaluation();
-                                    fetchFilteredAlertEvaluations();
-                                }}
-                            >
-                                {t("label.reload-data")}
-                            </Button>
-                        )}
+                        <TimeRangeSelectorButtonWithSearchParamsContext
+                            btnGroupColor="primary"
+                            btnVariant="text"
+                            timezone={timezone}
+                        />
+                        <IconButton
+                            color="primary"
+                            size="small"
+                            onClick={() => {
+                                fetchAlertEvaluation();
+                                fetchFilteredAlertEvaluations();
+                            }}
+                        >
+                            <RefreshIcon />
+                        </IconButton>
                     </Grid>
                 </Grid>
             </Grid>

@@ -173,6 +173,7 @@ export const AnalysisTabs: FunctionComponent<AnalysisTabsProps> = ({
                             >
                                 <Grid item>
                                     <EventsWizardModal
+                                        btnSize="large"
                                         event={newEventObject}
                                         onSubmit={handleAddEventSubmit}
                                     />

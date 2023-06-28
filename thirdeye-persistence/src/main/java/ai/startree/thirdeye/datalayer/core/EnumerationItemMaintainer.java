@@ -176,16 +176,7 @@ public class EnumerationItemMaintainer {
     if (idKeys != null && !idKeys.isEmpty()) {
       final EnumerationItemDTO existing = findUsingIdKeys(source, idKeys, existingEnumerationItems);
       if (existing != null) {
-        if (!existing.getParams().equals(source.getParams()) ||
-            !existing.getName().equals(source.getName())) {
-          /*
-           * Overwrite existing params with new params for the same key. The alert is the
-           * source of truth.
-           */
-          enumerationItemManager.save(existing
-              .setParams(source.getParams())
-              .setName(source.getName()));
-        }
+        updateExistingIfReqd(existing, source);
         return existing;
       }
 
@@ -233,6 +224,25 @@ public class EnumerationItemMaintainer {
         .forEach(ei -> migrate(ei, source));
 
     return source;
+  }
+
+  private void updateExistingIfReqd(final EnumerationItemDTO existing,
+      final EnumerationItemDTO source) {
+    if (!existing.getParams().equals(source.getParams()) ||
+        !existing.getName().equals(source.getName()) ||
+        !Objects.equals(existing.getAuth(), source.getAuth()) // auth can be null
+    ) {
+      /*
+       * Overwrite existing params with new params for the same key. The alert is the
+       * source of truth.
+       */
+      final EnumerationItemDTO updated = existing
+          .setParams(source.getParams())
+          .setName(source.getName());
+
+      updated.setAuth(source.getAuth());
+      enumerationItemManager.save(updated);
+    }
   }
 
   @VisibleForTesting

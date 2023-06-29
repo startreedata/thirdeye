@@ -32,7 +32,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import com.google.inject.Inject;
 import java.util.ArrayList;
@@ -161,23 +160,28 @@ public class AuthorizationManager {
   // Everything else -> itself
   private <T extends AbstractDTO> AbstractDTO resolveAuthParentDto(final T dto) {
     if (dto.getClass() == AnomalyDTO.class) {
-      final var anomalyDto = (AnomalyDTO) (dto);
-      if (anomalyDto.getEnumerationItem() != null) {
-        var enumItemId = anomalyDto.getEnumerationItem().getId();
-        return ensureExists(enumerationItemManager.findById(enumItemId));
-      }
+      return resolveAuthParentDto((AnomalyDTO) (dto));
+    } else if (dto.getClass() == RcaInvestigationDTO.class) {
+      return resolveAuthParentDto((RcaInvestigationDTO) (dto));
+    } else {
+      return dto;
+    }
+  }
 
-      var alertId = anomalyDto.getDetectionConfigId();
-      return ensureExists(alertManager.findById(alertId));
+  private AbstractDTO resolveAuthParentDto(final AnomalyDTO dto) {
+    if (dto.getEnumerationItem() != null) {
+      final Long enumItemId = dto.getEnumerationItem().getId();
+      return ensureExists(enumerationItemManager.findById(enumItemId));
     }
 
-    if (dto.getClass() == RcaInvestigationDTO.class) {
-      final var rcaDto = (RcaInvestigationDTO) (dto);
-      var anomalyId = rcaDto.getAnomaly().getId();
-      return resolveAuthParentDto(ensureExists(anomalyManager.findById(anomalyId)));
-    }
+    final Long alertId = dto.getDetectionConfigId();
+    return ensureExists(alertManager.findById(alertId));
+  }
 
-    return dto;
+  private AbstractDTO resolveAuthParentDto(final RcaInvestigationDTO dto) {
+    final Long anomalyId = dto.getAnomaly().getId();
+    final AnomalyDTO anomalyDto = ensureExists(anomalyManager.findById(anomalyId));
+    return resolveAuthParentDto(anomalyDto);
   }
 
   private <T extends AbstractDTO> List<ResourceIdentifier> relatedEntities(T entity) {

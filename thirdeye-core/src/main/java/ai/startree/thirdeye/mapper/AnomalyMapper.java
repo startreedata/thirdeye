@@ -94,9 +94,7 @@ public interface AnomalyMapper {
             .setDataset(datasetApi)
         )
         .setEnumerationItem(EnumerationItemMapper.INSTANCE.toApi(dto.getEnumerationItem()))
-        .setFeedback(toAnomalyFeedbackApi(dto))
-        .setAuth(optional(dto.getAuth())
-            .map(ApiBeanMapper::toApi).orElse(null));
+        .setFeedback(toAnomalyFeedbackApi(dto));
 
     if (dto.getMetricUrn() != null) {
       anomalyApi

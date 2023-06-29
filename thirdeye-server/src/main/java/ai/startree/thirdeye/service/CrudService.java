@@ -116,6 +116,9 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
   public List<ApiT> createMultiple(final ThirdEyePrincipal principal,
       final List<ApiT> list) {
     final RequestCache cache = createRequestCache();
+
+
+
     return list.stream()
         .peek(api1 -> validate(api1, null))
         .peek(api -> authorizationManager.ensureCanCreate(principal, toDto(api)))

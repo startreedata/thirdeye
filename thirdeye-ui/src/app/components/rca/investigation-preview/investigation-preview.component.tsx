@@ -15,6 +15,7 @@
 import { Grid } from "@material-ui/core";
 import { some } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Event } from "../../../rest/dto/event.interfaces";
 import { SavedStateKeys } from "../../../rest/dto/rca.interfaces";
 import { getFromSavedInvestigationOrDefault } from "../../../utils/investigation/investigation.util";
@@ -29,7 +30,8 @@ import {
 } from "./investigation-preview.interfaces";
 
 export const InvestigationPreview: FunctionComponent<InvestigationPreviewProps> =
-    ({ investigation, alertInsight, anomaly }) => {
+    ({ investigation, alertInsight, anomaly, children, title }) => {
+        const { t } = useTranslation();
         const [isInitialSetup, setIsInitialSetup] = useState(true);
 
         // useEffect will set this to the appropriate state
@@ -152,6 +154,7 @@ export const InvestigationPreview: FunctionComponent<InvestigationPreviewProps> 
                 <Grid item xs={12}>
                     <Header
                         selectedChartType={chartType}
+                        title={title || t("label.investigation-preview")}
                         onOptionClick={setChartType}
                     />
                 </Grid>
@@ -182,6 +185,7 @@ export const InvestigationPreview: FunctionComponent<InvestigationPreviewProps> 
                                     selectedDimensionCombinations
                                 }
                             />
+                            {children}
                         </Grid>
                     </Grid>
                 </Grid>

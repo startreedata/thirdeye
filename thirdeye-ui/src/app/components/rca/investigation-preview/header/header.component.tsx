@@ -27,15 +27,14 @@ import { HeaderProps } from "./header.interfaces";
 export const Header: FunctionComponent<HeaderProps> = ({
     selectedChartType,
     onOptionClick,
+    title,
 }) => {
     const { t } = useTranslation();
 
     return (
         <Grid container alignItems="center" justifyContent="space-between">
             <Grid item>
-                <Typography variant="h4">
-                    {t("label.investigation-preview")}
-                </Typography>
+                <Typography variant="h4">{title}</Typography>
             </Grid>
             <Grid item>
                 <Box display="inline-block" marginRight={2}>

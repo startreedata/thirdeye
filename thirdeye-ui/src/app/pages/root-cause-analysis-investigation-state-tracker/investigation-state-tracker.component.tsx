@@ -318,6 +318,7 @@ export const InvestigationStateTracker: FunctionComponent = () => {
                     context={{
                         investigation: localInvestigation,
                         investigationHasChanged: handleInvestigationChange,
+                        handleServerUpdatedInvestigation,
                         getEnumerationItemRequest,
                         enumerationItem,
                         anomaly,

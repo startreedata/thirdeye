@@ -19,12 +19,12 @@ import {
     DialogContent,
     DialogTitle,
     Grid,
-    TextField,
 } from "@material-ui/core";
 import Alert from "@material-ui/lab/Alert";
 import { isEmpty } from "lodash";
 import React, { FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { InvestigationDetailsForm } from "../../investigation-details-form/investigation-details-form.component";
 import { ModifyInvestigationDialogProps } from "./modify-investigation-dialog.interfaces";
 
 export const ModifyInvestigationDialog: FunctionComponent<ModifyInvestigationDialogProps> =
@@ -109,31 +109,12 @@ export const ModifyInvestigationDialog: FunctionComponent<ModifyInvestigationDia
                                 ))}
                             </Grid>
                         )}
-                        <Grid item xs={12}>
-                            <TextField
-                                fullWidth
-                                name="name"
-                                placeholder="Name your investigation"
-                                value={investigationName}
-                                onChange={(e) =>
-                                    setInvestigationName(e.target.value)
-                                }
-                            />
-                        </Grid>
-                        <Grid item xs={12}>
-                            <TextField
-                                fullWidth
-                                multiline
-                                name="text"
-                                placeholder="Add comments or conclusion"
-                                rows={5}
-                                value={investigationText}
-                                onChange={(e) =>
-                                    setInvestigationText(e.target.value)
-                                }
-                            />
-                        </Grid>
                     </Grid>
+                    <InvestigationDetailsForm
+                        investigation={investigation}
+                        onCommentChange={setInvestigationText}
+                        onNameChange={setInvestigationName}
+                    />
                 </DialogContent>
 
                 {/* Controls */}

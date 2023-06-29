@@ -13,10 +13,10 @@
  * the License.
  */
 
-import { ChartType } from "../investigation-preview.interfaces";
+import { Investigation } from "../../../rest/dto/rca.interfaces";
 
-export interface HeaderProps {
-    selectedChartType: ChartType;
-    onOptionClick: (option: ChartType) => void;
-    title: string;
+export interface InvestigationDetailsFormProps {
+    investigation: Investigation;
+    onCommentChange: (value: string) => void;
+    onNameChange: (value: string) => void;
 }

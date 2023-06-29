@@ -20,6 +20,7 @@ export interface InvestigationPreviewProps {
     investigation: Investigation | null;
     alertInsight: AlertInsight | null;
     anomaly: Anomaly | null;
+    title?: string;
 }
 
 export enum ChartType {

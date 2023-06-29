@@ -25,34 +25,30 @@ export const InputSection: FunctionComponent<InputSectionProps> = ({
     gridContainerProps,
 }) => {
     return (
-        <Grid
-            container
-            item
-            alignItems="center"
-            xs={12}
-            {...gridContainerProps}
-        >
-            <Grid item lg={2} md={4} sm={12} xs={12}>
-                {!!labelComponent && labelComponent}
-                {!labelComponent && label && (
-                    <>
-                        <Typography variant="body2">{label}</Typography>
-                        {helperLabel && (
-                            <Typography variant="caption">
-                                {helperLabel}
-                            </Typography>
-                        )}
-                    </>
-                )}
-            </Grid>
-            <Grid
-                item
-                lg={fullWidth ? 10 : 4}
-                md={fullWidth ? 8 : 5}
-                sm={12}
-                xs={12}
-            >
-                {inputComponent}
+        <Grid item xs={12}>
+            <Grid container alignItems="center" {...gridContainerProps}>
+                <Grid item lg={2} md={4} sm={12} xs={12}>
+                    {!!labelComponent && labelComponent}
+                    {!labelComponent && label && (
+                        <>
+                            <Typography variant="body2">{label}</Typography>
+                            {helperLabel && (
+                                <Typography variant="caption">
+                                    {helperLabel}
+                                </Typography>
+                            )}
+                        </>
+                    )}
+                </Grid>
+                <Grid
+                    item
+                    lg={fullWidth ? 10 : 4}
+                    md={fullWidth ? 8 : 5}
+                    sm={12}
+                    xs={12}
+                >
+                    {inputComponent}
+                </Grid>
             </Grid>
         </Grid>
     );

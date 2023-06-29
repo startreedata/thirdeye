@@ -21,6 +21,9 @@ import { Investigation } from "../../../rest/dto/rca.interfaces";
 export type InvestigationContext = {
     investigation: Investigation;
     onInvestigationChange: (modified: Investigation) => void;
+    handleServerUpdatedInvestigation: (
+        serverInvestigation: Investigation
+    ) => void;
     getEnumerationItemRequest: ActionStatus;
     enumerationItem: EnumerationItem | null;
     anomaly: Anomaly;

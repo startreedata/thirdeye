@@ -83,6 +83,12 @@ const EventsPage = lazy(() =>
     ).then((module) => ({ default: module.EventsPage }))
 );
 
+const ReviewShareSavePage = lazy(() =>
+    import(
+        /* webpackChunkName: "review-share-save-page" */ "../../pages/rca/review-share-save-page/review-share-save-page.component"
+    ).then((module) => ({ default: module.ReviewShareSavePage }))
+);
+
 const PageNotFoundPage = lazy(() =>
     import(
         /* webpackChunkName: "page-not-found-page" */ "../../pages/page-not-found-page/page-not-found-page.component"
@@ -196,7 +202,10 @@ export const RootCauseAnalysisRouter: FunctionComponent = () => {
                             element={<EventsPage />}
                             path={AppRouteRelative.RCA_EVENTS}
                         />
-                        <Route path={AppRouteRelative.RCA_REVIEW_SHARE} />
+                        <Route
+                            element={<ReviewShareSavePage />}
+                            path={AppRouteRelative.RCA_REVIEW_SHARE}
+                        />
                     </Route>
                     <Route element={<PageNotFoundPage />} path="*" />
                 </Route>

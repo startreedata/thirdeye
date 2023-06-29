@@ -28,3 +28,5 @@ export enum ChartType {
     ONE = "one",
     MULTI = "multi",
 }
+
+export const QUERY_PARAM_FOR_CHART_TYPE = "chartType";

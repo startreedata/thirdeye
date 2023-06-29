@@ -16,6 +16,7 @@ import { Grid } from "@material-ui/core";
 import { some } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
 import { Event } from "../../../rest/dto/event.interfaces";
 import { SavedStateKeys } from "../../../rest/dto/rca.interfaces";
 import { getFromSavedInvestigationOrDefault } from "../../../utils/investigation/investigation.util";
@@ -27,6 +28,7 @@ import { Header } from "./header/header.component";
 import {
     ChartType,
     InvestigationPreviewProps,
+    QUERY_PARAM_FOR_CHART_TYPE,
 } from "./investigation-preview.interfaces";
 
 export const InvestigationPreview: FunctionComponent<InvestigationPreviewProps> =
@@ -39,6 +41,8 @@ export const InvestigationPreview: FunctionComponent<InvestigationPreviewProps> 
         onInvestigationChange,
     }) => {
         const { t } = useTranslation();
+        const [searchParams, setSearchParams] = useSearchParams();
+
         const [isInitialSetup, setIsInitialSetup] = useState(true);
 
         // useEffect will set this to the appropriate state
@@ -53,7 +57,15 @@ export const InvestigationPreview: FunctionComponent<InvestigationPreviewProps> 
             setSelectedDimensionCombinations,
         ] = useState<Set<string>>(new Set());
 
-        const [chartType, setChartType] = useState<ChartType>(ChartType.ONE);
+        const [chartType, setChartType] = useState<ChartType>(() => {
+            if (searchParams.has(QUERY_PARAM_FOR_CHART_TYPE)) {
+                return searchParams.get(
+                    QUERY_PARAM_FOR_CHART_TYPE
+                ) as ChartType;
+            }
+
+            return ChartType.ONE;
+        });
 
         useEffect(() => {
             // #TODO only replace if actual contents change
@@ -174,7 +186,15 @@ export const InvestigationPreview: FunctionComponent<InvestigationPreviewProps> 
                     <Header
                         selectedChartType={chartType}
                         title={title || t("label.investigation-preview")}
-                        onOptionClick={setChartType}
+                        onOptionClick={(newChartType) => {
+                            setChartType(newChartType);
+
+                            searchParams.set(
+                                QUERY_PARAM_FOR_CHART_TYPE,
+                                newChartType
+                            );
+                            setSearchParams(searchParams);
+                        }}
                     />
                 </Grid>
                 <Grid item xs={12}>

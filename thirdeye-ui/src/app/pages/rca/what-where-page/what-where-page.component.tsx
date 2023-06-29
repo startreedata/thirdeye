@@ -40,6 +40,7 @@ export const WhatWherePage: FunctionComponent = () => {
                     alertInsight={context.alertInsight}
                     anomaly={context.anomaly}
                     investigation={context.investigation}
+                    onInvestigationChange={context.onInvestigationChange}
                 />
             </Grid>
         </>

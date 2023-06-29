@@ -42,6 +42,7 @@ export const ReviewShareSavePage: FunctionComponent = () => {
         anomaly,
         investigation,
         handleServerUpdatedInvestigation,
+        onInvestigationChange,
     } = useOutletContext<InvestigationContext>();
 
     const [isSaving, setIsSaving] = useState(false);
@@ -98,6 +99,7 @@ export const ReviewShareSavePage: FunctionComponent = () => {
                     anomaly={anomaly}
                     investigation={investigation}
                     title={t("label.review-investigation-share")}
+                    onInvestigationChange={onInvestigationChange}
                 >
                     <Box pt={3}>
                         <Card>

@@ -30,7 +30,14 @@ import {
 } from "./investigation-preview.interfaces";
 
 export const InvestigationPreview: FunctionComponent<InvestigationPreviewProps> =
-    ({ investigation, alertInsight, anomaly, children, title }) => {
+    ({
+        investigation,
+        alertInsight,
+        anomaly,
+        children,
+        title,
+        onInvestigationChange,
+    }) => {
         const { t } = useTranslation();
         const [isInitialSetup, setIsInitialSetup] = useState(true);
 
@@ -147,6 +154,18 @@ export const InvestigationPreview: FunctionComponent<InvestigationPreviewProps> 
 
                 return new Set(current);
             });
+
+            if (investigation) {
+                let currentSet = getFromSavedInvestigationOrDefault<
+                    AnomalyFilterOption[][]
+                >(investigation, SavedStateKeys.CHART_FILTER_SET, []);
+                currentSet = currentSet.filter((candidate) => {
+                    return serializeKeyValuePair(candidate) !== serializedStr;
+                });
+                investigation.uiMetadata[SavedStateKeys.CHART_FILTER_SET] =
+                    currentSet;
+                onInvestigationChange(investigation);
+            }
         };
 
         return (

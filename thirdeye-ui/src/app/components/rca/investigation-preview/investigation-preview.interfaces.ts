@@ -21,6 +21,7 @@ export interface InvestigationPreviewProps {
     alertInsight: AlertInsight | null;
     anomaly: Anomaly | null;
     title?: string;
+    onInvestigationChange: (modified: Investigation) => void;
 }
 
 export enum ChartType {

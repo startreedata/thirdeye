@@ -349,6 +349,7 @@ export const EventsPage: FunctionComponent = () => {
                     alertInsight={alertInsight}
                     anomaly={anomaly}
                     investigation={investigation}
+                    onInvestigationChange={onInvestigationChange}
                 />
             </Grid>
         </>

@@ -28,6 +28,7 @@ import { useOutletContext } from "react-router-dom";
 import { EventsWizardModal } from "../../../components/events-wizard-modal/event-wizard-modal.component";
 import { EmptyStateSwitch } from "../../../components/page-states/empty-state-switch/empty-state-switch.component";
 import { LoadingErrorStateSwitch } from "../../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
+import { InvestigationPreview } from "../../../components/rca/investigation-preview/investigation-preview.component";
 import { PreviewChart } from "../../../components/rca/top-contributors-table/preview-chart/preview-chart.component";
 import {
     DataGridScrollV1,
@@ -224,7 +225,7 @@ export const EventsPage: FunctionComponent = () => {
     };
 
     return (
-        <Grid container>
+        <>
             <Grid item xs={12}>
                 <Typography variant="h4">
                     {t("label.an-event-could-have-caused-it")}
@@ -342,6 +343,14 @@ export const EventsPage: FunctionComponent = () => {
                     </Box>
                 </PageContentsCardV1>
             </Grid>
-        </Grid>
+
+            <Grid item xs={12}>
+                <InvestigationPreview
+                    alertInsight={alertInsight}
+                    anomaly={anomaly}
+                    investigation={investigation}
+                />
+            </Grid>
+        </>
     );
 };

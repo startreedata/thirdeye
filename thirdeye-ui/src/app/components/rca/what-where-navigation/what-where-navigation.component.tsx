@@ -51,7 +51,7 @@ export const WhatWhereNavigation: FunctionComponent = () => {
     }, [location]);
 
     return (
-        <Box pb={3} pt={2}>
+        <Box pt={2}>
             <Tabs value={currentPage?.navLink}>
                 {stepItems.map((tableConfig) => {
                     return (

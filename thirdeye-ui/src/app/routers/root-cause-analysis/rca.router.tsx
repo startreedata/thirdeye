@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box } from "@material-ui/core";
+import { Grid } from "@material-ui/core";
 import React, { FunctionComponent, lazy, Suspense } from "react";
 import { Navigate, Route, Routes, useSearchParams } from "react-router-dom";
 import { InvestigationStepsNavigation } from "../../components/rca/investigation-steps-navigation/investigation-steps-navigation.component";
@@ -145,9 +145,9 @@ export const RootCauseAnalysisRouter: FunctionComponent = () => {
                                 ]}
                                 to=".."
                             >
-                                <Box pb={2}>
+                                <Grid item xs={12}>
                                     <InvestigationStepsNavigation />
-                                </Box>
+                                </Grid>
                             </RedirectValidation>
                         }
                         path={`${AppRouteRelative.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_INVESTIGATE}/*`}

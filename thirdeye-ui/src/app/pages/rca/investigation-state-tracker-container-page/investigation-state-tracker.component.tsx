@@ -23,7 +23,6 @@ import { AnomalyCard } from "../../../components/entity-cards/anomaly-card/anoma
 import { PageHeader } from "../../../components/page-header/page-header.component";
 import { LoadingErrorStateSwitch } from "../../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { InvestigationOptions } from "../../../components/rca/investigation-options/investigation-options.component";
-import { InvestigationPreview } from "../../../components/rca/investigation-preview/investigation-preview.component";
 import {
     AppLoadingIndicatorV1,
     NotificationTypeV1,
@@ -356,30 +355,19 @@ export const InvestigationStateTracker: FunctionComponent = () => {
                         />
                     </Grid>
 
-                    <Grid item xs={12}>
-                        <Outlet
-                            context={{
-                                investigation: localInvestigation,
-                                onInvestigationChange:
-                                    handleInvestigationChange,
-                                getEnumerationItemRequest,
-                                enumerationItem,
-                                anomaly,
-                                getAnomalyRequestStatus: getAnomalyStatus,
-                                anomalyRequestErrors: errorMessages,
-                                alert,
-                                alertInsight,
-                            }}
-                        />
-                    </Grid>
-
-                    <Grid item xs={12}>
-                        <InvestigationPreview
-                            alertInsight={alertInsight}
-                            anomaly={anomaly}
-                            investigation={localInvestigation}
-                        />
-                    </Grid>
+                    <Outlet
+                        context={{
+                            investigation: localInvestigation,
+                            onInvestigationChange: handleInvestigationChange,
+                            getEnumerationItemRequest,
+                            enumerationItem,
+                            anomaly,
+                            getAnomalyRequestStatus: getAnomalyStatus,
+                            anomalyRequestErrors: errorMessages,
+                            alert,
+                            alertInsight,
+                        }}
+                    />
                 </PageContentsGridV1>
             </LoadingErrorStateSwitch>
         </PageV1>

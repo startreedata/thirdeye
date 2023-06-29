@@ -12,20 +12,36 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Typography } from "@material-ui/core";
+import { Grid, Typography } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
+import { useTranslation } from "react-i18next";
 import { Outlet, useOutletContext } from "react-router-dom";
+import { InvestigationPreview } from "../../../components/rca/investigation-preview/investigation-preview.component";
 import { WhatWhereNavigation } from "../../../components/rca/what-where-navigation/what-where-navigation.component";
-import { InvestigationContext } from "../../root-cause-analysis-investigation-state-tracker/investigation-state-tracker.interfaces";
+import { InvestigationContext } from "../investigation-state-tracker-container-page/investigation-state-tracker.interfaces";
 
 export const WhatWherePage: FunctionComponent = () => {
+    const { t } = useTranslation();
     const context = useOutletContext<InvestigationContext>();
 
     return (
         <>
-            <Typography variant="h4">What went wrong and where?</Typography>
-            <WhatWhereNavigation />
+            <Grid item xs={12}>
+                <Typography variant="h4">
+                    {t("message.what-went-wrong-and-where")}
+                </Typography>
+                <WhatWhereNavigation />
+            </Grid>
+
             <Outlet context={context} />
+
+            <Grid item xs={12}>
+                <InvestigationPreview
+                    alertInsight={context.alertInsight}
+                    anomaly={context.anomaly}
+                    investigation={context.investigation}
+                />
+            </Grid>
         </>
     );
 };

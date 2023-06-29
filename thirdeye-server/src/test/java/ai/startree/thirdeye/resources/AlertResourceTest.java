@@ -69,7 +69,10 @@ public class AlertResourceTest {
       final AccessControl accessControl) {
     final AuthorizationManager authorizationManager = new AuthorizationManager(
         alertTemplateRenderer,
-        accessControl
+        accessControl,
+        null,
+        null,
+        null
     );
     return new AlertResource(
         newAlertService(alertManager, authorizationManager)
@@ -247,7 +250,10 @@ public class AlertResourceTest {
         mock(AlertInsightsProvider.class),
         new AuthorizationManager(alertTemplateRenderer,
             (String token, ResourceIdentifier id, AccessType accessType) ->
-                id.namespace.equals("allowedNamespace")
+                id.namespace.equals("allowedNamespace"),
+            null,
+            null,
+            null
         ))
     ).evaluate(nobody(), alertEvaluationApi);
   }
@@ -300,7 +306,10 @@ public class AlertResourceTest {
         mock(AlertInsightsProvider.class),
         new AuthorizationManager(alertTemplateRenderer,
             (String token, ResourceIdentifier id, AccessType accessType) ->
-                accessType == AccessType.READ && id.namespace.equals("allowedNamespace")
+                accessType == AccessType.READ && id.namespace.equals("allowedNamespace"),
+            null,
+            null,
+            null
         ))
     );
 
@@ -346,7 +355,10 @@ public class AlertResourceTest {
         mock(AlertInsightsProvider.class),
         new AuthorizationManager(alertTemplateRenderer,
             (String token, ResourceIdentifier id, AccessType accessType) ->
-                id.namespace.equals("readonlyNamespace") && accessType == AccessType.READ
+                id.namespace.equals("readonlyNamespace") && accessType == AccessType.READ,
+            null,
+            null,
+            null
         ))
     ).evaluate(nobody(), alertEvaluationApi);
   }
@@ -396,7 +408,10 @@ public class AlertResourceTest {
         mock(AlertInsightsProvider.class),
         new AuthorizationManager(alertTemplateRenderer,
             (String token, ResourceIdentifier id, AccessType accessType) ->
-                id.namespace.equals("allowedNamespace")
+                id.namespace.equals("allowedNamespace"),
+            null,
+            null,
+            null
         ))
     );
 

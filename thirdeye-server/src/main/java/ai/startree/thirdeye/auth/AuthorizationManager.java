@@ -17,16 +17,23 @@ import static ai.startree.thirdeye.spi.accessControl.ResourceIdentifier.DEFAULT_
 import static ai.startree.thirdeye.spi.accessControl.ResourceIdentifier.DEFAULT_NAME;
 import static ai.startree.thirdeye.spi.accessControl.ResourceIdentifier.DEFAULT_NAMESPACE;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.datalayer.dao.SubEntities;
 import ai.startree.thirdeye.spi.accessControl.AccessControl;
 import ai.startree.thirdeye.spi.accessControl.AccessType;
 import ai.startree.thirdeye.spi.accessControl.ResourceIdentifier;
+import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
+import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
+import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import com.google.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -49,14 +56,22 @@ public class AuthorizationManager {
 
   private final AlertTemplateRenderer alertTemplateRenderer;
   private final AccessControl accessControl;
+  private final AlertManager alertManager;
+  private final EnumerationItemManager enumerationItemManager;
+  private final AnomalyManager anomalyManager;
 
   @Inject
   public AuthorizationManager(
       final AlertTemplateRenderer alertTemplateRenderer,
-      final AccessControl accessControl
-  ) {
+      final AccessControl accessControl,
+      final AlertManager alertManager,
+      final EnumerationItemManager enumerationItemManager,
+      final AnomalyManager anomalyManager) {
     this.alertTemplateRenderer = alertTemplateRenderer;
     this.accessControl = accessControl;
+    this.alertManager = alertManager;
+    this.enumerationItemManager = enumerationItemManager;
+    this.anomalyManager = anomalyManager;
   }
 
   public <T extends AbstractDTO> void ensureCanCreate(final ThirdEyePrincipal principal,
@@ -129,13 +144,40 @@ public class AuthorizationManager {
         accessControl.hasAccess(principal.getAuthToken(), ROOT_RESOURCE_ID, AccessType.WRITE);
   }
 
-  static public <T extends AbstractDTO> ResourceIdentifier resourceId(final T dto) {
+  public <T extends AbstractDTO> ResourceIdentifier resourceId(final T dto) {
+    final AbstractDTO authParentDto = resolveAuthParentDto(dto);
+
     return ResourceIdentifier.from(
-        optional(dto.getId()).map(Objects::toString).orElse(DEFAULT_NAME),
-        optional(dto.getAuth())
+        optional(authParentDto.getId()).map(Objects::toString).orElse(DEFAULT_NAME),
+        optional(authParentDto.getAuth())
             .map(AuthorizationConfigurationDTO::getNamespace).orElse(DEFAULT_NAMESPACE),
-        optional(SubEntities.BEAN_TYPE_MAP.get(dto.getClass()))
+        optional(SubEntities.BEAN_TYPE_MAP.get(authParentDto.getClass()))
             .map(Objects::toString).orElse(DEFAULT_ENTITY_TYPE));
+  }
+
+  // Resolves the Authorization parent for certain dto classes.
+  // AnomalyDTO -> EnumerationItemDTO if exists, else AlertDTO
+  // RcaInvestigationDTO -> AnomalyDTO's parent (recursive call)
+  // Everything else -> itself
+  private <T extends AbstractDTO> AbstractDTO resolveAuthParentDto(final T dto) {
+    if (dto.getClass() == AnomalyDTO.class) {
+      final var anomalyDto = (AnomalyDTO) (dto);
+      if (anomalyDto.getEnumerationItem() != null) {
+        var enumItemId = anomalyDto.getEnumerationItem().getId();
+        return ensureExists(enumerationItemManager.findById(enumItemId));
+      }
+
+      var alertId = anomalyDto.getDetectionConfigId();
+      return ensureExists(alertManager.findById(alertId));
+    }
+
+    if (dto.getClass() == RcaInvestigationDTO.class) {
+      final var rcaDto = (RcaInvestigationDTO) (dto);
+      var anomalyId = rcaDto.getAnomaly().getId();
+      return resolveAuthParentDto(ensureExists(anomalyManager.findById(anomalyId)));
+    }
+
+    return dto;
   }
 
   private <T extends AbstractDTO> List<ResourceIdentifier> relatedEntities(T entity) {

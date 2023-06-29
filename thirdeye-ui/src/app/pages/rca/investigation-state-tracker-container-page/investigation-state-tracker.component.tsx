@@ -98,24 +98,16 @@ export const InvestigationStateTracker: FunctionComponent = () => {
         useState<Investigation | null>(null);
 
     const pageTitle = useMemo(() => {
-        let titleSoFar = t("label.investigation");
+        let titleSoFar = localInvestigation
+            ? localInvestigation.name
+            : t("label.investigation");
 
         if (!investigationId) {
             titleSoFar += ` (${t("label.not-saved")})`;
         }
 
         return titleSoFar;
-    }, [investigationId]);
-
-    const investigationBreadCrumbLabel = useMemo(() => {
-        let labelSoFar = t("label.investigate");
-
-        if (investigationId && investigationFromServer) {
-            labelSoFar += ` (${investigationFromServer.name})`;
-        }
-
-        return labelSoFar;
-    }, [investigationId, investigationFromServer]);
+    }, [investigationId, localInvestigation]);
 
     const breadcrumbs = useMemo(() => {
         const crumbs: Crumb[] = [];
@@ -150,11 +142,11 @@ export const InvestigationStateTracker: FunctionComponent = () => {
         });
 
         crumbs.push({
-            label: investigationBreadCrumbLabel,
+            label: t("label.investigate"),
         });
 
         return crumbs;
-    }, [anomaly, enumerationItem, investigationBreadCrumbLabel]);
+    }, [anomaly, enumerationItem]);
 
     useEffect(() => {
         getAnomaly(Number(anomalyId));

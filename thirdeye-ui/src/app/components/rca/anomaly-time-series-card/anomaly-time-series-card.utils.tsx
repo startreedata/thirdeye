@@ -214,7 +214,10 @@ export const generateChartOptions = (
         series = generateSeriesDataForDetectionEvaluation(
             detectionEvaluation,
             filteredAlertEvaluation,
-            translation
+            translation,
+            undefined,
+            undefined,
+            undefined
         );
         series.push(
             generateSeriesForAnomalies(

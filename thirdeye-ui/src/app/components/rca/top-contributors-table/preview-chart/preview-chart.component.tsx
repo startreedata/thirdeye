@@ -42,7 +42,11 @@ import { TimeRangeSelectorButtonWithSearchParamsContext } from "../../../time-ra
 import { TimeSeriesChart } from "../../../visualizations/time-series-chart/time-series-chart.component";
 import { TimeSeriesChartProps } from "../../../visualizations/time-series-chart/time-series-chart.interfaces";
 import { AnomalyFilterOption } from "../../anomaly-dimension-analysis/anomaly-dimension-analysis.interfaces";
-import { generateChartOptions } from "../../anomaly-time-series-card/anomaly-time-series-card.utils";
+import {
+    generateChartOptions,
+    generateSeriesForFilteredEvaluations,
+} from "../../anomaly-time-series-card/anomaly-time-series-card.utils";
+import { getColorForDimensionCombo } from "../../investigation-preview/investigation-preview.utils";
 import { PreviewChartProps } from "./preview-chart.interface";
 
 export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
@@ -151,10 +155,21 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
         if (!evaluationForAnomaly) {
             return;
         }
+
         const detectionsEvaluations =
             extractDetectionEvaluation(evaluationForAnomaly);
         const detectionEvalForAnomaly: DetectionEvaluation | undefined =
             detectionsEvaluations[0];
+
+        const seriesForFiltered = generateSeriesForFilteredEvaluations(
+            filteredAlertEvaluation
+        );
+
+        seriesForFiltered.forEach((series, idx) => {
+            series.color = getColorForDimensionCombo(
+                dimensionCombinations[idx]
+            );
+        });
 
         setTimeSeriesOptions(
             generateChartOptions(

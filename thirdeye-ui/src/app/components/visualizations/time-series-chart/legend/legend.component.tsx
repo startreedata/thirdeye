@@ -41,9 +41,11 @@ export const Legend: FunctionComponent<LegendProps> = ({
 
     return (
         <LegendOrdinal<ScaleOrdinal<string, string, never>> scale={colorScale}>
-            {() => (
-                <Grid container justifyContent="center">
-                    {sortSeries(series).map((seriesData) => {
+            {() => {
+                const legendItems: React.ReactNode[] = [];
+
+                sortSeries(series).forEach((seriesData) => {
+                    if (!seriesData.hideInLegend) {
                         let color = colorScale(seriesData.name as string);
 
                         /**
@@ -94,7 +96,7 @@ export const Legend: FunctionComponent<LegendProps> = ({
                             );
                         }
 
-                        return (
+                        legendItems.push(
                             <Grid
                                 item
                                 key={`legend-item-${seriesData.name}`}
@@ -116,9 +118,15 @@ export const Legend: FunctionComponent<LegendProps> = ({
                                 </LegendItem>
                             </Grid>
                         );
-                    })}
-                </Grid>
-            )}
+                    }
+                });
+
+                return (
+                    <Grid container justifyContent="center">
+                        {legendItems}
+                    </Grid>
+                );
+            }}
         </LegendOrdinal>
     );
 };

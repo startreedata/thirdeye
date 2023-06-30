@@ -18,6 +18,7 @@ import i18n from "i18next";
 import { parse, toSeconds } from "iso8601-duration";
 import { cloneDeep, every, isEmpty, isNil, isNumber } from "lodash";
 import { Dispatch, SetStateAction } from "react";
+import { TFunction } from "react-i18next";
 import { NotificationTypeV1 } from "../../platform/components";
 import {
     formatDateAndTimeV1,
@@ -422,7 +423,7 @@ export const handleAlertPropertyChangeGenerator = (
     setAlert: Dispatch<SetStateAction<EditableAlert>>,
     alertTemplateOptions: AlertTemplateType[],
     setSelectedAlertTemplate: Dispatch<SetStateAction<AlertTemplate | null>>,
-    translation: (label: string) => string
+    translation: TFunction
 ) => {
     return (
         contentsToReplace: Partial<EditableAlert>,
@@ -471,7 +472,7 @@ export const handleAlertPropertyChangeGenerator = (
 
 export const handleCreateAlertClickGenerator = (
     notify: (type: NotificationTypeV1, msg: string) => void,
-    translation: (label: string, options?: { [key: string]: string }) => string,
+    translation: TFunction,
     onSuccess: (alert: Alert) => void
 ) => {
     return (

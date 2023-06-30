@@ -52,6 +52,7 @@ export interface Series {
     strokeWidth?: number;
     legendIndex?: number;
     legendIcon?: (svgBound: number, color: string) => React.ReactElement;
+    hideInLegend?: boolean;
     xAccessor?: (d: DataPoint | ThresholdDataPoint) => Date;
     x1Accessor?: (d: LineDataPoint) => Date;
     yAccessor?: (d: DataPoint | ThresholdDataPoint) => number;

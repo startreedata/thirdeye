@@ -234,6 +234,7 @@ export const ChartSection: FunctionComponent<ChartSectionProps> = ({
                         dimensionCombinationForSeries
                     );
                     series.color = getColorForStr(strId, COLOR_PALETTE);
+                    series.hideInLegend = true;
 
                     return [
                         series,

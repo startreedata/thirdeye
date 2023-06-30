@@ -12,38 +12,25 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import {
-    OFFSET_REGEX_EXTRACT,
-    OFFSET_TO_HUMAN_READABLE,
-} from "../../pages/anomalies-view-page/anomalies-view-page.interfaces";
-import { OFFSET_TO_MILLISECONDS } from "../time/time.util";
+import { isNaN } from "lodash";
+import { Duration } from "luxon";
 
 export const comparisonOffsetReadableValue = (offsetString: string): string => {
-    const result = OFFSET_REGEX_EXTRACT.exec(offsetString);
+    try {
+        const result = Duration.fromISO(offsetString).toHuman();
 
-    if (result === null) {
+        return `${result} ago`;
+    } catch {
         return "could not parse offset";
     }
-
-    const [, valueStr, unit] = result;
-
-    if (Number(valueStr) === 1) {
-        return `${valueStr} ${OFFSET_TO_HUMAN_READABLE[
-            unit
-        ].toLowerCase()} ago`;
-    }
-
-    return `${valueStr} ${OFFSET_TO_HUMAN_READABLE[unit].toLowerCase()}s ago`;
 };
 
 export const baselineOffsetToMilliseconds = (offsetString: string): number => {
-    const result = OFFSET_REGEX_EXTRACT.exec(offsetString);
+    const result = Duration.fromISO(offsetString).toMillis();
 
-    if (result === null) {
+    if (isNaN(result)) {
         return 0;
     }
 
-    const [, valueStr, unit] = result;
-
-    return Number(valueStr) * OFFSET_TO_MILLISECONDS[unit];
+    return result;
 };

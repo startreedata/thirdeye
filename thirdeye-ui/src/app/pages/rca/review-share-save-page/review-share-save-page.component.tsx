@@ -133,6 +133,7 @@ export const ReviewShareSavePage: FunctionComponent = () => {
                                                     t("label.save-progress")}
                                             </>
                                         )}
+                                        {isSaving && <>{t("label.saving")}</>}
                                     </Button>
                                 </Box>
                             </CardContent>

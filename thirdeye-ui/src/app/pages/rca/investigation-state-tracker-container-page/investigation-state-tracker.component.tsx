@@ -98,7 +98,7 @@ export const InvestigationStateTracker: FunctionComponent = () => {
         useState<Investigation | null>(null);
 
     const pageTitle = useMemo(() => {
-        let titleSoFar = localInvestigation
+        let titleSoFar = localInvestigation?.name
             ? localInvestigation.name
             : t("label.investigation");
 

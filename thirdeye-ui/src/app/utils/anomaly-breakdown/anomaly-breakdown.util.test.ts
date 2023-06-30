@@ -34,9 +34,10 @@ describe("Anomaly Breakdown Util", () => {
     });
 
     it("baselineOffsetToMilliseconds should return milliseconds", () => {
+        expect(baselineOffsetToMilliseconds("PT1H")).toEqual(3600000);
         expect(baselineOffsetToMilliseconds("P1D")).toEqual(86400000);
         expect(baselineOffsetToMilliseconds("P2D")).toEqual(172800000);
-        expect(baselineOffsetToMilliseconds("P4Y")).toEqual(126230400000);
+        expect(baselineOffsetToMilliseconds("P4Y")).toEqual(126144000000);
     });
 
     it("baselineOffsetToMilliseconds should return 0 if unreadable", () => {

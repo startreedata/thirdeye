@@ -23,7 +23,10 @@ import { TimeRangeQueryStringKey } from "../../../components/time-range/time-ran
 import { AppLoadingIndicatorV1 } from "../../../platform/components";
 import { baselineOffsetToMilliseconds } from "../../../utils/anomaly-breakdown/anomaly-breakdown.util";
 import { getRootCauseAnalysisForAnomalyInvestigateV2Path } from "../../../utils/routes/routes.util";
-import { WEEK_IN_MILLISECONDS } from "../../../utils/time/time.util";
+import {
+    DAY_IN_MILLISECONDS,
+    WEEK_IN_MILLISECONDS,
+} from "../../../utils/time/time.util";
 import { InvestigationContext } from "../investigation-state-tracker-container-page/investigation-state-tracker.interfaces";
 
 export const IndexPage: FunctionComponent = () => {
@@ -39,9 +42,12 @@ export const IndexPage: FunctionComponent = () => {
             if (alertInsight?.templateWithProperties?.metadata?.granularity) {
                 const granularity =
                     alertInsight?.templateWithProperties?.metadata?.granularity;
-                const padding = granularity
-                    ? baselineOffsetToMilliseconds(granularity) * 14
-                    : 0;
+                const durationInMs = Math.max(
+                    baselineOffsetToMilliseconds(granularity),
+                    DAY_IN_MILLISECONDS / 2
+                );
+
+                const padding = granularity ? durationInMs * 14 : 0;
 
                 startTime = Number(anomaly.startTime) - padding;
                 endTime = Number(anomaly.endTime) + padding;

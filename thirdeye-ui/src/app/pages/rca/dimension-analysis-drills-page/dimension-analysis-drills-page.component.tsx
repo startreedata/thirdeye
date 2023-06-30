@@ -19,7 +19,6 @@ import { useTranslation } from "react-i18next";
 import { useOutletContext, useParams, useSearchParams } from "react-router-dom";
 import { EmptyStateSwitch } from "../../../components/page-states/empty-state-switch/empty-state-switch.component";
 import { LoadingErrorStateSwitch } from "../../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
-import { BaselineOffsetSelection } from "../../../components/rca/analysis-tabs/baseline-offset-selection/baseline-offset-selection.component";
 import { AnomalyFilterOption } from "../../../components/rca/anomaly-dimension-analysis/anomaly-dimension-analysis.interfaces";
 import { DimensionSearchAutocomplete } from "../../../components/rca/heat-map/dimension-search-automcomplete/dimension-search-autocomplete.component";
 import { formatDimensionOptions } from "../../../components/rca/heat-map/heat-map.utils";
@@ -64,9 +63,6 @@ export const DimensionAnalysisDrillsPage: FunctionComponent = () => {
                 : [];
         }
     );
-    const [comparisonOffset, setComparisonOffset] = useState(() => {
-        return searchParams.get("baselineWeekOffset") ?? "P1W";
-    });
 
     const { investigation, anomaly, alertInsight, onInvestigationChange } =
         useOutletContext<InvestigationContext>();
@@ -100,14 +96,14 @@ export const DimensionAnalysisDrillsPage: FunctionComponent = () => {
 
     useEffect(() => {
         getMetricBreakdown(Number(anomalyId), {
-            baselineOffset: comparisonOffset,
+            baselineOffset: "P1W",
             filters: [
                 ...anomalyFilters.map((item) =>
                     concatKeyValueWithEqual(item, false)
                 ),
             ],
         });
-    }, [anomalyId, comparisonOffset, anomalyFilters]);
+    }, [anomalyId, anomalyFilters]);
 
     useEffect(() => {
         notifyIfErrors(
@@ -119,12 +115,6 @@ export const DimensionAnalysisDrillsPage: FunctionComponent = () => {
             })
         );
     }, [heatMapDataRequestStatus]);
-
-    const handleBaselineChange = (newValue: string): void => {
-        setComparisonOffset(newValue);
-        searchParams.set("baselineWeekOffset", newValue);
-        setSearchParams(searchParams);
-    };
 
     const handleAddDimensionsToInvestigationClick = (): void => {
         const currentDimensions = getFromSavedInvestigationOrDefault<
@@ -186,17 +176,6 @@ export const DimensionAnalysisDrillsPage: FunctionComponent = () => {
                                     {t(
                                         "message.select-the-dimensions-below-to-drill-down-into-the"
                                     )}
-                                </Grid>
-                                <Grid item xs>
-                                    <BaselineOffsetSelection
-                                        baselineOffset={comparisonOffset}
-                                        label={t(
-                                            "label.dimensions-changed-from-the-last"
-                                        )}
-                                        onBaselineOffsetChange={
-                                            handleBaselineChange
-                                        }
-                                    />
                                 </Grid>
                             </Grid>
                         </Grid>

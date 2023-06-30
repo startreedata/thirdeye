@@ -232,7 +232,6 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                             height={300}
                             {...timeSeriesOptions}
                             brush={false}
-                            zoom={false}
                         />
                     )}
                 </LoadingErrorStateSwitch>

@@ -159,9 +159,9 @@ public class AuthorizationManager {
   // RcaInvestigationDTO -> AnomalyDTO's parent (recursive call)
   // Everything else -> itself
   private <T extends AbstractDTO> AbstractDTO resolveAuthParentDto(final T dto) {
-    if (dto.getClass() == AnomalyDTO.class) {
+    if (dto instanceof AnomalyDTO) {
       return resolveAuthParentDto((AnomalyDTO) (dto));
-    } else if (dto.getClass() == RcaInvestigationDTO.class) {
+    } else if (dto instanceof RcaInvestigationDTO) {
       return resolveAuthParentDto((RcaInvestigationDTO) (dto));
     } else {
       return dto;

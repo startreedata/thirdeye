@@ -70,12 +70,11 @@ export const generateName = (
     }
 
     const color = getColorForDimensionCombo(
-        rowData.names.map((dimensionValue: string, idx: number) => {
-            return {
-                key: dimensionColumns[idx],
-                value: dimensionValue,
-            };
-        })
+        generateFilterOptions(
+            rowData.names,
+            dimensionColumns,
+            rowData.otherDimensionValues
+        )
     );
 
     rowData.names.forEach((dimensionValue: string, idx: number) => {

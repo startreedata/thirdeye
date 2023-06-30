@@ -171,16 +171,18 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
             );
         });
 
-        setTimeSeriesOptions(
-            generateChartOptions(
-                detectionEvalForAnomaly,
-                anomaly,
-                filteredAlertEvaluation,
-                t,
-                timezone,
-                hideTime
-            )
+        const tsOptions = generateChartOptions(
+            detectionEvalForAnomaly,
+            anomaly,
+            [],
+            t,
+            timezone,
+            hideTime
         );
+
+        tsOptions.series = [...tsOptions.series, ...seriesForFiltered];
+
+        setTimeSeriesOptions(tsOptions);
     }, [evaluationForAnomaly, filteredAlertEvaluation]);
 
     useEffect(() => {

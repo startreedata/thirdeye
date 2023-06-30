@@ -165,125 +165,121 @@ export const DimensionAnalysisDrillsPage: FunctionComponent = () => {
 
     return (
         <>
-            <Grid container>
-                <Grid item xs={12}>
-                    <Typography variant="h4">
-                        Dimension analysis & drills
-                    </Typography>
-                    <Typography variant="body1">
-                        Manual filter for dimensions analysis.
-                    </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                    <PageContentsCardV1>
-                        <Grid container>
-                            <Grid item xs={12}>
-                                <Grid
-                                    container
-                                    alignItems="center"
-                                    justifyContent="space-between"
-                                >
-                                    <Grid item xs>
-                                        {t(
-                                            "message.select-the-dimensions-below-to-drill-down-into-the"
+            <Grid item xs={12}>
+                <Typography variant="h4">
+                    {t("label.dimension-analysis-drills")}
+                </Typography>
+                <Typography variant="body1">
+                    {t("message.manual-filter-for-dimensions-analysis")}
+                </Typography>
+            </Grid>
+            <Grid item xs={12}>
+                <PageContentsCardV1>
+                    <Grid container>
+                        <Grid item xs={12}>
+                            <Grid
+                                container
+                                alignItems="center"
+                                justifyContent="space-between"
+                            >
+                                <Grid item xs>
+                                    {t(
+                                        "message.select-the-dimensions-below-to-drill-down-into-the"
+                                    )}
+                                </Grid>
+                                <Grid item xs>
+                                    <BaselineOffsetSelection
+                                        baselineOffset={comparisonOffset}
+                                        label={t(
+                                            "label.dimensions-changed-from-the-last"
                                         )}
-                                    </Grid>
-                                    <Grid item xs>
-                                        <BaselineOffsetSelection
-                                            baselineOffset={comparisonOffset}
-                                            label={t(
-                                                "label.dimensions-changed-from-the-last"
-                                            )}
-                                            onBaselineOffsetChange={
-                                                handleBaselineChange
-                                            }
-                                        />
-                                    </Grid>
+                                        onBaselineOffsetChange={
+                                            handleBaselineChange
+                                        }
+                                    />
                                 </Grid>
                             </Grid>
+                        </Grid>
 
-                            <Grid item xs={12}>
-                                <DimensionSearchAutocomplete
-                                    anomalyFilters={anomalyFilters}
-                                    heatMapData={
-                                        heatMapData as AnomalyBreakdown
-                                    }
-                                    onFilterChange={handleFilterChange}
-                                />
-                                <LoadingErrorStateSwitch
-                                    isError={
-                                        heatMapDataRequestStatus ===
-                                        ActionStatus.Error
-                                    }
-                                    isLoading={
-                                        heatMapDataRequestStatus ===
-                                            ActionStatus.Initial ||
-                                        heatMapDataRequestStatus ===
-                                            ActionStatus.Working
-                                    }
-                                    loadingState={
-                                        <Box pb={2} pt={2}>
-                                            <SkeletonV1
-                                                animation="pulse"
-                                                height={300}
-                                                variant="rect"
-                                            />
+                        <Grid item xs={12}>
+                            <DimensionSearchAutocomplete
+                                anomalyFilters={anomalyFilters}
+                                heatMapData={heatMapData as AnomalyBreakdown}
+                                onFilterChange={handleFilterChange}
+                            />
+                            <LoadingErrorStateSwitch
+                                isError={
+                                    heatMapDataRequestStatus ===
+                                    ActionStatus.Error
+                                }
+                                isLoading={
+                                    heatMapDataRequestStatus ===
+                                        ActionStatus.Initial ||
+                                    heatMapDataRequestStatus ===
+                                        ActionStatus.Working
+                                }
+                                loadingState={
+                                    <Box pb={2} pt={2}>
+                                        <SkeletonV1
+                                            animation="pulse"
+                                            height={300}
+                                            variant="rect"
+                                        />
+                                    </Box>
+                                }
+                            >
+                                <EmptyStateSwitch
+                                    emptyState={
+                                        <Box pb={20} pt={20}>
+                                            <Typography
+                                                align="center"
+                                                variant="body1"
+                                            >
+                                                {t(
+                                                    "message.no-data-available-try-a-different-set-of-filters"
+                                                )}
+                                            </Typography>
                                         </Box>
+                                    }
+                                    isEmpty={
+                                        !heatMapData ||
+                                        isEmpty(
+                                            formatDimensionOptions(
+                                                heatMapData as AnomalyBreakdown
+                                            )
+                                        )
                                     }
                                 >
-                                    <EmptyStateSwitch
-                                        emptyState={
-                                            <Box pb={20} pt={20}>
-                                                <Typography
-                                                    align="center"
-                                                    variant="body1"
-                                                >
-                                                    {t(
-                                                        "message.no-data-available-try-a-different-set-of-filters"
-                                                    )}
-                                                </Typography>
-                                            </Box>
-                                        }
-                                        isEmpty={
-                                            !heatMapData ||
-                                            isEmpty(
-                                                formatDimensionOptions(
-                                                    heatMapData as AnomalyBreakdown
-                                                )
-                                            )
-                                        }
-                                    >
-                                        <Box pt={2}>
-                                            <PreviewChart
-                                                alertInsight={alertInsight}
-                                                anomaly={anomaly}
-                                                dimensionCombinations={
-                                                    isEmpty(anomalyFilters)
-                                                        ? []
-                                                        : [anomalyFilters]
+                                    <Box pt={2}>
+                                        <PreviewChart
+                                            alertInsight={alertInsight}
+                                            anomaly={anomaly}
+                                            dimensionCombinations={
+                                                isEmpty(anomalyFilters)
+                                                    ? []
+                                                    : [anomalyFilters]
+                                            }
+                                        >
+                                            <Button
+                                                color="primary"
+                                                disabled={isEmpty([
+                                                    anomalyFilters,
+                                                ])}
+                                                onClick={
+                                                    handleAddDimensionsToInvestigationClick
                                                 }
                                             >
-                                                <Button
-                                                    color="primary"
-                                                    disabled={isEmpty([
-                                                        anomalyFilters,
-                                                    ])}
-                                                    onClick={
-                                                        handleAddDimensionsToInvestigationClick
-                                                    }
-                                                >
-                                                    {t(
-                                                        "label.add-dimensions-to-investigation"
-                                                    )}
-                                                </Button>
-                                            </PreviewChart>
-                                        </Box>
-                                    </EmptyStateSwitch>
-                                </LoadingErrorStateSwitch>
-                            </Grid>
+                                                {t(
+                                                    "label.add-dimensions-to-investigation"
+                                                )}
+                                            </Button>
+                                        </PreviewChart>
+                                    </Box>
+                                </EmptyStateSwitch>
+                            </LoadingErrorStateSwitch>
                         </Grid>
-                    </PageContentsCardV1>
-                </Grid>
+                    </Grid>
+                </PageContentsCardV1>
             </Grid>
         </>
     );

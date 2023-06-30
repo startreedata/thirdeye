@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { TabsProps } from "@material-ui/core";
 import { BorderV1 } from "./border.util";
 import { DimensionV1 } from "./dimension.util";
 import { typographyOptionsV1 } from "./typography.util";
@@ -42,13 +41,4 @@ export const tabClassesV1 = {
     textColorInherit: {
         opacity: 1,
     },
-};
-
-// Material UI theme property overrides for Tabs
-export const tabsPropsV1: Partial<TabsProps> = {
-    scrollButtons: "off",
-    TabIndicatorProps: {
-        hidden: true, // Default selected tab indicator is not responsive
-    },
-    variant: "scrollable",
 };

@@ -38,7 +38,7 @@ import { radioPropsV1 } from "./radio.util";
 import { shapeOptionsV1 } from "./shape.util";
 import { switchPropsV1 } from "./switch.util";
 import { tablePaginationClassesV1 } from "./table-pagination.util";
-import { tabClassesV1, tabsClassesV1, tabsPropsV1 } from "./tabs.util";
+import { tabClassesV1, tabsClassesV1 } from "./tabs.util";
 import { textFieldPropsV1 } from "./text-field.util";
 import { typographyOptionsV1 } from "./typography.util";
 
@@ -57,7 +57,6 @@ export const lightV1: Theme = createTheme({
         MuiPopover: popoverPropsV1,
         MuiRadio: radioPropsV1,
         MuiSwitch: switchPropsV1,
-        MuiTabs: tabsPropsV1,
         MuiTextField: textFieldPropsV1,
     },
     overrides: {

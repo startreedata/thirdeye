@@ -52,7 +52,11 @@ export const WhatWhereNavigation: FunctionComponent = () => {
 
     return (
         <Box pt={2}>
-            <Tabs value={currentPage?.navLink}>
+            <Tabs
+                indicatorColor="primary"
+                style={{ borderBottom: "1px solid rgba(128, 128, 128, 0.25)" }}
+                value={currentPage?.navLink}
+            >
                 {stepItems.map((tableConfig) => {
                     return (
                         <Tab

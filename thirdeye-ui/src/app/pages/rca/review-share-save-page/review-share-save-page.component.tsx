@@ -25,7 +25,10 @@ import { useTranslation } from "react-i18next";
 import { useOutletContext } from "react-router-dom";
 import { InvestigationDetailsForm } from "../../../components/rca/investigation-details-form/investigation-details-form.component";
 import { InvestigationPreview } from "../../../components/rca/investigation-preview/investigation-preview.component";
-import { useNotificationProviderV1 } from "../../../platform/components";
+import {
+    NotificationTypeV1,
+    useNotificationProviderV1,
+} from "../../../platform/components";
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import {
     createInvestigation,
@@ -61,10 +64,10 @@ export const ReviewShareSavePage: FunctionComponent = () => {
     }, [investigation]);
     const errorGenericMsgIdentifier = useMemo(() => {
         if (investigation.id) {
-            return "message.create-error";
+            return "message.update-error";
         }
 
-        return "message.update-error";
+        return "message.create-error";
     }, [investigation]);
 
     const handleSaveClick = (): void => {
@@ -75,11 +78,23 @@ export const ReviewShareSavePage: FunctionComponent = () => {
         serverRequestRestFunction(investigation)
             .then((investigationFromServer) => {
                 handleServerUpdatedInvestigation(investigationFromServer);
+
+                if (investigation.id) {
+                    notify(
+                        NotificationTypeV1.Success,
+                        "Successfully updated investigation"
+                    );
+                } else {
+                    notify(
+                        NotificationTypeV1.Success,
+                        "Successfully created investigation, copy and paste URL to share the investigation"
+                    );
+                }
             })
             .catch((response) => {
                 notifyIfErrors(
                     ActionStatus.Error,
-                    response?.response?.data?.list,
+                    response?.data?.list,
                     notify,
                     t(errorGenericMsgIdentifier, {
                         entity: t("label.investigation"),

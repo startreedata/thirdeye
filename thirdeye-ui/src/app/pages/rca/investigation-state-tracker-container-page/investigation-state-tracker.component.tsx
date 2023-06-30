@@ -59,7 +59,7 @@ import {
 import { QUERY_PARAM_KEY_FOR_EXPANDED } from "../../../utils/params/params.util";
 import {
     getAlertsAlertPath,
-    getAnomaliesAnomalyViewPath,
+    getAnomaliesAnomalyViewPathV2,
 } from "../../../utils/routes/routes.util";
 import { RootCauseAnalysisForAnomalyPageParams } from "../../root-cause-analysis-for-anomaly-page/root-cause-analysis-for-anomaly-page.interfaces";
 
@@ -138,7 +138,7 @@ export const InvestigationStateTracker: FunctionComponent = () => {
 
         crumbs.push({
             label: anomalyId,
-            link: getAnomaliesAnomalyViewPath(Number(anomalyId)),
+            link: getAnomaliesAnomalyViewPathV2(Number(anomalyId)),
         });
 
         crumbs.push({
@@ -351,6 +351,7 @@ export const InvestigationStateTracker: FunctionComponent = () => {
                         context={{
                             investigation: localInvestigation,
                             onInvestigationChange: handleInvestigationChange,
+                            handleServerUpdatedInvestigation,
                             getEnumerationItemRequest,
                             enumerationItem,
                             anomaly,

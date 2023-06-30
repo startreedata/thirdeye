@@ -219,9 +219,15 @@ export const ChartSection: FunctionComponent<ChartSectionProps> = ({
                 t
             )
         );
-        setMultiChartData(
-            generateSeriesForFilteredEvaluations(filteredAlertEvaluations).map(
-                (series, idx) => {
+
+        const multiChartData = generateSeriesForFilteredEvaluations(
+            filteredAlertEvaluations
+        )
+            .map(
+                (
+                    series,
+                    idx
+                ): [Series, AnomalyFilterOption[], AlertEvaluation] => {
                     const dimensionCombinationForSeries =
                         filteredAlertEvaluations[idx][1];
                     const strId = serializeKeyValuePair(
@@ -236,7 +242,13 @@ export const ChartSection: FunctionComponent<ChartSectionProps> = ({
                     ];
                 }
             )
-        );
+            .filter(([, anomalyFilterOption]) => {
+                return selectedDimensionCombinations.has(
+                    serializeKeyValuePair(anomalyFilterOption)
+                );
+            });
+
+        setMultiChartData(multiChartData);
 
         const chartOptions: TimeSeriesChartProps = {
             series: [],

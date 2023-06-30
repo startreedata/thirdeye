@@ -266,6 +266,7 @@ export const generateAnomalyPointsForStartEnd = (
 
     if (anomalyRange > 1) {
         let idx;
+
         for (idx = 0; idx < anomalyRange; idx++) {
             const currentTimestamp = startTime + granularity * idx;
             const currentTimestampIdx = timestamps.findIndex(
@@ -280,9 +281,23 @@ export const generateAnomalyPointsForStartEnd = (
             }
         }
     } else {
+        /**
+         * Check to see if the value for the trend is less than the default value
+         * this is specifically used for the RCA 2.0 multi chart to ensure
+         * y scale is within the data points of the filtered data
+         */
+        const currentTimestampIdx = timestamps.findIndex(
+            (ts) => ts === startTime
+        );
+
         anomalySeriesData.push({
             x: startTime,
-            y: defaultValue,
+            y: currentTimestampIdx
+                ? Math.min(
+                      defaultValue,
+                      valuesToTrackAgainst[currentTimestampIdx]
+                  )
+                : defaultValue,
         });
     }
 

@@ -112,7 +112,7 @@ public class SimpleContributorsFinder implements ContributorsFinder {
 
   private ContributorsFinderResult cannotComputeResult(final String message) {
     return () -> new DimensionAnalysisResultApi()
-        .setAnalysisRunInfo(new AnalysisRunInfo().setSuccess(false).setMessage(message));
+        .setAnalysisRunInfo(AnalysisRunInfo.failure(message));
   }
 
   /**

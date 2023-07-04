@@ -1,3 +1,32 @@
+## [2.28.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.27.0...thirdeye-ui-2.28.0) (2023-07-04)
+
+
+### Features
+
+* [TE-1424](https://cortexdata.atlassian.net/browse/TE-1424) investigation preview section for rca 2 ([1b6323528](https://github.com/startreedata/thirdeye/commit/1b63235284fae59448ae878b5481852d44504a96))
+* [TE-1425](https://cortexdata.atlassian.net/browse/TE-1425) rca review and share section ([6d8b1b958](https://github.com/startreedata/thirdeye/commit/6d8b1b958587c0bfdbb771cae7d8154008682369))
+* [TE-1426](https://cortexdata.atlassian.net/browse/TE-1426) add zoom to preview chart ([2d0e84242](https://github.com/startreedata/thirdeye/commit/2d0e84242098eeefd06efcc5221516b63745508c))
+* [TE-1426](https://cortexdata.atlassian.net/browse/TE-1426) check box in the dimension summary control what is shown in the preview chart ([3bcd82951](https://github.com/startreedata/thirdeye/commit/3bcd82951c7b310ba16c6f38e2003d11680d3ecc))
+* [TE-1426](https://cortexdata.atlassian.net/browse/TE-1426) ensure start and end timestamps exist throughout rca 2 ([eb1a05810](https://github.com/startreedata/thirdeye/commit/eb1a05810c38eac35f96f0253c4e544090d447ad))
+* [TE-1426](https://cortexdata.atlassian.net/browse/TE-1426) make active tabs blue ([400ab57ee](https://github.com/startreedata/thirdeye/commit/400ab57ee227b3473c6ff212e1cbeeeb033c4e8a))
+* [TE-1426](https://cortexdata.atlassian.net/browse/TE-1426) use investigation name as page title for rca ([c889326ff](https://github.com/startreedata/thirdeye/commit/c889326ffa65e3b329738994b3fa1f1bb7cb260d))
+* [TE-1426](https://cortexdata.atlassian.net/browse/TE-1426) use query param for default chart type ([02bf84cf0](https://github.com/startreedata/thirdeye/commit/02bf84cf0a251377b1e8ba549b002b026c772f02))
+* [TE-1426](https://cortexdata.atlassian.net/browse/TE-1426) use search params as start and end time for charts in rca 2 ([4f88e2954](https://github.com/startreedata/thirdeye/commit/4f88e295424223ca1dc11748108d171552d17ff3))
+* [TE-1589](https://cortexdata.atlassian.net/browse/TE-1589) use single cause for anomaly cause feedback ([56e3eaebc](https://github.com/startreedata/thirdeye/commit/56e3eaebc3305cd5f62a50a3b1002ed6d1b85cf1))
+* [TE-1684](https://cortexdata.atlassian.net/browse/TE-1684) restrict cohort detector to COUNT and SUM metric and remove sync with alert config ([9c5677162](https://github.com/startreedata/thirdeye/commit/9c5677162c516d1e35ae9eecb8aeffbf54ad030d))
+
+
+### Bug Fixes
+
+* [TE-1426](https://cortexdata.atlassian.net/browse/TE-1426) ([7274cbb3f](https://github.com/startreedata/thirdeye/commit/7274cbb3f7167989fe75002f84ba9b7e9a821e8a))
+* [TE-1426](https://cortexdata.atlassian.net/browse/TE-1426) delete from preview section remove dimension combination from root investigation ([e55054db9](https://github.com/startreedata/thirdeye/commit/e55054db99faf33ac15a106836a069627f0d1d4e))
+* [TE-1426](https://cortexdata.atlassian.net/browse/TE-1426) ensure y scale matches filtered data y points ([e5a448d7e](https://github.com/startreedata/thirdeye/commit/e5a448d7e20cb7e728ec1ce045bf815ae312d927))
+* [TE-1426](https://cortexdata.atlassian.net/browse/TE-1426) match preview chart color and hide dimension combination from investigation chart ([04b4708dc](https://github.com/startreedata/thirdeye/commit/04b4708dcabc6efa27893a6d3d7f52140ebaf5b5))
+* [TE-1426](https://cortexdata.atlassian.net/browse/TE-1426) match top contributors color with dimension summary ([75414df6d](https://github.com/startreedata/thirdeye/commit/75414df6d0648a80110b086115d3be7a02c6a6c7))
+* [TE-1426](https://cortexdata.atlassian.net/browse/TE-1426) more color matching work ([155745680](https://github.com/startreedata/thirdeye/commit/155745680a30d323860bf9d00d247e62ea90e944))
+* clear button in all anomalies page clears alert default filters ([b055a0044](https://github.com/startreedata/thirdeye/commit/b055a0044322d2615d1a14dc6229b4a1510dfd66))
+* clear button in all anomalies page clears alert default filters ([01c15c317](https://github.com/startreedata/thirdeye/commit/01c15c317f0e6dce5cf92cf8f5667f86ea404924))
+
 ## [2.27.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.26.0...thirdeye-ui-2.27.0) (2023-06-26)
 
 

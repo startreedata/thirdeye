@@ -47,7 +47,7 @@ public class DimensionAnalysisResultApi {
   private List<SummaryGainerLoserResponseRow> gainer = new ArrayList<>();
   private List<SummaryGainerLoserResponseRow> loser = new ArrayList<>();
   private List<DimensionCost> dimensionCosts = new ArrayList<>();
-  private AnalysisRunInfo analysisRunInfo = new AnalysisRunInfo();
+  private AnalysisRunInfo analysisRunInfo = AnalysisRunInfo.success();
 
   public MetricApi getMetric() {
     return metric;

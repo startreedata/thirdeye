@@ -22,6 +22,14 @@ public class AnalysisRunInfo {
   private boolean success = true;
   private String message = "";
 
+  public static AnalysisRunInfo success() {
+    return new AnalysisRunInfo().setSuccess(true).setMessage("");
+  }
+
+  public static AnalysisRunInfo failure(final String message) {
+    return new AnalysisRunInfo().setSuccess(false).setMessage(message);
+  }
+
   public boolean isSuccess() {
     return success;
   }

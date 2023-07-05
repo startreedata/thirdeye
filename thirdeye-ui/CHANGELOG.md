@@ -1,3 +1,10 @@
+### [2.28.1](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.28.0...thirdeye-ui-2.28.1) (2023-07-05)
+
+
+### Bug Fixes
+
+* [TE-1690](https://cortexdata.atlassian.net/browse/TE-1690) use start and end if it is set for reload in preview chart ([374d41e05](https://github.com/startreedata/thirdeye/commit/374d41e0517b07ded204f1bf6e651ba9b7f1912a))
+
 ## [2.28.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.27.0...thirdeye-ui-2.28.0) (2023-07-04)
 
 

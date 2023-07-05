@@ -179,31 +179,44 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
     }, [alert]);
 
     const handleAutoRangeClick = (): void => {
-        getAlertInsight({ alert }).then(
-            (insights) => {
-                if (insights) {
-                    searchParams.set(
-                        TimeRangeQueryStringKey.START_TIME,
-                        insights.defaultStartTime.toString()
-                    );
-                    searchParams.set(
-                        TimeRangeQueryStringKey.END_TIME,
-                        insights.defaultEndTime.toString()
-                    );
-                    setSearchParams(searchParams, { replace: true });
-                    fetchAlertEvaluation(
-                        insights.defaultStartTime,
-                        insights.defaultEndTime
-                    );
-                } else {
+        if (
+            getAlertInsightStatus === ActionStatus.Initial ||
+            getAlertInsightStatus === ActionStatus.Error
+        ) {
+            getAlertInsight({ alert }).then(
+                (insights) => {
+                    if (insights) {
+                        searchParams.set(
+                            TimeRangeQueryStringKey.START_TIME,
+                            insights.defaultStartTime.toString()
+                        );
+                        searchParams.set(
+                            TimeRangeQueryStringKey.END_TIME,
+                            insights.defaultEndTime.toString()
+                        );
+                        setSearchParams(searchParams, { replace: true });
+                        fetchAlertEvaluation(
+                            insights.defaultStartTime,
+                            insights.defaultEndTime
+                        );
+                    } else {
+                        fetchAlertEvaluation(startTime, endTime);
+                    }
+                },
+                () => {
+                    // If API fails use current start and end
                     fetchAlertEvaluation(startTime, endTime);
                 }
-            },
-            () => {
-                // If API fails use current start and end
-                fetchAlertEvaluation(startTime, endTime);
-            }
-        );
+            );
+        } else if ((!startTime || !endTime) && alertInsight) {
+            // If start or end is missing and there exists an alert insight
+            fetchAlertEvaluation(
+                alertInsight.defaultStartTime,
+                alertInsight.defaultEndTime
+            );
+        } else {
+            fetchAlertEvaluation(startTime, endTime);
+        }
     };
 
     return (

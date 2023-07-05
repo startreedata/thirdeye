@@ -197,8 +197,8 @@ export const SetupMetricPage: FunctionComponent = () => {
                     setSearchParams(searchParams);
                 }
             );
-            // If start or end is missing and there exists an alert insight
         } else if ((!startTime || !endTime) && alertInsight) {
+            // If start or end is missing and there exists an alert insight
             fetchAlertEvaluation(
                 alertInsight.defaultStartTime,
                 alertInsight.defaultEndTime

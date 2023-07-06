@@ -21,5 +21,11 @@
     "dataType": "LONG",
     "format" : "1:MILLISECONDS:EPOCH",
     "granularity": "1:SECONDS"
-  }]
+  },
+    {
+      "name": "hourBucket",
+      "dataType": "LONG",
+      "format" : "1:HOURS:EPOCH",
+      "granularity": "1:SECONDS"
+    }]
 }

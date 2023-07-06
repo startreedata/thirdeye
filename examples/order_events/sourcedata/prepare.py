@@ -46,6 +46,7 @@ TIME_COLUMN_TO_EVENT = {"order_purchase_timestamp": "PLACED",
                         }
 EVENT_TYPE_COLUMN = "event_type"
 EVENT_TIME_COLUMN = "timestamp"
+EVENT_TIME_HOUR_BUCKET = "hourBucket"
 
 def generate_events(df, time_column, event_name):
     events = df[df[time_column].notna()][BASE_COLUMNS+[time_column]]
@@ -66,7 +67,10 @@ event_df[EVENT_TIME_COLUMN] = pd.to_datetime(event_df[EVENT_TIME_COLUMN])
 # add 3 years for convenience in TE UI
 event_df[EVENT_TIME_COLUMN] = event_df[EVENT_TIME_COLUMN] + pd.offsets.DateOffset(years=3)
 # make epoch millis
-event_df[EVENT_TIME_COLUMN] = (event_df[EVENT_TIME_COLUMN] - pd.Timestamp("1970-01-01")) // pd.Timedelta("1ms")
+epoch_millis = (event_df[EVENT_TIME_COLUMN] - pd.Timestamp("1970-01-01")) // pd.Timedelta("1ms")
+epoch_hours = (event_df[EVENT_TIME_COLUMN] - pd.Timestamp("1970-01-01")) // pd.Timedelta("1h")
+event_df[EVENT_TIME_COLUMN] = epoch_millis
+event_df[EVENT_TIME_HOUR_BUCKET] = epoch_hours
 event_df.sort_values(EVENT_TIME_COLUMN, inplace=True)
 event_df.to_csv("./data.csv", index=False)
 print("Move data.csv to the rawdata folder when it's ready.")

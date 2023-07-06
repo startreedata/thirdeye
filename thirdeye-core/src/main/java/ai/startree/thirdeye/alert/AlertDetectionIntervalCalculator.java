@@ -96,7 +96,7 @@ public class AlertDetectionIntervalCalculator {
     DateTime correctedEnd = taskEnd;
     // apply delay correction
     final Period delay = getDelay(metadata);
-    final DateTime dataWatermark = new DateTime(chronology).minus(delay);
+    final DateTime dataWatermark = DateTime.now(chronology).minus(delay);
     if (correctedEnd.isAfter(dataWatermark)) {
       correctedEnd = dataWatermark;
       LOG.info(

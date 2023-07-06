@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.scheduler.monitor;
 
 import static ai.startree.thirdeye.datalayer.util.PersistenceUtils.shutdownExecutionService;
+import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 
 import ai.startree.thirdeye.spi.datalayer.bao.JobManager;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
@@ -22,6 +23,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,8 +59,8 @@ public class MonitorJobScheduler {
     final MonitorJobRunnable monitorJobRunnable = new MonitorJobRunnable(monitorJobContext);
     scheduledExecutorService.scheduleWithFixedDelay(monitorJobRunnable,
         0,
-        monitorConfiguration.getMonitorFrequency().getSize(),
-        monitorConfiguration.getMonitorFrequency().getUnit());
+        isoPeriod(monitorConfiguration.getMonitorFrequency()).toStandardDuration().getMillis(),
+        TimeUnit.MILLISECONDS);
   }
 
   public void shutdown() {

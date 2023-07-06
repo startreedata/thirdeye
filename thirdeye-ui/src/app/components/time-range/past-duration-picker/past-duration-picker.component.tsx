@@ -62,6 +62,10 @@ export const PastDurationPicker: FunctionComponent<PastDurationPickerProps> = ({
         });
     }, []);
 
+    const shouldDisableRefreshBtn = useMemo(() => {
+        return `P${offsetValue}${offsetUnit}` === selected;
+    }, [offsetValue, offsetUnit, selected]);
+
     const handleSetClick = (): void => {
         if (!offsetUnit || offsetValue === 0) {
             return;
@@ -108,6 +112,7 @@ export const PastDurationPicker: FunctionComponent<PastDurationPickerProps> = ({
             <Grid item>
                 <Button
                     color="primary"
+                    disabled={shouldDisableRefreshBtn}
                     size="medium"
                     variant="outlined"
                     onClick={handleSetClick}

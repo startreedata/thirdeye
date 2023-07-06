@@ -64,7 +64,7 @@ export const AnomaliesViewValidatePage: FunctionComponent = () => {
             newState.push(newState[newState.length - 1]);
         } else {
             // Default to no offset from the start and end
-            newState.push("P0W");
+            newState.push("P1W");
         }
 
         searchParams.set(

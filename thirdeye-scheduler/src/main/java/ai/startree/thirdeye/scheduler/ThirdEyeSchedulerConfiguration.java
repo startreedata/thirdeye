@@ -15,11 +15,9 @@ package ai.startree.thirdeye.scheduler;
 
 import ai.startree.thirdeye.scheduler.autoonboard.AutoOnboardConfiguration;
 import ai.startree.thirdeye.scheduler.events.HolidayEventsLoaderConfiguration;
-import ai.startree.thirdeye.scheduler.modeldownload.ModelDownloaderConfiguration;
 import ai.startree.thirdeye.scheduler.monitor.MonitorConfiguration;
 import ai.startree.thirdeye.scheduler.monitor.TaskCleanUpConfiguration;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.List;
 
 public class ThirdEyeSchedulerConfiguration {
 
@@ -40,7 +38,6 @@ public class ThirdEyeSchedulerConfiguration {
   private AutoOnboardConfiguration autoOnboardConfiguration = new AutoOnboardConfiguration();
 
   private MonitorConfiguration monitorConfiguration = new MonitorConfiguration();
-  private List<ModelDownloaderConfiguration> modelDownloaderConfigs;
 
   public boolean isEnabled() {
     return enabled;
@@ -134,16 +131,6 @@ public class ThirdEyeSchedulerConfiguration {
   public ThirdEyeSchedulerConfiguration setAutoOnboardConfiguration(
       final AutoOnboardConfiguration autoOnboardConfiguration) {
     this.autoOnboardConfiguration = autoOnboardConfiguration;
-    return this;
-  }
-
-  public List<ModelDownloaderConfiguration> getModelDownloaderConfigs() {
-    return modelDownloaderConfigs;
-  }
-
-  public ThirdEyeSchedulerConfiguration setModelDownloaderConfigs(
-      final List<ModelDownloaderConfiguration> modelDownloaderConfigs) {
-    this.modelDownloaderConfigs = modelDownloaderConfigs;
     return this;
   }
 }

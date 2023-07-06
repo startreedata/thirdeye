@@ -17,7 +17,6 @@ import ai.startree.thirdeye.scheduler.autoonboard.AutoOnboardConfiguration;
 import ai.startree.thirdeye.scheduler.autoonboard.AutoOnboardService;
 import ai.startree.thirdeye.scheduler.events.HolidayEventsLoader;
 import ai.startree.thirdeye.scheduler.events.HolidayEventsLoaderConfiguration;
-import ai.startree.thirdeye.scheduler.modeldownload.ModelDownloaderManager;
 import ai.startree.thirdeye.scheduler.monitor.MonitorJobScheduler;
 import ai.startree.thirdeye.scheduler.monitor.TaskCleanUpConfiguration;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
@@ -48,7 +47,6 @@ public class SchedulerService implements Managed {
   private final AutoOnboardService autoOnboardService;
   private final HolidayEventsLoader holidayEventsLoader;
   private final DetectionCronScheduler detectionScheduler;
-  private final ModelDownloaderManager modelDownloaderManager;
   private final SubscriptionCronScheduler subscriptionScheduler;
   private final TaskManager taskManager;
 
@@ -63,7 +61,6 @@ public class SchedulerService implements Managed {
       final AutoOnboardService autoOnboardService,
       final HolidayEventsLoader holidayEventsLoader,
       final DetectionCronScheduler detectionScheduler,
-      final ModelDownloaderManager modelDownloaderManager,
       final SubscriptionCronScheduler subscriptionScheduler,
       final TaskManager taskManager) {
     this.config = config;
@@ -74,7 +71,6 @@ public class SchedulerService implements Managed {
     this.autoOnboardService = autoOnboardService;
     this.holidayEventsLoader = holidayEventsLoader;
     this.detectionScheduler = detectionScheduler;
-    this.modelDownloaderManager = modelDownloaderManager;
     this.subscriptionScheduler = subscriptionScheduler;
     this.taskManager = taskManager;
 
@@ -100,9 +96,6 @@ public class SchedulerService implements Managed {
     }
     if (config.isDetectionAlert()) {
       subscriptionScheduler.start();
-    }
-    if (config.getModelDownloaderConfigs() != null) {
-      modelDownloaderManager.start();
     }
 
     // TODO spyne improve scheduler arch and localize
@@ -167,9 +160,6 @@ public class SchedulerService implements Managed {
     }
     if (config.isDetectionAlert()) {
       subscriptionScheduler.shutdown();
-    }
-    if (modelDownloaderManager != null) {
-      modelDownloaderManager.shutdown();
     }
   }
 }

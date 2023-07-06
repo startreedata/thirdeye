@@ -73,7 +73,8 @@ public class AnomalyDTO extends AbstractDTO implements Comparable<AnomalyDTO>, S
   @JsonIgnore
   private AnomalyFeedbackDTO feedback;
   @JsonIgnore
-  private AnomalyFunctionDTO anomalyFunction;
+  @Deprecated
+  private Object anomalyFunction;
   @JsonIgnore
   private Set<AnomalyDTO> children = new HashSet<>();
   // flag to be set when severity changes but not to be persisted
@@ -373,16 +374,6 @@ public class AnomalyDTO extends AbstractDTO implements Comparable<AnomalyDTO>, S
     } else {
       this.feedback = new AnomalyFeedbackDTO(anomalyFeedback);
     }
-  }
-
-  @Deprecated
-  public AnomalyFunctionDTO getAnomalyFunction() {
-    return anomalyFunction;
-  }
-
-  @Deprecated
-  public void setAnomalyFunction(AnomalyFunctionDTO anomalyFunction) {
-    this.anomalyFunction = anomalyFunction;
   }
 
   public Set<AnomalyDTO> getChildren() {

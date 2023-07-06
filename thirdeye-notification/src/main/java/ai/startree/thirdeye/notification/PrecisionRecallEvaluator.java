@@ -15,15 +15,10 @@ package ai.startree.thirdeye.notification;
 
 import ai.startree.thirdeye.notification.anomalyfilter.AnomalyFilter;
 import ai.startree.thirdeye.notification.anomalyfilter.DummyAnomalyFilter;
-import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedback;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedbackType;
 import ai.startree.thirdeye.spi.detection.AnomalyResultSource;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -34,20 +29,7 @@ import java.util.List;
  */
 public class PrecisionRecallEvaluator {
 
-  public static final String PRECISION = "precision";
-  public static final String WEIGHTED_PRECISION = "weightedPrecision";
-  public static final String RECALL = "recall";
-  public static final String RESPONSE_RATE = "responseRate";
-  public static final String TOTALALERTS = "totalAlerts";
-  public static final String TOTALRESPONSES = "totalResponses";
-  public static final String TRUEANOMALIES = "trueAnomalies";
-  public static final String FALSEALARM = "falseAlarm";
-  public static final String NEWTREND = "newTrend";
-  public static final String USER_REPORT = "userReportAnomaly";
-  public static final Double WEIGHT_OF_NULL_LABEL = 0.5;
-
   protected final AnomalyFilter anomalyFilter;
-  private final AnomalyManager anomalyManager;
 
   protected int notifiedTrueAnomaly; // Anomaly is labeled as true and is notified
   protected int notifiedTrueAnomalyNewTrend; // Anomaly is labeled as TRUE_NEW_TREND and is notified
@@ -66,77 +48,19 @@ public class PrecisionRecallEvaluator {
    * performance statistics for this alert filter
    *  @param anomalies the list of anomalies as data for alert filter
    * @param anomalyFilter the alert filter to be evaluated
-   * @param anomalyManager
    */
-  public PrecisionRecallEvaluator(List<AnomalyDTO> anomalies,
-      final AnomalyFilter anomalyFilter,
-      final AnomalyManager anomalyManager) {
-    this.anomalyManager = anomalyManager;
+  public PrecisionRecallEvaluator(List<AnomalyDTO> anomalies, final AnomalyFilter anomalyFilter) {
     this.anomalyFilter = anomalyFilter;
     this.isProjected = true;
     init(anomalies);
   }
   // the weight used for NA labeled data point when calculating precision
 
-  public static List<String> getPropertyNames() {
-    return Collections.unmodifiableList(new ArrayList<>(
-        Arrays.asList(RESPONSE_RATE, PRECISION, WEIGHTED_PRECISION, RECALL, TOTALALERTS,
-            TOTALRESPONSES, TRUEANOMALIES,
-            FALSEALARM, NEWTREND, USER_REPORT)));
-  }
-
-  /**
-   * Evaluate user report anomaly is qualified given alert filter, user report anomaly, as well as
-   * total anomaly set
-   * Runs through total anomaly set, find out if total qualified region for system anomalies can
-   * reach more than 50% of user report region,
-   * return user report anomaly as qualified, otherwise return false
-   *
-   * @param anomalyManager
-   * @param anomalyFilter alert filter to evaluate system detected anoamlies isQualified
-   */
-  private static Boolean isUserReportAnomalyIsQualified(AnomalyFilter anomalyFilter,
-      AnomalyDTO userReportAnomaly,
-      final AnomalyManager anomalyManager) {
-    List<AnomalyDTO> systemAnomalies = anomalyManager
-        .findByFunctionId(userReportAnomaly.getAnomalyFunction().getId());
-    long startTime = userReportAnomaly.getStartTime();
-    long endTime = userReportAnomaly.getEndTime();
-    long qualifiedRegion = 0;
-    systemAnomalies.sort(Comparator.comparingLong(AnomalyDTO::getStartTime));
-    for (AnomalyDTO anomalyResult : systemAnomalies) {
-      if (anomalyResult.getAnomalyResultSource()
-          .equals(AnomalyResultSource.DEFAULT_ANOMALY_DETECTION)
-          && anomalyResult.getEndTime() >= startTime && anomalyResult.getStartTime() <= endTime &&
-          anomalyResult.getDimensions().equals(userReportAnomaly.getDimensions())) {
-        if (anomalyFilter.isQualified(anomalyResult)) {
-          qualifiedRegion += anomalyResult.getEndTime() - anomalyResult.getStartTime();
-        }
-      }
-    }
-    return qualifiedRegion >= (endTime - startTime) * 0.5;
-  }
-
-  public double getPrecision() {
-    if (getTotalAlerts() == 0) {
-      return Double.NaN;
-    }
-    return 1.0 * getTrueAlerts() / getTotalAlerts();
-  }
-
   public double getPrecisionInResponse() {
     if (getTotalResponses() == 0) {
       return Double.NaN;
     }
     return 1.0 * getTrueAlerts() / getTotalResponses();
-  }
-
-  public double getWeightedPrecision() {
-    if (getTotalAlerts() == 0) {
-      return Double.NaN;
-    }
-    return 1.0 * getTrueAlerts() / (getTotalResponses()
-        + WEIGHT_OF_NULL_LABEL * notifiedNotLabeled);
   }
 
   public double getRecall() {
@@ -151,10 +75,6 @@ public class PrecisionRecallEvaluator {
       return Double.NaN;
     }
     return 1.0 * getUserReportAnomaly() / (getTrueAnomalies() + getTrueAnomalyNewTrend());
-  }
-
-  public double getResponseRate() {
-    return 1.0 * getTotalResponses() / getTotalAlerts();
   }
 
   // Total responses is including notified labeled anomalies and user report anomalies
@@ -231,12 +151,7 @@ public class PrecisionRecallEvaluator {
             userReportTrueAnomalyNewTrend++;
           }
         } else {
-          if (isUserReportAnomalyIsQualified(anomalyFilterOfAnomaly, anomaly,
-              anomalyManager)) {
-            notifiedTrueAnomaly++;
-          } else {
             userReportTrueAnomaly++;
-          }
         }
       } else {
         // if system detected anomaly, if using projected evaluation, skip those true anomalies that are not notified

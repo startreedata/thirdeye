@@ -15,7 +15,6 @@ package ai.startree.thirdeye.spi.datalayer.dto;
 
 import ai.startree.thirdeye.spi.api.TimeColumnApi;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
-import ai.startree.thirdeye.spi.detection.TimeGranularity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Collections;
@@ -122,10 +121,6 @@ public class DatasetConfigDTO extends AbstractDTO {
   private long lastRefreshEventTime = 0;
 
   private Map<String, String> properties = new HashMap<>();
-
-  @JsonIgnore
-  @Deprecated
-  private TimeGranularity bucketTimeGranularity;
 
   public String getDataset() {
     return dataset;

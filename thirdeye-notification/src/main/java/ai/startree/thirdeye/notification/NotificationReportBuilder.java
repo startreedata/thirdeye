@@ -30,7 +30,6 @@ import ai.startree.thirdeye.spi.api.AnomalyReportDataApi;
 import ai.startree.thirdeye.spi.api.EnumerationItemApi;
 import ai.startree.thirdeye.spi.api.NotificationReportApi;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
-import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
@@ -62,18 +61,15 @@ public class NotificationReportBuilder {
 
   private final AlertManager alertManager;
   private final UiConfiguration uiConfiguration;
-  private final AnomalyManager anomalyManager;
   private final EnumerationItemManager enumerationItemManager;
 
   private final DateTimeZone dateTimeZone;
 
   @Inject
-  public NotificationReportBuilder(final AnomalyManager anomalyManager,
-      final AlertManager alertManager,
+  public NotificationReportBuilder(final AlertManager alertManager,
       final UiConfiguration uiConfiguration,
       final EnumerationItemManager enumerationItemManager,
       final TimeConfiguration timeConfiguration) {
-    this.anomalyManager = anomalyManager;
     this.alertManager = alertManager;
     this.uiConfiguration = uiConfiguration;
     this.enumerationItemManager = enumerationItemManager;
@@ -102,8 +98,7 @@ public class NotificationReportBuilder {
 
     final PrecisionRecallEvaluator precisionRecallEvaluator = new PrecisionRecallEvaluator(
         mergedAnomalyResults,
-        new DummyAnomalyFilter(),
-        anomalyManager);
+        new DummyAnomalyFilter());
 
     final NotificationReportApi report = new NotificationReportApi()
         .setStartTime(getDateString(startTime))

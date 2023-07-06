@@ -13,15 +13,21 @@
  */
 package ai.startree.thirdeye.scheduler.monitor;
 
-import ai.startree.thirdeye.spi.detection.TimeGranularity;
+import org.joda.time.Period;
 
 public class MonitorConfiguration {
 
-  private int defaultRetentionDays = MonitorConstants.DEFAULT_RETENTION_DAYS;
-  private int completedJobRetentionDays = MonitorConstants.DEFAULT_COMPLETED_JOB_RETENTION_DAYS;
-  private int detectionStatusRetentionDays = MonitorConstants.DEFAULT_DETECTION_STATUS_RETENTION_DAYS;
-  private int rawAnomalyRetentionDays = MonitorConstants.DEFAULT_RAW_ANOMALY_RETENTION_DAYS;
-  private TimeGranularity monitorFrequency = MonitorConstants.DEFAULT_MONITOR_FREQUENCY;
+  private static final int DEFAULT_RETENTION_DAYS = 30;
+  private static final int DEFAULT_COMPLETED_JOB_RETENTION_DAYS = 14;
+  private static final int DEFAULT_DETECTION_STATUS_RETENTION_DAYS = 7;
+  private static final int DEFAULT_RAW_ANOMALY_RETENTION_DAYS = 30;
+  private static final String DEFAULT_MONITOR_FREQUENCY = Period.days(1).toString();
+
+  private int defaultRetentionDays = DEFAULT_RETENTION_DAYS;
+  private int completedJobRetentionDays = DEFAULT_COMPLETED_JOB_RETENTION_DAYS;
+  private int detectionStatusRetentionDays = DEFAULT_DETECTION_STATUS_RETENTION_DAYS;
+  private int rawAnomalyRetentionDays = DEFAULT_RAW_ANOMALY_RETENTION_DAYS;
+  private String monitorFrequency = DEFAULT_MONITOR_FREQUENCY;
 
   public int getCompletedJobRetentionDays() {
     return completedJobRetentionDays;
@@ -55,11 +61,11 @@ public class MonitorConfiguration {
     this.rawAnomalyRetentionDays = rawAnomalyRetentionDays;
   }
 
-  public TimeGranularity getMonitorFrequency() {
+  public String getMonitorFrequency() {
     return monitorFrequency;
   }
 
-  public void setMonitorFrequency(TimeGranularity monitorFrequency) {
+  public void setMonitorFrequency(final String monitorFrequency) {
     this.monitorFrequency = monitorFrequency;
   }
 }

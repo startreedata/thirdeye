@@ -95,8 +95,8 @@ public class DatasetConfigDTO extends AbstractDTO {
   @Deprecated
   @JsonIgnore
   private Integer nonAdditiveBucketSize;
-
-  // the actual time unit for non-additive dataset
+  @Deprecated
+  @JsonIgnore
   private TimeUnit nonAdditiveBucketUnit;
   /**
    * End of Configuration for non-additive dataset
@@ -248,15 +248,6 @@ public class DatasetConfigDTO extends AbstractDTO {
     return this;
   }
 
-  public TimeUnit getNonAdditiveBucketUnit() {
-    return nonAdditiveBucketUnit;
-  }
-
-  public DatasetConfigDTO setNonAdditiveBucketUnit(TimeUnit nonAdditiveBucketUnit) {
-    this.nonAdditiveBucketUnit = nonAdditiveBucketUnit;
-    return this;
-  }
-
   public boolean isRealtime() {
     return realtime;
   }
@@ -342,7 +333,6 @@ public class DatasetConfigDTO extends AbstractDTO {
         dimensionsHaveNoPreAggregation, that.dimensionsHaveNoPreAggregation) && Objects
         .equals(preAggregatedKeyword,
             that.preAggregatedKeyword)
-        && nonAdditiveBucketUnit == that.nonAdditiveBucketUnit
         && Objects.equals(properties, that.properties);
   }
 
@@ -353,7 +343,7 @@ public class DatasetConfigDTO extends AbstractDTO {
             timezone,
             dataSource, owners, active, additive, dimensionsHaveNoPreAggregation,
             preAggregatedKeyword,
-            nonAdditiveBucketUnit, realtime, properties);
+            realtime, properties);
   }
 
   /**
@@ -376,8 +366,7 @@ public class DatasetConfigDTO extends AbstractDTO {
   public TimeGranularity bucketTimeGranularity() {
     if (bucketTimeGranularity == null) {
       Integer size = getTimeDuration();
-      TimeUnit timeUnit =
-          getNonAdditiveBucketUnit() != null ? getNonAdditiveBucketUnit() : getTimeUnit();
+      TimeUnit timeUnit = getTimeUnit();
       bucketTimeGranularity =
           (size != null && timeUnit != null) ? new TimeGranularity(size, timeUnit) : null;
     }

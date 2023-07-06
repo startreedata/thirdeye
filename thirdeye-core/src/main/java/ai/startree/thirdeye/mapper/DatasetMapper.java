@@ -87,38 +87,36 @@ public interface DatasetMapper {
   @VisibleForTesting
   static void updateTimeSpecOnDataset(final DatasetConfigDTO dto,
       final TimeColumnApi timeColumn) {
-    /*
-     * TODO cyril fixme. best would be to use a ISO-8601 period instead of a Duration, or directly expose the TimeDuration in the API.
-     *  minute or hourly
-     */
-    final TimeGranularity timeGranularity = TimeGranularity.fromDuration(timeColumn.getInterval());
-    if (timeGranularity.toMillis() < 1000) {
-      dto.setTimeDuration((int) timeGranularity.toMillis());
+    //TODO cyril fixme. best would be to use a ISO-8601 period instead of a Duration
+    final Duration d = timeColumn.getInterval();
+
+    if (d.toMillis() < 1000) {
+      dto.setTimeDuration(Math.toIntExact(d.toMillis()));
       dto.setTimeUnit(TimeUnit.MILLISECONDS);
-    } else if (isDaily(timeGranularity)) {
-      dto.setTimeDuration((int) timeGranularity.toDuration().toDays());
+    } else if (isDaily(d)) {
+      dto.setTimeDuration(Math.toIntExact(d.toDays()));
       dto.setTimeUnit(TimeUnit.DAYS);
-    } else if (isHourly(timeGranularity)) {
-      dto.setTimeDuration((int) timeGranularity.toDuration().toHours());
+    } else if (isHourly(d)) {
+      dto.setTimeDuration(Math.toIntExact(d.toHours()));
       dto.setTimeUnit(TimeUnit.HOURS);
-    } else if (isMinutely(timeGranularity)) {
-      dto.setTimeDuration((int) timeGranularity.toDuration().toMinutes());
+    } else if (isMinutely(d)) {
+      dto.setTimeDuration(Math.toIntExact(d.toMinutes()));
       dto.setTimeUnit(TimeUnit.MINUTES);
     } else {
-      dto.setTimeDuration((int) timeGranularity.toDuration().getSeconds());
+      dto.setTimeDuration(Math.toIntExact(d.getSeconds()));
       dto.setTimeUnit(TimeUnit.SECONDS);
     }
   }
 
-  private static boolean isDaily(final TimeGranularity timeGranularity) {
-    return timeGranularity.toMillis() % Duration.ofDays(1).toMillis() == 0;
+  private static boolean isDaily(final Duration d) {
+    return d.toMillis() % Duration.ofDays(1).toMillis() == 0;
   }
 
-  static boolean isHourly(TimeGranularity timeGranularity) {
-    return timeGranularity.toMillis() % Duration.ofHours(1).toMillis() == 0;
+  static boolean isHourly(final Duration d) {
+    return d.toMillis() % Duration.ofHours(1).toMillis() == 0;
   }
 
-  static boolean isMinutely(TimeGranularity timeGranularity) {
-    return timeGranularity.toMillis() % Duration.ofMinutes(1).toMillis() == 0;
+  static boolean isMinutely(final Duration d) {
+    return d.toMillis() % Duration.ofMinutes(1).toMillis() == 0;
   }
 }

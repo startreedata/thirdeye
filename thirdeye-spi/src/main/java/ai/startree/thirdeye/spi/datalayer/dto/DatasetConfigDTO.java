@@ -92,10 +92,11 @@ public class DatasetConfigDTO extends AbstractDTO {
   // The pre-aggregated keyword
   private String preAggregatedKeyword = DEFAULT_PREAGGREGATED_DIMENSION_VALUE;
 
-  // the actual time duration for non-additive dataset
+  @Deprecated
+  @JsonIgnore
   private Integer nonAdditiveBucketSize;
-
-  // the actual time unit for non-additive dataset
+  @Deprecated
+  @JsonIgnore
   private TimeUnit nonAdditiveBucketUnit;
   /**
    * End of Configuration for non-additive dataset
@@ -247,24 +248,6 @@ public class DatasetConfigDTO extends AbstractDTO {
     return this;
   }
 
-  public Integer getNonAdditiveBucketSize() {
-    return nonAdditiveBucketSize;
-  }
-
-  public DatasetConfigDTO setNonAdditiveBucketSize(Integer nonAdditiveBucketSize) {
-    this.nonAdditiveBucketSize = nonAdditiveBucketSize;
-    return this;
-  }
-
-  public TimeUnit getNonAdditiveBucketUnit() {
-    return nonAdditiveBucketUnit;
-  }
-
-  public DatasetConfigDTO setNonAdditiveBucketUnit(TimeUnit nonAdditiveBucketUnit) {
-    this.nonAdditiveBucketUnit = nonAdditiveBucketUnit;
-    return this;
-  }
-
   public boolean isRealtime() {
     return realtime;
   }
@@ -349,9 +332,7 @@ public class DatasetConfigDTO extends AbstractDTO {
         && Objects.equals(
         dimensionsHaveNoPreAggregation, that.dimensionsHaveNoPreAggregation) && Objects
         .equals(preAggregatedKeyword,
-            that.preAggregatedKeyword) && Objects
-        .equals(nonAdditiveBucketSize, that.nonAdditiveBucketSize)
-        && nonAdditiveBucketUnit == that.nonAdditiveBucketUnit
+            that.preAggregatedKeyword)
         && Objects.equals(properties, that.properties);
   }
 
@@ -362,7 +343,7 @@ public class DatasetConfigDTO extends AbstractDTO {
             timezone,
             dataSource, owners, active, additive, dimensionsHaveNoPreAggregation,
             preAggregatedKeyword,
-            nonAdditiveBucketSize, nonAdditiveBucketUnit, realtime, properties);
+            realtime, properties);
   }
 
   /**
@@ -384,10 +365,8 @@ public class DatasetConfigDTO extends AbstractDTO {
   @Deprecated
   public TimeGranularity bucketTimeGranularity() {
     if (bucketTimeGranularity == null) {
-      Integer size =
-          getNonAdditiveBucketSize() != null ? getNonAdditiveBucketSize() : getTimeDuration();
-      TimeUnit timeUnit =
-          getNonAdditiveBucketUnit() != null ? getNonAdditiveBucketUnit() : getTimeUnit();
+      Integer size = getTimeDuration();
+      TimeUnit timeUnit = getTimeUnit();
       bucketTimeGranularity =
           (size != null && timeUnit != null) ? new TimeGranularity(size, timeUnit) : null;
     }

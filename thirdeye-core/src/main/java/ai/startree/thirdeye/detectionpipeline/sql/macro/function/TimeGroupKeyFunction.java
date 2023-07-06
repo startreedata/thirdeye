@@ -88,8 +88,6 @@ public class TimeGroupKeyFunction implements MacroFunction {
               Collections.emptyList())
           .stream()
           .filter(c -> c.getGranularity() != null && c.getGranularity().equals(granularityText))
-          // assume timezone is UTC TODO CYRIL IMPLEMENT TIMEZONE SUPPORT
-          // assume format is epoch milliseconds TODO CYRIL IMPLEMENT SUPPORT FOR OTHER FORMATS
           .findFirst()
           .map(TimeColumnApi::getName)
           .map(context.getIdentifierQuoter());

@@ -31,24 +31,8 @@ public class DatasetConfigDTOTest {
 
     DatasetConfigDTO datasetConfigDTOEmptyBucketSize = new DatasetConfigDTO()
         .setTimeDuration(1)
-        .setTimeUnit(TimeUnit.MILLISECONDS)
-        .setNonAdditiveBucketUnit(TimeUnit.MINUTES);
+        .setTimeUnit(TimeUnit.MINUTES);
     Assert.assertEquals(datasetConfigDTOEmptyBucketSize.bucketTimeGranularity(),
         new TimeGranularity(1, TimeUnit.MINUTES));
-
-    DatasetConfigDTO datasetConfigDTOEmptyBucketUnit = new DatasetConfigDTO()
-        .setTimeDuration(1)
-        .setTimeUnit(TimeUnit.MILLISECONDS)
-        .setNonAdditiveBucketSize(5);
-    Assert.assertEquals(datasetConfigDTOEmptyBucketUnit.bucketTimeGranularity(),
-        new TimeGranularity(5, TimeUnit.MILLISECONDS));
-
-    DatasetConfigDTO datasetConfigDTOFullOverride = new DatasetConfigDTO()
-        .setTimeDuration(1)
-        .setTimeUnit(TimeUnit.MILLISECONDS)
-        .setNonAdditiveBucketSize(5)
-        .setNonAdditiveBucketUnit(TimeUnit.MINUTES);
-    Assert.assertEquals(datasetConfigDTOFullOverride.bucketTimeGranularity(),
-        new TimeGranularity(5, TimeUnit.MINUTES));
   }
 }

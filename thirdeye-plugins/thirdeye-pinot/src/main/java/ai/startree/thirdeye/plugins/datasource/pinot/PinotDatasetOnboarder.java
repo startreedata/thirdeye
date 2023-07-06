@@ -21,7 +21,6 @@ import ai.startree.thirdeye.plugins.datasource.pinot.restclient.PinotControllerR
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import ai.startree.thirdeye.spi.detection.TimeSpec;
 import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import ai.startree.thirdeye.spi.metric.MetricType;
 import ai.startree.thirdeye.spi.util.SpiUtils;
@@ -87,14 +86,6 @@ public class PinotDatasetOnboarder {
         .setTimeUnit(columnUnit)
         .setTimeFormat(timeFormatStr)
         .setTimezone(DEFAULT_CHRONOLOGY.getZone().toString());
-    // set the data granularity of epoch timestamp dataset to minute-level
-    if (datasetConfigDTO.getTimeFormat().equals(TimeSpec.SINCE_EPOCH_FORMAT) && datasetConfigDTO
-        .getTimeUnit()
-        .equals(TimeUnit.MILLISECONDS) && (datasetConfigDTO.getNonAdditiveBucketSize() == null
-        || datasetConfigDTO.getNonAdditiveBucketUnit() == null)) {
-      datasetConfigDTO.setNonAdditiveBucketUnit(TimeUnit.MINUTES);
-      datasetConfigDTO.setNonAdditiveBucketSize(5);
-    }
   }
 
   public static DatasetConfigDTO generateDatasetConfig(final String dataset, final Schema schema,

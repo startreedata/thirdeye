@@ -17,7 +17,6 @@ import static ai.startree.thirdeye.spi.accessControl.ResourceIdentifier.DEFAULT_
 import static ai.startree.thirdeye.spi.accessControl.ResourceIdentifier.DEFAULT_NAME;
 import static ai.startree.thirdeye.spi.accessControl.ResourceIdentifier.DEFAULT_NAMESPACE;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
-import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.datalayer.dao.SubEntities;
@@ -32,7 +31,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import com.google.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -143,45 +141,54 @@ public class AuthorizationManager {
         accessControl.hasAccess(principal.getAuthToken(), ROOT_RESOURCE_ID, AccessType.WRITE);
   }
 
-  public <T extends AbstractDTO> ResourceIdentifier resourceId(final T dto) {
-    final AbstractDTO authParentDto = resolveAuthParentDto(dto);
+  // Returns the resource identifier for a dto.
+  // Null is ok and maps to a default resource id.
+  public ResourceIdentifier resourceId(final AbstractDTO dto) {
+    final var name = optional(dto)
+        .map(AbstractDTO::getId)
+        .map(Objects::toString)
+        .orElse(DEFAULT_NAME);
 
-    return ResourceIdentifier.from(
-        optional(authParentDto.getId()).map(Objects::toString).orElse(DEFAULT_NAME),
-        optional(authParentDto.getAuth())
-            .map(AuthorizationConfigurationDTO::getNamespace).orElse(DEFAULT_NAMESPACE),
-        optional(SubEntities.BEAN_TYPE_MAP.get(authParentDto.getClass()))
-            .map(Objects::toString).orElse(DEFAULT_ENTITY_TYPE));
+    final var namespace = optional(dto)
+        .map(this::resolveAuthParentDto)
+        .map(AbstractDTO::getAuth)
+        .map(AuthorizationConfigurationDTO::getNamespace)
+        .orElse(DEFAULT_NAMESPACE);
+
+    final var entityType = optional(dto)
+        .map(AbstractDTO::getClass)
+        .map(SubEntities.BEAN_TYPE_MAP::get)
+        .map(Objects::toString)
+        .orElse(DEFAULT_ENTITY_TYPE);
+
+    return ResourceIdentifier.from(name, namespace, entityType);
   }
 
   // Resolves the Authorization parent for certain dto classes.
   // AnomalyDTO -> EnumerationItemDTO if exists, else AlertDTO
-  // RcaInvestigationDTO -> AnomalyDTO's parent (recursive call)
   // Everything else -> itself
-  private <T extends AbstractDTO> AbstractDTO resolveAuthParentDto(final T dto) {
+  private AbstractDTO resolveAuthParentDto(final AbstractDTO dto) {
     if (dto instanceof AnomalyDTO) {
       return resolveAuthParentDto((AnomalyDTO) (dto));
-    } else if (dto instanceof RcaInvestigationDTO) {
-      return resolveAuthParentDto((RcaInvestigationDTO) (dto));
     } else {
       return dto;
     }
   }
 
   private AbstractDTO resolveAuthParentDto(final AnomalyDTO dto) {
-    if (dto.getEnumerationItem() != null) {
-      final Long enumItemId = dto.getEnumerationItem().getId();
-      return ensureExists(enumerationItemManager.findById(enumItemId));
+    if (dto == null) {
+      return null;
     }
 
-    final Long alertId = dto.getDetectionConfigId();
-    return ensureExists(alertManager.findById(alertId));
-  }
+    if (dto.getEnumerationItem() != null) {
+      return optional(dto.getEnumerationItem().getId())
+          .map(enumerationItemManager::findById)
+          .orElse(null);
+    }
 
-  private AbstractDTO resolveAuthParentDto(final RcaInvestigationDTO dto) {
-    final Long anomalyId = dto.getAnomaly().getId();
-    final AnomalyDTO anomalyDto = ensureExists(anomalyManager.findById(anomalyId));
-    return resolveAuthParentDto(anomalyDto);
+    return optional(dto.getDetectionConfigId())
+        .map(alertManager::findById)
+        .orElse(null);
   }
 
   private <T extends AbstractDTO> List<ResourceIdentifier> relatedEntities(T entity) {

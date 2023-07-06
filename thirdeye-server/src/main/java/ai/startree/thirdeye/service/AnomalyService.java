@@ -15,7 +15,10 @@
 package ai.startree.thirdeye.service;
 
 import static ai.startree.thirdeye.RequestCache.buildCache;
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_ID_UNEXPECTED_AT_CREATION;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
+import static ai.startree.thirdeye.util.ResourceUtils.ensureNull;
 
 import ai.startree.thirdeye.RequestCache;
 import ai.startree.thirdeye.auth.AuthorizationManager;
@@ -24,14 +27,17 @@ import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.AnomalyFeedbackApi;
 import ai.startree.thirdeye.spi.api.AnomalyStatsApi;
+import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import com.google.common.collect.ImmutableMap;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -79,8 +85,17 @@ public class AnomalyService extends CrudService<AnomalyApi, AnomalyDTO> {
   }
 
   @Override
+  protected void validate(final AnomalyApi api, @Nullable final AnomalyDTO existing) {
+    super.validate(api, existing);
+    ensureNull(api.getAuth(), "cannot set auth for anomalies");
+  }
+
+  @Override
   protected AnomalyDTO toDto(final AnomalyApi api) {
-    return ApiBeanMapper.toDto(api);
+    final var dto = ApiBeanMapper.toDto(api);
+    final var authId = authorizationManager.resourceId(dto);
+    dto.setAuth(new AuthorizationConfigurationDTO().setNamespace(authId.namespace));
+    return dto;
   }
 
   @Override
@@ -91,6 +106,7 @@ public class AnomalyService extends CrudService<AnomalyApi, AnomalyDTO> {
         .ifPresent(alertApi -> alertApi.setName(cache.getAlerts()
             .getUnchecked(alertApi.getId())
             .getName()));
+    anomalyApi.setAuth(new AuthorizationConfigurationApi().setNamespace(authorizationManager.resourceId(dto).namespace));
     return anomalyApi;
   }
 

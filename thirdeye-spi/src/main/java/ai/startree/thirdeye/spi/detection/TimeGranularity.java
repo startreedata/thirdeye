@@ -24,10 +24,6 @@ public class TimeGranularity {
   private final int size;
   private final TimeUnit unit;
 
-  public TimeGranularity() {
-    this(1, TimeUnit.HOURS);
-  }
-
   public TimeGranularity(int size, TimeUnit unit) {
     this.size = size;
     this.unit = unit;

@@ -13,7 +13,6 @@
  * the License.
  */
 import i18n from "i18next";
-import { parse, toSeconds } from "iso8601-duration";
 import { cloneDeep, isEmpty, kebabCase, omit } from "lodash";
 import { GetAlertEvaluationPayload } from "../../rest/alerts/alerts.interfaces";
 import {
@@ -35,7 +34,7 @@ import {
 } from "../../rest/dto/ui-alert.interfaces";
 import { deepSearchStringProperty } from "../search/search.util";
 import { getSubscriptionGroupAlertsList } from "../subscription-groups/subscription-groups.util";
-import { DAY_IN_MILLISECONDS } from "../time/time.util";
+import { DAY_IN_MILLISECONDS, iso8601ToMilliseconds } from "../time/time.util";
 
 export const DEFAULT_FEEDBACK = {
     type: AnomalyFeedbackType.NO_FEEDBACK,
@@ -451,8 +450,8 @@ export const shouldHideTimeInDatetimeFormat = (
 
     if (alert.metadata?.granularity) {
         return (
-            toSeconds(parse(alert.metadata?.granularity as string)) >=
-            DAY_IN_MILLISECONDS / 1000
+            iso8601ToMilliseconds(alert.metadata?.granularity as string) >=
+            DAY_IN_MILLISECONDS
         );
     }
 

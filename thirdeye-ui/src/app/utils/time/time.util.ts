@@ -12,7 +12,17 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { en, isoDuration } from "@musement/iso-duration";
 import { DateTime } from "luxon";
+
+isoDuration.setLocales(
+    {
+        en,
+    },
+    {
+        fallbackLocale: "en",
+    }
+);
 
 export const SECOND_IN_MILLISECONDS = 1000;
 export const MINUTE_IN_MILLISECONDS = SECOND_IN_MILLISECONDS * 60;
@@ -31,4 +41,24 @@ export const OFFSET_TO_MILLISECONDS: { [key: string]: number } = {
 
 export const timezoneStringShort = (timezone: string | undefined): string => {
     return DateTime.now().setZone(timezone).offsetNameShort;
+};
+
+export const iso8601ToMilliseconds = (isoStr: string): number => {
+    const duration = isoDuration(isoStr).parse();
+
+    let msSoFar = 0;
+
+    msSoFar += duration.seconds * SECOND_IN_MILLISECONDS;
+    msSoFar += duration.minutes * MINUTE_IN_MILLISECONDS;
+    msSoFar += duration.hours * HOUR_IN_MILLISECONDS;
+    msSoFar += duration.days * DAY_IN_MILLISECONDS;
+    msSoFar += duration.weeks * WEEK_IN_MILLISECONDS;
+    msSoFar += duration.months * MONTH_IN_MILLISECONDS;
+    msSoFar += duration.years * YEAR_IN_MILLISECONDS;
+
+    return msSoFar;
+};
+
+export const iso8601ToHuman = (isoStr: string): string => {
+    return isoDuration(isoStr).humanize("en");
 };

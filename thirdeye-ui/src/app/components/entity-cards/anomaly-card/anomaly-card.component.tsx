@@ -21,7 +21,10 @@ import { formatDateAndTimeV1, formatDateV1 } from "../../../platform/utils";
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { useGetAlert } from "../../../rest/alerts/alerts.actions";
 import { getUiAnomaly } from "../../../utils/anomalies/anomalies.util";
-import { timezoneStringShort } from "../../../utils/time/time.util";
+import {
+    iso8601ToHuman,
+    timezoneStringShort,
+} from "../../../utils/time/time.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { EmptyStateSwitch } from "../../page-states/empty-state-switch/empty-state-switch.component";
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
@@ -47,6 +50,16 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = ({
             getAlert(anomaly.alert.id);
         }
     }, [anomaly]);
+
+    const seasonalityPeriodHumanStr = useMemo(() => {
+        if (alert?.templateProperties.seasonalityPeriod) {
+            return iso8601ToHuman(
+                alert?.templateProperties.seasonalityPeriod as string
+            );
+        }
+
+        return "";
+    }, [alert]);
 
     const dateFormatter = useMemo(() => {
         let formatter = formatDateAndTimeV1;
@@ -132,10 +145,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = ({
                                     >
                                         <AnomalySummaryCardDetail
                                             label="Seasonality"
-                                            value={
-                                                alert?.templateProperties
-                                                    .seasonalityPeriod
-                                            }
+                                            value={seasonalityPeriodHumanStr}
                                         />
                                     </EmptyStateSwitch>
                                 </LoadingErrorStateSwitch>

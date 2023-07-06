@@ -22,7 +22,6 @@ import {
     useTheme,
 } from "@material-ui/core";
 import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
-import { parse, toSeconds } from "iso8601-duration";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -36,6 +35,7 @@ import { DetectionEvaluation } from "../../../rest/dto/detection.interfaces";
 import { extractDetectionEvaluation } from "../../../utils/alerts/alerts.util";
 import { createAlertEvaluation } from "../../../utils/anomalies/anomalies.util";
 import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
+import { iso8601ToMilliseconds } from "../../../utils/time/time.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { EmptyStateSwitch } from "../../page-states/empty-state-switch/empty-state-switch.component";
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
@@ -63,7 +63,7 @@ export const Chart: FunctionComponent<ChartProps> = ({
     hideChartBrush,
     chartHeight,
 }) => {
-    const offset = toSeconds(parse(startEndShift)) * 100;
+    const offset = iso8601ToMilliseconds(startEndShift);
 
     const theme = useTheme();
     const { t } = useTranslation();

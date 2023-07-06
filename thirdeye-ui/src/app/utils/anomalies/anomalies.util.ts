@@ -15,7 +15,6 @@
 import { AxiosError } from "axios";
 import bounds from "binary-search-bounds";
 import i18n from "i18next";
-import { parse, toSeconds } from "iso8601-duration";
 import { cloneDeep, every, isEmpty, isNil, isNumber } from "lodash";
 import { Dispatch, SetStateAction } from "react";
 import { TFunction } from "react-i18next";
@@ -46,6 +45,7 @@ import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import { updateSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.rest";
 import { getErrorMessages } from "../rest/rest.util";
 import { deepSearchStringProperty } from "../search/search.util";
+import { iso8601ToMilliseconds } from "../time/time.util";
 
 export const EMPTY_STRING_DISPLAY = "<EMPTY_VALUE>";
 
@@ -596,18 +596,18 @@ export const getTimePaddingForGranularity = (
     offset = 1
 ): string => {
     if (granularity) {
-        const durationInSeconds = toSeconds(parse(granularity));
+        const durationInMilliseconds = iso8601ToMilliseconds(granularity);
 
-        if (durationInSeconds < toSeconds(parse("P1D"))) {
+        if (durationInMilliseconds < iso8601ToMilliseconds("P1D")) {
             // Hourly
             return `P${offset}W`;
-        } else if (durationInSeconds < toSeconds(parse("P1W"))) {
+        } else if (durationInMilliseconds < iso8601ToMilliseconds("P1W")) {
             // Daily
             return `P${2 * offset}W`;
-        } else if (durationInSeconds < toSeconds(parse("P1M"))) {
+        } else if (durationInMilliseconds < iso8601ToMilliseconds("P1M")) {
             // Weekly
             return `P${offset}M`;
-        } else if (durationInSeconds < toSeconds(parse("P3M"))) {
+        } else if (durationInMilliseconds < iso8601ToMilliseconds("P3M")) {
             // Monthly
             return `P${offset}Y`;
         }

@@ -13,7 +13,6 @@
  * the License.
  */
 import { Grid } from "@material-ui/core";
-import { parse, toSeconds } from "iso8601-duration";
 import React, { FunctionComponent, useEffect } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import {
@@ -23,6 +22,7 @@ import {
 import { PageContentsCardV1, SkeletonV1 } from "../../platform/components";
 import { getTimePaddingForGranularity } from "../../utils/anomalies/anomalies.util";
 import { AppRouteRelative } from "../../utils/routes/routes.util";
+import { iso8601ToMilliseconds } from "../../utils/time/time.util";
 import { AnomalyViewContainerPageOutletContext } from "../anomalies-view-page/anomalies-view-page.interfaces";
 
 /**
@@ -37,15 +37,11 @@ export const AnomaliesViewIndexPage: FunctionComponent = () => {
     useEffect(() => {
         if (anomaly && alertInsight) {
             // Default to 2 weeks and for days
-            const timeDiff =
-                toSeconds(
-                    parse(
-                        getTimePaddingForGranularity(
-                            alertInsight.templateWithProperties?.metadata
-                                ?.granularity
-                        )
-                    )
-                ) * 1000;
+            const timeDiff = iso8601ToMilliseconds(
+                getTimePaddingForGranularity(
+                    alertInsight.templateWithProperties?.metadata?.granularity
+                )
+            );
 
             const timeRangeQuery = new URLSearchParams([
                 [TimeRangeQueryStringKey.TIME_RANGE, TimeRange.CUSTOM],

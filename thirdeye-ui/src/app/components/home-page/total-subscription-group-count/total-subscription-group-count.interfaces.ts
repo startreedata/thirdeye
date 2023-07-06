@@ -12,12 +12,12 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { ActionStatus } from "../../../rest/actions.interfaces";
 import { SubscriptionGroup } from "../../../rest/dto/subscription-group.interfaces";
 
 export interface TotalSubscriptionGroupCountProps {
-    subscriptionGroups: SubscriptionGroup[] | null;
-    getSubscriptionGroupsStatus: ActionStatus;
+    subscriptionGroups: SubscriptionGroup[] | undefined;
+    isError: boolean;
+    isFetching: boolean;
     classes?: {
         noDataIndicator?: string;
     };

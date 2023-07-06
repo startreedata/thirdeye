@@ -17,7 +17,7 @@ import type { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 import type { SubscriptionGroup } from "../../../rest/dto/subscription-group.interfaces";
 
 export interface EntitySearchProps {
-    subscriptionGroups: SubscriptionGroup[] | null;
-    alerts: Alert[] | null;
+    subscriptionGroups: SubscriptionGroup[] | undefined;
+    alerts: Alert[] | undefined;
     anomalies: Anomaly[] | null;
 }

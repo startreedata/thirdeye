@@ -12,12 +12,12 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { ActionStatus } from "../../../rest/actions.interfaces";
+import { UseQueryResult } from "@tanstack/react-query/src/types";
 import { Alert } from "../../../rest/dto/alert.interfaces";
 
 export interface ActiveAlertsCountProps {
-    alerts: Alert[] | null;
-    getAlertsStatus: ActionStatus;
+    alerts: Alert[] | undefined;
+    query: UseQueryResult;
 }
 
 export interface EntityOption {

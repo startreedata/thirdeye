@@ -31,6 +31,11 @@ import {
 
 const BASE_URL_ALERTS = "/api/alerts";
 
+export const ALERT_CACHE_KEYS = {
+    GET_ALL_ALERTS: "alerts",
+    GET_ALERT: "alert",
+};
+
 export const getAlert = async (id: number): Promise<Alert> => {
     const response = await axios.get<Alert>(`${BASE_URL_ALERTS}/${id}`);
 

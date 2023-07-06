@@ -19,6 +19,7 @@ import {
     useMediaQuery,
     useTheme,
 } from "@material-ui/core";
+import { useQuery } from "@tanstack/react-query";
 import { DateTime } from "luxon";
 import {
     default as React,
@@ -48,13 +49,16 @@ import {
     useDialogProviderV1,
 } from "../../platform/components";
 import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
-import { useGetAlerts } from "../../rest/alerts/alerts.actions";
+import { ALERT_CACHE_KEYS, getAllAlerts } from "../../rest/alerts/alerts.rest";
 import {
     useGetAnomalies,
     useGetAnomalyStats,
 } from "../../rest/anomalies/anomaly.actions";
 import { useGetAppAnalytics } from "../../rest/app-analytics/app-analytics.action";
-import { useGetSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.actions";
+import {
+    getAllSubscriptionGroups,
+    SUBSCRIPTION_GROUP_CACHE_KEYS,
+} from "../../rest/subscription-groups/subscription-groups.rest";
 import { QUERY_PARAM_KEYS } from "../../utils/constants/constants.util";
 import {
     AppRoute,
@@ -82,12 +86,20 @@ export const HomePage: FunctionComponent = () => {
         status: appAnalyticsStatus,
     } = useGetAppAnalytics();
     const { anomalies, getAnomalies } = useGetAnomalies();
+
     const {
-        subscriptionGroups,
-        getSubscriptionGroups,
-        status: getSubscriptionGroupsStatus,
-    } = useGetSubscriptionGroups();
-    const { alerts, getAlerts, status: getAlertsStatus } = useGetAlerts();
+        data: subscriptionGroups,
+        isFetching: isSubscriptionGroupsRequestFetching,
+        isError: isSubscriptionGroupsRequestError,
+    } = useQuery({
+        queryKey: [SUBSCRIPTION_GROUP_CACHE_KEYS.GET_ALL_SUBSCRIPTION_GROUPS],
+        queryFn: getAllSubscriptionGroups,
+    });
+    const getAlertsQuery = useQuery({
+        queryKey: [ALERT_CACHE_KEYS.GET_ALL_ALERTS],
+        queryFn: getAllAlerts,
+    });
+
     const {
         anomalyStats,
         getAnomalyStats,
@@ -100,14 +112,14 @@ export const HomePage: FunctionComponent = () => {
     );
 
     useEffect(() => {
+        if (getAlertsQuery.data?.length === 0) {
+            navigate(AppRoute.WELCOME);
+        }
+    }, [getAlertsQuery.data]);
+
+    useEffect(() => {
         getAppAnalytics();
-        getSubscriptionGroups();
         getAnomalies();
-        getAlerts().then((alerts) => {
-            if (alerts?.length === 0) {
-                navigate(AppRoute.WELCOME);
-            }
-        });
     }, []);
 
     useEffect(() => {
@@ -171,7 +183,7 @@ export const HomePage: FunctionComponent = () => {
                     <PageHeaderActionsV1>
                         <Box width={screenWidthSmUp ? 500 : "100%"}>
                             <EntitySearch
-                                alerts={alerts}
+                                alerts={getAlertsQuery.data}
                                 anomalies={anomalies}
                                 subscriptionGroups={subscriptionGroups}
                             />
@@ -189,8 +201,8 @@ export const HomePage: FunctionComponent = () => {
                         <Grid item sm={4} xs={12}>
                             <PageContentsCardV1 fullHeight>
                                 <ActiveAlertsCount
-                                    alerts={alerts}
-                                    getAlertsStatus={getAlertsStatus}
+                                    alerts={getAlertsQuery.data}
+                                    query={getAlertsQuery}
                                 />
                             </PageContentsCardV1>
                         </Grid>
@@ -211,8 +223,9 @@ export const HomePage: FunctionComponent = () => {
                                     classes={{
                                         noDataIndicator: style.noDataIndicator,
                                     }}
-                                    getSubscriptionGroupsStatus={
-                                        getSubscriptionGroupsStatus
+                                    isError={isSubscriptionGroupsRequestError}
+                                    isFetching={
+                                        isSubscriptionGroupsRequestFetching
                                     }
                                     subscriptionGroups={subscriptionGroups}
                                 />

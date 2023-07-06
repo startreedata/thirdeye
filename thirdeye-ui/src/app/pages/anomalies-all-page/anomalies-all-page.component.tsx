@@ -13,6 +13,7 @@
  * the License.
  */
 import { Box, Button, Grid } from "@material-ui/core";
+import { useQuery } from "@tanstack/react-query";
 import { isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -40,7 +41,10 @@ import { GetAnomaliesProps } from "../../rest/anomalies/anomaly.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import { useGetEnumerationItems } from "../../rest/enumeration-items/enumeration-items.actions";
-import { useGetSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.actions";
+import {
+    getAllSubscriptionGroups,
+    SUBSCRIPTION_GROUP_CACHE_KEYS,
+} from "../../rest/subscription-groups/subscription-groups.rest";
 import {
     makeDeleteRequest,
     promptDeleteConfirmation,
@@ -53,8 +57,10 @@ export const AnomaliesAllPage: FunctionComponent = () => {
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
 
-    const { subscriptionGroups, getSubscriptionGroups } =
-        useGetSubscriptionGroups();
+    const { data: subscriptionGroups } = useQuery({
+        queryKey: [SUBSCRIPTION_GROUP_CACHE_KEYS.GET_ALL_SUBSCRIPTION_GROUPS],
+        queryFn: getAllSubscriptionGroups,
+    });
     const { alerts, getAlerts } = useGetAlerts();
     const { enumerationItems, getEnumerationItems } = useGetEnumerationItems();
     const {
@@ -105,7 +111,6 @@ export const AnomaliesAllPage: FunctionComponent = () => {
     }, [searchParams]);
 
     useEffect(() => {
-        getSubscriptionGroups();
         getAlerts();
         getEnumerationItems();
     }, []);

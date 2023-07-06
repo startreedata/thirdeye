@@ -16,60 +16,12 @@ import { act, renderHook } from "@testing-library/react-hooks";
 import axios from "axios";
 import { ActionStatus } from "../actions.interfaces";
 import { SubscriptionGroup } from "../dto/subscription-group.interfaces";
-import {
-    useCreateSubscriptionGroup,
-    useGetSubscriptionGroups,
-} from "./subscription-groups.actions";
+import { useCreateSubscriptionGroup } from "./subscription-groups.actions";
 
 jest.mock("axios");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 describe("Subscription Groups Actions", () => {
-    describe("useGetSubscriptionGroups", () => {
-        it("should return initial default values", () => {
-            const { result } = renderHook(() => useGetSubscriptionGroups());
-
-            expect(result.current.subscriptionGroups).toBeNull();
-            expect(result.current.getSubscriptionGroups).toBeDefined();
-            expect(result.current.status).toEqual(ActionStatus.Initial);
-            expect(result.current.errorMessages).toEqual([]);
-        });
-
-        it("should update data appropriately when making a successful REST call", async () => {
-            mockedAxios.get.mockResolvedValueOnce({
-                data: mockSubscriptionGroupResponse,
-            });
-            const { result, waitFor } = renderHook(() =>
-                useGetSubscriptionGroups()
-            );
-
-            await act(async () => {
-                const promise = result.current.getSubscriptionGroups();
-
-                // Wait for state update
-                await waitFor(
-                    () => result.current.status === ActionStatus.Initial
-                );
-
-                // When REST call is in progress
-                expect(result.current.subscriptionGroups).toBeNull();
-                expect(result.current.getSubscriptionGroups).toBeDefined();
-                expect(result.current.status).toEqual(ActionStatus.Working);
-                expect(result.current.errorMessages).toEqual([]);
-
-                return promise.then(() => {
-                    // When REST call is completed
-                    expect(result.current.subscriptionGroups).toEqual(
-                        mockSubscriptionGroupResponse
-                    );
-                    expect(result.current.getSubscriptionGroups).toBeDefined();
-                    expect(result.current.status).toEqual(ActionStatus.Done);
-                    expect(result.current.errorMessages).toEqual([]);
-                });
-            });
-        });
-    });
-
     describe("useCreateSubscriptionGroup", () => {
         it("should return initial default values", () => {
             const { result } = renderHook(() => useCreateSubscriptionGroup());

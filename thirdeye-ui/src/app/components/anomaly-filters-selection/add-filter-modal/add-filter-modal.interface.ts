@@ -18,6 +18,6 @@ import { SubscriptionGroup } from "../../../rest/dto/subscription-group.interfac
 
 export interface AddFilterModalProps {
     alertsData: Alert[] | null;
-    subscriptionGroupData: SubscriptionGroup[] | null;
+    subscriptionGroupData: SubscriptionGroup[] | undefined;
     enumerationItemsData: EnumerationItem[] | null;
 }

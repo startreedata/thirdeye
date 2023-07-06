@@ -13,6 +13,8 @@
  * the License.
  */
 import { Box, Button, Grid } from "@material-ui/core";
+import { useQuery } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ConfigurationPageHeader } from "../../components/configuration-page-header/configuration-page-header.component";
@@ -31,23 +33,44 @@ import { ActionStatus } from "../../rest/actions.interfaces";
 import { useGetAlerts } from "../../rest/alerts/alerts.actions";
 import { UiSubscriptionGroup } from "../../rest/dto/ui-subscription-group.interfaces";
 import { useGetEnumerationItems } from "../../rest/enumeration-items/enumeration-items.actions";
-import { useGetSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.actions";
-import { deleteSubscriptionGroup } from "../../rest/subscription-groups/subscription-groups.rest";
+import {
+    deleteSubscriptionGroup,
+    getAllSubscriptionGroups,
+    SUBSCRIPTION_GROUP_CACHE_KEYS,
+} from "../../rest/subscription-groups/subscription-groups.rest";
 import {
     makeDeleteRequest,
     promptDeleteConfirmation,
 } from "../../utils/bulk-delete/bulk-delete.util";
-import { notifyIfErrors } from "../../utils/notifications/notifications.util";
+import {
+    notifyErrors,
+    notifyIfErrors,
+} from "../../utils/notifications/notifications.util";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getSubscriptionGroupsCreatePath } from "../../utils/routes/routes.util";
 import { getUiSubscriptionGroups } from "../../utils/subscription-groups/subscription-groups.util";
 
 export const SubscriptionGroupsAllPage: FunctionComponent = () => {
+    const { showDialog } = useDialogProviderV1();
+    const { t } = useTranslation();
+    const { notify } = useNotificationProviderV1();
+
     const {
-        subscriptionGroups,
-        getSubscriptionGroups,
-        status: getSubscriptionGroupStatus,
-        errorMessages: getSubscriptionGroupErrorMessages,
-    } = useGetSubscriptionGroups();
+        data: subscriptionGroups,
+        isError: isSubscriptionGroupsRequestError,
+    } = useQuery({
+        queryKey: [SUBSCRIPTION_GROUP_CACHE_KEYS.GET_ALL_SUBSCRIPTION_GROUPS],
+        queryFn: getAllSubscriptionGroups,
+        onError: (err: AxiosError) => {
+            notifyErrors(
+                getErrorMessages(err),
+                notify,
+                t("message.error-while-fetching", {
+                    entity: t("label.subscription-groups"),
+                })
+            );
+        },
+    });
 
     const {
         alerts,
@@ -66,25 +89,11 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
     const [uiSubscriptionGroups, setUiSubscriptionGroups] = useState<
         UiSubscriptionGroup[]
     >([]);
-    const { showDialog } = useDialogProviderV1();
-    const { t } = useTranslation();
-    const { notify } = useNotificationProviderV1();
 
     useEffect(() => {
         // Time range refreshed, fetch subscription groups
         fetchAllSubscriptionGroups();
     }, []);
-
-    useEffect(() => {
-        notifyIfErrors(
-            getSubscriptionGroupStatus,
-            getSubscriptionGroupErrorMessages,
-            notify,
-            t("message.error-while-fetching", {
-                entity: t("label.subscription-groups"),
-            })
-        );
-    }, [getSubscriptionGroupStatus]);
 
     useEffect(() => {
         notifyIfErrors(
@@ -124,7 +133,6 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
     const fetchAllSubscriptionGroups = (): void => {
         setUiSubscriptionGroups([]);
 
-        getSubscriptionGroups();
         getEnumerationItems();
         getAlerts();
     };
@@ -163,7 +171,9 @@ export const SubscriptionGroupsAllPage: FunctionComponent = () => {
         );
     };
     const statusList = [
-        getSubscriptionGroupStatus,
+        isSubscriptionGroupsRequestError
+            ? ActionStatus.Error
+            : ActionStatus.Done,
         getAlertsStatus,
         getEnumerationItemsStatus,
     ];

@@ -24,7 +24,7 @@ export enum AnomalyFilterQueryStringKey {
 }
 
 export interface AnomalyFiltersSelectionProps {
-    subscriptionGroupData: SubscriptionGroup[] | null;
+    subscriptionGroupData: SubscriptionGroup[] | undefined;
     alertsData: Alert[] | null;
     enumerationItemsData: EnumerationItem[] | null;
 }

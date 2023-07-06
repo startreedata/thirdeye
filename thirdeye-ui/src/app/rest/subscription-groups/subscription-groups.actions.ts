@@ -15,33 +15,8 @@
 
 import { useHTTPAction } from "../create-rest-action";
 import { SubscriptionGroup } from "../dto/subscription-group.interfaces";
-import {
-    CreateSubscriptionGroup,
-    GetSubscriptionGroups,
-} from "./subscription-groups.interface";
-import {
-    createSubscriptionGroup,
-    getAllSubscriptionGroups,
-} from "./subscription-groups.rest";
-
-export const useGetSubscriptionGroups = (): GetSubscriptionGroups => {
-    const { data, makeRequest, status, errorMessages, resetData } =
-        useHTTPAction<SubscriptionGroup[]>(getAllSubscriptionGroups);
-
-    const getSubscriptionGroups = (): Promise<
-        SubscriptionGroup[] | undefined
-    > => {
-        return makeRequest();
-    };
-
-    return {
-        subscriptionGroups: data,
-        getSubscriptionGroups,
-        status,
-        errorMessages,
-        resetData,
-    };
-};
+import { CreateSubscriptionGroup } from "./subscription-groups.interface";
+import { createSubscriptionGroup } from "./subscription-groups.rest";
 
 export const useCreateSubscriptionGroup = (): CreateSubscriptionGroup => {
     const { data, makeRequest, status, errorMessages, resetData } =

@@ -114,7 +114,7 @@ export const PastDurationPicker: FunctionComponent<PastDurationPickerProps> = ({
                     color="primary"
                     disabled={shouldDisableRefreshBtn}
                     size="medium"
-                    variant="outlined"
+                    variant="contained"
                     onClick={handleSetClick}
                 >
                     <ReplayIcon />

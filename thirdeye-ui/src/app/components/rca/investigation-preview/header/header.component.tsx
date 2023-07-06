@@ -47,7 +47,7 @@ export const Header: FunctionComponent<HeaderProps> = ({
                             color="primary"
                         />
                     }
-                    label={t("label.one-chart")}
+                    label={t("label.consolidated")}
                     value={ChartType.ONE}
                     onClick={() => onOptionClick(ChartType.ONE)}
                 />
@@ -58,7 +58,7 @@ export const Header: FunctionComponent<HeaderProps> = ({
                             color="primary"
                         />
                     }
-                    label={t("label.multi-chart")}
+                    label={t("label.split")}
                     value={ChartType.MULTI}
                     onClick={() => onOptionClick(ChartType.MULTI)}
                 />

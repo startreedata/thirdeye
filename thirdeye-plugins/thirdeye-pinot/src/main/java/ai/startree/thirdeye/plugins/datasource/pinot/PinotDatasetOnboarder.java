@@ -31,7 +31,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -71,19 +70,10 @@ public class PinotDatasetOnboarder {
         formatSpec.getTimeFormat().equals(TimeFormat.SIMPLE_DATE_FORMAT) ? String
             .format("%s:%s", TimeFormat.SIMPLE_DATE_FORMAT, formatSpec.getSDFPattern())
             : TimeFormat.EPOCH.toString();
-    setDateTimeSpecs(datasetConfigDTO, dateTimeFieldSpec.getName(), timeFormatStr,
-        formatSpec.getColumnSize(),
-        formatSpec.getColumnUnit());
-  }
-
-  public static void setDateTimeSpecs(final DatasetConfigDTO datasetConfigDTO,
-      final String timeColumnName,
-      final String timeFormatStr,
-      final int columnSize, final TimeUnit columnUnit) {
     datasetConfigDTO
-        .setTimeColumn(timeColumnName)
-        .setTimeDuration(columnSize)
-        .setTimeUnit(columnUnit)
+        .setTimeColumn(dateTimeFieldSpec.getName())
+        .setTimeDuration(formatSpec.getColumnSize())
+        .setTimeUnit(formatSpec.getColumnUnit())
         .setTimeFormat(timeFormatStr)
         .setTimezone(DEFAULT_CHRONOLOGY.getZone().toString());
   }

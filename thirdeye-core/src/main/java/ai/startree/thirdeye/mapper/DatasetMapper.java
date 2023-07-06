@@ -19,7 +19,6 @@ import ai.startree.thirdeye.spi.api.DataSourceApi;
 import ai.startree.thirdeye.spi.api.DatasetApi;
 import ai.startree.thirdeye.spi.api.TimeColumnApi;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import ai.startree.thirdeye.spi.detection.TimeGranularity;
 import com.google.common.annotations.VisibleForTesting;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
@@ -73,11 +72,11 @@ public interface DatasetMapper {
             .map(ApiBeanMapper::toApi).orElse(null))
         .setTimeColumns(dto.getTimeColumns());
     optional(dto.getRcaExcludedDimensions()).ifPresent(datasetApi::setRcaExcludedDimensions);
+    final Duration interval = optional(dto.getTimeDuration()).map(d -> Duration.of(d,dto.getTimeUnit().toChronoUnit())).orElse(null);
     optional(dto.getTimeColumn()).ifPresent(timeColumn -> datasetApi.setTimeColumn(
         new TimeColumnApi()
             .setName(timeColumn)
-            .setInterval(optional(dto.bucketTimeGranularity()).map(TimeGranularity::toDuration)
-                .orElse(null))
+            .setInterval(interval)
             .setFormat(dto.getTimeFormat())
             .setTimezone(dto.getTimezone())));
 

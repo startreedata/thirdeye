@@ -16,7 +16,6 @@ package ai.startree.thirdeye.spi.metric;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import ai.startree.thirdeye.spi.detection.TimeGranularity;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
@@ -24,7 +23,6 @@ import java.util.List;
 import java.util.Objects;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 
 /**
@@ -69,28 +67,6 @@ public final class MetricSlice {
         predicates,
         ArrayListMultimap.create(),
         datasetConfigDTO);
-  }
-
-  public static MetricSlice from(final @NonNull MetricConfigDTO metricConfigDTO,
-      final Interval interval,
-      final List<Predicate> predicates, TimeGranularity granularity,
-      final @NonNull DatasetConfigDTO datasetConfigDTO) {
-    // todo cyril set granularity
-    return new MetricSlice(metricConfigDTO,
-        interval,
-        predicates,
-        ArrayListMultimap.create(),
-        datasetConfigDTO);
-  }
-
-  @Deprecated
-  public static MetricSlice from(final long metricId, long start, long end,
-      Multimap<String, String> filters) {
-    return new MetricSlice((MetricConfigDTO) new MetricConfigDTO().setId(metricId),
-        new Interval(start, end, DateTimeZone.UTC),
-        List.of(),
-        filters,
-        new DatasetConfigDTO());
   }
 
   public @NonNull MetricConfigDTO getMetricConfigDTO() {

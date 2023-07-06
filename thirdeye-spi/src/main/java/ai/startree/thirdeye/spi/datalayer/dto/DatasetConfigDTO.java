@@ -15,7 +15,6 @@ package ai.startree.thirdeye.spi.datalayer.dto;
 
 import ai.startree.thirdeye.spi.api.TimeColumnApi;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
-import ai.startree.thirdeye.spi.detection.TimeGranularity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Collections;
@@ -34,8 +33,19 @@ public class DatasetConfigDTO extends AbstractDTO {
   private String dataset;
   private Templatable<List<String>> dimensions;
   private String timeColumn;
+  /**
+   * Only meaningful when the timeFormat is EPOCH. Contains MILLISECONDS, SECONDS. etc...
+   */
+  @Deprecated
   private TimeUnit timeUnit;
+  /**
+   * Only meaningful when he timeFormat is EPOCH. The number of Units. In most cases it should be
+   * one.
+   * todo cyril timeUnit and timeDuration should be replaced by a fullTimeFormat field, that totally defines the format
+   */
+  @Deprecated
   private Integer timeDuration;
+  // as of today, partial format, for Pinot either EPOCH or SIMPLE_DATE_FORMAT - should be replaced by a single string that totally defines the format
   private String timeFormat;
   private String timezone;
   private String dataSource;
@@ -47,14 +57,14 @@ public class DatasetConfigDTO extends AbstractDTO {
    * This info is used to optimize generated queries.
    * For instance
    * [ {
-   *   "name": "timeBucket1hour",
-   *   "granularity": "PT1H",
-   *   "timezone: "UTC"
-   *   },
-   *   {
-   *   "name": "timeBucket5minute",
-   *   "granularity": "PT5M"
-   *   },
+   * "name": "timeBucket1hour",
+   * "granularity": "PT1H",
+   * "timezone: "UTC"
+   * },
+   * {
+   * "name": "timeBucket5minute",
+   * "granularity": "PT5M"
+   * },
    * ]
    */
   private List<TimeColumnApi> timeColumns;
@@ -64,7 +74,8 @@ public class DatasetConfigDTO extends AbstractDTO {
    */
   private String completenessDelay;
   /**
-   * ISO-8601 period. Eg P7D. At detection run, TE re-runs the detection starting from min(lastTimestamp,
+   * ISO-8601 period. Eg P7D. At detection run, TE re-runs the detection starting from
+   * min(lastTimestamp,
    * endTime-replayPeriod). Used to manage data mutability.
    */
   private String mutabilityPeriod;
@@ -111,9 +122,6 @@ public class DatasetConfigDTO extends AbstractDTO {
 
   private Map<String, String> properties = new HashMap<>();
 
-  @JsonIgnore
-  private TimeGranularity bucketTimeGranularity;
-
   public String getDataset() {
     return dataset;
   }
@@ -156,15 +164,6 @@ public class DatasetConfigDTO extends AbstractDTO {
     return this;
   }
 
-  /**
-   * Use DatasetConfigDTO.bucketTimeGranularity instead of this method for considering the additives
-   * of the dataset.
-   *
-   * This method is preserved for reading object from database via object mapping (i.e., Java
-   * reflection)
-   *
-   * @return the duration of the granularity of the timestamp of each data point.
-   */
   @Deprecated
   public Integer getTimeDuration() {
     return timeDuration;
@@ -344,33 +343,6 @@ public class DatasetConfigDTO extends AbstractDTO {
             dataSource, owners, active, additive, dimensionsHaveNoPreAggregation,
             preAggregatedKeyword,
             realtime, properties);
-  }
-
-  /**
-   * Returns the granularity of a bucket (i.e., a data point) of this dataset if such information is
-   * available.
-   *
-   * The granularity that is defined in dataset configuration actually defines the granularity of
-   * the timestamp of each
-   * data point. For instance, timestamp's granularity (in database) could be 1-MILLISECONDS but the
-   * bucket's
-   * granularity is 1-HOURS. In real applications, the granularity of timestamp is never being used.
-   * Therefore, this
-   * method returns the actual granularity of the bucket (data point) if such information is
-   * available in the cnofig.
-   * This information is crucial for non-additive dataset.
-   *
-   * @return the granularity of a bucket (a data point) of this dataset.
-   */
-  @Deprecated
-  public TimeGranularity bucketTimeGranularity() {
-    if (bucketTimeGranularity == null) {
-      Integer size = getTimeDuration();
-      TimeUnit timeUnit = getTimeUnit();
-      bucketTimeGranularity =
-          (size != null && timeUnit != null) ? new TimeGranularity(size, timeUnit) : null;
-    }
-    return bucketTimeGranularity;
   }
 
   public String getMutabilityPeriod() {

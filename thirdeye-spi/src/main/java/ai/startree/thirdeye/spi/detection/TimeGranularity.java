@@ -18,6 +18,7 @@ import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
+@Deprecated // use a joda Period instead
 public class TimeGranularity {
 
   private final int size;

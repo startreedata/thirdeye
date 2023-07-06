@@ -56,10 +56,6 @@
       <outputDirectory>plugins/example/</outputDirectory>
     </fileSet>
     <fileSet>
-      <directory>${thirdeye.root}/thirdeye-plugins/thirdeye-datasources/target/thirdeye-datasources-${project.version}-dist</directory>
-      <outputDirectory>plugins/datasources-default/</outputDirectory>
-    </fileSet>
-    <fileSet>
       <directory>${thirdeye.root}/thirdeye-plugins/thirdeye-pinot/target/thirdeye-pinot-${project.version}-dist</directory>
       <outputDirectory>plugins/datasource-pinot/</outputDirectory>
     </fileSet>

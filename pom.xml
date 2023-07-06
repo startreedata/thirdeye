@@ -465,11 +465,6 @@
       </dependency>
       <dependency>
         <groupId>ai.startree.thirdeye.plugins</groupId>
-        <artifactId>thirdeye-datasources</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>ai.startree.thirdeye.plugins</groupId>
         <artifactId>thirdeye-pinot</artifactId>
         <version>${project.version}</version>
       </dependency>

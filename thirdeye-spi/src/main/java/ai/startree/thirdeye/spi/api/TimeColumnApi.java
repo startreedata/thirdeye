@@ -31,12 +31,11 @@ public class TimeColumnApi {
   private String format;
   private String timezone;
   /**
-   * Granularity of the measurements.
+   * Granularity of the measurements in ISO-8601 format.
    * For instance, a time column can be in format epoch millis, but only have value corresponding to
    * buckets of 1 minute.
    * In this case, granularity would be 1-minute = PT1M.
    */
-  // TODO CYRIL USE A Period - introduce jackson joda
   private String granularity;
 
   public String getName() {

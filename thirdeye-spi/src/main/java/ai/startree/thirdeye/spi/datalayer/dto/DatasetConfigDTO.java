@@ -92,7 +92,8 @@ public class DatasetConfigDTO extends AbstractDTO {
   // The pre-aggregated keyword
   private String preAggregatedKeyword = DEFAULT_PREAGGREGATED_DIMENSION_VALUE;
 
-  // the actual time duration for non-additive dataset
+  @Deprecated
+  @JsonIgnore
   private Integer nonAdditiveBucketSize;
 
   // the actual time unit for non-additive dataset
@@ -247,15 +248,6 @@ public class DatasetConfigDTO extends AbstractDTO {
     return this;
   }
 
-  public Integer getNonAdditiveBucketSize() {
-    return nonAdditiveBucketSize;
-  }
-
-  public DatasetConfigDTO setNonAdditiveBucketSize(Integer nonAdditiveBucketSize) {
-    this.nonAdditiveBucketSize = nonAdditiveBucketSize;
-    return this;
-  }
-
   public TimeUnit getNonAdditiveBucketUnit() {
     return nonAdditiveBucketUnit;
   }
@@ -349,8 +341,7 @@ public class DatasetConfigDTO extends AbstractDTO {
         && Objects.equals(
         dimensionsHaveNoPreAggregation, that.dimensionsHaveNoPreAggregation) && Objects
         .equals(preAggregatedKeyword,
-            that.preAggregatedKeyword) && Objects
-        .equals(nonAdditiveBucketSize, that.nonAdditiveBucketSize)
+            that.preAggregatedKeyword)
         && nonAdditiveBucketUnit == that.nonAdditiveBucketUnit
         && Objects.equals(properties, that.properties);
   }
@@ -362,7 +353,7 @@ public class DatasetConfigDTO extends AbstractDTO {
             timezone,
             dataSource, owners, active, additive, dimensionsHaveNoPreAggregation,
             preAggregatedKeyword,
-            nonAdditiveBucketSize, nonAdditiveBucketUnit, realtime, properties);
+            nonAdditiveBucketUnit, realtime, properties);
   }
 
   /**
@@ -384,8 +375,7 @@ public class DatasetConfigDTO extends AbstractDTO {
   @Deprecated
   public TimeGranularity bucketTimeGranularity() {
     if (bucketTimeGranularity == null) {
-      Integer size =
-          getNonAdditiveBucketSize() != null ? getNonAdditiveBucketSize() : getTimeDuration();
+      Integer size = getTimeDuration();
       TimeUnit timeUnit =
           getNonAdditiveBucketUnit() != null ? getNonAdditiveBucketUnit() : getTimeUnit();
       bucketTimeGranularity =

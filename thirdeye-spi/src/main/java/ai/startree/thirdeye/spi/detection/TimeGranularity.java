@@ -17,11 +17,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.DurationFieldType;
-import org.joda.time.Period;
-import org.joda.time.PeriodType;
 
 public class TimeGranularity {
 
@@ -75,98 +70,6 @@ public class TimeGranularity {
    */
   public long toMillis(long number) {
     return unit.toMillis(number * size);
-  }
-
-  /**
-   * Returns the equivalent milliseconds of the specified number of this time granularity,
-   * given a time zone.
-   *
-   * @param number the specified number of this time granularity.
-   * @param timeZone the time zone to base the timestamp off of
-   * @return the timestamp in millis
-   */
-  public long toMillis(long number, DateTimeZone timeZone) {
-    if (number > Integer.MAX_VALUE) {
-      switch (this.getUnit()) {
-        case MILLISECONDS:
-          return number;
-        case SECONDS:
-          return number * 1000;
-        default:
-          throw new IllegalArgumentException("epoch offset too large");
-      }
-    }
-
-    return new DateTime(0, timeZone).plus(this.toPeriod((int) number)).getMillis();
-  }
-
-  /**
-   * Returns an equivalent Period object of this time granularity.
-   *
-   * @return an equivalent Period object of this time granularity.
-   */
-  public Period toPeriod() {
-    return toPeriod(1);
-  }
-
-  /**
-   * Returns an equivalent Period object of the specified number of this time granularity.
-   *
-   * @param number the specified number of this time granularity.
-   * @return an equivalent Period object of the specified number of this time granularity.
-   */
-  public Period toPeriod(int number) {
-    int size = this.size * number;
-    switch (unit) {
-      case DAYS:
-        return new Period().withPeriodType(PeriodType.days())
-            .withField(DurationFieldType.days(), size);
-      case HOURS:
-        return new Period().withPeriodType(PeriodType.hours())
-            .withField(DurationFieldType.hours(), size);
-      case MINUTES:
-        return new Period().withPeriodType(PeriodType.minutes())
-            .withField(DurationFieldType.minutes(), size);
-      case SECONDS:
-        return new Period().withPeriodType(PeriodType.seconds())
-            .withField(DurationFieldType.seconds(), size);
-      case MILLISECONDS:
-        return new Period().withPeriodType(PeriodType.millis())
-            .withField(DurationFieldType.millis(), size);
-    }
-    throw new IllegalArgumentException(String.format("Unsupported unit type %s", this.unit));
-  }
-
-  /**
-   * Converts millis to time unit
-   * e.g. If TimeGranularity is defined as 1 HOURS,
-   * and we invoke convertToUnit(1458284400000) (i.e. 2016-03-18 00:00:00)
-   * this method will return HOURS.convert(1458284400000, MILLISECONDS)/1 = 405079 hoursSinceEpoch
-   * If TimeGranularity is defined as 10 MINUTES,
-   * and we invoke convertToUnit(1458284400000) (i.e. 2016-03-18 00:00:00)
-   * this method will return MINUTES.convert(1458284400000, MILLISECONDS)/10 = 2430474
-   * tenMinutesSinceEpoch
-   */
-  public long convertToUnit(long millis) {
-    return unit.convert(millis, TimeUnit.MILLISECONDS) / size;
-  }
-
-  /**
-   * Initialize time granularity from its aggregation string representation, in which duration and
-   * unit are separated
-   * by "_". For instance, "5_MINUTES" initialize a time granularity with size = 5 and TimeUnit =
-   * "MINUTES".
-   *
-   * @param timeGranularityString the aggregation string representation of the time granularity.
-   * @return time granularity that is initialized from the given aggregation string representation.
-   */
-  public static TimeGranularity fromString(String timeGranularityString) {
-    if (timeGranularityString.contains("_")) {
-      String[] split = timeGranularityString.split("_");
-      return new TimeGranularity(Integer.parseInt(split[0]), TimeUnit.valueOf(split[1]));
-    } else {
-      return new TimeGranularity(1, TimeUnit.valueOf(timeGranularityString));
-    }
   }
 
   public Duration toDuration() {

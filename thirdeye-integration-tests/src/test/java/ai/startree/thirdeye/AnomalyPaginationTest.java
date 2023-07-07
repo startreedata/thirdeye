@@ -24,11 +24,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.datalayer.util.DatabaseConfiguration;
+import ai.startree.thirdeye.spi.api.AlertApi;
+import ai.startree.thirdeye.spi.api.AlertTemplateApi;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
+import ai.startree.thirdeye.spi.api.PlanNodeApi;
 import ai.startree.thirdeye.spi.api.StatusListApi;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
 import io.dropwizard.testing.DropwizardTestSupport;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.ws.rs.client.Client;
@@ -72,9 +76,18 @@ public class AnomalyPaginationTest {
     SUPPORT.before();
     client = buildClient("pagination-test-client", SUPPORT);
 
+    var alertId = request("api/alerts")
+        .post(Entity.json(List.of(new AlertApi()
+            .setName("test_alert")
+            .setLastTimestamp(new Date())
+            .setTemplate(new AlertTemplateApi().setNodes(List.of(new PlanNodeApi()))))))
+        .readEntity(new GenericType<List<AlertApi>>() {})
+        .get(0)
+        .getId();
+
     final List<AnomalyApi> anomalies = new ArrayList<>();
     for (int i = 0; i < TOTAL_ANOMALIES; i++) {
-      anomalies.add(anomaly());
+      anomalies.add(new AnomalyApi().setAlert(new AlertApi().setId(alertId)));
     }
     request("api/anomalies").post(Entity.json(anomalies));
   }

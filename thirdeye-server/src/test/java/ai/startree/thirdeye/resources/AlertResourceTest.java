@@ -67,13 +67,8 @@ public class AlertResourceTest {
   private static AlertResource newAlertResource(final AlertManager alertManager,
       final AlertTemplateRenderer alertTemplateRenderer,
       final AccessControl accessControl) {
-    final AuthorizationManager authorizationManager = new AuthorizationManager(
-        alertTemplateRenderer,
-        accessControl
-    );
-    return new AlertResource(
-        newAlertService(alertManager, authorizationManager)
-    );
+    final AuthorizationManager authorizationManager = newAuthorizationManager(alertTemplateRenderer, accessControl);
+    return new AlertResource(newAlertService(alertManager, authorizationManager));
   }
 
   private static AlertService newAlertService(final AlertManager alertManager,
@@ -245,10 +240,9 @@ public class AlertResourceTest {
         alertManager,
         mock(AppAnalyticsService.class),
         mock(AlertInsightsProvider.class),
-        new AuthorizationManager(alertTemplateRenderer,
+        newAuthorizationManager(alertTemplateRenderer,
             (String token, ResourceIdentifier id, AccessType accessType) ->
-                id.namespace.equals("allowedNamespace")
-        ))
+                id.namespace.equals("allowedNamespace")))
     ).evaluate(nobody(), alertEvaluationApi);
   }
 
@@ -298,10 +292,9 @@ public class AlertResourceTest {
         alertManager,
         mock(AppAnalyticsService.class),
         mock(AlertInsightsProvider.class),
-        new AuthorizationManager(alertTemplateRenderer,
+        newAuthorizationManager(alertTemplateRenderer,
             (String token, ResourceIdentifier id, AccessType accessType) ->
-                accessType == AccessType.READ && id.namespace.equals("allowedNamespace")
-        ))
+                accessType == AccessType.READ && id.namespace.equals("allowedNamespace")))
     );
 
     try (Response resp = alertResource.evaluate(nobody(), alertEvaluationApi)) {
@@ -344,10 +337,9 @@ public class AlertResourceTest {
         mock(AlertManager.class),
         mock(AppAnalyticsService.class),
         mock(AlertInsightsProvider.class),
-        new AuthorizationManager(alertTemplateRenderer,
+        newAuthorizationManager(alertTemplateRenderer,
             (String token, ResourceIdentifier id, AccessType accessType) ->
-                id.namespace.equals("readonlyNamespace") && accessType == AccessType.READ
-        ))
+                id.namespace.equals("readonlyNamespace") && accessType == AccessType.READ))
     ).evaluate(nobody(), alertEvaluationApi);
   }
 
@@ -394,10 +386,9 @@ public class AlertResourceTest {
         mock(AlertManager.class),
         mock(AppAnalyticsService.class),
         mock(AlertInsightsProvider.class),
-        new AuthorizationManager(alertTemplateRenderer,
+        newAuthorizationManager(alertTemplateRenderer,
             (String token, ResourceIdentifier id, AccessType accessType) ->
-                id.namespace.equals("allowedNamespace")
-        ))
+                id.namespace.equals("allowedNamespace")))
     );
 
     try (Response resp = resource.evaluate(nobody(), alertEvaluationApi)) {
@@ -407,6 +398,11 @@ public class AlertResourceTest {
       assertThat(results.getDetectionEvaluations().get("allowedEval")).isNotNull();
       assertThat(results.getDetectionEvaluations().get("blockedEval")).isNull();
     }
+  }
+
+  private static AuthorizationManager newAuthorizationManager(
+      final AlertTemplateRenderer alertTemplateRenderer, final AccessControl accessControl) {
+    return new AuthorizationManager(alertTemplateRenderer, accessControl, null, null, null);
   }
 
   @Test(expectedExceptions = ForbiddenException.class)

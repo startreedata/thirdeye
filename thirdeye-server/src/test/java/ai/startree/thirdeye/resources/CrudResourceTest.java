@@ -383,7 +383,7 @@ class DummyResource extends CrudResource<DummyApi, DummyDto> {
       final ImmutableMap<String, String> apiToBeanMap,
       final AccessControl accessControl) {
     super(new DummyService(
-        new AuthorizationManager(mock(AlertTemplateRenderer.class), accessControl),
+        new AuthorizationManager(mock(AlertTemplateRenderer.class), accessControl, null, null, null),
         dtoManager,
         apiToBeanMap));
   }

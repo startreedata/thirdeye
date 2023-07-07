@@ -23,9 +23,13 @@ import ai.startree.thirdeye.datalayer.dao.SubEntities;
 import ai.startree.thirdeye.spi.accessControl.AccessControl;
 import ai.startree.thirdeye.spi.accessControl.AccessType;
 import ai.startree.thirdeye.spi.accessControl.ResourceIdentifier;
+import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
+import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
+import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import com.google.inject.Inject;
 import java.util.ArrayList;
@@ -49,14 +53,22 @@ public class AuthorizationManager {
 
   private final AlertTemplateRenderer alertTemplateRenderer;
   private final AccessControl accessControl;
+  private final AlertManager alertManager;
+  private final EnumerationItemManager enumerationItemManager;
+  private final AnomalyManager anomalyManager;
 
   @Inject
   public AuthorizationManager(
       final AlertTemplateRenderer alertTemplateRenderer,
-      final AccessControl accessControl
-  ) {
+      final AccessControl accessControl,
+      final AlertManager alertManager,
+      final EnumerationItemManager enumerationItemManager,
+      final AnomalyManager anomalyManager) {
     this.alertTemplateRenderer = alertTemplateRenderer;
     this.accessControl = accessControl;
+    this.alertManager = alertManager;
+    this.enumerationItemManager = enumerationItemManager;
+    this.anomalyManager = anomalyManager;
   }
 
   public <T extends AbstractDTO> void ensureCanCreate(final ThirdEyePrincipal principal,
@@ -129,13 +141,54 @@ public class AuthorizationManager {
         accessControl.hasAccess(principal.getAuthToken(), ROOT_RESOURCE_ID, AccessType.WRITE);
   }
 
-  static public <T extends AbstractDTO> ResourceIdentifier resourceId(final T dto) {
-    return ResourceIdentifier.from(
-        optional(dto.getId()).map(Objects::toString).orElse(DEFAULT_NAME),
-        optional(dto.getAuth())
-            .map(AuthorizationConfigurationDTO::getNamespace).orElse(DEFAULT_NAMESPACE),
-        optional(SubEntities.BEAN_TYPE_MAP.get(dto.getClass()))
-            .map(Objects::toString).orElse(DEFAULT_ENTITY_TYPE));
+  // Returns the resource identifier for a dto.
+  // Null is ok and maps to a default resource id.
+  public ResourceIdentifier resourceId(final AbstractDTO dto) {
+    final var name = optional(dto)
+        .map(AbstractDTO::getId)
+        .map(Objects::toString)
+        .orElse(DEFAULT_NAME);
+
+    final var namespace = optional(dto)
+        .map(this::resolveAuthParentDto)
+        .map(AbstractDTO::getAuth)
+        .map(AuthorizationConfigurationDTO::getNamespace)
+        .orElse(DEFAULT_NAMESPACE);
+
+    final var entityType = optional(dto)
+        .map(AbstractDTO::getClass)
+        .map(SubEntities.BEAN_TYPE_MAP::get)
+        .map(Objects::toString)
+        .orElse(DEFAULT_ENTITY_TYPE);
+
+    return ResourceIdentifier.from(name, namespace, entityType);
+  }
+
+  // Resolves the Authorization parent for certain dto classes.
+  // AnomalyDTO -> EnumerationItemDTO if exists, else AlertDTO
+  // Everything else -> itself
+  private AbstractDTO resolveAuthParentDto(final AbstractDTO dto) {
+    if (dto instanceof AnomalyDTO) {
+      return resolveAuthParentDto((AnomalyDTO) (dto));
+    } else {
+      return dto;
+    }
+  }
+
+  private AbstractDTO resolveAuthParentDto(final AnomalyDTO dto) {
+    if (dto == null) {
+      return null;
+    }
+
+    if (dto.getEnumerationItem() != null) {
+      return optional(dto.getEnumerationItem().getId())
+          .map(enumerationItemManager::findById)
+          .orElse(null);
+    }
+
+    return optional(dto.getDetectionConfigId())
+        .map(alertManager::findById)
+        .orElse(null);
   }
 
   private <T extends AbstractDTO> List<ResourceIdentifier> relatedEntities(T entity) {

@@ -28,7 +28,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyResultSource;
-import ai.startree.thirdeye.spi.detection.ConfigUtils;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Collection;
@@ -114,7 +113,7 @@ public class SubscriptionGroupFilter {
    * @return List of Alert Association objects
    */
   private List<AlertAssociationDto> generate(final SubscriptionGroupDTO subscriptionGroup) {
-    final List<Long> alertIds = ConfigUtils.getLongs(subscriptionGroup.getProperties()
+    final List<Long> alertIds = SubscriptionGroupFilterUtils.getLongs(subscriptionGroup.getProperties()
         .get(PROP_DETECTION_CONFIG_IDS));
 
     return alertIds.stream()

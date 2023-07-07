@@ -36,7 +36,7 @@ jobs:
         key: tests-${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
         restore-keys: tests-${{ runner.os }}-maven-
     - name: Build with Maven
-      run: ./mvnw -U -T 1C -B clean verify
+      run: ./mvnw -U -B clean verify
       env:
         ARTIFACTORY_USERNAME_REF: ${{ secrets.MVN_ARTIFACTORY_USERNAME }}
         ARTIFACTORY_TOKEN_REF: ${{ secrets.MVN_ARTIFACTORY_TOKEN }}

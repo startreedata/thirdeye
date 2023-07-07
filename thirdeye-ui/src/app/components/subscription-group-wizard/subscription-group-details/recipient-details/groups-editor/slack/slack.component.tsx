@@ -136,7 +136,7 @@ export const Slack: FunctionComponent<SlackProps> = ({
 
                                 <FormHelperText>
                                     e.g.
-                                    https://company.slack.com/archives/XXXXXXXX
+                                    https://hooks.slack.com/services/T1234567/AAAAAAAA/ZZZZZZ
                                 </FormHelperText>
                             </>
                         }

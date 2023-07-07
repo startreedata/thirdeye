@@ -19,15 +19,17 @@ import static org.mockito.Mockito.when;
 
 import ai.startree.thirdeye.spi.accessControl.ResourceIdentifier;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
+import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import org.testng.annotations.Test;
 
 public class AuthorizationManagerTest {
 
   @Test
-  public void testResourceId_forNullDto() {
+  public void testResourceIdForNullDto() {
     final var authorizationManager = new AuthorizationManager(
         null, null, null, null, null);
     final var got = authorizationManager.resourceId(null);
@@ -37,11 +39,11 @@ public class AuthorizationManagerTest {
   }
 
   @Test
-  public void testResourceId_forAnomalyDto() {
+  public void testResourceIdForAnomalyDtoWithoutEnum() {
     final var alertManager = mock(AlertManager.class);
     final var alertDto = new AlertDTO();
     alertDto.setId(1L);
-    alertDto.setAuth(new AuthorizationConfigurationDTO().setNamespace("test_namespace"));
+    alertDto.setAuth(new AuthorizationConfigurationDTO().setNamespace("alert_namespace"));
     when(alertManager.findById(1L)).thenReturn(alertDto);
 
     final var anomalyDto = new AnomalyDTO();
@@ -53,7 +55,35 @@ public class AuthorizationManagerTest {
 
     final var got = authorizationManager.resourceId(anomalyDto);
     assertThat(got.name).isEqualTo("2");
-    assertThat(got.namespace).isEqualTo("test_namespace");
+    assertThat(got.namespace).isEqualTo("alert_namespace");
+    assertThat(got.entityType).isEqualTo("ANOMALY");
+  }
+
+  @Test
+  public void testResourceIdForAnomalyDtoWithEnum() {
+    final var alertManager = mock(AlertManager.class);
+    final var alertDto = new AlertDTO();
+    alertDto.setId(1L);
+    alertDto.setAuth(new AuthorizationConfigurationDTO().setNamespace("alert_namespace"));
+    when(alertManager.findById(1L)).thenReturn(alertDto);
+
+    final var enumManager = mock(EnumerationItemManager.class);
+    final var enumItemDto = new EnumerationItemDTO();
+    enumItemDto.setId(2L);
+    enumItemDto.setAuth(new AuthorizationConfigurationDTO().setNamespace("enum_namespace"));
+    when(enumManager.findById(2L)).thenReturn(enumItemDto);
+
+    final var anomalyDto = new AnomalyDTO();
+    anomalyDto.setDetectionConfigId(1L);
+    anomalyDto.setEnumerationItem((EnumerationItemDTO) new EnumerationItemDTO().setId(2L));
+    anomalyDto.setId(3L);
+
+    final var authorizationManager = new AuthorizationManager(
+        null, null, alertManager, enumManager, null);
+
+    final var got = authorizationManager.resourceId(anomalyDto);
+    assertThat(got.name).isEqualTo("3");
+    assertThat(got.namespace).isEqualTo("enum_namespace");
     assertThat(got.entityType).isEqualTo("ANOMALY");
   }
 }

@@ -51,7 +51,7 @@ public class DataSourceResourceTest {
         mock(DataSourceOnboarder.class),
         new AuthorizationManager(
             mock(AlertTemplateRenderer.class),
-            AccessControlProvider.alwaysAllow,
+            AccessControlProvider.ALWAYS_ALLOW,
             null,
             null,
             null

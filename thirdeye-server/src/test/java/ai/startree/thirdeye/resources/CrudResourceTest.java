@@ -60,7 +60,7 @@ public class CrudResourceTest {
     });
     when(manager.update(any(DummyDto.class))).thenReturn(1);
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
-        AccessControlProvider.alwaysAllow);
+        AccessControlProvider.ALWAYS_ALLOW);
 
     final List<String> emails = List.of("tester1@testing.com", "tester2@testing.com");
     final ThirdEyePrincipal owner = getPrincipal(emails.get(0));
@@ -88,7 +88,7 @@ public class CrudResourceTest {
     });
     when(manager.update(any(DummyDto.class))).thenReturn(1);
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
-        AccessControlProvider.alwaysAllow);
+        AccessControlProvider.ALWAYS_ALLOW);
 
     final List<String> emails = List.of("tester1@testing.com", "tester2@testing.com");
     final Timestamp before = new Timestamp(1671476530000L);
@@ -134,7 +134,7 @@ public class CrudResourceTest {
     ));
 
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
-        AccessControlProvider.alwaysDeny);
+        AccessControlProvider.ALWAYS_DENY);
     try (Response resp = resource.list(nobody(), uriInfo)) {
       assertThat(resp.getStatus()).isEqualTo(200);
 
@@ -156,7 +156,7 @@ public class CrudResourceTest {
 
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
         (String token, ResourceIdentifier identifiers, AccessType accessType)
-            -> identifiers.name.equals("2"));
+            -> identifiers.getName().equals("2"));
 
     try (Response resp = resource.list(nobody(), uriInfo)) {
       assertThat(resp.getStatus()).isEqualTo(200);
@@ -172,7 +172,7 @@ public class CrudResourceTest {
     final DummyManager manager = mock(DummyManager.class);
     when(manager.findById(1L)).thenReturn((DummyDto) new DummyDto().setId(1L));
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
-        AccessControlProvider.alwaysDeny);
+        AccessControlProvider.ALWAYS_DENY);
     resource.get(new ThirdEyePrincipal("nobody", ""), 1L);
   }
 
@@ -181,7 +181,7 @@ public class CrudResourceTest {
     final DummyManager manager = mock(DummyManager.class);
     when(manager.findById(1L)).thenReturn((DummyDto) new DummyDto().setId(1L));
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
-        AccessControlProvider.alwaysDeny);
+        AccessControlProvider.ALWAYS_DENY);
     resource.delete(nobody(), 1L);
   }
 
@@ -194,7 +194,7 @@ public class CrudResourceTest {
         (DummyDto) new DummyDto().setId(3L)
     ));
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
-        AccessControlProvider.alwaysDeny);
+        AccessControlProvider.ALWAYS_DENY);
     resource.deleteAll(nobody());
   }
 
@@ -210,7 +210,7 @@ public class CrudResourceTest {
 
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
         (String token, ResourceIdentifier identifiers, AccessType accessType)
-            -> identifiers.name.equals("2"));
+            -> identifiers.getName().equals("2"));
     resource.deleteAll(nobody());
   }
 
@@ -218,7 +218,7 @@ public class CrudResourceTest {
   public void testCreateMultiple_withNoAccess() {
     final DummyManager manager = mock(DummyManager.class);
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
-        AccessControlProvider.alwaysDeny);
+        AccessControlProvider.ALWAYS_DENY);
 
     resource.createMultiple(nobody(),
         Arrays.asList(new DummyApi(), new DummyApi(), new DummyApi()));
@@ -228,7 +228,7 @@ public class CrudResourceTest {
   public void testCreateMultiple_withNoAccessToRelatedResources() {
     final DummyManager manager = mock(DummyManager.class);
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
-        AccessControlProvider.alwaysDeny);
+        AccessControlProvider.ALWAYS_DENY);
 
     resource.createMultiple(
         nobody(),
@@ -244,7 +244,7 @@ public class CrudResourceTest {
     when(manager.findById(3L)).thenReturn((DummyDto) new DummyDto().setId(3L));
 
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
-        AccessControlProvider.alwaysDeny);
+        AccessControlProvider.ALWAYS_DENY);
 
     resource.editMultiple(nobody(), Arrays.asList(
         new DummyApi().setId(1L),
@@ -262,7 +262,7 @@ public class CrudResourceTest {
 
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
         (String token, ResourceIdentifier identifiers, AccessType accessType)
-            -> identifiers.name.equals("2"));
+            -> identifiers.getName().equals("2"));
 
     resource.editMultiple(nobody(), Arrays.asList(
         new DummyApi().setId(1L),

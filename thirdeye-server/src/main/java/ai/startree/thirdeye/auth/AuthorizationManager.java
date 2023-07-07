@@ -208,7 +208,7 @@ public class AuthorizationManager {
     return new ForbiddenException(Response.status(
         Status.FORBIDDEN.getStatusCode(),
         String.format("%s access denied to %s for entity %s %s",
-            accessType, principal.getName(), resourceIdentifier.entityType, resourceIdentifier.name)
+            accessType, principal.getName(), resourceIdentifier.getEntityType(), resourceIdentifier.getName())
     ).build());
   }
 

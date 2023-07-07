@@ -23,9 +23,9 @@ public class ResourceIdentifier {
   static public final String DEFAULT_NAMESPACE = "default";
   static public final String DEFAULT_ENTITY_TYPE = "RESOURCE";
 
-  public final String name;
-  public final String namespace;
-  public final String entityType;
+  private final String name;
+  private final String namespace;
+  private final String entityType;
 
   private ResourceIdentifier(final String name, final String namespace, final String entityType) {
     this.name = name;
@@ -40,5 +40,17 @@ public class ResourceIdentifier {
         optional(namespace).filter(StringUtils::isNotEmpty).orElse(DEFAULT_NAMESPACE),
         optional(entityType).filter(StringUtils::isNotEmpty).orElse(DEFAULT_ENTITY_TYPE)
     );
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public String getNamespace() {
+    return namespace;
+  }
+
+  public String getEntityType() {
+    return entityType;
   }
 }

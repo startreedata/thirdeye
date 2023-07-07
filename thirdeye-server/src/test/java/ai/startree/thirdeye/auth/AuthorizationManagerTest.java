@@ -33,9 +33,9 @@ public class AuthorizationManagerTest {
     final var authorizationManager = new AuthorizationManager(
         null, null, null, null, null);
     final var got = authorizationManager.resourceId(null);
-    assertThat(got.name).isEqualTo(ResourceIdentifier.DEFAULT_NAME);
-    assertThat(got.namespace).isEqualTo(ResourceIdentifier.DEFAULT_NAMESPACE);
-    assertThat(got.entityType).isEqualTo(ResourceIdentifier.DEFAULT_ENTITY_TYPE);
+    assertThat(got.getName()).isEqualTo(ResourceIdentifier.DEFAULT_NAME);
+    assertThat(got.getNamespace()).isEqualTo(ResourceIdentifier.DEFAULT_NAMESPACE);
+    assertThat(got.getEntityType()).isEqualTo(ResourceIdentifier.DEFAULT_ENTITY_TYPE);
   }
 
   @Test
@@ -54,9 +54,9 @@ public class AuthorizationManagerTest {
         null, null, alertManager, null, null);
 
     final var got = authorizationManager.resourceId(anomalyDto);
-    assertThat(got.name).isEqualTo("2");
-    assertThat(got.namespace).isEqualTo("alert_namespace");
-    assertThat(got.entityType).isEqualTo("ANOMALY");
+    assertThat(got.getName()).isEqualTo("2");
+    assertThat(got.getNamespace()).isEqualTo("alert_namespace");
+    assertThat(got.getEntityType()).isEqualTo("ANOMALY");
   }
 
   @Test
@@ -82,8 +82,8 @@ public class AuthorizationManagerTest {
         null, null, alertManager, enumManager, null);
 
     final var got = authorizationManager.resourceId(anomalyDto);
-    assertThat(got.name).isEqualTo("3");
-    assertThat(got.namespace).isEqualTo("enum_namespace");
-    assertThat(got.entityType).isEqualTo("ANOMALY");
+    assertThat(got.getName()).isEqualTo("3");
+    assertThat(got.getNamespace()).isEqualTo("enum_namespace");
+    assertThat(got.getEntityType()).isEqualTo("ANOMALY");
   }
 }

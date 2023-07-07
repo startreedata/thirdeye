@@ -17,7 +17,6 @@ import static com.google.common.base.CaseFormat.LOWER_UNDERSCORE;
 import static com.google.common.base.CaseFormat.UPPER_CAMEL;
 
 import ai.startree.thirdeye.datalayer.bao.AlertManagerImpl;
-import ai.startree.thirdeye.datalayer.bao.AlertSnapshotManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.AlertTemplateManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.AnomalyManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.AnomalySubscriptionGroupNotificationManagerImpl;
@@ -61,7 +60,6 @@ import ai.startree.thirdeye.datalayer.entity.TaskEntity;
 import ai.startree.thirdeye.datalayer.entity.TaskIndex;
 import ai.startree.thirdeye.datalayer.util.EntityMappingHolder;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
-import ai.startree.thirdeye.spi.datalayer.bao.AlertSnapshotManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
@@ -149,7 +147,6 @@ public class ThirdEyePersistenceModule extends AbstractModule {
         .in(Scopes.SINGLETON);
     bind(OnboardDatasetMetricManager.class).to(OnboardDatasetMetricManagerImpl.class).in(
         Scopes.SINGLETON);
-    bind(AlertSnapshotManager.class).to(AlertSnapshotManagerImpl.class).in(Scopes.SINGLETON);
     bind(RcaInvestigationManager.class).to(RcaInvestigationManagerImpl.class).in(Scopes.SINGLETON);
     bind(RootcauseTemplateManager.class).to(RootcauseTemplateManagerImpl.class)
         .in(Scopes.SINGLETON);

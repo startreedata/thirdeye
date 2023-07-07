@@ -1,5 +1,5 @@
 # Workflow to triage pull requests, validate title and assign labels
-name: pr-workflow
+name: UI conventions
 
 on:
     pull_request_target:
@@ -11,8 +11,7 @@ on:
 
 jobs:
     pr-title:
-        # Job to validate PR title
-        name: pr-title
+        name: Validate PR title
         permissions:
             pull-requests: read
         runs-on: ubuntu-latest
@@ -47,8 +46,7 @@ jobs:
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     pr-labels:
-        # Job to assign PR labels
-        name: pr-labels
+        name: Assign PR labels
         permissions:
             contents: read
             pull-requests: write

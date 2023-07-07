@@ -1,4 +1,4 @@
-name: License header check
+name: Check license header
 
 on:
   push:

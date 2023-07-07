@@ -35,17 +35,24 @@ public class DatasetConfigDTO extends AbstractDTO {
   private String timeColumn;
   /**
    * Only meaningful when the timeFormat is EPOCH. Contains MILLISECONDS, SECONDS. etc...
+   * kept until dataset entities using the legacy format are migrated to the new format
    */
   @Deprecated
   private TimeUnit timeUnit;
   /**
    * Only meaningful when he timeFormat is EPOCH. The number of Units. In most cases it should be
    * one.
-   * todo cyril timeUnit and timeDuration should be replaced by a fullTimeFormat field, that totally defines the format
+   * kept until dataset entities using the legacy format are migrated to the new format
    */
   @Deprecated
   private Integer timeDuration;
-  // as of today, partial format, for Pinot either EPOCH or SIMPLE_DATE_FORMAT - should be replaced by a single string that totally defines the format
+  /**
+   * Legacy format is EPOCH + timeUnit=x + timeDuration=X or SIMPLE_DATE_FORMAT:yyyy-MM-xx
+   * New format is
+   * x:Units:EPOCH or x:Units:SIMPLE_DATE_FORMAT:yyyy-MM-xx
+   * Until all dataset entities are migrated to the new format,
+   * consumer of the timeFormat should be compatible with both legacy and new formats.
+   * */
   private String timeFormat;
   private String timezone;
   private String dataSource;
@@ -149,16 +156,12 @@ public class DatasetConfigDTO extends AbstractDTO {
     return this;
   }
 
-  /**
-   * This method is preserved for reading object from database via object mapping (i.e., Java
-   * reflection)
-   *
-   * @return the time unit of the granularity of the timestamp of each data point.
-   */
+  @Deprecated
   public TimeUnit getTimeUnit() {
     return timeUnit;
   }
 
+  @Deprecated
   public DatasetConfigDTO setTimeUnit(TimeUnit timeUnit) {
     this.timeUnit = timeUnit;
     return this;
@@ -169,6 +172,7 @@ public class DatasetConfigDTO extends AbstractDTO {
     return timeDuration;
   }
 
+  @Deprecated
   public DatasetConfigDTO setTimeDuration(Integer timeDuration) {
     this.timeDuration = timeDuration;
     return this;

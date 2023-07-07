@@ -32,6 +32,13 @@ public interface SqlExpressionBuilder {
    *
    * Implementation should respect the filterInterval timezone.
    *
+   * timeColumnFormat is specific to the datasource.
+   * The function should be able to parse the timeFormat used by the datasource. Aliases can be
+   * introduced for ease of use in a sql macro context.
+   * Eg EPOCH_MILLIS can be an alias for 1:MILLISECONDS:EPOCH.
+   * If timeFormat is null, the function should assume the input format is epoch milliseconds.
+   *
+   *
    * For example: {@code getTimeFilterExpression(myTimeEpoch, Interval(42,84), "EPOCH_MILLIS")} returns
    * "myTimeEpoch >= 42 AND myTimeEpoch < 84"
    *
@@ -47,27 +54,15 @@ public interface SqlExpressionBuilder {
   }
 
   /**
-   * Generates a SQL expression that test if a time column is between bounds.
-   * Does not escape identifiers. Identifiers that have to be escaped should be passed escaped.
+   * Deprecated use {@link #getTimeFilterExpression(String, Interval, String)}
+   * Can be removed once all dataset entities are migrated to the new timeFormat that
+   * does not require timeUnit.
    *
-   * Used internally to generate queries. For RCA for instance.
-   * Implementation should respect the filterInterval timezone.
-   *
-   * timeFormat comes from DatasetConfigDTO$format, so it can be anything. It is specific to the
-   * datasource.
-   * The function should be able to parse the timeFormat used by the datasource.
-   * If it's null, the function should assume the format is epoch milliseconds.
-   *
-   * This method can either generate the datetime in the given format directly,
-   * or generate a SQL that transforms the colum or the milliseconds in the correct format at
-   * runtime.
-   *
-   * @param timeColumn time column name
-   * @param filterInterval interval to filter on.
    * @param timeFormat any string, coming from DatasetConfigDTO$format - the datasource is free
    *     to put any format in DatasetConfigDTO$format.
    * @param timeUnit the String of a TimeUnit, coming from DatasetConfigDTO$timeUnit.
    */
+  @Deprecated
   default String getTimeFilterExpression(final String timeColumn, final Interval filterInterval,
       final @Nullable String timeFormat,
       @Nullable final String timeUnit) {
@@ -82,36 +77,33 @@ public interface SqlExpressionBuilder {
    * For example: for a MySQL implementation, {@code getTimeGroupExpression(dateTimeColumn,
    * DATETIME, P1D)} returns "UNIX_TIMESTAMP(DATE(dateTimeColumn))*1000"
    *
-   * Used by macro __timeGroup()
+   * timeFormat is specific to the datasource.
+   * The function should be able to parse the timeFormat used by the datasource. Aliases can be
+   * introduced for ease of use in a sql macro context.
+   * Eg EPOCH_MILLIS can be an alias for 1:MILLISECONDS:EPOCH.
+   * If timeFormat is null, the function should assume the input format is epoch milliseconds.
+   *
    *
    * @param timeColumn time column name
-   * @param timeColumnFormat time column time format. Managed formats depend on the datasource
+   * @param timeFormat time column time format. Managed formats depend on the datasource
    * @param granularity granularity of the output epoch milliseconds (minutes, days, etc...)
    * @param timezone timezone string in tz database format
    */
-  default String getTimeGroupExpression(final String timeColumn, final String timeColumnFormat,
+  default String getTimeGroupExpression(final String timeColumn, @Nullable final String timeFormat,
       final Period granularity, @Nullable final String timezone) {
     throw new UnsupportedOperationException();
   }
 
   /**
-   * Generate a SQL expression that rounds to a given granularity and cast to epoch milliseconds.
-   * Does not escape identifiers. Identifiers that have to be escaped should be passed escaped.
-   * Round with the given timezone. If timezone is null, keep the default timezone
-   * behavior of the datasource.
-   *
-   * timeFormat comes from DatasetConfigDTO$format, so it can be anything. It is specific to the
-   * datasource.
-   * The function should be able to parse the timeFormat used by the datasource.
-   * If it's null, the function should assume the input format is epoch milliseconds.
-   *
-   * Used internally to generate queries. For RCA for instance.
+   * Deprecated use {@link #getTimeFilterExpression(String, Interval, String)}
+   * Can be removed once all dataset entities are migrated to the new timeFormat that
+   * does not require timeUnit.
    *
    * @param timeFormat any string, coming from DatasetConfigDTO$format - the datasource is free
    *     to put any format in DatasetConfigDTO$format.
    * @param timeUnit the String of a TimeUnit, coming from DatasetConfigDTO$timeUnit.
-   * @param timezone timezone string in tz database format
    */
+  @Deprecated
   default String getTimeGroupExpression(final String timeColumn, @Nullable final String timeFormat,
       final Period granularity, @Nullable final String timeUnit, @Nullable final String timezone) {
     throw new UnsupportedOperationException();

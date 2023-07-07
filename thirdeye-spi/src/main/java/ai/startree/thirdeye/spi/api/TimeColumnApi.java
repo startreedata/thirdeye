@@ -22,11 +22,14 @@ public class TimeColumnApi {
 
   private String name;
   /**
-   * Exists because format is an incomplete definition of the time format.
+   * Exists because legacy format is an incomplete definition of the time format.
    * Eg for EPOCH_MILLIS, format=EPOCH and Duration=1ms.
    * Do not confuse with granularity.
-   * TODO cyril refactor to simplify TimeSpec/TimeGranularity
+   * Kept to support legacy format. Will be in JsonIgnore as soon as dataset entities are migrated to the new format.
+   * The new format is simply 1:MILLISECONDS:EPOCH in the format field.
+   * // TODO CYRIL perform migration of dataset entities using the legacy format
    */
+  @Deprecated
   private Duration interval;
   private String format;
   private String timezone;
@@ -47,10 +50,12 @@ public class TimeColumnApi {
     return this;
   }
 
+  @Deprecated
   public Duration getInterval() {
     return interval;
   }
 
+  @Deprecated
   public TimeColumnApi setInterval(final Duration interval) {
     this.interval = interval;
     return this;

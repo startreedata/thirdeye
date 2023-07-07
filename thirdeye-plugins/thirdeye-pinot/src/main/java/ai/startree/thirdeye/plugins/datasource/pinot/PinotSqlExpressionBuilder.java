@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.plugins.datasource.pinot;
 
 import static ai.startree.thirdeye.spi.Constants.UTC_LIKE_TIMEZONES;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
@@ -36,8 +37,12 @@ import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
+
+  private static final Logger LOG = LoggerFactory.getLogger(PinotSqlExpressionBuilder.class);
 
   public static final Pattern SIMPLE_DATE_FORMAT_PATTERN = Pattern.compile(
       "^([0-9]:[A-Z]+:)?SIMPLE_DATE_FORMAT:");
@@ -65,7 +70,7 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
   public static final String STRING_LITERAL_QUOTE = "'";
   public static final String ESCAPED_STRING_LITERAL_QUOTE = "''";
 
-  private static final String escapeLiteralQuote(String s) {
+  private static String escapeLiteralQuote(String s) {
     return s.replace(STRING_LITERAL_QUOTE, ESCAPED_STRING_LITERAL_QUOTE);
   }
 
@@ -85,6 +90,7 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
       return getTimeFilterExpression(timeColumn, filterInterval, "EPOCH_MILLIS");
     }
     if ("EPOCH".equals(timeFormat)) {
+      LOG.warn("Using legacy timeFormat. Support for legacy timeFormat will be removed soon. Dataset entity should be updated.");
       Objects.requireNonNull(timeUnit);
       return getTimeFilterExpression(timeColumn, filterInterval, "1:" + timeUnit + ":EPOCH");
     }
@@ -99,15 +105,15 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
       return getTimeGroupExpression(timeColumn, "EPOCH_MILLIS", granularity, timezone);
     }
     if ("EPOCH".equals(timeFormat)) {
+      LOG.warn("Using legacy timeFormat. Support for legacy timeFormat will be removed soon. Dataset entity should be updated.");
       Objects.requireNonNull(timeUnit);
       return getTimeGroupExpression(timeColumn, "1:" + timeUnit + ":EPOCH", granularity, timezone);
     }
-    // case simple date format
     return getTimeGroupExpression(timeColumn, timeFormat, granularity, timezone);
   }
 
   @Override
-  public String getTimeGroupExpression(String timeColumn, @NonNull String timeColumnFormat,
+  public String getTimeGroupExpression(String timeColumn, @Nullable String timeColumnFormat,
       final Period granularity, @Nullable final String timezone) {
     final TimeFormat timeFormat = TimeFormat.of(timeColumnFormat);
     if (timezone == null || UTC_LIKE_TIMEZONES.contains(timezone)) {
@@ -221,11 +227,12 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
     // set to null for epoch formats because nothing in Pinot ensures a LONG epoch time column respects a granularity
     private final @Nullable Period exactGranularity;
 
-    static TimeFormat of(final String userFacingTimeColumnFormat) {
-      return cache.computeIfAbsent(userFacingTimeColumnFormat, TimeFormat::new);
+    static TimeFormat of(final @Nullable String userFacingTimeColumnFormat) {
+      final String nullSafeFormat = optional(userFacingTimeColumnFormat).orElse("EPOCH_MILLIS");
+      return cache.computeIfAbsent(nullSafeFormat, TimeFormat::new);
     }
 
-    private TimeFormat(final String userFacingTimeColumnFormat) {
+    private TimeFormat(final @NonNull String userFacingTimeColumnFormat) {
       switch (userFacingTimeColumnFormat) {
         case "EPOCH_NANOS":
         case "1:NANOSECONDS:EPOCH":

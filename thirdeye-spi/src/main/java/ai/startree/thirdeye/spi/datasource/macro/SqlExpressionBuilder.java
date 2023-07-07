@@ -49,7 +49,7 @@ public interface SqlExpressionBuilder {
    * @param timeColumnFormat time column time format. Managed formats depend on the datasource
    */
   default String getTimeFilterExpression(final String timeColumn, final Interval filterInterval,
-      final String timeColumnFormat) {
+      final @Nullable String timeColumnFormat) {
     throw new UnsupportedOperationException();
   }
 

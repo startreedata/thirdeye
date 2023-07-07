@@ -76,7 +76,7 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
 
   @Override
   public String getTimeFilterExpression(final String timeColumn, final Interval filterInterval,
-      @NonNull final String timeColumnFormat) {
+      @Nullable final String timeColumnFormat) {
     final TimeFormat timeFormat = TimeFormat.of(timeColumnFormat);
 
     return timeColumn + " >= " + timeFormat.timeFormatter.apply(filterInterval.getStart()) + " AND "
@@ -86,9 +86,6 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
   @Override
   public String getTimeFilterExpression(final String timeColumn, final Interval filterInterval,
       @Nullable final String timeFormat, @Nullable final String timeUnit) {
-    if (timeFormat == null) {
-      return getTimeFilterExpression(timeColumn, filterInterval, "EPOCH_MILLIS");
-    }
     if ("EPOCH".equals(timeFormat)) {
       LOG.warn("Using legacy timeFormat. Support for legacy timeFormat will be removed soon. Dataset entity should be updated.");
       Objects.requireNonNull(timeUnit);
@@ -101,9 +98,6 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
   @Override
   public String getTimeGroupExpression(final String timeColumn, final @Nullable String timeFormat,
       final Period granularity, final @Nullable String timeUnit, @Nullable final String timezone) {
-    if (timeFormat == null) {
-      return getTimeGroupExpression(timeColumn, "EPOCH_MILLIS", granularity, timezone);
-    }
     if ("EPOCH".equals(timeFormat)) {
       LOG.warn("Using legacy timeFormat. Support for legacy timeFormat will be removed soon. Dataset entity should be updated.");
       Objects.requireNonNull(timeUnit);

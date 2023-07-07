@@ -135,7 +135,7 @@ public class HappyPathTest {
   @Test()
   public void testPing() {
     final Response response = request("internal/ping").get();
-    assertThat(response.getStatus()).isEqualTo(200);
+    assert200(response);
   }
 
   @Test(dependsOnMethods = "testPing")
@@ -143,20 +143,20 @@ public class HappyPathTest {
 
     final Response response = request("api/data-sources").post(Entity.json(List.of(
         pinotDataSourceApi)));
-    assertThat(response.getStatus()).isEqualTo(200);
+    assert200(response);
   }
 
   @Test(dependsOnMethods = "testCreatePinotDataSource", timeOut = 5000)
   public void testPinotDataSourceHealth() {
     final Response response = request(
         "api/data-sources/validate?name=" + pinotDataSourceApi.getName()).get();
-    assertThat(response.getStatus()).isEqualTo(200);
+    assert200(response);
   }
 
   @Test(dependsOnMethods = "testPing")
   public void testSwaggerApiJson() throws JsonProcessingException {
     final Response response = request("/openapi.json").get();
-    assertThat(response.getStatus()).isEqualTo(200);
+    assert200(response);
     final JsonNode r = new ObjectMapper().readTree(
         response.readEntity(JSONObject.class).toJSONString());
     assertThat(r.get("openapi").textValue()).isEqualTo("3.0.1");
@@ -188,7 +188,7 @@ public class HappyPathTest {
   @Test(dependsOnMethods = "testPing")
   public void testCreateDxTemplate() {
     final Response response = request("/api/alert-templates/name/" + THRESHOLD_TEMPLATE_NAME).get();
-    assertThat(response.getStatus()).isEqualTo(200);
+    assert200(response);
 
     final AlertTemplateApi template = response.readEntity(AlertTemplateApi.class);
     final List<PlanNodeApi> nodes = template.getNodes();
@@ -220,7 +220,7 @@ public class HappyPathTest {
 
     final Response response = request("api/data-sources/onboard-dataset/").post(
         Entity.form(formData));
-    assertThat(response.getStatus()).isEqualTo(200);
+    assert200(response);
   }
 
   @Test(dependsOnMethods = "testCreateDataset", timeOut = 7000)
@@ -229,19 +229,14 @@ public class HappyPathTest {
         PAGEVIEWS_DATASET_START_TIME, EVALUATE_END_TIME);
 
     final Response response = request("api/alerts/evaluate").post(Entity.json(alertEvaluationApi));
-    if (response.getStatus() == 200) {
-      assert true;
-    } else {
-      System.out.println("error: " + response.readEntity(Object.class));
-      assert false;
-    }
+    assert200(response);
   }
 
   @Test(dependsOnMethods = "testEvaluateAlert")
   public void testCreateAlert() {
     final Response response = request("api/alerts").post(Entity.json(List.of(MAIN_ALERT_API)));
 
-    assertThat(response.getStatus()).isEqualTo(200);
+    assert200(response);
     final List<AlertApi> alerts = response.readEntity(ALERT_LIST_TYPE);
     alertId = alerts.get(0).getId();
   }
@@ -268,13 +263,13 @@ public class HappyPathTest {
         PAGEVIEWS_DATASET_START_TIME, EVALUATE_END_TIME);
 
     final Response response = request("api/alerts/evaluate").post(Entity.json(alertEvaluationApi));
-    assertThat(response.getStatus()).isEqualTo(200);
+    assert200(response);
   }
 
   @Test(dependsOnMethods = "testCreateAlert")
   public void testAlertInsights() {
     final Response response = request("api/alerts/" + alertId + "/insights").get();
-    assertThat(response.getStatus()).isEqualTo(200);
+    assert200(response);
     final AlertInsightsApi insights = response.readEntity(AlertInsightsApi.class);
     assertThat(insights.getTemplateWithProperties().getMetadata().getGranularity()).isEqualTo(
         "P1D");
@@ -294,7 +289,7 @@ public class HappyPathTest {
         .setAlerts(List.of(new AlertApi().setId(alertId)));
     final Response response = request("api/subscription-groups").post(
         Entity.json(List.of(subscriptionGroupApi)));
-    assertThat(response.getStatus()).isEqualTo(200);
+    assert200(response);
   }
 
   @Test(dependsOnMethods = "testCreateAlert", timeOut = 50000L)
@@ -306,7 +301,7 @@ public class HappyPathTest {
       // see taskDriver server config for optimization
       Thread.sleep(1000);
       final Response response = request("api/anomalies?isChild=false").get();
-      assertThat(response.getStatus()).isEqualTo(200);
+      assert200(response);
       anomalies = response.readEntity(ANOMALIES_LIST_TYPE);
     }
     // the third anomaly is the March 21 - March 23 anomaly
@@ -319,7 +314,7 @@ public class HappyPathTest {
   public void testGetSingleAnomaly() {
     // test get a single anomaly
     final Response response = request("api/anomalies/" + anomalyId).get();
-    assertThat(response.getStatus()).isEqualTo(200);
+    assert200(response);
   }
 
   @Test(dependsOnMethods = "testGetAnomalies")
@@ -329,7 +324,7 @@ public class HappyPathTest {
         PAGEVIEWS_DATASET_START_TIME, EVALUATE_END_TIME);
 
     final Response response = request("api/alerts/evaluate").post(Entity.json(alertEvaluationApi));
-    assertThat(response.getStatus()).isEqualTo(200);
+    assert200(response);
   }
 
   @Test(dependsOnMethods = "testGetAnomalies")
@@ -344,7 +339,7 @@ public class HappyPathTest {
         .setComment("Valid anomaly");
     final Response response = request(String.format("api/anomalies/%d/feedback", anomalyId))
         .post(Entity.json(feedback));
-    assertThat(response.getStatus()).isEqualTo(200);
+    assert200(response);
 
     // test get a single anomaly
     final Response responseAfterFeedback = request("api/anomalies/" + anomalyId).get();
@@ -376,7 +371,7 @@ public class HappyPathTest {
         .setCause(AnomalyCause.PLATFORM_UPGRADE);
     final Response response = request(String.format("api/anomalies/%d/feedback", anomalyId))
         .post(Entity.json(feedback));
-    assertThat(response.getStatus()).isEqualTo(200);
+    assert200(response);
 
     // test get a single anomaly
     final Response responseAfterFeedback = request("api/anomalies/" + anomalyId).get();
@@ -396,13 +391,13 @@ public class HappyPathTest {
   public void testAnomalyCount() {
     // without filters
     Response response = request("api/anomalies/count").get();
-    assertThat(response.getStatus()).isEqualTo(200);
+    assert200(response);
     Long anomalyCount = response.readEntity(CountApi.class).getCount();
     assertThat(anomalyCount).isEqualTo(22);
 
     // there are only 6 parent anomalies
     response = request("api/anomalies/count?isChild=false").get();
-    assertThat(response.getStatus()).isEqualTo(200);
+    assert200(response);
     anomalyCount = response.readEntity(CountApi.class).getCount();
     assertThat(anomalyCount).isEqualTo(6);
 
@@ -411,7 +406,7 @@ public class HappyPathTest {
 
     // with filters
     response = request("api/anomalies/count?isChild=false&startTime=[gte]" + startTime).get();
-    assertThat(response.getStatus()).isEqualTo(200);
+    assert200(response);
     anomalyCount = response.readEntity(CountApi.class).getCount();
     assertThat(anomalyCount).isEqualTo(3);
   }
@@ -439,7 +434,8 @@ public class HappyPathTest {
 
     final Response afterReplayResponse = request("api/anomalies").get();
     assertThat(afterReplayResponse.getStatus()).isEqualTo(200);
-    final List<AnomalyApi> afterReplayAnomalies = afterReplayResponse.readEntity(ANOMALIES_LIST_TYPE);
+    final List<AnomalyApi> afterReplayAnomalies = afterReplayResponse.readEntity(
+        ANOMALIES_LIST_TYPE);
     // the only contract of the replay is to be user-facing idempotent - hence this test can break if we chose in the implementation to save all anomalies, even the ones at replay
     assertThat(beforeReplayAnomalies).isEqualTo(afterReplayAnomalies);
   }
@@ -447,7 +443,7 @@ public class HappyPathTest {
   @Test(dependsOnMethods = "testGetSingleAnomaly")
   public void testGetHeatmap() {
     final Response response = request("api/rca/metrics/heatmap?id=" + anomalyId).get();
-    assertThat(response.getStatus()).isEqualTo(200);
+    assert200(response);
     final HeatMapResponseApi heatmap = response.readEntity(HeatMapResponseApi.class);
     assertThat(heatmap.getBaseline().getBreakdown().size()).isGreaterThan(0);
     assertThat(heatmap.getCurrent().getBreakdown().size()).isGreaterThan(0);
@@ -456,7 +452,7 @@ public class HappyPathTest {
   @Test(dependsOnMethods = "testGetSingleAnomaly")
   public void testGetTopContributors() {
     final Response response = request("api/rca/dim-analysis?id=" + anomalyId).get();
-    assertThat(response.getStatus()).isEqualTo(200);
+    assert200(response);
     final DimensionAnalysisResultApi dimensionAnalysisResultApi = response.readEntity(
         DimensionAnalysisResultApi.class);
     assertThat(dimensionAnalysisResultApi.getResponseRows().size()).isGreaterThan(0);
@@ -472,7 +468,7 @@ public class HappyPathTest {
 
     final Response response = request("api/rca/investigations").post(
         Entity.json(List.of(rcaInvestigationApi)));
-    assertThat(response.getStatus()).isEqualTo(200);
+    assert200(response);
   }
 
   private Builder request(final String urlFragment) {
@@ -485,9 +481,19 @@ public class HappyPathTest {
 
   private long getAlertLastUpdatedTime() {
     final Response getResponse = request("api/alerts/" + alertId).get();
-    assertThat(getResponse.getStatus()).isEqualTo(200);
+    assert200(getResponse);
     final AlertApi alert = getResponse.readEntity(AlertApi.class);
     return alert.getUpdated().getTime();
+  }
+
+  public static void assert200(final Response response) {
+    try {
+      assertThat(response.getStatus()).isEqualTo(200);
+    } catch (AssertionError e) {
+      System.out.printf("Status 200 assertion failed. Response Status: %s Response content: %s%n",
+          response.getStatus(), response.readEntity(Object.class));
+      throw e;
+    }
   }
 }
 

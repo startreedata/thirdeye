@@ -18,6 +18,7 @@ import static ai.startree.thirdeye.DropwizardTestUtils.buildSupport;
 import static ai.startree.thirdeye.DropwizardTestUtils.loadAlertApi;
 import static ai.startree.thirdeye.HappyPathTest.ALERT_LIST_TYPE;
 import static ai.startree.thirdeye.HappyPathTest.ANOMALIES_LIST_TYPE;
+import static ai.startree.thirdeye.HappyPathTest.assert200;
 import static ai.startree.thirdeye.PinotDataSourceManager.PINOT_DATASET_NAME;
 import static ai.startree.thirdeye.PinotDataSourceManager.PINOT_DATA_SOURCE_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -118,12 +119,12 @@ public class SchedulingTest {
   @Test
   public void setUpData() {
     Response response = request("internal/ping").get();
-    assertThat(response.getStatus()).isEqualTo(200);
+    assert200(response);
 
     // create datasource
     response = request("api/data-sources")
         .post(Entity.json(List.of(pinotDataSourceApi)));
-    assertThat(response.getStatus()).isEqualTo(200);
+    assert200(response);
 
     // create dataset
     MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
@@ -131,7 +132,7 @@ public class SchedulingTest {
     formData.add("datasetName", PINOT_DATASET_NAME);
     response = request("api/data-sources/onboard-dataset/")
         .post(Entity.form(formData));
-    assertThat(response.getStatus()).isEqualTo(200);
+    assert200(response);
   }
 
   @Test(dependsOnMethods = "setUpData")
@@ -227,7 +228,7 @@ public class SchedulingTest {
 
   private List<AnomalyApi> getAnomalies() {
     Response response = request("api/anomalies").get();
-    assertThat(response.getStatus()).isEqualTo(200);
+    assert200(response);
     return response.readEntity(ANOMALIES_LIST_TYPE);
   }
 

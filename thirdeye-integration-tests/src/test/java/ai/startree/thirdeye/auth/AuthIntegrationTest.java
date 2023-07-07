@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.auth;
 
+import static ai.startree.thirdeye.HappyPathTest.assert200;
 import static ai.startree.thirdeye.IntegrationTestUtils.getJWKS;
 import static ai.startree.thirdeye.IntegrationTestUtils.getToken;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
@@ -132,7 +133,7 @@ public class AuthIntegrationTest {
         .request()
         .header(HttpHeaders.AUTHORIZATION, oAuthToken)
         .post(null);
-    assertThat(response.getStatus()).isEqualTo(200);
+    assert200(response);
 
   }
 
@@ -142,7 +143,7 @@ public class AuthIntegrationTest {
         .request()
         .header(HttpHeaders.AUTHORIZATION, basicAuthToken)
         .post(null);
-    assertThat(response.getStatus()).isEqualTo(200);
+    assert200(response);
 
   }
 

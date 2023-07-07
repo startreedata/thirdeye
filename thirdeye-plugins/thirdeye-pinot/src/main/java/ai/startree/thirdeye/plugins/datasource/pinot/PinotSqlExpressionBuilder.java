@@ -23,7 +23,6 @@ import com.google.common.annotations.VisibleForTesting;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -81,29 +80,6 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
 
     return timeColumn + " >= " + timeFormat.timeFormatter.apply(filterInterval.getStart()) + " AND "
         + timeColumn + " < " + timeFormat.timeFormatter.apply(filterInterval.getEnd());
-  }
-
-  @Override
-  public String getTimeFilterExpression(final String timeColumn, final Interval filterInterval,
-      @Nullable final String timeFormat, @Nullable final String timeUnit) {
-    if ("EPOCH".equals(timeFormat)) {
-      LOG.warn("Using legacy timeFormat. Support for legacy timeFormat will be removed soon. Dataset entity should be updated.");
-      Objects.requireNonNull(timeUnit);
-      return getTimeFilterExpression(timeColumn, filterInterval, "1:" + timeUnit + ":EPOCH");
-    }
-    // case simple date format
-    return getTimeFilterExpression(timeColumn, filterInterval, timeFormat);
-  }
-
-  @Override
-  public String getTimeGroupExpression(final String timeColumn, final @Nullable String timeFormat,
-      final Period granularity, final @Nullable String timeUnit, @Nullable final String timezone) {
-    if ("EPOCH".equals(timeFormat)) {
-      LOG.warn("Using legacy timeFormat. Support for legacy timeFormat will be removed soon. Dataset entity should be updated.");
-      Objects.requireNonNull(timeUnit);
-      return getTimeGroupExpression(timeColumn, "1:" + timeUnit + ":EPOCH", granularity, timezone);
-    }
-    return getTimeGroupExpression(timeColumn, timeFormat, granularity, timezone);
   }
 
   @Override

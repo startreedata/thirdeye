@@ -63,6 +63,7 @@ public class MacroEngineTest {
   private static final DatasetConfigDTO DATASET_CONFIG_DTO = new DatasetConfigDTO().setDataset(
           TABLE_NAME)
       .setTimeColumn("defaultCol")
+      // TODO cyril keeping this config to test compatibility with legacy format
       .setTimeFormat(INPUT_TIME_COLUMN_FORMAT)
       .setTimeUnit(DATASET_CONFIG_EPOCH_UNIT);
   public static final String SIMPLE_TIME_FORMAT = "dd-M-yyyy hh:mm:ss";
@@ -124,8 +125,7 @@ public class MacroEngineTest {
         MOCK_SQL_EXPRESSION_BUILDER.getTimeFilterExpression(
             "\"" + DATASET_CONFIG_DTO.getTimeColumn() + "\"",
             INPUT_INTERVAL,
-            DATASET_CONFIG_DTO.getTimeFormat(),
-            DATASET_CONFIG_DTO.getTimeUnit().toString()));
+            DATASET_CONFIG_DTO.getTimeFormat()));
 
     final Map<String, String> expectedProperties = ImmutableMap.of(
         MacroMetadataKeys.MIN_TIME_MILLIS.toString(),
@@ -248,7 +248,6 @@ public class MacroEngineTest {
             "\"" + DATASET_CONFIG_DTO.getTimeColumn() + "\"",
             DATASET_CONFIG_DTO.getTimeFormat(),
             HOUR_PERIOD,
-            DATASET_CONFIG_DTO.getTimeUnit().toString(),
             INPUT_INTERVAL.getChronology().getZone().toString()));
 
     final Map<String, String> expectedProperties = ImmutableMap.of(

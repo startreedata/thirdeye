@@ -34,7 +34,6 @@ import com.google.common.annotations.VisibleForTesting;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Function;
 import org.apache.calcite.sql.SqlBasicCall;
 import org.apache.calcite.sql.SqlIdentifier;
@@ -470,7 +469,7 @@ public class SelectQueryTranslatorTest {
             DimensionType.STRING))
         .where(textPredicate)
         .where(sqlNodePredicate)
-        .whereTimeFilter(timeFilterInterval, epoch_date, "EPOCH", "MILLISECONDS");
+        .whereTimeFilter(timeFilterInterval, epoch_date, "EPOCH_MILLIS");
     final SelectQueryTranslator request = builder.build();
     final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
     final String expected = String.format(
@@ -493,8 +492,7 @@ public class SelectQueryTranslatorTest {
         .select(SIMPLE_PROJECTION)
         .withTimeAggregation(Period.days(7),
             timeAggregationColumn,
-            "EPOCH",
-            "SECONDS",
+            "1:SECONDS:EPOCH",
             false,
             null);
     final SelectQueryTranslator request = builder.build();
@@ -520,8 +518,7 @@ public class SelectQueryTranslatorTest {
         .select(SIMPLE_PROJECTION)
         .withTimeAggregation(Period.days(7),
             timeAggregationColumn,
-            "EPOCH",
-            "MILLISECONDS",
+            "1:MILLISECONDS:EPOCH",
             false,
             null);
     final SelectQueryTranslator request = builder.build();
@@ -548,7 +545,6 @@ public class SelectQueryTranslatorTest {
         .withTimeAggregation(Period.days(7),
             timeAggregationColumn,
             "SIMPLE_DATE_FORMAT:yyyyMMdd",
-            null,
             false,
             null);
     final SelectQueryTranslator request = builder.build();
@@ -575,8 +571,7 @@ public class SelectQueryTranslatorTest {
         // null timeFormat defaults to milliseconds
         .withTimeAggregation(Period.days(7),
             timeAggregationColumn,
-            "EPOCH",
-            "MILLISECONDS",
+            "EPOCH_MILLIS",
             true,
             null);
     final SelectQueryTranslator request = builder.build();
@@ -602,7 +597,7 @@ public class SelectQueryTranslatorTest {
     final Interval timeFilterInterval = new Interval(100L, 100000000L, DateTimeZone.UTC);
     final SelectQuery builder = new SelectQuery(TABLE).withDatabase(DATABASE)
         .select(SIMPLE_PROJECTION)
-        .whereTimeFilter(timeFilterInterval, timeAggregationColumn, "EPOCH", "MILLISECONDS");
+        .whereTimeFilter(timeFilterInterval, timeAggregationColumn, "1:MILLISECONDS:EPOCH");
     final SelectQueryTranslator request = builder.build();
     final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
 
@@ -630,8 +625,7 @@ public class SelectQueryTranslatorTest {
         .select(SIMPLE_PROJECTION)
         .whereTimeFilter(timeFilterInterval,
             reservedKeywordTimeAggregationColumn,
-            "EPOCH",
-            "MILLISECONDS");
+            "EPOCH_MILLIS");
     final SelectQueryTranslator request = builder.build();
     final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
 
@@ -660,7 +654,7 @@ public class SelectQueryTranslatorTest {
     final String simpleDateFormat = "yyyyMMdd";
     final SelectQuery builder = new SelectQuery(TABLE).withDatabase(DATABASE)
         .select(SIMPLE_PROJECTION)
-        .whereTimeFilter(timeFilterInterval, timeAggregationColumn, simpleDateFormat, null);
+        .whereTimeFilter(timeFilterInterval, timeAggregationColumn, simpleDateFormat);
     final SelectQueryTranslator request = builder.build();
     final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
 
@@ -689,11 +683,10 @@ public class SelectQueryTranslatorTest {
         .withTimeAggregation(Period.days(1),
             timeAggregationColumn,
             timeColumnFormat,
-            null,
             true,
             null)
         // timeFormat and unit is not used because the filtering will use the buckets in epoch millis
-        .whereTimeFilter(timeFilterInterval, timeAggregationColumn, timeColumnFormat, "DAYS");
+        .whereTimeFilter(timeFilterInterval, timeAggregationColumn, timeColumnFormat);
     final SelectQueryTranslator request = builder.build();
     final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
 
@@ -731,7 +724,6 @@ public class SelectQueryTranslatorTest {
         .withTimeAggregation(Period.days(1),
             timeAggregationColumn,
             timeColumnFormat,
-            null,
             true,
             null)
         // missing projection on col3 : because group by col3 but don't select it for test purpose
@@ -790,7 +782,6 @@ public class SelectQueryTranslatorTest {
         .withTimeAggregation(Period.days(1),
             timeAggregationColumn,
             timeColumnFormat,
-            null,
             true,
             null)
         // missing projection on col3 : because group by col3 but don't select it for test purpose
@@ -928,38 +919,6 @@ public class SelectQueryTranslatorTest {
           timeFormat.timeFormatter.apply(filterInterval.getStart()),
           timeColumn,
           timeFormat.timeFormatter.apply(filterInterval.getEnd()));
-    }
-
-    @Override
-    public String getTimeFilterExpression(final String timeColumn, final Interval filterInterval,
-        @Nullable final String timeFormat, @Nullable final String timeUnit) {
-      if (timeFormat == null) {
-        return getTimeFilterExpression(timeColumn, filterInterval, "EPOCH_MILLIS");
-      }
-      if ("EPOCH".equals(timeFormat)) {
-        Objects.requireNonNull(timeUnit);
-        return getTimeFilterExpression(timeColumn, filterInterval, "1:" + timeUnit + ":EPOCH");
-      }
-      // case simple date format
-      return getTimeFilterExpression(timeColumn, filterInterval, timeFormat);
-    }
-
-    @Override
-    public String getTimeGroupExpression(final String timeColumn, final @Nullable String timeFormat,
-        final Period granularity, final @Nullable String timeUnit,
-        @Nullable final String timezone) {
-      if (timeFormat == null) {
-        return getTimeGroupExpression(timeColumn, "EPOCH_MILLIS", granularity, timezone);
-      }
-      if ("EPOCH".equals(timeFormat)) {
-        Objects.requireNonNull(timeUnit);
-        return getTimeGroupExpression(timeColumn,
-            "1:" + timeUnit + ":EPOCH",
-            granularity,
-            timezone);
-      }
-      // case simple date format
-      return getTimeGroupExpression(timeColumn, timeFormat, granularity, timezone);
     }
 
     @Override

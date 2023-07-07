@@ -54,22 +54,6 @@ public interface SqlExpressionBuilder {
   }
 
   /**
-   * Deprecated use {@link #getTimeFilterExpression(String, Interval, String)}
-   * Can be removed once all dataset entities are migrated to the new timeFormat that
-   * does not require timeUnit.
-   *
-   * @param timeFormat any string, coming from DatasetConfigDTO$format - the datasource is free
-   *     to put any format in DatasetConfigDTO$format.
-   * @param timeUnit the String of a TimeUnit, coming from DatasetConfigDTO$timeUnit.
-   */
-  @Deprecated
-  default String getTimeFilterExpression(final String timeColumn, final Interval filterInterval,
-      final @Nullable String timeFormat,
-      @Nullable final String timeUnit) {
-    throw new UnsupportedOperationException();
-  }
-
-  /**
    * Generate a SQL expression that rounds to a given granularity and cast to epoch milliseconds.
    * Round with the given timezone. If timezone is null, keep the default timezone
    * behavior of the datasource.
@@ -91,21 +75,6 @@ public interface SqlExpressionBuilder {
    */
   default String getTimeGroupExpression(final String timeColumn, @Nullable final String timeFormat,
       final Period granularity, @Nullable final String timezone) {
-    throw new UnsupportedOperationException();
-  }
-
-  /**
-   * Deprecated use {@link #getTimeFilterExpression(String, Interval, String)}
-   * Can be removed once all dataset entities are migrated to the new timeFormat that
-   * does not require timeUnit.
-   *
-   * @param timeFormat any string, coming from DatasetConfigDTO$format - the datasource is free
-   *     to put any format in DatasetConfigDTO$format.
-   * @param timeUnit the String of a TimeUnit, coming from DatasetConfigDTO$timeUnit.
-   */
-  @Deprecated
-  default String getTimeGroupExpression(final String timeColumn, @Nullable final String timeFormat,
-      final Period granularity, @Nullable final String timeUnit, @Nullable final String timezone) {
     throw new UnsupportedOperationException();
   }
 

@@ -141,7 +141,7 @@ public class DefaultMinMaxTimeLoader implements MinMaxTimeLoader {
 
     if (timeFilterInterval != null) {
       calciteRequestBuilder.whereTimeFilter(timeFilterInterval, datasetConfigDTO.getTimeColumn(),
-          datasetConfigDTO.getTimeFormat(), datasetConfigDTO.getTimeUnit().name());
+          datasetConfigDTO.getTimeFormat());
     }
 
     return calciteRequestBuilder.build().getSql(sqlLanguage, sqlExpressionBuilder);
@@ -153,8 +153,7 @@ public class DefaultMinMaxTimeLoader implements MinMaxTimeLoader {
       final SqlParser.Config sqlParserConfig) {
     final String quoteSafeTimeColumn = dialect.quoteIdentifier(datasetConfigDTO.getTimeColumn());
     final String timeGroupExpression = sqlExpressionBuilder.getTimeGroupExpression(
-        quoteSafeTimeColumn, datasetConfigDTO.getTimeFormat(), Period.millis(1),
-        datasetConfigDTO.getTimeUnit().toString(), DateTimeZone.UTC.toString());
+        quoteSafeTimeColumn, datasetConfigDTO.getTimeFormat(), Period.millis(1), DateTimeZone.UTC.toString());
 
     final SqlNode timeGroupNode = CalciteUtils.expressionToNode(timeGroupExpression,
         sqlParserConfig);

@@ -43,14 +43,12 @@ public class SelectQuery {
   Period timeAggregationGranularity = null;
   String timeAggregationColumnFormat = null;
   String timeAggregationColumn = null;
-  String timeAggregationColumnUnit = null;
   boolean timeAggregationOrderBy = false;
   String timeAggregationTimezone = null;
 
   Interval timeFilterInterval = null;
   String timeFilterColumn = null;
   String timeFilterColumnFormat = null;
-  String timeFilterColumnUnit;
 
   final List<QueryPredicate> predicates = new ArrayList<>();
   final List<String> freeTextPredicates = new ArrayList<>();
@@ -82,8 +80,7 @@ public class SelectQuery {
     final SelectQuery builder = new SelectQuery(datasetConfigDTO.getDataset())
         .whereTimeFilter(slice.getInterval(),
             datasetConfigDTO.getTimeColumn(),
-            datasetConfigDTO.getTimeFormat(),
-            datasetConfigDTO.getTimeUnit().name())
+            datasetConfigDTO.getTimeFormat())
         .select(QueryProjection.fromMetricConfig(metricConfigDTO)
             .withAlias(Constants.COL_VALUE));
     if (isNotBlank(metricConfigDTO.getWhere())) {
@@ -114,13 +111,11 @@ public class SelectQuery {
   public SelectQuery withTimeAggregation(final Period timeAggregationGranularity,
       final String timeAggregationColumn,
       final String timeAggregationColumnFormat,
-      final @Nullable String timeAggregationColumnUnit,
       final boolean timeAggregationOrderBy,
       final @Nullable String timeAggregationTimezone) {
     this.timeAggregationGranularity = requireNonNull(timeAggregationGranularity);
     this.timeAggregationColumn = requireNonNull(timeAggregationColumn);
     this.timeAggregationColumnFormat = requireNonNull(timeAggregationColumnFormat);
-    this.timeAggregationColumnUnit = timeAggregationColumnUnit;
     this.timeAggregationOrderBy = timeAggregationOrderBy;
     this.timeAggregationTimezone = timeAggregationTimezone;
     return this;
@@ -181,12 +176,10 @@ public class SelectQuery {
    */
   public SelectQuery whereTimeFilter(final Interval timeFilterInterval,
       final String timeFilterColumn,
-      final String timeFilterColumnFormat,
-      @Nullable final String timeFilterColumnUnit) {
+      final String timeFilterColumnFormat) {
     this.timeFilterInterval = requireNonNull(timeFilterInterval);
     this.timeFilterColumn = requireNonNull(timeFilterColumn);
     this.timeFilterColumnFormat = requireNonNull(timeFilterColumnFormat);
-    this.timeFilterColumnUnit = timeFilterColumnUnit;
 
     return this;
   }

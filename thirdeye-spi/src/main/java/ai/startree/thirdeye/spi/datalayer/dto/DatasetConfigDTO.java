@@ -179,6 +179,10 @@ public class DatasetConfigDTO extends AbstractDTO {
   }
 
   public String getTimeFormat() {
+    if ("EPOCH".equals(timeFormat) && timeUnit != null) {
+      // legacy format that has not been migrated yet - convert to new format on the fly
+      return "1:" + timeUnit + ":EPOCH";
+    }
     return timeFormat;
   }
 

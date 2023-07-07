@@ -44,7 +44,6 @@ import org.joda.time.Period;
 
 /**
  * Class that helps build and generate SQL queries.
- * Use the builder {@link #newBuilder}.
  **/
 public class SelectQueryTranslator {
 
@@ -59,7 +58,6 @@ public class SelectQueryTranslator {
   // aggregation - in SELECT, GROUP BY, ORDER BY?
   final private Period timeAggregationGranularity;
   final private String timeAggregationColumnFormat;
-  final private String timeAggregationColumnUnit;
   final private String timeAggregationColumn;
   /**
    * If set, is the timeAggregation will be the first order by column.
@@ -75,7 +73,6 @@ public class SelectQueryTranslator {
   final private Interval timeFilterInterval;
   final private String timeFilterColumn;
   final private String timeFilterColumnFormat;
-  final private String timeFilterColumnUnit;
   // todo cyril add a partitionTimeFilterColumn with a period granularity - for partition constraint - to be used by Presto/BQ
 
   // WHERE clause
@@ -112,7 +109,6 @@ public class SelectQueryTranslator {
     sqlNodeSelectProjections = List.copyOf(selectQuery.slqNodeSelectProjections);
     timeAggregationGranularity = selectQuery.timeAggregationGranularity;
     timeAggregationColumnFormat = selectQuery.timeAggregationColumnFormat;
-    timeAggregationColumnUnit = selectQuery.timeAggregationColumnUnit;
     timeAggregationColumn = selectQuery.timeAggregationColumn;
     timeAggregationOrderBy = selectQuery.timeAggregationOrderBy;
     timeAggregationTimezone = selectQuery.timeAggregationTimezone;
@@ -122,7 +118,6 @@ public class SelectQueryTranslator {
     timeFilterInterval = selectQuery.timeFilterInterval;
     timeFilterColumn = selectQuery.timeFilterColumn;
     timeFilterColumnFormat = selectQuery.timeFilterColumnFormat;
-    timeFilterColumnUnit = selectQuery.timeFilterColumnUnit;
 
     predicates = List.copyOf(selectQuery.predicates);
     freeTextPredicates = List.copyOf(selectQuery.freeTextPredicates);
@@ -181,7 +176,6 @@ public class SelectQueryTranslator {
           quoteIdentifierIfReserved(timeAggregationColumn, sqlParserConfig, dialect),
           timeAggregationColumnFormat,
           timeAggregationGranularity,
-          timeAggregationColumnUnit,
           timeAggregationTimezone);
       final SqlNode timeGroupNode = expressionToNode(timeGroupExpression, sqlParserConfig);
       final SqlNode timeGroupWithAlias = addAlias(timeGroupNode, TIME_AGGREGATION_ALIAS);
@@ -207,8 +201,7 @@ public class SelectQueryTranslator {
       final String timeFilterExpression = expressionBuilder.getTimeFilterExpression(
           preparedTimeColumn,
           timeFilterInterval,
-          timeFilterColumnFormat,
-          timeFilterColumnUnit);
+          timeFilterColumnFormat);
       final SqlNode timeGroupNode = expressionToNode(timeFilterExpression, sqlParserConfig);
       predicates.add(timeGroupNode);
     }
@@ -304,7 +297,6 @@ public class SelectQueryTranslator {
         .add("sqlNodeSelectProjections", sqlNodeSelectProjections)
         .add("timeAggregationGranularity", timeAggregationGranularity)
         .add("timeAggregationColumnFormat", timeAggregationColumnFormat)
-        .add("timeAggregationColumnUnit", timeAggregationColumnUnit)
         .add("timeAggregationColumn", timeAggregationColumn)
         .add("timeAggregationOrderBy", timeAggregationOrderBy)
         .add("timeAggregationTimezone", timeAggregationTimezone)
@@ -313,7 +305,6 @@ public class SelectQueryTranslator {
         .add("timeFilterInterval", timeFilterInterval)
         .add("timeFilterColumn", timeFilterColumn)
         .add("timeFilterColumnFormat", timeFilterColumnFormat)
-        .add("timeFilterColumnUnit", timeFilterColumnUnit)
         .add("predicates", predicates)
         .add("freeTextPredicates", freeTextPredicates)
         .add("sqlNodePredicates", sqlNodePredicates)

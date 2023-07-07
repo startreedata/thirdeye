@@ -229,7 +229,12 @@ public class HappyPathTest {
         PAGEVIEWS_DATASET_START_TIME, EVALUATE_END_TIME);
 
     final Response response = request("api/alerts/evaluate").post(Entity.json(alertEvaluationApi));
-    assertThat(response.getStatus()).isEqualTo(200);
+    if (response.getStatus() == 200) {
+      assert true;
+    } else {
+      System.out.println("error: " + response.readEntity(Object.class));
+      assert false;
+    }
   }
 
   @Test(dependsOnMethods = "testEvaluateAlert")

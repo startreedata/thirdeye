@@ -17,7 +17,6 @@ import static ai.startree.thirdeye.mapper.ApiBeanMapper.toAlertTemplateApi;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DATASET_NOT_FOUND;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_CONFIGURATION_FIELD;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_UNKNOWN;
-import static ai.startree.thirdeye.spi.util.AlertMetadataUtils.getDelay;
 import static ai.startree.thirdeye.spi.util.AlertMetadataUtils.getGranularity;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.ResourceUtils.serverError;
@@ -200,9 +199,8 @@ public class AlertInsightsProvider {
     final Interval datasetInterval = new Interval(datasetStartTime, datasetEndTime, chronology);
     // FIXME CYRIL internalize this?
     final Period granularity = getGranularity(metadata);
-    final Period delay = getDelay(metadata);
     // compute default chart interval
-    final Interval defaultInterval = getDefaultChartInterval(datasetInterval, granularity, delay);
+    final Interval defaultInterval = getDefaultChartInterval(datasetInterval, granularity);
     insights.setDefaultStartTime(defaultInterval.getStartMillis());
     insights.setDefaultEndTime(defaultInterval.getEndMillis());
   }
@@ -213,7 +211,7 @@ public class AlertInsightsProvider {
 
   @VisibleForTesting
   protected static Interval getDefaultChartInterval(final @NonNull Interval datasetInterval,
-      @NonNull final Period granularity, @NonNull final Period delay) {
+      @NonNull final Period granularity) {
     final DateTime datasetEndTimeBucketStart = TimeUtils.floorByPeriod(datasetInterval.getEnd(),
         granularity);
 
@@ -225,9 +223,7 @@ public class AlertInsightsProvider {
     }
 
     final DateTime datasetEndTimeBucketEnd = datasetEndTimeBucketStart.plus(granularity);
-    // delay is applied in evaluate call - anticipate by adding it here to avoid hiding most recent points
-    final DateTime defaultEndTime = datasetEndTimeBucketEnd.plus(delay);
-    return new Interval(defaultStartTime, defaultEndTime);
+    return new Interval(defaultStartTime, datasetEndTimeBucketEnd);
   }
 
   /**

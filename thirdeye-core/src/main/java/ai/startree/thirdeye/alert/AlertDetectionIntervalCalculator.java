@@ -96,10 +96,13 @@ public class AlertDetectionIntervalCalculator {
     DateTime correctedEnd = taskEnd;
     // apply delay correction
     final Period delay = getDelay(metadata);
-    // if alert has already run: start = lastTimestamp = correctedEnd from last run -> delay was applied
-    // if alert has never run: delay is not important if end-delay > start.
-    // only apply delay on start if end-delay > start is not true
-    correctedEnd = correctedEnd.minus(delay);
+    final DateTime dataWatermark = DateTime.now(chronology).minus(delay);
+    if (correctedEnd.isAfter(dataWatermark)) {
+      correctedEnd = dataWatermark;
+      LOG.info(
+          "Applied delay correction of {} for id {} between {} and {}. Corrected end time is {}",
+          delay, alertId, taskStart, taskEnd, correctedEnd);
+    }
     if (correctedEnd.isBefore(correctedStart)) {
       correctedStart = correctedStart.minus(delay);
       LOG.warn(
@@ -108,14 +111,6 @@ public class AlertDetectionIntervalCalculator {
           correctedEnd,
           correctedStart);
     }
-    LOG.info(
-        "Applied delay correction of {} for id {} between {} and {}. Corrected timeframe is between {} and {}",
-        delay,
-        alertId,
-        taskStart,
-        taskEnd,
-        correctedStart,
-        correctedEnd);
 
     // apply granularity correction
     final Period granularity = getGranularity(metadata);

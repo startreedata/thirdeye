@@ -40,7 +40,7 @@ public class AlertInsightsProviderTest {
         JANUARY_1_2022_2AM,
         DateTimeZone.UTC);
     final Interval res = AlertInsightsProvider.getDefaultChartInterval(datasetInterval,
-        DAILY_GRANULARITY, Period.ZERO);
+        DAILY_GRANULARITY);
 
     // end of end bucket
     final DateTime expectedEnd = new DateTime(JANUARY_2_2022_0AM, DateTimeZone.UTC);
@@ -51,28 +51,12 @@ public class AlertInsightsProviderTest {
   }
 
   @Test
-  public void testDefaultIntervalWithDailyGranularityWithCompletenessDelay() {
-    final Interval datasetInterval = new Interval(JANUARY_1_2019_OAM,
-        JANUARY_1_2022_2AM,
-        DateTimeZone.UTC);
-    final Interval res = AlertInsightsProvider.getDefaultChartInterval(datasetInterval,
-        DAILY_GRANULARITY, Period.days(1));
-
-    // end of bucket = JANUARY_2_2022_0AM then delay is added
-    final DateTime expectedEnd = new DateTime(JANUARY_3_2022_0AM, DateTimeZone.UTC);
-    // 6 months from start of end bucket
-    final DateTime expectedStart = new DateTime(JANUARY_2_2022_0AM, DateTimeZone.UTC).minus(DAILY_GRANULARITY).minus(Period.months(6));
-    final Interval expected = new Interval(expectedStart, expectedEnd);
-    assertThat(res).isEqualTo(expected);
-  }
-
-  @Test
   public void testDefaultIntervalWithDailyGranularityWithParisTimezone() {
     final Interval datasetInterval = new Interval(JANUARY_1_2019_OAM,
         JANUARY_1_2022_2AM,
         PARIS_TIMEZONE);
     final Interval res = AlertInsightsProvider.getDefaultChartInterval(datasetInterval,
-        DAILY_GRANULARITY, Period.ZERO);
+        DAILY_GRANULARITY);
 
 
     // end of end bucket
@@ -89,7 +73,7 @@ public class AlertInsightsProviderTest {
         JANUARY_1_2022_2AM,
         DateTimeZone.UTC);
     final Interval res = AlertInsightsProvider.getDefaultChartInterval(datasetInterval,
-        DAILY_GRANULARITY, Period.ZERO);
+        DAILY_GRANULARITY);
 
     final Interval expected = new Interval(JULY_2_2021_0AM, JANUARY_2_2022_0AM, DateTimeZone.UTC);
     assertThat(res).isEqualTo(expected);

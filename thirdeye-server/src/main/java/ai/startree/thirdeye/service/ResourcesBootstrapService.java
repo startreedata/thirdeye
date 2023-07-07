@@ -14,20 +14,34 @@
 package ai.startree.thirdeye.service;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
+import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
+import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.List;
 
 @Singleton
 public class ResourcesBootstrapService {
 
   private final AlertTemplateService alertTemplateService;
+  private final DatasetConfigManager datasetDAO;
 
   @Inject
-  public ResourcesBootstrapService(final AlertTemplateService alertTemplateService) {
+  public ResourcesBootstrapService(final AlertTemplateService alertTemplateService,
+      final DatasetConfigManager datasetDAO) {
     this.alertTemplateService = alertTemplateService;
+    this.datasetDAO = datasetDAO;
   }
 
   public void bootstrap() {
-    alertTemplateService.loadRecommendedTemplates(AuthorizationManager.getInternalValidPrincipal(), true);
+    // MIGRATION CODE: START
+    // TODO CYRIL - can be removed around November 2023/December 2024
+    // force migration of dataset configuration to the new timeFormat - migration is made inside DatasetConfigDto#getTimeFormat
+    final List<DatasetConfigDTO> datasets = datasetDAO.findAll();
+    datasetDAO.update(datasets);
+    // MIGRATION CODE: END
+
+    alertTemplateService.loadRecommendedTemplates(AuthorizationManager.getInternalValidPrincipal(),
+        true);
   }
 }

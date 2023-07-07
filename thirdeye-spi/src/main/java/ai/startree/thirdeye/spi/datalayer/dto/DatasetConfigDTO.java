@@ -179,8 +179,10 @@ public class DatasetConfigDTO extends AbstractDTO {
   }
 
   public String getTimeFormat() {
+    // todo cyril - can be removed around November 2023/December 2024 - see ResourcesBootstrapService#bootstrap()
     if ("EPOCH".equals(timeFormat) && timeUnit != null) {
-      // legacy format that has not been migrated yet - convert to new format on the fly
+      // legacy format that has not been migrated yet - convert to new format on the fly for backward compatibility
+      // also, an update on a dataset DTO will result in an upgrade to the new format
       return "1:" + timeUnit + ":EPOCH";
     }
     return timeFormat;

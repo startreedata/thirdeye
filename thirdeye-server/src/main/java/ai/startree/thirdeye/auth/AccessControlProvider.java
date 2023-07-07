@@ -19,9 +19,6 @@ import ai.startree.thirdeye.spi.accessControl.AccessControl;
 import ai.startree.thirdeye.spi.accessControl.AccessControlFactory;
 import ai.startree.thirdeye.spi.accessControl.AccessType;
 import ai.startree.thirdeye.spi.accessControl.ResourceIdentifier;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * AccessControlProvider serves as a mutable layer between Guice bindings and the access control
@@ -29,13 +26,13 @@ import java.util.List;
  */
 public class AccessControlProvider implements AccessControl {
 
-  public final static AccessControl alwaysAllow = (
+  public final static AccessControl ALWAYS_ALLOW = (
       final String token,
       final ResourceIdentifier identifiers,
       final AccessType accessType
   ) -> true;
 
-  public final static AccessControl alwaysDeny = (
+  public final static AccessControl ALWAYS_DENY = (
       final String token,
       final ResourceIdentifier identifiers,
       final AccessType accessType
@@ -67,7 +64,7 @@ public class AccessControlProvider implements AccessControl {
 
   public AccessControl getAccessControl() {
     if (!config.isEnabled()) {
-      return alwaysAllow;
+      return ALWAYS_ALLOW;
     }
 
     checkState(this.accessControl != null,

@@ -15,7 +15,6 @@
 package ai.startree.thirdeye.service;
 
 import static ai.startree.thirdeye.RequestCache.buildCache;
-import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_ID_UNEXPECTED_AT_CREATION;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureNull;
@@ -94,7 +93,7 @@ public class AnomalyService extends CrudService<AnomalyApi, AnomalyDTO> {
   protected AnomalyDTO toDto(final AnomalyApi api) {
     final var dto = ApiBeanMapper.toDto(api);
     final var authId = authorizationManager.resourceId(dto);
-    dto.setAuth(new AuthorizationConfigurationDTO().setNamespace(authId.namespace));
+    dto.setAuth(new AuthorizationConfigurationDTO().setNamespace(authId.getNamespace()));
     return dto;
   }
 
@@ -106,7 +105,7 @@ public class AnomalyService extends CrudService<AnomalyApi, AnomalyDTO> {
         .ifPresent(alertApi -> alertApi.setName(cache.getAlerts()
             .getUnchecked(alertApi.getId())
             .getName()));
-    anomalyApi.setAuth(new AuthorizationConfigurationApi().setNamespace(authorizationManager.resourceId(dto).namespace));
+    anomalyApi.setAuth(new AuthorizationConfigurationApi().setNamespace(authorizationManager.resourceId(dto).getNamespace()));
     return anomalyApi;
   }
 

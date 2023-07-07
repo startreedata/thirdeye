@@ -131,7 +131,7 @@ public class AlertResourceTest {
         mock(AlertManager.class), alertTemplateManager);
 
     final AccessControl accessControl = (String token, ResourceIdentifier identifier, AccessType accessType)
-        -> identifier.name.equals("0");
+        -> identifier.getName().equals("0");
 
     newAlertResource(mock(AlertManager.class), alertTemplateRenderer, accessControl).createMultiple(
         nobody(),
@@ -147,7 +147,7 @@ public class AlertResourceTest {
     final AlertTemplateRenderer alertTemplateRenderer = new AlertTemplateRenderer(alertManager,
         mock(AlertTemplateManager.class));
 
-    newAlertResource(alertManager, alertTemplateRenderer, AccessControlProvider.alwaysDeny).runTask(
+    newAlertResource(alertManager, alertTemplateRenderer, AccessControlProvider.ALWAYS_DENY).runTask(
         nobody(),
         1L,
         0L,
@@ -158,7 +158,7 @@ public class AlertResourceTest {
   public void testValidate_withNoAccess() {
     newAlertResource(mock(AlertManager.class),
         mock(AlertTemplateRenderer.class),
-        AccessControlProvider.alwaysDeny).validateMultiple(
+        AccessControlProvider.ALWAYS_DENY).validateMultiple(
         nobody(),
         Collections.singletonList(
             new AlertApi().setTemplate(new AlertTemplateApi().setId(1L)).setName("alert1")
@@ -175,7 +175,7 @@ public class AlertResourceTest {
         mock(AlertManager.class), alertTemplateManager);
 
     final AccessControl accessControl = (String token, ResourceIdentifier identifier, AccessType accessType)
-        -> identifier.name.equals("alert1");
+        -> identifier.getName().equals("alert1");
 
     newAlertResource(mock(AlertManager.class),
         alertTemplateRenderer,
@@ -198,7 +198,7 @@ public class AlertResourceTest {
 
     newAlertResource(mock(AlertManager.class),
         alertTemplateRenderer,
-        AccessControlProvider.alwaysDeny).evaluate(nobody(),
+        AccessControlProvider.ALWAYS_DENY).evaluate(nobody(),
         new AlertEvaluationApi()
             .setAlert(new AlertApi().setTemplate(new AlertTemplateApi().setId(1L)))
             .setStart(new Date())
@@ -242,7 +242,7 @@ public class AlertResourceTest {
         mock(AlertInsightsProvider.class),
         newAuthorizationManager(alertTemplateRenderer,
             (String token, ResourceIdentifier id, AccessType accessType) ->
-                id.namespace.equals("allowedNamespace")))
+                id.getNamespace().equals("allowedNamespace")))
     ).evaluate(nobody(), alertEvaluationApi);
   }
 
@@ -294,7 +294,7 @@ public class AlertResourceTest {
         mock(AlertInsightsProvider.class),
         newAuthorizationManager(alertTemplateRenderer,
             (String token, ResourceIdentifier id, AccessType accessType) ->
-                accessType == AccessType.READ && id.namespace.equals("allowedNamespace")))
+                accessType == AccessType.READ && id.getNamespace().equals("allowedNamespace")))
     );
 
     try (Response resp = alertResource.evaluate(nobody(), alertEvaluationApi)) {
@@ -339,7 +339,7 @@ public class AlertResourceTest {
         mock(AlertInsightsProvider.class),
         newAuthorizationManager(alertTemplateRenderer,
             (String token, ResourceIdentifier id, AccessType accessType) ->
-                id.namespace.equals("readonlyNamespace") && accessType == AccessType.READ))
+                id.getNamespace().equals("readonlyNamespace") && accessType == AccessType.READ))
     ).evaluate(nobody(), alertEvaluationApi);
   }
 
@@ -388,7 +388,7 @@ public class AlertResourceTest {
         mock(AlertInsightsProvider.class),
         newAuthorizationManager(alertTemplateRenderer,
             (String token, ResourceIdentifier id, AccessType accessType) ->
-                id.namespace.equals("allowedNamespace")))
+                id.getNamespace().equals("allowedNamespace")))
     );
 
     try (Response resp = resource.evaluate(nobody(), alertEvaluationApi)) {
@@ -412,7 +412,7 @@ public class AlertResourceTest {
     final AlertTemplateRenderer alertTemplateRenderer = new AlertTemplateRenderer(alertManager,
         mock(AlertTemplateManager.class));
 
-    newAlertResource(alertManager, alertTemplateRenderer, AccessControlProvider.alwaysDeny).reset(
+    newAlertResource(alertManager, alertTemplateRenderer, AccessControlProvider.ALWAYS_DENY).reset(
         nobody(),
         1L);
   }

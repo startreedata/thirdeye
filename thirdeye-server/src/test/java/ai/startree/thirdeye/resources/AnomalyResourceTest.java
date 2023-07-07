@@ -47,7 +47,7 @@ public class AnomalyResourceTest {
         null,
         new AuthorizationManager(
             null,
-            AccessControlProvider.alwaysAllow,
+            AccessControlProvider.ALWAYS_ALLOW,
             alertManager,
             null,
             anomalyManager

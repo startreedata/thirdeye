@@ -19,7 +19,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Setup artifactory
+    - name: Install java and setup artifactory
       uses: actions/setup-java@v3
       with:
         java-version: '11'
@@ -28,13 +28,22 @@ jobs:
         server-username: ARTIFACTORY_USERNAME_REF
         server-password: ARTIFACTORY_TOKEN_REF
       # don't use setup-java cache - hash file pattern has issues
-    - name: Cache local Maven repository
-      uses: actions/cache@v3
+    - name: Cache - restore local Maven repository
+      id: cache-restore
+      uses: actions/cache/restore@v3
       with:
         path: ~/.m2/repository
         key: tests-${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: tests-${{ runner.os }}-maven-
     - name: Build with Maven
-      run: ./mvnw -T 1C -B clean verify
+      run: ./mvnw -U -T 1C -B clean verify
       env:
         ARTIFACTORY_USERNAME_REF: ${{ secrets.MVN_ARTIFACTORY_USERNAME }}
         ARTIFACTORY_TOKEN_REF: ${{ secrets.MVN_ARTIFACTORY_TOKEN }}
+    - name: Cache - save local Maven repository
+      uses: actions/cache/save@v3
+      # save to cache only if necessary + cache even if tests failed (for faster flaky tests)
+      if: steps.cache-restore.outputs.cache-hit != 'true' && ( failure() || success())
+      with:
+        path: ~/.m2/repository
+        key: tests-${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}

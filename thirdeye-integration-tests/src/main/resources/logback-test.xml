@@ -26,6 +26,7 @@
   </root>
 
   <logger name="org.apache.pinot" level="DEBUG" />
+  <logger name="org.apache.calcite" level="INFO"/>
   <!-- custom log configuration for test containers-->
   <logger name="org.testcontainers" level="INFO"/>
   <!-- The following logger can be used for containers logs since 1.18.0 -->

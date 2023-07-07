@@ -36,7 +36,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.spi.data.DateTimeFieldSpec;
-import org.apache.pinot.spi.data.DateTimeFieldSpec.TimeFormat;
 import org.apache.pinot.spi.data.DateTimeFormatSpec;
 import org.apache.pinot.spi.data.MetricFieldSpec;
 import org.apache.pinot.spi.data.Schema;
@@ -65,17 +64,26 @@ public class PinotDatasetOnboarder {
   public static void setDateTimeSpecs(final DatasetConfigDTO datasetConfigDTO,
       final DateTimeFieldSpec dateTimeFieldSpec) {
     Preconditions.checkNotNull(dateTimeFieldSpec);
-    final DateTimeFormatSpec formatSpec = new DateTimeFormatSpec(dateTimeFieldSpec.getFormat());
-    final String timeFormatStr =
-        formatSpec.getTimeFormat().equals(TimeFormat.SIMPLE_DATE_FORMAT) ? String
-            .format("%s:%s", TimeFormat.SIMPLE_DATE_FORMAT, formatSpec.getSDFPattern())
-            : TimeFormat.EPOCH.toString();
+    final String timeFormat = parseTimeFormat(dateTimeFieldSpec);
     datasetConfigDTO
         .setTimeColumn(dateTimeFieldSpec.getName())
-        .setTimeDuration(formatSpec.getColumnSize())
-        .setTimeUnit(formatSpec.getColumnUnit())
-        .setTimeFormat(timeFormatStr)
+        .setTimeFormat(timeFormat)
         .setTimezone(DEFAULT_CHRONOLOGY.getZone().toString());
+  }
+
+  private static String parseTimeFormat(final DateTimeFieldSpec dateTimeFieldSpec) {
+    final DateTimeFormatSpec formatSpec = new DateTimeFormatSpec(dateTimeFieldSpec.getFormat());
+    switch (formatSpec.getTimeFormat()) {
+      case EPOCH:
+      case SIMPLE_DATE_FORMAT:
+        return formatSpec.getFormat();
+      case TIMESTAMP:
+        // fixme this is unlikely to be correct and not tested - previous behaviour was undefined anyway
+        //  left for another PR  - see https://cortexdata.atlassian.net/browse/TE-1674
+        return formatSpec.getFormat();
+      default:
+        throw new UnsupportedOperationException(String.format("Unsupported pinot time format: %s", formatSpec.getTimeFormat()));
+    }
   }
 
   public static DatasetConfigDTO generateDatasetConfig(final String dataset, final Schema schema,

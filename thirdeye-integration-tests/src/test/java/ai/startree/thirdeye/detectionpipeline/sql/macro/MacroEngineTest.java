@@ -60,11 +60,17 @@ public class MacroEngineTest {
 
   private static final TimeUnit DATASET_CONFIG_EPOCH_UNIT = TimeUnit.HOURS;
 
-  private static final DatasetConfigDTO DATASET_CONFIG_DTO = new DatasetConfigDTO().setDataset(
+  // todo cyril can be removed once all users are migrated to the new configuration
+  private static final DatasetConfigDTO LEGACY_DATASET_CONFIG_DTO = new DatasetConfigDTO().setDataset(
           TABLE_NAME)
       .setTimeColumn("defaultCol")
       .setTimeFormat(INPUT_TIME_COLUMN_FORMAT)
       .setTimeUnit(DATASET_CONFIG_EPOCH_UNIT);
+  private static final DatasetConfigDTO DATASET_CONFIG_DTO = new DatasetConfigDTO().setDataset(
+          TABLE_NAME)
+      .setTimeColumn("defaultCol")
+      .setTimeFormat("1:HOURS:EPOCH");
+
   public static final String SIMPLE_TIME_FORMAT = "dd-M-yyyy hh:mm:ss";
   public static final Period HOUR_PERIOD = Period.hours(1);
 
@@ -89,6 +95,8 @@ public class MacroEngineTest {
       final Interval detectionInterval,
       final String expectedQuery,
       final Map<String, String> expectedProperties) {
+    prepareRequestAndAssert(inputQuery, detectionInterval, expectedQuery, expectedProperties,
+        LEGACY_DATASET_CONFIG_DTO);
     prepareRequestAndAssert(inputQuery, detectionInterval, expectedQuery, expectedProperties,
         DATASET_CONFIG_DTO);
   }
@@ -122,10 +130,9 @@ public class MacroEngineTest {
 
     final String expectedQuery = String.format("SELECT * FROM tableName WHERE %s",
         MOCK_SQL_EXPRESSION_BUILDER.getTimeFilterExpression(
-            "\"" + DATASET_CONFIG_DTO.getTimeColumn() + "\"",
+            "\"" + LEGACY_DATASET_CONFIG_DTO.getTimeColumn() + "\"",
             INPUT_INTERVAL,
-            DATASET_CONFIG_DTO.getTimeFormat(),
-            DATASET_CONFIG_DTO.getTimeUnit().toString()));
+            LEGACY_DATASET_CONFIG_DTO.getTimeFormat()));
 
     final Map<String, String> expectedProperties = ImmutableMap.of(
         MacroMetadataKeys.MIN_TIME_MILLIS.toString(),
@@ -245,10 +252,9 @@ public class MacroEngineTest {
 
     final String expectedQuery = String.format("SELECT %s FROM tableName",
         MOCK_SQL_EXPRESSION_BUILDER.getTimeGroupExpression(
-            "\"" + DATASET_CONFIG_DTO.getTimeColumn() + "\"",
-            DATASET_CONFIG_DTO.getTimeFormat(),
+            "\"" + LEGACY_DATASET_CONFIG_DTO.getTimeColumn() + "\"",
+            LEGACY_DATASET_CONFIG_DTO.getTimeFormat(),
             HOUR_PERIOD,
-            DATASET_CONFIG_DTO.getTimeUnit().toString(),
             INPUT_INTERVAL.getChronology().getZone().toString()));
 
     final Map<String, String> expectedProperties = ImmutableMap.of(

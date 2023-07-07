@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.plugins.datasource.pinot;
 
 import static ai.startree.thirdeye.spi.Constants.UTC_LIKE_TIMEZONES;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
@@ -22,7 +23,6 @@ import com.google.common.annotations.VisibleForTesting;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -36,8 +36,12 @@ import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
+
+  private static final Logger LOG = LoggerFactory.getLogger(PinotSqlExpressionBuilder.class);
 
   public static final Pattern SIMPLE_DATE_FORMAT_PATTERN = Pattern.compile(
       "^([0-9]:[A-Z]+:)?SIMPLE_DATE_FORMAT:");
@@ -65,13 +69,13 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
   public static final String STRING_LITERAL_QUOTE = "'";
   public static final String ESCAPED_STRING_LITERAL_QUOTE = "''";
 
-  private static final String escapeLiteralQuote(String s) {
+  private static String escapeLiteralQuote(String s) {
     return s.replace(STRING_LITERAL_QUOTE, ESCAPED_STRING_LITERAL_QUOTE);
   }
 
   @Override
   public String getTimeFilterExpression(final String timeColumn, final Interval filterInterval,
-      @NonNull final String timeColumnFormat) {
+      @Nullable final String timeColumnFormat) {
     final TimeFormat timeFormat = TimeFormat.of(timeColumnFormat);
 
     return timeColumn + " >= " + timeFormat.timeFormatter.apply(filterInterval.getStart()) + " AND "
@@ -79,35 +83,7 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
   }
 
   @Override
-  public String getTimeFilterExpression(final String timeColumn, final Interval filterInterval,
-      @Nullable final String timeFormat, @Nullable final String timeUnit) {
-    if (timeFormat == null) {
-      return getTimeFilterExpression(timeColumn, filterInterval, "EPOCH_MILLIS");
-    }
-    if ("EPOCH".equals(timeFormat)) {
-      Objects.requireNonNull(timeUnit);
-      return getTimeFilterExpression(timeColumn, filterInterval, "1:" + timeUnit + ":EPOCH");
-    }
-    // case simple date format
-    return getTimeFilterExpression(timeColumn, filterInterval, timeFormat);
-  }
-
-  @Override
-  public String getTimeGroupExpression(final String timeColumn, final @Nullable String timeFormat,
-      final Period granularity, final @Nullable String timeUnit, @Nullable final String timezone) {
-    if (timeFormat == null) {
-      return getTimeGroupExpression(timeColumn, "EPOCH_MILLIS", granularity, timezone);
-    }
-    if ("EPOCH".equals(timeFormat)) {
-      Objects.requireNonNull(timeUnit);
-      return getTimeGroupExpression(timeColumn, "1:" + timeUnit + ":EPOCH", granularity, timezone);
-    }
-    // case simple date format
-    return getTimeGroupExpression(timeColumn, timeFormat, granularity, timezone);
-  }
-
-  @Override
-  public String getTimeGroupExpression(String timeColumn, @NonNull String timeColumnFormat,
+  public String getTimeGroupExpression(String timeColumn, @Nullable String timeColumnFormat,
       final Period granularity, @Nullable final String timezone) {
     final TimeFormat timeFormat = TimeFormat.of(timeColumnFormat);
     if (timezone == null || UTC_LIKE_TIMEZONES.contains(timezone)) {
@@ -221,11 +197,12 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
     // set to null for epoch formats because nothing in Pinot ensures a LONG epoch time column respects a granularity
     private final @Nullable Period exactGranularity;
 
-    static TimeFormat of(final String userFacingTimeColumnFormat) {
-      return cache.computeIfAbsent(userFacingTimeColumnFormat, TimeFormat::new);
+    static TimeFormat of(final @Nullable String userFacingTimeColumnFormat) {
+      final String nullSafeFormat = optional(userFacingTimeColumnFormat).orElse("EPOCH_MILLIS");
+      return cache.computeIfAbsent(nullSafeFormat, TimeFormat::new);
     }
 
-    private TimeFormat(final String userFacingTimeColumnFormat) {
+    private TimeFormat(final @NonNull String userFacingTimeColumnFormat) {
       switch (userFacingTimeColumnFormat) {
         case "EPOCH_NANOS":
         case "1:NANOSECONDS:EPOCH":

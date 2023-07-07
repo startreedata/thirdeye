@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye;
 
+import static ai.startree.thirdeye.HappyPathTest.assert200;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
@@ -77,7 +78,7 @@ public class ForkJoinEvaluationApiTest {
         .request()
         .post(Entity.json(alertEvaluationApi));
 
-    assertThat(response.getStatus()).isEqualTo(200);
+    assert200(response);
 
     final AlertEvaluationApi result = response.readEntity(AlertEvaluationApi.class);
 
@@ -98,7 +99,7 @@ public class ForkJoinEvaluationApiTest {
         .request()
         .post(Entity.json(alertEvaluationApi));
 
-    assertThat(response.getStatus()).isEqualTo(200);
+    assert200(response);
 
     final AlertEvaluationApi result = response.readEntity(AlertEvaluationApi.class);
 
@@ -122,7 +123,7 @@ public class ForkJoinEvaluationApiTest {
         .request()
         .post(Entity.json(alertEvaluationApi));
 
-    assertThat(response.getStatus()).isEqualTo(200);
+    assert200(response);
 
     final AlertEvaluationApi result = response.readEntity(AlertEvaluationApi.class);
 

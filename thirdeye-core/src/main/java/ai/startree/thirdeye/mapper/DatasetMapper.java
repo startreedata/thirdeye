@@ -84,9 +84,9 @@ public interface DatasetMapper {
   }
 
   @VisibleForTesting
+  @Deprecated // timeDuration and TimeUnit are deprecated
   static void updateTimeSpecOnDataset(final DatasetConfigDTO dto,
       final TimeColumnApi timeColumn) {
-    //TODO cyril fixme. best would be to use a ISO-8601 period instead of a Duration
     final Duration d = timeColumn.getInterval();
 
     if (d.toMillis() < 1000) {

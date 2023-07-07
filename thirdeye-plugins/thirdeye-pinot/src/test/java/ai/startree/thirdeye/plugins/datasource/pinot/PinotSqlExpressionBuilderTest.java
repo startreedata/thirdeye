@@ -16,7 +16,6 @@ package ai.startree.thirdeye.plugins.datasource.pinot;
 import static ai.startree.thirdeye.plugins.datasource.pinot.PinotSqlExpressionBuilder.removeSimpleDateFormatPrefix;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import ai.startree.thirdeye.plugins.datasource.pinot.PinotSqlExpressionBuilder;
 import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import org.joda.time.Period;
 import org.testng.annotations.Test;

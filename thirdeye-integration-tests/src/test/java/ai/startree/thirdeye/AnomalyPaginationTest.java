@@ -15,6 +15,7 @@ package ai.startree.thirdeye;
 
 import static ai.startree.thirdeye.DropwizardTestUtils.buildClient;
 import static ai.startree.thirdeye.DropwizardTestUtils.buildSupport;
+import static ai.startree.thirdeye.HappyPathTest.assert200;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_NEGATIVE_LIMIT_VALUE;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_NEGATIVE_OFFSET_VALUE;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_OFFSET_WITHOUT_LIMIT;
@@ -89,13 +90,13 @@ public class AnomalyPaginationTest {
   public void testResponseSizeWithLimitFilter() {
     final int limit = 20;
     Response response = request("api/anomalies?limit=" + limit).get();
-    assertThat(response.getStatus()).isEqualTo(200);
+    assert200(response);
     List<AnomalyApi> returnedAnomalies = response.readEntity(ANOMALY_LIST_TYPE);
     assertThat(returnedAnomalies.size()).isEqualTo(limit);
 
     // ensure when limit is higher that actual entity cardinality, it returns all the entries
     response = request("api/anomalies?limit=" + (limit + TOTAL_ANOMALIES)).get();
-    assertThat(response.getStatus()).isEqualTo(200);
+    assert200(response);
     returnedAnomalies = response.readEntity(ANOMALY_LIST_TYPE);
     assertThat(returnedAnomalies.size()).isEqualTo(TOTAL_ANOMALIES);
   }

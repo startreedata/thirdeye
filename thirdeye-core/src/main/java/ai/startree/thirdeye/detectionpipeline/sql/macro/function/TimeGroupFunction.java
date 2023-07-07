@@ -68,7 +68,6 @@ public class TimeGroupFunction implements MacroFunction {
           .getTimeGroupExpression(mainTimeColumn,
               datasetConfigDTO.getTimeFormat(),
               granularity,
-              datasetConfigDTO.getTimeUnit().toString(),
               timezone);
     }
 

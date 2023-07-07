@@ -12,14 +12,18 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { toNumber } from "lodash";
+import { Box, Card, CardContent, Grid } from "@material-ui/core";
+import { isEmpty, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet, useParams } from "react-router-dom";
 import { PageSkeleton } from "../../components/anomalies-view/page-skeleton/page-skeleton.component";
+import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import {
     NotificationTypeV1,
+    PageContentsGridV1,
+    PageV1,
     useNotificationProviderV1,
 } from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
@@ -114,16 +118,31 @@ export const AnomaliesViewContainerPage: FunctionComponent = () => {
         <LoadingErrorStateSwitch
             wrapInGrid
             wrapInGridContainer
+            errorState={
+                <PageV1>
+                    <PageContentsGridV1>
+                        <Grid item xs={12}>
+                            <Card>
+                                <CardContent>
+                                    <Box p={20}>
+                                        <NoDataIndicator
+                                            text={
+                                                isEmpty(anomalyRequestErrors)
+                                                    ? ""
+                                                    : anomalyRequestErrors[0]
+                                            }
+                                        />
+                                    </Box>
+                                </CardContent>
+                            </Card>
+                        </Grid>
+                    </PageContentsGridV1>
+                </PageV1>
+            }
             isError={anomalyRequestStatus === ActionStatus.Error}
             isLoading={
                 anomalyRequestStatus === ActionStatus.Initial ||
-                anomalyRequestStatus === ActionStatus.Working ||
-                /**
-                 * When users use the back button, they will encounter a situation,
-                 * where this page is loaded. Account for it by checking
-                 * !!currentAnomaly
-                 */
-                !currentAnomaly
+                anomalyRequestStatus === ActionStatus.Working
             }
             loadingState={<PageSkeleton />}
         >

@@ -14,8 +14,6 @@
  */
 import { Icon } from "@iconify/react";
 import { Box, Button, Card, CardContent, Grid, Link } from "@material-ui/core";
-import { useQuery } from "@tanstack/react-query";
-import { AxiosError } from "axios";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link as RouterLink } from "react-router-dom";
@@ -36,24 +34,13 @@ import {
 } from "../../platform/components";
 import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { ActionStatus } from "../../rest/actions.interfaces";
-import { useResetAlert } from "../../rest/alerts/alerts.actions";
-import {
-    ALERT_CACHE_KEYS,
-    deleteAlert,
-    getAllAlerts,
-} from "../../rest/alerts/alerts.rest";
+import { useGetAlerts, useResetAlert } from "../../rest/alerts/alerts.actions";
+import { deleteAlert } from "../../rest/alerts/alerts.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { UiAlert } from "../../rest/dto/ui-alert.interfaces";
-import {
-    getAllSubscriptionGroups,
-    SUBSCRIPTION_GROUP_CACHE_KEYS,
-} from "../../rest/subscription-groups/subscription-groups.rest";
+import { useGetSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.actions";
 import { getUiAlerts } from "../../utils/alerts/alerts.util";
-import {
-    notifyErrors,
-    notifyIfErrors,
-} from "../../utils/notifications/notifications.util";
-import { getErrorMessages } from "../../utils/rest/rest.util";
+import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { getAlertsCreatePath } from "../../utils/routes/routes.util";
 
 export const AlertsAllPage: FunctionComponent = () => {
@@ -67,41 +54,18 @@ export const AlertsAllPage: FunctionComponent = () => {
         status,
         errorMessages,
     } = useResetAlert();
-
     const {
-        data: alerts,
-        isFetching: isAlertsRequestFetching,
-        isError: isAlertsRequestError,
-    } = useQuery({
-        queryKey: [ALERT_CACHE_KEYS.GET_ALL_ALERTS],
-        queryFn: getAllAlerts,
-        onError: (err: AxiosError) => {
-            notifyErrors(
-                getErrorMessages(err),
-                notify,
-                t("message.error-while-fetching", {
-                    entity: t("label.alerts"),
-                })
-            );
-        },
-    });
-
+        alerts,
+        getAlerts,
+        status: getAlertsStatus,
+        errorMessages: getAlertsErrors,
+    } = useGetAlerts();
     const {
-        data: subscriptionGroups,
-        isFetching: isSubscriptionGroupsRequestFetching,
-    } = useQuery({
-        queryKey: [SUBSCRIPTION_GROUP_CACHE_KEYS.GET_ALL_SUBSCRIPTION_GROUPS],
-        queryFn: getAllSubscriptionGroups,
-        onError: (err: AxiosError) => {
-            notifyErrors(
-                getErrorMessages(err),
-                notify,
-                t("message.error-while-fetching", {
-                    entity: t("label.subscription-groups"),
-                })
-            );
-        },
-    });
+        subscriptionGroups,
+        getSubscriptionGroups,
+        status: getSubscriptionGroupStatus,
+        errorMessages: getSubscriptionGroupErrors,
+    } = useGetSubscriptionGroups();
 
     // Handle communicating alert reset status to the user
     useEffect(() => {
@@ -120,6 +84,33 @@ export const AlertsAllPage: FunctionComponent = () => {
             t("message.alert-reset-error")
         );
     }, [status]);
+
+    useEffect(() => {
+        notifyIfErrors(
+            getAlertsStatus,
+            getAlertsErrors,
+            notify,
+            t("message.error-while-fetching", {
+                entity: t("label.alerts"),
+            })
+        );
+    }, [getAlertsErrors]);
+
+    useEffect(() => {
+        notifyIfErrors(
+            getSubscriptionGroupStatus,
+            getSubscriptionGroupErrors,
+            notify,
+            t("message.error-while-fetching", {
+                entity: t("label.subscription-groups"),
+            })
+        );
+    }, [getSubscriptionGroupErrors]);
+
+    useEffect(() => {
+        getAlerts();
+        getSubscriptionGroups();
+    }, []);
 
     useEffect(() => {
         if (alerts) {
@@ -189,9 +180,12 @@ export const AlertsAllPage: FunctionComponent = () => {
     };
 
     const loadingErrorStateParams = {
-        isError: isAlertsRequestError,
+        isError: getAlertsStatus === ActionStatus.Error,
         isLoading:
-            isAlertsRequestFetching || isSubscriptionGroupsRequestFetching,
+            getAlertsStatus === ActionStatus.Working ||
+            getAlertsStatus === ActionStatus.Initial ||
+            getSubscriptionGroupStatus === ActionStatus.Initial ||
+            getSubscriptionGroupStatus === ActionStatus.Working,
         wrapInGrid: true,
         wrapInCard: true,
     };

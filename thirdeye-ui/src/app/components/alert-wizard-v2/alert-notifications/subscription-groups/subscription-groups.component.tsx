@@ -13,18 +13,15 @@
  * the License.
  */
 import { Box, Button, Grid, Typography } from "@material-ui/core";
-import { useQuery } from "@tanstack/react-query";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
     DataGridSelectionModelV1,
     DataGridV1,
 } from "../../../../platform/components";
+import { ActionStatus } from "../../../../rest/actions.interfaces";
 import { SubscriptionGroup } from "../../../../rest/dto/subscription-group.interfaces";
-import {
-    getAllSubscriptionGroups,
-    SUBSCRIPTION_GROUP_CACHE_KEYS,
-} from "../../../../rest/subscription-groups/subscription-groups.rest";
+import { useGetSubscriptionGroups } from "../../../../rest/subscription-groups/subscription-groups.actions";
 import { getSubscriptionGroupsCreatePath } from "../../../../utils/routes/routes.util";
 import { getSubscriptionGroupAlertsList } from "../../../../utils/subscription-groups/subscription-groups.util";
 import { EmptyStateSwitch } from "../../../page-states/empty-state-switch/empty-state-switch.component";
@@ -39,14 +36,8 @@ export const SubscriptionGroups: FunctionComponent<SubscriptionGroupsProps> = ({
     emptySubscriptionGroupButton,
 }) => {
     const { t } = useTranslation();
-    const {
-        data: subscriptionGroups,
-        isFetching,
-        isError,
-    } = useQuery({
-        queryKey: [SUBSCRIPTION_GROUP_CACHE_KEYS.GET_ALL_SUBSCRIPTION_GROUPS],
-        queryFn: getAllSubscriptionGroups,
-    });
+    const { subscriptionGroups, getSubscriptionGroups, status } =
+        useGetSubscriptionGroups();
     const [selectedSubscriptionGroup, setSelectedSubscriptionGroup] = useState<
         DataGridSelectionModelV1<SubscriptionGroup>
     >(() => ({
@@ -59,31 +50,34 @@ export const SubscriptionGroups: FunctionComponent<SubscriptionGroupsProps> = ({
     }));
 
     useEffect(() => {
-        if (!subscriptionGroups) {
-            return;
-        }
-        let subscribed: SubscriptionGroup[] = [];
+        getSubscriptionGroups().then((fetchedSubscriptionGroups) => {
+            let subscribed: SubscriptionGroup[] = [];
 
-        subscribed = subscriptionGroups.filter((group) => {
-            // Get the list of alerts for the subscription group.
-            // `subscriptionGroup.alertAssociations` is the new way to store
-            // alert+enumeration item data for a subscription group, whereas
-            // `subscriptionGroup.alert` is the @deprecated way to do that,
-            // and does not support enumeration items
-            const alerts = getSubscriptionGroupAlertsList(group);
+            if (fetchedSubscriptionGroups) {
+                subscribed = fetchedSubscriptionGroups.filter((group) => {
+                    // Get the list of alerts for the subscription group.
+                    // `subscriptionGroup.alertAssociations` is the new way to store
+                    // alert+enumeration item data for a subscription group, whereas
+                    // `subscriptionGroup.alert` is the @deprecated way to do that,
+                    // and does not support enumeration items
+                    const alerts = getSubscriptionGroupAlertsList(group);
 
-            return alerts.some((item) => item.id === alert.id);
+                    return alerts.some((item) => item.id === alert.id);
+                });
+            }
+
+            if (subscribed.length > 0 && !selectedSubscriptionGroup) {
+                setSelectedSubscriptionGroup({
+                    rowKeyValues: subscribed.map(
+                        (e: SubscriptionGroup) => e.id
+                    ),
+                    rowKeyValueMap: new Map(
+                        subscribed.map((group) => [group.id, group])
+                    ),
+                });
+            }
         });
-
-        if (subscribed.length > 0 && !selectedSubscriptionGroup) {
-            setSelectedSubscriptionGroup({
-                rowKeyValues: subscribed.map((e: SubscriptionGroup) => e.id),
-                rowKeyValueMap: new Map(
-                    subscribed.map((group) => [group.id, group])
-                ),
-            });
-        }
-    }, [subscriptionGroups]);
+    }, []);
 
     const handleSelectedSubscriptionGroupChange = (
         updated: DataGridSelectionModelV1<SubscriptionGroup>
@@ -118,8 +112,11 @@ export const SubscriptionGroups: FunctionComponent<SubscriptionGroupsProps> = ({
         <Grid container item xs={12}>
             <LoadingErrorStateSwitch
                 wrapInGrid
-                isError={isError}
-                isLoading={isFetching}
+                isError={status === ActionStatus.Error}
+                isLoading={
+                    status === ActionStatus.Working ||
+                    status === ActionStatus.Initial
+                }
             >
                 <Grid container item xs={12}>
                     <EmptyStateSwitch
@@ -186,7 +183,7 @@ export const SubscriptionGroups: FunctionComponent<SubscriptionGroupsProps> = ({
                                             hideBorder
                                             hideToolbar
                                             columns={subscriptionGroupColumns}
-                                            data={subscriptionGroups || []}
+                                            data={subscriptionGroups}
                                             rowKey="id"
                                             selectionModel={
                                                 selectedSubscriptionGroup

@@ -18,6 +18,7 @@ import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { Link as RouterLink } from "react-router-dom";
 import { SkeletonV1 } from "../../../platform/components";
+import { ActionStatus } from "../../../rest/actions.interfaces";
 import {
     getAlertsAllPath,
     getAlertsCreatePath,
@@ -27,7 +28,7 @@ import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-s
 import { ActiveAlertsCountProps } from "./active-alerts-count.interfaces";
 
 export const ActiveAlertsCount: FunctionComponent<ActiveAlertsCountProps> = ({
-    query,
+    getAlertsStatus,
     alerts,
 }) => {
     const { t } = useTranslation();
@@ -62,8 +63,11 @@ export const ActiveAlertsCount: FunctionComponent<ActiveAlertsCountProps> = ({
                             {t("message.experienced-issues-fetching-data")}
                         </NoDataIndicator>
                     }
-                    isError={query.isError}
-                    isLoading={query.isFetching}
+                    isError={getAlertsStatus === ActionStatus.Error}
+                    isLoading={
+                        getAlertsStatus === ActionStatus.Working ||
+                        getAlertsStatus === ActionStatus.Initial
+                    }
                     loadingState={
                         <Box width={100}>
                             <Typography variant="h2">

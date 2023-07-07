@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { AppBarConfigProvider } from "./components/app-bar/app-bar-config-provider/app-bar-config-provider.component";
@@ -24,14 +23,6 @@ import {
     useNotificationProviderV1,
 } from "./platform/components";
 import { AppRouter } from "./routers/app/app.router";
-
-const queryClient = new QueryClient({
-    defaultOptions: {
-        queries: {
-            retry: 0,
-        },
-    },
-});
 
 // ThirdEye UI app
 export const App: FunctionComponent = () => {
@@ -57,12 +48,10 @@ export const App: FunctionComponent = () => {
     }, [authDisabled, authDisabledNotification]);
 
     return (
-        <QueryClientProvider client={queryClient}>
-            <AppContainerV1 name={t("label.thirdeye")}>
-                <AppBarConfigProvider>
-                    <AppRouter />
-                </AppBarConfigProvider>
-            </AppContainerV1>
-        </QueryClientProvider>
+        <AppContainerV1 name={t("label.thirdeye")}>
+            <AppBarConfigProvider>
+                <AppRouter />
+            </AppBarConfigProvider>
+        </AppContainerV1>
     );
 };

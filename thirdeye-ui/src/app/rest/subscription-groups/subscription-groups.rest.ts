@@ -17,10 +17,6 @@ import { SubscriptionGroup } from "../dto/subscription-group.interfaces";
 
 const BASE_URL_SUBSCRIPTION_GROUPS = "/api/subscription-groups";
 
-export const SUBSCRIPTION_GROUP_CACHE_KEYS = {
-    GET_ALL_SUBSCRIPTION_GROUPS: "subscriptionGroups",
-};
-
 export const getSubscriptionGroup = async (
     id: number
 ): Promise<SubscriptionGroup> => {

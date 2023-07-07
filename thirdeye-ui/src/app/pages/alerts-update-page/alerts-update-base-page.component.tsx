@@ -13,7 +13,6 @@
  * the License.
  */
 import { Box } from "@material-ui/core";
-import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { differenceBy, isEmpty, some, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
@@ -30,23 +29,16 @@ import {
     useNotificationProviderV1,
 } from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
-import {
-    ALERT_CACHE_KEYS,
-    getAlert,
-    updateAlert,
-} from "../../rest/alerts/alerts.rest";
+import { useGetAlert } from "../../rest/alerts/alerts.actions";
+import { updateAlert } from "../../rest/alerts/alerts.rest";
 import { Alert, EditableAlert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
+import { useGetSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.actions";
 import {
     createSubscriptionGroup,
-    getAllSubscriptionGroups,
-    SUBSCRIPTION_GROUP_CACHE_KEYS,
     updateSubscriptionGroups,
 } from "../../rest/subscription-groups/subscription-groups.rest";
-import {
-    notifyErrors,
-    notifyIfErrors,
-} from "../../utils/notifications/notifications.util";
+import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getAlertsAlertPath } from "../../utils/routes/routes.util";
@@ -61,43 +53,11 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const { notify } = useNotificationProviderV1();
-    const params = useParams<AlertsUpdatePageParams>();
-
     const {
-        data: subscriptionGroups,
-        isFetching: isSubscriptionGroupsRequestFetching,
-    } = useQuery({
-        queryKey: [SUBSCRIPTION_GROUP_CACHE_KEYS.GET_ALL_SUBSCRIPTION_GROUPS],
-        queryFn: getAllSubscriptionGroups,
-        onError: (err: AxiosError) => {
-            notifyErrors(
-                getErrorMessages(err),
-                notify,
-                t("message.error-while-fetching", {
-                    entity: t("label.subscription-groups"),
-                })
-            );
-        },
-    });
-
-    const {
-        data: originalAlert,
-        isFetching: isAlertsRequestFetching,
-        isError: isAlertsRequestError,
-    } = useQuery({
-        queryKey: [ALERT_CACHE_KEYS.GET_ALERT, toNumber(params.id)],
-        queryFn: () => getAlert(toNumber(params.id)),
-        onError: (err: AxiosError) => {
-            notifyErrors(
-                getErrorMessages(err),
-                notify,
-                t("message.error-while-fetching", {
-                    entity: t("label.alert"),
-                })
-            );
-        },
-    });
-
+        getSubscriptionGroups,
+        errorMessages: getSubscriptionGroupsErrorMessages,
+        status: getSubscriptionGroupStatus,
+    } = useGetSubscriptionGroups();
     const [
         currentlySelectedSubscriptionGroups,
         setCurrentlySelectedSubscriptionGroups,
@@ -106,7 +66,14 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
         originallySelectedSubscriptionGroups,
         setOriginallySelectedSubscriptionGroups,
     ] = useState<SubscriptionGroup[]>([]);
-
+    const {
+        alert: originalAlert,
+        getAlert,
+        status: getAlertStatus,
+        errorMessages: getAlertErrorMessages,
+    } = useGetAlert();
+    const params = useParams<AlertsUpdatePageParams>();
+    const [loading, setLoading] = useState(true);
     const [isEditRequestInFlight, setIsEditRequestInFlight] = useState(false);
 
     const [singleNewSubscriptionGroup, setSingleNewSubscriptionGroup] =
@@ -126,25 +93,79 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
             return;
         }
 
-        if (originalAlert && subscriptionGroups) {
-            const currentAlertId = originalAlert.id;
-            const subGroupsAlertIsIn = subscriptionGroups.filter((subGroup) => {
-                const alerts = getSubscriptionGroupAlertsList(subGroup);
+        Promise.allSettled([
+            getAlert(toNumber(params.id)),
+            getSubscriptionGroups(),
+        ])
+            .then(([getAlertResult, getSubscriptionResult]) => {
+                if (
+                    getSubscriptionResult.status === "fulfilled" &&
+                    getAlertResult.status === "fulfilled" &&
+                    getSubscriptionResult.value &&
+                    getAlertResult.value
+                ) {
+                    const currentAlertId = getAlertResult.value.id;
+                    const subGroupsAlertIsIn =
+                        getSubscriptionResult.value.filter((subGroup) => {
+                            const alerts =
+                                getSubscriptionGroupAlertsList(subGroup);
 
-                return some(alerts.map((alert) => alert.id === currentAlertId));
+                            return some(
+                                alerts.map(
+                                    (alert) => alert.id === currentAlertId
+                                )
+                            );
+                        });
+                    setOriginallySelectedSubscriptionGroups(
+                        subGroupsAlertIsIn as SubscriptionGroup[]
+                    );
+                    setCurrentlySelectedSubscriptionGroups(
+                        subGroupsAlertIsIn as SubscriptionGroup[]
+                    );
+                    singleNewSubscriptionGroup.name = `${getAlertResult.value.name}_subscription_group`;
+                    setSingleNewSubscriptionGroup({
+                        ...singleNewSubscriptionGroup,
+                    });
+                }
+            })
+            .finally(() => {
+                setLoading(false);
             });
-            setOriginallySelectedSubscriptionGroups(
-                subGroupsAlertIsIn as SubscriptionGroup[]
-            );
-            setCurrentlySelectedSubscriptionGroups(
-                subGroupsAlertIsIn as SubscriptionGroup[]
-            );
-            singleNewSubscriptionGroup.name = `${originalAlert.name}_subscription_group`;
-            setSingleNewSubscriptionGroup({
-                ...singleNewSubscriptionGroup,
-            });
+    }, []);
+
+    useEffect(() => {
+        if (getAlertStatus !== ActionStatus.Error) {
+            return;
         }
-    }, [subscriptionGroups, originalAlert]);
+
+        isEmpty(getAlertErrorMessages)
+            ? notify(
+                  NotificationTypeV1.Error,
+                  t("message.error-while-fetching", {
+                      entity: t("label.alert"),
+                  })
+              )
+            : getAlertErrorMessages.map((err) =>
+                  notify(NotificationTypeV1.Error, err)
+              );
+    }, [getAlertErrorMessages, getAlertStatus]);
+
+    useEffect(() => {
+        if (getSubscriptionGroupStatus !== ActionStatus.Error) {
+            return;
+        }
+
+        isEmpty(getSubscriptionGroupsErrorMessages)
+            ? notify(
+                  NotificationTypeV1.Error,
+                  t("message.error-while-fetching", {
+                      entity: t("label.subscription-groups"),
+                  })
+              )
+            : getSubscriptionGroupsErrorMessages.map((err) =>
+                  notify(NotificationTypeV1.Error, err)
+              );
+    }, [getSubscriptionGroupsErrorMessages, getSubscriptionGroupStatus]);
 
     const handleUpdatingSubscriptionGroups = async (
         alert: Alert
@@ -294,10 +315,8 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
                     </Box>
                 </PageV1>
             }
-            isError={isAlertsRequestError}
-            isLoading={
-                isSubscriptionGroupsRequestFetching && isAlertsRequestFetching
-            }
+            isError={getAlertStatus === ActionStatus.Error}
+            isLoading={loading}
             loadingState={<AppLoadingIndicatorV1 />}
         >
             <AlertsEditCreateBasePageComponent

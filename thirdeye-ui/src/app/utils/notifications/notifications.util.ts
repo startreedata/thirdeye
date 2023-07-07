@@ -26,13 +26,6 @@ export const notifyIfErrors = (
         return;
     }
 
-    notifyErrors(errorMessages, notify, fallbackMsg);
-};
-export const notifyErrors = (
-    errorMessages: string[] | null | undefined,
-    notify: (msgType: NotificationTypeV1, msg: string) => void,
-    fallbackMsg: string
-): void => {
     if (!isEmpty(errorMessages)) {
         errorMessages
             ?.reverse() // First in first shown

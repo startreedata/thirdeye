@@ -261,6 +261,10 @@
             </argLine>
             <threadCount>1</threadCount>
             <systemPropertyVariables>
+              <!-- using a single configuration file for test logging
+              warning: maven.multiModuleProjectDirectory may break if there is no ./mvn folder.
+              as of today we know there is always one because we use the maven wrapper-->
+              <logback.configurationFile>${maven.multiModuleProjectDirectory}/logback-test.xml</logback.configurationFile>
               <projectVersion>${project.version}</projectVersion>
               <projectBuildDirectory>${project.build.directory}</projectBuildDirectory>
             </systemPropertyVariables>

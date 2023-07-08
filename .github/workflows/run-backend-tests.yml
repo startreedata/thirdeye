@@ -36,17 +36,22 @@ jobs:
         key: tests-${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
         restore-keys: tests-${{ runner.os }}-maven-
     # docker image cache
-    - id: image-cache
+    - name: Docker - prepare cache
+      run: mkdir -p ~/image-cache
+    - name: Docker - retrieve from cache
+      id: image-cache
       uses: actions/cache@v3
       with:
         path: ~/image-cache
         key: image-cache-${{ runner.os }}
-    - if: steps.image-cache.outputs.cache-hit != 'true'
+    - name: Docker - download if not cached
+      if: steps.image-cache.outputs.cache-hit != 'true'
       # FIXME CYRIL image tags have to be maintained
       run: |
         docker pull apachepinot/pinot:0.12.1
         docker save -o ~/image-cache/pinot-0-12-1.tar apachepinot/pinot:0.12.1
-    - if: steps.image-cache.outputs.cache-hit == 'true'
+    - name: Docker - install if cached
+      if: steps.image-cache.outputs.cache-hit == 'true'
       run: docker load -i ~/image-cache/pinot-0-12-1.tar
     # end docker image cache
 

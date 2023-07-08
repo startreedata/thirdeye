@@ -45,7 +45,7 @@ jobs:
       # FIXME CYRIL image tags have to be maintained
       run: |
         docker pull apachepinot/pinot:0.12.1
-        docker save -o ~/image-cache/pinot-0-12-1.tar
+        docker save -o ~/image-cache/pinot-0-12-1.tar apachepinot/pinot:0.12.1
     - if: steps.image-cache.outputs.cache-hit == 'true'
       run: docker load -i ~/image-cache/pinot-0-12-1.tar
     # end docker image cache

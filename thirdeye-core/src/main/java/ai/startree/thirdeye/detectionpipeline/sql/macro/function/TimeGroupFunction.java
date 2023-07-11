@@ -43,12 +43,11 @@ public class TimeGroupFunction implements MacroFunction {
         "timeGroup macro requires 3 parameters. Eg: __timeGroup(timeColumn, 'timeFormat', 'granularity')");
     String timeColumn = macroParams.get(0);
     String timeColumnFormat = context.getLiteralUnquoter().apply(macroParams.get(1));
-    final String granularityText = context.getLiteralUnquoter().apply(macroParams.get(2));
-    final Period granularity = isoPeriod(granularityText);
+    final Period granularity = isoPeriod(context.getLiteralUnquoter().apply(macroParams.get(2)));
     final String timezone = context.getDetectionInterval().getChronology().getZone().toString();
 
     //write granularity to metadata
-    context.getProperties().put(GRANULARITY.toString(), granularityText);
+    context.getProperties().put(GRANULARITY.toString(), granularity.toString());
     if (isAutoTimeConfiguration(timeColumn)) {
       final DatasetConfigDTO datasetConfigDTO = context.getDatasetConfigDTO();
       Objects.requireNonNull(datasetConfigDTO,
@@ -57,7 +56,7 @@ public class TimeGroupFunction implements MacroFunction {
           datasetConfigDTO.getTimeColumns()).orElse(
               Collections.emptyList())
           .stream()
-          .filter(c -> c.getGranularity() != null && c.getGranularity().equals(granularityText))
+          .filter(timeCol -> granularity.toString().equals(timeCol.getGranularity()))
           // assume timezone is UTC TODO CYRIL IMPLEMENT COMPLETE TIMEZONE SUPPORT
           .findFirst();
       if (exactBucketTimeColumn.isPresent()) {
@@ -65,10 +64,10 @@ public class TimeGroupFunction implements MacroFunction {
         final TimeColumnApi timeColumnApi = exactBucketTimeColumn.get();
         checkNotNull(timeColumnApi.getName(),
             "A custom timeColumn of granularity %s is provided in the %s dataset configuration, but the name field is empty. name is required.",
-            granularityText, datasetConfigDTO.getDataset());
+            granularity, datasetConfigDTO.getDataset());
         checkNotNull(timeColumnApi.getFormat(),
             "A custom timeColumn of granularity %s is provided in the %s dataset configuration, but the format field is empty. format is required.",
-            granularityText, datasetConfigDTO.getDataset());
+            granularity, datasetConfigDTO.getDataset());
         // TODO CYRIL can be optimized further - if timeformat is milliseconds, then there is no need to use the timegroup expression - not sure if pinot optimizes under the hood
         timeColumn = context.getIdentifierQuoter().apply(timeColumnApi.getName());
         timeColumnFormat = timeColumnApi.getFormat();

@@ -18,28 +18,35 @@ import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
+    NotificationTypeV1,
+    useNotificationProviderV1,
+} from "../../../platform/components";
+import { deleteAlert } from "../../../rest/alerts/alerts.rest";
+import {
     createPathWithRecognizedQueryString,
     getAlertsAlertPath,
+    getAlertsAllPath,
     getAlertsCreateCopyPath,
     getAlertsUpdatePath,
     getAnomaliesCreatePath,
 } from "../../../utils/routes/routes.util";
+import { Modal } from "../../modal/modal.component";
 import { TimeRangeQueryStringKey } from "../../time-range/time-range-provider/time-range-provider.interfaces";
 import { AlertOptionsButtonProps } from "./alert-options-button.interfaces";
 
 export const AlertOptionsButton: FunctionComponent<AlertOptionsButtonProps> = ({
     alert,
     onChange,
-    onDelete,
-    onReset,
     showViewDetails,
     openButtonRenderer,
+    handleAlertResetClick,
 }) => {
     const [alertOptionsAnchorElement, setAlertOptionsAnchorElement] =
         useState<HTMLElement | null>();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const { t } = useTranslation();
+    const { notify } = useNotificationProviderV1();
 
     const handleAlertOptionsClick = (event: MouseEvent<HTMLElement>): void => {
         setAlertOptionsAnchorElement(event.currentTarget);
@@ -86,24 +93,6 @@ export const AlertOptionsButton: FunctionComponent<AlertOptionsButtonProps> = ({
         handleAlertOptionsClose();
     };
 
-    const handleAlertDelete = (): void => {
-        if (!alert) {
-            return;
-        }
-
-        onDelete && onDelete(alert);
-        handleAlertOptionsClose();
-    };
-
-    const handleReset = (): void => {
-        if (!alert) {
-            return;
-        }
-
-        onReset && onReset(alert);
-        handleAlertOptionsClose();
-    };
-
     const handleCreateAlertAnomaly = (): void => {
         const start = Number(
             searchParams.get(TimeRangeQueryStringKey.START_TIME)
@@ -124,6 +113,18 @@ export const AlertOptionsButton: FunctionComponent<AlertOptionsButtonProps> = ({
 
         navigate(path);
         handleAlertOptionsClose();
+    };
+
+    const handleAlertDeleteOk = (): void => {
+        deleteAlert(alert.id).then(() => {
+            notify(
+                NotificationTypeV1.Success,
+                t("message.delete-success", { entity: t("label.alert") })
+            );
+
+            // Redirect to alerts all path
+            navigate(getAlertsAllPath());
+        });
     };
 
     return (
@@ -175,11 +176,23 @@ export const AlertOptionsButton: FunctionComponent<AlertOptionsButtonProps> = ({
                 </MenuItem>
 
                 {/* Delete alert */}
-                <MenuItem onClick={handleAlertDelete}>
-                    {t("label.delete-entity", {
-                        entity: t("label.alert"),
-                    })}
-                </MenuItem>
+                <Modal
+                    submitButtonLabel={t("label.confirm")}
+                    trigger={(onClick) => (
+                        <MenuItem onClick={onClick}>
+                            {t("label.delete-entity", {
+                                entity: t("label.alert"),
+                            })}
+                        </MenuItem>
+                    )}
+                    onSubmit={handleAlertDeleteOk}
+                >
+                    <p>
+                        {t("message.delete-confirmation", {
+                            name: alert.name,
+                        })}
+                    </p>
+                </Modal>
 
                 {/* Create anomaly for alert */}
                 <MenuItem onClick={handleCreateAlertAnomaly}>
@@ -190,9 +203,22 @@ export const AlertOptionsButton: FunctionComponent<AlertOptionsButtonProps> = ({
                 </MenuItem>
 
                 {/* Reset alert */}
-                <MenuItem onClick={handleReset}>
-                    {t("label.reset-anomalies-for-alert")}
-                </MenuItem>
+                <Modal
+                    submitButtonLabel={t("label.confirm")}
+                    trigger={(onClick) => (
+                        <MenuItem onClick={onClick}>
+                            {t("label.reset-anomalies-for-alert")}
+                        </MenuItem>
+                    )}
+                    onSubmit={handleAlertResetClick}
+                >
+                    <p>{t("message.reset-alert-information")}</p>
+                    <p>
+                        {t("message.reset-alert-confirmation-prompt", {
+                            alertName: alert.name,
+                        })}
+                    </p>
+                </Modal>
             </Menu>
         </>
     );

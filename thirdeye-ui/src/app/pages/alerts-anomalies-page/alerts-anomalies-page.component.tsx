@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, FormControlLabel, Grid, Switch } from "@material-ui/core";
+import { Grid } from "@material-ui/core";
 import React, { FunctionComponent, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams, useSearchParams } from "react-router-dom";
@@ -84,7 +84,7 @@ export const AlertsAnomaliesPage: FunctionComponent = () => {
         errorMessages: getEnumerationItemErrorsMessages,
         status: getEnumerationItemStatus,
     } = useGetEnumerationItem();
-    const [searchParams, setSearchParams] = useSearchParams();
+    const [searchParams] = useSearchParams();
     const [startTime, endTime, enumerationItemIdStr, filterIgnoredAnomalies] =
         useMemo(
             () => [
@@ -96,20 +96,6 @@ export const AlertsAnomaliesPage: FunctionComponent = () => {
             ],
             [searchParams]
         );
-
-    const setShowIgnored = (newState: boolean): void => {
-        searchParams.set(
-            FILTER_IGNORED_ANOMALIES_QUERY_PARAM_KEY,
-            `${!newState}`
-        );
-        setSearchParams(searchParams);
-    };
-
-    const handleToggleIgnoredAnomalies = (
-        event: React.ChangeEvent<HTMLInputElement>
-    ): void => {
-        setShowIgnored(event.target.checked);
-    };
 
     const fetchData = (): void => {
         if (!alert || !startTime || !endTime) {
@@ -263,31 +249,12 @@ export const AlertsAnomaliesPage: FunctionComponent = () => {
                                 alertInsight?.templateWithProperties
                             )}
                             toolbar={
-                                <>
-                                    <Box width="100%">
-                                        <FormControlLabel
-                                            control={
-                                                <Switch
-                                                    checked={
-                                                        !filterIgnoredAnomalies
-                                                    }
-                                                    onChange={
-                                                        handleToggleIgnoredAnomalies
-                                                    }
-                                                />
-                                            }
-                                            label={t(
-                                                "message.show-ignored-flagged"
-                                            )}
-                                        />
-                                    </Box>
-                                    <AnomalyQuickFilters
-                                        showTimeSelectorOnly
-                                        timezone={determineTimezoneFromAlertInEvaluation(
-                                            alertInsight?.templateWithProperties
-                                        )}
-                                    />
-                                </>
+                                <AnomalyQuickFilters
+                                    showTimeSelectorOnly
+                                    timezone={determineTimezoneFromAlertInEvaluation(
+                                        alertInsight?.templateWithProperties
+                                    )}
+                                />
                             }
                             onDelete={handleAnomalyDelete}
                         />

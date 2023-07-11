@@ -12,27 +12,16 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import {
-    Box,
-    Button,
-    DialogActions,
-    DialogContent,
-    Grid,
-    Typography,
-    useTheme,
-} from "@material-ui/core";
+import { Box, Button, Grid, Typography, useTheme } from "@material-ui/core";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import HighlightOffIcon from "@material-ui/icons/HighlightOff";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import {
-    JSONEditorV1,
-    useDialogProviderV1,
-} from "../../../platform/components";
-import { DialogType } from "../../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
+import { JSONEditorV1 } from "../../../platform/components";
 import { Alert } from "../../../rest/dto/alert.interfaces";
 import { getAlertsUpdatePath } from "../../../utils/routes/routes.util";
+import { Modal } from "../../modal/modal.component";
 import { TimeRangeButtonWithContext } from "../../time-range/time-range-button-with-context/time-range-button.component";
 import { AlertViewSubHeaderProps } from "./alert-sub-header.interfaces";
 
@@ -41,47 +30,8 @@ export const AlertViewSubHeader: FunctionComponent<AlertViewSubHeaderProps> = ({
     timezone,
 }) => {
     const navigate = useNavigate();
-    const { showDialog, hideDialog } = useDialogProviderV1();
     const { t } = useTranslation();
     const theme = useTheme();
-
-    const handleViewConfigButtonClick = (): void => {
-        showDialog({
-            type: DialogType.CUSTOM,
-            headerText: t("label.detection-configuration"),
-            customContents: true,
-            contents: (
-                <>
-                    <DialogContent>
-                        <JSONEditorV1<Alert>
-                            disableValidation
-                            readOnly
-                            value={alert}
-                        />
-                    </DialogContent>
-                    <DialogActions>
-                        <Button
-                            className="dialog-provider-v1-cancel-button"
-                            onClick={() => {
-                                navigate(getAlertsUpdatePath(alert.id));
-                                hideDialog();
-                            }}
-                        >
-                            {t("label.edit")}
-                        </Button>
-                        <Button
-                            className="dialog-provider-v1-ok-button"
-                            color="primary"
-                            onClick={hideDialog}
-                        >
-                            {t("label.close")}
-                        </Button>
-                    </DialogActions>
-                </>
-            ),
-            width: "md",
-        });
-    };
 
     return (
         <Grid container justifyContent="space-between">
@@ -123,13 +73,36 @@ export const AlertViewSubHeader: FunctionComponent<AlertViewSubHeaderProps> = ({
             <Grid item>
                 <Grid container alignItems="center" direction="row">
                     <Grid item>
-                        <Button
-                            color="primary"
-                            variant="text"
-                            onClick={handleViewConfigButtonClick}
+                        <Modal
+                            cancelButtonLabel={t("label.close")}
+                            footerActions={
+                                <Button
+                                    className="dialog-provider-v1-cancel-button"
+                                    onClick={() => {
+                                        navigate(getAlertsUpdatePath(alert.id));
+                                    }}
+                                >
+                                    {t("label.edit")}
+                                </Button>
+                            }
+                            maxWidth="md"
+                            title={t("label.detection-configuration")}
+                            trigger={(handleTriggerClick) => (
+                                <Button
+                                    color="primary"
+                                    variant="text"
+                                    onClick={handleTriggerClick}
+                                >
+                                    {t("message.view-detection-configuration")}
+                                </Button>
+                            )}
                         >
-                            {t("message.view-detection-configuration")}
-                        </Button>
+                            <JSONEditorV1<Alert>
+                                disableValidation
+                                readOnly
+                                value={alert}
+                            />
+                        </Modal>
                     </Grid>
                     <Grid item>
                         <TimeRangeButtonWithContext

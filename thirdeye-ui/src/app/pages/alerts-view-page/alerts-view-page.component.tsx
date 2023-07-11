@@ -30,7 +30,7 @@ import React, {
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { AlertAccuracyColored } from "../../components/alert-accuracy-colored/alert-accuracy-colored.component";
 import { AlertOptionsButton } from "../../components/alert-view/alert-options-button/alert-options-button.component";
 import { EnumerationItemMerger } from "../../components/alert-view/enumeration-item-merger/enumeration-item-merger.component";
@@ -48,21 +48,15 @@ import {
     PageContentsGridV1,
     PageV1,
     SkeletonV1,
-    useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
-import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import {
     useGetAlert,
     useGetEvaluation,
     useResetAlert,
 } from "../../rest/alerts/alerts.actions";
-import {
-    deleteAlert,
-    getAlertStats,
-    updateAlert,
-} from "../../rest/alerts/alerts.rest";
+import { getAlertStats, updateAlert } from "../../rest/alerts/alerts.rest";
 import { useGetAnomalies } from "../../rest/anomalies/anomaly.actions";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import {
@@ -84,10 +78,8 @@ import {
 } from "./alerts-view-page.utils";
 
 export const AlertsViewPage: FunctionComponent = () => {
-    const navigate = useNavigate();
     const { t } = useTranslation();
     const { notify, remove: removeNotification } = useNotificationProviderV1();
-    const { showDialog } = useDialogProviderV1();
     const { id: alertId } = useParams<AlertsViewPageParams>();
 
     // Used for the scenario when user first creates an alert but no anomalies generated yet
@@ -401,63 +393,6 @@ export const AlertsViewPage: FunctionComponent = () => {
         setSearchParams(searchParams, { replace: true });
     };
 
-    const handleAlertDelete = (): void => {
-        if (!alert) {
-            return;
-        }
-        showDialog({
-            type: DialogType.ALERT,
-            contents: t("message.delete-confirmation", {
-                name: alert.name,
-            }),
-            okButtonText: t("label.confirm"),
-            cancelButtonText: t("label.cancel"),
-            onOk: () => handleAlertDeleteOk(alert),
-        });
-    };
-
-    const handleAlertDeleteOk = (alert: Alert): void => {
-        deleteAlert(alert.id).then(() => {
-            notify(
-                NotificationTypeV1.Success,
-                t("message.delete-success", { entity: t("label.alert") })
-            );
-
-            // Redirect to alerts all path
-            navigate(getAlertsAllPath());
-        });
-    };
-
-    const handleAlertReset = (alert: Alert): void => {
-        showDialog({
-            type: DialogType.CUSTOM,
-            contents: (
-                <>
-                    <p>{t("message.reset-alert-information")}</p>
-                    <p>
-                        {t("message.reset-alert-confirmation-prompt", {
-                            alertName: alert.name,
-                        })}
-                    </p>
-                </>
-            ),
-            okButtonText: t("label.confirm"),
-            cancelButtonText: t("label.cancel"),
-            onOk: () => {
-                resetAnomaliesData();
-                resetAlert(alert.id).then(() => {
-                    getAnomalies({
-                        alertId: alert.id,
-                        startTime,
-                        endTime,
-                    });
-                    searchParams.set(QUERY_PARAM_KEY_ANOMALIES_RETRY, "true");
-                    setSearchParams(searchParams, { replace: true });
-                });
-            },
-        });
-    };
-
     return (
         <PageV1>
             <PageHeader
@@ -475,6 +410,24 @@ export const AlertsViewPage: FunctionComponent = () => {
                     alert ? (
                         <AlertOptionsButton
                             alert={alert}
+                            handleAlertResetClick={() => {
+                                resetAnomaliesData();
+                                resetAlert(alert.id).then((newlyResetAlert) => {
+                                    getAnomalies({
+                                        alertId: newlyResetAlert?.id,
+                                        startTime,
+                                        endTime,
+                                    });
+
+                                    searchParams.set(
+                                        QUERY_PARAM_KEY_ANOMALIES_RETRY,
+                                        "true"
+                                    );
+                                    setSearchParams(searchParams, {
+                                        replace: true,
+                                    });
+                                });
+                            }}
                             openButtonRenderer={(
                                 clickHandler: (
                                     event: MouseEvent<HTMLElement>
@@ -495,8 +448,6 @@ export const AlertsViewPage: FunctionComponent = () => {
                                 );
                             }}
                             onChange={handleAlertChange}
-                            onDelete={handleAlertDelete}
-                            onReset={handleAlertReset}
                         />
                     ) : (
                         ""

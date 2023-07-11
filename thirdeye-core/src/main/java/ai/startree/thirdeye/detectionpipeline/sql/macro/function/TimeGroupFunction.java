@@ -62,14 +62,14 @@ public class TimeGroupFunction implements MacroFunction {
           .findFirst();
       if (exactBucketTimeColumn.isPresent()) {
         // use a column of pre-computed exact buckets
-        TimeColumnApi timeColumnApi = exactBucketTimeColumn.get();
+        final TimeColumnApi timeColumnApi = exactBucketTimeColumn.get();
         checkNotNull(timeColumnApi.getName(),
             "A custom timeColumn of granularity %s is provided in the %s dataset configuration, but the name field is empty. name is required.",
             granularityText, datasetConfigDTO.getDataset());
-        timeColumn = context.getIdentifierQuoter().apply(timeColumnApi.getName());
         checkNotNull(timeColumnApi.getFormat(),
             "A custom timeColumn of granularity %s is provided in the %s dataset configuration, but the format field is empty. format is required.",
             granularityText, datasetConfigDTO.getDataset());
+        timeColumn = context.getIdentifierQuoter().apply(timeColumnApi.getName());
         timeColumnFormat = timeColumnApi.getFormat();
       } else {
         // use the main time column

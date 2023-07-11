@@ -115,9 +115,8 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
           "monitoringGranularity is required when seasonalityPeriod is used");
       final Period seasonality = isoPeriod(spec.getSeasonalityPeriod());
       checkArgument(SUPPORTED_SEASONALITIES.contains(seasonality),
-          String.format(
               "Unsupported period %s. Supported periods are P7D and P1D, or PTOS for no seasonality.",
-              seasonality));
+              seasonality);
       int minimumLookbackRequired =
           2 * computeSteps(spec.getSeasonalityPeriod(), spec.getMonitoringGranularity());
       checkArgument(minimumLookbackRequired <= lookback,

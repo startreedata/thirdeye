@@ -228,7 +228,7 @@ public class SqlQueryBuilder {
         final String dbFieldName = pair.getKey();
         final ColumnInfo info = columnInfoMap.get(dbFieldName);
         checkNotNull(info,
-            String.format("Found field '%s' but expected %s", dbFieldName, columnInfoMap.keySet()));
+            "Found field '%s' but expected %s", dbFieldName, columnInfoMap.keySet());
         prepareStatement.setObject(parameterIndex++, pair.getValue(), info.getSqlType());
       }
     }

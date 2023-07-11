@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.joda.time.Period;
 
 /**
@@ -77,7 +78,7 @@ public class TimeGroupKeyFunction implements MacroFunction {
     String timeColumn = macroParams.get(0);
     String timeColumnFormat = context.getLiteralUnquoter().apply(macroParams.get(1));
     final String granularityText = context.getLiteralUnquoter().apply(macroParams.get(2));
-    final Period granularity = isoPeriod(granularityText);
+    final @NonNull Period granularity = isoPeriod(granularityText);
     final String timeGroupAlias = macroParams.get(3);
 
     if (isAutoTimeConfiguration(timeColumn)) {
@@ -92,6 +93,7 @@ public class TimeGroupKeyFunction implements MacroFunction {
           .map(TimeColumnApi::getName)
           .map(context.getIdentifierQuoter());
       if (exactBucketTimeColumn.isPresent()) {
+        // use the exact column name as the group key --> ensures the group by is a cheap operation if the column has indexes
         return exactBucketTimeColumn.get();
       }
       // else use the main time column
@@ -101,7 +103,7 @@ public class TimeGroupKeyFunction implements MacroFunction {
 
     final Period timeColumnGranularity = context.getSqlExpressionBuilder()
         .granularityOfTimeFormat(timeColumnFormat);
-    if (timeColumnGranularity != null && timeColumnGranularity.equals(granularity)) {
+    if (granularity.equals(timeColumnGranularity)) {
       // optimization happens
       return timeColumn;
     }

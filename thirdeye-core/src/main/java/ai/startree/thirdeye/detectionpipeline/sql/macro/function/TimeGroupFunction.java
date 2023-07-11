@@ -17,6 +17,7 @@ import static ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys.GRANUL
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import ai.startree.thirdeye.spi.api.TimeColumnApi;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
@@ -40,35 +41,41 @@ public class TimeGroupFunction implements MacroFunction {
     //parse params
     checkArgument(macroParams.size() == 3,
         "timeGroup macro requires 3 parameters. Eg: __timeGroup(timeColumn, 'timeFormat', 'granularity')");
-    final String timeColumn = macroParams.get(0);
-    final String timeColumnFormat = context.getLiteralUnquoter().apply(macroParams.get(1));
-    final String granularityText = context.getLiteralUnquoter().apply(macroParams.get(2));
-    final Period granularity = isoPeriod(granularityText);
+    String timeColumn = macroParams.get(0);
+    String timeColumnFormat = context.getLiteralUnquoter().apply(macroParams.get(1));
+    final Period granularity = isoPeriod(context.getLiteralUnquoter().apply(macroParams.get(2)));
     final String timezone = context.getDetectionInterval().getChronology().getZone().toString();
 
     //write granularity to metadata
-    context.getProperties().put(GRANULARITY.toString(), granularityText);
+    context.getProperties().put(GRANULARITY.toString(), granularity.toString());
     if (isAutoTimeConfiguration(timeColumn)) {
       final DatasetConfigDTO datasetConfigDTO = context.getDatasetConfigDTO();
-      Objects.requireNonNull(datasetConfigDTO, "Cannot use AUTO mode for macro. dataset table name is not defined.");
-      final Optional<String> exactBucketTimeColumn = optional(datasetConfigDTO.getTimeColumns()).orElse(
+      Objects.requireNonNull(datasetConfigDTO,
+          "Cannot use AUTO mode for macro. dataset table name is not defined.");
+      final Optional<TimeColumnApi> exactBucketTimeColumn = optional(
+          datasetConfigDTO.getTimeColumns()).orElse(
               Collections.emptyList())
           .stream()
-          .filter(c -> c.getGranularity() != null && c.getGranularity().equals(granularityText))
+          .filter(timeCol -> granularity.toString().equals(timeCol.getGranularity()))
           // assume timezone is UTC TODO CYRIL IMPLEMENT COMPLETE TIMEZONE SUPPORT
-          // assume format is epoch milliseconds TODO CYRIL IMPLEMENT SUPPORT FOR OTHER FORMATS
-          .findFirst()
-          .map(TimeColumnApi::getName)
-          .map(context.getIdentifierQuoter());
+          .findFirst();
       if (exactBucketTimeColumn.isPresent()) {
-        return exactBucketTimeColumn.get();
+        // use a column of pre-computed exact buckets
+        final TimeColumnApi timeColumnApi = exactBucketTimeColumn.get();
+        checkNotNull(timeColumnApi.getName(),
+            "A custom timeColumn of granularity %s is provided in the %s dataset configuration, but the name field is empty. name is required.",
+            granularity, datasetConfigDTO.getDataset());
+        checkNotNull(timeColumnApi.getFormat(),
+            "A custom timeColumn of granularity %s is provided in the %s dataset configuration, but the format field is empty. format is required.",
+            granularity, datasetConfigDTO.getDataset());
+        // TODO CYRIL can be optimized further - if timeformat is milliseconds, then there is no need to use the timegroup expression - not sure if pinot optimizes under the hood
+        timeColumn = context.getIdentifierQuoter().apply(timeColumnApi.getName());
+        timeColumnFormat = timeColumnApi.getFormat();
+      } else {
+        // use the main time column
+        timeColumn = context.getIdentifierQuoter().apply(datasetConfigDTO.getTimeColumn());
+        timeColumnFormat = datasetConfigDTO.getTimeFormat();
       }
-      final String mainTimeColumn = context.getIdentifierQuoter().apply(datasetConfigDTO.getTimeColumn());
-      return context.getSqlExpressionBuilder()
-          .getTimeGroupExpression(mainTimeColumn,
-              datasetConfigDTO.getTimeFormat(),
-              granularity,
-              timezone);
     }
 
     //generate SQL expression

@@ -22,6 +22,7 @@ import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_NEGATIVE_OFFSET_VALUE;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_OFFSET_WITHOUT_LIMIT;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
@@ -162,7 +163,7 @@ public class GenericPojoDao {
   }
 
   public <E extends AbstractDTO> int update(final E pojo, final Predicate predicate) {
-    requireNonNull(pojo.getId(), String.format("Need an ID to update the DB entity: %s", pojo));
+    checkNotNull(pojo.getId(), "An id is required to update the entity: %s", pojo);
 
     /* Update updateTime before DB update. Restore if update fails */
     final Timestamp lastUpdateTime = pojo.getUpdateTime();

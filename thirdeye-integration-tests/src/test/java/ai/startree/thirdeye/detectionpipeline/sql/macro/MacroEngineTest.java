@@ -265,7 +265,7 @@ public class MacroEngineTest {
   }
 
   @Test
-  public void testTimeGroupMacroWithAutoTimeWithExactBucket() {
+  public void testTimeGroupMacroWithAutoTimeWithExactBucketInEpochMillis() {
     final String inputQuery = String.format("select __timeGroup(%s,'%s','%s') from tableName",
         MacroFunction.AUTO_TIME_CONFIG,
         "NOT_IMPORTANT_SHOULD_NOT_BE_USED",
@@ -274,9 +274,35 @@ public class MacroEngineTest {
         .setDataset(TABLE_NAME)
         .setTimeColumns(
             List.of(
-                new TimeColumnApi().setGranularity(HOUR_PERIOD.toString()).setName("hourlyBuckets"))
+                new TimeColumnApi().setGranularity(HOUR_PERIOD.toString()).setName("hourlyBuckets").setFormat("1:MILLISECONDS:EPOCH"))
         );
-    final String expectedQuery = "SELECT \"hourlyBuckets\" FROM tableName";
+    // todo cyril can be optimized further to "hourlyBuckets" only - see todo in TimeGroupFunction
+    final String expectedQuery = "SELECT DATETIMECONVERT(\"hourlyBuckets\", '1:MILLISECONDS:EPOCH', '1:MILLISECONDS:EPOCH', '1:HOURS') FROM tableName";
+
+    final Map<String, String> expectedProperties = ImmutableMap.of(
+        MacroMetadataKeys.GRANULARITY.toString(),
+        HOUR_PERIOD.toString());
+
+    prepareRequestAndAssert(inputQuery, INPUT_INTERVAL, expectedQuery, expectedProperties,
+        datasetConfigDTO);
+  }
+
+  @Test
+  public void testTimeGroupMacroWithAutoTimeWithExactBucketInCustomTimeFormat() {
+    final String inputQuery = String.format("select __timeGroup(%s,'%s','%s') from tableName",
+        MacroFunction.AUTO_TIME_CONFIG,
+        "NOT_IMPORTANT_SHOULD_NOT_BE_USED",
+        HOUR_PERIOD);
+    final DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO()
+        .setDataset(TABLE_NAME)
+        .setTimeColumns(
+            List.of(
+                new TimeColumnApi().setGranularity(HOUR_PERIOD.toString()).setName("hourlyBuckets")
+                    // custom time format
+                    .setFormat("SIMPLE_DATE_FORMAT:yyyy-MM-dd-hh"))
+        );
+    // todo cyril can be optimized further to "hourlyBuckets" only - see todo in TimeGroupFunction
+    final String expectedQuery = "SELECT DATETIMECONVERT(\"hourlyBuckets\", '1:DAYS:SIMPLE_DATE_FORMAT:yyyy-MM-dd-hh', '1:MILLISECONDS:EPOCH', '1:HOURS') FROM tableName";
 
     final Map<String, String> expectedProperties = ImmutableMap.of(
         MacroMetadataKeys.GRANULARITY.toString(),

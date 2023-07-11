@@ -156,7 +156,7 @@ public class NotificationReportBuilder {
     if (anomaly.getDetectionConfigId() != null) {
       final AlertDTO alert = alertManager.findById(anomaly.getDetectionConfigId());
       Preconditions.checkNotNull(alert,
-          String.format("Cannot find detection config %d", anomaly.getDetectionConfigId()));
+          "Cannot find detection config %d", anomaly.getDetectionConfigId());
       alertName = alert.getName();
       alertDescription = alert.getDescription() == null ? "" : alert.getDescription();
     }

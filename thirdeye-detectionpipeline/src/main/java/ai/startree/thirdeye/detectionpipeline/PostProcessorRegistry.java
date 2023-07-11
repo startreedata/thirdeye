@@ -62,9 +62,9 @@ public class PostProcessorRegistry {
   public AnomalyPostProcessor build(final String factoryName, final Map<String, Object> nodeParams,
       final OperatorContext context) {
     checkArgument(anomalyPostProcessorFactoryMap.containsKey(factoryName),
-        String.format("Anomaly PostProcessor type not registered: %s. Available postProcessors: %s",
+        "Anomaly PostProcessor type not registered: %s. Available postProcessors: %s",
             factoryName,
-            anomalyPostProcessorFactoryMap.keySet()));
+            anomalyPostProcessorFactoryMap.keySet());
     final Map<String, Object> componentSpec = getComponentSpec(nodeParams);
 
     final DetectionPipelineContext detectionPipelineContext = context.getPlanNodeContext()

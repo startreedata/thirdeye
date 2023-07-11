@@ -84,9 +84,9 @@ public class PlanNodeFactory {
       throw new RuntimeException("Failed to initialize PlanNode: " + c.getSimpleName(), e);
     }
     checkState(!typeVsPlanNodeClassMap.containsKey(type),
-        String.format("PlanNode with type: %s is already registered. class: %s",
+        "PlanNode with type: %s is already registered. class: %s",
             type,
-            optional(typeVsPlanNodeClassMap.get(type)).map(Class::getName).orElse("null")));
+            optional(typeVsPlanNodeClassMap.get(type)).map(Class::getName).orElse("null"));
 
     typeVsPlanNodeClassMap.put(type, c);
   }

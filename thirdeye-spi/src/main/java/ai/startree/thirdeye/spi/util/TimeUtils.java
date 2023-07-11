@@ -25,7 +25,7 @@ import org.joda.time.format.ISOPeriodFormat;
 
 public class TimeUtils {
 
-  public static Period isoPeriod(@NonNull final String period) {
+  public static @NonNull Period isoPeriod(@NonNull final String period) {
     return Period.parse(period, ISOPeriodFormat.standard());
   }
 

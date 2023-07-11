@@ -69,6 +69,7 @@ public class TimeGroupFunction implements MacroFunction {
         checkNotNull(timeColumnApi.getFormat(),
             "A custom timeColumn of granularity %s is provided in the %s dataset configuration, but the format field is empty. format is required.",
             granularityText, datasetConfigDTO.getDataset());
+        // TODO CYRIL can be optimized further - if timeformat is milliseconds, then there is no need to use the timegroup expression - not sure if pinot optimizes under the hood
         timeColumn = context.getIdentifierQuoter().apply(timeColumnApi.getName());
         timeColumnFormat = timeColumnApi.getFormat();
       } else {

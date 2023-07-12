@@ -36,9 +36,12 @@ export const Modal: FunctionComponent<ModalProps> = ({
     maxWidth,
     footerActions,
     onOpen,
+    initiallyOpen = false,
+    disableCancelButton,
+    disableSubmitButton,
 }) => {
     const { t } = useTranslation();
-    const [isOpen, setIsOpen] = useState(false);
+    const [isOpen, setIsOpen] = useState(initiallyOpen);
 
     const handleCancelClick = (): void => {
         setIsOpen(false);
@@ -79,6 +82,7 @@ export const Modal: FunctionComponent<ModalProps> = ({
                                 <Grid item>
                                     <Button
                                         color="secondary"
+                                        disabled={disableCancelButton}
                                         onClick={handleCancelClick}
                                     >
                                         {cancelButtonLabel || t("label.cancel")}
@@ -88,6 +92,7 @@ export const Modal: FunctionComponent<ModalProps> = ({
                                     {onSubmit && (
                                         <Button
                                             color="primary"
+                                            disabled={disableSubmitButton}
                                             type="submit"
                                             onClick={handleSubmit}
                                         >

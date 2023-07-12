@@ -14,10 +14,11 @@
  */
 import { Box } from "@material-ui/core";
 import { AxiosError } from "axios";
-import { differenceBy, isEmpty, some, toNumber } from "lodash";
+import { differenceBy, isEmpty, isEqual, some, toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { Modal } from "../../components/modal/modal.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { validateSubscriptionGroup } from "../../components/subscription-group-wizard/subscription-group-wizard.utils";
@@ -29,7 +30,7 @@ import {
     useNotificationProviderV1,
 } from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
-import { useGetAlert } from "../../rest/alerts/alerts.actions";
+import { useGetAlert, useResetAlert } from "../../rest/alerts/alerts.actions";
 import { updateAlert } from "../../rest/alerts/alerts.rest";
 import { Alert, EditableAlert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
@@ -47,11 +48,13 @@ import {
     getSubscriptionGroupAlertsList,
 } from "../../utils/subscription-groups/subscription-groups.util";
 import { AlertsEditCreateBasePageComponent } from "../alerts-edit-create-common/alerts-edit-create-base-page.component";
+import { QUERY_PARAM_KEY_ANOMALIES_RETRY } from "../alerts-view-page/alerts-view-page.utils";
 import { AlertsUpdatePageParams } from "./alerts-update-page.interfaces";
 
 export const AlertsUpdateBasePage: FunctionComponent = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
     const { notify } = useNotificationProviderV1();
     const {
         getSubscriptionGroups,
@@ -72,9 +75,11 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
         status: getAlertStatus,
         errorMessages: getAlertErrorMessages,
     } = useGetAlert();
+    const { resetAlert, status: resetAlertRequestStatus } = useResetAlert();
     const params = useParams<AlertsUpdatePageParams>();
     const [loading, setLoading] = useState(true);
     const [isEditRequestInFlight, setIsEditRequestInFlight] = useState(false);
+    const [isResetModalOpen, setIsResetModalOpen] = useState(false);
 
     const [singleNewSubscriptionGroup, setSingleNewSubscriptionGroup] =
         useState<SubscriptionGroup>(createEmptySubscriptionGroup());
@@ -168,7 +173,8 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
     }, [getSubscriptionGroupsErrorMessages, getSubscriptionGroupStatus]);
 
     const handleUpdatingSubscriptionGroups = async (
-        alert: Alert
+        alert: Alert,
+        shouldResetModalOpen: boolean
     ): Promise<void> => {
         let copiedCurrentlySelectedSubscriptionGroups = [
             ...currentlySelectedSubscriptionGroups,
@@ -215,8 +221,12 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
             isEmpty(subscriptionGroupsRemoved) &&
             isEmpty(subscriptionGroupsAdded)
         ) {
-            // Redirect to alerts detail path
-            navigate(getAlertsAlertPath(alert.id));
+            if (shouldResetModalOpen) {
+                setIsResetModalOpen(true);
+            } else {
+                // Redirect to alerts detail path
+                navigate(getAlertsAlertPath(alert.id));
+            }
 
             return;
         }
@@ -268,8 +278,12 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
                 })
             );
         } finally {
-            // Redirect to alerts detail path
-            navigate(getAlertsAlertPath(alert.id));
+            if (shouldResetModalOpen) {
+                setIsResetModalOpen(true);
+            } else {
+                // Redirect to alerts detail path
+                navigate(getAlertsAlertPath(alert.id));
+            }
         }
     };
 
@@ -277,6 +291,11 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
         if (!modifiedAlert) {
             return;
         }
+        const shouldAskForReset =
+            !isEqual(
+                modifiedAlert.templateProperties,
+                originalAlert?.templateProperties
+            ) || !isEqual(modifiedAlert?.template, originalAlert?.template);
 
         setIsEditRequestInFlight(true);
         updateAlert(modifiedAlert as Alert)
@@ -285,7 +304,7 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
                     NotificationTypeV1.Success,
                     t("message.update-success", { entity: t("label.alert") })
                 );
-                handleUpdatingSubscriptionGroups(alert);
+                handleUpdatingSubscriptionGroups(alert, shouldAskForReset);
             })
             .catch((error: AxiosError): void => {
                 notifyIfErrors(
@@ -300,6 +319,33 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
             .finally(() => {
                 setIsEditRequestInFlight(false);
             });
+    };
+
+    const handleAlertResetClick = (): boolean => {
+        originalAlert &&
+            resetAlert(originalAlert.id)
+                .then(() => {
+                    searchParams.set(QUERY_PARAM_KEY_ANOMALIES_RETRY, "true");
+                    setSearchParams(searchParams, {
+                        replace: true,
+                    });
+                    // Navigate to alerts detail path
+                    navigate(
+                        `${getAlertsAlertPath(
+                            originalAlert.id
+                        )}?${searchParams.toString()}`
+                    );
+                })
+                .catch(() => {
+                    notify(
+                        NotificationTypeV1.Error,
+                        t(
+                            "message.failed-to-reset-alert-due-to-server-error-however"
+                        )
+                    );
+                });
+
+        return false;
     };
 
     return (
@@ -333,6 +379,29 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
                     setCurrentlySelectedSubscriptionGroups
                 }
             />
+            {isResetModalOpen && (
+                <Modal
+                    initiallyOpen
+                    cancelButtonLabel={t("label.no")}
+                    disableSubmitButton={
+                        resetAlertRequestStatus === ActionStatus.Working
+                    }
+                    submitButtonLabel={t("label.yes")}
+                    trigger={() => <></>}
+                    onCancel={() =>
+                        navigate(
+                            getAlertsAlertPath(originalAlert?.id as number)
+                        )
+                    }
+                    onSubmit={handleAlertResetClick}
+                >
+                    <p>
+                        {t(
+                            "message.do-you-want-to-reset-the-alert-which-will-delete"
+                        )}
+                    </p>
+                </Modal>
+            )}
         </LoadingErrorStateSwitch>
     );
 };

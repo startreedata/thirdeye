@@ -28,4 +28,7 @@ export interface ModalProps {
     children: ReactNode;
     maxWidth?: "xs" | "sm" | "md" | "lg" | "xl" | false;
     dividers?: boolean;
+    initiallyOpen?: boolean;
+    disableCancelButton?: boolean;
+    disableSubmitButton?: boolean;
 }

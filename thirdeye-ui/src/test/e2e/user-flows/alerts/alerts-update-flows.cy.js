@@ -67,6 +67,15 @@ describe("alert update flows", () => {
 
         // Click the update button
         cy.get("#next-bottom-bar-btn").click();
+
+        // Ensure reset is called
+        cy.intercept("http://localhost:7004/api/alerts/*/reset").as(
+            "resetAlert"
+        );
+        // Modal asking for reset popped up, click submit
+        cy.get("button").contains("Yes").click();
+        cy.wait("@resetAlert").its("response.statusCode").should("eq", 200);
+
         // User is take to the view page
         cy.url().should("match", /.*\/alerts\/\d.*\/view/);
     });
@@ -85,7 +94,6 @@ describe("alert update flows", () => {
             "dataset",
             "aggregationColumn",
             "aggregationFunction",
-            "sensitivity",
         ];
 
         inputKeys.forEach((inputKey) => {
@@ -95,11 +103,70 @@ describe("alert update flows", () => {
             );
         });
 
+        // This will cause reset modal to pop up
+        cy.getByDataTestId(`input-sensitivity`).clear();
+        cy.getByDataTestId(`input-sensitivity`).type(1);
+
         // Click on button to initiate API call for chart data
         cy.getByDataTestId(PREVIEW_CHART_TEST_IDS.PREVIEW_BUTTON).click();
 
         // Click the update button
         cy.get("#next-bottom-bar-btn").click();
+
+        // Ensure reset is called
+        cy.intercept("http://localhost:7004/api/alerts/*/reset").as(
+            "resetAlert"
+        );
+        // Modal asking for reset popped up, click submit
+        cy.get("button").contains("Yes").click();
+        cy.wait("@resetAlert").its("response.statusCode").should("eq", 200);
+
+        // User is take to the view page
+        cy.url().should("match", /.*\/alerts\/\d.*\/view/);
+    });
+
+    it("user is not prompted to reset if template properties are not changed", () => {
+        cy.getByDataTestId(TEST_IDS.TABLE).find(CHECKBOX_SELECTOR).click();
+        cy.getByDataTestId(TEST_IDS.EDIT_BUTTON).click();
+        cy.getByDataTestId(
+            ALERT_CREATION_NAVIGATE_DROPDOWN_TEST_IDS.DROPDOWN_CONTAINER
+        ).click();
+        cy.get("li").contains("Advanced").click();
+
+        cy.getByDataTestId("name-input-container").type("-custom");
+
+        // Click on button to initiate API call for chart data
+        cy.getByDataTestId(PREVIEW_CHART_TEST_IDS.PREVIEW_BUTTON).click();
+
+        // Click the update button
+        cy.get("#next-bottom-bar-btn").click();
+
+        // User is take to the view page
+        cy.url().should("match", /.*\/alerts\/\d.*\/view/);
+    });
+
+    it("user directed to deatails page if no is clicked", () => {
+        cy.getByDataTestId(TEST_IDS.TABLE).find(CHECKBOX_SELECTOR).click();
+        cy.getByDataTestId(TEST_IDS.EDIT_BUTTON).click();
+        cy.getByDataTestId(
+            ALERT_CREATION_NAVIGATE_DROPDOWN_TEST_IDS.DROPDOWN_CONTAINER
+        ).click();
+        cy.get("li").contains("Advanced").click();
+
+        cy.getByDataTestId("name-input-container").type("-custom");
+        // This will cause reset modal to pop up
+        cy.getByDataTestId(`input-sensitivity`).clear();
+        cy.getByDataTestId(`input-sensitivity`).type(1);
+
+        // Click on button to initiate API call for chart data
+        cy.getByDataTestId(PREVIEW_CHART_TEST_IDS.PREVIEW_BUTTON).click();
+
+        // Click the update button
+        cy.get("#next-bottom-bar-btn").click();
+
+        // Modal asking for reset popped up, click submit
+        cy.get("button").contains("No").click();
+
         // User is take to the view page
         cy.url().should("match", /.*\/alerts\/\d.*\/view/);
     });

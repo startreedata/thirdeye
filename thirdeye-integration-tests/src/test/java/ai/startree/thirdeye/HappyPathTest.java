@@ -35,6 +35,7 @@ import ai.startree.thirdeye.spi.api.AlertInsightsApi;
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.AnomalyFeedbackApi;
+import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
 import ai.startree.thirdeye.spi.api.CountApi;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
 import ai.startree.thirdeye.spi.api.DimensionAnalysisResultApi;
@@ -471,6 +472,81 @@ public class HappyPathTest {
     assert200(response);
   }
 
+  @Test(dependsOnMethods = "testAnomalyCount")
+  public void TestCreateAnomalyWithAuth() {
+    final var createAnomalyResp = request("api/anomalies").put(Entity.json(List.of(
+        new AnomalyApi()
+            .setAlert(new AlertApi().setId(alertId))
+            .setAuth(new AuthorizationConfigurationApi().setNamespace("anomaly-namespace"))
+    )));
+    // Anomalies cannot be created with a namespace.
+    assertThat(createAnomalyResp.getStatus()).isEqualTo(400);
+  }
+
+  @Test(dependsOnMethods = "testAnomalyCount")
+  public void TestCreateInvestigationWithAuth() throws InterruptedException {
+    final var createInvestigationResp = request("api/rca/investigations").post(Entity.json(List.of(
+        new RcaInvestigationApi()
+            .setName("my-investigation")
+            .setAnomaly(new AnomalyApi().setId(anomalyId))
+            .setAuth(new AuthorizationConfigurationApi().setNamespace("anomaly-namespace"))
+    )));
+    // Investigations cannot be created with a namespace.
+    assertThat(createInvestigationResp.getStatus()).isEqualTo(400);
+  }
+
+  @Test(timeOut = 60000, dependsOnMethods = "testAnomalyCount")
+  public void TestGetAnomalyAuth() throws InterruptedException {
+    var alertId = mustCreateAlert(newRunnableAlertApiWithAuth("TestGetAnomalyAuth", "alert-namespace"));
+
+    waitForAnyAnomalies(alertId);
+    final var anomalyApi = mustGetAnomaliesForAlert(alertId).get(0);
+    assertThat(anomalyApi.getAuth()).isNotNull();
+    assertThat(anomalyApi.getAuth().getNamespace()).isEqualTo("alert-namespace");
+  }
+
+  @Test(timeOut = 60000, dependsOnMethods = "testAnomalyCount")
+  public void TestGetRcaInvestigationAuth() throws InterruptedException {
+    final var alertId = mustCreateAlert(newRunnableAlertApiWithAuth("TestGetRcaInvestigationAuth", "alert-namespace"));
+
+    waitForAnyAnomalies(alertId);
+    final var anomalyId = mustGetAnomaliesForAlert(alertId).get(0).getId();
+    final var investigationId = mustCreateInvestigation(new RcaInvestigationApi()
+        .setName("my-investigation")
+        .setAnomaly(new AnomalyApi().setId(anomalyId)));
+
+    final var investigationApi = mustGetInvestigation(investigationId);
+    assertThat(investigationApi.getAuth()).isNotNull();
+    assertThat(investigationApi.getAuth().getNamespace()).isEqualTo("alert-namespace");
+  }
+
+  @Test(timeOut = 60000, dependsOnMethods = "testAnomalyCount")
+  public void TestUpdateAlertAuth() throws InterruptedException {
+    final var alertId = mustCreateAlert(newRunnableAlertApiWithAuth("TestUpdateAlertAuth", "alert-namespace"));
+
+    waitForAnyAnomalies(alertId);
+    final var anomalyId = mustGetAnomaliesForAlert(alertId).get(0).getId();
+    final var investigationId = mustCreateInvestigation(new RcaInvestigationApi()
+        .setName("my-investigation")
+        .setAnomaly(new AnomalyApi().setId(anomalyId)));
+
+    final var alertApi = newRunnableAlertApiWithAuth("test-alert", "new-alert-namespace").setId(alertId);
+    final var updateAlertResp = request("api/alerts").put(Entity.json(List.of(alertApi)));
+    assertThat(updateAlertResp.getStatus()).isEqualTo(200);
+
+    final var gotAlertApi = updateAlertResp.readEntity(new GenericType<List<AlertApi>>() {}).get(0);
+    assertThat(gotAlertApi.getAuth()).isNotNull();
+    assertThat(gotAlertApi.getAuth().getNamespace()).isEqualTo("new-alert-namespace");
+
+    final var anomalyApi = mustGetAnomaliesForAlert(alertId).get(0);
+    assertThat(anomalyApi.getAuth()).isNotNull();
+    assertThat(anomalyApi.getAuth().getNamespace()).isEqualTo("new-alert-namespace");
+
+    final var investigationApi = mustGetInvestigation(investigationId);
+    assertThat(investigationApi.getAuth()).isNotNull();
+    assertThat(investigationApi.getAuth().getNamespace()).isEqualTo("new-alert-namespace");
+  }
+
   private Builder request(final String urlFragment) {
     return client.target(endPoint(urlFragment)).request();
   }
@@ -494,6 +570,80 @@ public class HappyPathTest {
           response.getStatus(), response.readEntity(Object.class));
       throw e;
     }
+  }
+
+  private long mustCreateAlert(final AlertApi alertApi) {
+    final var response = request("api/alerts")
+        .post(Entity.json(List.of(alertApi)));
+    assertThat(response.getStatus()).isEqualTo(200);
+    final var gotApi = response.readEntity(new GenericType<List<AlertApi>>() {}).get(0);
+    assertThat(gotApi).isNotNull();
+    assertThat(gotApi.getId()).isNotNull();
+    return gotApi.getId();
+  }
+
+  private long mustCreateInvestigation(final RcaInvestigationApi investigationApi) {
+    final var response = request("api/rca/investigations")
+        .post(Entity.json(List.of(investigationApi)));
+    assertThat(response.getStatus()).isEqualTo(200);
+    final var gotApi = response.readEntity(new GenericType<List<RcaInvestigationApi>>() {}).get(0);
+    assertThat(gotApi).isNotNull();
+    assertThat(gotApi.getId()).isNotNull();
+    return gotApi.getId();
+  }
+
+  private AlertApi mustGetAlert(long alertId) {
+    final var response = request("api/alerts/" + alertId).get();
+    assertThat(response.getStatus()).isEqualTo(200);
+    final var alertApi = response.readEntity(AlertApi.class);
+    assertThat(alertApi).isNotNull();
+    return alertApi;
+  }
+
+  private AnomalyApi mustGetAnomaly(long anomalyId) {
+    final var response = request("api/anomaly/" + anomalyId).get();
+    assertThat(response.getStatus()).isEqualTo(200);
+    final var anomalyApi = response.readEntity(AnomalyApi.class);
+    assertThat(anomalyApi).isNotNull();
+    return anomalyApi;
+  }
+
+  List<AnomalyApi> mustGetAnomaliesForAlert(long alertId) {
+    final var resp = request("/api/anomalies?alert.id=" + alertId).get();
+    assertThat(resp.getStatus()).isEqualTo(200);
+    return resp.readEntity(new GenericType<>() {});
+  }
+
+  private RcaInvestigationApi mustGetInvestigation(long id) {
+    final var response = request("/api/rca/investigations/" + id).get();
+    assertThat(response.getStatus()).isEqualTo(200);
+    final var investigationApi = response.readEntity(RcaInvestigationApi.class);
+    assertThat(investigationApi).isNotNull();
+    return investigationApi;
+  }
+
+  private void waitForAnyAnomalies(final long alertId) throws InterruptedException {
+    List<AnomalyApi> gotAnomalies = mustGetAnomaliesForAlert(alertId);
+    while (gotAnomalies.size() == 0) {
+      Thread.sleep(1000);
+      gotAnomalies = mustGetAnomaliesForAlert(alertId);
+    }
+  }
+
+  private static AlertApi newRunnableAlertApiWithAuth(final String name, final String namespace) {
+    return new AlertApi()
+        .setName(name)
+        .setTemplate(new AlertTemplateApi().setName("startree-threshold"))
+        .setAuth(new AuthorizationConfigurationApi().setNamespace(namespace))
+        .setTemplateProperties(Map.of(
+            "dataSource", PINOT_DATA_SOURCE_NAME,
+            "dataset", PINOT_DATASET_NAME,
+            "monitoringGranularity", "P1D",
+            "aggregationColumn", "views",
+            "aggregationFunction", "sum",
+            "max", "1",
+            "min", "0"
+        ));
   }
 }
 

@@ -16,10 +16,12 @@ package ai.startree.thirdeye.service;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
+import static ai.startree.thirdeye.util.ResourceUtils.ensureNull;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
+import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
 import ai.startree.thirdeye.spi.api.RcaInvestigationApi;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.RcaInvestigationManager;
@@ -58,27 +60,21 @@ public class RcaInvestigationService extends CrudService<RcaInvestigationApi, Rc
 
   @Override
   protected RcaInvestigationDTO toDto(final RcaInvestigationApi api) {
-    final RcaInvestigationDTO dto = ApiBeanMapper.toDto(api);
-
-    // Copy auth from the anomaly.
-    if (dto.getAuth() == null) {
-      optional(dto.getAnomaly())
-          .map(AbstractDTO::getId)
-          .map(anomalyManager::findById)
-          .map(AbstractDTO::getAuth)
-          .ifPresent(dto::setAuth);
-    }
-    return dto;
+    return ApiBeanMapper.toDto(api);
   }
 
   @Override
   protected RcaInvestigationApi toApi(final RcaInvestigationDTO dto) {
-    return ApiBeanMapper.toApi(dto);
+    final var investigationApi = ApiBeanMapper.toApi(dto);
+    investigationApi.setAuth(new AuthorizationConfigurationApi()
+        .setNamespace(authorizationManager.resourceId(dto).getNamespace()));
+    return investigationApi;
   }
 
   @Override
   protected void validate(final RcaInvestigationApi api, final RcaInvestigationDTO existing) {
     super.validate(api, existing);
     ensureExists(api.getName(), "Name must be present");
+    ensureNull(api.getAuth(), "cannot set auth for investigations");
   }
 }

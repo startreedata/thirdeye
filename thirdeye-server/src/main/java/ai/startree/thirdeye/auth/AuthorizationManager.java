@@ -31,6 +31,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import com.google.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -170,6 +171,8 @@ public class AuthorizationManager {
   private AbstractDTO resolveAuthParentDto(final AbstractDTO dto) {
     if (dto instanceof AnomalyDTO) {
       return resolveAuthParentDto((AnomalyDTO) (dto));
+    } else if (dto instanceof RcaInvestigationDTO) {
+      return resolveAuthParentDto((RcaInvestigationDTO) (dto));
     } else {
       return dto;
     }
@@ -188,6 +191,15 @@ public class AuthorizationManager {
 
     return optional(dto.getDetectionConfigId())
         .map(alertManager::findById)
+        .orElse(null);
+  }
+
+  private AbstractDTO resolveAuthParentDto(final RcaInvestigationDTO dto) {
+    return optional(dto)
+        .map(RcaInvestigationDTO::getAnomaly)
+        .map(AbstractDTO::getId)
+        .map(anomalyManager::findById)
+        .map(this::resolveAuthParentDto)
         .orElse(null);
   }
 

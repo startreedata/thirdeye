@@ -1,3 +1,16 @@
+## [2.29.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.28.1...thirdeye-ui-2.29.0) (2023-07-10)
+
+
+### Features
+
+* [TE-1696](https://cortexdata.atlassian.net/browse/TE-1696) translate seasonalityPeriod to human readable string ([cd8235434](https://github.com/startreedata/thirdeye/commit/cd82354347c985ca7e2ec7c616c16283fe137587))
+
+
+### Bug Fixes
+
+* [TE-1697](https://cortexdata.atlassian.net/browse/TE-1697) default additional chart to 1 week ago and reload button greyed out ([a6783dbe1](https://github.com/startreedata/thirdeye/commit/a6783dbe1ffc623c5196c8a8c075b4d7dacc3d02))
+* show error screen when viewing anomaly that does not exist ([2ad1dcfdb](https://github.com/startreedata/thirdeye/commit/2ad1dcfdb0d7bc5d219cbfdd4a8a5b0a80ee3d0b))
+
 ### [2.28.1](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.28.0...thirdeye-ui-2.28.1) (2023-07-05)
 
 

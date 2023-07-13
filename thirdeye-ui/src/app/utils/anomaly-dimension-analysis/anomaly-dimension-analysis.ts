@@ -49,6 +49,10 @@ export const areFiltersEqual = (
         FILTER_OPTION_SORT_KEYS
     );
 
+    if (filterOption.length !== otherFilterOption.length) {
+        return false;
+    }
+
     for (let i = 0; i < sortedFilterOption.length; i++) {
         if (
             sortedFilterOption[i].key !== sortedOtherFilterOption[i].key ||

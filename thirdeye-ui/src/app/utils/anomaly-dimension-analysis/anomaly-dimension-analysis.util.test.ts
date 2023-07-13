@@ -61,5 +61,15 @@ describe("Anomaly Dimension Analysis Util", () => {
                 ]
             )
         ).toBe(false);
+
+        expect(
+            areFiltersEqual(
+                [
+                    { key: "1", value: "a" },
+                    { key: "2", value: "c" },
+                ],
+                [{ key: "1", value: "a" }]
+            )
+        ).toBe(false);
     });
 });

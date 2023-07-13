@@ -21,8 +21,10 @@ export interface EnumerationItemsTableProps {
     onExpandedChange: (newExpanded: string[]) => void;
     alertId: number;
     sortOrder: DataGridSortOrderV1;
+    sortKey: string;
     initialSearchTerm: string;
     onSearchTermChange: (newTerm: string) => void;
+    onSortKeyChange: (newKey: string) => void;
     onSortOrderChange: (newOrder: DataGridSortOrderV1) => void;
     timezone?: string;
     hideTime?: boolean;

@@ -75,6 +75,7 @@ import {
     QUERY_PARAM_KEY_ANOMALIES_RETRY,
     QUERY_PARAM_KEY_FOR_SEARCH,
     QUERY_PARAM_KEY_FOR_SORT,
+    QUERY_PARAM_KEY_FOR_SORT_KEY,
 } from "./alerts-view-page.utils";
 
 export const AlertsViewPage: FunctionComponent = () => {
@@ -129,12 +130,13 @@ export const AlertsViewPage: FunctionComponent = () => {
         ],
         [searchParams]
     );
-    const [searchTerm, sortOrder] = useMemo(
+    const [searchTerm, sortOrder, sortKey] = useMemo(
         () => [
             searchParams.get(QUERY_PARAM_KEY_FOR_SEARCH),
             (searchParams.get(
                 QUERY_PARAM_KEY_FOR_SORT
             ) as DataGridSortOrderV1) || DataGridSortOrderV1.DESC,
+            searchParams.get(QUERY_PARAM_KEY_FOR_SORT_KEY) ?? "lastAnomalyTs",
         ],
         [searchParams]
     );
@@ -384,6 +386,15 @@ export const AlertsViewPage: FunctionComponent = () => {
         setSearchParams(searchParams, { replace: true });
     };
 
+    const handleSortKeyChange = (newKey: string): void => {
+        if (newKey) {
+            searchParams.set(QUERY_PARAM_KEY_FOR_SORT_KEY, newKey);
+        } else {
+            searchParams.delete(QUERY_PARAM_KEY_FOR_SEARCH);
+        }
+        setSearchParams(searchParams, { replace: true });
+    };
+
     const handleSortOrderChange = (newOrder: DataGridSortOrderV1): void => {
         if (newOrder) {
             searchParams.set(QUERY_PARAM_KEY_FOR_SORT, newOrder);
@@ -569,6 +580,7 @@ export const AlertsViewPage: FunctionComponent = () => {
                                                 evaluation?.alert?.template
                                             )}
                                             initialSearchTerm={searchTerm || ""}
+                                            sortKey={sortKey}
                                             sortOrder={sortOrder}
                                             timezone={determineTimezoneFromAlertInEvaluation(
                                                 evaluation?.alert?.template
@@ -578,6 +590,9 @@ export const AlertsViewPage: FunctionComponent = () => {
                                             }
                                             onSearchTermChange={
                                                 handleSearchTermChange
+                                            }
+                                            onSortKeyChange={
+                                                handleSortKeyChange
                                             }
                                             onSortOrderChange={
                                                 handleSortOrderChange

@@ -47,6 +47,7 @@ export const mergeContent = (
         [key: string]: {
             anomalies: Anomaly[];
             evaluation: DetectionEvaluation;
+            name: string;
         };
     } = {};
 
@@ -67,6 +68,7 @@ export const mergeContent = (
                     anomalies:
                         enumerationIdToAnomalies[enumerationItemId] || [],
                     evaluation,
+                    name: correspondingEnumerationItem.name,
                 };
             } else {
                 /**
@@ -84,6 +86,7 @@ export const mergeContent = (
                 ] = {
                     anomalies: [],
                     evaluation,
+                    name: "",
                 };
             }
         } else {
@@ -92,17 +95,19 @@ export const mergeContent = (
                 anomalies:
                     enumerationIdToAnomalies[NON_ENUMERATION_ITEM_ID] || [],
                 evaluation,
+                name: "",
             };
         }
     });
 
     // Replace the anomalies from the evaluation with the persisted anomalies
     return Object.entries(enumerationIdToAnomaliesEvaluations).map(
-        ([id, { anomalies, evaluation }]) => {
+        ([id, { anomalies, evaluation, name }]) => {
             const clone: DetectionEvaluationForRender = {
                 ...evaluation,
                 firstAnomalyTs: Number.MIN_SAFE_INTEGER,
                 lastAnomalyTs: Number.MAX_SAFE_INTEGER,
+                name,
             };
 
             clone.anomalies = anomalies;

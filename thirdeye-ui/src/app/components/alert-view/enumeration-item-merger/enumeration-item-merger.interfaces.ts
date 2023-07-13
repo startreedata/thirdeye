@@ -28,4 +28,5 @@ export interface DetectionEvaluationForRender extends DetectionEvaluation {
     enumerationId?: number;
     firstAnomalyTs: number;
     lastAnomalyTs: number;
+    name: string;
 }

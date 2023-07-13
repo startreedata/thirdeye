@@ -15,6 +15,7 @@
 import {
     Box,
     Button,
+    ButtonGroup,
     Card,
     CardContent,
     Divider,
@@ -36,6 +37,17 @@ import { Pluralize } from "../../pluralize/pluralize.component";
 import { EnumerationItemRow } from "./enumeration-item-row/enumeration-item-row.component";
 import { EnumerationItemsTableProps } from "./enumeration-items-table.interfaces";
 
+const sortOptions = [
+    {
+        label: "Name",
+        key: "name",
+    },
+    {
+        label: "Latest Anomaly",
+        key: "lastAnomalyTs",
+    },
+];
+
 export const EnumerationItemsTable: FunctionComponent<EnumerationItemsTableProps> =
     ({
         detectionEvaluations,
@@ -46,6 +58,8 @@ export const EnumerationItemsTable: FunctionComponent<EnumerationItemsTableProps
         onSearchTermChange,
         sortOrder,
         onSortOrderChange,
+        onSortKeyChange,
+        sortKey,
         timezone,
         hideTime,
     }) => {
@@ -88,7 +102,7 @@ export const EnumerationItemsTable: FunctionComponent<EnumerationItemsTableProps
         useEffect(() => {
             let copied = sortBy(
                 [...filteredDetectionEvaluations],
-                "lastAnomalyTs"
+                sortKey ?? "lastAnomalyTs"
             );
 
             if (sortOrder === DataGridSortOrderV1.DESC) {
@@ -96,13 +110,28 @@ export const EnumerationItemsTable: FunctionComponent<EnumerationItemsTableProps
             }
 
             setSortedDetectionEvaluations(copied);
-        }, [sortOrder, filteredDetectionEvaluations]);
+        }, [sortOrder, filteredDetectionEvaluations, sortKey]);
 
         useEffect(() => {
             setFilteredDetectionEvaluations(
                 filterEvaluations(detectionEvaluations, searchTerm)
             );
         }, [detectionEvaluations]);
+
+        const handleSortOptionClick = (sortOption: {
+            label: string;
+            key: string;
+        }): void => {
+            if (sortOption.key === sortOption.key) {
+                if (sortOrder === DataGridSortOrderV1.DESC) {
+                    onSortOrderChange(DataGridSortOrderV1.ASC);
+                } else {
+                    onSortOrderChange(DataGridSortOrderV1.DESC);
+                }
+            }
+
+            onSortKeyChange(sortOption.key);
+        };
 
         return (
             <Card variant="outlined">
@@ -121,65 +150,71 @@ export const EnumerationItemsTable: FunctionComponent<EnumerationItemsTableProps
                                     </Typography>
                                 </Box>
                             </Grid>
-                            <Grid container item xs={12}>
-                                <Grid item sm={2} xs={12}>
-                                    Search dimensions
-                                </Grid>
-                                <Grid item sm={10} xs={12}>
-                                    <form
-                                        onSubmit={(e) => {
-                                            e.preventDefault();
-                                            handleSearchClick(searchTerm);
-                                        }}
-                                    >
-                                        <Grid container>
-                                            <Grid item sm={9} xs={12}>
-                                                <TextField
-                                                    fullWidth
-                                                    value={searchTerm}
-                                                    onChange={(e) =>
-                                                        setSearchTerm(
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                />
-                                            </Grid>
-                                            <Grid
-                                                container
-                                                item
-                                                sm={3}
-                                                spacing={1}
-                                                xs={12}
-                                            >
-                                                <Grid item>
-                                                    <Button type="submit">
-                                                        {t("label.search")}
-                                                    </Button>
-                                                </Grid>
 
-                                                {filteredDetectionEvaluations.length !==
-                                                    detectionEvaluations.length && (
+                            <Grid item xs={12}>
+                                <Grid container item alignItems="center">
+                                    <Grid item sm={2} xs={12}>
+                                        Search dimensions
+                                    </Grid>
+                                    <Grid item sm={10} xs={12}>
+                                        <form
+                                            onSubmit={(e) => {
+                                                e.preventDefault();
+                                                handleSearchClick(searchTerm);
+                                            }}
+                                        >
+                                            <Grid container>
+                                                <Grid item sm={9} xs={12}>
+                                                    <TextField
+                                                        fullWidth
+                                                        value={searchTerm}
+                                                        onChange={(e) =>
+                                                            setSearchTerm(
+                                                                e.target.value
+                                                            )
+                                                        }
+                                                    />
+                                                </Grid>
+                                                <Grid
+                                                    container
+                                                    item
+                                                    alignItems="center"
+                                                    sm={3}
+                                                    spacing={1}
+                                                    xs={12}
+                                                >
                                                     <Grid item>
-                                                        <Button
-                                                            onClick={() => {
-                                                                setSearchTerm(
-                                                                    ""
-                                                                );
-                                                                onSearchTermChange(
-                                                                    ""
-                                                                );
-                                                                handleSearchClick(
-                                                                    ""
-                                                                );
-                                                            }}
-                                                        >
-                                                            {t("label.reset")}
+                                                        <Button type="submit">
+                                                            {t("label.search")}
                                                         </Button>
                                                     </Grid>
-                                                )}
+
+                                                    {filteredDetectionEvaluations.length !==
+                                                        detectionEvaluations.length && (
+                                                        <Grid item>
+                                                            <Button
+                                                                onClick={() => {
+                                                                    setSearchTerm(
+                                                                        ""
+                                                                    );
+                                                                    onSearchTermChange(
+                                                                        ""
+                                                                    );
+                                                                    handleSearchClick(
+                                                                        ""
+                                                                    );
+                                                                }}
+                                                            >
+                                                                {t(
+                                                                    "label.reset"
+                                                                )}
+                                                            </Button>
+                                                        </Grid>
+                                                    )}
+                                                </Grid>
                                             </Grid>
-                                        </Grid>
-                                    </form>
+                                        </form>
+                                    </Grid>
                                 </Grid>
                             </Grid>
 
@@ -203,39 +238,39 @@ export const EnumerationItemsTable: FunctionComponent<EnumerationItemsTableProps
                         </Grid>
                         <Grid item>
                             {filteredDetectionEvaluations.length > 1 && (
-                                <Button
-                                    color="primary"
-                                    variant="text"
-                                    onClick={() =>
-                                        onSortOrderChange(
-                                            sortOrder ===
-                                                DataGridSortOrderV1.DESC
-                                                ? DataGridSortOrderV1.ASC
-                                                : DataGridSortOrderV1.DESC
-                                        )
-                                    }
-                                >
-                                    {sortOrder === DataGridSortOrderV1.DESC && (
-                                        <Grid container alignItems="center">
-                                            <Grid item>
-                                                <ArrowDownwardIcon />
-                                            </Grid>
-                                            <Grid item>
-                                                {t("label.latest-one-first")}
-                                            </Grid>
-                                        </Grid>
-                                    )}
-                                    {sortOrder === DataGridSortOrderV1.ASC && (
-                                        <Grid container alignItems="center">
-                                            <Grid item>
-                                                <ArrowUpwardIcon />
-                                            </Grid>
-                                            <Grid item>
-                                                {t("label.latest-one-last")}
-                                            </Grid>
-                                        </Grid>
-                                    )}
-                                </Button>
+                                <Grid container alignItems="center">
+                                    <Grid item>Sort:</Grid>
+                                    <Grid item>
+                                        <ButtonGroup color="primary">
+                                            {sortOptions.map((sortOption) => {
+                                                return (
+                                                    <Button
+                                                        key={sortOption.label}
+                                                        onClick={() =>
+                                                            handleSortOptionClick(
+                                                                sortOption
+                                                            )
+                                                        }
+                                                    >
+                                                        {sortOption.label}
+                                                        {sortOrder ===
+                                                            DataGridSortOrderV1.DESC &&
+                                                            sortKey ===
+                                                                sortOption.key && (
+                                                                <ArrowDownwardIcon fontSize="small" />
+                                                            )}
+                                                        {sortOrder ===
+                                                            DataGridSortOrderV1.ASC &&
+                                                            sortKey ===
+                                                                sortOption.key && (
+                                                                <ArrowUpwardIcon fontSize="small" />
+                                                            )}
+                                                    </Button>
+                                                );
+                                            })}
+                                        </ButtonGroup>
+                                    </Grid>
+                                </Grid>
                             )}
                         </Grid>
                     </Grid>

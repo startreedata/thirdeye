@@ -12,19 +12,13 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import {
-    Box,
-    Button,
-    Card,
-    CardContent,
-    CardHeader,
-    Grid,
-} from "@material-ui/core";
+import { Box, Card, CardContent, CardHeader, Grid } from "@material-ui/core";
 import React, { FunctionComponent, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useOutletContext } from "react-router-dom";
+import { useOutletContext, useSearchParams } from "react-router-dom";
 import { InvestigationDetailsForm } from "../../../components/rca/investigation-details-form/investigation-details-form.component";
 import { InvestigationPreview } from "../../../components/rca/investigation-preview/investigation-preview.component";
+import { WizardBottomBar } from "../../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import {
     NotificationTypeV1,
     useNotificationProviderV1,
@@ -35,10 +29,12 @@ import {
     updateInvestigation,
 } from "../../../rest/rca/rca.rest";
 import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
+import { AppRouteRelative } from "../../../utils/routes/routes.util";
 import { InvestigationContext } from "../investigation-state-tracker-container-page/investigation-state-tracker.interfaces";
 
 export const ReviewShareSavePage: FunctionComponent = () => {
     const { t } = useTranslation();
+    const [searchParams] = useSearchParams();
     const { notify } = useNotificationProviderV1();
     const {
         alertInsight,
@@ -70,9 +66,31 @@ export const ReviewShareSavePage: FunctionComponent = () => {
         return "message.create-error";
     }, [investigation]);
 
+    const saveButtonLabel = useMemo(() => {
+        if (!isSaving) {
+            if (investigation.id === undefined) {
+                return t("label.save-investigation");
+            } else {
+                return t("label.save-progress");
+            }
+        }
+
+        return t("label.saving");
+    }, [isSaving, investigation]);
+
     const handleSaveClick = (): void => {
+        if (!investigationName) {
+            notify(
+                NotificationTypeV1.Error,
+                "Please enter a name for the investigation in the investigation details section at the bottom of the page"
+            );
+
+            return;
+        }
+
         investigation.name = investigationName;
         investigation.text = investigationText;
+
         setIsSaving(true);
 
         serverRequestRestFunction(investigation)
@@ -127,35 +145,20 @@ export const ReviewShareSavePage: FunctionComponent = () => {
                                     onCommentChange={setInvestigationText}
                                     onNameChange={setInvestigationName}
                                 />
-                                <Box pt={2} textAlign="right">
-                                    <Button
-                                        color="primary"
-                                        disabled={isSaving}
-                                        variant="outlined"
-                                        onClick={handleSaveClick}
-                                    >
-                                        {investigation.id === undefined && (
-                                            <>
-                                                {!isSaving &&
-                                                    t(
-                                                        "label.save-investigation"
-                                                    )}
-                                            </>
-                                        )}
-                                        {investigation.id !== undefined && (
-                                            <>
-                                                {!isSaving &&
-                                                    t("label.save-progress")}
-                                            </>
-                                        )}
-                                        {isSaving && <>{t("label.saving")}</>}
-                                    </Button>
-                                </Box>
                             </CardContent>
                         </Card>
                     </Box>
                 </InvestigationPreview>
             </Grid>
+
+            <WizardBottomBar
+                backBtnLink={`../${
+                    AppRouteRelative.RCA_EVENTS
+                }?${searchParams.toString()}`}
+                handleNextClick={handleSaveClick}
+                nextButtonIsDisabled={isSaving}
+                nextButtonLabel={saveButtonLabel}
+            />
         </>
     );
 };

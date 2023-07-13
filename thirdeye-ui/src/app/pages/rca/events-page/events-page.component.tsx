@@ -24,12 +24,13 @@ import React, {
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import { useOutletContext } from "react-router-dom";
+import { useOutletContext, useSearchParams } from "react-router-dom";
 import { EventsWizardModal } from "../../../components/events-wizard-modal/event-wizard-modal.component";
 import { EmptyStateSwitch } from "../../../components/page-states/empty-state-switch/empty-state-switch.component";
 import { LoadingErrorStateSwitch } from "../../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { InvestigationPreview } from "../../../components/rca/investigation-preview/investigation-preview.component";
 import { PreviewChart } from "../../../components/rca/top-contributors-table/preview-chart/preview-chart.component";
+import { WizardBottomBar } from "../../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import {
     DataGridScrollV1,
     DataGridSelectionModelV1,
@@ -53,10 +54,12 @@ import { createEmptyEvent } from "../../../utils/events/events.util";
 import { getFromSavedInvestigationOrDefault } from "../../../utils/investigation/investigation.util";
 import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
 import { getErrorMessages } from "../../../utils/rest/rest.util";
+import { AppRouteRelative } from "../../../utils/routes/routes.util";
 import { InvestigationContext } from "../investigation-state-tracker-container-page/investigation-state-tracker.interfaces";
 
 export const EventsPage: FunctionComponent = () => {
     const { t } = useTranslation();
+    const [searchParams] = useSearchParams();
     const { notify } = useNotificationProviderV1();
     const { getEventsForAnomaly, errorMessages, status, events } =
         useGetEventsForAnomaly();
@@ -352,6 +355,15 @@ export const EventsPage: FunctionComponent = () => {
                     onInvestigationChange={onInvestigationChange}
                 />
             </Grid>
+
+            <WizardBottomBar
+                backBtnLink={`../${
+                    AppRouteRelative.RCA_WHAT_WHERE
+                }?${searchParams.toString()}`}
+                nextBtnLink={`../${
+                    AppRouteRelative.RCA_REVIEW_SHARE
+                }?${searchParams.toString()}`}
+            />
         </>
     );
 };

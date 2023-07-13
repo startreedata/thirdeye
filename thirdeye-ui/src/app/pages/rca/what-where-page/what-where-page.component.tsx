@@ -15,13 +15,16 @@
 import { Grid, Typography } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
-import { Outlet, useOutletContext } from "react-router-dom";
+import { Outlet, useOutletContext, useSearchParams } from "react-router-dom";
 import { InvestigationPreview } from "../../../components/rca/investigation-preview/investigation-preview.component";
 import { WhatWhereNavigation } from "../../../components/rca/what-where-navigation/what-where-navigation.component";
+import { WizardBottomBar } from "../../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
+import { AppRouteRelative } from "../../../utils/routes/routes.util";
 import { InvestigationContext } from "../investigation-state-tracker-container-page/investigation-state-tracker.interfaces";
 
 export const WhatWherePage: FunctionComponent = () => {
     const { t } = useTranslation();
+    const [searchParams] = useSearchParams();
     const context = useOutletContext<InvestigationContext>();
 
     return (
@@ -43,6 +46,11 @@ export const WhatWherePage: FunctionComponent = () => {
                     onInvestigationChange={context.onInvestigationChange}
                 />
             </Grid>
+            <WizardBottomBar
+                nextBtnLink={`../${
+                    AppRouteRelative.RCA_EVENTS
+                }?${searchParams.toString()}`}
+            />
         </>
     );
 };

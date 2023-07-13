@@ -64,7 +64,7 @@ export const InvestigationPreview: FunctionComponent<InvestigationPreviewProps> 
                 ) as ChartType;
             }
 
-            return ChartType.ONE;
+            return ChartType.MULTI;
         });
 
         useEffect(() => {

@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Card, CardContent, Grid } from "@material-ui/core";
+import { Icon } from "@iconify/react";
+import { Box, Button, Card, CardContent, Grid } from "@material-ui/core";
 import { cloneDeep, isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -20,9 +21,10 @@ import { Outlet, useParams, useSearchParams } from "react-router-dom";
 import { MetricRenderer } from "../../../components/anomalies-view/metric-renderer/metric-renderer.component";
 import { Crumb } from "../../../components/breadcrumbs/breadcrumbs.interfaces";
 import { AnomalyCard } from "../../../components/entity-cards/anomaly-card/anomaly-card.component";
+import { anomaliesInvestigateBasicHelpCards } from "../../../components/help-drawer-v1/help-drawer-card-contents.utils";
+import { HelpDrawerV1 } from "../../../components/help-drawer-v1/help-drawer-v1.component";
 import { PageHeader } from "../../../components/page-header/page-header.component";
 import { LoadingErrorStateSwitch } from "../../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
-import { InvestigationOptions } from "../../../components/rca/investigation-options/investigation-options.component";
 import {
     AppLoadingIndicatorV1,
     NotificationTypeV1,
@@ -262,13 +264,6 @@ export const InvestigationStateTracker: FunctionComponent = () => {
         setLocalInvestigation(cloneDeep(updatedInvestigation));
     };
 
-    const handleRemoveInvestigationAssociation = (): void => {
-        searchParams.delete(INVESTIGATION_ID_QUERY_PARAM);
-        setSearchParams(searchParams, { replace: true });
-        setInvestigationFromServer(null);
-        setLocalInvestigation(createNewInvestigation(Number(anomalyId)));
-    };
-
     return (
         <PageV1>
             <LoadingErrorStateSwitch
@@ -300,18 +295,27 @@ export const InvestigationStateTracker: FunctionComponent = () => {
                     breadcrumbs={breadcrumbs}
                     customActions={
                         <PageHeaderActionsV1>
-                            <InvestigationOptions
-                                investigationId={investigationId}
-                                localInvestigation={
-                                    localInvestigation as Investigation
-                                }
-                                serverInvestigation={investigationFromServer}
-                                onRemoveInvestigationAssociation={
-                                    handleRemoveInvestigationAssociation
-                                }
-                                onSuccessfulUpdate={
-                                    handleServerUpdatedInvestigation
-                                }
+                            <HelpDrawerV1
+                                cards={anomaliesInvestigateBasicHelpCards}
+                                title={`${t("label.need-help")}?`}
+                                trigger={(handleOpen) => (
+                                    <Button
+                                        color="primary"
+                                        size="small"
+                                        variant="outlined"
+                                        onClick={handleOpen}
+                                    >
+                                        <Box component="span" mr={1}>
+                                            {t("label.need-help")}
+                                        </Box>
+                                        <Box component="span" display="flex">
+                                            <Icon
+                                                fontSize={24}
+                                                icon="mdi:question-mark-circle-outline"
+                                            />
+                                        </Box>
+                                    </Button>
+                                )}
                             />
                         </PageHeaderActionsV1>
                     }

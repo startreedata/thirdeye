@@ -12,11 +12,32 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Button, ButtonGroup } from "@material-ui/core";
+import { Button, Step, StepLabel, Stepper } from "@material-ui/core";
+import AdjustIcon from "@material-ui/icons/Adjust";
+import FiberManualRecordIcon from "@material-ui/icons/FiberManualRecord";
+import FiberManualRecordOutlinedIcon from "@material-ui/icons/FiberManualRecordOutlined";
 import React, { FunctionComponent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { AppRouteRelative } from "../../../utils/routes/routes.util";
+
+const CircleIcon = ({
+    active,
+    completed,
+}: {
+    active: boolean;
+    completed: boolean;
+}): React.ReactNode => {
+    if (active) {
+        return <AdjustIcon color="primary" />;
+    }
+
+    return completed ? (
+        <FiberManualRecordIcon color="primary" />
+    ) : (
+        <FiberManualRecordOutlinedIcon color="primary" />
+    );
+};
 
 export const InvestigationStepsNavigation: FunctionComponent = () => {
     const { t } = useTranslation();
@@ -28,46 +49,50 @@ export const InvestigationStepsNavigation: FunctionComponent = () => {
             matcher: (path: string) =>
                 path.includes(AppRouteRelative.RCA_WHAT_WHERE),
             navLink: `${AppRouteRelative.RCA_WHAT_WHERE}`,
-            text: t("label.1-what-went-wrong-and-where"),
+            text: t("label.what-went-wrong-and-where"),
         },
         {
             matcher: (path: string) =>
                 path.endsWith(AppRouteRelative.RCA_EVENTS),
             navLink: AppRouteRelative.RCA_EVENTS,
-            text: t("label.2-an-event-could-have-caused-it"),
+            text: t("label.an-event-could-have-caused-it"),
         },
         {
             matcher: (path: string) =>
                 path.endsWith(AppRouteRelative.RCA_REVIEW_SHARE),
             navLink: AppRouteRelative.RCA_REVIEW_SHARE,
-            text: t("label.3-review-investigation-share"),
+            text: t("label.review-investigation-share"),
         },
     ];
 
-    const currentPage = useMemo(() => {
-        return stepItems.find((candidate) => {
+    const currentPageIdx = useMemo(() => {
+        return stepItems.findIndex((candidate) => {
             return candidate.matcher(location.pathname);
         });
     }, [location]);
 
     return (
-        <ButtonGroup fullWidth variant="outlined">
-            {stepItems.map((btnConfig) => {
+        <Stepper activeStep={currentPageIdx}>
+            {stepItems.map((stepConfig) => {
                 return (
-                    <Button
-                        color={
-                            currentPage?.navLink === btnConfig.navLink
-                                ? "primary"
-                                : undefined
-                        }
-                        component={Link}
-                        key={btnConfig.text}
-                        to={`${btnConfig.navLink}?${searchParams.toString()}`}
-                    >
-                        {btnConfig.text}
-                    </Button>
+                    <Step key={stepConfig.navLink}>
+                        <StepLabel
+                            StepIconComponent={CircleIcon as React.ElementType}
+                        >
+                            <Button
+                                color="default"
+                                component={Link}
+                                to={`${
+                                    stepConfig.navLink
+                                }?${searchParams.toString()}`}
+                                variant="text"
+                            >
+                                {stepConfig.text}
+                            </Button>
+                        </StepLabel>
+                    </Step>
                 );
             })}
-        </ButtonGroup>
+        </Stepper>
     );
 };

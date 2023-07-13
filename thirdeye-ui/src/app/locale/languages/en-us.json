@@ -1,9 +1,6 @@
 {
     "label": {
-        "1-what-went-wrong-and-where": "1. What went wrong and where?",
         "15-minutes": "15 Minutes",
-        "2-an-event-could-have-caused-it": "2. An event could have caused it?",
-        "3-review-investigation-share": "3. Review investigation & share",
         "404": "404",
         "about": "About",
         "absolute-change": "Absolute change",
@@ -465,6 +462,7 @@
         "week-lowercase": "week",
         "weekly": "Weekly",
         "weeks-lowercase": "weeks",
+        "what-went-wrong-and-where": "What went wrong and where?",
         "year": "Year",
         "year-lowercase": "year",
         "years-lowercase": "years",

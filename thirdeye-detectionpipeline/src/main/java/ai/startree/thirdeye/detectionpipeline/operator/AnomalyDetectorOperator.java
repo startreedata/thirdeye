@@ -18,6 +18,7 @@ import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_CONFIGURATION_
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
+import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detectionpipeline.DetectionPipelineContext;
@@ -139,8 +140,13 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
     final Map<String, DataTable> dataTableMap = DetectionPipelineUtils.getDataTableMap(inputMap);
     final AnomalyDetectorResult detectorResult = detector.runDetection(detectionInterval,
         dataTableMap);
-
-    final OperatorResult operatorResult = buildDetectionResult(detectorResult);
+    final List<AnomalyDTO> anomalies = buildAnomaliesFromDetectorDf(detectorResult.getDataFrame());
+    final TimeSeries timeSeries = TimeSeries.fromDataFrame(detectorResult.getDataFrame()
+        .sortedBy(COL_TIME)); // FIXME CYRIL this sorted by should not be necessary and is expensive
+    final OperatorResult operatorResult = new Builder()
+        .setAnomalies(anomalies)
+        .setTimeseries(timeSeries)
+        .build();
 
     setOutput(DEFAULT_OUTPUT_KEY, operatorResult);
   }
@@ -177,6 +183,9 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
       if (!isAnomalySeries.isNull(i) && BooleanSeries.booleanValueOf(isAnomalySeries.get(i))) {
         final AnomalyDTO anomaly = newAnomaly();
         final long startTimeMillis = timeMillisSeries.get(i);
+        checkState(startTimeMillis >= detectionInterval.getStartMillis(),
+            "The detector %s returned an anomaly with startTime %s, smaller than detection interval start %s. Detector implementation error. Please reach out to StarTree support.",
+            detector.getClass().getName(), startTimeMillis, detectionInterval.getStartMillis());
         anomaly.setStartTime(startTimeMillis);
         if (i < df.size() - 1) {
           anomaly.setEndTime(timeMillisSeries.get(i + 1));

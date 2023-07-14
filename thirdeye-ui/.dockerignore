@@ -1,4 +1,2 @@
-# Ignore everything other than docker and distribution files
-**
-!docker
-!dist
+*.md
+Dockerfile

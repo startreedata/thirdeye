@@ -51,7 +51,7 @@ describe("alert details flows", () => {
             }
         );
 
-        cy.get("a").contains("View 1 Anomaly").click();
+        cy.get("a").contains("View").click();
 
         cy.get(".BaseTable__body")
             .find("div[role='row']")
@@ -165,7 +165,7 @@ describe("alert details flows", () => {
             .click();
 
         cy.get("button").contains("Options").click();
-        cy.get("li").contains("Reset anomalies for Alert").click();
+        cy.get("li").contains("Reset Anomalies for Alert").click();
 
         // Click confirm button in the dialog
         cy.get("[role='dialog']").contains("Confirm").click();

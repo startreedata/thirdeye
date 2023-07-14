@@ -14,6 +14,8 @@
  */
 import { IconButton, Menu, MenuItem } from "@material-ui/core";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
+import { Alert } from "@material-ui/lab";
+import { useMutation } from "@tanstack/react-query";
 import React, { FunctionComponent, MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -21,7 +23,11 @@ import {
     NotificationTypeV1,
     useNotificationProviderV1,
 } from "../../../platform/components";
-import { deleteAlert } from "../../../rest/alerts/alerts.rest";
+import {
+    deleteAlert,
+    getAlertInsight,
+    rerunAnomalyDetectionForAlert,
+} from "../../../rest/alerts/alerts.rest";
 import {
     createPathWithRecognizedQueryString,
     getAlertsAlertPath,
@@ -40,6 +46,7 @@ export const AlertOptionsButton: FunctionComponent<AlertOptionsButtonProps> = ({
     showViewDetails,
     openButtonRenderer,
     handleAlertResetClick,
+    onDetectionRerunSuccess,
 }) => {
     const [alertOptionsAnchorElement, setAlertOptionsAnchorElement] =
         useState<HTMLElement | null>();
@@ -47,6 +54,18 @@ export const AlertOptionsButton: FunctionComponent<AlertOptionsButtonProps> = ({
     const [searchParams] = useSearchParams();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
+
+    const { mutateAsync, isLoading, isError } = useMutation({
+        mutationFn: async (alertId: number) => {
+            const insights = await getAlertInsight({ alertId });
+
+            return rerunAnomalyDetectionForAlert({
+                id: alertId,
+                start: insights.datasetStartTime,
+                end: insights.defaultStartTime,
+            });
+        },
+    });
 
     const handleAlertOptionsClick = (event: MouseEvent<HTMLElement>): void => {
         setAlertOptionsAnchorElement(event.currentTarget);
@@ -127,6 +146,19 @@ export const AlertOptionsButton: FunctionComponent<AlertOptionsButtonProps> = ({
         });
     };
 
+    const handleRerunAlert = (closeCallback: () => void): boolean => {
+        mutateAsync(alert.id).then(() => {
+            closeCallback();
+            notify(
+                NotificationTypeV1.Success,
+                "Anomaly detection task ran successfully"
+            );
+            onDetectionRerunSuccess();
+        });
+
+        return false;
+    };
+
     return (
         <>
             {/* Alert options button */}
@@ -191,6 +223,34 @@ export const AlertOptionsButton: FunctionComponent<AlertOptionsButtonProps> = ({
                         {t("message.delete-confirmation", {
                             name: alert.name,
                         })}
+                    </p>
+                </Modal>
+
+                {/* Rerun detection task */}
+                <Modal
+                    disableSubmitButton={isLoading}
+                    submitButtonLabel={
+                        isLoading ? "Running..." : t("label.confirm")
+                    }
+                    title={t("label.rerun-the-anomalies-detection-task")}
+                    trigger={(onClick) => (
+                        <MenuItem onClick={onClick}>
+                            {t("label.rerun-anomaly-detection")}
+                        </MenuItem>
+                    )}
+                    onSubmit={handleRerunAlert}
+                >
+                    {isError && (
+                        <Alert severity="error" variant="outlined">
+                            {t(
+                                "message.an-error-was-experienced-while-trying-to"
+                            )}
+                        </Alert>
+                    )}
+                    <p>
+                        {t(
+                            "message.confirming-will-rerun-the-anomalies-task-which"
+                        )}
                     </p>
                 </Modal>
 

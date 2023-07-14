@@ -54,7 +54,7 @@ export const Modal: FunctionComponent<ModalProps> = ({
         }
 
         // Response of false means keep modal open
-        onSubmit() !== false && setIsOpen(false);
+        onSubmit(() => setIsOpen(false)) !== false && setIsOpen(false);
     };
 
     return (

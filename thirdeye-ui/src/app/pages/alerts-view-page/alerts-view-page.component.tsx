@@ -404,6 +404,10 @@ export const AlertsViewPage: FunctionComponent = () => {
         setSearchParams(searchParams, { replace: true });
     };
 
+    const handleAnomalyDetectionRerun = (): void => {
+        fetchData();
+    };
+
     return (
         <PageV1>
             <PageHeader
@@ -459,6 +463,9 @@ export const AlertsViewPage: FunctionComponent = () => {
                                 );
                             }}
                             onChange={handleAlertChange}
+                            onDetectionRerunSuccess={
+                                handleAnomalyDetectionRerun
+                            }
                         />
                     ) : (
                         ""

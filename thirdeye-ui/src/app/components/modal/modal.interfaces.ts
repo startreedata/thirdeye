@@ -20,7 +20,7 @@ export interface ModalProps {
     submitButtonLabel?: ReactNode;
     cancelButtonLabel?: ReactNode;
     footerActions?: ReactNode;
-    onSubmit?: () => boolean | void;
+    onSubmit?: (closeCallback: () => void) => boolean | void;
     onCancel?: () => void;
     onOpen?: () => void;
     title?: ReactNode;

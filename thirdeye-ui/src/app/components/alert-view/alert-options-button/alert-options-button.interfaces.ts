@@ -23,4 +23,5 @@ export interface AlertOptionsButtonProps {
         clickCallback: (event: MouseEvent<HTMLElement>) => void
     ) => ReactNode;
     handleAlertResetClick: () => void;
+    onDetectionRerunSuccess: () => void;
 }

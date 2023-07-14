@@ -124,6 +124,30 @@ export const resetAlert = async (id: number): Promise<Alert> => {
     return response.data;
 };
 
+export const rerunAnomalyDetectionForAlert = async ({
+    id,
+    start,
+    end,
+}: {
+    id: number;
+    start?: number;
+    end?: number;
+}): Promise<Alert> => {
+    const params = new URLSearchParams();
+
+    if (start) {
+        params.append("start", start.toString());
+    }
+
+    if (end) {
+        params.append("end", end.toString());
+    }
+
+    const response = await axios.post(`/api/alerts/${id}/run`, params);
+
+    return response.data;
+};
+
 export const getAlertEvaluation = async (
     alertEvaluation: GetAlertEvaluationPayload,
     filters?: string[], // array of strings in `column=value` format

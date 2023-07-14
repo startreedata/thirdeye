@@ -1,3 +1,17 @@
+## [2.30.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.29.0...thirdeye-ui-2.30.0) (2023-07-13)
+
+
+### Features
+
+* [TE-1687](https://cortexdata.atlassian.net/browse/TE-1687) allow name sorting of enumeration items for alert details page ([91c845024](https://github.com/startreedata/thirdeye/commit/91c845024bb7c40e7676dc0d5e033153b0d5e434))
+* [TE-1691](https://cortexdata.atlassian.net/browse/TE-1691) user is prompted reset after alert template properties are modified ([02994be09](https://github.com/startreedata/thirdeye/commit/02994be09ffd92061c90a85171d8e45d4cebdaea))
+* addressing feedback for rca 2 page ([3bbd82817](https://github.com/startreedata/thirdeye/commit/3bbd82817c754efe8ab76cee323356a4b9f968c6))
+
+
+### Bug Fixes
+
+* [TE-1692](https://cortexdata.atlassian.net/browse/TE-1692) back button should close modal alert ([0b724b907](https://github.com/startreedata/thirdeye/commit/0b724b9075d1fc9cd22639893325af2defcb1957))
+
 ## [2.29.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.28.1...thirdeye-ui-2.29.0) (2023-07-10)
 
 

@@ -21,17 +21,15 @@ RUN ./mvnw package -DskipTests
 
 FROM eclipse-temurin:11-jre-alpine
 RUN addgroup -g 1000 thirdeye && \
-  adduser -u 1000 thirdeye -G thirdeye -D -H
+  adduser -u 1000 thirdeye -G thirdeye -D
 
 USER thirdeye
-WORKDIR /app
+WORKDIR /home/thirdeye
 
 EXPOSE 8080
 EXPOSE 8081
 EXPOSE 8443
 
-ENV THIRDEYE_PLUGINS_DIR "/app/plugins"
-
-COPY --from=builder --chown=1000:1000 /build/thirdeye-distribution/target/thirdeye-distribution-*-dist/thirdeye-distribution-*/ /app/
+COPY --from=builder --chown=1000:1000 /build/thirdeye-distribution/target/thirdeye-distribution-*-dist/thirdeye-distribution-*/ ./
 
 ENTRYPOINT ["sh", "bin/thirdeye.sh"]

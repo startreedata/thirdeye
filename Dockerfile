@@ -16,7 +16,7 @@ FROM eclipse-temurin:11-jdk-alpine as builder
 WORKDIR /build
 RUN apk add --no-cache git
 COPY ./ ./
-RUN ./mvnw install -DskipTests
+RUN ./mvnw package -DskipTests
 
 
 FROM eclipse-temurin:11-jre-alpine

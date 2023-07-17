@@ -4,13 +4,8 @@ server {
     resolver ${DNS_RESOLVER} valid=30s;
     root /app/dist/;
 
-    location ~/api(.*) {
-        if ($args != "") {
-            proxy_pass $backend_servers/api$1?$args;
-        }
-        if ($args = "") {
-            proxy_pass $backend_servers/api$1;
-        }
+    location /api/ {
+        proxy_pass $backend_servers;
         proxy_ssl_server_name on;
         proxy_redirect off;
         proxy_set_header Host $proxy_host;
@@ -20,8 +15,8 @@ server {
         proxy_read_timeout 300;
     }
 
-    location ~/swagger(.*) {
-        proxy_pass $backend_servers/swagger$1;
+    location /swagger/ {
+        proxy_pass $backend_servers;
         proxy_ssl_server_name on;
         proxy_redirect off;
         proxy_set_header Host $proxy_host;
@@ -31,8 +26,8 @@ server {
         proxy_read_timeout 300;
     }
 
-    location ~/openapi(.*) {
-        proxy_pass $backend_servers/openapi$1;
+    location /openapi/ {
+        proxy_pass $backend_servers;
         proxy_ssl_server_name on;
         proxy_redirect off;
         proxy_set_header Host $proxy_host;
@@ -46,7 +41,7 @@ server {
         try_files $uri $uri/ /index.html;
     }
 
-    location ~ /index.html {
+    location /index.html {
         add_header Cache-Control "no-cache, no-store, must-revalidate";
     }
 }

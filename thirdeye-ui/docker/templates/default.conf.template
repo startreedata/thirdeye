@@ -2,8 +2,6 @@ server {
     listen  ${NGINX_PORT};
     set $backend_servers ${THIRDEYE_API_BASE_URL};
     resolver ${DNS_RESOLVER} valid=30s;
-    root /app/dist/;
-
     location ~/api(.*) {
         if ($args != "") {
             proxy_pass $backend_servers/api$1?$args;
@@ -19,7 +17,6 @@ server {
         proxy_set_header X-Forwarded-Host $server_name;
         proxy_read_timeout 300;
     }
-
     location ~/swagger(.*) {
         proxy_pass $backend_servers/swagger$1;
         proxy_ssl_server_name on;
@@ -30,7 +27,6 @@ server {
         proxy_set_header X-Forwarded-Host $server_name;
         proxy_read_timeout 300;
     }
-
     location ~/openapi(.*) {
         proxy_pass $backend_servers/openapi$1;
         proxy_ssl_server_name on;
@@ -41,11 +37,9 @@ server {
         proxy_set_header X-Forwarded-Host $server_name;
         proxy_read_timeout 300;
     }
-
     location / {
         try_files $uri $uri/ /index.html;
     }
-
     location ~ /index.html {
         add_header Cache-Control "no-cache, no-store, must-revalidate";
     }

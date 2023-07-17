@@ -175,4 +175,23 @@ describe("alert details flows", () => {
             )
             .should("be.visible");
     });
+
+    it("user can rerun detection task via options menu", () => {
+        cy.getByDataTestId(TEST_IDS.TABLE)
+            .find("a")
+            .contains(DEFAULT_ALERT_NAME)
+            .click();
+
+        cy.get("button").contains("Options").click();
+        cy.get("li").contains("Rerun Anomaly Detection").click();
+
+        // Ensure reset is called
+        cy.intercept("http://localhost:7004/api/alerts/*/run").as(
+            "rerunDetection"
+        );
+
+        // Click confirm button
+        cy.get("button").contains("Confirm").click();
+        cy.wait("@rerunDetection").its("response.statusCode").should("eq", 200);
+    });
 });

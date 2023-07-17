@@ -145,13 +145,12 @@ export const AlertOptionsButton: FunctionComponent<AlertOptionsButtonProps> = ({
             navigate(getAlertsAllPath());
         });
     };
-
     const handleRerunAlert = (closeCallback: () => void): boolean => {
         mutateAsync(alert.id).then(() => {
             closeCallback();
             notify(
                 NotificationTypeV1.Success,
-                "Anomaly detection task ran successfully"
+                t("message.anomaly-detection-task-ran-successfully")
             );
             onDetectionRerunSuccess();
         });

@@ -12,14 +12,14 @@
 # the License.
 #
 
-FROM adoptopenjdk/openjdk11:alpine as builder
+FROM eclipse-temurin:11-jdk-alpine as builder
 WORKDIR /build
 RUN apk add --no-cache git
 COPY ./ ./
-RUN ./mvnw -T 1C install -DskipTests
+RUN ./mvnw install -DskipTests
 
 
-FROM adoptopenjdk/openjdk11:alpine
+FROM eclipse-temurin:11-jre-alpine
 RUN addgroup -g 1000 thirdeye && \
   adduser -u 1000 thirdeye -G thirdeye -D -H
 
@@ -32,6 +32,6 @@ EXPOSE 8443
 
 ENV THIRDEYE_PLUGINS_DIR "/app/plugins"
 
-COPY --from=builder --chown=1000:1000 /build/thirdeye-distribution/target/thirdeye-distribution-1.168.0-SNAPSHOT-dist/thirdeye-distribution-1.168.0-SNAPSHOT/ /app/
+COPY --from=builder --chown=1000:1000 /build/thirdeye-distribution/target/thirdeye-distribution-*-dist/thirdeye-distribution-*/ /app/
 
 ENTRYPOINT ["sh", "bin/thirdeye.sh"]

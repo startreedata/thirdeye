@@ -69,15 +69,16 @@ auth:
 database:
   # Assuming a local MySQL server running on the default port 3306
   # use sslMode=REQUIRED or more in prod
-  url: jdbc:mysql://db-3-eu.adsrv.wtf:3306/thirdeye?autoReconnect=true&allowPublicKeyRetrieval=true&sslMode=DISABLED
-  user: thirdeye
-  password: 3E1Xi9Mqd5wEiT0zPNVM
+  url: jdbc:mysql://127.0.0.1:3306/thirdeye_test?autoReconnect=true&allowPublicKeyRetrieval=true&sslMode=DISABLED
+  user: uthirdeye
+  password: pass
   driver: com.mysql.cj.jdbc.Driver
 
 swagger:
   # Enable/Disable the swagger resource. Helps in API documentation. Should be true by default
   enabled: true
   schemes:
+    - http
     - https
   # package to scan for jersey resources
   resourcePackage: ai.startree.thirdeye.resources.root
@@ -103,7 +104,7 @@ time:
   minimumOnboardingStartTime: 946684800000
 
 mockEvents:
-  enabled: false
+  enabled: true
   generators:
     - type: HOLIDAY
       arrivalType: exponential
@@ -119,7 +120,7 @@ mockEvents:
       durationType: exponential
       durationMean: 3600000
       seed: 1
-      namePrefixes: [Login, Web, Search, CattaskDriveralog, Integration, Network, Backup, Ingress, Proxy, Failure, Pinot, ThirdEye]
+      namePrefixes: [Login, Web, Search, Catalog, Integration, Network, Backup, Ingress, Proxy, Failure, Pinot, ThirdEye]
       nameSuffixes: [backend, frontend, v1.1, v1.2, v1.3, v2.0, v3, v4, v5, storage, topic, container, database]
     - type: CM
       arrivalType: exponential
@@ -167,7 +168,7 @@ phantomJsPath: "/usr/local/bin/jstf"
 
 # Prometheus compatible metrics will be exposed at /admin/prometheus
 prometheus:
-  enabled: true
+  enabled: false
 
 scheduler:
   # Run the Quartz Scheduler.
@@ -179,8 +180,8 @@ scheduler:
 
   # Enable autoloading data sources with a default frequency of 5 min
   autoOnboard:
-    enabled: true
-    frequency: PT10m #  min
+    enabled: false
+    frequency: PT3m # 3 min
 
   holidayEvents:
     enabled: false

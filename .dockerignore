@@ -1,4 +1,11 @@
 Dockerfile
 *.md
 thirdeye-ui/
-
+**/target/
+# tests are not run
+**/src/test
+examples
+.idea
+.github
+doc
+tmp

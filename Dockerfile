@@ -16,8 +16,8 @@ FROM eclipse-temurin:11-jdk-alpine as builder
 WORKDIR /build
 RUN apk add --no-cache git
 COPY ./ ./
-RUN ./mvnw package -DskipTests
-
+# if the disitrbution is provided, do nothing - else build it
+RUN if [[ ! -d thirdeye-distribution/target/thirdeye-distribution-*-dist/thirdeye-distribution-* ]]; then ./mvnw package -U -DskipTests; fi
 
 FROM eclipse-temurin:11-jre-alpine
 RUN addgroup -g 1000 thirdeye && \

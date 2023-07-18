@@ -22,7 +22,7 @@ jobs:
       - name: Set maven repository settings
         uses: s4u/maven-settings-action@v2.8.0
         with:
-          servers: '[{"id": "${{ env.MVN_REPOSITORY_ID }}", "username": "${{ secrets.MVN_REPOSITORY_USERNAME }}", "password": "${{ secrets.MVN_REPOSITORY_PASSWORD }}"}]'
+          servers: '[{"id": "${{ env.MVN_REPOSITORY_ID }}", "username": "test", "password": "test2"}]'
       - name: "debug"
         run: |
           cat ~/.m2/settings.xml

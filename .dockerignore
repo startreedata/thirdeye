@@ -9,3 +9,8 @@ examples
 .github
 doc
 tmp
+
+# distribution can be built outside of docker - it will be picked if it is available
+!thirdeye-distribution/target
+# dependency of thirdeye-integration-tests - cannot be ignored
+!thirdeye-persistence/src/test

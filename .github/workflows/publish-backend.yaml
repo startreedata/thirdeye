@@ -20,10 +20,12 @@ jobs:
         run: |
           RELEASE_VERSION=$(./mvnw -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
           MVN_REPOSITORY_ID=$( [[ ${RELEASE_VERSION} == *SNAPSHOT ]] && echo ${MVN_REPOSITORY_ID_SNAPSHOTS} || echo ${MVN_REPOSITORY_ID_RELEASES} )
+          echo ${MVN_REPOSITORY_ID}
           echo "MVN_REPOSITORY_ID=${MVN_REPOSITORY_ID}" >> "$GITHUB_OUTPUT"
       - name: Set maven repository settings
         uses: s4u/maven-settings-action@v2.8.0
         with:
+          ## TODO add ${{ secrets.MVN_ARTIFACTORY_TOKEN }} and the like
           servers: '[{"id": "${{ steps.release-type.outputs.MVN_REPOSITORY_ID }}", "username": "test", "password": "test2"}]'
       - name: "debug"
         run: |

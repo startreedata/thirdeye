@@ -137,7 +137,7 @@ You can modify server config in `config/server.yaml` and start the server:
 
 ```SHELL
 docker run --name  thirdeye-server -p 8080:8080 -p 8090:8090 -d \
-  -v ./config/server.yaml:/app/config/server.yaml \
+  -v ./config/server.yaml:/home/thirdeye/thirdeye/config/server.yaml \
   thirdeye:latest server
 ```
 

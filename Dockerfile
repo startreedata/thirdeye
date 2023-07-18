@@ -24,7 +24,7 @@ RUN addgroup -g 1000 thirdeye && \
   adduser -u 1000 thirdeye -G thirdeye -D
 
 USER thirdeye
-WORKDIR /home/thirdeye
+WORKDIR /home/thirdeye/thirdeye
 
 EXPOSE 8080
 EXPOSE 8081

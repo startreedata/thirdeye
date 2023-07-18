@@ -16,13 +16,15 @@ jobs:
           distribution: 'temurin'
       ## TODO ADD MAVEN CACHE
       - name: Determine release type - release or snapshot ?
+        id: release-type
         run: |
-          export RELEASE_VERSION=$(./mvnw -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
-          export MVN_REPOSITORY_ID=$( [[ ${RELEASE_VERSION} == *SNAPSHOT ]] && echo ${MVN_REPOSITORY_ID_SNAPSHOTS} || echo ${MVN_REPOSITORY_ID_RELEASES} )
+          RELEASE_VERSION=$(./mvnw -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
+          MVN_REPOSITORY_ID=$( [[ ${RELEASE_VERSION} == *SNAPSHOT ]] && echo ${MVN_REPOSITORY_ID_SNAPSHOTS} || echo ${MVN_REPOSITORY_ID_RELEASES} )
+          echo "MVN_REPOSITORY_ID=${MVN_REPOSITORY_ID}" >> "$GITHUB_OUTPUT"
       - name: Set maven repository settings
         uses: s4u/maven-settings-action@v2.8.0
         with:
-          servers: '[{"id": "${{ env.MVN_REPOSITORY_ID }}", "username": "test", "password": "test2"}]'
+          servers: '[{"id": "${{ steps.release-type.outputs.MVN_REPOSITORY_ID }}", "username": "test", "password": "test2"}]'
       - name: "debug"
         run: |
           cat ~/.m2/settings.xml

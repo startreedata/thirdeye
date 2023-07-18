@@ -18,15 +18,18 @@ jobs:
       - name: Determine release type - release or snapshot ?
         id: release-type
         run: |
-          RELEASE_VERSION=$(./mvnw -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
-          MVN_REPOSITORY_ID=$( [[ ${RELEASE_VERSION} == *SNAPSHOT ]] && echo ${MVN_REPOSITORY_ID_SNAPSHOTS} || echo ${MVN_REPOSITORY_ID_RELEASES} )
+          export RELEASE_VERSION=$(./mvnw -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
+          export MVN_REPOSITORY_ID=$( [[ ${RELEASE_VERSION} == *SNAPSHOT ]] && echo ${MVN_REPOSITORY_ID_SNAPSHOTS} || echo ${MVN_REPOSITORY_ID_RELEASES} )
           echo ${MVN_REPOSITORY_ID}
-          echo "MVN_REPOSITORY_ID=${MVN_REPOSITORY_ID}" >> "$GITHUB_OUTPUT"
+        env:
+          # TODO replace by secrets
+          MVN_REPOSITORY_ID_SNAPSHOTS: snapshots-demo
+          MVN_REPOSITORY_ID_RELEASES: releases-demo
       - name: Set maven repository settings
         uses: s4u/maven-settings-action@v2.8.0
         with:
           ## TODO add ${{ secrets.MVN_ARTIFACTORY_TOKEN }} and the like
-          servers: '[{"id": "${{ steps.release-type.outputs.MVN_REPOSITORY_ID }}", "username": "test", "password": "test2"}]'
+          servers: '[{"id": "${{ env.MVN_REPOSITORY_ID }}", "username": "test", "password": "test2"}]'
       - name: "debug"
         run: |
           cat ~/.m2/settings.xml

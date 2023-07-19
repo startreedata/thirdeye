@@ -11,6 +11,7 @@ jobs:
   publish-thirdeye:
     runs-on: ubuntu-latest
     environment: github-production
+    timeout-minutes: 20
     steps:
       - name: Pull repository
         uses: actions/checkout@v3

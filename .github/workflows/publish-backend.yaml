@@ -30,7 +30,7 @@ jobs:
       - name: Determine release type (release or snapshot)
         id: release-type
         run: |
-          export RELEASE_VERSION=$(./mvnw -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
+          RELEASE_VERSION=$(./mvnw -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
           echo "RELEASE_VERSION=${RELEASE_VERSION}" >> "$GITHUB_OUTPUT"
           MVN_REPOSITORY_ID=$( [[ ${RELEASE_VERSION} == *SNAPSHOT ]] && echo ${MVN_REPOSITORY_ID_SNAPSHOTS} || echo ${MVN_REPOSITORY_ID_RELEASES} )
           echo "MVN_REPOSITORY_ID=${MVN_REPOSITORY_ID}" >> "$GITHUB_OUTPUT"

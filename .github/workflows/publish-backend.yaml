@@ -84,8 +84,4 @@ jobs:
         env:
           REGISTRY: ${{ secrets.DKR_EXTERNAL_REGISTRY }}
 
-# to get notification in a slack channel, run
-#  /github subscribe startreedata/thirdeye workflows:{name:"Publish ThirdEye Backend" branch:"master"}
-# /github unsubscribe startreedata/thirdeye pulls commits deployments
-
 

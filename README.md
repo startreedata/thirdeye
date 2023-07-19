@@ -124,24 +124,30 @@ bin/thirdeye.sh server
 Once a distribution is ready, you can package it into a docker container using the command below.
 
 ```SHELL
-./mvnw -T 1C package -D skipTests && docker build -t thirdeye:latest .
+# Build server image
+docker build -t thirdeye:latest .
+
+# Build UI image
+cd thirdeye-ui/ && docker build -t thirdeye-ui:latest . && cd ..
 ```
 
-#### Start ThirdEye Coordinator
+#### Start ThirdEye with Docker
+
+You can modify server config in `config/server.yaml` and start the server:
+
 ```SHELL
-docker run \
-    --name  thirdeye-coordinator \
-    -p 8081:8080 \
-    -d thirdeye:latest coordinator
+docker run --name  thirdeye-server -p 8080:8080 -p 8090:8090 -d \
+  -v ./config/server.yaml:/home/thirdeye/thirdeye/config/server.yaml \
+  thirdeye:latest server
 ```
 
-#### Start ThirdEye worker
+Next you should launch the UI:
+
 ```SHELL
-docker run \
-    --name  thirdeye-worker \
-    -p 8081:8080 \
-    -d thirdeye:latest worker
+docker run --name  thirdeye-ui -p 8085:8085 -d thirdeye-ui:latest
 ```
+
+You can access the UI on [127.0.0.1:8085](http://127.0.0.1:8085).
 
 ## Developer Guide
 

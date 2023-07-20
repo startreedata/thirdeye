@@ -3,7 +3,8 @@ name: Publish ThirdEye Backend
 on:
   push:
     branches: [ master ]
-    paths-ignore: thirdeye-ui/**
+    paths-ignore:
+      - thirdeye-ui/**
   # for debugging purpose
   workflow_dispatch:
 

@@ -54,6 +54,14 @@ jobs:
           RELEASE_VERSION: ${{ steps.release-type.outputs.RELEASE_VERSION }}
           MVN_REPOSITORY_ID: ${{ steps.release-type.outputs.MVN_REPOSITORY_ID }}
           MVN_REPOSITORY_URL: ${{ secrets.MVN_ARTIFACTORY_URL }}
+      - name: Notify enterprise thirdEye repo
+        # if a release is cut - notify the enterprise ThirdEye repo
+        if: ${{ steps.release-type.outputs.MVN_REPOSITORY_ID == 'startree-releases'}}
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          repository: startreedata/startree-thirdeye
+          event-type: community-te-release
       - name: Clean Maven settings before caching maven folder
         # run with the same condition as the caching step below
         if: steps.cache-restore.outputs.cache-hit != 'true' && ( failure() || success())

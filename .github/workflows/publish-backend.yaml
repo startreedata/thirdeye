@@ -4,6 +4,7 @@ on:
   push:
     branches: [ master ]
     paths-ignore:
+      - kubernetes
       - thirdeye-ui/**
   # for debugging purpose
   workflow_dispatch:

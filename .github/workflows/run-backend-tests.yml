@@ -6,10 +6,14 @@ name: Run backend tests
 on:
   push:
     branches: [ master ]
-    paths-ignore: thirdeye-ui/**
+    paths-ignore:
+      - thirdeye-ui/**
+      - kubernetes
   pull_request:
     branches: [ master ]
-    paths-ignore: thirdeye-ui/**
+    paths-ignore:
+      - thirdeye-ui/**
+      - kubernetes
 
 jobs:
   build:

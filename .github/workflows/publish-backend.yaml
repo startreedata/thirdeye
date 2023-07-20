@@ -94,5 +94,6 @@ jobs:
           token: ${{ secrets.GH_TOKEN }}
           repository: startreedata/startree-thirdeye
           event-type: community-te-release
+          client-payload: '{"community_version": "${{ steps.release-type.outputs.RELEASE_VERSION }}"}'
 
 

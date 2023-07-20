@@ -20,17 +20,23 @@ jobs:
           sparse-checkout: |
             thirdeye-ui
             pom.xml
+            .mvn
       - name: Install node and npm
         uses: actions/setup-node@v3
         with:
           node-version: 14
           cache: "npm"
           cache-dependency-path: './thirdeye-ui/package-lock.json'
+      # java is required to get the backend project version with maven
+      - name: Install JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
       - name: Generate frontend distribution
         id: generate-frontend-dist
-        # xmllint is used to avoid a dependency on java and maven
         run: |
-          TE_VERSION=$(xmllint --xpath '/*[local-name()="project"]/*[local-name()="version"]/text()' pom.xml)
+          TE_VERSION=$(./mvnw -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
           echo "ThirdEye version is: ${TE_VERSION}"
           cd thirdeye-ui
           if [[ "$TE_VERSION" == *"$SNAPSHOT_STR"* ]]

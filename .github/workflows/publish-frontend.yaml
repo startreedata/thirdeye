@@ -1,0 +1,79 @@
+name: Publish ThirdEye Frontend
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - thirdeye-ui/**
+  # for debugging purpose
+  workflow_dispatch:
+
+jobs:
+  publish-thirdeye-frontend:
+    runs-on: ubuntu-latest
+    environment: github-production
+    timeout-minutes: 20
+    steps:
+      - name: Pull repository
+        uses: actions/checkout@v3
+        with:
+          sparse-checkout: |
+            thirdeye-ui
+            pom.xml
+            .mvn
+      - name: Install node and npm
+        uses: actions/setup-node@v3
+        with:
+          node-version: 14
+          cache: "npm"
+          cache-dependency-path: './thirdeye-ui/package-lock.json'
+      # java is required to get the backend project version with maven
+      - name: Install JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+      - name: Generate frontend distribution
+        id: generate-frontend-dist
+        run: |
+          TE_VERSION=$(./mvnw -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
+          echo "ThirdEye version is: ${TE_VERSION}"
+          cd thirdeye-ui
+          if [[ "$TE_VERSION" == *"$SNAPSHOT_STR"* ]]
+          then
+            echo "Snapshot build detected. Generating dist with local build"
+            export GH_SHA=$(git log -1 --format="%H")
+            npm ci
+            npm run build
+            SNAPSHOT_VERSION_SUFFIX="-SNAPSHOT"
+          else
+            echo "Downloading artifact for latest version via npm"
+            npm pack "@startree-ui/thirdeye-ui"
+            tar -xvf startree-ui-thirdeye-ui-*.tgz package/dist
+            mv package/dist dist
+          fi
+          UI_VERSION=$(npm view "@startree-ui\/thireye-ui" version --json | tr -d '"')${SNAPSHOT_VERSION_SUFFIX}
+          echo "UI_VERSION=${UI_VERSION}" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          NPM_CONFIG__AUTH: ${{ secrets.NPM_CONFIG__AUTH }}
+
+      # build and publish docker image
+      - name: Login in Docker registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ secrets.DKR_EXTERNAL_REGISTRY }}
+          username: ${{ secrets.MVN_ARTIFACTORY_USERNAME }}
+          password: ${{ secrets.MVN_ARTIFACTORY_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: thirdeye-ui
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/thirdeye-ui:${{ steps.generate-frontend-dist.outputs.UI_VERSION }}
+            ${{ env.REGISTRY }}/thirdeye-ui:latest
+        env:
+          REGISTRY: ${{ secrets.DKR_EXTERNAL_REGISTRY }}
+
+

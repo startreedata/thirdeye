@@ -1,0 +1,45 @@
+name: Publish ThirdEye Helm Chart
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - kubernetes/helm/**
+  # for debugging purpose
+  workflow_dispatch:
+
+
+jobs:
+  publish-thirdeye-helm-chart:
+    runs-on: ubuntu-latest
+    environment: github-production
+    timeout-minutes: 20
+    steps:
+      - name: Pull repository
+        uses: actions/checkout@v3
+        with:
+          sparse-checkout: |
+            kubernetes
+      # Note: helm is pre-installed in github image. See https://github.com/actions/runner-images/blob/main/images/linux/Ubuntu2204-Readme.md for version numbers
+      - name: Bump version and publish chart
+        run: |
+          cd kubernetes/helm/startree-thirdeye
+          CURRENT_VERSION=$(yq eval ".version" Chart.yaml)
+          NEW_VERSION=$(echo $CURRENT_VERSION | awk -F. '/[0-9]+\.[0-9]+\./{$(NF-1)++;print}' OFS=.) # bump minor version 
+          yq eval --inplace ".version = \"${NEW_VERSION}\"" Chart.yaml
+          helm dependency update
+          helm lint --strict .
+          helm package .
+                 
+          git config --global user.email "thirdeye-ci@startree.ai"
+          git config --global user.name "ThirdEye CI"
+          git add Chart.yaml
+          git commit -m "[k8s] bump helm chart version from ${CURRENT_VERSION} to ${NEW_VERSION}"
+          git push
+          
+          CHART_PATH=$(ls *.tgz)
+          curl -H "X-JFrog-Art-Api:${HELM_REPOSITORY_TOKEN}" -T ${CHART_PATH} "${HELM_REPOSITORY_URL}/${CHART_PATH}"
+
+        env:
+          HELM_REPOSITORY_URL: ${{ secrets.HELM_REPOSITORY_URL }}
+          HELM_REPOSITORY_TOKEN: ${{ secrets.MVN_ARTIFACTORY_TOKEN }}

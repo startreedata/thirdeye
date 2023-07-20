@@ -1,3 +1,17 @@
+## [2.31.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.30.0...thirdeye-ui-2.31.0) (2023-07-18)
+
+
+### Features
+
+* [TE-1414](https://cortexdata.atlassian.net/browse/TE-1414) rerun anomaly detection algorithm ([7bf0c6284](https://github.com/startreedata/thirdeye/commit/7bf0c6284a0201e4a51d3a796eb12124e06a01a0))
+* [TE-1414](https://cortexdata.atlassian.net/browse/TE-1414) rerun detection task prompt when updating alert ([46bf2eaec](https://github.com/startreedata/thirdeye/commit/46bf2eaec13bb1399dd7cdd9edd66c0d82930460))
+
+
+### Bug Fixes
+
+* fix alert details e2e test ([1dda72398](https://github.com/startreedata/thirdeye/commit/1dda723987ba690312bf4e790af8a05815db9ce6))
+* fix bug where some dimension combinations are not added ([1856c3bcf](https://github.com/startreedata/thirdeye/commit/1856c3bcf3a7ab9eafb5dd5b398bffce8eeb7454))
+
 ## [2.30.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.29.0...thirdeye-ui-2.30.0) (2023-07-13)
 
 

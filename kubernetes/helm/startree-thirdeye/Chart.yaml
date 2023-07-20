@@ -16,25 +16,25 @@ apiVersion: v2
 appVersion: 0.5.0-SNAPSHOT # Should be maintained automatically by a pipeline
 name: startree-thirdeye
 description: One Stop Shop For Anomaly Detection.
-version: 0.1.0
+version: 2.1.0
 keywords:
-- thirdeye
-- metrics
-- anomaly detection
-- statistical analysis
-- rootcause analysis
+  - thirdeye
+  - metrics
+  - anomaly detection
+  - statistical analysis
+  - rootcause analysis
 home: https://github.com/startreedata/thirdeye
 sources:
-- https://github.com/startreedata/thirdeye
+  - https://github.com/startreedata/thirdeye
 maintainers:
-- name: Suvodeep Pyne
-  email: suvodeep@startree.ai
-- name: Shounak Kulkarni
-  email: shounak@startree.ai
-- name: Cyril de Catheu
-  email: cyril@startree.ai
+  - name: Suvodeep Pyne
+    email: suvodeep@startree.ai
+  - name: Shounak Kulkarni
+    email: shounak@startree.ai
+  - name: Cyril de Catheu
+    email: cyril@startree.ai
 dependencies:
-- name: mysql
-  version: 1.6.6
-  repository: https://charts.helm.sh/stable
-  condition: mysql.enabled
+  - name: mysql
+    version: 1.6.6
+    repository: https://charts.helm.sh/stable
+    condition: mysql.enabled

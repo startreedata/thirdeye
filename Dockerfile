@@ -12,24 +12,24 @@
 # the License.
 #
 
-FROM adoptopenjdk/openjdk11:alpine
+FROM eclipse-temurin:11-jdk-alpine as builder
+WORKDIR /build
+RUN apk add --no-cache git
+COPY ./ ./
+# if the disitrbution is provided, do nothing - else build it
+RUN if [[ ! -d thirdeye-distribution/target/thirdeye-distribution-*-dist/thirdeye-distribution-* ]]; then ./mvnw package -U -DskipTests; fi
+
+FROM eclipse-temurin:11-jre-alpine
+RUN addgroup -g 1000 thirdeye && \
+  adduser -u 1000 thirdeye -G thirdeye -D
+
+USER thirdeye
+WORKDIR /home/thirdeye/thirdeye
 
 EXPOSE 8080
 EXPOSE 8081
 EXPOSE 8443
 
-RUN addgroup -S thirdeye && \
-  adduser -S thirdeye -G thirdeye && \
-  chown thirdeye:thirdeye /home/thirdeye
-
-USER thirdeye
-WORKDIR /home/thirdeye
-
-COPY thirdeye-distribution/target/thirdeye-distribution-*-dist.tar.gz thirdeye-distribution-dist.tar.gz
-
-RUN mkdir thirdeye && tar -xvf thirdeye-distribution-dist.tar.gz -C thirdeye --strip-components=1 && \
-  rm thirdeye-distribution-dist.tar.gz
-
-WORKDIR /home/thirdeye/thirdeye
+COPY --from=builder --chown=1000:1000 /build/thirdeye-distribution/target/thirdeye-distribution-*-dist/thirdeye-distribution-*/ ./
 
 ENTRYPOINT ["sh", "bin/thirdeye.sh"]

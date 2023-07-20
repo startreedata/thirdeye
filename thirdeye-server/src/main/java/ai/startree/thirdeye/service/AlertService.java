@@ -49,7 +49,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.quartz.CronExpression;
 import org.slf4j.Logger;
@@ -110,7 +109,6 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
   protected void validate(final AlertApi api, final AlertDTO existing) {
     super.validate(api, existing);
     ensureExists(api.getName(), "Name must be present");
-    ensure(!StringUtils.containsWhitespace(api.getName()), "Name must not contain white space");
     optional(api.getCron()).ifPresent(cron ->
         ensure(CronExpression.isValidExpression(cron), ERR_CRON_INVALID, api.getCron()));
 

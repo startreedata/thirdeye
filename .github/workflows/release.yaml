@@ -1,0 +1,114 @@
+name: Release ThirdEye
+
+on:
+  # a release must be triggered manually
+  workflow_dispatch:
+
+jobs:
+  release-thirdeye:
+    runs-on: ubuntu-latest
+    environment: github-production
+    timeout-minutes: 20
+    steps:
+      - name: Pull repository
+        uses: actions/checkout@v3
+      - name: Install JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+      - name: Set git ci user info
+        run: |
+          git config --global user.email "thirdeye-ci@startree.ai"
+          git config --global user.name "ThirdEye CI"
+      - name: Setup SSH key of privileged github ci account
+        # an action is available for this, but it's not an official one, need to perform security checks before using it
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan github.com > ~/.ssh/known_hosts
+          echo "${{ secrets.GH_THIRDEYE_CI_PRIVATE_KEY }}" > ~/.ssh/github_key
+          chmod 400 ~/.ssh/github_key
+          cat > ~/.ssh/config <<EOF
+          Host github.com
+          HostName github.com
+          IdentityFile ~/.ssh/github_key
+          EOF
+          if (ssh -T git@github.com 2>&1 | grep -q 'successfully'); then
+            echo "SSH connection to github successful."
+          else
+            echo "Could not connect to github with ssh" || exit 1
+          fi
+      - name: Cache - restore local Maven repository
+        id: cache-restore
+        uses: actions/cache/restore@v3
+        with:
+          path: ~/.m2/repository
+          key: publish-${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: release-${{ runner.os }}-maven-
+      - name: Set maven repository settings
+        uses: s4u/maven-settings-action@v2.8.0
+        with:
+          servers: >
+            [
+              {
+                "id": "startree-snapshots", 
+                "username": "${{ env.MVN_REPOSITORY_USERNAME }}", 
+                "password": "${{ env.MVN_REPOSITORY_PASSWORD }}"
+              },
+              {
+                "id": "startree-releases", 
+                "username": "${{ env.MVN_REPOSITORY_USERNAME }}", 
+                "password": "${{ env.MVN_REPOSITORY_PASSWORD }}"
+              }
+            ]
+        env:
+          MVN_REPOSITORY_USERNAME: ${{ secrets.MVN_ARTIFACTORY_USERNAME }}
+          MVN_REPOSITORY_PASSWORD: ${{ secrets.MVN_ARTIFACTORY_TOKEN }}
+      - name: Perform Maven release
+        run: |
+          ./mvnw -B -DskipTests -Darguments=-DskipTests release:clean initialize release:prepare
+      - name: Clean Maven settings before caching maven folder
+        # run with the same condition as the caching step below
+        if: steps.cache-restore.outputs.cache-hit != 'true' && ( failure() || success())
+        run: rm ~/.m2/settings.xml
+      - name: Cache - save local Maven repository
+        uses: actions/cache/save@v3
+        # save to cache only if necessary - cache even if failed (useful if some steps are flaky)
+        if: steps.cache-restore.outputs.cache-hit != 'true' && ( failure() || success())
+        with:
+          path: ~/.m2/repository
+          key: publish-${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+
+
+      # cache things?
+  release-thirdeye-ui:
+    runs-on: ubuntu-latest
+    environment: github-production
+    timeout-minutes: 20
+    steps:
+      - name: Pull repository
+        uses: actions/checkout@v3
+        with:
+          sparse-checkout: |
+            thirdeye-ui
+      - name: Set git ci user info
+        run: |
+          git config --global user.email "thirdeye-ci@startree.ai"
+          git config --global user.name "ThirdEye CI"
+      - name: Install node and npm
+        uses: actions/setup-node@v3
+        with:
+          node-version: 14
+          cache: "npm"
+          cache-dependency-path: './thirdeye-ui/package-lock.json'
+      - name: Release UI
+        run: |
+          cd thirdeye-ui
+          npm ci
+          npm run build
+          export GH_SHA=$(git log -1 --format="%H")
+          npm run release
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          SLACK_WEBHOOK: ${{ secrets.UI_SLACK_WEBHOOK }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}

@@ -106,6 +106,7 @@ jobs:
           cd thirdeye-ui
           npm ci
           npm run build
+          export GH_SHA=$(git log -1 --format="%H")
           npm run release
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

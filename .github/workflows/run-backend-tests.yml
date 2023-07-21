@@ -55,3 +55,12 @@ jobs:
           ~/.m2/repository
           ~/.m2/wrapper
         key: tests-${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+    - name: Slack - Notify Failure
+      uses: rtCamp/action-slack-notify@v2
+      if: github.ref == 'refs/heads/master' && failure()
+      env:
+        SLACK_COLOR: ${{ job.status }}
+        SLACK_MESSAGE: "@here - ThirdEye backend tests failed."
+        SLACK_TITLE: FAILURE
+        SLACK_LINK_NAMES: true
+        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}

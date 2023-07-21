@@ -105,6 +105,19 @@
     <url>https://www.startree.ai/</url>
   </organization>
 
+  <distributionManagement>
+    <snapshotRepository>
+      <id>startree-snapshots</id>
+      <name>StarTree Artifactory Snapshots</name>
+      <url>https://repo.startreedata.io/artifactory/startree-snapshots</url>
+    </snapshotRepository>
+    <repository>
+      <id>startree-releases</id>
+      <name>StarTree Artifactory Releases</name>
+      <url>https://repo.startreedata.io/artifactory/startree-releases</url>
+    </repository>
+  </distributionManagement>
+
   <scm>
     <!-- This is used by maven-release-plugin -->
     <url>https://github.com/startreedata/thirdeye.git</url>

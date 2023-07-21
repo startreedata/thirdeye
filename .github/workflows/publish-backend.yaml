@@ -31,31 +31,33 @@ jobs:
             ~/.m2/wrapper
           key: publish-${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: publish-${{ runner.os }}-maven-
-      - name: Determine release type (release or snapshot)
-        id: release-type
+      - name: Get release version number
+        id: release-version
         run: |
           RELEASE_VERSION=$(./mvnw -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
           echo "RELEASE_VERSION=${RELEASE_VERSION}" >> "$GITHUB_OUTPUT"
-          MVN_REPOSITORY_ID=$( [[ ${RELEASE_VERSION} == *SNAPSHOT ]] && echo ${MVN_REPOSITORY_ID_SNAPSHOTS} || echo ${MVN_REPOSITORY_ID_RELEASES} )
-          echo "MVN_REPOSITORY_ID=${MVN_REPOSITORY_ID}" >> "$GITHUB_OUTPUT"
-        env:
-          MVN_REPOSITORY_ID_SNAPSHOTS: startree-snapshots
-          MVN_REPOSITORY_ID_RELEASES: startree-releases
       - name: Set maven repository settings
         uses: s4u/maven-settings-action@v2.8.0
         with:
-          servers: '[{"id": "${{ steps.release-type.outputs.MVN_REPOSITORY_ID }}", "username": "${{ env.MVN_REPOSITORY_USERNAME }}", "password": "${{ env.MVN_REPOSITORY_PASSWORD }}"}]'
+          servers: >
+            [
+              {
+                "id": "startree-snapshots", 
+                "username": "${{ env.MVN_REPOSITORY_USERNAME }}", 
+                "password": "${{ env.MVN_REPOSITORY_PASSWORD }}"
+              },
+              {
+                "id": "startree-releases", 
+                "username": "${{ env.MVN_REPOSITORY_USERNAME }}", 
+                "password": "${{ env.MVN_REPOSITORY_PASSWORD }}"
+              }
+            ]
         env:
           MVN_REPOSITORY_USERNAME: ${{ secrets.MVN_ARTIFACTORY_USERNAME }}
           MVN_REPOSITORY_PASSWORD: ${{ secrets.MVN_ARTIFACTORY_TOKEN }}
       - name: Publish backend artefacts
         run: |
-          ./mvnw -Prelease -DskipTests -DreleaseVersion=${RELEASE_VERSION} deploy -U \
-            -DaltDeploymentRepository=${MVN_REPOSITORY_ID}::default::${MVN_REPOSITORY_URL}/${MVN_REPOSITORY_ID}
-        env:
-          RELEASE_VERSION: ${{ steps.release-type.outputs.RELEASE_VERSION }}
-          MVN_REPOSITORY_ID: ${{ steps.release-type.outputs.MVN_REPOSITORY_ID }}
-          MVN_REPOSITORY_URL: ${{ secrets.MVN_ARTIFACTORY_URL }}
+          ./mvnw -B -Prelease -DskipTests deploy -U
       - name: Cache - save local Maven repository
         uses: actions/cache/save@v3
         # save to cache only if necessary - cache even if failed (useful if some steps are flaky)
@@ -81,19 +83,19 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ env.REGISTRY }}/thirdeye:${{ steps.release-type.outputs.RELEASE_VERSION }}
+            ${{ env.REGISTRY }}/thirdeye:${{ steps.release-version.outputs.RELEASE_VERSION }}
             ${{ env.REGISTRY }}/thirdeye:latest
         env:
           REGISTRY: ${{ secrets.DKR_EXTERNAL_REGISTRY }}
 
       # if a release is cut - notify the enterprise ThirdEye repo
       - name: Notify enterprise thirdEye repo
-        if: ${{ steps.release-type.outputs.MVN_REPOSITORY_ID == 'startree-releases'}}
+        if: steps.release-version.outputs.RELEASE_VERSION != '' && !contains(steps.release-version.outputs.RELEASE_VERSION, 'SNAPSHOT')
         uses: peter-evans/repository-dispatch@v2
         with:
           token: ${{ secrets.GH_TOKEN }}
           repository: startreedata/startree-thirdeye
           event-type: community-te-release
-          client-payload: '{"community_version": "${{ steps.release-type.outputs.RELEASE_VERSION }}"}'
+          client-payload: '{"community_version": "${{ steps.release-version.outputs.RELEASE_VERSION }}"}'
 
 

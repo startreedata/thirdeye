@@ -42,7 +42,9 @@ jobs:
         id: cache-restore
         uses: actions/cache/restore@v3
         with:
-          path: ~/.m2/repository
+          path: |
+            ~/.m2/repository
+            ~/.m2/wrapper
           key: publish-${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: release-${{ runner.os }}-maven-
       - name: Set maven repository settings
@@ -67,16 +69,14 @@ jobs:
       - name: Perform Maven release
         run: |
           ./mvnw -B -DskipTests -Darguments=-DskipTests release:clean initialize release:prepare
-      - name: Clean Maven settings before caching maven folder
-        # run with the same condition as the caching step below
-        if: steps.cache-restore.outputs.cache-hit != 'true' && ( failure() || success())
-        run: rm ~/.m2/settings.xml
       - name: Cache - save local Maven repository
         uses: actions/cache/save@v3
         # save to cache only if necessary - cache even if failed (useful if some steps are flaky)
         if: steps.cache-restore.outputs.cache-hit != 'true' && ( failure() || success())
         with:
-          path: ~/.m2/repository
+          path: |
+            ~/.m2/repository
+            ~/.m2/wrapper
           key: publish-${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
 
 

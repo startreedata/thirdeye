@@ -53,7 +53,7 @@ jobs:
             tar -xvf startree-ui-thirdeye-ui-*.tgz package/dist
             mv package/dist dist
           fi
-          UI_VERSION=$(npm view "@startree-ui\/thireye-ui" version --json | tr -d '"')${SNAPSHOT_VERSION_SUFFIX}
+          UI_VERSION=$(npm view "@startree-ui\/thirdeye-ui" version --json | tr -d '"')${SNAPSHOT_VERSION_SUFFIX}
           echo "UI_VERSION=${UI_VERSION}" >> "$GITHUB_OUTPUT"
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}

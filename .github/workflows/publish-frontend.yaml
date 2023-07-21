@@ -5,6 +5,7 @@ on:
     branches: [ master ]
     paths:
       - thirdeye-ui/**
+      - pom.xml
   # for debugging purpose
   workflow_dispatch:
 

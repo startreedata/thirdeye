@@ -88,6 +88,10 @@ public interface DatasetMapper {
   static void updateTimeSpecOnDataset(final DatasetConfigDTO dto,
       final TimeColumnApi timeColumn) {
     final Duration d = timeColumn.getInterval();
+    if (d == null) {
+      // deprecated field not used anymore
+      return;
+    }
 
     if (d.toMillis() < 1000) {
       dto.setTimeDuration(Math.toIntExact(d.toMillis()));

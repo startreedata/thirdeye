@@ -25,6 +25,7 @@ import org.testng.annotations.Test;
 public class DatasetMapperTest {
 
   @Test
+  @Deprecated
   public void testMillisecondsGranularity() {
     final DatasetConfigDTO dto = new DatasetConfigDTO();
     DatasetMapper.updateTimeSpecOnDataset(dto,
@@ -34,6 +35,7 @@ public class DatasetMapperTest {
   }
 
   @Test
+  @Deprecated
   public void testSecondsGranularity() {
     final DatasetConfigDTO dto = new DatasetConfigDTO();
     // 1 sec granularity
@@ -51,6 +53,7 @@ public class DatasetMapperTest {
   }
 
   @Test
+  @Deprecated
   public void testMinutesGranularity() {
     final DatasetConfigDTO dto = new DatasetConfigDTO();
     DatasetMapper.updateTimeSpecOnDataset(dto,
@@ -60,6 +63,7 @@ public class DatasetMapperTest {
   }
 
   @Test
+  @Deprecated
   public void testHoursGranularity() {
     final DatasetConfigDTO dto = new DatasetConfigDTO();
     DatasetMapper.updateTimeSpecOnDataset(dto,
@@ -69,6 +73,7 @@ public class DatasetMapperTest {
   }
 
   @Test
+  @Deprecated
   public void testDaysGranularity() {
     final DatasetConfigDTO dto = new DatasetConfigDTO();
     DatasetMapper.updateTimeSpecOnDataset(dto,

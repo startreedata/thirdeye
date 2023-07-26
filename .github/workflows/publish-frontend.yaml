@@ -40,7 +40,7 @@ jobs:
           TE_VERSION=$(./mvnw -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
           echo "ThirdEye version is: ${TE_VERSION}"
           cd thirdeye-ui
-          if [[ "$TE_VERSION" == *"$SNAPSHOT_STR"* ]]
+          if [[ "$TE_VERSION" == *"-SNAPSHOT"* ]]
           then
             echo "Snapshot build detected. Generating dist with local build"
             export GH_SHA=$(git log -1 --format="%H")

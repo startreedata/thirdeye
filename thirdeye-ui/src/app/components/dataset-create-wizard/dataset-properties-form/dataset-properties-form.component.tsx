@@ -36,7 +36,10 @@ import { InputSection } from "../../form-basics/input-section/input-section.comp
 import { SelectDatasetOption } from "../../welcome-onboard-datasource/select-dataset-option/select-dataset-option.component";
 import { WizardBottomBar } from "../../welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import { DatasourceVerification } from "../datasource-verification/datasource-verification.component";
-import { DatasetPropertiesFormProps } from "./dataset-properties-form.interfaces";
+import {
+    DatasetPropertiesFormProps,
+    DATASET_FORM_TEST_IDS,
+} from "./dataset-properties-form.interfaces";
 
 export const DatasetPropertiesForm: FunctionComponent<DatasetPropertiesFormProps> =
     ({ existingDatasets, datasources, onSubmit }) => {
@@ -144,6 +147,9 @@ export const DatasetPropertiesForm: FunctionComponent<DatasetPropertiesFormProps
                                                     InputProps={{
                                                         ...params.InputProps,
                                                     }}
+                                                    data-testId={
+                                                        DATASET_FORM_TEST_IDS.DATASOURCE_AUTOCOMPLETE_TEXT_BOX
+                                                    }
                                                     placeholder={t(
                                                         "label.select-a-datasource"
                                                     )}
@@ -277,7 +283,12 @@ export const DatasetPropertiesForm: FunctionComponent<DatasetPropertiesFormProps
 
                 <WizardBottomBar
                     handleNextClick={() => {
-                        onSubmit && onSubmit(selectedDatasetsToOnboard);
+                        onSubmit &&
+                            selectedDataSource &&
+                            onSubmit(
+                                selectedDatasetsToOnboard,
+                                selectedDataSource.name
+                            );
                     }}
                     nextButtonLabel={t("label.submit")}
                 />

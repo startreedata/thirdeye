@@ -18,3 +18,9 @@ export interface DatasetListV1Props {
     datasets: UiDataset[] | null;
     onDelete?: (uiDatasets: UiDataset[]) => void;
 }
+
+export const TEST_IDS = {
+    TABLE: "dataset-list-table",
+    EDIT_BUTTON: "dataset-list-edit-button",
+    DELETE_BUTTON: "dataset-list-delete-button",
+};

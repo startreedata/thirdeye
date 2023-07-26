@@ -28,7 +28,7 @@ import {
     getDatasetsViewPath,
 } from "../../utils/routes/routes.util";
 import { ActiveIndicator } from "../active-indicator/active-indicator.component";
-import { DatasetListV1Props } from "./dataset-list-v1.interfaces";
+import { DatasetListV1Props, TEST_IDS } from "./dataset-list-v1.interfaces";
 
 export const DatasetListV1: FunctionComponent<DatasetListV1Props> = ({
     datasets,
@@ -122,6 +122,7 @@ export const DatasetListV1: FunctionComponent<DatasetListV1Props> = ({
                     hideBorder
                     columns={datasetColumns}
                     data={datasets as UiDataset[]}
+                    data-testId={TEST_IDS.TABLE}
                     rowKey="id"
                     scroll={DataGridScrollV1.Contents}
                     searchPlaceholder={t("label.search-entity", {
@@ -131,6 +132,7 @@ export const DatasetListV1: FunctionComponent<DatasetListV1Props> = ({
                         <Grid container alignItems="center" spacing={2}>
                             <Grid item>
                                 <Button
+                                    data-testId={TEST_IDS.EDIT_BUTTON}
                                     disabled={isActionButtonDisable}
                                     variant="contained"
                                     onClick={handleDatasetEdit}
@@ -141,6 +143,7 @@ export const DatasetListV1: FunctionComponent<DatasetListV1Props> = ({
 
                             <Grid>
                                 <Button
+                                    data-testId={TEST_IDS.DELETE_BUTTON}
                                     disabled={
                                         !selectedDataset ||
                                         selectedDataset.rowKeyValues.length ===

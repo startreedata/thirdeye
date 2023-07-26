@@ -18,5 +18,9 @@ import { Datasource } from "../../../rest/dto/datasource.interfaces";
 export interface DatasetPropertiesFormProps {
     existingDatasets: Dataset[];
     datasources: Datasource[];
-    onSubmit: (datasets: Dataset[]) => void;
+    onSubmit: (datasets: Dataset[], datasourceName: string) => void;
 }
+
+export const DATASET_FORM_TEST_IDS = {
+    DATASOURCE_AUTOCOMPLETE_TEXT_BOX: "datasource-selector-textbox",
+};

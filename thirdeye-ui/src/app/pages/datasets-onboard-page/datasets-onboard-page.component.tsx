@@ -25,7 +25,7 @@ import {
     useNotificationProviderV1,
 } from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
-import { createDatasets } from "../../rest/datasets/datasets.rest";
+import { onBoardDataset } from "../../rest/datasets/datasets.rest";
 import { Dataset } from "../../rest/dto/dataset.interfaces";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
@@ -39,31 +39,20 @@ export const DatasetsOnboardPage: FunctionComponent = () => {
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
 
-    const handleSubmit = (datasets: Dataset[]): void => {
+    const handleSubmit = (
+        datasets: Dataset[],
+        datasourceName: string
+    ): void => {
         if (isEmpty(datasets)) {
             return;
         }
 
-        createDatasets(datasets)
-            .then((datasets: Dataset[]): void => {
-                if (datasets.length === 1) {
-                    // Redirect to datasets detail path
-                    navigate(getDatasetsViewPath(datasets[0].id));
-                } else {
-                    navigate(getDatasetsAllPath());
-                }
+        const datasetsAndPromises: [Dataset, Promise<Dataset>][] = datasets.map(
+            (dataset) => [dataset, onBoardDataset(dataset.name, datasourceName)]
+        );
 
-                notify(
-                    NotificationTypeV1.Success,
-                    t("message.onboard-success", {
-                        entity:
-                            datasets.length > 1
-                                ? t("label.datasets")
-                                : t("label.dataset"),
-                    })
-                );
-            })
-            .catch((error: AxiosError): void => {
+        datasetsAndPromises.forEach(([, onboardPromise]) => {
+            onboardPromise.catch((error: AxiosError): void => {
                 notifyIfErrors(
                     ActionStatus.Error,
                     getErrorMessages(error),
@@ -73,6 +62,38 @@ export const DatasetsOnboardPage: FunctionComponent = () => {
                     })
                 );
             });
+        });
+
+        Promise.allSettled(
+            datasetsAndPromises.map(
+                (datasetsAndPromises) => datasetsAndPromises[1]
+            )
+        ).then((promiseStatuses) => {
+            let failures = 0;
+
+            promiseStatuses.forEach((promiseStatus) => {
+                if (promiseStatus.status !== "fulfilled") {
+                    failures += 1;
+                }
+            });
+
+            if (promiseStatuses.length === 1 && failures === 0) {
+                // Redirect to datasets detail path
+                navigate(getDatasetsViewPath(datasetsAndPromises[0][0].id));
+            } else {
+                navigate(getDatasetsAllPath());
+            }
+
+            notify(
+                NotificationTypeV1.Success,
+                t("message.onboard-success", {
+                    entity:
+                        promiseStatuses.length > 1
+                            ? t("label.datasets")
+                            : t("label.dataset"),
+                })
+            );
+        });
     };
 
     return (

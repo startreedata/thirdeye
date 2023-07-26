@@ -124,9 +124,9 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
     }, [getTablesStatus]);
 
     const handleOnboardDatasets = useCallback(
-        (datasetsName: string[], datasourceName: string) =>
+        (datasetNames: string[], datasourceName: string) =>
             Promise.all(
-                datasetsName.map((datasetName) =>
+                datasetNames.map((datasetName) =>
                     onBoardDataset(datasetName, datasourceName)
                         .then(() => {
                             notify(

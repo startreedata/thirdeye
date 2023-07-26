@@ -78,8 +78,15 @@ export const DatasetsOnboardPage: FunctionComponent = () => {
             });
 
             if (promiseStatuses.length === 1 && failures === 0) {
-                // Redirect to datasets detail path
-                navigate(getDatasetsViewPath(datasetsAndPromises[0][0].id));
+                // Redirect to dataset detail path
+                if (
+                    promiseStatuses[0].status === "fulfilled" &&
+                    promiseStatuses[0].value
+                ) {
+                    navigate(getDatasetsViewPath(promiseStatuses[0].value.id));
+                } else {
+                    navigate(getDatasetsAllPath());
+                }
             } else {
                 navigate(getDatasetsAllPath());
             }

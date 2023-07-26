@@ -19,7 +19,7 @@ import { TEST_IDS } from "../../../../app/components/dataset-list-v1/dataset-lis
 const CHECKBOX_SELECTOR =
     ".BaseTable__body [role='row'] input[type='checkbox']";
 
-describe("configuration datasources pages", () => {
+describe("configuration datasets pages", () => {
     beforeEach(() => {
         // Clear out any existing data sources
         cy.resetDatasets();
@@ -27,7 +27,7 @@ describe("configuration datasources pages", () => {
         cy.visit("http://localhost:7004/configuration/datasets");
     });
 
-    it("user can edit datasource", () => {
+    it("user can edit dataset", () => {
         cy.getByDataTestId(TEST_IDS.TABLE).find(CHECKBOX_SELECTOR).click();
 
         cy.getByDataTestId(TEST_IDS.EDIT_BUTTON).click();
@@ -37,7 +37,7 @@ describe("configuration datasources pages", () => {
         cy.url().should("contain", "/configuration/datasets/update/id/");
     });
 
-    it("user can delete datasource", () => {
+    it("user can delete dataset", () => {
         cy.getByDataTestId(TEST_IDS.TABLE).find(CHECKBOX_SELECTOR).click();
 
         cy.getByDataTestId(TEST_IDS.DELETE_BUTTON).click();
@@ -60,7 +60,7 @@ describe("configuration datasources pages", () => {
         cy.getByDataTestId(TEST_IDS.TABLE).should("not.exist");
     });
 
-    it("user can create datasource", () => {
+    it("user can create multiple datasets", () => {
         cy.getByDataTestId("create-menu-button").click();
 
         cy.get("ul.MuiMenu-list")
@@ -87,5 +87,32 @@ describe("configuration datasources pages", () => {
             .should("be.visible");
 
         cy.wait("@getDatasets").its("response.body.length").should("eq", 4);
+    });
+
+    it("user can create one dataset", () => {
+        cy.getByDataTestId("create-menu-button").click();
+
+        cy.get("ul.MuiMenu-list")
+            .find("li[role='menuitem']")
+            .contains("Onboard Dataset")
+            .click();
+
+        cy.getByDataTestId(
+            DATASET_FORM_TEST_IDS.DATASOURCE_AUTOCOMPLETE_TEXT_BOX
+        ).click();
+
+        cy.get("ul.MuiAutocomplete-listbox")
+            .find("li")
+            .contains("mypinot")
+            .click();
+
+        cy.get("input[type='checkbox']").first().click();
+
+        cy.get("button").contains("Submit").click();
+        cy.get(".notification-display-v1")
+            .contains("Dataset onboarded successfully")
+            .should("be.visible");
+
+        cy.url().should("contain", "/configuration/datasets/view/id/");
     });
 });

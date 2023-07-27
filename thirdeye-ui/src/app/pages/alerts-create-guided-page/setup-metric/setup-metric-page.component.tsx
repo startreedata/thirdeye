@@ -58,6 +58,7 @@ const PROPERTIES_TO_COPY = [
     "aggregationFunction",
     "monitoringGranularity",
     "enumerationItems",
+    "queryFilters",
 ];
 
 export const SetupMetricPage: FunctionComponent = () => {

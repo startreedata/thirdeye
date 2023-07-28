@@ -15,12 +15,14 @@
 # Default values for ThirdEye Deployment
 
 image:
+  repository: image
   tag: latest
   pullPolicy: Always
   pullSecretsName: startree
 
 ui:
   image:
+    repository: image
     tag: latest
     pullPolicy: Always
     pullSecretsName: startree

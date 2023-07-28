@@ -15,7 +15,6 @@ package ai.startree.thirdeye.spi;
 
 import java.time.Duration;
 import java.util.Locale;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.joda.time.Chronology;
 import org.joda.time.chrono.ISOChronology;
@@ -24,19 +23,8 @@ public interface Constants {
   Locale DEFAULT_LOCALE = Locale.ENGLISH;
 
   Chronology DEFAULT_CHRONOLOGY = ISOChronology.getInstanceUTC();
-  String CRON_TIMEZONE = "UTC";
-  // tz database names that are equivalent to UTC
-  Set<String> UTC_LIKE_TIMEZONES = Set.of("Etc/GMT",
-      "Etc/GMT+0",
-      "Etc/GMT0",
-      "GMT",
-      "GMT+0",
-      "GMT-0",
-      "GMT0",
-      "Etc/UTC",
-      "UTC",
-      "Etc/Zulu",
-      "Zulu");
+  String UTC_TIMEZONE = "UTC";
+  String CRON_TIMEZONE = UTC_TIMEZONE;
 
   // Auth related constants
   String NO_AUTH_USER = "no-auth-user";

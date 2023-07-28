@@ -14,7 +14,8 @@
 package ai.startree.thirdeye.datasource.calcite;
 
 import static ai.startree.thirdeye.datasource.calcite.SelectQueryTranslator.TIME_AGGREGATION_ALIAS;
-import static ai.startree.thirdeye.spi.Constants.UTC_LIKE_TIMEZONES;
+import static ai.startree.thirdeye.spi.Constants.UTC_TIMEZONE;
+import static ai.startree.thirdeye.spi.util.TimeUtils.timezonesAreEquivalent;
 import static ai.startree.thirdeye.util.CalciteUtils.EQUALS_OPERATOR;
 import static ai.startree.thirdeye.util.CalciteUtils.identifierOf;
 import static ai.startree.thirdeye.util.CalciteUtils.stringLiteralOf;
@@ -925,7 +926,7 @@ public class SelectQueryTranslatorTest {
     public String getTimeGroupExpression(String timeColumn, @NonNull String timeColumnFormat,
         Period granularity, @Nullable final String timezone) {
       final TimeFormat timeFormat = new TimeFormat(timeColumnFormat);
-      if (timezone == null || UTC_LIKE_TIMEZONES.contains(timezone)) {
+      if (timezone == null || timezonesAreEquivalent(timezone, UTC_TIMEZONE)) {
         return String.format(" DATETIMECONVERT(%s, '%s', '1:MILLISECONDS:EPOCH', '%s') ",
             timeColumn,
             escapeLiteralQuote(timeFormat.dateTimeConvertString),

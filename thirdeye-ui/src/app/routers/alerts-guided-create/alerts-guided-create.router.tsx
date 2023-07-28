@@ -94,15 +94,7 @@ export const AlertsCreateGuidedRouter: FunctionComponent<AlertsGuidedCreateRoute
                             }
                         />
                         <Route
-                            element={
-                                <CancelAPICallsOnPageUnload
-                                    key={
-                                        AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_METRIC
-                                    }
-                                >
-                                    <SetupMetricPage />
-                                </CancelAPICallsOnPageUnload>
-                            }
+                            element={<SetupMetricPage />}
                             path={
                                 AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_METRIC
                             }
@@ -116,15 +108,7 @@ export const AlertsCreateGuidedRouter: FunctionComponent<AlertsGuidedCreateRoute
                         />
 
                         <Route
-                            element={
-                                <CancelAPICallsOnPageUnload
-                                    key={
-                                        AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE
-                                    }
-                                >
-                                    <SelectTypePage />
-                                </CancelAPICallsOnPageUnload>
-                            }
+                            element={<SelectTypePage />}
                             path={
                                 AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE
                             }

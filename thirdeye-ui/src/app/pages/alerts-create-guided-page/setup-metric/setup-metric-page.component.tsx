@@ -82,6 +82,8 @@ export const SetupMetricPage: FunctionComponent = () => {
         getAlertInsight,
         getAlertInsightStatus,
         isMultiDimensionAlert,
+
+        getAlertRecommendation,
     } = useOutletContext<AlertCreatedGuidedPageOutletContext>();
 
     const {
@@ -160,6 +162,8 @@ export const SetupMetricPage: FunctionComponent = () => {
                 copied.templateProperties.min = 0;
                 copied.templateProperties.max = 0;
             }
+
+            getAlertRecommendation(copied);
 
             return copied;
         });

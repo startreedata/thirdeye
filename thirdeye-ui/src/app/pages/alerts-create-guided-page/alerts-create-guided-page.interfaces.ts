@@ -48,4 +48,8 @@ export interface AlertCreatedGuidedPageOutletContext {
     setShouldShowStepper: (flag: boolean) => void;
     isMultiDimensionAlert: boolean;
     setIsMultiDimensionAlert: (flag: boolean) => void;
+
+    getAlertRecommendation: (alert: EditableAlert) => void;
+    getAlertRecommendationIsLoading: boolean;
+    alertRecommendations: { alert: EditableAlert }[];
 }

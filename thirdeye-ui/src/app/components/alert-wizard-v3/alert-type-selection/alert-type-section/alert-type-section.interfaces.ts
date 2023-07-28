@@ -22,4 +22,5 @@ export interface AlertTypeSectionProps {
     option: AvailableAlgorithmOption;
     onClick: (algorithmOption: AlgorithmOption) => void;
     selected: boolean;
+    recommended: boolean;
 }

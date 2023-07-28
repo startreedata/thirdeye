@@ -20,6 +20,7 @@ export interface AlertTypeSelectionProps {
     alertTemplates: AlertTemplate[];
     isMultiDimensionAlert: boolean;
     selectedAlertTemplateName?: string;
+    recommendedAlertTemplate: string | undefined;
 }
 
 export interface AlgorithmOption {

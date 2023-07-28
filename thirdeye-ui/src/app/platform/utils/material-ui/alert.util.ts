@@ -19,17 +19,6 @@ import { DimensionV1 } from "./dimension.util";
 export const alertClassesV1 = {
     root: {
         borderRadius: DimensionV1.CardBorderRadius,
-        // Adjusted padding so that default alert height is DimensionV1.AlertHeight
-        paddingTop: 2,
-        paddingBottom: 2,
-    },
-    filledWarning: {
-        color: "inherit",
-    },
-    action: {
-        display: "flex",
-        alignItems: "flex-start",
-        paddingTop: 6,
     },
 };
 

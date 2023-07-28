@@ -179,3 +179,17 @@ export const getAlertEvaluation = async (
 
     return response.data;
 };
+
+export const getAlertRecommendation = async (
+    alert: EditableAlert
+): Promise<{ alert: EditableAlert }[]> => {
+    const response = await axios.post(`${BASE_URL_ALERTS}/recommend`, {
+        alert,
+    });
+
+    if (!response.data?.analysisRunInfo?.success) {
+        return [];
+    }
+
+    return response.data.recommendations;
+};

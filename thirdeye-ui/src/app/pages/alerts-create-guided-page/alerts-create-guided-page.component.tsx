@@ -13,6 +13,7 @@
  * the License.
  */
 import { Box, Grid, Typography } from "@material-ui/core";
+import { useMutation } from "@tanstack/react-query";
 import { default as React, FunctionComponent, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet, useLocation, useOutletContext } from "react-router-dom";
@@ -22,6 +23,7 @@ import {
     PageContentsGridV1,
     StepperV1,
 } from "../../platform/components";
+import { getAlertRecommendation } from "../../rest/alerts/alerts.rest";
 import { EditableAlert } from "../../rest/dto/alert.interfaces";
 import { generateGenericNameForAlert } from "../../utils/alerts/alerts.util";
 import { AppRouteRelative } from "../../utils/routes/routes.util";
@@ -60,6 +62,12 @@ export const CreateAlertGuidedPage: FunctionComponent = () => {
     const { t } = useTranslation();
     const { pathname } = useLocation();
     const classes = useAlertsCreateGuidedPage();
+
+    const {
+        isLoading,
+        data,
+        mutate: getRecommendation,
+    } = useMutation(getAlertRecommendation);
 
     const {
         alert,
@@ -211,6 +219,10 @@ export const CreateAlertGuidedPage: FunctionComponent = () => {
 
                             isMultiDimensionAlert,
                             setIsMultiDimensionAlert,
+
+                            getAlertRecommendation: getRecommendation,
+                            getAlertRecommendationIsLoading: isLoading,
+                            alertRecommendations: data,
                         }}
                     />
                 </Box>

@@ -12,12 +12,9 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Grid, Typography } from "@material-ui/core";
+import { Card, CardContent, Grid } from "@material-ui/core";
 import { Alert } from "@material-ui/lab";
 import React, { FunctionComponent, useMemo } from "react";
-import { useTranslation } from "react-i18next";
-import { PageContentsCardV1 } from "../../../platform/components";
-import { AlertTemplatesInformationLinks } from "../alert-templates-information-links/alert-templates-information-links";
 import { AlertTypeSection } from "./alert-type-section/alert-type-section.component";
 import {
     AlertTypeSelectionProps,
@@ -30,9 +27,8 @@ export const AlertTypeSelection: FunctionComponent<AlertTypeSelectionProps> = ({
     alertTemplates,
     isMultiDimensionAlert,
     selectedAlertTemplateName,
+    recommendedAlertTemplate,
 }) => {
-    const { t } = useTranslation();
-
     const handleAlgorithmClick = (algorithmOption: AlgorithmOption): void => {
         onAlertPropertyChange({
             template: {
@@ -53,48 +49,83 @@ export const AlertTypeSelection: FunctionComponent<AlertTypeSelectionProps> = ({
         );
     }, [alertTemplates]);
 
+    const recommendedAlertTemplateFirst = useMemo(() => {
+        const cloned = options.filter((c) => {
+            return isMultiDimensionAlert
+                ? c.algorithmOption.alertTemplateForMultidimension !==
+                      recommendedAlertTemplate
+                : c.algorithmOption.alertTemplate !== recommendedAlertTemplate;
+        });
+
+        const recommendedAlertTemplateOption = options.find((c) => {
+            return isMultiDimensionAlert
+                ? c.algorithmOption.alertTemplateForMultidimension ===
+                      recommendedAlertTemplate
+                : c.algorithmOption.alertTemplate === recommendedAlertTemplate;
+        });
+
+        if (recommendedAlertTemplateOption) {
+            cloned.unshift(recommendedAlertTemplateOption);
+        }
+
+        return cloned;
+    }, [alertTemplates, recommendedAlertTemplate]);
+
     return (
-        <PageContentsCardV1>
-            <Grid container alignItems="stretch">
-                <Grid item xs={12}>
-                    <Typography variant="h5">
-                        {t(
-                            "message.select-the-algorithm-type-best-fit-for-your-alert"
-                        )}
-                    </Typography>
-                    <AlertTemplatesInformationLinks />
-                </Grid>
+        <Grid container alignItems="stretch">
+            {recommendedAlertTemplateFirst.map((option) => {
+                const alertTemplateNameForOption = isMultiDimensionAlert
+                    ? option.algorithmOption.alertTemplateForMultidimension
+                    : option.algorithmOption.alertTemplate;
+                const isSelected =
+                    selectedAlertTemplateName === alertTemplateNameForOption;
+                option.algorithmOption.alertTemplate;
+                const isRecommended =
+                    alertTemplateNameForOption === recommendedAlertTemplate;
 
-                {options.map((option) => {
-                    const isSelected = isMultiDimensionAlert
-                        ? selectedAlertTemplateName ===
-                          option.algorithmOption.alertTemplateForMultidimension
-                        : selectedAlertTemplateName ===
-                          option.algorithmOption.alertTemplate;
-
-                    return (
-                        <Grid item key={option.algorithmOption.title} xs={12}>
-                            {isSelected ? (
-                                <Alert color="info" variant="standard">
-                                    <Box pb={1} pt={1}>
+                return (
+                    <Grid
+                        item
+                        data-testId={`${alertTemplateNameForOption}-option-container`}
+                        key={option.algorithmOption.title}
+                        md={6}
+                        sm={12}
+                        xs={12}
+                    >
+                        <Card style={{ height: "100%" }} variant="outlined">
+                            <CardContent
+                                style={
+                                    isSelected
+                                        ? { height: "100%", padding: 0 }
+                                        : { height: "100%" }
+                                }
+                            >
+                                {isSelected ? (
+                                    <Alert
+                                        color="info"
+                                        style={{ height: "100%" }}
+                                        variant="standard"
+                                    >
                                         <AlertTypeSection
                                             option={option}
+                                            recommended={isRecommended}
                                             selected={isSelected}
                                             onClick={handleAlgorithmClick}
                                         />
-                                    </Box>
-                                </Alert>
-                            ) : (
-                                <AlertTypeSection
-                                    option={option}
-                                    selected={isSelected}
-                                    onClick={handleAlgorithmClick}
-                                />
-                            )}
-                        </Grid>
-                    );
-                })}
-            </Grid>
-        </PageContentsCardV1>
+                                    </Alert>
+                                ) : (
+                                    <AlertTypeSection
+                                        option={option}
+                                        recommended={isRecommended}
+                                        selected={isSelected}
+                                        onClick={handleAlgorithmClick}
+                                    />
+                                )}
+                            </CardContent>
+                        </Card>
+                    </Grid>
+                );
+            })}
+        </Grid>
     );
 };

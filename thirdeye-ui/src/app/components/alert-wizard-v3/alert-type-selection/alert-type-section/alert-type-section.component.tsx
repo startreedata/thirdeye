@@ -13,14 +13,18 @@
  * the License.
  */
 import { Box, Button, Grid, Typography } from "@material-ui/core";
+import DoneAllIcon from "@material-ui/icons/DoneAll";
+import { Alert } from "@material-ui/lab";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
+import ShowMoreText from "react-show-more-text";
 import { AlertTypeSectionProps } from "./alert-type-section.interfaces";
 
 export const AlertTypeSection: FunctionComponent<AlertTypeSectionProps> = ({
     option,
     onClick,
     selected,
+    recommended,
 }) => {
     const { t } = useTranslation();
     const dataTestId = `${option.algorithmOption.title
@@ -30,26 +34,46 @@ export const AlertTypeSection: FunctionComponent<AlertTypeSectionProps> = ({
 
     return (
         <Grid container>
+            {recommended && (
+                <Grid item xs={12}>
+                    <Alert
+                        action={
+                            <>
+                                <Box display="inline-block" mr={1}>
+                                    <DoneAllIcon />
+                                </Box>
+                                <Box display="inline-block" pr={2}>
+                                    {t("label.recommended-type")}
+                                </Box>
+                            </>
+                        }
+                        severity="info"
+                    >
+                        {t("message.this-type-best-first-your-data")}
+                    </Alert>
+                </Grid>
+            )}
             <Grid item xs={12}>
                 <Grid
                     container
                     alignItems="center"
                     justifyContent="space-between"
                 >
-                    <Grid item lg md sm xs>
+                    <Grid item lg md sm xl xs>
                         <Typography
                             gutterBottom
-                            color={selected ? "primary" : undefined}
                             variant="h5"
                             onClick={() => onClick(option.algorithmOption)}
                         >
                             {option.algorithmOption.title}
                         </Typography>
                         <Typography component="p" variant="body2">
-                            {option.algorithmOption.description}
+                            <ShowMoreText lines={2}>
+                                {option.algorithmOption.description}
+                            </ShowMoreText>
                         </Typography>
                     </Grid>
-                    <Grid item lg={2} md={2} sm={2} xs={12}>
+                    <Grid item lg={3} md={4} sm={3} xl={2} xs={12}>
                         <Box textAlign="right">
                             <Button
                                 color="primary"

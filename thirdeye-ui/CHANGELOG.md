@@ -1,3 +1,18 @@
+## [2.32.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.31.0...thirdeye-ui-2.32.0) (2023-07-31)
+
+
+### Features
+
+* [TE-1281](https://cortexdata.atlassian.net/browse/TE-1281) show recommended alert template in select type and tune alert option in tune alert ([8ce5addb0](https://github.com/startreedata/thirdeye/commit/8ce5addb045876643d740df590ff5ad1a18e6162))
+
+
+### Bug Fixes
+
+* [TE-1724](https://cortexdata.atlassian.net/browse/TE-1724) fix user flow when onboarding one dataset ([6ed1314d9](https://github.com/startreedata/thirdeye/commit/6ed1314d94360ffcab1475d99fab6fcd5cc01564))
+* [TE-1724](https://cortexdata.atlassian.net/browse/TE-1724) use api/datasources/onboard-dataset ([f738ea0ad](https://github.com/startreedata/thirdeye/commit/f738ea0add22e116b21dc1c86e7cc96f4b468a2a))
+* add beta to wording of alert recommender banner ([560d4e4ab](https://github.com/startreedata/thirdeye/commit/560d4e4ab0e53da8339689a395d08395b0681ca1))
+* Select metric page should show dimension exploration trends ([a9a8e9140](https://github.com/startreedata/thirdeye/commit/a9a8e914018ea2eaf6a5d7da18901d7a0c4938b6))
+
 ## [2.31.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.30.0...thirdeye-ui-2.31.0) (2023-07-18)
 
 

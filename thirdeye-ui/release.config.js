@@ -117,25 +117,6 @@ module.exports = {
                 placeholder: `0.0.0-development-${projectName}`,
             },
         ],
-
-        // Notify on Slack
-        [
-            "semantic-release-slack-bot",
-            {
-                notifyOnSuccess: true,
-                notifyOnFail: false, // CI pipeline will notify upon failure
-                onSuccessTemplate: {
-                    username: `${projectName}-publish-${releaseBranch}`,
-                    icon_emoji: ":white_circle:",
-                    text:
-                        "<!channel> Successfully published `$package_name $npm_package_version`\n" +
-                        "Links: <https://repo.startreedata.io/ui/repos/tree/General/startree-ui/$package_name/-/$package_name-$npm_package_version.tgz|Artifacts> | " +
-                        "<$repo_url/releases/tag/" +
-                        projectName +
-                        "-$npm_package_version|Github>",
-                },
-            },
-        ],
     ],
 
     // GitHub tag for the release

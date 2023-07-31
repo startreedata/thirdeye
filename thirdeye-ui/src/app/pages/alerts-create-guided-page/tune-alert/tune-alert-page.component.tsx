@@ -161,7 +161,7 @@ export const TuneAlertPage: FunctionComponent = () => {
                                             color="primary"
                                             onClick={handleTuneAlertClick}
                                         >
-                                            Tune my alert
+                                            {t("label.tune-my-alert")}
                                         </Button>
                                     )}
                                 </>
@@ -171,9 +171,11 @@ export const TuneAlertPage: FunctionComponent = () => {
                             variant="outlined"
                         >
                             <AlertTitle>
-                                We can automatically tune the alert for you
+                                {t("message.we-can-tune-the-alert-for-you")}
                             </AlertTitle>
-                            It will be a good starting base
+                            {t(
+                                "message.our-new-feature-sets-up-your-alert-with-the-parameters"
+                            )}
                         </Alert>
                     </Grid>
                 )}

@@ -48,6 +48,7 @@ export const AlertTypeSection: FunctionComponent<AlertTypeSectionProps> = ({
                             </>
                         }
                         severity="info"
+                        variant={selected ? "filled" : "outlined"}
                     >
                         {t("message.this-type-best-first-your-data")}
                     </Alert>

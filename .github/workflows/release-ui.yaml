@@ -1,4 +1,4 @@
-name: Release ThirdEye
+name: Release ThirdEye UI
 
 on:
   # a release must be triggered manually

@@ -15,6 +15,8 @@ package ai.startree.thirdeye.spi.util;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
+import ai.startree.thirdeye.spi.api.AnomalyApi;
+import ai.startree.thirdeye.spi.api.AnomalyLabelApi;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
 import java.util.ArrayList;
@@ -26,6 +28,13 @@ public class AnomalyUtils {
   public static boolean isIgnore(final @NonNull AnomalyDTO parent) {
     return optional(parent.getAnomalyLabels())
         .map(labels -> labels.stream().anyMatch(AnomalyLabelDTO::isIgnore))
+        .orElse(false);
+  }
+
+  @SuppressWarnings("unused") // used in enterprise distribution
+  public static boolean isIgnore(final @NonNull AnomalyApi parent) {
+    return optional(parent.getAnomalyLabels())
+        .map(labels -> labels.stream().anyMatch(AnomalyLabelApi::isIgnore))
         .orElse(false);
   }
 

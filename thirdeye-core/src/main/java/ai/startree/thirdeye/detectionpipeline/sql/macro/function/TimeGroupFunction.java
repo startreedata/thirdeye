@@ -13,9 +13,11 @@
  */
 package ai.startree.thirdeye.detectionpipeline.sql.macro.function;
 
+import static ai.startree.thirdeye.spi.Constants.UTC_TIMEZONE;
 import static ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys.GRANULARITY;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
+import static ai.startree.thirdeye.spi.util.TimeUtils.timezonesAreEquivalent;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -52,12 +54,13 @@ public class TimeGroupFunction implements MacroFunction {
       final DatasetConfigDTO datasetConfigDTO = context.getDatasetConfigDTO();
       Objects.requireNonNull(datasetConfigDTO,
           "Cannot use AUTO mode for macro. dataset table name is not defined.");
+      final String alertTimezone = context.getDetectionInterval().getChronology().getZone().getID();
       final Optional<TimeColumnApi> exactBucketTimeColumn = optional(
           datasetConfigDTO.getTimeColumns()).orElse(
               Collections.emptyList())
           .stream()
           .filter(timeCol -> granularity.toString().equals(timeCol.getGranularity()))
-          // assume timezone is UTC TODO CYRIL IMPLEMENT COMPLETE TIMEZONE SUPPORT
+          .filter(c -> timezonesAreEquivalent(optional(c.getTimezone()).orElse(UTC_TIMEZONE), alertTimezone))
           .findFirst();
       if (exactBucketTimeColumn.isPresent()) {
         // use a column of pre-computed exact buckets

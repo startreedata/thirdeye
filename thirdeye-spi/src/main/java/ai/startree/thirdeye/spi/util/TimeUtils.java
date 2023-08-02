@@ -13,17 +13,80 @@
  */
 package ai.startree.thirdeye.spi.util;
 
-import static ai.startree.thirdeye.spi.Constants.UTC_LIKE_TIMEZONES;
+import static ai.startree.thirdeye.spi.Constants.UTC_TIMEZONE;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.Period;
 import org.joda.time.format.ISOPeriodFormat;
 
 public class TimeUtils {
+
+  private final static LoadingCache<Set<String>, Boolean> equivalentTimezonesCache = CacheBuilder.newBuilder()
+      // see computeTimezonesAreEquivalent
+      .expireAfterWrite(7, TimeUnit.DAYS)
+      .build(new CacheLoader<>() {
+        @Override
+        public Boolean load(@NonNull Set<String> key) {
+          final Iterator<String> iterator = key.iterator();
+          return computeTimezonesAreEquivalent(iterator.next(), iterator.next());
+        }
+      });
+
+  public static boolean timezonesAreEquivalent(final @NonNull String tz1, final @NonNull String tz2) {
+    if (tz1.equals(tz2)) {
+      return true;
+    }
+    final Set<String> cacheKey = Set.of(tz1, tz2);
+    return equivalentTimezonesCache.getUnchecked(cacheKey);
+  }
+
+  /**
+   * Defining two timezones as equal is not straightforward, because one country could decide to
+   * change its timezone offsets at any time. So two timezones can be equivalent at some
+   * point in time but not equivalent at another point in time.
+   * We still need this fuzzy equivalence because sometimes in ThirdEye we have to check if a
+   * timezone matches another one.
+   * We consider two timezones are equivalent if they have the same offset every hour for a year,
+   * around the date of execution of the function.
+   * The computation is pretty slow (a few milliseconds) so we cache the results.
+   * Results are cached for 7 days, so we compute the timezone equivalence on (now+7days - 1 year, now + 7 days).
+   * In effect, this means if there are two timezone tz1, tz2, such that tz1=tz2 currently, and
+   * this equality is exploited by the user, then any change to one of the tz such that tz1!=tz2
+   * should be anticipated in TE at least 7 days prior. In effect this may never happen in the life
+   * of the product.
+   * One example of the case above is one client interchanges Europe/Amsterdam and Europe/Paris
+   * because they are equivalent.
+   */
+  private static boolean computeTimezonesAreEquivalent(final String tz1, final String tz2) {
+    final DateTimeZone dtZone1 = DateTimeZone.forID(tz1);
+    final DateTimeZone dtZone2 = DateTimeZone.forID(tz2);
+    // to check if two timezones are equivalent - we look at every hour every year
+    final DateTime currentTime = new DateTime(dtZone1);
+    final DateTime startDate = currentTime.plusDays(7).minusYears(1);
+    final DateTime endDate = currentTime.plusDays(7);
+    DateTime checkDate = startDate;
+    while (checkDate.isBefore(endDate)) {
+      final int offset1 = dtZone1.getOffset(checkDate);
+      final int offset2 = dtZone2.getOffset(checkDate);
+      if (offset1 != offset2) {
+        // Time zones have different offsets for this date --> timezones are not equivalent.
+        return false;
+      }
+      checkDate = checkDate.plusHours(1);
+    }
+    return true;
+  }
 
   public static @NonNull Period isoPeriod(@NonNull final String period) {
     return Period.parse(period, ISOPeriodFormat.standard());
@@ -72,7 +135,8 @@ public class TimeUtils {
 
   /**
    * Context: datetimeconvert function in Pinot does not implement weekly bucketing.
-   * So users use P7D instead, but P7D in datetimeconvert rounds from Thursday to Thursday, by epoch.
+   * So users use P7D instead, but P7D in datetimeconvert rounds from Thursday to Thursday, by
+   * epoch.
    *
    * Moreover, datetimeconvert does not implement timezone.
    * So datetimetrunc may be used when a custom timezone is used.
@@ -81,8 +145,7 @@ public class TimeUtils {
    * in datetimeconvert.
    */
   private static DateTime pinotFloorByDay(final DateTime dt, final Period period) {
-    if (period.getDays() > 1 && UTC_LIKE_TIMEZONES.contains(
-        dt.getChronology().getZone().getID())) {
+    if (period.getDays() > 1 && timezonesAreEquivalent(UTC_TIMEZONE, dt.getChronology().getZone().getID())) {
       // assumes datetimeconverter was used in Pinot query. groups from thursday to thursday by doing direct operation on the millis
       // see BaseDateTimeTransformer.transformToOutputGranularity
       final long epochRounded =

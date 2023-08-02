@@ -13,8 +13,10 @@
  */
 package ai.startree.thirdeye.detectionpipeline.sql.macro.function;
 
+import static ai.startree.thirdeye.spi.Constants.UTC_TIMEZONE;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
+import static ai.startree.thirdeye.spi.util.TimeUtils.timezonesAreEquivalent;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.spi.api.TimeColumnApi;
@@ -84,11 +86,13 @@ public class TimeGroupKeyFunction implements MacroFunction {
     if (isAutoTimeConfiguration(timeColumn)) {
       final DatasetConfigDTO datasetConfigDTO = context.getDatasetConfigDTO();
       Objects.requireNonNull(datasetConfigDTO, "Cannot use AUTO mode for macro. dataset table name is not defined.");
+      final String alertTimezone = context.getDetectionInterval().getChronology().getZone().getID();
       // use directly an exact bucket time column if available
       final Optional<String> exactBucketTimeColumn = optional(datasetConfigDTO.getTimeColumns()).orElse(
               Collections.emptyList())
           .stream()
           .filter(c -> c.getGranularity() != null && c.getGranularity().equals(granularityText))
+          .filter(c -> timezonesAreEquivalent(optional(c.getTimezone()).orElse(UTC_TIMEZONE), alertTimezone))
           .findFirst()
           .map(TimeColumnApi::getName)
           .map(context.getIdentifierQuoter());

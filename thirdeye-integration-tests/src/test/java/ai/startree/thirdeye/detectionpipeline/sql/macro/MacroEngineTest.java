@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.Period;
+import org.joda.time.chrono.ISOChronology;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -273,11 +274,21 @@ public class MacroEngineTest {
     final DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO()
         .setDataset(TABLE_NAME)
         .setTimeColumns(
+            // two pre-computed timezones are available for the given granularity, but only one matches the timezone
             List.of(
-                new TimeColumnApi().setGranularity(HOUR_PERIOD.toString()).setName("hourlyBuckets").setFormat("1:MILLISECONDS:EPOCH"))
+                new TimeColumnApi().setGranularity(HOUR_PERIOD.toString())
+                    .setName("hourlyBucketsFrance")
+                    .setFormat("1:MILLISECONDS:EPOCH")
+                    // should not match
+                    .setTimezone("Europe/Paris"),
+                new TimeColumnApi().setGranularity(HOUR_PERIOD.toString())
+                    .setName("hourlyBucketsUtc")
+                    .setFormat("1:MILLISECONDS:EPOCH")
+                    // GMT should fuzzy-match UTC
+                    .setTimezone("GMT"))
         );
     // todo cyril can be optimized further to "hourlyBuckets" only - see todo in TimeGroupFunction
-    final String expectedQuery = "SELECT DATETIMECONVERT(\"hourlyBuckets\", '1:MILLISECONDS:EPOCH', '1:MILLISECONDS:EPOCH', '1:HOURS') FROM tableName";
+    final String expectedQuery = "SELECT DATETIMECONVERT(\"hourlyBucketsUtc\", '1:MILLISECONDS:EPOCH', '1:MILLISECONDS:EPOCH', '1:HOURS') FROM tableName";
 
     final Map<String, String> expectedProperties = ImmutableMap.of(
         MacroMetadataKeys.GRANULARITY.toString(),
@@ -297,18 +308,29 @@ public class MacroEngineTest {
         .setDataset(TABLE_NAME)
         .setTimeColumns(
             List.of(
-                new TimeColumnApi().setGranularity(HOUR_PERIOD.toString()).setName("hourlyBuckets")
+                // two pre-computed timezones are available for the given granularity, but only one matches the timezone
+                new TimeColumnApi().setGranularity(HOUR_PERIOD.toString())
+                    .setName("hourlyBucketsUtc")
                     // custom time format
-                    .setFormat("SIMPLE_DATE_FORMAT:yyyy-MM-dd-hh"))
+                    .setFormat("SIMPLE_DATE_FORMAT:yyyy-MM-dd-hh")
+                    .setTimezone("UTC"),
+                new TimeColumnApi().setGranularity(HOUR_PERIOD.toString())
+                    .setName("hourlyBucketsAmsterdamTz")
+                    // custom time format
+                    .setFormat("SIMPLE_DATE_FORMAT:yyyy-MM-dd-hh")
+                    // should fuzzy match Europe/Paris
+                    .setTimezone("Europe/Amsterdam"))
         );
     // todo cyril can be optimized further to "hourlyBuckets" only - see todo in TimeGroupFunction
-    final String expectedQuery = "SELECT DATETIMECONVERT(\"hourlyBuckets\", '1:DAYS:SIMPLE_DATE_FORMAT:yyyy-MM-dd-hh', '1:MILLISECONDS:EPOCH', '1:HOURS') FROM tableName";
+    final String expectedQuery = "SELECT FromDateTime(DATETIMECONVERT(\"hourlyBucketsAmsterdamTz\", '1:DAYS:SIMPLE_DATE_FORMAT:yyyy-MM-dd-hh', '1:DAYS:SIMPLE_DATE_FORMAT:yyyy-MM-dd HH:mm:ss.SSSZ tz(Europe/Paris)', '1:HOURS'), 'yyyy-MM-dd HH:mm:ss.SSSZ') FROM tableName";
 
     final Map<String, String> expectedProperties = ImmutableMap.of(
         MacroMetadataKeys.GRANULARITY.toString(),
         HOUR_PERIOD.toString());
 
-    prepareRequestAndAssert(inputQuery, INPUT_INTERVAL, expectedQuery, expectedProperties,
+    final Interval inputIntervalInFranceTz = new Interval(INPUT_INTERVAL,
+        ISOChronology.getInstance(DateTimeZone.forID("Europe/Paris")));
+    prepareRequestAndAssert(inputQuery, inputIntervalInFranceTz, expectedQuery, expectedProperties,
         datasetConfigDTO);
   }
 
@@ -323,8 +345,15 @@ public class MacroEngineTest {
     final DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO()
         .setDataset(TABLE_NAME)
         .setTimeColumns(List.of(
-            new TimeColumnApi().setGranularity(HOUR_PERIOD.toString()).setName("hourlyBuckets")));
-    final String expectedQuery = "SELECT COUNT(*) FROM tableName GROUP BY \"hourlyBuckets\"";
+            // two pre-computed timezones are available for the given granularity, but only one matches the timezone
+            new TimeColumnApi().setGranularity(HOUR_PERIOD.toString())
+                .setName("hourlyBucketsUsTs")
+                .setTimezone("America/Los_Angeles"),
+            new TimeColumnApi().setGranularity(HOUR_PERIOD.toString())
+                .setName("hourlyBucketsUtc")
+                // should fuzzy-match UTC
+                .setTimezone("Etc/UTC")));
+    final String expectedQuery = "SELECT COUNT(*) FROM tableName GROUP BY \"hourlyBucketsUtc\"";
 
     final Map<String, String> expectedProperties = ImmutableMap.of();
 

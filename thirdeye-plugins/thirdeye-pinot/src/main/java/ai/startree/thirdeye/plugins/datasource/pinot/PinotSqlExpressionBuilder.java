@@ -13,8 +13,9 @@
  */
 package ai.startree.thirdeye.plugins.datasource.pinot;
 
-import static ai.startree.thirdeye.spi.Constants.UTC_LIKE_TIMEZONES;
+import static ai.startree.thirdeye.spi.Constants.UTC_TIMEZONE;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static ai.startree.thirdeye.spi.util.TimeUtils.timezonesAreEquivalent;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
@@ -86,7 +87,7 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
   public String getTimeGroupExpression(String timeColumn, @Nullable String timeColumnFormat,
       final Period granularity, @Nullable final String timezone) {
     final TimeFormat timeFormat = TimeFormat.of(timeColumnFormat);
-    if (timezone == null || UTC_LIKE_TIMEZONES.contains(timezone)) {
+    if (timezone == null || timezonesAreEquivalent(timezone, UTC_TIMEZONE)) {
       return String.format(" DATETIMECONVERT(%s, '%s', '1:MILLISECONDS:EPOCH', '%s') ",
           timeColumn,
           escapeLiteralQuote(timeFormat.dateTimeConvertString),

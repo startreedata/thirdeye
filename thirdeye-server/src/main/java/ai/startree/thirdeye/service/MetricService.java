@@ -15,7 +15,7 @@
 package ai.startree.thirdeye.service;
 
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DATASET_NOT_FOUND;
-import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DUPLICATE_NAME;
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DUPLICATE_ENTITY;
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
@@ -63,7 +63,17 @@ public class MetricService extends CrudService<MetricApi, MetricConfigDTO> {
 
     // For new Metric or existing metric with different name
     if (existing == null || !existing.getName().equals(api.getName())) {
-      ensure(dtoManager.findByName(api.getName()).size() == 0, ERR_DUPLICATE_NAME, api.getName());
+      final var nMetricsSameNameAndDataset = dtoManager.findByName(api.getName())
+          .stream()
+          .map(MetricConfigDTO::getDataset)
+          .filter(m -> api.getDataset().getName().equals(m))
+          .count();
+
+      ensure(nMetricsSameNameAndDataset <= 0,
+          ERR_DUPLICATE_ENTITY,
+          String.format("Metric with name: %s and dataset: %s already exists.",
+              api.getName(),
+              api.getDataset().getName()));
     }
   }
 

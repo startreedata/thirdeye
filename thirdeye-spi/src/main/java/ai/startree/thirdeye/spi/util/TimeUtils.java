@@ -73,14 +73,14 @@ public class TimeUtils {
     final DateTimeZone dtZone2 = DateTimeZone.forID(tz2);
     // to check if two timezones are equivalent - we look at every hour every year
     final DateTime currentTime = new DateTime(dtZone1);
-    DateTime startDate = currentTime.plusDays(7).minusYears(1);
-    DateTime endDate = currentTime.plusDays(7);
+    final DateTime startDate = currentTime.plusDays(7).minusYears(1);
+    final DateTime endDate = currentTime.plusDays(7);
     DateTime checkDate = startDate;
     while (checkDate.isBefore(endDate)) {
       final int offset1 = dtZone1.getOffset(checkDate);
       final int offset2 = dtZone2.getOffset(checkDate);
       if (offset1 != offset2) {
-        // Time zones have different offsets for this date, not equivalent.
+        // Time zones have different offsets for this date --> timezones are not equivalent.
         return false;
       }
       checkDate = checkDate.plusHours(1);

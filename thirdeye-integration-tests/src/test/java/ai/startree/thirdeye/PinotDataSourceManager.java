@@ -23,6 +23,9 @@ import java.net.URL;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import org.apache.pinot.testcontainer.AddTable;
 import org.apache.pinot.testcontainer.ImportData;
 import org.apache.pinot.testcontainer.PinotContainer;
@@ -44,6 +47,7 @@ public class PinotDataSourceManager {
   private static final String SCHEMA_FILENAME = "schema.json";
   private static final String TABLE_CONFIG_FILENAME = "table-config.json";
   private static final String DATA_FILENAME = "data.csv";
+  private static final ExecutorService EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
   private static PinotContainer instance;
 
   private PinotDataSourceManager() {
@@ -88,7 +92,11 @@ public class PinotDataSourceManager {
     return new PinotContainer(addTableList, importDataList);
   }
 
-  public static synchronized DataSourceApi getPinotDataSourceApi() {
+  public static synchronized Future<DataSourceApi> getPinotDataSourceApi() {
+    return EXECUTOR_SERVICE.submit(PinotDataSourceManager::internalGetPinotDataSourceApi);
+  }
+
+  private static synchronized DataSourceApi internalGetPinotDataSourceApi() {
     final String property = System.getProperty("thirdeye.test.useLocalPinotInstance");
     if (property != null) {
       LOG.warn("Using local pinot instance for testing!");

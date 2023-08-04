@@ -33,6 +33,7 @@ import ai.startree.thirdeye.spi.api.DataSourceApi;
 import io.dropwizard.testing.DropwizardTestSupport;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
@@ -98,7 +99,7 @@ public class SchedulingTest {
     // ensure time is controlled via the TimeProvider CLOCK - ie weaving is working correctly
     assertThat(CLOCK.isTimeMockWorking()).isTrue();
 
-    pinotDataSourceApi = PinotDataSourceManager.getPinotDataSourceApi();
+    final Future<DataSourceApi> pinotDataSourceFuture = PinotDataSourceManager.getPinotDataSourceApi();
     final DatabaseConfiguration dbConfiguration = MySqlTestDatabase.sharedDatabaseConfiguration();
     // Setup plugins dir so ThirdEye can load it
     IntegrationTestUtils.setupPluginsDirAbsolutePath();
@@ -106,6 +107,7 @@ public class SchedulingTest {
     SUPPORT = buildSupport(dbConfiguration, "scheduling/config/server.yaml");
     SUPPORT.before();
     client = buildClient("scheduling-test-client", SUPPORT);
+    pinotDataSourceApi = pinotDataSourceFuture.get();
   }
 
   @AfterClass(alwaysRun = true)

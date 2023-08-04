@@ -54,6 +54,7 @@ import io.dropwizard.testing.DropwizardTestSupport;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
@@ -115,7 +116,7 @@ public class HappyPathTest {
 
   @BeforeClass
   public void beforeClass() throws Exception {
-    pinotDataSourceApi = PinotDataSourceManager.getPinotDataSourceApi();
+    final Future<DataSourceApi> pinotDataSourceFuture = PinotDataSourceManager.getPinotDataSourceApi();
     final DatabaseConfiguration dbConfiguration = MySqlTestDatabase.sharedDatabaseConfiguration();
 
     // Setup plugins dir so ThirdEye can load it
@@ -124,6 +125,7 @@ public class HappyPathTest {
     SUPPORT = buildSupport(dbConfiguration, "happypath/config/server.yaml");
     SUPPORT.before();
     client = buildClient("happy-path-test-client", SUPPORT);
+    pinotDataSourceApi = pinotDataSourceFuture.get();
   }
 
   @AfterClass(alwaysRun = true)

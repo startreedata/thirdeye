@@ -53,9 +53,15 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = ({
 
     const seasonalityPeriodHumanStr = useMemo(() => {
         if (alert?.templateProperties.seasonalityPeriod) {
-            return iso8601ToHuman(
-                alert?.templateProperties.seasonalityPeriod as string
-            );
+            // seasonalityPeriod can be in the enumeration item
+            // #TODO find it in the enumeration item
+            try {
+                return iso8601ToHuman(
+                    alert?.templateProperties.seasonalityPeriod as string
+                );
+            } catch {
+                return "";
+            }
         }
 
         return "";

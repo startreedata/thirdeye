@@ -70,8 +70,7 @@ public class SqlFilterRunner<T> {
         .add(objectSchema.singleTableName(), objectSchema);
     final Planner planner = buildPlanner(querySchema);
     final String sqlQuery = buildQueryString(queryFilter, objectSchema.singleTableName());
-    try {
-      final ResultSet resultSet = runQuery(planner, sqlQuery);
+    try (final ResultSet resultSet = runQuery(planner, sqlQuery)) {
       final Set<Long> matchingIds = getIdsFrom(resultSet);
       //return the original collection filtered by the matching ids
       return elements.stream()
@@ -103,9 +102,8 @@ public class SqlFilterRunner<T> {
     final SqlNode sqlNodeValidated = planner.validate(sqlNode);
     final RelRoot relRoot = planner.rel(sqlNodeValidated);
     final RelNode relNode = relRoot.project();
-    try (final PreparedStatement run = RelRunners.run(relNode)) {
-      return run.executeQuery();
-    }
+    final PreparedStatement run = RelRunners.run(relNode);
+    return run.executeQuery();
   }
 
   @NonNull

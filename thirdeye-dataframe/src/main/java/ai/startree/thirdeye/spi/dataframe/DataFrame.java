@@ -2365,12 +2365,12 @@ public class DataFrame {
 
     DataFrame dataFrame = (DataFrame) o;
 
-    return series != null ? series.equals(dataFrame.series) : dataFrame.series == null;
+    return series.equals(dataFrame.series);
   }
 
   @Override
   public int hashCode() {
-    return series != null ? series.hashCode() : 0;
+    return series.hashCode();
   }
 
   Series[] names2series(String... names) {

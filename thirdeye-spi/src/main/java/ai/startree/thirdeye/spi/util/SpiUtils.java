@@ -21,7 +21,6 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -30,9 +29,6 @@ import java.util.Properties;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.joda.time.DateTimeFieldType;
-import org.joda.time.Partial;
-import org.joda.time.PeriodType;
 
 public class SpiUtils {
 
@@ -56,52 +52,6 @@ public class SpiUtils {
 
   public static String constructMetricAlias(final String datasetName, final String metricName) {
     return datasetName + MetricConfigDTO.ALIAS_JOINER + metricName;
-  }
-
-  /**
-   * Returns partial to zero out date fields based on period type
-   *
-   * @return partial
-   */
-  public static Partial makeOrigin(final PeriodType type) {
-    final List<DateTimeFieldType> fields = new ArrayList<>();
-
-    if (PeriodType.millis().equals(type)) {
-      // left blank
-
-    } else if (PeriodType.seconds().equals(type)) {
-      fields.add(DateTimeFieldType.millisOfSecond());
-    } else if (PeriodType.minutes().equals(type)) {
-      fields.add(DateTimeFieldType.secondOfMinute());
-      fields.add(DateTimeFieldType.millisOfSecond());
-    } else if (PeriodType.hours().equals(type)) {
-      fields.add(DateTimeFieldType.minuteOfHour());
-      fields.add(DateTimeFieldType.secondOfMinute());
-      fields.add(DateTimeFieldType.millisOfSecond());
-    } else if (PeriodType.days().equals(type)) {
-      fields.add(DateTimeFieldType.hourOfDay());
-      fields.add(DateTimeFieldType.minuteOfHour());
-      fields.add(DateTimeFieldType.secondOfMinute());
-      fields.add(DateTimeFieldType.millisOfSecond());
-    } else if (PeriodType.months().equals(type)) {
-      fields.add(DateTimeFieldType.dayOfMonth());
-      fields.add(DateTimeFieldType.hourOfDay());
-      fields.add(DateTimeFieldType.minuteOfHour());
-      fields.add(DateTimeFieldType.secondOfMinute());
-      fields.add(DateTimeFieldType.millisOfSecond());
-    } else {
-      throw new IllegalArgumentException(String.format("Unsupported PeriodType '%s'", type));
-    }
-
-    final int[] zeros = new int[fields.size()];
-    Arrays.fill(zeros, 0);
-
-    // workaround for dayOfMonth > 0 constraint
-    if (PeriodType.months().equals(type)) {
-      zeros[0] = 1;
-    }
-
-    return new Partial(fields.toArray(new DateTimeFieldType[fields.size()]), zeros);
   }
 
   public static Multimap<String, String> getFilterSet(final String filters) {

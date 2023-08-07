@@ -867,7 +867,7 @@ public abstract class Series {
       }
     }
 
-    int[] fromIndex = ArrayUtils.toPrimitive(indices.toArray(new Integer[indices.size()]));
+    int[] fromIndex = ArrayUtils.toPrimitive(indices.toArray(new Integer[0]));
     return sorted.project(fromIndex);
   }
 

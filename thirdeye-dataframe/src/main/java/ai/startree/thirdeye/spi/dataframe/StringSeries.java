@@ -145,7 +145,7 @@ public final class StringSeries extends TypedSeries<StringSeries> {
 
     @Override
     public StringSeries build() {
-      return StringSeries.buildFrom(this.values.toArray(new String[this.values.size()]));
+      return StringSeries.buildFrom(this.values.toArray(new String[0]));
     }
   }
 

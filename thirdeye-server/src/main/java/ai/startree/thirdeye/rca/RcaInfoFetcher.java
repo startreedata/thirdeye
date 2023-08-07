@@ -190,8 +190,8 @@ public class RcaInfoFetcher {
             .setTypes(Templatable.of(eventTypes))
             .setSqlFilter(eventSqlFilter);
       }
-    } catch (Exception ignored) {
-      LOG.error("error applying eventContext on anomaly! alert id: " + alertDTO.getId(), ignored);
+    } catch (Exception e) {
+      LOG.error("error applying eventContext on anomaly! alert id: " + alertDTO.getId(), e);
     }
     return null;
   }

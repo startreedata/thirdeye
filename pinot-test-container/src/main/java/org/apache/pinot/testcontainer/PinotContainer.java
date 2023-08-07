@@ -66,8 +66,9 @@ public class PinotContainer extends GenericContainer<PinotContainer> {
           "machdep.cpu.brand_string");
       try {
         final Process process = processBuilder.start();
-        try (final InputStreamReader inputStream = new InputStreamReader(process.getInputStream());
-            final BufferedReader reader = new BufferedReader(inputStream)) {
+        final InputStreamReader inputStream = new InputStreamReader(process.getInputStream());
+        final BufferedReader reader = new BufferedReader(inputStream);
+        try (inputStream; reader) {
           final String cpuBrand = reader.readLine().trim();
           if (cpuBrand.startsWith("Apple M1")) {
             return "arm64";

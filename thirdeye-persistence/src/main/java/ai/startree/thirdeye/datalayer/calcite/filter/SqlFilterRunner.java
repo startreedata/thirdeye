@@ -103,8 +103,9 @@ public class SqlFilterRunner<T> {
     final SqlNode sqlNodeValidated = planner.validate(sqlNode);
     final RelRoot relRoot = planner.rel(sqlNodeValidated);
     final RelNode relNode = relRoot.project();
-    final PreparedStatement run = RelRunners.run(relNode);
-    return run.executeQuery();
+    try (final PreparedStatement run = RelRunners.run(relNode)) {
+      return run.executeQuery();
+    }
   }
 
   @NonNull

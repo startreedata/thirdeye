@@ -61,9 +61,9 @@ public class FilterEngine {
   }
 
   public String prepareQuery() {
-    SqlNode rootNode = queryToNode(query, sqlParserConfig);
-    SqlNode rootNodeWithFilters = rootNode.accept(new FilterVisitor());
-    String preparedQuery = nodeToQuery(rootNodeWithFilters, sqlDialect, QUOTE_IDENTIFIERS);
+    final SqlNode rootNode = queryToNode(query, sqlParserConfig);
+    final SqlNode rootNodeWithFilters = rootNode.accept(new FilterVisitor());
+    final String preparedQuery = nodeToQuery(rootNodeWithFilters, sqlDialect, QUOTE_IDENTIFIERS);
 
     return preparedQuery;
   }

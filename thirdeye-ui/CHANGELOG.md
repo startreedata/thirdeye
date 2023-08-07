@@ -1,3 +1,10 @@
+### [2.32.1](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.32.0...thirdeye-ui-2.32.1) (2023-08-07)
+
+
+### Bug Fixes
+
+* account for missing seasonalityPeriod duration string ([5ed046ad4](https://github.com/startreedata/thirdeye/commit/5ed046ad4fa3f54c1f60d15dcc7c8925d05913bd))
+
 ## [2.32.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.31.0...thirdeye-ui-2.32.0) (2023-07-31)
 
 

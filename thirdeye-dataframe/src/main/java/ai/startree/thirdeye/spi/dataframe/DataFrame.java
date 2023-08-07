@@ -445,8 +445,8 @@ public class DataFrame {
     Set<String> seriesLeft = new HashSet<>(left.getSeriesNames());
     Set<String> seriesRight = new HashSet<>(right.getSeriesNames());
 
-    seriesLeft.removeAll(onSeriesLeft);
-    seriesRight.removeAll(onSeriesRight);
+    onSeriesLeft.forEach(seriesLeft::remove);
+    onSeriesRight.forEach(seriesRight::remove);
 
     final List<String> joinKeyNames = onSeriesLeft;
 
@@ -1194,7 +1194,7 @@ public class DataFrame {
     assertSeriesExist(seriesNames);
 
     Set<String> deleted = new HashSet<>(this.series.keySet());
-    deleted.removeAll(seriesNames);
+    seriesNames.forEach(deleted::remove);
 
     for (String name : deleted) {
       this.series.remove(name);

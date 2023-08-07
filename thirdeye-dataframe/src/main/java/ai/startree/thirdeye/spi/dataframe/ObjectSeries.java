@@ -405,8 +405,7 @@ public class ObjectSeries extends TypedSeries<ObjectSeries> {
 
   @Override
   public ObjectSeries unique() {
-    HashSet<Object> objects = new LinkedHashSet<>();
-    objects.addAll(Arrays.asList(this.values));
+    HashSet<Object> objects = new LinkedHashSet<>(List.of(this.values));
     return buildFrom(objects.toArray());
   }
 

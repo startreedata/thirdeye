@@ -177,7 +177,7 @@ public class PinotControllerRestClient {
       final JsonNode jsonNode = tableConfigJson.get("metadata").get("customConfigs");
       customConfigs = OBJECT_MAPPER.convertValue(jsonNode, new TypeReference<>() {});
     } catch (final Exception e) {
-      LOG.warn("Failed to get custom config from table: {}. Reason: {}", tableConfigJson, e);
+      LOG.warn("Failed to get custom config from table: {}. Exception:", tableConfigJson, e);
     }
     return customConfigs;
   }

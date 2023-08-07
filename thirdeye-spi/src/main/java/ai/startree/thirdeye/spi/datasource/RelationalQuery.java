@@ -36,8 +36,15 @@ public abstract class RelationalQuery {
 
   @Override
   public boolean equals(Object obj) {
-    RelationalQuery that = (RelationalQuery) obj;
-    return this.query.equals(that.query);
+    if (this == obj) {
+      return true;
+    }
+    if (obj instanceof RelationalQuery) {
+      final RelationalQuery that = (RelationalQuery) obj;
+      return this.query.equals(that.query);
+    }
+
+    return false;
   }
 }
 

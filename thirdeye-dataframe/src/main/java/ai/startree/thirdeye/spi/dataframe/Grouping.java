@@ -675,7 +675,7 @@ public abstract class Grouping {
       List<int[]> buckets = new ArrayList<>();
       for (Map.Entry<Object, List<Integer>> entry : dynBuckets.entrySet()) {
         buckets.add(ArrayUtils.toPrimitive(
-            entry.getValue().toArray(new Integer[entry.getValue().size()])));
+            entry.getValue().toArray(new Integer[0])));
       }
 
       return new GroupingByValue(series.project(keysFromBuckets(buckets)), buckets);
@@ -764,7 +764,7 @@ public abstract class Grouping {
 
       List<int[]> arrayBuckets = new ArrayList<>();
       for (List<Integer> b : buckets) {
-        arrayBuckets.add(ArrayUtils.toPrimitive(b.toArray(new Integer[b.size()])));
+        arrayBuckets.add(ArrayUtils.toPrimitive(b.toArray(new Integer[0])));
       }
 
       return new GroupingByInterval(LongSeries.buildFrom(keys), arrayBuckets);
@@ -1214,7 +1214,7 @@ public abstract class Grouping {
         offsets.add(offset.getMillis());
         offset = offset.plus(bucketSize);
       }
-      return ArrayUtils.toPrimitive(offsets.toArray(new Long[offsets.size()]));
+      return ArrayUtils.toPrimitive(offsets.toArray(new Long[0]));
     }
 
     public static GroupingByPeriod from(LongSeries timestamps, DateTimeZone timezone,

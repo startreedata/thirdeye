@@ -62,19 +62,20 @@ public class PinotContainer extends GenericContainer<PinotContainer> {
     if (System.getProperty("os.name").equals("Mac OS X")) {
       // Java 11 for M1 cpu virtualizes the x86_64 arch, so java and uname reports os.arch as x86_64.
       // Use sysctl to get cpu brand and infer the arch.
-      String cpuBrand = "";
+      final ProcessBuilder processBuilder = new ProcessBuilder("sysctl", "-n",
+          "machdep.cpu.brand_string");
       try {
-        final Process process = new ProcessBuilder(
-            "sysctl", "-n", "machdep.cpu.brand_string").start();
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-        cpuBrand = reader.readLine().trim();
-        reader.close();
+        final Process process = processBuilder.start();
+        final InputStreamReader inputStream = new InputStreamReader(process.getInputStream());
+        final BufferedReader reader = new BufferedReader(inputStream);
+        try (inputStream; reader) {
+          final String cpuBrand = reader.readLine().trim();
+          if (cpuBrand.startsWith("Apple M1")) {
+            return "arm64";
+          }
+        }
       } catch (IOException e) {
         throw new RuntimeException(e);
-      }
-
-      if (cpuBrand.startsWith("Apple M1")) {
-        return "arm64";
       }
     }
     return System.getProperty("os.arch");

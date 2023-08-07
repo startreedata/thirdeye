@@ -148,15 +148,18 @@ public class HyperSqlDataTableToSqlAdapter implements DataTableToSqlAdapter {
 
   private String getTableCreationStatement(final String tableName, final List<String> columns,
       final List<SeriesType> seriesTypes) {
-    String tableCreationStatement = "CREATE TABLE " + tableName + " (";
+    final StringBuilder tableCreationStatement = new StringBuilder(
+        "CREATE TABLE " + tableName + " (");
     for (int i = 0; i < columns.size(); i++) {
-      tableCreationStatement += columns.get(i) + " " + getColumnType(seriesTypes.get(i));
+      tableCreationStatement.append(columns.get(i))
+          .append(" ")
+          .append(getColumnType(seriesTypes.get(i)));
       if (i < columns.size() - 1) {
-        tableCreationStatement += ", ";
+        tableCreationStatement.append(", ");
       }
     }
-    tableCreationStatement += ")";
-    return tableCreationStatement;
+    tableCreationStatement.append(")");
+    return tableCreationStatement.toString();
   }
 
   private String getColumnType(final SeriesType seriesType) {

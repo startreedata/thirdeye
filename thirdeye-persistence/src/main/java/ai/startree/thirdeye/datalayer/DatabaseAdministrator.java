@@ -86,8 +86,8 @@ public class DatabaseAdministrator {
   }
 
   public boolean validate() {
-    try {
-      return executeQuery("SELECT 1").next();
+    try (final ResultSet resultSet = executeQuery("SELECT 1"))  {
+      return resultSet.next();
     } catch (SQLException | RuntimeException e) {
       LOG.error("Exception while performing database validation.", e);
     }

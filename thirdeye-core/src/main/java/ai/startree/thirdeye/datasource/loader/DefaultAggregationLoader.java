@@ -211,7 +211,6 @@ public class DefaultAggregationLoader implements AggregationLoader {
     final ThirdEyeDataSource thirdEyeDataSource = dataSourceCache.getDataSource(dataSource);
     final String query = request.getSql(thirdEyeDataSource.getSqlLanguage(),
         thirdEyeDataSource.getSqlExpressionBuilder());
-    LOG.info("Sending query: {}", query.replace("\n", ""));
     final Map<String, String> customOptions = Map.of(); // custom query options not implemented in MinMaxTimeLoader
     // table info is only used with legacy Pinot client - should be removed
     final DataSourceRequest requestV2 = new DataSourceRequest(null, query, customOptions, Map.of());

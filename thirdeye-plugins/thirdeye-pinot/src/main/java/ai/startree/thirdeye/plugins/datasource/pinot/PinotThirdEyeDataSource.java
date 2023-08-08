@@ -43,6 +43,7 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.apache.commons.io.FileUtils;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -200,13 +201,10 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
       return true;
     }
 
-    String query = optional(healthCheck.getQuery())
+    final @Nullable String query = optional(healthCheck.getQuery())
         .filter(sql -> !sql.isBlank())
-        .orElse(null);
+        .orElse(healthCheckQuery());
 
-    if (query == null) {
-      query = healthCheckQuery();
-    }
     if (query == null) {
       /* No tables. partially validated with REST. can't validate with query. return true */
       return true;
@@ -220,7 +218,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
     return result.size() > 0 && result.get(0).getRowCount() > 0;
   }
 
-  private String healthCheckQuery() throws IOException {
+  private @Nullable String healthCheckQuery() throws IOException {
     // Table name required to execute query against pinot broker.
     final ImmutableList<String> allTables = datasetOnboarder.getAllTables();
     if (allTables.isEmpty()) {

@@ -354,7 +354,7 @@ describe("alert create flows", () => {
                             templateProperties: {
                                 dataSource: "mypinot",
                                 dataset: "USStoreSalesOrderData",
-                                aggregationColumn: "DiscountApplied",
+                                aggregationColumn: "UnitCost",
                                 aggregationFunction: "SUM",
                                 lookback: "P28D",
                                 monitoringGranularity: "P1D",

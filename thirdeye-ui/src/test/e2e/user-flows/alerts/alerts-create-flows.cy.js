@@ -494,9 +494,7 @@ describe("alert create flows", () => {
         // User is taken to the view page
         cy.url().should("match", /.*\/alerts\/\d.*\/view/);
         // The custom name should be displayed
-        cy.get("h4")
-            .contains("UnitCost_SUM_mean-variance-rule-custom")
-            .should("exist");
+        cy.get("h4").contains("UnitCost_SUM_threshold-custom").should("exist");
         // Description should show
         cy.get("h6").contains("foo bar description").should("exist");
     });

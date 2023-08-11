@@ -48,6 +48,7 @@ public class DimensionAnalysisResultApi {
   private List<SummaryGainerLoserResponseRow> loser = new ArrayList<>();
   private List<DimensionCost> dimensionCosts = new ArrayList<>();
   private AnalysisRunInfo analysisRunInfo = AnalysisRunInfo.success();
+  private TextualAnalysis textualAnalysis;
 
   public MetricApi getMetric() {
     return metric;
@@ -168,6 +169,16 @@ public class DimensionAnalysisResultApi {
   public DimensionAnalysisResultApi setAnalysisRunInfo(
       final AnalysisRunInfo analysisRunInfo) {
     this.analysisRunInfo = analysisRunInfo;
+    return this;
+  }
+
+  public TextualAnalysis getTextualAnalysis() {
+    return textualAnalysis;
+  }
+
+  public DimensionAnalysisResultApi setTextualAnalysis(
+      final TextualAnalysis textualAnalysis) {
+    this.textualAnalysis = textualAnalysis;
     return this;
   }
 }

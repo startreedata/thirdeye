@@ -196,7 +196,7 @@ public class RcaRelatedResource {
    * Limit the number of events to 3 per type.
    *
    * naive fuzzy matching cleaning:
-   * Filter events that have names with a small levenstein distance. They are most likely the same
+   * Filter events that have names with a small levenshtein distance. They are most likely the same
    * events.
    * */
   @NonNull

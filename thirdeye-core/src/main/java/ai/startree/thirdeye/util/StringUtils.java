@@ -17,6 +17,9 @@ import java.util.Arrays;
 
 public class StringUtils {
 
+  /**
+   * Copy-pasted from https://www.baeldung.com/java-levenshtein-distance
+   * */
   public static int levenshteinDistance(final String x, final String y) {
     int[][] dp = new int[x.length() + 1][y.length() + 1];
 

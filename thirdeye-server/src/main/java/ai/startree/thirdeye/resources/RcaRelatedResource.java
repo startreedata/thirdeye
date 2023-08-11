@@ -45,9 +45,9 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.ToDoubleFunction;
@@ -78,10 +78,12 @@ import org.joda.time.format.DateTimeFormatter;
 @Singleton
 public class RcaRelatedResource {
 
+  public static final int MAX_SELECTED_EVENTS_PER_TYPE_FOR_TEXT = 3;
   private static final String DEFAULT_LOOKBACK = "P7D";
   private static final String DEFAULT_LIMIT = "50";
   private static final String DEFAULT_SCORING = "TRIANGULAR";
   public static final int SAME_EVENT_LEVENSHTEIN_THRESHOLD = 2;
+  public static final int MAX_EVENTS_FOR_TEXT = 6;
   private final RcaInfoFetcher rcaInfoFetcher;
   private final EventManager eventDAO;
   private final AnomalyManager anomalyDAO;
@@ -184,7 +186,7 @@ public class RcaRelatedResource {
     final StringBuilder text = new StringBuilder();
     text.append("Some events occur close to the anomaly and might have caused it.\n");
 
-    final List<EventApi> selectedEvents = getSelectedEvents(events);
+    final List<EventApi> selectedEvents = selectEventsForText(events);
     for (final EventApi event : selectedEvents) {
       text.append(generateAnalysisText(event, rcaInfo));
       text.append("\n");
@@ -202,13 +204,13 @@ public class RcaRelatedResource {
    * events.
    */
   @NonNull
-  private static List<EventApi> getSelectedEvents(final List<EventApi> events) {
-    final int maxEventsPerType = 3;
+  private static List<EventApi> selectEventsForText(final List<EventApi> events) {
     final Map<String, List<EventApi>> typeToEvents = new HashMap<>();
+    final LinkedList<EventApi> selectedEvents = new LinkedList<>();
     for (final EventApi e : events) {
       final List<EventApi> typeEvents = typeToEvents.computeIfAbsent(e.getType(),
           k -> new ArrayList<>());
-      if (typeEvents.size() >= maxEventsPerType) {
+      if (typeEvents.size() >= MAX_SELECTED_EVENTS_PER_TYPE_FOR_TEXT) {
         continue;
       }
       final boolean isNew = typeEvents.stream()
@@ -219,11 +221,17 @@ public class RcaRelatedResource {
           .findFirst()
           .isEmpty();
       if (isNew) {
+        if (typeEvents.isEmpty()) {
+          // add at the beginning to ensure all different types of events have a chance of appearing in the analysis
+          selectedEvents.addFirst(e);
+        } else {
+          selectedEvents.addLast(e);
+        }
         typeEvents.add(e);
       }
     }
 
-    return typeToEvents.values().stream().flatMap(Collection::stream).collect(Collectors.toList());
+    return selectedEvents.subList(0, MAX_EVENTS_FOR_TEXT);
   }
 
   // TODO add weekend analysis wordings eg: "the previous week-end or the following week-end)

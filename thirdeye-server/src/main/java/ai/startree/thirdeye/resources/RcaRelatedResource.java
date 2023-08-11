@@ -184,7 +184,7 @@ public class RcaRelatedResource {
       return "No events related to this anomaly were found.";
     }
     final StringBuilder text = new StringBuilder();
-    text.append("Some events occur close to the anomaly and might have caused it.\n");
+    text.append("Some events might have caused the anomaly.\n");
 
     final List<EventApi> selectedEvents = selectEventsForText(events);
     for (final EventApi event : selectedEvents) {
@@ -242,7 +242,7 @@ public class RcaRelatedResource {
 
     final String timeRelation;
     if (event.getEndTime() <= rcaInfo.getAnomaly().getStartTime()) {
-      timeRelation = "occurred on " + eventStart.toString(FORMATTER);
+      timeRelation = "occurred just before, on " + eventStart.toString(FORMATTER);
       // todo add x days before the event
     } else if (event.getStartTime() >= rcaInfo.getAnomaly().getEndTime()) {
       // event happens after the anomaly without overlap
@@ -251,7 +251,7 @@ public class RcaRelatedResource {
     } else {
       // event happens around the same time
       // todo differentiate left overlap, exact match nd right overlap
-      timeRelation = "happened around the same time on " + eventStart.toString(FORMATTER);
+      timeRelation = "happened at the same time on " + eventStart.toString(FORMATTER);
     }
 
     final List<CharSequence> words = List.of("The", event.getType(), "event", event.getName(),

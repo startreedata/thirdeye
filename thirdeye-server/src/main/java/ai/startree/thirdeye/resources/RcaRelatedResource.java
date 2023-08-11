@@ -15,14 +15,18 @@ package ai.startree.thirdeye.resources;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
+import static ai.startree.thirdeye.util.StringUtils.levenshteinDistance;
 
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.rca.RcaInfo;
 import ai.startree.thirdeye.rca.RcaInfoFetcher;
 import ai.startree.thirdeye.rootcause.events.IntervalSimilarityScoring;
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.EventApi;
+import ai.startree.thirdeye.spi.api.RelatedEventsAnalysisApi;
+import ai.startree.thirdeye.spi.api.TextualAnalysis;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
@@ -40,8 +44,11 @@ import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.ToDoubleFunction;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
@@ -55,10 +62,13 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.Period;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
-@SecurityRequirement(name="oauth")
+@SecurityRequirement(name = "oauth")
 @OpenAPIDefinition(security = {
     @SecurityRequirement(name = "oauth")
 })
@@ -87,7 +97,7 @@ public class RcaRelatedResource {
   @GET
   @Path("/events")
   @Operation(summary = "Returns calendar events related to the anomaly. Events are ordered by the scoring function.")
-  public Response getCalendarEvents(
+  public Response getRelatedEvents(
       @Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
       @Parameter(description = "id of the anomaly") @NotNull @QueryParam("anomalyId") Long anomalyId,
       @Parameter(description = "Type of event.") @QueryParam("type") @Nullable String type,
@@ -96,9 +106,16 @@ public class RcaRelatedResource {
       @Parameter(description = "Period, in ISO-8601 format, to look after and before the anomaly start.") @QueryParam("lookaround") @DefaultValue(DEFAULT_LOOKBACK) String lookaround)
       throws IOException, ClassNotFoundException {
 
+    final RcaInfo rcaInfo = rcaInfoFetcher.getRcaInfo(anomalyId);
+    final List<EventApi> eventApis = getCalendarEvents(rcaInfo, type, scoring, limit, lookaround);
+    return Response.ok(eventApis).build();
+  }
+
+  @NonNull
+  private List<EventApi> getCalendarEvents(final RcaInfo rcaInfo,
+      final @org.checkerframework.checker.nullness.qual.Nullable String type,
+      final IntervalSimilarityScoring scoring, final int limit, final String lookaround) {
     final Period lookaroundPeriod = isoPeriod(lookaround);
-    final RcaInfo rcaInfo = rcaInfoFetcher.getRcaInfo(
-        anomalyId);
     final Interval anomalyInterval = new Interval(
         rcaInfo.getAnomaly().getStartTime(),
         rcaInfo.getAnomaly().getEndTime(),
@@ -131,7 +148,99 @@ public class RcaRelatedResource {
 
     final List<EventApi> eventApis = events.stream().limit(limit).map(ApiBeanMapper::toApi).collect(
         Collectors.toList());
-    return Response.ok(eventApis).build();
+    return eventApis;
+  }
+
+  // TODO experimental - deprecate the endpoint above and add tests
+  @GET
+  @Path("/events-analysis")
+  @Operation(summary = "Returns calendar events related to the anomaly. Events are ordered by the scoring function.")
+  public Response getEventsAnalysis(
+      @Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
+      @Parameter(description = "id of the anomaly") @NotNull @QueryParam("anomalyId") Long anomalyId,
+      @Parameter(description = "Type of event.") @QueryParam("type") @Nullable String type,
+      @Parameter(description = "Scoring function") @QueryParam("scoring") @DefaultValue(DEFAULT_SCORING) IntervalSimilarityScoring scoring,
+      @Parameter(description = "Limit number of anomalies to return.") @QueryParam("limit") @DefaultValue(DEFAULT_LIMIT) int limit,
+      @Parameter(description = "Period, in ISO-8601 format, to look after and before the anomaly start.") @QueryParam("lookaround") @DefaultValue(DEFAULT_LOOKBACK) String lookaround)
+      throws IOException, ClassNotFoundException {
+
+    final RcaInfo rcaInfo = rcaInfoFetcher.getRcaInfo(anomalyId);
+    final List<EventApi> events = getCalendarEvents(rcaInfo, type, scoring, limit, lookaround);
+
+    final RelatedEventsAnalysisApi result = new RelatedEventsAnalysisApi();
+    result.setEvents(events);
+    final String analysisText = generateAnalysisText(events, rcaInfo);
+    result.setTextualAnalysis(new TextualAnalysis().setText(analysisText));
+
+    return Response.ok(result).build();
+  }
+
+  private String generateAnalysisText(final List<EventApi> events, final RcaInfo rcaInfo) {
+    if (events.isEmpty()) {
+      return "No events related to this anomaly were found.";
+    }
+    final StringBuilder text = new StringBuilder();
+    text.append("Some events occur close to the anomaly and might have caused it.\n");
+
+    final List<EventApi> selectedEvents = getSelectedEvents(events);
+    for (final EventApi event : selectedEvents) {
+      text.append(generateAnalysisText(event, rcaInfo));
+      text.append("\n");
+    }
+
+    return text.toString();
+  }
+
+  /**
+   * Select relevant events for textual analysis.
+   * Limit the number of events to 3 per type.
+   *
+   * naive fuzzy matching cleaning:
+   * Filter events that have names with a small levenstein distance. They are most likely the same
+   * events.
+   * */
+  @NonNull
+  private static List<EventApi> getSelectedEvents(final List<EventApi> events) {
+    final int maxEventsPerType = 3;
+    final Map<String, List<EventApi>> typeToEvents = new HashMap<>();
+    for (final EventApi e: events) {
+      final List<EventApi> typeEvents = typeToEvents.computeIfAbsent(e.getType(), k -> new ArrayList<>());
+      if (typeEvents.size() >= maxEventsPerType) {
+        continue;
+      }
+      final boolean isNew = typeEvents.stream().map(el -> el.getName().toLowerCase(Constants.DEFAULT_LOCALE))
+          // very naive fuzzy matching
+          .filter(el -> levenshteinDistance(el, e.getName().toLowerCase(Constants.DEFAULT_LOCALE)) < 2)
+          .findFirst().isEmpty();
+      if (isNew) {
+        typeEvents.add(e);
+      }
+    }
+    return events.subList(0, 3);
+  }
+
+  // TODO add weekend analysis wordings eg: "the previous week-end or the following week-end)
+  private static String generateAnalysisText(final EventApi event, final RcaInfo rcaInfo) {
+    final DateTimeFormatter FORMATTER = DateTimeFormat.forPattern("EEEEE, MMMMMM d")
+        .withChronology(rcaInfo.getChronology());
+    final DateTime eventStart = new DateTime(event.getStartTime(), rcaInfo.getChronology());
+
+    final String timeRelation;
+    if (event.getEndTime() <= rcaInfo.getAnomaly().getStartTime()) {
+      timeRelation = "occurred on " + eventStart.toString(FORMATTER);
+      // todo add x days before the event
+    } else if (event.getStartTime() >= rcaInfo.getAnomaly().getEndTime()) {
+      // event happens after the anomaly without overlap
+      // todo replace soon after by a more precise
+      timeRelation = "happens soon after, on " + eventStart.toString(FORMATTER);
+    } else {
+      // event happens around the same time
+      // todo differentiate left overlap, exact match nd right overlap
+      timeRelation = "happened around the same time on " + eventStart.toString(FORMATTER);
+    }
+
+    final List<CharSequence> words = List.of("The", event.getType(), "event", event.getName(), timeRelation);
+    return String.join(" ", words) + ".";
   }
 
   @GET
@@ -181,4 +290,6 @@ public class RcaRelatedResource {
         .collect(Collectors.toList());
     return Response.ok(anomalyApis).build();
   }
+
+
 }

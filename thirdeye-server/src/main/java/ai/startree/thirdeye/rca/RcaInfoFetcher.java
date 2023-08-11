@@ -17,6 +17,7 @@ import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_CONFIGURATION_
 import static ai.startree.thirdeye.spi.metric.MetricAggFunction.COUNT;
 import static ai.startree.thirdeye.spi.util.AlertMetadataUtils.getDateTimeZone;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -46,6 +47,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.Chronology;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
+import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -165,6 +167,7 @@ public class RcaInfoFetcher {
     addCustomFields(metricConfigDTO, metadataMetricDTO);
     addCustomFields(datasetConfigDTO, metadataDatasetDTO);
 
+    final Period granularity = isoPeriod(alertMetadataDto.getGranularity());
     final Chronology chronology = getDateTimeZone(alertMetadataDto);
     EventContextDto eventContext = alertMetadataDto.getEventContext();
     if (eventContext == null || eventContext.equals(EMPTY_CONTEXT_DTO)) {
@@ -173,7 +176,8 @@ public class RcaInfoFetcher {
           EMPTY_CONTEXT_DTO);
     }
 
-    return new RcaInfo(anomalyDTO, metricConfigDTO, datasetConfigDTO, chronology, eventContext);
+    return new RcaInfo(anomalyDTO, metricConfigDTO, datasetConfigDTO, chronology, granularity,
+        eventContext);
   }
 
   @SuppressWarnings("unchecked")

@@ -26,7 +26,7 @@ public class RcaInfo {
   private final @NonNull AnomalyDTO anomaly;
   private final @NonNull MetricConfigDTO metric;
   private final @NonNull DatasetConfigDTO dataset;
-  // avoided passing the whole AlertMetadataDTO but maybe we should now
+  // avoid passing the whole AlertMetadataDTO
   private final @NonNull Chronology chronology;
   private final @NonNull Period granularity;
 

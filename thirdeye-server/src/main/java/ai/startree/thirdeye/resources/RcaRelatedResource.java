@@ -45,6 +45,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -199,25 +200,30 @@ public class RcaRelatedResource {
    * naive fuzzy matching cleaning:
    * Filter events that have names with a small levenshtein distance. They are most likely the same
    * events.
-   * */
+   */
   @NonNull
   private static List<EventApi> getSelectedEvents(final List<EventApi> events) {
     final int maxEventsPerType = 3;
     final Map<String, List<EventApi>> typeToEvents = new HashMap<>();
-    for (final EventApi e: events) {
-      final List<EventApi> typeEvents = typeToEvents.computeIfAbsent(e.getType(), k -> new ArrayList<>());
+    for (final EventApi e : events) {
+      final List<EventApi> typeEvents = typeToEvents.computeIfAbsent(e.getType(),
+          k -> new ArrayList<>());
       if (typeEvents.size() >= maxEventsPerType) {
         continue;
       }
-      final boolean isNew = typeEvents.stream().map(el -> el.getName().toLowerCase(Constants.DEFAULT_LOCALE))
+      final boolean isNew = typeEvents.stream()
+          .map(el -> el.getName().toLowerCase(Constants.DEFAULT_LOCALE))
           // very naive fuzzy matching
-          .filter(el -> levenshteinDistance(el, e.getName().toLowerCase(Constants.DEFAULT_LOCALE)) < SAME_EVENT_LEVENSHTEIN_THRESHOLD)
-          .findFirst().isEmpty();
+          .filter(el -> levenshteinDistance(el, e.getName().toLowerCase(Constants.DEFAULT_LOCALE))
+              < SAME_EVENT_LEVENSHTEIN_THRESHOLD)
+          .findFirst()
+          .isEmpty();
       if (isNew) {
         typeEvents.add(e);
       }
     }
-    return events;
+
+    return typeToEvents.values().stream().flatMap(Collection::stream).collect(Collectors.toList());
   }
 
   // TODO add weekend analysis wordings eg: "the previous week-end or the following week-end)
@@ -240,7 +246,8 @@ public class RcaRelatedResource {
       timeRelation = "happened around the same time on " + eventStart.toString(FORMATTER);
     }
 
-    final List<CharSequence> words = List.of("The", event.getType(), "event", event.getName(), timeRelation);
+    final List<CharSequence> words = List.of("The", event.getType(), "event", event.getName(),
+        timeRelation);
     return String.join(" ", words) + ".";
   }
 
@@ -291,6 +298,4 @@ public class RcaRelatedResource {
         .collect(Collectors.toList());
     return Response.ok(anomalyApis).build();
   }
-
-
 }

@@ -80,6 +80,7 @@ public class RcaRelatedResource {
   private static final String DEFAULT_LOOKBACK = "P7D";
   private static final String DEFAULT_LIMIT = "50";
   private static final String DEFAULT_SCORING = "TRIANGULAR";
+  public static final int SAME_EVENT_LEVENSHTEIN_THRESHOLD = 2;
   private final RcaInfoFetcher rcaInfoFetcher;
   private final EventManager eventDAO;
   private final AnomalyManager anomalyDAO;
@@ -210,13 +211,13 @@ public class RcaRelatedResource {
       }
       final boolean isNew = typeEvents.stream().map(el -> el.getName().toLowerCase(Constants.DEFAULT_LOCALE))
           // very naive fuzzy matching
-          .filter(el -> levenshteinDistance(el, e.getName().toLowerCase(Constants.DEFAULT_LOCALE)) < 2)
+          .filter(el -> levenshteinDistance(el, e.getName().toLowerCase(Constants.DEFAULT_LOCALE)) < SAME_EVENT_LEVENSHTEIN_THRESHOLD)
           .findFirst().isEmpty();
       if (isNew) {
         typeEvents.add(e);
       }
     }
-    return events.subList(0, 3);
+    return events;
   }
 
   // TODO add weekend analysis wordings eg: "the previous week-end or the following week-end)

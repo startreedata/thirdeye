@@ -25,6 +25,7 @@ import ai.startree.thirdeye.rootcause.events.IntervalSimilarityScoring;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.EventApi;
+import ai.startree.thirdeye.spi.api.RelatedAnomaliesAnalysisApi;
 import ai.startree.thirdeye.spi.api.RelatedEventsAnalysisApi;
 import ai.startree.thirdeye.spi.api.TextualAnalysis;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
@@ -70,9 +71,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 @SecurityRequirement(name = "oauth")
-@OpenAPIDefinition(security = {
-    @SecurityRequirement(name = "oauth")
-})
+@OpenAPIDefinition(security = {@SecurityRequirement(name = "oauth")})
 @SecurityScheme(name = "oauth", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER, paramName = HttpHeaders.AUTHORIZATION)
 @Produces(MediaType.APPLICATION_JSON)
 @Singleton
@@ -89,9 +88,7 @@ public class RcaRelatedResource {
   private final AnomalyManager anomalyDAO;
 
   @Inject
-  public RcaRelatedResource(
-      final RcaInfoFetcher rcaInfoFetcher,
-      final EventManager eventDAO,
+  public RcaRelatedResource(final RcaInfoFetcher rcaInfoFetcher, final EventManager eventDAO,
       final AnomalyManager anomalyDAO) {
     this.rcaInfoFetcher = rcaInfoFetcher;
     this.eventDAO = eventDAO;
@@ -101,8 +98,7 @@ public class RcaRelatedResource {
   @GET
   @Path("/events")
   @Operation(summary = "Returns calendar events related to the anomaly. Events are ordered by the scoring function.")
-  public Response getRelatedEvents(
-      @Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
+  public Response getRelatedEvents(@Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
       @Parameter(description = "id of the anomaly") @NotNull @QueryParam("anomalyId") Long anomalyId,
       @Parameter(description = "Type of event.") @QueryParam("type") @Nullable String type,
       @Parameter(description = "Scoring function") @QueryParam("scoring") @DefaultValue(DEFAULT_SCORING) IntervalSimilarityScoring scoring,
@@ -111,56 +107,15 @@ public class RcaRelatedResource {
       throws IOException, ClassNotFoundException {
 
     final RcaInfo rcaInfo = rcaInfoFetcher.getRcaInfo(anomalyId);
-    final List<EventApi> eventApis = getCalendarEvents(rcaInfo, type, scoring, limit, lookaround);
+    final List<EventApi> eventApis = getRelatedEvents(rcaInfo, type, scoring, limit, lookaround);
     return Response.ok(eventApis).build();
-  }
-
-  @NonNull
-  private List<EventApi> getCalendarEvents(final RcaInfo rcaInfo,
-      final @org.checkerframework.checker.nullness.qual.Nullable String type,
-      final IntervalSimilarityScoring scoring, final int limit, final String lookaround) {
-    final Period lookaroundPeriod = isoPeriod(lookaround);
-    final Interval anomalyInterval = new Interval(
-        rcaInfo.getAnomaly().getStartTime(),
-        rcaInfo.getAnomaly().getEndTime(),
-        rcaInfo.getChronology()
-    );
-    final long startWithLookback = anomalyInterval.getStart()
-        .minus(lookaroundPeriod)
-        .getMillis();
-    final long endWithLookahead = Math.max(anomalyInterval.getStart()
-        .plus(lookaroundPeriod)
-        .getMillis(), anomalyInterval.getEnd().getMillis());
-
-    final @NonNull EventContextDto eventContext = rcaInfo.getEventContext();
-    // todo cyril make the type parameter a list - ask FrontEnd if it's ok first
-    final List<@NonNull String> types = optional(type)
-        .map(List::of)
-        .orElse(optional(eventContext.getTypes()).map(Templatable::getValue).orElse(List.of()));
-    final List<EventDTO> events = eventDAO.findEventsBetweenTimeRange(startWithLookback,
-        endWithLookahead,
-        types,
-        // todo rca dimension filters can be set at call time?
-        eventContext.getSqlFilter());
-
-    final Comparator<EventDTO> comparator = Comparator.comparingDouble(
-        (ToDoubleFunction<EventDTO>) dto -> scoring.score(anomalyInterval,
-            new Interval(dto.getStartTime(), dto.getEndTime(), anomalyInterval.getChronology()),
-            lookaroundPeriod)
-    ).reversed();
-    events.sort(comparator);
-
-    final List<EventApi> eventApis = events.stream().limit(limit).map(ApiBeanMapper::toApi).collect(
-        Collectors.toList());
-    return eventApis;
   }
 
   // TODO experimental - deprecate the endpoint above and add tests
   @GET
   @Path("/events-analysis")
   @Operation(summary = "Returns calendar events related to the anomaly. Events are ordered by the scoring function.")
-  public Response getEventsAnalysis(
-      @Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
+  public Response getEventsAnalysis(@Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
       @Parameter(description = "id of the anomaly") @NotNull @QueryParam("anomalyId") Long anomalyId,
       @Parameter(description = "Type of event.") @QueryParam("type") @Nullable String type,
       @Parameter(description = "Scoring function") @QueryParam("scoring") @DefaultValue(DEFAULT_SCORING) IntervalSimilarityScoring scoring,
@@ -169,17 +124,51 @@ public class RcaRelatedResource {
       throws IOException, ClassNotFoundException {
 
     final RcaInfo rcaInfo = rcaInfoFetcher.getRcaInfo(anomalyId);
-    final List<EventApi> events = getCalendarEvents(rcaInfo, type, scoring, limit, lookaround);
+    final List<EventApi> events = getRelatedEvents(rcaInfo, type, scoring, limit, lookaround);
 
     final RelatedEventsAnalysisApi result = new RelatedEventsAnalysisApi();
     result.setEvents(events);
-    final String analysisText = generateAnalysisText(events, rcaInfo);
+    final String analysisText = generateEventsAnalysisText(events, rcaInfo);
     result.setTextualAnalysis(new TextualAnalysis().setText(analysisText));
 
     return Response.ok(result).build();
   }
 
-  private String generateAnalysisText(final List<EventApi> events, final RcaInfo rcaInfo) {
+  @NonNull
+  private List<EventApi> getRelatedEvents(final RcaInfo rcaInfo,
+      final @org.checkerframework.checker.nullness.qual.Nullable String type,
+      final IntervalSimilarityScoring scoring, final int limit, final String lookaround) {
+    final Period lookaroundPeriod = isoPeriod(lookaround);
+    final Interval anomalyInterval = new Interval(rcaInfo.getAnomaly().getStartTime(),
+        rcaInfo.getAnomaly().getEndTime(), rcaInfo.getChronology());
+    final long startWithLookback = anomalyInterval.getStart().minus(lookaroundPeriod).getMillis();
+    final long endWithLookahead = Math.max(
+        anomalyInterval.getStart().plus(lookaroundPeriod).getMillis(),
+        anomalyInterval.getEnd().getMillis());
+
+    final @NonNull EventContextDto eventContext = rcaInfo.getEventContext();
+    // todo cyril make the type parameter a list - ask FrontEnd if it's ok first
+    final List<@NonNull String> types = optional(type).map(List::of)
+        .orElse(optional(eventContext.getTypes()).map(Templatable::getValue).orElse(List.of()));
+    final List<EventDTO> events = eventDAO.findEventsBetweenTimeRange(startWithLookback,
+        endWithLookahead, types,
+        // todo rca dimension filters can be set at call time?
+        eventContext.getSqlFilter());
+
+    final Comparator<EventDTO> comparator = Comparator.comparingDouble(
+        (ToDoubleFunction<EventDTO>) dto -> scoring.score(anomalyInterval,
+            new Interval(dto.getStartTime(), dto.getEndTime(), anomalyInterval.getChronology()),
+            lookaroundPeriod)).reversed();
+    events.sort(comparator);
+
+    final List<EventApi> eventApis = events.stream()
+        .limit(limit)
+        .map(ApiBeanMapper::toApi)
+        .collect(Collectors.toList());
+    return eventApis;
+  }
+
+  private String generateEventsAnalysisText(final List<EventApi> events, final RcaInfo rcaInfo) {
     if (events.isEmpty()) {
       return "No events related to this anomaly were found.";
     }
@@ -262,31 +251,63 @@ public class RcaRelatedResource {
   @GET
   @Path("/anomalies")
   @Operation(summary = "Returns anomalies related to the anomaly. Anomalies are ordered by the scoring function.")
-  public Response getAnomaliesEvents(
-      @Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
+  public Response getAnomaliesEvents(@Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
       @Parameter(description = "id of the anomaly") @NotNull @QueryParam("anomalyId") Long anomalyId,
       @Parameter(description = "Scoring function") @QueryParam("scoring") @DefaultValue(DEFAULT_SCORING) IntervalSimilarityScoring scoring,
       @Parameter(description = "Limit number of anomalies to return.") @QueryParam("limit") @DefaultValue(DEFAULT_LIMIT) int limit,
       @Parameter(description = "Period, in ISO-8601 format, to look after and before the anomaly start.") @QueryParam("lookaround") @DefaultValue(DEFAULT_LOOKBACK) String lookaround)
       throws IOException, ClassNotFoundException {
 
-    final Period lookaroundPeriod = isoPeriod(lookaround);
-    final RcaInfo rcaInfo = rcaInfoFetcher.getRcaInfo(
-        anomalyId);
-    final Interval anomalyInterval = new Interval(
-        rcaInfo.getAnomaly().getStartTime(),
-        rcaInfo.getAnomaly().getEndTime(),
-        rcaInfo.getChronology()
-    );
-    final long startWithLookback = anomalyInterval.getStart()
-        .minus(lookaroundPeriod)
-        .getMillis();
-    final long endWithLookahead = Math.max(anomalyInterval.getStart()
-        .plus(lookaroundPeriod)
-        .getMillis(), anomalyInterval.getEnd().getMillis());
+    final RcaInfo rcaInfo = rcaInfoFetcher.getRcaInfo(anomalyId);
+    final List<AnomalyApi> anomalyApis = getRelatedAnomalies(rcaInfo, scoring, limit, lookaround);
+    return Response.ok(anomalyApis).build();
+  }
 
-    final List<AnomalyDTO> anomalies = anomalyDAO
-        .findByTime(startWithLookback, endWithLookahead)
+  @GET
+  @Path("/anomalies-analysis")
+  @Operation(summary = "Returns anomalies related to the anomaly. Anomalies are ordered by the scoring function.")
+  public Response getAnomaliesAnalysis(@Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
+      @Parameter(description = "id of the anomaly") @NotNull @QueryParam("anomalyId") Long anomalyId,
+      @Parameter(description = "Scoring function") @QueryParam("scoring") @DefaultValue(DEFAULT_SCORING) IntervalSimilarityScoring scoring,
+      @Parameter(description = "Limit number of anomalies to return.") @QueryParam("limit") @DefaultValue(DEFAULT_LIMIT) int limit,
+      @Parameter(description = "Period, in ISO-8601 format, to look after and before the anomaly start.") @QueryParam("lookaround") @DefaultValue(DEFAULT_LOOKBACK) String lookaround)
+      throws IOException, ClassNotFoundException {
+
+    final RcaInfo rcaInfo = rcaInfoFetcher.getRcaInfo(anomalyId);
+    final List<AnomalyApi> anomalies = getRelatedAnomalies(rcaInfo, scoring, limit, lookaround);
+
+    final RelatedAnomaliesAnalysisApi result = new RelatedAnomaliesAnalysisApi();
+    result.setAnomalies(anomalies);
+    final String analysisText = generateAnomaliesAnalysisText(anomalies, rcaInfo);
+    result.setTextualAnalysis(new TextualAnalysis().setText(analysisText));
+
+    // do the analysis
+    return Response.ok(result).build();
+  }
+
+  private String generateAnomaliesAnalysisText(final List<AnomalyApi> anomalies, final RcaInfo rcaInfo) {
+    // identify the anomalies with the same alert but different enumeration --> tell if
+    // the anomaly impacts multiple dimensions
+
+    // limit the number of related anomalies
+    // gen text
+    // TODO CYRIL implement this
+    return "";
+  }
+
+  // TODO experimental - deprecate the endpoint above and add tests
+  @NonNull
+  private List<AnomalyApi> getRelatedAnomalies(final RcaInfo rcaInfo,
+      final IntervalSimilarityScoring scoring, final int limit, final String lookaround) {
+    final Period lookaroundPeriod = isoPeriod(lookaround);
+    final Interval anomalyInterval = new Interval(rcaInfo.getAnomaly().getStartTime(),
+        rcaInfo.getAnomaly().getEndTime(), rcaInfo.getChronology());
+    final long startWithLookback = anomalyInterval.getStart().minus(lookaroundPeriod).getMillis();
+    final long endWithLookahead = Math.max(
+        anomalyInterval.getStart().plus(lookaroundPeriod).getMillis(),
+        anomalyInterval.getEnd().getMillis());
+
+    final List<AnomalyDTO> anomalies = anomalyDAO.findByTime(startWithLookback, endWithLookahead)
         .stream()
         // todo cyril - filter at the db level - not in the app
         .filter(dto -> !dto.isChild())
@@ -295,15 +316,14 @@ public class RcaRelatedResource {
     final Comparator<AnomalyDTO> comparator = Comparator.comparingDouble(
         (ToDoubleFunction<AnomalyDTO>) dto -> scoring.score(anomalyInterval,
             new Interval(dto.getStartTime(), dto.getEndTime(), anomalyInterval.getChronology()),
-            lookaroundPeriod)
-    ).reversed();
+            lookaroundPeriod)).reversed();
     anomalies.sort(comparator);
 
     final List<AnomalyApi> anomalyApis = anomalies.stream()
         .limit(limit)
-        .filter(dto -> !dto.getId().equals(anomalyId))
+        .filter(dto -> !dto.getId().equals(rcaInfo.getAnomaly().getId()))
         .map(ApiBeanMapper::toApi)
         .collect(Collectors.toList());
-    return Response.ok(anomalyApis).build();
+    return anomalyApis;
   }
 }

@@ -243,14 +243,14 @@ public class RcaRelatedResource {
     final String timeRelation;
     if (event.getEndTime() <= rcaInfo.getAnomaly().getStartTime()) {
       timeRelation = "occurred just before, on " + eventStart.toString(FORMATTER);
-      // todo add x days before the event
+      // todo replace just before by "x days before ..." the event
     } else if (event.getStartTime() >= rcaInfo.getAnomaly().getEndTime()) {
       // event happens after the anomaly without overlap
-      // todo replace soon after by a more precise
+      // todo replace soon after by a more precise wording
       timeRelation = "happens soon after, on " + eventStart.toString(FORMATTER);
     } else {
       // event happens around the same time
-      // todo differentiate left overlap, exact match nd right overlap
+      // todo differentiate left overlap, exact match and right overlap
       timeRelation = "happened at the same time on " + eventStart.toString(FORMATTER);
     }
 

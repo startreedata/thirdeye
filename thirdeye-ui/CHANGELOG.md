@@ -1,3 +1,10 @@
+### [2.32.2](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.32.1...thirdeye-ui-2.32.2) (2023-08-14)
+
+
+### Bug Fixes
+
+* fix e2e test with naming ([bb363ff23](https://github.com/startreedata/thirdeye/commit/bb363ff239edc5cf58a92f12299167bf7f8619f5))
+
 ### [2.32.1](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.32.0...thirdeye-ui-2.32.1) (2023-08-07)
 
 

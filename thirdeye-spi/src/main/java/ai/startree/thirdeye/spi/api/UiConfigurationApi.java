@@ -18,17 +18,19 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UiConfigurationApi implements ThirdEyeApi {
 
-    private String clientId;
-    private boolean authEnabled;
+  private String clientId;
+  private boolean authEnabled;
+  private HeapConfigurationApi heap;
+  private SentryConfigurationApi sentry;
 
-    public String getClientId() {
-        return clientId;
-    }
+  public String getClientId() {
+    return clientId;
+  }
 
-    public UiConfigurationApi setClientId(final String clientId) {
-        this.clientId = clientId;
-        return this;
-    }
+  public UiConfigurationApi setClientId(final String clientId) {
+    this.clientId = clientId;
+    return this;
+  }
 
   public boolean isAuthEnabled() {
     return authEnabled;
@@ -37,5 +39,51 @@ public class UiConfigurationApi implements ThirdEyeApi {
   public UiConfigurationApi setAuthEnabled(final boolean authEnabled) {
     this.authEnabled = authEnabled;
     return this;
+  }
+
+  public HeapConfigurationApi getHeap() {
+    return heap;
+  }
+
+  public UiConfigurationApi setHeap(HeapConfigurationApi heap) {
+    this.heap = heap;
+    return this;
+  }
+
+  public SentryConfigurationApi getSentry() {
+    return sentry;
+  }
+
+  public UiConfigurationApi setSentry(SentryConfigurationApi sentry) {
+    this.sentry = sentry;
+    return this;
+  }
+
+  public static class HeapConfigurationApi {
+
+    private String environmentId;
+
+    public String getEnvironmentId() {
+      return environmentId;
+    }
+
+    public HeapConfigurationApi setEnvironmentId(final String environmentId) {
+      this.environmentId = environmentId;
+      return this;
+    }
+  }
+
+  public static class SentryConfigurationApi {
+
+    private String clientDsn;
+
+    public String getClientDsn() {
+      return clientDsn;
+    }
+
+    public SentryConfigurationApi setClientDsn(final String clientDsn) {
+      this.clientDsn = clientDsn;
+      return this;
+    }
   }
 }

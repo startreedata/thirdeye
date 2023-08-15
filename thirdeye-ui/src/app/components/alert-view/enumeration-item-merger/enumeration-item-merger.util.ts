@@ -86,7 +86,7 @@ export const mergeContent = (
                 ] = {
                     anomalies: [],
                     evaluation,
-                    name: "",
+                    name: evaluation.enumerationItem?.name || "",
                 };
             }
         } else {

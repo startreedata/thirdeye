@@ -18,6 +18,9 @@ public class UiConfiguration {
   private String externalUrl;
   private String clientId;
 
+  private HeapConfiguration heap;
+  private SentryConfiguration sentry;
+
   public String getExternalUrl() {
     return externalUrl;
   }
@@ -34,5 +37,51 @@ public class UiConfiguration {
   public UiConfiguration setClientId(String clientId) {
     this.clientId = clientId;
     return this;
+  }
+
+  public HeapConfiguration getHeap() {
+    return heap;
+  }
+
+  public UiConfiguration setHeap(HeapConfiguration heap) {
+    this.heap = heap;
+    return this;
+  }
+
+  public SentryConfiguration getSentry() {
+    return sentry;
+  }
+
+  public UiConfiguration setSentry(SentryConfiguration sentry) {
+    this.sentry = sentry;
+    return this;
+  }
+
+  public static class HeapConfiguration {
+
+    private String environmentId;
+
+    public String getEnvironmentId() {
+      return environmentId;
+    }
+
+    public HeapConfiguration setEnvironmentId(final String environmentId) {
+      this.environmentId = environmentId;
+      return this;
+    }
+  }
+
+  public static class SentryConfiguration {
+
+    private String clientDsn;
+
+    public String getClientDsn() {
+      return clientDsn;
+    }
+
+    public SentryConfiguration setClientDsn(final String clientDsn) {
+      this.clientDsn = clientDsn;
+      return this;
+    }
   }
 }

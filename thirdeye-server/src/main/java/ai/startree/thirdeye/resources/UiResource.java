@@ -17,7 +17,7 @@ import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 
 import ai.startree.thirdeye.auth.AuthConfiguration;
 import ai.startree.thirdeye.config.UiConfiguration;
-import ai.startree.thirdeye.spi.api.UiConfigurationApi;
+import ai.startree.thirdeye.mapper.UiConfigurationMapper;
 import com.codahale.metrics.annotation.Timed;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import javax.inject.Inject;
@@ -33,25 +33,23 @@ import javax.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 public class UiResource {
 
-    private final UiConfiguration configuration;
-    private final AuthConfiguration authConfiguration;
+  private final UiConfiguration configuration;
+  private final AuthConfiguration authConfiguration;
 
-    @Inject
-    public UiResource(final UiConfiguration uiConfiguration,
-        final AuthConfiguration authConfiguration) {
-        this.configuration = uiConfiguration;
-        this.authConfiguration = authConfiguration;
-    }
+  @Inject
+  public UiResource(final UiConfiguration uiConfiguration,
+      final AuthConfiguration authConfiguration) {
+    this.configuration = uiConfiguration;
+    this.authConfiguration = authConfiguration;
+  }
 
-    @GET
-    @Path("config")
-    @Timed
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response get() {
-        return respondOk(
-            new UiConfigurationApi()
-                .setClientId(configuration.getClientId())
-                .setAuthEnabled(authConfiguration.isEnabled())
-        );
-    }
+  @GET
+  @Path("config")
+  @Timed
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response get() {
+    return respondOk(UiConfigurationMapper.INSTANCE.toApi(configuration)
+        .setAuthEnabled(authConfiguration.isEnabled())
+    );
+  }
 }

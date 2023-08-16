@@ -1,0 +1,31 @@
+# Run sanity checks on helm chart
+name: helm-tests
+
+# Run on push to master or pull request to master
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'kubernetes/helm/**'
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'kubernetes/helm/**'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v1
+        with:
+          version: 'v3.12.3'  # Adjust the Helm version if needed
+
+      - name: Run helm lint
+        run: helm lint ./kubernetes/helm/startree-thirdeye

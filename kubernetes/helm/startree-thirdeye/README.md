@@ -315,3 +315,12 @@ mysql:
 | `tls.[coordinator/worker/scheduler/ui].secretName` | When provided it will override the default secret names referred for tls keys                                        |
 
 Please refer [values.yaml](values.yaml) for default values.
+
+
+### Development
+Here are a list of useful commands to run when updating the helm chart.
+
+```shell
+# Run the following command to lint the helm chart
+helm lint ./kubernetes/helm/startree-thirdeye
+```

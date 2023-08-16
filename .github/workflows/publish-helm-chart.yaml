@@ -1,5 +1,6 @@
 name: Publish ThirdEye Helm Chart
 
+# This releases a new version of the helm chart and cannot be run on pull requests
 on:
   push:
     branches: [ master ]

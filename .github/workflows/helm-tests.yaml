@@ -29,3 +29,6 @@ jobs:
 
       - name: Run helm lint
         run: helm lint ./kubernetes/helm/startree-thirdeye
+
+      - name: Render Helm templates
+        run: helm template my-release ./kubernetes/helm

@@ -35,6 +35,9 @@ kubectl create secret docker-registry startree \
 This installs thirdeye in the default namespace.
 
 ```bash
+# Add stable helm repo
+helm repo add helmstable https://charts.helm.sh/stable
+
 # fetch dependencies. example: mysql. See Chart.yaml
 helm dependency update
 

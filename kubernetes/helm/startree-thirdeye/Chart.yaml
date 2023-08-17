@@ -16,7 +16,7 @@ apiVersion: v2
 appVersion: 0.5.0-SNAPSHOT # Should be maintained automatically by a pipeline
 name: startree-thirdeye
 description: One Stop Shop For Anomaly Detection.
-version: 2.2.0
+version: 2.3.0
 keywords:
   - thirdeye
   - metrics

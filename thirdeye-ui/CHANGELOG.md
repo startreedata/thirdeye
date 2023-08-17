@@ -1,3 +1,10 @@
+## [2.34.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.33.0...thirdeye-ui-2.34.0) (2023-08-17)
+
+
+### Features
+
+* sentry tracing enhancements ([99296ccf2](https://github.com/startreedata/thirdeye/commit/99296ccf29605d5f12f247450934e339b8a8df13))
+
 ## [2.33.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.32.2...thirdeye-ui-2.33.0) (2023-08-17)
 
 

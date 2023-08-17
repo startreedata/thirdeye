@@ -86,6 +86,12 @@ export const AnalyticsAndErrorReportingProviderV1: FunctionComponent<AnalyticsAn
             if (appConfig?.sentry?.clientDsn && !isSentrySetup) {
                 Sentry.init({
                     dsn: appConfig.sentry.clientDsn,
+                    integrations: [
+                        new Sentry.BrowserTracing({
+                            tracePropagationTargets: [],
+                        }),
+                    ],
+                    tracesSampleRate: 0.05,
                 });
                 setIsSentrySetup(true);
 

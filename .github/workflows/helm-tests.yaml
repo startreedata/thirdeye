@@ -31,7 +31,9 @@ jobs:
         run: helm lint ./kubernetes/helm/startree-thirdeye
 
       - name: Render Helm templates
-        run: helm template thirdeye ./kubernetes/helm/startree-thirdeye > rendered.yaml
+        run: |
+          helm dependency build
+          helm template thirdeye ./kubernetes/helm/startree-thirdeye > rendered.yaml
 
       # Coordinator ConfigMap
       - name: Extract and validate coordinator-configmap and coordinator-config

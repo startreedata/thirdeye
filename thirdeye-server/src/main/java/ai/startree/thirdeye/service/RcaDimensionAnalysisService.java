@@ -114,7 +114,7 @@ public class RcaDimensionAnalysisService {
         .append(". ")
         // TODO prefer giving the expected range rather than the expected mean
         .append("The metric value was expected to be close to ")
-        .append(DECIMAL_FORMAT.format(expected)) // TODO cyril ensure the decimal format is precise enough
+        .append(DECIMAL_FORMAT.format(expected)) // TODO cyril ensure the decimal format should depend on the value
         .append(" but it is ")
         .append(DECIMAL_FORMAT.format(current));
     if (expected != 0) {

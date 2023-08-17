@@ -32,7 +32,7 @@ jobs:
 
       - name: Render Helm templates
         run: |
-          helm dependency build
+          helm dependency build ./kubernetes/helm/startree-thirdeye
           helm template thirdeye ./kubernetes/helm/startree-thirdeye > rendered.yaml
 
       # Coordinator ConfigMap

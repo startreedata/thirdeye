@@ -30,6 +30,10 @@ ui:
   publicUrl: http://localhost:8081
   serviceType: LoadBalancer
   resolver: kube-dns.kube-system.svc.cluster.local
+  heap:
+    environmentId: 1234567890
+  sentry:
+    clientDsn: https://something.ingest.sentry.io/someid
 
   resources: {}
   nodeSelector: {}

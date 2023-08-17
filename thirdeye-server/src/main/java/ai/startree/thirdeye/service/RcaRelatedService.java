@@ -15,6 +15,7 @@ package ai.startree.thirdeye.service;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.StringUtils.levenshteinDistance;
+import static ai.startree.thirdeye.util.StringUtils.timeFormatterFor;
 
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.rca.RcaInfo;
@@ -52,7 +53,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.Period;
-import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 @Singleton
@@ -190,22 +190,22 @@ public class RcaRelatedService {
 
   // TODO add weekend analysis wordings eg: "the previous week-end or the following week-end)
   private static String generateAnalysisText(final EventApi event, final RcaInfo rcaInfo) {
-    final DateTimeFormatter FORMATTER = DateTimeFormat.forPattern("EEEEE, MMMMMM d")
-        .withChronology(rcaInfo.getChronology());
+    final DateTimeFormatter timeFormatter = timeFormatterFor(rcaInfo.getGranularity(),
+        rcaInfo.getChronology());
     final DateTime eventStart = new DateTime(event.getStartTime(), rcaInfo.getChronology());
 
     final String timeRelation;
     if (event.getEndTime() <= rcaInfo.getAnomaly().getStartTime()) {
-      timeRelation = "occurred just before, on " + eventStart.toString(FORMATTER);
+      timeRelation = "occurred just before, on " + eventStart.toString(timeFormatter);
       // todo replace just before by "x days before ..." the event
     } else if (event.getStartTime() >= rcaInfo.getAnomaly().getEndTime()) {
       // event happens after the anomaly without overlap
       // todo replace soon after by a more precise wording
-      timeRelation = "happens soon after, on " + eventStart.toString(FORMATTER);
+      timeRelation = "happens soon after, on " + eventStart.toString(timeFormatter);
     } else {
       // event happens around the same time
       // todo differentiate left overlap, exact match and right overlap
-      timeRelation = "happened at the same time on " + eventStart.toString(FORMATTER);
+      timeRelation = "happened at the same time on " + eventStart.toString(timeFormatter);
     }
 
     final List<CharSequence> words = List.of("The", event.getType(), "event", event.getName(),
@@ -315,8 +315,8 @@ public class RcaRelatedService {
 
   private static StringBuilder textForAnomaliesOfSameMetric(
       final List<AnomalyApi> anomaliesOfSameAlertSameEnum, final RcaInfo rcaInfo) {
-    final DateTimeFormatter FORMATTER = DateTimeFormat.forPattern("EEEEE, MMMMMM d")
-        .withChronology(rcaInfo.getChronology());
+    final DateTimeFormatter timeFormatter = timeFormatterFor(rcaInfo.getGranularity(),
+        rcaInfo.getChronology());
     final StringBuilder text = new StringBuilder();
     if (anomaliesOfSameAlertSameEnum.isEmpty()) {
       return text;
@@ -325,7 +325,7 @@ public class RcaRelatedService {
     text.append("The metric has other anomalies close to this one on ");
     text.append(anomaliesOfSameAlertSameEnum.stream()
         .map(a -> a.getStartTime().getTime())
-        .map(t -> new DateTime(t).toString(FORMATTER))
+        .map(t -> new DateTime(t).toString(timeFormatter))
         .collect(Collectors.joining(", ")));
     text.append(". ");
     text.append("Maybe those anomalies are related. ");
@@ -338,8 +338,8 @@ public class RcaRelatedService {
     if (otherAnomalies.isEmpty()) {
       return text;
     }
-    final DateTimeFormatter FORMATTER = DateTimeFormat.forPattern("EEEEE, MMMMMM d")
-        .withChronology(rcaInfo.getChronology());
+    final DateTimeFormatter timeFormatter = timeFormatterFor(rcaInfo.getGranularity(),
+        rcaInfo.getChronology());
     text.append("Anomalies in different metrics were also detected around the same time for: ");
     for (int i = 0; i < otherAnomalies.size(); i++) {
       final AnomalyApi anomaly = otherAnomalies.get(i);
@@ -355,7 +355,7 @@ public class RcaRelatedService {
         text.append(" - ").append(enumerationName);
       }
       text.append(" on ")
-          .append(new DateTime(anomaly.getStartTime().getTime()).toString(FORMATTER));
+          .append(new DateTime(anomaly.getStartTime().getTime()).toString(timeFormatter));
       if (i < otherAnomalies.size() - 1) {
         text.append(", ");
       }

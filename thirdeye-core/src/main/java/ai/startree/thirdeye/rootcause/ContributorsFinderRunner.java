@@ -83,7 +83,7 @@ public class ContributorsFinderRunner {
     return contributorsFinderFactory.build(context);
   }
 
-  public ContributorsFinderResult run(final ContributorsSearchConfiguration searchConfiguration)
+  public @NonNull ContributorsFinderResult run(final ContributorsSearchConfiguration searchConfiguration)
       throws Exception {
     final ContributorsFinder contributorsFinder = get(defaultAlgorithm, defaultParams);
 

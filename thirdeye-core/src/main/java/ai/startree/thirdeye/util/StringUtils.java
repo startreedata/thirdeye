@@ -14,12 +14,16 @@
 package ai.startree.thirdeye.util;
 
 import java.util.Arrays;
+import org.joda.time.Chronology;
+import org.joda.time.Period;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 public class StringUtils {
 
   /**
    * Copy-pasted from https://www.baeldung.com/java-levenshtein-distance
-   * */
+   */
   public static int levenshteinDistance(final String x, final String y) {
     int[][] dp = new int[x.length() + 1][y.length() + 1];
 
@@ -27,15 +31,11 @@ public class StringUtils {
       for (int j = 0; j <= y.length(); j++) {
         if (i == 0) {
           dp[i][j] = j;
-        }
-        else if (j == 0) {
+        } else if (j == 0) {
           dp[i][j] = i;
-        }
-        else {
-          dp[i][j] = min(dp[i - 1][j - 1]
-                  + costOfSubstitution(x.charAt(i - 1), y.charAt(j - 1)),
-              dp[i - 1][j] + 1,
-              dp[i][j - 1] + 1);
+        } else {
+          dp[i][j] = min(dp[i - 1][j - 1] + costOfSubstitution(x.charAt(i - 1), y.charAt(j - 1)),
+              dp[i - 1][j] + 1, dp[i][j - 1] + 1);
         }
       }
     }
@@ -48,7 +48,19 @@ public class StringUtils {
   }
 
   private static int min(int... numbers) {
-    return Arrays.stream(numbers)
-        .min().orElse(Integer.MAX_VALUE);
+    return Arrays.stream(numbers).min().orElse(Integer.MAX_VALUE);
+  }
+
+  /**
+   * Returns a time formatter that is as simple as possible to read, depending on the granularity.
+   */
+  public static DateTimeFormatter timeFormatterFor(final Period granularity,
+      final Chronology chronology) {
+    if (granularity.equals(Period.days(1))) {
+      return DateTimeFormat.forPattern("EEEEE MMMMMM d").withChronology(chronology);
+    } else if (granularity.equals(Period.hours(1))) {
+      return DateTimeFormat.forPattern("EEEEE MMMMMM d hh aaa").withChronology(chronology);
+    }
+    return DateTimeFormat.forPattern("EEEEE MMMMMM d HH:mm:ss").withChronology(chronology);
   }
 }

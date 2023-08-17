@@ -17,6 +17,8 @@ import { DateTimeUnit } from "luxon/src/datetime";
 import { ENUMERATION_ITEM_QUERY_PARAM_KEY } from "../../pages/alerts-anomalies-page/alerts-anomalies-page.interfaces";
 import { getRecognizedQuery } from "../params/params.util";
 
+// export const SentryRoutes = Sentry.withSentryReactRouterV6Routing(Routes);
+
 const PLACEHOLDER_ROUTE_ID = ":id";
 const PLACEHOLDER_ROUTE_NAME = ":name";
 const SEARCH_TERM_QUERY_PARAM_KEY = "search";

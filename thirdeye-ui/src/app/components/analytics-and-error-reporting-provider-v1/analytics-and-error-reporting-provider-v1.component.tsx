@@ -22,6 +22,7 @@ import { useQuery } from "@tanstack/react-query";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useAuthProviderV1 } from "../../platform/components";
 import { getAppConfiguration as getAppConfigurationRest } from "../../rest/app-config/app-config.rest";
+import { getThirdEyeUiVersion } from "../../utils/version/version.util";
 import { AnalyticsAndErrorReportingProviderV1Props } from "./analytics-and-error-reporting-provider-v1.interfaces";
 
 export const AnalyticsAndErrorReportingProviderV1: FunctionComponent<AnalyticsAndErrorReportingProviderV1Props> =
@@ -74,7 +75,9 @@ export const AnalyticsAndErrorReportingProviderV1: FunctionComponent<AnalyticsAn
 
         useEffect(() => {
             if (!authUser?.email || !appConfig?.heap?.environmentId) {
-                console.info("Analytics: disabled, appId not available");
+                console.info(
+                    "Analytics: disabled, appId or auth user not available"
+                );
 
                 return;
             }
@@ -85,6 +88,10 @@ export const AnalyticsAndErrorReportingProviderV1: FunctionComponent<AnalyticsAn
         useEffect(() => {
             if (appConfig?.sentry?.clientDsn && !isSentrySetup) {
                 Sentry.init({
+                    environment: window.location.host.includes("localhost:7004")
+                        ? "development"
+                        : "production",
+                    release: getThirdEyeUiVersion(),
                     dsn: appConfig.sentry.clientDsn,
                     integrations: [
                         new Sentry.BrowserTracing({
@@ -93,11 +100,18 @@ export const AnalyticsAndErrorReportingProviderV1: FunctionComponent<AnalyticsAn
                     ],
                     tracesSampleRate: 0.05,
                 });
+                if (authUser?.email) {
+                    Sentry.setUser({ email: authUser.email });
+                }
                 setIsSentrySetup(true);
 
                 return;
             }
         }, [appConfig]);
+
+        if (!isSentrySetup) {
+            return <></>;
+        }
 
         return <>{children}</>;
     };

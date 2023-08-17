@@ -126,15 +126,4 @@
     <!-- ################################### -->
 
   </dependencies>
-
-  <build>
-    <testResources>
-      <testResource>
-        <directory>src/test/resources</directory>
-      </testResource>
-      <testResource>
-        <directory>../thirdeye-persistence/src/main/resources</directory>
-      </testResource>
-    </testResources>
-  </build>
 </project>

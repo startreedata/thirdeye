@@ -14,6 +14,10 @@
  */
 import create from "zustand";
 import { persist } from "zustand/middleware";
+import {
+    getAuthUserEmailFromAccessTokenV1,
+    getAuthUserNameFromAccessTokenV1,
+} from "../../utils";
 import { AuthV1 } from "./auth-v1.interfaces";
 
 const KEY_AUTH = "auth-v1";
@@ -22,6 +26,10 @@ const KEY_AUTH = "auth-v1";
 export const useAuthV1 = create<AuthV1>(
     persist(
         (set) => ({
+            authUser: {
+                name: "",
+                email: "",
+            },
             authenticated: false,
             authDisabled: false,
             authDisabledNotification: true,
@@ -60,6 +68,10 @@ export const useAuthV1 = create<AuthV1>(
 
             setAccessToken: (token) => {
                 set({
+                    authUser: {
+                        name: getAuthUserNameFromAccessTokenV1(token),
+                        email: getAuthUserEmailFromAccessTokenV1(token),
+                    },
                     authenticated: Boolean(token),
                     authDisabled: false,
                     authDisabledNotification: true, // Auth disabled notification to be displayed next time auth is disabled
@@ -70,6 +82,10 @@ export const useAuthV1 = create<AuthV1>(
 
             clearAuth: (exceptionCode) => {
                 set({
+                    authUser: {
+                        name: "",
+                        email: "",
+                    },
                     authenticated: false,
                     authDisabled: false,
                     accessToken: "",

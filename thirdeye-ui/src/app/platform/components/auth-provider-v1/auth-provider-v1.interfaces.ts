@@ -27,6 +27,7 @@ export interface AuthProviderV1Props {
 }
 
 export interface AuthProviderV1ContextProps {
+    authUser: AuthUserV1;
     authenticated: boolean;
     authDisabled: boolean;
     accessToken: string;
@@ -35,6 +36,11 @@ export interface AuthProviderV1ContextProps {
     login: () => void;
     logout: () => void;
     clearAuthDisabledNotification: () => void;
+}
+
+export interface AuthUserV1 {
+    name: string;
+    email: string;
 }
 
 export enum AuthRedirectMethodV1 {

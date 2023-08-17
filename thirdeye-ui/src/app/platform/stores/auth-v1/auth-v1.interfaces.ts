@@ -12,7 +12,10 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { AuthUserV1 } from "../../components/auth-provider-v1/auth-provider-v1.interfaces";
+
 export interface AuthV1 {
+    authUser: AuthUserV1;
     authenticated: boolean;
     authDisabled: boolean;
     authDisabledNotification: boolean;

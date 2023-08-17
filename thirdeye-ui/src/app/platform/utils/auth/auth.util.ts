@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import jwtDecode from "jwt-decode";
+import { get } from "lodash";
 import { AuthExceptionCodeV1 } from "../../components/auth-provider-v1/auth-provider-v1.interfaces";
 
 export const isBlockingAuthExceptionV1 = (
@@ -33,3 +35,55 @@ export const AuthExceptionCodeV1Label: Record<AuthExceptionCodeV1, string> =
         "006": "Open ID configuration missing | CODE 006",
         "007": "Unauthorized access | CODE 007",
     });
+
+export const getAuthUserNameFromAccessTokenV1 = (
+    accessToken: string
+): string => {
+    if (!accessToken) {
+        return "";
+    }
+
+    let decoded;
+    try {
+        decoded = jwtDecode(accessToken);
+    } catch (e) {
+        return "";
+    }
+
+    if (!decoded) {
+        return "";
+    }
+
+    const name =
+        get(decoded, "name") ||
+        get(decoded, "https://startree.cloud/name") ||
+        "";
+
+    return name;
+};
+
+export const getAuthUserEmailFromAccessTokenV1 = (
+    accessToken: string
+): string => {
+    if (!accessToken) {
+        return "";
+    }
+
+    let decoded;
+    try {
+        decoded = jwtDecode(accessToken);
+    } catch (e) {
+        return "";
+    }
+
+    if (!decoded) {
+        return "";
+    }
+
+    const email =
+        get(decoded, "email") ||
+        get(decoded, "https://startree.cloud/email") ||
+        "";
+
+    return email;
+};

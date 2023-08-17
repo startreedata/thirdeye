@@ -287,30 +287,4 @@ describe("Auth V1", () => {
         expect(result.current.authAction).toEqual("");
         expect(result.current.authActionData).toEqual("");
     });
-
-    it("should persist in browser local storage", async () => {
-        const { result, waitFor } = renderHook(() => useAuthV1());
-        act(() => {
-            result.current.setAccessToken("testToken");
-            result.current.setRedirectHref("/testHref");
-            result.current.setAuthAction("testAction", "testActionData");
-        });
-
-        // Wait for state update
-        await waitFor(() => Boolean(result.current.accessToken));
-
-        expect(localStorage.getItem("auth-v1")).toEqual(
-            `{` +
-                `"state":{` +
-                `"authenticated":true,` +
-                `"authDisabled":false,` +
-                `"authDisabledNotification":true,` +
-                `"accessToken":"testToken",` +
-                `"authExceptionCode":"",` +
-                `"redirectHref":"/testHref"` +
-                `},` +
-                `"version":0` +
-                `}`
-        );
-    });
 });

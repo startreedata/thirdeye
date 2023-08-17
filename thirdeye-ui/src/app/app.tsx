@@ -15,6 +15,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { AnalyticsAndErrorReportingProviderV1 } from "./components/analytics-and-error-reporting-provider-v1/analytics-and-error-reporting-provider-v1.component";
 import { AppBarConfigProvider } from "./components/app-bar/app-bar-config-provider/app-bar-config-provider.component";
 import {
     AppContainerV1,
@@ -58,11 +59,13 @@ export const App: FunctionComponent = () => {
 
     return (
         <QueryClientProvider client={queryClient}>
-            <AppContainerV1 name={t("label.thirdeye")}>
-                <AppBarConfigProvider>
-                    <AppRouter />
-                </AppBarConfigProvider>
-            </AppContainerV1>
+            <AnalyticsAndErrorReportingProviderV1>
+                <AppContainerV1 name={t("label.thirdeye")}>
+                    <AppBarConfigProvider>
+                        <AppRouter />
+                    </AppBarConfigProvider>
+                </AppContainerV1>
+            </AnalyticsAndErrorReportingProviderV1>
         </QueryClientProvider>
     );
 };

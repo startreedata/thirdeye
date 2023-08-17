@@ -12,13 +12,13 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-export interface AppConfiguration {
-    authEnabled?: boolean;
-    clientId?: string;
-    heap?: {
-        environmentId: string;
-    };
-    sentry?: {
-        clientDsn: string;
-    };
+/*
+ * Copyright 2022 StarTree Inc.
+ *
+ * All rights reserved. Confidential and proprietary information of StarTree Inc.
+ */
+import { ReactNode } from "react";
+
+export interface AnalyticsAndErrorReportingProviderV1Props {
+    children?: ReactNode;
 }

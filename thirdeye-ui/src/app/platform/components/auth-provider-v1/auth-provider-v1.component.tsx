@@ -77,6 +77,7 @@ export const AuthProviderV1: FunctionComponent<AuthProviderV1Props> = ({
     const loginFormRef = useRef<HTMLFormElement>(null);
     const logoutFormRef = useRef<HTMLFormElement>(null);
     const [
+        authUser,
         authenticated,
         authDisabled,
         accessToken,
@@ -97,6 +98,7 @@ export const AuthProviderV1: FunctionComponent<AuthProviderV1Props> = ({
         clearAuthAction,
         enableAuthDisabledNotification,
     ] = useAuthV1((state) => [
+        state.authUser,
         state.authenticated,
         state.authDisabled,
         state.accessToken,
@@ -498,6 +500,7 @@ export const AuthProviderV1: FunctionComponent<AuthProviderV1Props> = ({
     };
 
     const authProviderV1Context = {
+        authUser: authUser,
         authenticated: authenticated,
         authDisabled: authDisabled,
         accessToken: accessToken,

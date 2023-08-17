@@ -13,10 +13,12 @@
  */
 package ai.startree.thirdeye.spi.rca;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 public interface ContributorsFinder {
 
   /**
    * Find top contributors of an anomaly.
    */
-  ContributorsFinderResult search(final ContributorsSearchConfiguration searchConfiguration) throws Exception;
+  @NonNull ContributorsFinderResult search(final ContributorsSearchConfiguration searchConfiguration) throws Exception;
 }

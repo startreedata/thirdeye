@@ -112,6 +112,7 @@ public class RcaDimensionAnalysisService {
         .append(new DateTime(rcaInfo.getAnomaly().getStartTime(), rcaInfo.getChronology()).toString(
             timeFormatter))
         .append(". ")
+        // TODO prefer giving the expected range rather than the expected mean
         .append("The metric value was expected to be close to ")
         .append(DECIMAL_FORMAT.format(expected)) // TODO cyril ensure the decimal format is precise enough
         .append(" but it is ")

@@ -28,13 +28,13 @@ jobs:
           version: 'v3.12.3'  # Adjust the Helm version if needed
 
       - name: Run helm lint
-        run: helm lint --strict ./kubernetes/helm/startree-thirdeye
-
-      - name: Render Helm templates
         run: |
           helm repo add helmstable https://charts.helm.sh/stable
           helm dependency build ./kubernetes/helm/startree-thirdeye
-          helm template thirdeye ./kubernetes/helm/startree-thirdeye > rendered.yaml
+          helm lint --strict ./kubernetes/helm/startree-thirdeye
+
+      - name: Render Helm templates
+        run: helm template thirdeye ./kubernetes/helm/startree-thirdeye > rendered.yaml
 
       # Coordinator ConfigMap
       - name: Extract and validate coordinator-configmap and coordinator-config

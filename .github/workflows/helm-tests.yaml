@@ -44,6 +44,7 @@ jobs:
           yq e '.' coordinator-configmap.yaml
           content=$(yq e '.data."server.yaml"' coordinator-configmap.yaml)
           echo "$content" > coordinator-config.yaml
+          yq e '.' coordinator-config.yaml
 
       # Scheduler ConfigMap
       - name: Extract and validate scheduler-configmap and scheduler-config
@@ -52,6 +53,7 @@ jobs:
           yq e '.' scheduler-configmap.yaml
           content=$(yq e '.data."server.yaml"' scheduler-configmap.yaml)
           echo "$content" > scheduler-config.yaml
+          yq e '.' scheduler-config.yaml
 
       # Worker ConfigMap
       - name: Extract and validate worker-configmap and worker-config
@@ -60,3 +62,4 @@ jobs:
           yq e '.' worker-configmap.yaml
           content=$(yq e '.data."server.yaml"' worker-configmap.yaml)
           echo "$content" > worker-config.yaml
+          yq e '.' worker-config.yaml

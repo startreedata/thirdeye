@@ -147,15 +147,12 @@ data:
     ui:
       externalUrl: {{ .Values.ui.publicUrl }}
       clientId: {{ .Values.ui.clientId }}
-      # Use the entire 'ui.heap' object
-    {{- with .Values.ui.heap }}
-      heap: {{ toYaml . | nindent 8 }}
+
+      # Paste the entire backend config here
+    {{- with .Values.ui.backend }}
+      {{ toYaml . | nindent 6 }}
     {{- end }}
 
-      # Use the entire 'ui.sentry' object
-    {{- with .Values.ui.sentry }}
-      sentry: {{ toYaml . | nindent 8 }}
-    {{- end }}
     # Prometheus compatible metrics will be exposed at /admin/prometheus
     prometheus:
       enabled: {{ .Values.prometheus.enabled }}

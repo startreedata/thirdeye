@@ -28,4 +28,32 @@ jobs:
           version: 'v3.12.3'  # Adjust the Helm version if needed
 
       - name: Run helm lint
-        run: helm lint ./kubernetes/helm/startree-thirdeye
+        run: |
+          helm repo add helmstable https://charts.helm.sh/stable
+          helm dependency build ./kubernetes/helm/startree-thirdeye
+          helm lint --strict ./kubernetes/helm/startree-thirdeye
+
+      - name: Render Helm templates
+        run: helm template thirdeye ./kubernetes/helm/startree-thirdeye > rendered.yaml
+
+      # Coordinator ConfigMap
+      - name: Extract and validate coordinator-configmap and coordinator-config
+        run: |
+          sudo snap install yq
+          yq e 'select(.kind == "ConfigMap" and .metadata.name == "thirdeye-config")' rendered.yaml > coordinator-configmap.yaml
+          yq e '.data."server.yaml"' coordinator-configmap.yaml > coordinator-config.yaml
+          yq e '.' coordinator-config.yaml
+
+      # Scheduler ConfigMap
+      - name: Extract and validate scheduler-configmap and scheduler-config
+        run: |
+          yq e 'select(.kind == "ConfigMap" and .metadata.name == "thirdeye-scheduler")' rendered.yaml > scheduler-configmap.yaml
+          yq e '.data."server.yaml"' scheduler-configmap.yaml > scheduler-config.yaml
+          yq e '.' scheduler-config.yaml
+
+      # Worker ConfigMap
+      - name: Extract and validate worker-configmap and worker-config
+        run: |
+          yq e 'select(.kind == "ConfigMap" and .metadata.name == "thirdeye-worker")' rendered.yaml > worker-configmap.yaml
+          yq e '.data."server.yaml"' worker-configmap.yaml > worker-config.yaml
+          yq e '.' worker-config.yaml

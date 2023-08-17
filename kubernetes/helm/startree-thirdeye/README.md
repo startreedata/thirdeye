@@ -315,3 +315,26 @@ mysql:
 | `tls.[coordinator/worker/scheduler/ui].secretName` | When provided it will override the default secret names referred for tls keys                                        |
 
 Please refer [values.yaml](values.yaml) for default values.
+
+
+### Development
+Here are a list of useful commands to run when updating the helm chart.
+
+```shell
+# Run the following command to lint the helm chart
+helm lint ./kubernetes/helm/startree-thirdeye
+
+# Run the following command to render the helm chart
+helm template thirdeye ./kubernetes/helm/startree-thirdeye > rendered.yaml
+
+yq e 'select(.kind == "ConfigMap" and .metadata.name == "thirdeye-config")' rendered.yaml > coordinator-configmap.yaml
+yq e '.data."server.yaml"' coordinator-configmap.yaml > coordinator-config.yaml
+
+yq e 'select(.kind == "ConfigMap" and .metadata.name == "thirdeye-scheduler")' rendered.yaml > scheduler-configmap.yaml
+yq e '.data."server.yaml"' scheduler-configmap.yaml > scheduler-config.yaml
+
+yq e 'select(.kind == "ConfigMap" and .metadata.name == "thirdeye-worker")' rendered.yaml > worker-configmap.yaml
+yq e '.data."server.yaml"' worker-configmap.yaml > worker-config.yaml
+
+```
+

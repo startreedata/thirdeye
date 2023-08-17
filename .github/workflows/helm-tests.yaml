@@ -28,7 +28,7 @@ jobs:
           version: 'v3.12.3'  # Adjust the Helm version if needed
 
       - name: Run helm lint
-        run: helm lint ./kubernetes/helm/startree-thirdeye
+        run: helm lint --strict ./kubernetes/helm/startree-thirdeye
 
       - name: Render Helm templates
         run: |

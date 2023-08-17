@@ -8,12 +8,12 @@ on:
     branches: [ master ]
     paths-ignore:
       - thirdeye-ui/**
-      - kubernetes
+      - kubernetes/**
   pull_request:
     branches: [ master ]
     paths-ignore:
       - thirdeye-ui/**
-      - kubernetes
+      - kubernetes/**
 
 jobs:
   build:

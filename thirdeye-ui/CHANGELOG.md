@@ -1,3 +1,16 @@
+## [2.33.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.32.2...thirdeye-ui-2.33.0) (2023-08-17)
+
+
+### Features
+
+* enable performance tracing ([92839504e](https://github.com/startreedata/thirdeye/commit/92839504ec8e3fd77a0bc499325c2bfb09141290))
+* sentry error tracking and heap analytics integration ([e3280491e](https://github.com/startreedata/thirdeye/commit/e3280491e06cc5a956e34f0417c3ef389b3d518c))
+
+
+### Bug Fixes
+
+* fix sorting with enumeration items ([df1e5518c](https://github.com/startreedata/thirdeye/commit/df1e5518cf59b2edb3dc6c55fa2f581b774ee13f))
+
 ### [2.32.2](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.32.1...thirdeye-ui-2.32.2) (2023-08-14)
 
 

@@ -41,25 +41,19 @@ jobs:
         run: |
           sudo snap install yq
           yq e 'select(.kind == "ConfigMap" and .metadata.name == "thirdeye-config")' rendered.yaml > coordinator-configmap.yaml
-          yq e '.' coordinator-configmap.yaml
-          content=$(yq e '.data."server.yaml"' coordinator-configmap.yaml)
-          echo "$content" > coordinator-config.yaml
+          yq e '.data."server.yaml"' coordinator-configmap.yaml > coordinator-config.yaml
           yq e '.' coordinator-config.yaml
 
       # Scheduler ConfigMap
       - name: Extract and validate scheduler-configmap and scheduler-config
         run: |
           yq e 'select(.kind == "ConfigMap" and .metadata.name == "thirdeye-scheduler")' rendered.yaml > scheduler-configmap.yaml
-          yq e '.' scheduler-configmap.yaml
-          content=$(yq e '.data."server.yaml"' scheduler-configmap.yaml)
-          echo "$content" > scheduler-config.yaml
+          yq e '.data."server.yaml"' scheduler-configmap.yaml > scheduler-config.yaml
           yq e '.' scheduler-config.yaml
 
       # Worker ConfigMap
       - name: Extract and validate worker-configmap and worker-config
         run: |
           yq e 'select(.kind == "ConfigMap" and .metadata.name == "thirdeye-worker")' rendered.yaml > worker-configmap.yaml
-          yq e '.' worker-configmap.yaml
-          content=$(yq e '.data."server.yaml"' worker-configmap.yaml)
-          echo "$content" > worker-config.yaml
+          yq e '.data."server.yaml"' worker-configmap.yaml > worker-config.yaml
           yq e '.' worker-config.yaml

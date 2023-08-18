@@ -1,3 +1,15 @@
+## [2.35.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.34.0...thirdeye-ui-2.35.0) (2023-08-18)
+
+
+### Features
+
+* tag sentry environment with hostname ([c8c4b60d2](https://github.com/startreedata/thirdeye/commit/c8c4b60d2cfacb0f711b83a4faa9c1958c1a0d3f))
+
+
+### Bug Fixes
+
+* use helper function to get env ([24af09499](https://github.com/startreedata/thirdeye/commit/24af09499ed9fd5eb18b94b815dd044635bec32e))
+
 ## [2.34.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.33.0...thirdeye-ui-2.34.0) (2023-08-17)
 
 

@@ -37,6 +37,9 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           SLACK_WEBHOOK: ${{ secrets.UI_SLACK_WEBHOOK }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.UI_SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.UI_SENTRY_ORG }}
+          SENTRY_PROJECT : ${{ secrets.UI_SENTRY_PROJECT }}
       - name: Slack - Notify Success
         uses: rtCamp/action-slack-notify@v2
         env:

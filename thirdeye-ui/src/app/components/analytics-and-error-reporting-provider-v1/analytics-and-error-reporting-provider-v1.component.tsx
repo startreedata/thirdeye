@@ -25,6 +25,10 @@ import { getAppConfiguration as getAppConfigurationRest } from "../../rest/app-c
 import { getThirdEyeUiVersion } from "../../utils/version/version.util";
 import { AnalyticsAndErrorReportingProviderV1Props } from "./analytics-and-error-reporting-provider-v1.interfaces";
 
+const getEnvironmentFromHostname = (hostname: string): string => {
+    return hostname.split(".").slice(1).join(".") || "production";
+};
+
 export const AnalyticsAndErrorReportingProviderV1: FunctionComponent<AnalyticsAndErrorReportingProviderV1Props> =
     ({ children }) => {
         const [isSentrySetup, setIsSentrySetup] = useState(false);
@@ -90,7 +94,7 @@ export const AnalyticsAndErrorReportingProviderV1: FunctionComponent<AnalyticsAn
                 Sentry.init({
                     environment: window.location.host.includes("localhost:7004")
                         ? "development"
-                        : window.location.hostname,
+                        : getEnvironmentFromHostname(window.location.hostname),
                     release: getThirdEyeUiVersion(),
                     dsn: appConfig.sentry.clientDsn,
                     integrations: [

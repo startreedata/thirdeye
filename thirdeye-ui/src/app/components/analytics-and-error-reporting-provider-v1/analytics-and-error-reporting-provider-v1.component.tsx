@@ -90,7 +90,7 @@ export const AnalyticsAndErrorReportingProviderV1: FunctionComponent<AnalyticsAn
                 Sentry.init({
                     environment: window.location.host.includes("localhost:7004")
                         ? "development"
-                        : "production",
+                        : window.location.hostname,
                     release: getThirdEyeUiVersion(),
                     dsn: appConfig.sentry.clientDsn,
                     integrations: [

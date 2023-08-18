@@ -100,6 +100,7 @@
         "@musement/iso-duration": "^1.0.0",
         "@prettier/plugin-xml": "1.0.2",
         "@semantic-release/changelog": "6.0.1",
+        "@sentry/webpack-plugin": "^2.7.0",
         "@svgr/webpack": "6.2.0",
         "@testing-library/jest-dom": "^5.11.8",
         "@testing-library/react": "^11.2.2",

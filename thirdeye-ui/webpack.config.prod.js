@@ -20,6 +20,8 @@ const { RetryChunkLoadPlugin } = require("webpack-retry-chunk-load-plugin");
 const WebpackBar = require("webpackbar");
 const BundleAnalyzerPlugin =
     require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
+const { sentryWebpackPlugin } = require("@sentry/webpack-plugin");
+const webpack = require("webpack");
 
 const outputPath = path.join(__dirname, "dist");
 
@@ -110,9 +112,21 @@ module.exports = {
     },
 
     plugins: [
-        // Clean webpack output directory
+        /**
+         * Clean webpack output directory
+         * Note that this cleans up sourcemaps
+         */
         new CleanWebpackPlugin({
             verbose: true,
+        }),
+        // Send sourcemaps to sentry
+        sentryWebpackPlugin({
+            options: {
+                telemetry: false,
+            },
+            org: process.env.SENTRY_ORG,
+            project: process.env.SENTRY_PROJECT,
+            authToken: process.env.SENTRY_AUTH_TOKEN,
         }),
         // Generate index.html from template
         new HtmlWebpackPlugin({

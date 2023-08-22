@@ -79,10 +79,6 @@ export const AnalyticsAndErrorReportingProviderV1: FunctionComponent<AnalyticsAn
 
         useEffect(() => {
             if (!authUser?.email || !appConfig?.heap?.environmentId) {
-                console.info(
-                    "Analytics: disabled, appId or auth user not available"
-                );
-
                 return;
             }
 
@@ -102,7 +98,7 @@ export const AnalyticsAndErrorReportingProviderV1: FunctionComponent<AnalyticsAn
                             tracePropagationTargets: [],
                         }),
                     ],
-                    tracesSampleRate: 0.05,
+                    tracesSampleRate: 0.25,
                 });
                 if (authUser?.email) {
                     Sentry.setUser({ email: authUser.email });
@@ -112,10 +108,6 @@ export const AnalyticsAndErrorReportingProviderV1: FunctionComponent<AnalyticsAn
                 return;
             }
         }, [appConfig]);
-
-        if (!isSentrySetup) {
-            return <></>;
-        }
 
         return <>{children}</>;
     };

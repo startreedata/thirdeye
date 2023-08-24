@@ -43,9 +43,6 @@ export const SpecificPropertiesRenderer: FunctionComponent<SpecificPropertiesRen
 
             return (
                 <Slider
-                    defaultValue={
-                        existingValue ? Number(existingValue) : middlePoint
-                    }
                     marks={[
                         {
                             value: sliderFieldConfig.min as number,
@@ -63,6 +60,7 @@ export const SpecificPropertiesRenderer: FunctionComponent<SpecificPropertiesRen
                     max={sliderFieldConfig.max}
                     min={sliderFieldConfig.min}
                     step={1}
+                    value={existingValue ? Number(existingValue) : middlePoint}
                     onChange={(_, value) =>
                         handlePropertyChange(
                             sliderFieldConfig.templatePropertyName,

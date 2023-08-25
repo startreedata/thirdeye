@@ -12,9 +12,11 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import * as Sentry from "@sentry/react";
 import React, { FunctionComponent, lazy, Suspense } from "react";
 import { Route, Routes } from "react-router-dom";
 import { CancelAPICallsOnPageUnload } from "../../components/cancel-api-calls-on-page-unload/cancel-api-calls-on-page-unload.component";
+import { AppCrashPage } from "../../pages/app-crash-page/app-crash-page.component";
 import {
     AppLoadingIndicatorV1,
     useAuthProviderV1,
@@ -72,31 +74,45 @@ export const AppRouter: FunctionComponent = () => {
                 <Routes>
                     {/* Direct all alerts paths to alerts router */}
                     <Route
-                        element={<AlertsRouter />}
+                        element={
+                            <Sentry.ErrorBoundary fallback={<AppCrashPage />}>
+                                <AlertsRouter />
+                            </Sentry.ErrorBoundary>
+                        }
                         path={`${AppRoute.ALERTS}/*`}
                     />
 
                     {/* Direct all anomalies paths to anomalies router */}
                     <Route
-                        element={<AnomaliesRouter />}
+                        element={
+                            <Sentry.ErrorBoundary fallback={<AppCrashPage />}>
+                                <AnomaliesRouter />
+                            </Sentry.ErrorBoundary>
+                        }
                         path={`${AppRoute.ANOMALIES}/*`}
                     />
 
                     {/* Direct all configuration paths to configuration router */}
                     <Route
                         element={
-                            <CancelAPICallsOnPageUnload
-                                key={AppRoute.CONFIGURATION}
-                            >
-                                <ConfigurationRouter />
-                            </CancelAPICallsOnPageUnload>
+                            <Sentry.ErrorBoundary fallback={<AppCrashPage />}>
+                                <CancelAPICallsOnPageUnload
+                                    key={AppRoute.CONFIGURATION}
+                                >
+                                    <ConfigurationRouter />
+                                </CancelAPICallsOnPageUnload>
+                            </Sentry.ErrorBoundary>
                         }
                         path={`${AppRoute.CONFIGURATION}/*`}
                     />
 
                     {/* Direct all rca paths root cause analysis router */}
                     <Route
-                        element={<RootCauseAnalysisRouter />}
+                        element={
+                            <Sentry.ErrorBoundary fallback={<AppCrashPage />}>
+                                <RootCauseAnalysisRouter />
+                            </Sentry.ErrorBoundary>
+                        }
                         path={`${AppRoute.ROOT_CAUSE_ANALYSIS}/*`}
                     />
 
@@ -107,7 +123,14 @@ export const AppRouter: FunctionComponent = () => {
                     />
 
                     {/* Direct all other paths to general authenticated router */}
-                    <Route element={<GeneralAuthenticatedRouter />} path="/*" />
+                    <Route
+                        element={
+                            <Sentry.ErrorBoundary fallback={<AppCrashPage />}>
+                                <GeneralAuthenticatedRouter />
+                            </Sentry.ErrorBoundary>
+                        }
+                        path="/*"
+                    />
                 </Routes>
             </Suspense>
         );
@@ -115,8 +138,10 @@ export const AppRouter: FunctionComponent = () => {
 
     return (
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
-            {/* Not authenticated, direct all paths to general unauthenticated router */}
-            <GeneralUnauthenticatedRouter />
+            <Sentry.ErrorBoundary fallback={<AppCrashPage />}>
+                {/* Not authenticated, direct all paths to general unauthenticated router */}
+                <GeneralUnauthenticatedRouter />
+            </Sentry.ErrorBoundary>
         </Suspense>
     );
 };

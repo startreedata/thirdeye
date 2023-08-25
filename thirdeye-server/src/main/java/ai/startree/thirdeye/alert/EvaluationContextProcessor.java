@@ -14,7 +14,6 @@
 package ai.startree.thirdeye.alert;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
-import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
 import ai.startree.thirdeye.detectionpipeline.DetectionPipelineContext;
@@ -23,7 +22,6 @@ import ai.startree.thirdeye.spi.api.EnumerationItemApi;
 import ai.startree.thirdeye.spi.api.EvaluationContextApi;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
-import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
@@ -40,26 +38,17 @@ public class EvaluationContextProcessor {
   }
 
   public void process(final DetectionPipelineContext context,
-      final EvaluationContextApi evaluationContext,
-      final AlertTemplateDTO templateWithProperties) {
+      final EvaluationContextApi evaluationContext) {
     if (evaluationContext == null) {
       return;
     }
     // add predicates
     addPredicates(context, evaluationContext);
-    addEnumerationItem(context, evaluationContext, templateWithProperties);
+    addEnumerationItem(context, evaluationContext);
   }
 
   void addEnumerationItem(final DetectionPipelineContext context,
-      final EvaluationContextApi evaluationContext,
-      final AlertTemplateDTO templateWithProperties) {
-    if (templateWithProperties != null) {
-      final long count = templateWithProperties.getNodes()
-          .stream()
-          .filter(p -> "Enumerator".equals(p.getType())) // TODO spyne - use enumerator node type
-          .count();
-      ensure(count <= 1, "Max 1 enumerator node supported at this time. found: " + count);
-    }
+      final EvaluationContextApi evaluationContext) {
     optional(evaluationContext.getEnumerationItem())
         .map(this::map)
         .ifPresent(context::setEnumerationItem);

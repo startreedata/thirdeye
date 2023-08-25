@@ -105,9 +105,7 @@ public class AlertEvaluator {
         .setDetectionInterval(detectionInterval);
 
     // inject custom evaluation context
-    evaluationContextProcessor.process(context,
-        request.getEvaluationContext(),
-        templateWithProperties);
+    evaluationContextProcessor.process(context, request.getEvaluationContext());
 
     if (bool(request.isDryRun())) {
       return new AlertEvaluationApi()

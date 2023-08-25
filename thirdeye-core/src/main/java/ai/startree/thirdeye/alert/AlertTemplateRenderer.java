@@ -131,10 +131,20 @@ public class AlertTemplateRenderer {
       final String alertName)
       throws IOException, ClassNotFoundException {
     final AlertTemplateDTO template = getTemplate(alertTemplateInsideAlertDto);
+    validate(template);
+
     return applyContext(template,
         templateProperties,
         detectionInterval,
         alertName);
+  }
+
+  private static void validate(final AlertTemplateDTO template) {
+    final long count = template.getNodes()
+        .stream()
+        .filter(p -> "Enumerator".equals(p.getType())) // TODO spyne - use enumerator node type
+        .count();
+    ensure(count <= 1, "Max 1 enumerator node supported at this time. found: " + count);
   }
 
   public AlertTemplateDTO getTemplate(final AlertTemplateDTO alertTemplateDTO) {

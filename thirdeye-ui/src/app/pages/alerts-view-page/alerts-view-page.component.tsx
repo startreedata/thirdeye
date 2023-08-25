@@ -116,6 +116,7 @@ export const AlertsViewPage: FunctionComponent = () => {
         resetData: resetAnomaliesData,
     } = useGetAnomalies();
     const [searchParams, setSearchParams] = useSearchParams();
+
     const [expanded, setExpanded] = useState<string[]>(
         searchParams.has(QUERY_PARAM_KEY_FOR_EXPANDED)
             ? (searchParams.get(QUERY_PARAM_KEY_FOR_EXPANDED) as string).split(

@@ -245,7 +245,6 @@ export const AlertsRouter: FunctionComponent = () => {
                         element={
                             <RedirectValidation
                                 queryParams={[
-                                    TimeRangeQueryStringKey.TIME_RANGE,
                                     TimeRangeQueryStringKey.START_TIME,
                                     TimeRangeQueryStringKey.END_TIME,
                                 ]}
@@ -261,7 +260,6 @@ export const AlertsRouter: FunctionComponent = () => {
                         element={
                             <RedirectValidation
                                 queryParams={[
-                                    TimeRangeQueryStringKey.TIME_RANGE,
                                     TimeRangeQueryStringKey.START_TIME,
                                     TimeRangeQueryStringKey.END_TIME,
                                 ]}

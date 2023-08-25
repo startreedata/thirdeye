@@ -30,7 +30,7 @@ import {
     useNotificationProviderV1,
 } from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
-import { useGetAlert } from "../../rest/alerts/alerts.actions";
+import { useGetAlert, useResetAlert } from "../../rest/alerts/alerts.actions";
 import { updateAlert } from "../../rest/alerts/alerts.rest";
 import { Alert, EditableAlert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
@@ -48,6 +48,7 @@ import {
     getSubscriptionGroupAlertsList,
 } from "../../utils/subscription-groups/subscription-groups.util";
 import { AlertsEditCreateBasePageComponent } from "../alerts-edit-create-common/alerts-edit-create-base-page.component";
+import { QUERY_PARAM_KEY_ANOMALIES_RETRY } from "../alerts-view-page/alerts-view-page.utils";
 import { AlertsUpdatePageParams } from "./alerts-update-page.interfaces";
 
 export const AlertsUpdateBasePage: FunctionComponent = () => {
@@ -59,6 +60,8 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
         errorMessages: getSubscriptionGroupsErrorMessages,
         status: getSubscriptionGroupStatus,
     } = useGetSubscriptionGroups();
+    const { resetAlert } = useResetAlert();
+
     const [
         currentlySelectedSubscriptionGroups,
         setCurrentlySelectedSubscriptionGroups,
@@ -80,6 +83,13 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
 
     const [singleNewSubscriptionGroup, setSingleNewSubscriptionGroup] =
         useState<SubscriptionGroup>(createEmptySubscriptionGroup());
+
+    /**
+     * This is a placeholder for the state in between the user clicking update alert on the page
+     * to the user clicking update alert in the modal
+     */
+    const [modifiedAlertForUpdate, setModifiedAlertForUpdate] =
+        useState<EditableAlert>();
 
     useEffect(() => {
         // Validate id from URL
@@ -171,11 +181,16 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
 
     const handleUpdatingSubscriptionGroups = async (
         alert: Alert,
-        shouldResetModalOpen: boolean
+        alertWasReset: boolean
     ): Promise<void> => {
         let copiedCurrentlySelectedSubscriptionGroups = [
             ...currentlySelectedSubscriptionGroups,
         ];
+        const searchParams = new URLSearchParams();
+        if (alertWasReset) {
+            searchParams.set(QUERY_PARAM_KEY_ANOMALIES_RETRY, "true");
+        }
+        const redirectURL = getAlertsAlertPath(alert.id, searchParams);
 
         if (
             validateSubscriptionGroup(singleNewSubscriptionGroup) &&
@@ -218,12 +233,8 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
             isEmpty(subscriptionGroupsRemoved) &&
             isEmpty(subscriptionGroupsAdded)
         ) {
-            if (shouldResetModalOpen) {
-                setIsResetModalOpen(true);
-            } else {
-                // Redirect to alerts detail path
-                navigate(getAlertsAlertPath(alert.id));
-            }
+            // Redirect to alerts detail path
+            navigate(redirectURL);
 
             return;
         }
@@ -275,24 +286,18 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
                 })
             );
         } finally {
-            if (shouldResetModalOpen) {
-                setIsResetModalOpen(true);
-            } else {
-                // Redirect to alerts detail path
-                navigate(getAlertsAlertPath(alert.id));
-            }
+            // Redirect to alerts detail path
+            navigate(redirectURL);
         }
     };
 
-    const handleUpdateAlertClick = (modifiedAlert: EditableAlert): void => {
+    const handleUpdateAlertModalClick = (
+        modifiedAlert: EditableAlert,
+        shouldDeleteAnomalies: boolean
+    ): void => {
         if (!modifiedAlert) {
             return;
         }
-        const shouldAskForReset =
-            !isEqual(
-                modifiedAlert.templateProperties,
-                originalAlert?.templateProperties
-            ) || !isEqual(modifiedAlert?.template, originalAlert?.template);
 
         setIsEditRequestInFlight(true);
         updateAlert(modifiedAlert as Alert)
@@ -301,7 +306,13 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
                     NotificationTypeV1.Success,
                     t("message.update-success", { entity: t("label.alert") })
                 );
-                handleUpdatingSubscriptionGroups(alert, shouldAskForReset);
+                if (shouldDeleteAnomalies) {
+                    resetAlert(alert.id).finally(() => {
+                        handleUpdatingSubscriptionGroups(alert, true);
+                    });
+                } else {
+                    handleUpdatingSubscriptionGroups(alert, false);
+                }
             })
             .catch((error: AxiosError): void => {
                 notifyIfErrors(
@@ -316,6 +327,21 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
             .finally(() => {
                 setIsEditRequestInFlight(false);
             });
+    };
+
+    const handlePageUpdateAlertClick = (modifiedAlert: EditableAlert): void => {
+        const shouldAskForReset =
+            !isEqual(
+                modifiedAlert.templateProperties,
+                originalAlert?.templateProperties
+            ) || !isEqual(modifiedAlert?.template, originalAlert?.template);
+
+        if (shouldAskForReset) {
+            setModifiedAlertForUpdate(modifiedAlert);
+            setIsResetModalOpen(true);
+        } else {
+            handleUpdateAlertModalClick(modifiedAlert, false);
+        }
     };
 
     return (
@@ -344,13 +370,21 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
                 selectedSubscriptionGroups={currentlySelectedSubscriptionGroups}
                 startingAlertConfiguration={originalAlert as EditableAlert}
                 onNewSubscriptionGroupChange={setSingleNewSubscriptionGroup}
-                onSubmit={handleUpdateAlertClick}
+                onSubmit={handlePageUpdateAlertClick}
                 onSubscriptionGroupChange={
                     setCurrentlySelectedSubscriptionGroups
                 }
             />
             {isResetModalOpen && originalAlert && (
-                <AlertUpdateResetModal alert={originalAlert} />
+                <AlertUpdateResetModal
+                    onUpdateAlertClick={(shouldDeleteAnomalies) => {
+                        modifiedAlertForUpdate &&
+                            handleUpdateAlertModalClick(
+                                modifiedAlertForUpdate,
+                                shouldDeleteAnomalies
+                            );
+                    }}
+                />
             )}
         </LoadingErrorStateSwitch>
     );

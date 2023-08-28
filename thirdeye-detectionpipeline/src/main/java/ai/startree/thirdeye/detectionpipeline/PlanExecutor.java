@@ -40,7 +40,7 @@ import java.util.concurrent.Executors;
 @Singleton
 public class PlanExecutor implements AutoCloseable {
 
-  public static final String ROOT_OPERATOR_KEY = "root";
+  public static final String ROOT_NODE_NAME = "root";
 
   private final PlanNodeFactory planNodeFactory;
 
@@ -139,26 +139,44 @@ public class PlanExecutor implements AutoCloseable {
    * @return Outputs from the root node in the DAG
    * @throws Exception All exceptions are to be handled by upstream consumer.
    */
-  public Map<String, OperatorResult> runPipelineAndGetRootOutputs(
+  public Map<String, OperatorResult> runAndGetRootOutputs(
       final List<PlanNodeBean> planNodeBeans,
       final DetectionPipelineContext runTimeContext)
       throws Exception {
-    final Map<ContextKey, OperatorResult> context = runPipeline(planNodeBeans, runTimeContext);
+    return runAndGetOutputs(planNodeBeans, runTimeContext, ROOT_NODE_NAME);
+  }
+
+  /**
+   * @param planNodeBeans The pipeline DAG as a list of nodes
+   * @param runTimeContext The context to be used for pipeline execution
+   * @param rootNodeName The name of the root node in the DAG
+   * @return Outputs from the root node in the DAG
+   * @throws Exception All exceptions are to be handled by upstream consumer.
+   */
+  public Map<String, OperatorResult> runAndGetOutputs(
+      final List<PlanNodeBean> planNodeBeans, final DetectionPipelineContext runTimeContext,
+      final String rootNodeName)
+      throws Exception {
+    final Map<ContextKey, OperatorResult> context = runPipeline(planNodeBeans,
+        runTimeContext,
+        rootNodeName);
 
     /* Return the output */
-    return getOutput(context, ROOT_OPERATOR_KEY);
+    return getOutput(context, rootNodeName);
   }
 
   /**
    * Main interface for running the pipeline.
    *
+   * @param rootNodeName Name of the root node to be executed
    * @param planNodeBeans The pipeline DAG as a list of nodes
    * @return The result map. All the outputs from all the nodes are emitted here.
    * @throws Exception All exceptions are to be handled by upstream consumer.
    */
-  public Map<ContextKey, OperatorResult> runPipeline(
+  private Map<ContextKey, OperatorResult> runPipeline(
       final List<PlanNodeBean> planNodeBeans,
-      final DetectionPipelineContext context) throws Exception {
+      final DetectionPipelineContext context,
+      final String rootNodeName) throws Exception {
 
     /* Set Application Context */
     context.setApplicationContext(createApplicationContext());
@@ -172,7 +190,7 @@ public class PlanExecutor implements AutoCloseable {
     final Map<ContextKey, OperatorResult> resultMap = new HashMap<>();
 
     /* Execute the DAG */
-    final PlanNode rootNode = pipelinePlanNodes.get(ROOT_OPERATOR_KEY);
+    final PlanNode rootNode = pipelinePlanNodes.get(rootNodeName);
     executePlanNode(pipelinePlanNodes, rootNode, resultMap);
 
     return resultMap;

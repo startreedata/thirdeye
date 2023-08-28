@@ -13,12 +13,12 @@
  */
 package ai.startree.thirdeye.alert;
 
-import static java.util.Objects.requireNonNull;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static java.util.stream.Collectors.toList;
 
 import ai.startree.thirdeye.detectionpipeline.operator.CombinerResult;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
-import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.DetectionDataApi;
 import ai.startree.thirdeye.spi.api.DetectionEvaluationApi;
 import ai.startree.thirdeye.spi.api.EnumerationItemApi;
@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
 
 public abstract class AlertEvaluatorResponseMapper {
 
@@ -47,26 +46,27 @@ public abstract class AlertEvaluatorResponseMapper {
   }
 
   private static DetectionDataApi getData(final OperatorResult operatorResult) {
-    final var rawData = requireNonNull(operatorResult.getRawData(), "rawData is null");
-    if (!rawData.isEmpty()) {
+    final var rawData = operatorResult.getRawData();
+    if (rawData != null && !rawData.isEmpty()) {
       return new DetectionDataApi().setRawData(rawData);
     }
-    final TimeSeries timeSeries = requireNonNull(operatorResult.getTimeseries(),
-        "timeseries is null");
 
-    final DetectionDataApi api = new DetectionDataApi()
-        .setCurrent(timeSeries.getCurrent().toList())
-        .setExpected(timeSeries.getPredictedBaseline().toList())
-        .setTimestamp(timeSeries.getTime().toList());
+    final TimeSeries timeSeries = operatorResult.getTimeseries();
+    if (timeSeries != null) {
+      final DetectionDataApi api = new DetectionDataApi()
+          .setCurrent(timeSeries.getCurrent().toList())
+          .setExpected(timeSeries.getPredictedBaseline().toList())
+          .setTimestamp(timeSeries.getTime().toList());
 
-    if (timeSeries.hasLowerBound()) {
-      api.setLowerBound(timeSeries.getPredictedLowerBound().toList());
+      if (timeSeries.hasLowerBound()) {
+        api.setLowerBound(timeSeries.getPredictedLowerBound().toList());
+      }
+      if (timeSeries.hasUpperBound()) {
+        api.setUpperBound(timeSeries.getPredictedUpperBound().toList());
+      }
+      return api;
     }
-
-    if (timeSeries.hasUpperBound()) {
-      api.setUpperBound(timeSeries.getPredictedUpperBound().toList());
-    }
-    return api;
+    return null;
   }
 
   private static Map<String, DetectionEvaluationApi> operatorResultToApi(
@@ -96,11 +96,13 @@ public abstract class AlertEvaluatorResponseMapper {
   private static DetectionEvaluationApi toDetectionEvaluationApi(
       final OperatorResult operatorResult) {
     final DetectionEvaluationApi api = new DetectionEvaluationApi();
-    final List<AnomalyApi> anomalyApis = requireNonNull(operatorResult.getAnomalies(),
-        "operatorResult.anomalies is null").stream()
-        .map(ApiBeanMapper::toApi)
-        .collect(Collectors.toList());
-    api.setAnomalies(anomalyApis);
+
+    optional(operatorResult.getAnomalies())
+        .map(anomalies -> anomalies.stream()
+            .map(ApiBeanMapper::toApi)
+            .collect(toList()))
+        .ifPresent(api::setAnomalies);
+
     api.setData(getData(operatorResult));
     api.setEnumerationItem(ApiBeanMapper.toApi(operatorResult.getEnumerationItem()));
     return api;

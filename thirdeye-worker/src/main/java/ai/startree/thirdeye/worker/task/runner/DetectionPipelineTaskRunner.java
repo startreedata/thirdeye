@@ -175,7 +175,7 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
         .setAlertId(alert.getId())
         .setUsage(DetectionPipelineUsage.DETECTION)
         .setDetectionInterval(detectionInterval);
-    final var detectionPipelineResultMap = planExecutor.runPipelineAndGetRootOutputs(
+    final var detectionPipelineResultMap = planExecutor.runAndGetRootOutputs(
         templateWithProperties.getNodes(),
         context);
     checkState(detectionPipelineResultMap.size() == 1,

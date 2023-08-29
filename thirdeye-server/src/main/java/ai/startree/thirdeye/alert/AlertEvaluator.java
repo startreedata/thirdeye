@@ -17,22 +17,28 @@ import static ai.startree.thirdeye.alert.AlertEvaluatorResponseMapper.toAlertEva
 import static ai.startree.thirdeye.core.ExceptionHandler.handleAlertEvaluationException;
 import static ai.startree.thirdeye.mapper.ApiBeanMapper.toAlertTemplateApi;
 import static ai.startree.thirdeye.spi.util.SpiUtils.bool;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 
 import ai.startree.thirdeye.detectionpipeline.DetectionPipelineContext;
 import ai.startree.thirdeye.detectionpipeline.PlanExecutor;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
+import ai.startree.thirdeye.spi.api.EvaluationContextApi;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.detection.DetectionPipelineUsage;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import javax.ws.rs.WebApplicationException;
 import org.joda.time.Interval;
 import org.slf4j.Logger;
@@ -43,6 +49,7 @@ public class AlertEvaluator {
 
   protected static final Logger LOG = LoggerFactory.getLogger(AlertEvaluator.class);
 
+  private static final String ENUMERATOR_NODE_TYPE = "Enumerator";
   // 5 detection previews are running at the same time at most
   private static final int PARALLELISM = 5;
 
@@ -105,7 +112,8 @@ public class AlertEvaluator {
         .setDetectionInterval(detectionInterval);
 
     // inject custom evaluation context
-    evaluationContextProcessor.process(context, request.getEvaluationContext());
+    final EvaluationContextApi evaluationContext = request.getEvaluationContext();
+    evaluationContextProcessor.process(context, evaluationContext);
 
     if (bool(request.isDryRun())) {
       return new AlertEvaluationApi()
@@ -114,9 +122,16 @@ public class AlertEvaluator {
               .setTemplate(toAlertTemplateApi(templateWithProperties)));
     }
 
+    final String rootNodeName = optional(evaluationContext)
+        .map(EvaluationContextApi::getListEnumerationItemsOnly)
+        .filter(b -> b)
+        .map(b -> findEnumeratorNodeName(templateWithProperties.getNodes()))
+        .orElse(PlanExecutor.ROOT_NODE_NAME);
+
     final Map<String, OperatorResult> result = executorService
-        .submit(() -> planExecutor.runAndGetRootOutputs(templateWithProperties.getNodes(),
-            context))
+        .submit(() -> planExecutor.runAndGetOutputs(templateWithProperties.getNodes(),
+            context,
+            rootNodeName))
         .get(TIMEOUT, TimeUnit.MILLISECONDS);
 
     final Map<String, OperatorResult> processed = new DetectionPipelineOutputPostProcessor()
@@ -124,5 +139,17 @@ public class AlertEvaluator {
 
     return toAlertEvaluationApi(processed)
         .setAlert(new AlertApi().setTemplate(toAlertTemplateApi(templateWithProperties)));
+  }
+
+  private String findEnumeratorNodeName(final List<PlanNodeBean> nodes) {
+    final List<String> enumeratorNodeNames = nodes.stream()
+        .filter(n -> ENUMERATOR_NODE_TYPE.equals(n.getType()))
+        .map(PlanNodeBean::getName)
+        .collect(Collectors.toList());
+    ensure(enumeratorNodeNames.size() == 1,
+        String.format("Expecting exactly 1 enumeration item in the template. Found: %d",
+            enumeratorNodeNames.size()));
+
+    return enumeratorNodeNames.iterator().next();
   }
 }

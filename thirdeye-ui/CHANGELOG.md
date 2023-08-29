@@ -1,3 +1,16 @@
+## [2.37.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.36.0...thirdeye-ui-2.37.0) (2023-08-29)
+
+
+### Features
+
+* [TE-1806](https://cortexdata.atlassian.net/browse/TE-1806) default to one month when viewing anomalies ([750ce98a0](https://github.com/startreedata/thirdeye/commit/750ce98a00f6d174a283584d8edcf5ed2a6da9ff))
+* disable sentry during development ([ce4a50a46](https://github.com/startreedata/thirdeye/commit/ce4a50a460a992f177159ef8e80a5c0372b8263c))
+
+
+### Bug Fixes
+
+* hide navbar when application crashes ([fa0f62f2f](https://github.com/startreedata/thirdeye/commit/fa0f62f2f87d61ada99df148c0c40c90611f77e9))
+
 ## [2.36.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.35.0...thirdeye-ui-2.36.0) (2023-08-29)
 
 

@@ -12,11 +12,14 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+
+import * as Sentry from "@sentry/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { AnalyticsAndErrorReportingProviderV1 } from "./components/analytics-and-error-reporting-provider-v1/analytics-and-error-reporting-provider-v1.component";
 import { AppBarConfigProvider } from "./components/app-bar/app-bar-config-provider/app-bar-config-provider.component";
+import { AppCrashPage } from "./pages/app-crash-page/app-crash-page.component";
 import {
     AppContainerV1,
     NotificationScopeV1,
@@ -61,9 +64,11 @@ export const App: FunctionComponent = () => {
         <QueryClientProvider client={queryClient}>
             <AnalyticsAndErrorReportingProviderV1>
                 <AppContainerV1 name={t("label.thirdeye")}>
-                    <AppBarConfigProvider>
-                        <AppRouter />
-                    </AppBarConfigProvider>
+                    <Sentry.ErrorBoundary fallback={<AppCrashPage />}>
+                        <AppBarConfigProvider>
+                            <AppRouter />
+                        </AppBarConfigProvider>
+                    </Sentry.ErrorBoundary>
                 </AppContainerV1>
             </AnalyticsAndErrorReportingProviderV1>
         </QueryClientProvider>

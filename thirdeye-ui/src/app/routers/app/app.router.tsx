@@ -74,45 +74,31 @@ export const AppRouter: FunctionComponent = () => {
                 <Routes>
                     {/* Direct all alerts paths to alerts router */}
                     <Route
-                        element={
-                            <Sentry.ErrorBoundary fallback={<AppCrashPage />}>
-                                <AlertsRouter />
-                            </Sentry.ErrorBoundary>
-                        }
+                        element={<AlertsRouter />}
                         path={`${AppRoute.ALERTS}/*`}
                     />
 
                     {/* Direct all anomalies paths to anomalies router */}
                     <Route
-                        element={
-                            <Sentry.ErrorBoundary fallback={<AppCrashPage />}>
-                                <AnomaliesRouter />
-                            </Sentry.ErrorBoundary>
-                        }
+                        element={<AnomaliesRouter />}
                         path={`${AppRoute.ANOMALIES}/*`}
                     />
 
                     {/* Direct all configuration paths to configuration router */}
                     <Route
                         element={
-                            <Sentry.ErrorBoundary fallback={<AppCrashPage />}>
-                                <CancelAPICallsOnPageUnload
-                                    key={AppRoute.CONFIGURATION}
-                                >
-                                    <ConfigurationRouter />
-                                </CancelAPICallsOnPageUnload>
-                            </Sentry.ErrorBoundary>
+                            <CancelAPICallsOnPageUnload
+                                key={AppRoute.CONFIGURATION}
+                            >
+                                <ConfigurationRouter />
+                            </CancelAPICallsOnPageUnload>
                         }
                         path={`${AppRoute.CONFIGURATION}/*`}
                     />
 
                     {/* Direct all rca paths root cause analysis router */}
                     <Route
-                        element={
-                            <Sentry.ErrorBoundary fallback={<AppCrashPage />}>
-                                <RootCauseAnalysisRouter />
-                            </Sentry.ErrorBoundary>
-                        }
+                        element={<RootCauseAnalysisRouter />}
                         path={`${AppRoute.ROOT_CAUSE_ANALYSIS}/*`}
                     />
 
@@ -123,14 +109,7 @@ export const AppRouter: FunctionComponent = () => {
                     />
 
                     {/* Direct all other paths to general authenticated router */}
-                    <Route
-                        element={
-                            <Sentry.ErrorBoundary fallback={<AppCrashPage />}>
-                                <GeneralAuthenticatedRouter />
-                            </Sentry.ErrorBoundary>
-                        }
-                        path="/*"
-                    />
+                    <Route element={<GeneralAuthenticatedRouter />} path="/*" />
                 </Routes>
             </Suspense>
         );

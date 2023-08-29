@@ -86,11 +86,15 @@ export const AnalyticsAndErrorReportingProviderV1: FunctionComponent<AnalyticsAn
         }, [authUser, appConfig]);
 
         useEffect(() => {
+            if (window.location.host.includes("localhost:7004")) {
+                return;
+            }
+
             if (appConfig?.sentry?.clientDsn && !isSentrySetup) {
                 Sentry.init({
-                    environment: window.location.host.includes("localhost:7004")
-                        ? "development"
-                        : getEnvironmentFromHostname(window.location.hostname),
+                    environment: getEnvironmentFromHostname(
+                        window.location.hostname
+                    ),
                     release: getThirdEyeUiVersion(),
                     dsn: appConfig.sentry.clientDsn,
                     integrations: [

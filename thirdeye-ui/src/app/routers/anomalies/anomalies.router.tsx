@@ -126,7 +126,7 @@ export const AnomaliesRouter: FunctionComponent = () => {
                                 replace
                                 useStoredLastUsedParamsPathKey
                                 customDurationGenerator={() => {
-                                    return generateDateRangeMonthsFromNow(3);
+                                    return generateDateRangeMonthsFromNow(1);
                                 }}
                                 customSearchStringModifier={(
                                     searchParams,

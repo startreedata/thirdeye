@@ -1,3 +1,17 @@
+## [2.36.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.35.0...thirdeye-ui-2.36.0) (2023-08-29)
+
+
+### Features
+
+* [TE-1770](https://cortexdata.atlassian.net/browse/TE-1770) wrap high level routs with error boundary ([384de1fbf](https://github.com/startreedata/thirdeye/commit/384de1fbfd3b625cabc48646f8d2be90e7c0b482))
+
+
+### Bug Fixes
+
+* [TE-1718](https://cortexdata.atlassian.net/browse/TE-1718) enhance asking reset alert flow ([0077beaf7](https://github.com/startreedata/thirdeye/commit/0077beaf729cd88abac513849f85e37b689485c0))
+* sensitivity slider match current settings ([b399aefa2](https://github.com/startreedata/thirdeye/commit/b399aefa2b111da41c9bb21c41ebeba304a59a14))
+* ui show not be blank if sentry not set up ([844413513](https://github.com/startreedata/thirdeye/commit/8444135133c2eb7962a3e5e1841fb1e5640abfa0))
+
 ## [2.35.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.34.0...thirdeye-ui-2.35.0) (2023-08-18)
 
 

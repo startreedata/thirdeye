@@ -30,6 +30,14 @@ public class EvaluationContextApi {
    * Not dealing with that complexity for now. That will require a more complex API.
    */
   private EnumerationItemApi enumerationItem;
+
+  /**
+   * Run the detection pipeline partially and output the enumeration items. Skip running the
+   * fork join node.
+   * note: Only 1 enumerator node is supported at this time.
+   */
+  private Boolean listEnumerationItemsOnly;
+
   public List<String> getFilters() {
     return filters;
   }
@@ -45,6 +53,16 @@ public class EvaluationContextApi {
   public EvaluationContextApi setEnumerationItem(
       final EnumerationItemApi enumerationItem) {
     this.enumerationItem = enumerationItem;
+    return this;
+  }
+
+  public Boolean getListEnumerationItemsOnly() {
+    return listEnumerationItemsOnly;
+  }
+
+  public EvaluationContextApi setListEnumerationItemsOnly(
+      final Boolean listEnumerationItemsOnly) {
+    this.listEnumerationItemsOnly = listEnumerationItemsOnly;
     return this;
   }
 }

@@ -14,7 +14,7 @@
 #
 ---
 # Insert license header
-"*": npm run license-header-fix
+"*.{ts,tsx,js,json,css,scss}": npm run license-header-fix
 
 # Run ESLint
 "*.{ts,tsx,js,json}": eslint --fix

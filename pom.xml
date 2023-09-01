@@ -566,6 +566,11 @@
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-server</artifactId>
           </exclusion>
+          <exclusion>
+            <!-- added in compile scope in version 0.12.1-->
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+          </exclusion>
         </exclusions>
       </dependency>
       <dependency>

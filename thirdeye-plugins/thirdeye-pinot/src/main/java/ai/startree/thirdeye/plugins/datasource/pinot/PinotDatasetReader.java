@@ -26,7 +26,6 @@ import ai.startree.thirdeye.spi.metric.MetricType;
 import ai.startree.thirdeye.spi.util.SpiUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,11 +41,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class PinotDatasetOnboarder {
+public class PinotDatasetReader {
 
   public static final MetricAggFunction DEFAULT_AGG_FUNCTION = MetricAggFunction.SUM;
   public static final MetricAggFunction DEFAULT_TDIGEST_AGG_FUNCTION = MetricAggFunction.PCT90;
-  private static final Logger LOG = LoggerFactory.getLogger(PinotDatasetOnboarder.class);
+  private static final Logger LOG = LoggerFactory.getLogger(PinotDatasetReader.class);
 
   /* Use "ROW_COUNT" as the special token for the count(*) metric for a pinot table */
   private static final String BYTES_STRING = "BYTES";
@@ -56,7 +55,7 @@ public class PinotDatasetOnboarder {
   private final PinotControllerRestClient pinotControllerRestClient;
 
   @Inject
-  public PinotDatasetOnboarder(final PinotControllerRestClient pinotControllerRestClient) {
+  public PinotDatasetReader(final PinotControllerRestClient pinotControllerRestClient) {
     this.pinotControllerRestClient = pinotControllerRestClient;
   }
 
@@ -115,17 +114,17 @@ public class PinotDatasetOnboarder {
     return metricConfigDTO;
   }
 
-  public ImmutableList<String> getAllTables() throws IOException {
-    return ImmutableList.copyOf(pinotControllerRestClient.getAllTablesFromPinot());
+  public List<String> getAllTableNames() throws IOException {
+    return List.copyOf(pinotControllerRestClient.getAllTablesFromPinot());
   }
 
-  public List<DatasetConfigDTO> onboardAll(final String dataSourceName) throws IOException {
-    final List<String> allTables = getAllTables();
+  public List<DatasetConfigDTO> getAll(final String dataSourceName) throws IOException {
+    final List<String> allTables = getAllTableNames();
 
     final List<DatasetConfigDTO> onboarded = new ArrayList<>();
     for (final String tableName : allTables) {
       try {
-        final DatasetConfigDTO datasetConfigDTO = onboardTable(tableName, dataSourceName);
+        final DatasetConfigDTO datasetConfigDTO = getTable(tableName, dataSourceName);
         onboarded.add(requireNonNull(datasetConfigDTO, "Dataset config is null"));
       } catch (final Exception e) {
         // Catch the exception and continue to onboard other tables
@@ -135,7 +134,7 @@ public class PinotDatasetOnboarder {
     return onboarded;
   }
 
-  public DatasetConfigDTO onboardTable(final String tableName, final String dataSourceName)
+  public DatasetConfigDTO getTable(final String tableName, final String dataSourceName)
       throws IOException {
     final Schema schema = pinotControllerRestClient.getSchemaFromPinot(tableName);
     requireNonNull(schema, "Onboarding Error: schema is null for pinot table: " + tableName);

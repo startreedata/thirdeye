@@ -32,7 +32,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.HashMap;
@@ -58,7 +57,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   private final DataSourceDTO dataSourceDTO;
   private final SqlExpressionBuilder sqlExpressionBuilder;
   private final SqlLanguage sqlLanguage;
-  private final PinotDatasetOnboarder datasetOnboarder;
+  private final PinotDatasetReader datasetReader;
   private final LoadingCache<PinotQuery, ThirdEyeResultSetGroup> queryCache;
   private final PinotThirdEyeDataSourceConfig config;
   private final PinotConnectionManager connectionManager;
@@ -71,13 +70,13 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
       final ThirdEyeDataSourceContext context,
       final SqlExpressionBuilder sqlExpressionBuilder,
       final PinotSqlLanguage sqlLanguage,
-      final PinotDatasetOnboarder datasetOnboarder,
+      final PinotDatasetReader datasetReader,
       final PinotConnectionManager connectionManager,
       final PinotQueryExecutor queryExecutor,
       final PinotThirdEyeDataSourceConfig config) {
     this.sqlExpressionBuilder = sqlExpressionBuilder;
     this.sqlLanguage = sqlLanguage;
-    this.datasetOnboarder = datasetOnboarder;
+    this.datasetReader = datasetReader;
 
     this.dataSourceDTO = context.getDataSourceDTO();
     name = context.getDataSourceDTO().getName();
@@ -220,7 +219,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
 
   private @Nullable String healthCheckQuery() throws IOException {
     // Table name required to execute query against pinot broker.
-    final ImmutableList<String> allTables = datasetOnboarder.getAllTables();
+    final List<String> allTables = datasetReader.getAllTableNames();
     if (allTables.isEmpty()) {
       /* Can't proceed if there are no tables but a successful response is returned as positive */
       return null;
@@ -233,7 +232,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   @Override
   public List<DatasetConfigDTO> getDatasets() {
     try {
-      return datasetOnboarder.onboardAll(name);
+      return datasetReader.getAll(name);
     } catch (final IOException e) {
       throw new RuntimeException(e);
     }
@@ -242,7 +241,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   @Override
   public DatasetConfigDTO getDataset(final String datasetName) {
     try {
-      return datasetOnboarder.onboardTable(datasetName, name);
+      return datasetReader.getTable(datasetName, name);
     } catch (final IOException e) {
       throw new RuntimeException(e);
     }
@@ -251,7 +250,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   @Override
   public void close() {
     connectionManager.close();
-    datasetOnboarder.close();
+    datasetReader.close();
   }
 
   @Override

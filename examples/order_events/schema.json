@@ -19,7 +19,7 @@
   "dateTimeFieldSpecs": [{
     "name": "timestamp",
     "dataType": "LONG",
-    "format" : "1:MILLISECONDS:EPOCH",
+    "format" : "EPOCH|MILLISECONDS|1",
     "granularity": "1:SECONDS"
   },
     {

@@ -118,7 +118,7 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
 
   @NonNull
   @VisibleForTesting
-  protected static String extractSimpleDateFormatPattern(final String timeColumnFormat) {
+  protected static String extractSimpleDateFormatPattern(final @NonNull String timeColumnFormat) {
     if (timeColumnFormat.startsWith("SIMPLE_DATE_FORMAT|")) {
       // new time format https://docs.pinot.apache.org/configuration-reference/schema#new-datetime-formats
       final String[] sdfElements = timeColumnFormat.split("[|]");

@@ -124,11 +124,10 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
       final String[] sdfElements = timeColumnFormat.split("[|]");
       checkArgument(sdfElements.length >= 2, "Invalid timeformat: ", timeColumnFormat);
       return sdfElements[1];
-    } else {
-      // assume old time format https://docs.pinot.apache.org/configuration-reference/schema#old-date-time-formats
-      // remove (1:DAYS:)SIMPLE_DATE_FORMAT:
-      return SIMPLE_DATE_FORMAT_PATTERN.matcher(timeColumnFormat).replaceFirst("");
     }
+    // assume sdf pattern only OR old time format https://docs.pinot.apache.org/configuration-reference/schema#old-date-time-formats
+    // remove (1:DAYS:)SIMPLE_DATE_FORMAT: if it is present
+    return SIMPLE_DATE_FORMAT_PATTERN.matcher(timeColumnFormat).replaceFirst("");
   }
 
   private String periodToDateTimeConvertFormat(final Period period) {

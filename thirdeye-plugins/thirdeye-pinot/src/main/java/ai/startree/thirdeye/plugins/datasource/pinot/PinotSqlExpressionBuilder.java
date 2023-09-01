@@ -13,7 +13,6 @@
  */
 package ai.startree.thirdeye.plugins.datasource.pinot;
 
-import static ai.startree.thirdeye.spi.Constants.DEFAULT_LOCALE;
 import static ai.startree.thirdeye.spi.Constants.UTC_TIMEZONE;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.timezonesAreEquivalent;
@@ -290,18 +289,14 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
           exactGranularity = null;
           break;
         default:
-          if (userFacingTimeColumnFormat.toUpperCase(DEFAULT_LOCALE).startsWith("EPOCH|")) {
-            throw new IllegalArgumentException("Unsupported time format: " + userFacingTimeColumnFormat);
-          }
           // assume simple date format
           final String sdfPattern = extractSimpleDateFormatPattern(
               userFacingTimeColumnFormat);
-          // fail if invalid format - note: this is slow because this instantiate calendars - maybe extract
+          // fail if invalid format - note: this is slow because this instantiate calendars
           try {
             new SimpleDateFormat(sdfPattern);
           } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException(
-                "Failed to parse the time format: " + sdfPattern, e);
+            throw new IllegalArgumentException("Failed to parse the time format: " + sdfPattern, e);
           }
           dateTimeConvertString = "1:DAYS:SIMPLE_DATE_FORMAT:" + sdfPattern;
           dateTruncString = null;

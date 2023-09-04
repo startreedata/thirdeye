@@ -117,8 +117,15 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
 
   @NonNull
   @VisibleForTesting
-  protected static String removeSimpleDateFormatPrefix(final String timeColumnFormat) {
-    // remove (1:DAYS:)SIMPLE_DATE_FORMAT:
+  protected static String extractSimpleDateFormatPattern(final @NonNull String timeColumnFormat) {
+    if (timeColumnFormat.startsWith("SIMPLE_DATE_FORMAT|")) {
+      // new time format https://docs.pinot.apache.org/configuration-reference/schema#new-datetime-formats
+      final String[] sdfElements = timeColumnFormat.split("[|]");
+      checkArgument(sdfElements.length >= 2, "Invalid timeformat: ", timeColumnFormat);
+      return sdfElements[1];
+    }
+    // assume sdf pattern only OR old time format https://docs.pinot.apache.org/configuration-reference/schema#old-date-time-formats
+    // remove (1:DAYS:)SIMPLE_DATE_FORMAT: if it is present
     return SIMPLE_DATE_FORMAT_PATTERN.matcher(timeColumnFormat).replaceFirst("");
   }
 
@@ -204,9 +211,14 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
     }
 
     private TimeFormat(final @NonNull String userFacingTimeColumnFormat) {
+      // TODO CYRIL  for the moment we keep backward compatibility with pinot <=0.12.0 in generated queries so we use the old datetime formats https://docs.pinot.apache.org/configuration-reference/schema#old-date-time-formats
+      //   we will change to the new datetime format around mid 2024 or when pinot removes the support for the old format https://docs.pinot.apache.org/configuration-reference/schema#new-datetime-formats
+      //   dateTimeConvertString will be changed to the new format using "|". eg replace 1:NANOSECONDS:EPOCH by EPOCH|NANOSECONDS|1
       switch (userFacingTimeColumnFormat) {
         case "EPOCH_NANOS":
         case "1:NANOSECONDS:EPOCH":
+        case "EPOCH|NANOSECONDS":
+        case "EPOCH|NANOSECONDS|1":
           dateTimeConvertString = "1:NANOSECONDS:EPOCH";
           dateTruncString = "NANOSECONDS";
           isEpochFormat = true;
@@ -215,6 +227,8 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
           break;
         case "EPOCH_MICROS":
         case "1:MICROSECONDS:EPOCH":
+        case "EPOCH|MICROSECONDS":
+        case "EPOCH|MICROSECONDS|1":
           dateTimeConvertString = "1:MICROSECONDS:EPOCH";
           dateTruncString = "MICROSECONDS";
           isEpochFormat = true;
@@ -223,14 +237,21 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
           break;
         case "EPOCH_MILLIS":
         case "1:MILLISECONDS:EPOCH":
+        case "EPOCH|MILLISECONDS":
+        case "EPOCH|MILLISECONDS|1":
+        case "TIMESTAMP":
+          // breaking change - previously EPOCH was an alias for EPOCH_SECONDS. Now it is a valid pinot format that means epoch millis  - TODO CYRIL this comment can be removed after migration of users is done
+        case "EPOCH":
           dateTimeConvertString = "1:MILLISECONDS:EPOCH";
           dateTruncString = "MILLISECONDS";
           isEpochFormat = true;
           timeFormatter = d -> String.valueOf(d.getMillis());
           exactGranularity = null;
           break;
-        case "EPOCH":
+        case "EPOCH_SECONDS":
         case "1:SECONDS:EPOCH":
+        case "EPOCH|SECONDS":
+        case "EPOCH|SECONDS|1":
           dateTimeConvertString = "1:SECONDS:EPOCH";
           dateTruncString = "SECONDS";
           isEpochFormat = true;
@@ -239,6 +260,8 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
           break;
         case "EPOCH_MINUTES":
         case "1:MINUTES:EPOCH":
+        case "EPOCH|MINUTES":
+        case "EPOCH|MINUTES|1":
           dateTimeConvertString = "1:MINUTES:EPOCH";
           dateTruncString = "MINUTES";
           isEpochFormat = true;
@@ -247,6 +270,8 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
           break;
         case "EPOCH_HOURS":
         case "1:HOURS:EPOCH":
+        case "EPOCH|HOURS":
+        case "EPOCH|HOURS|1":
           dateTimeConvertString = "1:HOURS:EPOCH";
           dateTruncString = "HOURS";
           isEpochFormat = true;
@@ -255,6 +280,8 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
           break;
         case "EPOCH_DAYS":
         case "1:DAYS:EPOCH":
+        case "EPOCH|DAYS":
+        case "EPOCH|DAYS|1":
           dateTimeConvertString = "1:DAYS:EPOCH";
           dateTruncString = "DAYS";
           isEpochFormat = true;
@@ -263,20 +290,24 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
           break;
         default:
           // assume simple date format
-          final String cleanSimpleDateFormat = removeSimpleDateFormatPrefix(
+          final String sdfPattern = extractSimpleDateFormatPattern(
               userFacingTimeColumnFormat);
-          // fail if invalid format - note: this is slow because this instantiate calendars - maybe extract
-          new SimpleDateFormat(cleanSimpleDateFormat);
-          dateTimeConvertString = "1:DAYS:SIMPLE_DATE_FORMAT:" + cleanSimpleDateFormat;
+          // fail if invalid format - note: this is slow because this instantiate calendars
+          try {
+            new SimpleDateFormat(sdfPattern);
+          } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Failed to parse the time format: " + sdfPattern, e);
+          }
+          dateTimeConvertString = "1:DAYS:SIMPLE_DATE_FORMAT:" + sdfPattern;
           dateTruncString = null;
           isEpochFormat = false;
           timeFormatter = d -> {
             final DateTimeFormatter inputDataDateTimeFormatter = DateTimeFormat.forPattern(
-                cleanSimpleDateFormat).withChronology(d.getChronology());
+                sdfPattern).withChronology(d.getChronology());
             return STRING_LITERAL_QUOTE + inputDataDateTimeFormatter.print(d)
                 + STRING_LITERAL_QUOTE;
           };
-          exactGranularity = simpleDateFormatGranularity(cleanSimpleDateFormat);
+          exactGranularity = simpleDateFormatGranularity(sdfPattern);
       }
     }
 

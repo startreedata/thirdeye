@@ -26,7 +26,6 @@ import ai.startree.thirdeye.spi.metric.MetricType;
 import ai.startree.thirdeye.spi.util.SpiUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,18 +35,17 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.spi.data.DateTimeFieldSpec;
-import org.apache.pinot.spi.data.DateTimeFormatSpec;
 import org.apache.pinot.spi.data.MetricFieldSpec;
 import org.apache.pinot.spi.data.Schema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class PinotDatasetOnboarder {
+public class PinotDatasetReader {
 
   public static final MetricAggFunction DEFAULT_AGG_FUNCTION = MetricAggFunction.SUM;
   public static final MetricAggFunction DEFAULT_TDIGEST_AGG_FUNCTION = MetricAggFunction.PCT90;
-  private static final Logger LOG = LoggerFactory.getLogger(PinotDatasetOnboarder.class);
+  private static final Logger LOG = LoggerFactory.getLogger(PinotDatasetReader.class);
 
   /* Use "ROW_COUNT" as the special token for the count(*) metric for a pinot table */
   private static final String BYTES_STRING = "BYTES";
@@ -57,33 +55,8 @@ public class PinotDatasetOnboarder {
   private final PinotControllerRestClient pinotControllerRestClient;
 
   @Inject
-  public PinotDatasetOnboarder(final PinotControllerRestClient pinotControllerRestClient) {
+  public PinotDatasetReader(final PinotControllerRestClient pinotControllerRestClient) {
     this.pinotControllerRestClient = pinotControllerRestClient;
-  }
-
-  public static void setDateTimeSpecs(final DatasetConfigDTO datasetConfigDTO,
-      final DateTimeFieldSpec dateTimeFieldSpec) {
-    Preconditions.checkNotNull(dateTimeFieldSpec);
-    final String timeFormat = parseTimeFormat(dateTimeFieldSpec);
-    datasetConfigDTO
-        .setTimeColumn(dateTimeFieldSpec.getName())
-        .setTimeFormat(timeFormat)
-        .setTimezone(DEFAULT_CHRONOLOGY.getZone().toString());
-  }
-
-  private static String parseTimeFormat(final DateTimeFieldSpec dateTimeFieldSpec) {
-    final DateTimeFormatSpec formatSpec = new DateTimeFormatSpec(dateTimeFieldSpec.getFormat());
-    switch (formatSpec.getTimeFormat()) {
-      case EPOCH:
-      case SIMPLE_DATE_FORMAT:
-        return formatSpec.getFormat();
-      case TIMESTAMP:
-        // fixme this is unlikely to be correct and not tested - previous behaviour was undefined anyway
-        //  left for another PR  - see https://cortexdata.atlassian.net/browse/TE-1674
-        return formatSpec.getFormat();
-      default:
-        throw new UnsupportedOperationException(String.format("Unsupported pinot time format: %s", formatSpec.getTimeFormat()));
-    }
   }
 
   public static DatasetConfigDTO generateDatasetConfig(final String dataset, final Schema schema,
@@ -91,14 +64,17 @@ public class PinotDatasetOnboarder {
       final Map<String, String> customConfigs, final String dataSourceName) {
     final List<String> dimensions = schema.getDimensionNames();
     final DateTimeFieldSpec dateTimeFieldSpec = schema.getSpecForTimeColumn(timeColumnName);
+    Preconditions.checkNotNull(dateTimeFieldSpec);
     // Create DatasetConfig
     final DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO()
         .setDataset(dataset)
         .setDimensions(Templatable.of(dimensions))
         .setDataSource(dataSourceName)
         .setProperties(customConfigs)
-        .setActive(Boolean.TRUE);
-    setDateTimeSpecs(datasetConfigDTO, dateTimeFieldSpec);
+        .setActive(Boolean.TRUE)
+        .setTimeColumn(dateTimeFieldSpec.getName())
+        .setTimeFormat(dateTimeFieldSpec.getFormat())
+        .setTimezone(DEFAULT_CHRONOLOGY.getZone().toString());
     checkNonAdditive(datasetConfigDTO);
     return datasetConfigDTO;
   }
@@ -138,17 +114,17 @@ public class PinotDatasetOnboarder {
     return metricConfigDTO;
   }
 
-  public ImmutableList<String> getAllTables() throws IOException {
-    return ImmutableList.copyOf(pinotControllerRestClient.getAllTablesFromPinot());
+  public List<String> getAllTableNames() throws IOException {
+    return List.copyOf(pinotControllerRestClient.getAllTablesFromPinot());
   }
 
-  public List<DatasetConfigDTO> onboardAll(final String dataSourceName) throws IOException {
-    final List<String> allTables = getAllTables();
+  public List<DatasetConfigDTO> getAll(final String dataSourceName) throws IOException {
+    final List<String> allTables = getAllTableNames();
 
     final List<DatasetConfigDTO> onboarded = new ArrayList<>();
     for (final String tableName : allTables) {
       try {
-        final DatasetConfigDTO datasetConfigDTO = onboardTable(tableName, dataSourceName);
+        final DatasetConfigDTO datasetConfigDTO = getTable(tableName, dataSourceName);
         onboarded.add(requireNonNull(datasetConfigDTO, "Dataset config is null"));
       } catch (final Exception e) {
         // Catch the exception and continue to onboard other tables
@@ -158,7 +134,7 @@ public class PinotDatasetOnboarder {
     return onboarded;
   }
 
-  public DatasetConfigDTO onboardTable(final String tableName, final String dataSourceName)
+  public DatasetConfigDTO getTable(final String tableName, final String dataSourceName)
       throws IOException {
     final Schema schema = pinotControllerRestClient.getSchemaFromPinot(tableName);
     requireNonNull(schema, "Onboarding Error: schema is null for pinot table: " + tableName);

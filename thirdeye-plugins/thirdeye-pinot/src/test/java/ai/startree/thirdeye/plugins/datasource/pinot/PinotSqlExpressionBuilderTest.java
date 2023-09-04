@@ -13,8 +13,9 @@
  */
 package ai.startree.thirdeye.plugins.datasource.pinot;
 
-import static ai.startree.thirdeye.plugins.datasource.pinot.PinotSqlExpressionBuilder.removeSimpleDateFormatPrefix;
+import static ai.startree.thirdeye.plugins.datasource.pinot.PinotSqlExpressionBuilder.extractSimpleDateFormatPattern;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import org.joda.time.Period;
@@ -23,30 +24,55 @@ import org.testng.annotations.Test;
 public class PinotSqlExpressionBuilderTest implements SqlExpressionBuilder {
 
   @Test
-  public void testRemoveSimpleDateFormatPrefixWithNoPrefix() {
+  public void testExtractSimpleDateFormatPatternWithNoPrefix() {
     final String timeColumnFormat = "yyyyMMdd";
-    final String output = removeSimpleDateFormatPrefix(timeColumnFormat);
+    final String output = extractSimpleDateFormatPattern(timeColumnFormat);
     final String expected = "yyyyMMdd";
 
     assertThat(output).isEqualTo(expected);
   }
 
   @Test
-  public void testRemoveSimpleDateFormatPrefixWithSimpleDateFormatPrefix() {
+  public void testExtractSimpleDateFormatPatternWithSimpleDateFormatPrefix() {
     final String timeColumnFormat = "SIMPLE_DATE_FORMAT:yyyyMMdd";
-    final String output = removeSimpleDateFormatPrefix(timeColumnFormat);
+    final String output = extractSimpleDateFormatPattern(timeColumnFormat);
     final String expected = "yyyyMMdd";
 
     assertThat(output).isEqualTo(expected);
   }
 
   @Test
-  public void testRemoveSimpleDateFormatPrefixWithFullPrefix() {
+  public void testExtractSimpleDateFormatPatternWithFullPrefix() {
     final String timeColumnFormat = "1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd";
-    final String output = removeSimpleDateFormatPrefix(timeColumnFormat);
+    final String output = extractSimpleDateFormatPattern(timeColumnFormat);
     final String expected = "yyyyMMdd";
 
     assertThat(output).isEqualTo(expected);
+  }
+
+  @Test
+  public void testExtractSimpleDateFormatPatternWithNewDateFormat() {
+    final String timeColumnFormat = "SIMPLE_DATE_FORMAT|yyyyMMdd";
+    final String output = extractSimpleDateFormatPattern(timeColumnFormat);
+    final String expected = "yyyyMMdd";
+
+    assertThat(output).isEqualTo(expected);
+  }
+
+  @Test
+  public void testExtractSimpleDateFormatPatternWithNewDateFormatWithUnusedTimezone() {
+    final String timeColumnFormat = "SIMPLE_DATE_FORMAT|yyyyMMdd|Europe/Paris";
+    final String output = extractSimpleDateFormatPattern(timeColumnFormat);
+    final String expected = "yyyyMMdd";
+
+    assertThat(output).isEqualTo(expected);
+  }
+
+  @Test
+  public void testExtractSimpleDateFormatPatternWithInvalidNewFormat() {
+    final String timeColumnFormat = "SIMPLE_DATE_FORMAT|";
+    assertThatThrownBy(() -> extractSimpleDateFormatPattern(timeColumnFormat)).isInstanceOf(
+        IllegalArgumentException.class);
   }
 
   @Test

@@ -37,7 +37,7 @@
   "dateTimeFieldSpecs": [{
     "name": "date",
     "dataType": "LONG",
-    "format" : "1:DAYS:SIMPLE_DATE_FORMAT:yyyyMMdd",
+    "format" : "SIMPLE_DATE_FORMAT|yyyyMMdd",
     "granularity": "1:DAYS"
   }]
 }

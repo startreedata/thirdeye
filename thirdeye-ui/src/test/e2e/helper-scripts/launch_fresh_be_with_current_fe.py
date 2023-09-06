@@ -20,6 +20,9 @@ import subprocess
 import tempfile
 import time
 import argparse
+import requests
+from retry import retry
+from retry.api import retry_call
 
 from setup_local.launch_backend import setup_and_launch_thirdeye_backend
 from setup_local.launch_frontend import launch_thirdeye_frontend
@@ -31,15 +34,17 @@ TE_UI_DIR = 'thirdeye-ui'
 args_parser = argparse.ArgumentParser()
 args_parser.add_argument('-r', '--run-only', default=False, help='Use cypress run instead of open', action='store_true')
 
-def retry(func, max_tries=3):
-    for i in range(max_tries):
-        try:
-           return func()
-        except Exception as e:
-            if not i < max_tries - 1:
-                raise e
+@retry(delay=15, backoff=2)
+def ping_backend():
+    print("Pinging backend")
+    r = requests.delete('http://localhost:7004/api/alerts/all')
+    r.raise_for_status()
 
-            continue
+@retry(delay=15, backoff=2)
+def ping_pinot():
+    r = requests.get('http://localhost:9000')
+    r.raise_for_status()
+
 
 def get_path_to_thirdeye_ui():
     path = Path.cwd()
@@ -105,10 +110,8 @@ if __name__ == '__main__':
         with tempfile.TemporaryDirectory() as temp_dir_path:
             subprocess.run(['docker', 'compose', 'up', '-d'],
                            check=True)
-            print('[Setup Script] Sleeping 10 seconds for pinot to get up and running', flush=True)
-            time.sleep(10)
+            ping_pinot()
 
-            print('[Setup Script] Cloning ThirdEye git repo', flush=True)
             # Check out ThirdEye
             subprocess.run(['git', 'clone', 'https://github.com/startreedata/thirdeye.git'],
                            cwd=temp_dir_path,
@@ -116,16 +119,19 @@ if __name__ == '__main__':
                            stdout=subprocess.DEVNULL,
                            stderr=subprocess.DEVNULL)
 
-            backend_process = retry(lambda: setup_and_launch_thirdeye_backend(temp_dir_path))
-            frontend_process = retry(lambda: launch_thirdeye_frontend(get_path_to_thirdeye_ui()))
+            print('[Setup Script] Setting up ThirdEye Backend and Frontend', flush=True)
+            backend_process = retry_call(lambda: setup_and_launch_thirdeye_backend(temp_dir_path))
+            frontend_process = retry_call(lambda: launch_thirdeye_frontend(get_path_to_thirdeye_ui()))
+
+            time.sleep(60)
+            ping_backend()
 
             args = args_parser.parse_args()
-            print('[Setup Script] Sleeping 60 seconds wait for backend and frontend', flush=True)
-            time.sleep(60)
-
             npx_command = ['npx', 'cypress']
             if args.run_only:
                 npx_command.append('run')
+                npx_command.append('--browser')
+                npx_command.append('chrome')
             else:
                 npx_command.append('open')
 

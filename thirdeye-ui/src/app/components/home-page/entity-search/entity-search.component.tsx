@@ -20,7 +20,6 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import {
     getAlertsAlertViewPath,
-    getAnomaliesViewPath,
     getSubscriptionGroupsViewPath,
 } from "../../../utils/routes/routes.util";
 import { EntityOption } from "../active-alerts-count/active-alerts-count.interfaces";
@@ -30,7 +29,6 @@ import { useEntitySearchStyles } from "./entity-search.styles";
 export const EntitySearch: FunctionComponent<EntitySearchProps> = ({
     subscriptionGroups,
     alerts,
-    anomalies,
 }) => {
     const classes = useEntitySearchStyles();
     const navigate = useNavigate();
@@ -58,18 +56,8 @@ export const EntitySearch: FunctionComponent<EntitySearchProps> = ({
             });
         }
 
-        if (anomalies) {
-            anomalies.forEach((anomaly) => {
-                options.push({
-                    type: t("label.anomaly"),
-                    label: `${anomaly.alert.name} : ${anomaly.id}`,
-                    link: getAnomaliesViewPath(anomaly.id),
-                });
-            });
-        }
-
         return options;
-    }, [subscriptionGroups, alerts, anomalies]);
+    }, [subscriptionGroups, alerts]);
 
     const handleSomething = (option: EntityOption | null): void => {
         if (option) {

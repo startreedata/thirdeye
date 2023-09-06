@@ -12,12 +12,12 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { ActionStatus } from "../../../rest/actions.interfaces";
+import { UseQueryResult } from "@tanstack/react-query/src/types";
+import { AxiosError } from "axios";
 import { SubscriptionGroup } from "../../../rest/dto/subscription-group.interfaces";
 
 export interface TotalSubscriptionGroupCountProps {
-    subscriptionGroups: SubscriptionGroup[] | null;
-    getSubscriptionGroupsStatus: ActionStatus;
+    subscriptionGroupsQuery: UseQueryResult<SubscriptionGroup[], AxiosError>;
     classes?: {
         noDataIndicator?: string;
     };

@@ -18,38 +18,36 @@ import classNames from "classnames";
 import React, { FunctionComponent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { SkeletonV1, TooltipV1 } from "../../../platform/components";
-import { ActionStatus } from "../../../rest/actions.interfaces";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { AlertAccuracyProps } from "./alert-accuracy.interfaces";
 
 export const AlertAccuracy: FunctionComponent<AlertAccuracyProps> = ({
-    appAnalytics,
-    getAppAnalyticsStatus,
+    appAnalyticsQuery,
     classes,
 }) => {
     const { t } = useTranslation();
 
     const precision = useMemo(() => {
-        if (!appAnalytics) {
+        if (!appAnalyticsQuery.data) {
             return null;
         }
         const totalAnomaliesLabeledAsAnomaly =
-            appAnalytics.anomalyStats.feedbackStats.ANOMALY +
-            appAnalytics.anomalyStats.feedbackStats.ANOMALY_EXPECTED +
-            appAnalytics.anomalyStats.feedbackStats.ANOMALY_NEW_TREND;
+            appAnalyticsQuery.data.anomalyStats.feedbackStats.ANOMALY +
+            appAnalyticsQuery.data.anomalyStats.feedbackStats.ANOMALY_EXPECTED +
+            appAnalyticsQuery.data.anomalyStats.feedbackStats.ANOMALY_NEW_TREND;
 
         // If there are no anomalies with feedback return n/a
-        if (appAnalytics.anomalyStats.countWithFeedback === 0) {
+        if (appAnalyticsQuery.data.anomalyStats.countWithFeedback === 0) {
             return "n/a";
         }
 
         return `${Math.round(
             (totalAnomaliesLabeledAsAnomaly /
-                appAnalytics.anomalyStats.countWithFeedback) *
+                appAnalyticsQuery.data.anomalyStats.countWithFeedback) *
                 100
         )}%`;
-    }, [appAnalytics]);
+    }, [appAnalyticsQuery.data]);
 
     return (
         <Grid container alignItems="center" justifyContent="space-between">
@@ -78,11 +76,8 @@ export const AlertAccuracy: FunctionComponent<AlertAccuracyProps> = ({
                             {t("message.experienced-issues-fetching-data")}
                         </NoDataIndicator>
                     }
-                    isError={getAppAnalyticsStatus === ActionStatus.Error}
-                    isLoading={
-                        getAppAnalyticsStatus === ActionStatus.Working ||
-                        getAppAnalyticsStatus === ActionStatus.Initial
-                    }
+                    isError={appAnalyticsQuery.isError}
+                    isLoading={appAnalyticsQuery.isLoading}
                     loadingState={
                         <Box
                             className={classNames(classes?.noDataIndicator)}
@@ -95,7 +90,7 @@ export const AlertAccuracy: FunctionComponent<AlertAccuracyProps> = ({
                     }
                 >
                     <Typography variant="h2">
-                        {appAnalytics && precision !== null && (
+                        {appAnalyticsQuery.data && precision !== null && (
                             <span>{precision}</span>
                         )}
                     </Typography>

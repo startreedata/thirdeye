@@ -13,11 +13,9 @@
  * the License.
  */
 import type { Alert } from "../../../rest/dto/alert.interfaces";
-import type { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 import type { SubscriptionGroup } from "../../../rest/dto/subscription-group.interfaces";
 
 export interface EntitySearchProps {
     subscriptionGroups: SubscriptionGroup[] | null;
     alerts: Alert[] | null;
-    anomalies: Anomaly[] | null;
 }

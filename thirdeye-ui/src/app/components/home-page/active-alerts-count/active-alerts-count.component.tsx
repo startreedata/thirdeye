@@ -18,7 +18,6 @@ import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { Link as RouterLink } from "react-router-dom";
 import { SkeletonV1 } from "../../../platform/components";
-import { ActionStatus } from "../../../rest/actions.interfaces";
 import {
     getAlertsAllPath,
     getAlertsCreatePath,
@@ -28,8 +27,7 @@ import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-s
 import { ActiveAlertsCountProps } from "./active-alerts-count.interfaces";
 
 export const ActiveAlertsCount: FunctionComponent<ActiveAlertsCountProps> = ({
-    getAlertsStatus,
-    alerts,
+    alertsQuery,
 }) => {
     const { t } = useTranslation();
 
@@ -63,11 +61,8 @@ export const ActiveAlertsCount: FunctionComponent<ActiveAlertsCountProps> = ({
                             {t("message.experienced-issues-fetching-data")}
                         </NoDataIndicator>
                     }
-                    isError={getAlertsStatus === ActionStatus.Error}
-                    isLoading={
-                        getAlertsStatus === ActionStatus.Working ||
-                        getAlertsStatus === ActionStatus.Initial
-                    }
+                    isError={alertsQuery.isError}
+                    isLoading={alertsQuery.isLoading}
                     loadingState={
                         <Box width={100}>
                             <Typography variant="h2">
@@ -77,8 +72,9 @@ export const ActiveAlertsCount: FunctionComponent<ActiveAlertsCountProps> = ({
                     }
                 >
                     <Typography variant="h2">
-                        {alerts &&
-                            alerts.filter((alert) => alert.active).length}
+                        {alertsQuery.data &&
+                            alertsQuery.data.filter((alert) => alert.active)
+                                .length}
                     </Typography>
                 </LoadingErrorStateSwitch>
             </Grid>

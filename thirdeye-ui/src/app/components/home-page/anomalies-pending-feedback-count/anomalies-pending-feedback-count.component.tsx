@@ -18,14 +18,13 @@ import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { Link as RouterLink } from "react-router-dom";
 import { SkeletonV1 } from "../../../platform/components";
-import { ActionStatus } from "../../../rest/actions.interfaces";
 import { getAnomaliesAllPath } from "../../../utils/routes/routes.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { AnomaliesPendingFeedbackCountProps } from "./anomlies-pending-feedback-count.interfaces";
 
 export const AnomaliesPendingFeedbackCount: FunctionComponent<AnomaliesPendingFeedbackCountProps> =
-    ({ anomalyStats, getAnomalyStatsStatus: status, classes }) => {
+    ({ anomalyStatsQuery, classes }) => {
         const { t } = useTranslation();
 
         return (
@@ -49,11 +48,8 @@ export const AnomaliesPendingFeedbackCount: FunctionComponent<AnomaliesPendingFe
                                 {t("message.experienced-issues-fetching-data")}
                             </NoDataIndicator>
                         }
-                        isError={status === ActionStatus.Error}
-                        isLoading={
-                            status === ActionStatus.Working ||
-                            status === ActionStatus.Initial
-                        }
+                        isError={anomalyStatsQuery.isError}
+                        isLoading={anomalyStatsQuery.isLoading}
                         loadingState={
                             <Box
                                 className={classNames(classes?.noDataIndicator)}
@@ -66,9 +62,9 @@ export const AnomaliesPendingFeedbackCount: FunctionComponent<AnomaliesPendingFe
                         }
                     >
                         <Typography variant="h2">
-                            {anomalyStats &&
-                                anomalyStats.totalCount -
-                                    anomalyStats.countWithFeedback}
+                            {anomalyStatsQuery.data &&
+                                anomalyStatsQuery.data.totalCount -
+                                    anomalyStatsQuery.data.countWithFeedback}
                         </Typography>
                     </LoadingErrorStateSwitch>
                 </Grid>

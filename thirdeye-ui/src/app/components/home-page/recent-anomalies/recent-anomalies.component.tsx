@@ -16,13 +16,17 @@ import { Box, Button, Grid, Table, Typography } from "@material-ui/core";
 import TableCell from "@material-ui/core/TableCell";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
+import { useQuery } from "@tanstack/react-query";
 import { capitalize, sortBy } from "lodash";
-import React, { FunctionComponent, useEffect, useMemo } from "react";
+import { DateTime } from "luxon";
+import React, { FunctionComponent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Link as RouterLink } from "react-router-dom";
 import { PageContentsCardV1, SkeletonV1 } from "../../../platform/components";
-import { ActionStatus } from "../../../rest/actions.interfaces";
-import { useGetAnomalies } from "../../../rest/anomalies/anomaly.actions";
+import {
+    getAnomalies,
+    getAnomaliesCount,
+} from "../../../rest/anomalies/anomalies.rest";
 import { getAnomaliesAllPath } from "../../../utils/routes/routes.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { EmptyStateSwitch } from "../../page-states/empty-state-switch/empty-state-switch.component";
@@ -32,21 +36,44 @@ import { AnomalyRow } from "./anomaly-row/anomaly-row.component";
 
 export const RecentAnomalies: FunctionComponent = () => {
     const { t } = useTranslation();
-    const { anomalies, getAnomalies, status } = useGetAnomalies();
 
-    useEffect(() => {
-        getAnomalies();
-    }, []);
+    const startTime = DateTime.local()
+        .minus({ month: 1 })
+        .startOf("day")
+        .toMillis();
+    const endTime = DateTime.local().endOf("hour").toMillis();
+
+    const getAnomaliesQuery = useQuery({
+        queryKey: ["anomalies", startTime, endTime],
+        queryFn: () => {
+            return getAnomalies({
+                startTime,
+                endTime,
+            });
+        },
+        refetchOnWindowFocus: false,
+    });
+
+    const getAnomaliesCountQuery = useQuery({
+        queryKey: ["anomaliesCount"],
+        queryFn: () => {
+            return getAnomaliesCount();
+        },
+        refetchOnWindowFocus: false,
+    });
 
     const anomaliesToDisplay = useMemo(() => {
-        if (!anomalies) {
+        if (!getAnomaliesQuery.data) {
             return [];
         }
 
-        const sortedAnomalies = sortBy(anomalies, "startTime").reverse();
+        const sortedAnomalies = sortBy(
+            getAnomaliesQuery.data,
+            "startTime"
+        ).reverse();
 
         return sortedAnomalies.slice(0, 10);
-    }, [anomalies]);
+    }, [getAnomaliesQuery.data]);
 
     return (
         <>
@@ -67,14 +94,11 @@ export const RecentAnomalies: FunctionComponent = () => {
                     <Typography variant="body1">
                         <LoadingErrorStateSwitch
                             isError={false}
-                            isLoading={
-                                status === ActionStatus.Working ||
-                                status === ActionStatus.Initial
-                            }
+                            isLoading={getAnomaliesQuery.isLoading}
                             loadingState={<SkeletonV1 animation="pulse" />}
                         >
                             {capitalize(
-                                `${anomalies?.length} ${t(
+                                `${getAnomaliesCountQuery.data?.count} ${t(
                                     "message.total-entity-from-start",
                                     {
                                         entity: t("label.anomalies"),
@@ -116,8 +140,8 @@ export const RecentAnomalies: FunctionComponent = () => {
                             </Box>
                         </Box>
                     }
-                    isError={status === ActionStatus.Error}
-                    isLoading={status === ActionStatus.Working}
+                    isError={getAnomaliesQuery.isError}
+                    isLoading={getAnomaliesQuery.isLoading}
                     loadingState={
                         <>
                             <SkeletonV1 animation="pulse" />
@@ -140,15 +164,7 @@ export const RecentAnomalies: FunctionComponent = () => {
                             >
                                 <NoDataIndicator>
                                     {capitalize(
-                                        t(
-                                            "message.no-recent-entity-found-in-the-timePeriod",
-                                            {
-                                                entity: t("label.anomalies"),
-                                                timePeriod: t(
-                                                    "label.last-6-months"
-                                                ),
-                                            }
-                                        )
+                                        t("message.no-recent-anomalies")
                                     )}
                                 </NoDataIndicator>
                             </Box>

@@ -19,6 +19,8 @@ import {
     useMediaQuery,
     useTheme,
 } from "@material-ui/core";
+import { useQuery } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { DateTime } from "luxon";
 import {
     default as React,
@@ -48,13 +50,14 @@ import {
     useDialogProviderV1,
 } from "../../platform/components";
 import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
-import { useGetAlerts } from "../../rest/alerts/alerts.actions";
-import {
-    useGetAnomalies,
-    useGetAnomalyStats,
-} from "../../rest/anomalies/anomaly.actions";
-import { useGetAppAnalytics } from "../../rest/app-analytics/app-analytics.action";
-import { useGetSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.actions";
+import { getAllAlerts } from "../../rest/alerts/alerts.rest";
+import { getAnomalyStats } from "../../rest/anomalies/anomalies.rest";
+import { getAppAnalytics } from "../../rest/app-analytics/app-analytics.rest";
+import { Alert } from "../../rest/dto/alert.interfaces";
+import { AnomalyStats } from "../../rest/dto/anomaly.interfaces";
+import { AppAnalytics } from "../../rest/dto/app-analytics.interfaces";
+import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
+import { getAllSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.rest";
 import { QUERY_PARAM_KEYS } from "../../utils/constants/constants.util";
 import {
     AppRoute,
@@ -76,23 +79,41 @@ export const HomePage: FunctionComponent = () => {
     const theme = useTheme();
     const style = useHomePageStyles();
     const screenWidthSmUp = useMediaQuery(theme.breakpoints.up("md"));
-    const {
-        appAnalytics,
-        getAppAnalytics,
-        status: appAnalyticsStatus,
-    } = useGetAppAnalytics();
-    const { anomalies, getAnomalies } = useGetAnomalies();
-    const {
-        subscriptionGroups,
-        getSubscriptionGroups,
-        status: getSubscriptionGroupsStatus,
-    } = useGetSubscriptionGroups();
-    const { alerts, getAlerts, status: getAlertsStatus } = useGetAlerts();
-    const {
-        anomalyStats,
-        getAnomalyStats,
-        status: anomalyStatsStatus,
-    } = useGetAnomalyStats();
+
+    const getAppAnalyticsQuery = useQuery<AppAnalytics, AxiosError>({
+        queryKey: ["appAnalytics"],
+        queryFn: () => {
+            return getAppAnalytics();
+        },
+        refetchOnWindowFocus: false,
+    });
+    const getAlertsQuery = useQuery<Alert[], AxiosError>({
+        queryKey: ["alerts"],
+        queryFn: () => {
+            return getAllAlerts();
+        },
+        refetchOnWindowFocus: false,
+    });
+    const getSubscriptionGroupsQuery = useQuery<
+        SubscriptionGroup[],
+        AxiosError
+    >({
+        queryKey: ["subscriptiongroups"],
+        queryFn: () => {
+            return getAllSubscriptionGroups();
+        },
+        refetchOnWindowFocus: false,
+    });
+    const getAnomalyStatsQuery = useQuery<AnomalyStats, AxiosError>({
+        queryKey: ["anomalyStats"],
+        queryFn: () => {
+            return getAnomalyStats({
+                startTime: anomalyStartTime,
+                endTime: DateTime.local().endOf("hour").toMillis(),
+            });
+        },
+        refetchOnWindowFocus: false,
+    });
     const { setPreference, getPreference } = useUserPreferences();
 
     const [shouldHideDocumentation, setShouldHideDocumentation] = useState(
@@ -100,21 +121,13 @@ export const HomePage: FunctionComponent = () => {
     );
 
     useEffect(() => {
-        getAppAnalytics();
-        getSubscriptionGroups();
-        getAnomalies();
-        getAlerts().then((alerts) => {
-            if (alerts?.length === 0) {
-                navigate(AppRoute.WELCOME);
-            }
-        });
-    }, []);
+        if (getAlertsQuery.data && getAlertsQuery.data.length === 0) {
+            navigate(AppRoute.WELCOME);
+        }
+    }, [getAlertsQuery.data]);
 
     useEffect(() => {
-        getAnomalyStats({
-            startTime: anomalyStartTime,
-            endTime: DateTime.local().endOf("hour").toMillis(),
-        });
+        getAnomalyStatsQuery.refetch();
     }, [anomalyStartTime]);
 
     const handleHideDocumentationClick = (): void => {
@@ -171,9 +184,10 @@ export const HomePage: FunctionComponent = () => {
                     <PageHeaderActionsV1>
                         <Box width={screenWidthSmUp ? 500 : "100%"}>
                             <EntitySearch
-                                alerts={alerts}
-                                anomalies={anomalies}
-                                subscriptionGroups={subscriptionGroups}
+                                alerts={getAlertsQuery.data || []}
+                                subscriptionGroups={
+                                    getSubscriptionGroupsQuery.data || []
+                                }
                             />
                         </Box>
                     </PageHeaderActionsV1>
@@ -189,19 +203,17 @@ export const HomePage: FunctionComponent = () => {
                         <Grid item sm={4} xs={12}>
                             <PageContentsCardV1 fullHeight>
                                 <ActiveAlertsCount
-                                    alerts={alerts}
-                                    getAlertsStatus={getAlertsStatus}
+                                    alertsQuery={getAlertsQuery}
                                 />
                             </PageContentsCardV1>
                         </Grid>
                         <Grid item sm={4} xs={12}>
                             <PageContentsCardV1 fullHeight>
                                 <AlertAccuracy
-                                    appAnalytics={appAnalytics}
+                                    appAnalyticsQuery={getAppAnalyticsQuery}
                                     classes={{
                                         noDataIndicator: style.noDataIndicator,
                                     }}
-                                    getAppAnalyticsStatus={appAnalyticsStatus}
                                 />
                             </PageContentsCardV1>
                         </Grid>
@@ -211,10 +223,9 @@ export const HomePage: FunctionComponent = () => {
                                     classes={{
                                         noDataIndicator: style.noDataIndicator,
                                     }}
-                                    getSubscriptionGroupsStatus={
-                                        getSubscriptionGroupsStatus
+                                    subscriptionGroupsQuery={
+                                        getSubscriptionGroupsQuery
                                     }
-                                    subscriptionGroups={subscriptionGroups}
                                 />
                             </PageContentsCardV1>
                         </Grid>
@@ -269,22 +280,20 @@ export const HomePage: FunctionComponent = () => {
                         <Grid item>
                             <PageContentsCardV1 fullHeight>
                                 <AnomaliesReportedCount
-                                    anomalyStats={anomalyStats}
+                                    anomalyStatsQuery={getAnomalyStatsQuery}
                                     classes={{
                                         noDataIndicator: style.noDataIndicator,
                                     }}
-                                    getAnomalyStatsStatus={anomalyStatsStatus}
                                 />
                             </PageContentsCardV1>
                         </Grid>
                         <Grid item>
                             <PageContentsCardV1 fullHeight>
                                 <AnomaliesPendingFeedbackCount
-                                    anomalyStats={anomalyStats}
+                                    anomalyStatsQuery={getAnomalyStatsQuery}
                                     classes={{
                                         noDataIndicator: style.noDataIndicator,
                                     }}
-                                    getAnomalyStatsStatus={anomalyStatsStatus}
                                 />
                             </PageContentsCardV1>
                         </Grid>

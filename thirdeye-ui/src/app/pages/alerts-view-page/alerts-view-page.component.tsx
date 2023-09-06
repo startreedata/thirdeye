@@ -22,6 +22,8 @@ import {
     Typography,
 } from "@material-ui/core";
 import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
+import { useQuery } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import React, {
     FunctionComponent,
     MouseEvent,
@@ -32,9 +34,8 @@ import React, {
 import { useTranslation } from "react-i18next";
 import { useParams, useSearchParams } from "react-router-dom";
 import { AlertAccuracyColored } from "../../components/alert-accuracy-colored/alert-accuracy-colored.component";
+import { AlertChart } from "../../components/alert-view/alert-chart/alert-chart.component";
 import { AlertOptionsButton } from "../../components/alert-view/alert-options-button/alert-options-button.component";
-import { EnumerationItemMerger } from "../../components/alert-view/enumeration-item-merger/enumeration-item-merger.component";
-import { DetectionEvaluationForRender } from "../../components/alert-view/enumeration-item-merger/enumeration-item-merger.interfaces";
 import { EnumerationItemsTable } from "../../components/alert-view/enumeration-items-table/enumeration-items-table.component";
 import { AlertViewSubHeader } from "../../components/alert-view/sub-header/alert-sub-header.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
@@ -51,23 +52,18 @@ import {
     useNotificationProviderV1,
 } from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
+import { useResetAlert } from "../../rest/alerts/alerts.actions";
 import {
-    useGetAlert,
-    useGetEvaluation,
-    useResetAlert,
-} from "../../rest/alerts/alerts.actions";
-import { getAlertStats, updateAlert } from "../../rest/alerts/alerts.rest";
-import { useGetAnomalies } from "../../rest/anomalies/anomaly.actions";
+    getAlert,
+    getAlertStats,
+    updateAlert,
+} from "../../rest/alerts/alerts.rest";
+import { getAnomalies } from "../../rest/anomalies/anomalies.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
-import {
-    createAlertEvaluation,
-    determineTimezoneFromAlertInEvaluation,
-    extractDetectionEvaluation,
-    shouldHideTimeInDatetimeFormat,
-} from "../../utils/alerts/alerts.util";
-import { generateNameForDetectionResult } from "../../utils/enumeration-items/enumeration-items.util";
+import { getEnumerationItems } from "../../rest/enumeration-items/enumeration-items.rest";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { QUERY_PARAM_KEY_FOR_EXPANDED } from "../../utils/params/params.util";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getAlertsAllPath } from "../../utils/routes/routes.util";
 import { AlertsViewPageParams } from "./alerts-view-page.interfaces";
 import {
@@ -90,31 +86,6 @@ export const AlertsViewPage: FunctionComponent = () => {
     const [resetStatusNotification, setResetStatusNotification] =
         useState<NotificationV1 | null>(null);
 
-    const {
-        alert: alertThatWasReset,
-        resetAlert,
-        status: resetAlertRequestStatus,
-        errorMessages: resetAlertRequestErrors,
-    } = useResetAlert();
-    const {
-        alert,
-        getAlert,
-        errorMessages: getAlertErrorMessages,
-        status: getAlertStatus,
-    } = useGetAlert();
-    const {
-        evaluation,
-        getEvaluation,
-        errorMessages: getEvaluationErrorMessages,
-        status: evaluationRequestStatus,
-    } = useGetEvaluation();
-    const {
-        anomalies,
-        getAnomalies,
-        errorMessages: getAnomaliesErrorsMessages,
-        status: anomaliesRequestStatus,
-        resetData: resetAnomaliesData,
-    } = useGetAnomalies();
     const [searchParams, setSearchParams] = useSearchParams();
 
     const [expanded, setExpanded] = useState<string[]>(
@@ -131,6 +102,42 @@ export const AlertsViewPage: FunctionComponent = () => {
         ],
         [searchParams]
     );
+
+    const {
+        alert: alertThatWasReset,
+        resetAlert,
+        status: resetAlertRequestStatus,
+        errorMessages: resetAlertRequestErrors,
+    } = useResetAlert();
+
+    const getAlertQuery = useQuery({
+        queryKey: ["alert", alertId],
+        queryFn: () => {
+            return getAlert(Number(alertId));
+        },
+        refetchOnWindowFocus: false,
+    });
+
+    const getEnumerationItemsQuery = useQuery({
+        queryKey: ["enumerationItems", alertId],
+        queryFn: () => {
+            return getEnumerationItems({ alertId: Number(alertId) });
+        },
+        refetchOnWindowFocus: false,
+    });
+
+    const getAnomaliesQuery = useQuery({
+        queryKey: ["anomalies", alertId, startTime, endTime],
+        queryFn: () => {
+            return getAnomalies({
+                alertId,
+                startTime,
+                endTime,
+            });
+        },
+        refetchOnWindowFocus: false,
+    });
+
     const [searchTerm, sortOrder, sortKey] = useMemo(
         () => [
             searchParams.get(QUERY_PARAM_KEY_FOR_SEARCH),
@@ -155,35 +162,6 @@ export const AlertsViewPage: FunctionComponent = () => {
             fetchStats();
         }
     }, [alertId, startTime, endTime]);
-
-    useEffect(() => {
-        if (!evaluation) {
-            return;
-        }
-        const extracted = extractDetectionEvaluation(evaluation);
-
-        // Automatically expand the only item in the response
-        if (extracted.length === 1) {
-            const nameForOnlyItem = generateNameForDetectionResult(
-                extracted[0]
-            );
-            searchParams.set(QUERY_PARAM_KEY_FOR_EXPANDED, nameForOnlyItem);
-            setSearchParams(searchParams, { replace: true });
-            setExpanded([nameForOnlyItem]);
-        }
-    }, [evaluation]);
-
-    const fetchData = (): void => {
-        if (!alert || !startTime || !endTime) {
-            return;
-        }
-        getAnomalies({
-            alertId: alert.id,
-            startTime,
-            endTime,
-        });
-        getEvaluation(createAlertEvaluation(alert, startTime, endTime));
-    };
 
     // Handle communicating status to the user
     useEffect(() => {
@@ -213,50 +191,24 @@ export const AlertsViewPage: FunctionComponent = () => {
     }, [alertId]);
 
     useEffect(() => {
-        // Fetched alert changed, fetch alert evaluation
-        fetchData();
-    }, [alert, startTime, endTime]);
-
-    useEffect(() => {
-        notifyIfErrors(
-            getAlertStatus,
-            getAlertErrorMessages,
-            notify,
-            t("message.error-while-fetching", {
-                entity: t("label.alert"),
-            })
-        );
-    }, [getAlertErrorMessages, getAlertStatus]);
-
-    useEffect(() => {
-        notifyIfErrors(
-            evaluationRequestStatus,
-            getEvaluationErrorMessages,
-            notify,
-            t("message.error-while-fetching", {
-                entity: t("label.chart-data"),
-            })
-        );
-    }, [getEvaluationErrorMessages, evaluationRequestStatus]);
-
-    useEffect(() => {
-        notifyIfErrors(
-            anomaliesRequestStatus,
-            getAnomaliesErrorsMessages,
-            notify,
-            t("message.error-while-fetching", {
-                entity: t("label.anomalies"),
-            })
-        );
-    }, [anomaliesRequestStatus, getAnomaliesErrorsMessages]);
+        getAnomaliesQuery.isError &&
+            notifyIfErrors(
+                ActionStatus.Error,
+                getErrorMessages(getAnomaliesQuery.error as AxiosError),
+                notify,
+                t("message.error-while-fetching", {
+                    entity: t("label.anomalies"),
+                })
+            );
+    }, [getAnomaliesQuery.isError]);
 
     /**
      * If anomalies list is empty and QUERY_PARAM_KEY_ANOMALIES_RETRY flag exists
      */
     useEffect(() => {
         if (
-            anomalies &&
-            anomalies.length === 0 &&
+            getAnomaliesQuery.data &&
+            getAnomaliesQuery.data.length === 0 &&
             searchParams.has(QUERY_PARAM_KEY_ANOMALIES_RETRY)
         ) {
             // If not in reset flow, assume alert was just created
@@ -271,14 +223,14 @@ export const AlertsViewPage: FunctionComponent = () => {
                     )
                 );
         }
-    }, [alert, anomalies]);
+    }, [getAnomaliesQuery.data]);
     /**
      * Automatic retry loading anomalies flow
      */
     useEffect(() => {
         if (
-            anomalies &&
-            anomalies.length > 0 &&
+            getAnomaliesQuery.data &&
+            getAnomaliesQuery.data.length > 0 &&
             searchParams.has(QUERY_PARAM_KEY_ANOMALIES_RETRY)
         ) {
             searchParams.delete(QUERY_PARAM_KEY_ANOMALIES_RETRY);
@@ -298,8 +250,8 @@ export const AlertsViewPage: FunctionComponent = () => {
         }
 
         if (
-            (anomalies && anomalies.length > 0) ||
-            anomaliesRequestStatus !== ActionStatus.Working
+            (getAnomaliesQuery.data && getAnomaliesQuery.data.length > 0) ||
+            getAnomaliesQuery.isLoading
         ) {
             if (autoRefreshNotification) {
                 removeNotification(autoRefreshNotification);
@@ -313,12 +265,8 @@ export const AlertsViewPage: FunctionComponent = () => {
             if (refreshAttempts < 3) {
                 setTimeout(() => {
                     setRefreshAttempts(refreshAttempts + 1);
-                    getAnomalies({
-                        alertId: alert.id,
-                        startTime,
-                        endTime,
-                    }).then((newAnomalies) => {
-                        if (newAnomalies && newAnomalies.length > 0) {
+                    getAnomaliesQuery.refetch().then((newAnomalies) => {
+                        if (newAnomalies.data && newAnomalies.data.length > 0) {
                             fetchStats();
                         }
                     });
@@ -347,7 +295,7 @@ export const AlertsViewPage: FunctionComponent = () => {
                 );
             }
         }
-    }, [anomalies, alert]);
+    }, [getAnomaliesQuery.data]);
 
     const handleExpandedChange = (newExpanded: string[]): void => {
         if (newExpanded.length > 0) {
@@ -374,7 +322,7 @@ export const AlertsViewPage: FunctionComponent = () => {
             );
 
             // Replace updated alert as fetched alert
-            fetchData();
+            // fetchData();
         });
     };
 
@@ -406,7 +354,7 @@ export const AlertsViewPage: FunctionComponent = () => {
     };
 
     const handleAnomalyDetectionRerun = (): void => {
-        fetchData();
+        // fetchData();
     };
 
     return (
@@ -419,21 +367,16 @@ export const AlertsViewPage: FunctionComponent = () => {
                         link: getAlertsAllPath(),
                     },
                     {
-                        label: alert ? alert.name : "",
+                        label: getAlertQuery?.data?.name || "",
                     },
                 ]}
                 customActions={
-                    alert ? (
+                    getAlertQuery.data ? (
                         <AlertOptionsButton
-                            alert={alert}
+                            alert={getAlertQuery.data}
                             handleAlertResetClick={() => {
-                                resetAnomaliesData();
-                                resetAlert(alert.id).then((newlyResetAlert) => {
-                                    getAnomalies({
-                                        alertId: newlyResetAlert?.id,
-                                        startTime,
-                                        endTime,
-                                    });
+                                resetAlert(Number(alertId)).then(() => {
+                                    getAnomaliesQuery.refetch();
 
                                     searchParams.set(
                                         QUERY_PARAM_KEY_ANOMALIES_RETRY,
@@ -474,13 +417,13 @@ export const AlertsViewPage: FunctionComponent = () => {
                 }
                 subtitle={
                     <>
-                        {alert?.description && (
+                        {getAlertQuery.data?.description && (
                             <Box paddingBottom={1}>
                                 <Typography
                                     color="textSecondary"
                                     variant="subtitle2"
                                 >
-                                    {alert?.description}
+                                    {getAlertQuery.data?.description}
                                 </Typography>
                             </Box>
                         )}
@@ -494,29 +437,22 @@ export const AlertsViewPage: FunctionComponent = () => {
                         />
                     </>
                 }
-                title={alert?.name || ""}
+                title={getAlertQuery.data?.name || ""}
             >
-                {getAlertStatus === ActionStatus.Working && (
-                    <SkeletonV1 width="512px" />
-                )}
+                {getAlertQuery.isLoading && <SkeletonV1 width="512px" />}
             </PageHeader>
 
             <PageContentsGridV1>
                 {/* Alert sub header */}
                 <Grid item xs={12}>
                     <LoadingErrorStateSwitch
-                        isError={getAlertStatus === ActionStatus.Error}
-                        isLoading={
-                            getAlertStatus === ActionStatus.Initial ||
-                            getAlertStatus === ActionStatus.Working
-                        }
+                        errorState={<></>}
+                        isError={getAlertQuery.isError}
+                        isLoading={getAlertQuery.isLoading}
                         loadingState={<SkeletonV1 />}
                     >
                         <AlertViewSubHeader
-                            alert={alert as Alert}
-                            timezone={determineTimezoneFromAlertInEvaluation(
-                                evaluation?.alert.template
-                            )}
+                            alert={getAlertQuery.data as Alert}
                         />
                     </LoadingErrorStateSwitch>
                 </Grid>
@@ -530,29 +466,32 @@ export const AlertsViewPage: FunctionComponent = () => {
                                     <Box pb={20} pt={20}>
                                         <NoDataIndicator>
                                             <Box p={1}>
-                                                <Button
-                                                    color="primary"
-                                                    onClick={fetchData}
-                                                >
-                                                    {t(
-                                                        "label.reload-chart-data"
-                                                    )}
-                                                </Button>
+                                                <Typography>
+                                                    Experienced error while
+                                                    loading alert. Try reloading
+                                                    the alert data.
+                                                </Typography>
+                                                <Box pt={1}>
+                                                    <Button
+                                                        color="primary"
+                                                        onClick={() =>
+                                                            getAlertQuery.refetch()
+                                                        }
+                                                    >
+                                                        {t("label.reload")}
+                                                    </Button>
+                                                </Box>
                                             </Box>
                                         </NoDataIndicator>
                                     </Box>
                                 </CardContent>
                             </Card>
                         }
-                        isError={
-                            evaluationRequestStatus === ActionStatus.Error ||
-                            getAlertStatus === ActionStatus.Error
-                        }
+                        isError={getAlertQuery.isError}
                         isLoading={
-                            evaluationRequestStatus === ActionStatus.Working ||
-                            evaluationRequestStatus === ActionStatus.Initial ||
-                            getAlertStatus === ActionStatus.Working ||
-                            getAlertStatus === ActionStatus.Initial
+                            getAnomaliesQuery.isLoading ||
+                            getEnumerationItemsQuery.isLoading ||
+                            getAlertQuery.isLoading
                         }
                         loadingState={
                             <Card variant="outlined">
@@ -567,48 +506,32 @@ export const AlertsViewPage: FunctionComponent = () => {
                             </Card>
                         }
                     >
-                        {evaluation && (
-                            <EnumerationItemMerger
-                                anomalies={anomalies || []}
-                                detectionEvaluations={extractDetectionEvaluation(
-                                    evaluation
-                                )}
-                            >
-                                {(
-                                    detectionEvaluations: DetectionEvaluationForRender[]
-                                ) => {
-                                    return (
-                                        <EnumerationItemsTable
-                                            alertId={Number(alertId)}
-                                            detectionEvaluations={
-                                                detectionEvaluations
-                                            }
-                                            expanded={expanded}
-                                            hideTime={shouldHideTimeInDatetimeFormat(
-                                                evaluation?.alert?.template
-                                            )}
-                                            initialSearchTerm={searchTerm || ""}
-                                            sortKey={sortKey}
-                                            sortOrder={sortOrder}
-                                            timezone={determineTimezoneFromAlertInEvaluation(
-                                                evaluation?.alert?.template
-                                            )}
-                                            onExpandedChange={
-                                                handleExpandedChange
-                                            }
-                                            onSearchTermChange={
-                                                handleSearchTermChange
-                                            }
-                                            onSortKeyChange={
-                                                handleSortKeyChange
-                                            }
-                                            onSortOrderChange={
-                                                handleSortOrderChange
-                                            }
-                                        />
-                                    );
-                                }}
-                            </EnumerationItemMerger>
+                        {getAlertQuery.data?.templateProperties
+                            ?.enumerationItems ? (
+                            <EnumerationItemsTable
+                                alertId={Number(alertId)}
+                                anomalies={getAnomaliesQuery.data || []}
+                                endTime={endTime}
+                                enumerationsItems={
+                                    getEnumerationItemsQuery.data || []
+                                }
+                                expanded={expanded}
+                                initialSearchTerm={searchTerm || ""}
+                                sortKey={sortKey}
+                                sortOrder={sortOrder}
+                                startTime={startTime}
+                                onExpandedChange={handleExpandedChange}
+                                onSearchTermChange={handleSearchTermChange}
+                                onSortKeyChange={handleSortKeyChange}
+                                onSortOrderChange={handleSortOrderChange}
+                            />
+                        ) : (
+                            <AlertChart
+                                alertId={Number(alertId)}
+                                anomalies={getAnomaliesQuery.data || []}
+                                endTime={endTime}
+                                startTime={startTime}
+                            />
                         )}
                     </LoadingErrorStateSwitch>
                 </Grid>

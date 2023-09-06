@@ -15,11 +15,14 @@
 import { Box, Button, Grid, Typography, useTheme } from "@material-ui/core";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import HighlightOffIcon from "@material-ui/icons/HighlightOff";
+import { useQuery } from "@tanstack/react-query";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { JSONEditorV1 } from "../../../platform/components";
+import { getAlertInsight } from "../../../rest/alerts/alerts.rest";
 import { Alert } from "../../../rest/dto/alert.interfaces";
+import { determineTimezoneFromAlertInEvaluation } from "../../../utils/alerts/alerts.util";
 import { getAlertsUpdatePath } from "../../../utils/routes/routes.util";
 import { Modal } from "../../modal/modal.component";
 import { TimeRangeButtonWithContext } from "../../time-range/time-range-button-with-context/time-range-button.component";
@@ -27,11 +30,18 @@ import { AlertViewSubHeaderProps } from "./alert-sub-header.interfaces";
 
 export const AlertViewSubHeader: FunctionComponent<AlertViewSubHeaderProps> = ({
     alert,
-    timezone,
 }) => {
     const navigate = useNavigate();
     const { t } = useTranslation();
     const theme = useTheme();
+
+    const getAlertInsightQuery = useQuery({
+        queryKey: ["alertInsight", alert.id],
+        queryFn: () => {
+            return getAlertInsight({ alertId: alert.id });
+        },
+        refetchOnWindowFocus: false,
+    });
 
     return (
         <Grid container justifyContent="space-between">
@@ -107,7 +117,10 @@ export const AlertViewSubHeader: FunctionComponent<AlertViewSubHeaderProps> = ({
                     <Grid item>
                         <TimeRangeButtonWithContext
                             btnGroupColor="primary"
-                            timezone={timezone}
+                            timezone={determineTimezoneFromAlertInEvaluation(
+                                getAlertInsightQuery.data
+                                    ?.templateWithProperties
+                            )}
                         />
                     </Grid>
                 </Grid>

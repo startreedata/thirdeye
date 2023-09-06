@@ -22,7 +22,11 @@ import type {
     AlertStats,
     EditableAlert,
 } from "../dto/alert.interfaces";
-import { EnumerationItemParams } from "../dto/detection.interfaces";
+import {
+    DetectionEvaluation,
+    EnumerationItemInEvaluation,
+} from "../dto/detection.interfaces";
+import { EnumerationItem } from "../dto/enumeration-item.interfaces";
 import {
     GetAlertEvaluationPayload,
     GetAlertStatsParams,
@@ -151,7 +155,10 @@ export const rerunAnomalyDetectionForAlert = async ({
 export const getAlertEvaluation = async (
     alertEvaluation: GetAlertEvaluationPayload,
     filters?: string[], // array of strings in `column=value` format
-    enumerationItem?: { id: number } | EnumerationItemParams
+    enumerationItem?:
+        | { id: number }
+        | EnumerationItem
+        | EnumerationItemInEvaluation
 ): Promise<AlertEvaluation> => {
     const payload: GetEvaluationRequestPayload = { ...alertEvaluation };
 
@@ -178,6 +185,34 @@ export const getAlertEvaluation = async (
     }
 
     return response.data;
+};
+
+export const getAlertEvaluationEnumerationItems = async (
+    alert: Alert | EditableAlert | Pick<Alert, "id">,
+    start: number,
+    end: number
+): Promise<EnumerationItemInEvaluation[]> => {
+    const payload: GetEvaluationRequestPayload = {
+        alert,
+        start,
+        end,
+        evaluationContext: {
+            listEnumerationItemsOnly: true,
+        },
+    };
+
+    const response = await axios.post(`${BASE_URL_ALERTS}/evaluate`, payload);
+
+    if (response.data.detectionEvaluations) {
+        return Object.values<DetectionEvaluation>(
+            response.data.detectionEvaluations
+        ).map(
+            (d: DetectionEvaluation) =>
+                d.enumerationItem as EnumerationItemInEvaluation
+        );
+    }
+
+    return [];
 };
 
 export const getAlertRecommendation = async (

@@ -13,19 +13,29 @@
  * the License.
  */
 import type { DataGridSortOrderV1 } from "../../../platform/components";
-import type { DetectionEvaluationForRender } from "../enumeration-item-merger/enumeration-item-merger.interfaces";
+import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
+import { EnumerationItem } from "../../../rest/dto/enumeration-item.interfaces";
 
 export interface EnumerationItemsTableProps {
-    detectionEvaluations: DetectionEvaluationForRender[];
+    anomalies: Anomaly[];
+    enumerationsItems: EnumerationItem[];
+    alertId: number;
+    startTime: number;
+    endTime: number;
+
     expanded: string[];
     onExpandedChange: (newExpanded: string[]) => void;
-    alertId: number;
     sortOrder: DataGridSortOrderV1;
     sortKey: string;
     initialSearchTerm: string;
     onSearchTermChange: (newTerm: string) => void;
     onSortKeyChange: (newKey: string) => void;
     onSortOrderChange: (newOrder: DataGridSortOrderV1) => void;
-    timezone?: string;
-    hideTime?: boolean;
+}
+
+export interface EnumerationItemsWithAnomalies {
+    enumerationItem: EnumerationItem;
+    anomalies: Anomaly[];
+
+    lastAnomalyTs: number;
 }

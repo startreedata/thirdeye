@@ -122,6 +122,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
         .map(api -> createDto(principal, api))
         .map(dto -> createGateKeeper(principal, dto))
         .peek(dtoManager::save)
+        .peek(dto -> authorizationManager.invalidateCache())
         .peek(dto -> Objects.requireNonNull(dto.getId(), "DB update failed!"))
         .map(dto -> toApi(dto, cache))
         .collect(Collectors.toList());
@@ -135,6 +136,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
         .map(o -> updateDto(principal, o))
         .peek(dtoManager::update)
         .peek(this::postUpdate)
+        .peek(dto -> authorizationManager.invalidateCache())
         .map(dto -> toApi(dto, cache))
         .collect(Collectors.toList());
   }

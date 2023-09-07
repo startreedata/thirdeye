@@ -15,7 +15,7 @@ package ai.startree.thirdeye.auth;
 
 import static ai.startree.thirdeye.spi.accessControl.ResourceIdentifier.DEFAULT_ENTITY_TYPE;
 import static ai.startree.thirdeye.spi.accessControl.ResourceIdentifier.DEFAULT_NAME;
-import static ai.startree.thirdeye.spi.accessControl.ResourceIdentifier.DEFAULT_NAMESPACE;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal.AuthenticationType;
@@ -29,19 +29,11 @@ import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.google.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -59,15 +51,7 @@ public class AuthorizationManager {
 
   private final AlertTemplateRenderer alertTemplateRenderer;
   private final AccessControl accessControl;
-  private final AlertManager alertManager;
-  private final EnumerationItemManager enumerationItemManager;
-  private final AnomalyManager anomalyManager;
-
-  // cache resource id's to their respective auth namespaces
-  private final Cache<Long, String> namespaceCache = CacheBuilder.newBuilder()
-      .maximumSize(2048)
-      .expireAfterAccess(5, TimeUnit.SECONDS)
-      .build();
+  private final NamespaceResolver namespaceResolver;
 
   @Inject
   public AuthorizationManager(
@@ -78,9 +62,7 @@ public class AuthorizationManager {
       final AnomalyManager anomalyManager) {
     this.alertTemplateRenderer = alertTemplateRenderer;
     this.accessControl = accessControl;
-    this.alertManager = alertManager;
-    this.enumerationItemManager = enumerationItemManager;
-    this.anomalyManager = anomalyManager;
+    this.namespaceResolver = new NamespaceResolver(alertManager, enumerationItemManager, anomalyManager);
   }
 
   public <T extends AbstractDTO> void ensureCanCreate(final ThirdEyePrincipal principal,
@@ -161,79 +143,20 @@ public class AuthorizationManager {
   // Returns the resource identifier for a dto.
   // Null is ok and maps to a default resource id.
   public ResourceIdentifier resourceId(final AbstractDTO dto) {
-    final var name = Optional.ofNullable(dto)
+    final var name = optional(dto)
         .map(AbstractDTO::getId)
         .map(Objects::toString)
         .orElse(DEFAULT_NAME);
 
-    final var namespace = Optional.ofNullable(dto)
-        .map(this::resolveAuthNamespaceFromCache)
-        .orElse(DEFAULT_NAMESPACE);
+    final var namespace = namespaceResolver.resolveNamespace(dto);
 
-    final var entityType = Optional.ofNullable(dto)
+    final var entityType = optional(dto)
         .map(AbstractDTO::getClass)
         .map(SubEntities.BEAN_TYPE_MAP::get)
         .map(Objects::toString)
         .orElse(DEFAULT_ENTITY_TYPE);
 
     return ResourceIdentifier.from(name, namespace, entityType);
-  }
-
-  // Resolves the Authorization parent for certain dto classes.
-  // AnomalyDTO -> EnumerationItemDTO namespace if exists, else AlertDTO namespace
-  // RcaInvestigationDTO -> Anomaly's parent namespace
-  private String resolveAuthNamespaceFromCache(final AbstractDTO dto) {
-    if (dto == null) {
-      return DEFAULT_NAMESPACE;
-    } else if (dto.getId() == null) {
-      return resolveAuthNamespace(dto);
-    }
-
-    try {
-      return namespaceCache.get(dto.getId(), () -> resolveAuthNamespace(dto));
-    } catch (ExecutionException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  private String resolveAuthNamespace(final AbstractDTO dto) {
-    if (dto instanceof AnomalyDTO) {
-      return resolveAnomalyNamespace((AnomalyDTO) (dto));
-    }
-
-    if (dto instanceof RcaInvestigationDTO) {
-      return resolveRcaNamespace((RcaInvestigationDTO) (dto));
-    }
-
-    return Optional.of(dto)
-        .map(AbstractDTO::getAuth)
-        .map(AuthorizationConfigurationDTO::getNamespace)
-        .orElse(DEFAULT_NAMESPACE);
-  }
-
-  private String resolveAnomalyNamespace(final AnomalyDTO dto) {
-    if (dto.getEnumerationItem() != null) {
-      return Optional.of(dto.getEnumerationItem())
-          .map(AbstractDTO::getId)
-          .map(enumerationItemManager::findById)
-          .map(this::resolveAuthNamespaceFromCache)
-          .orElse(DEFAULT_NAMESPACE);
-    }
-
-    return Optional.of(dto)
-        .map(AnomalyDTO::getDetectionConfigId)
-        .map(alertManager::findById)
-        .map(this::resolveAuthNamespaceFromCache)
-        .orElse(DEFAULT_NAMESPACE);
-  }
-
-  private String resolveRcaNamespace(final RcaInvestigationDTO dto) {
-    return Optional.of(dto)
-        .map(RcaInvestigationDTO::getAnomaly)
-        .map(AbstractDTO::getId)
-        .map(anomalyManager::findById)
-        .map(this::resolveAuthNamespaceFromCache)
-        .orElse(DEFAULT_NAMESPACE);
   }
 
   private <T extends AbstractDTO> List<ResourceIdentifier> relatedEntities(T entity) {
@@ -259,5 +182,9 @@ public class AuthorizationManager {
 
   public static ThirdEyePrincipal getInternalValidPrincipal() {
     return INTERNAL_VALID_PRINCIPAL;
+  }
+
+  public void invalidateCache() {
+    namespaceResolver.invalidateCache();
   }
 }

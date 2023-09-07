@@ -49,10 +49,10 @@ const AnomaliesViewV1Page = lazy(() =>
     ).then((module) => ({ default: module.AnomaliesViewV1Page }))
 );
 
-const AnomaliesViewIndexV1Page = lazy(() =>
+const AnomaliesViewIndexV2Page = lazy(() =>
     import(
-        /* webpackChunkName: "anomalies-index-v1-page" */ "../../pages/anomalies-view-index-page/anomalies-view-index-v1-page.component"
-    ).then((module) => ({ default: module.AnomaliesViewIndexV1Page }))
+        /* webpackChunkName: "anomalies-index-v1-page" */ "../../pages/anomalies-view-index-page/anomalies-view-index-v2-page.component"
+    ).then((module) => ({ default: module.AnomaliesViewIndexV2Page }))
 );
 
 const AnomaliesViewInformationPage = lazy(() =>
@@ -219,7 +219,7 @@ export const AnomaliesRouter: FunctionComponent = () => {
 
                 <Route path={`${AppRouteRelative.ANOMALIES_ANOMALY}/*`}>
                     {/* Anomalies view index path to default the time range params */}
-                    <Route index element={<AnomaliesViewIndexV1Page />} />
+                    <Route index element={<AnomaliesViewIndexV2Page />} />
 
                     {/* Anomalies view path */}
                     <Route

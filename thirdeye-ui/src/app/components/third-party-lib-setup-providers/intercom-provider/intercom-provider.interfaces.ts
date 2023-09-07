@@ -12,16 +12,14 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-export interface AppConfiguration {
-    authEnabled?: boolean;
-    clientId?: string;
-    heap?: {
-        environmentId: string;
-    };
-    sentry?: {
-        clientDsn: string;
-    };
-    intercom?: {
-        appId: string;
-    };
+/*
+ * Copyright 2023 StarTree Inc.
+ *
+ * All rights reserved. Confidential and proprietary information of StarTree Inc.
+ */
+
+export interface IntercomProviderProps {
+    appId?: string;
+    email?: string;
+    nameOfUser?: string;
 }

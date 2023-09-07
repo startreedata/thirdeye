@@ -20,9 +20,10 @@
 import * as Sentry from "@sentry/react";
 import { useQuery } from "@tanstack/react-query";
 import React, { FunctionComponent, useEffect, useState } from "react";
-import { useAuthProviderV1 } from "../../platform/components";
-import { getAppConfiguration as getAppConfigurationRest } from "../../rest/app-config/app-config.rest";
-import { getThirdEyeUiVersion } from "../../utils/version/version.util";
+import { useAuthProviderV1 } from "../../../platform/components";
+import { getAppConfiguration as getAppConfigurationRest } from "../../../rest/app-config/app-config.rest";
+import { getThirdEyeUiVersion } from "../../../utils/version/version.util";
+import { IntercomProvider } from "../intercom-provider/intercom-provider.component";
 import { AnalyticsAndErrorReportingProviderV1Props } from "./analytics-and-error-reporting-provider-v1.interfaces";
 
 const getEnvironmentFromHostname = (hostname: string): string => {
@@ -114,5 +115,13 @@ export const AnalyticsAndErrorReportingProviderV1: FunctionComponent<AnalyticsAn
             }
         }, [appConfig]);
 
-        return <>{children}</>;
+        return (
+            <IntercomProvider
+                appId={appConfig?.intercom?.appId}
+                email={authUser.email}
+                nameOfUser={authUser.name}
+            >
+                {children}
+            </IntercomProvider>
+        );
     };

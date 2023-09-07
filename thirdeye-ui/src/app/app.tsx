@@ -17,8 +17,8 @@ import * as Sentry from "@sentry/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { AnalyticsAndErrorReportingProviderV1 } from "./components/analytics-and-error-reporting-provider-v1/analytics-and-error-reporting-provider-v1.component";
 import { AppBarConfigProvider } from "./components/app-bar/app-bar-config-provider/app-bar-config-provider.component";
+import { AnalyticsAndErrorReportingProviderV1 } from "./components/third-party-lib-setup-providers/analytics-and-error-reporting-provider-v1/analytics-and-error-reporting-provider-v1.component";
 import { AppCrashPage } from "./pages/app-crash-page/app-crash-page.component";
 import {
     AppContainerV1,

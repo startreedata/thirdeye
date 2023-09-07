@@ -35,6 +35,7 @@ export const AnalyticsAndErrorReportingProviderV1: FunctionComponent<AnalyticsAn
         const { data: appConfig } = useQuery({
             queryKey: ["appConfig"],
             queryFn: getAppConfigurationRest,
+            refetchOnWindowFocus: false,
         });
         const { authUser } = useAuthProviderV1();
 

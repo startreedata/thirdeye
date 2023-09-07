@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { DetectionEvaluationForRender } from "../../components/alert-view/enumeration-item-merger/enumeration-item-merger.interfaces";
+import { EnumerationItemsWithAnomalies } from "../../components/alert-view/enumeration-items-table/enumeration-items-table.interfaces";
 import {
     DetectionEvaluation,
     EnumerationItemInEvaluation,
@@ -113,6 +113,9 @@ export const doesMatch = (
     return numLeftToMatch === 0;
 };
 
+/**
+ * Returns true if the criteria matches the generated string from the params
+ */
 export const doesMatchString = (
     candidate: EnumerationItemInEvaluation,
     criteria: string
@@ -125,20 +128,22 @@ export const doesMatchString = (
     const lowerCasedCriteria = criteria.toLowerCase();
 
     return (
-        name.toLowerCase().indexOf(lowerCasedCriteria) > -1 ||
-        nameWithoutQuotes.toLowerCase().indexOf(lowerCasedCriteria) > -1
+        name.toLowerCase().includes(lowerCasedCriteria) ||
+        nameWithoutQuotes.toLowerCase().includes(lowerCasedCriteria)
     );
 };
 
-export const filterEvaluations = (
-    detectionEvaluations: DetectionEvaluationForRender[],
+export const filterEnumerationItems = (
+    enumerationItems: EnumerationItemsWithAnomalies[],
     term: string
-): DetectionEvaluationForRender[] => {
+): EnumerationItemsWithAnomalies[] => {
     if (term) {
-        return detectionEvaluations.filter((c) =>
-            c.enumerationItem ? doesMatchString(c.enumerationItem, term) : false
+        const termLowered = term.toLowerCase();
+
+        return enumerationItems.filter((c) =>
+            c.enumerationItem.name.toLowerCase().includes(termLowered)
         );
     }
 
-    return detectionEvaluations;
+    return enumerationItems;
 };

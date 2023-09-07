@@ -19,14 +19,13 @@ import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { Link as RouterLink } from "react-router-dom";
 import { SkeletonV1 } from "../../../platform/components";
-import { ActionStatus } from "../../../rest/actions.interfaces";
 import { getAnomaliesAllPath } from "../../../utils/routes/routes.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { AnomaliesReportedCountProps } from "./anomalies-reported-count.interfaces";
 
 export const AnomaliesReportedCount: FunctionComponent<AnomaliesReportedCountProps> =
-    ({ anomalyStats, getAnomalyStatsStatus: status, classes }) => {
+    ({ anomalyStatsQuery, classes }) => {
         const { t } = useTranslation();
 
         return (
@@ -52,11 +51,8 @@ export const AnomaliesReportedCount: FunctionComponent<AnomaliesReportedCountPro
                                 {t("message.experienced-issues-fetching-data")}
                             </NoDataIndicator>
                         }
-                        isError={status === ActionStatus.Error}
-                        isLoading={
-                            status === ActionStatus.Working ||
-                            status === ActionStatus.Initial
-                        }
+                        isError={anomalyStatsQuery.isError}
+                        isLoading={anomalyStatsQuery.isLoading}
                         loadingState={
                             <Box
                                 className={classNames(classes?.noDataIndicator)}
@@ -69,7 +65,8 @@ export const AnomaliesReportedCount: FunctionComponent<AnomaliesReportedCountPro
                         }
                     >
                         <Typography variant="h2">
-                            {anomalyStats && anomalyStats.totalCount}
+                            {anomalyStatsQuery.data &&
+                                anomalyStatsQuery.data.totalCount}
                         </Typography>
                     </LoadingErrorStateSwitch>
                 </Grid>

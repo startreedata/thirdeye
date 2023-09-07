@@ -31,7 +31,7 @@ import {
 import { useGetAnomaly } from "../../rest/anomalies/anomaly.actions";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { isValidNumberId } from "../../utils/params/params.util";
-import { getAnomaliesAnomalyViewPath } from "../../utils/routes/routes.util";
+import { getAnomaliesAnomalyViewPathV2 } from "../../utils/routes/routes.util";
 import { WEEK_IN_MILLISECONDS } from "../../utils/time/time.util";
 import { AnomaliesViewPageParams } from "../anomalies-view-page/anomalies-view-page.interfaces";
 
@@ -39,7 +39,7 @@ import { AnomaliesViewPageParams } from "../anomalies-view-page/anomalies-view-p
  * The sole purpose of this page is to figure out the default dates
  * to redirect to the anomalies view page to
  */
-export const AnomaliesViewIndexV1Page: FunctionComponent = () => {
+export const AnomaliesViewIndexV2Page: FunctionComponent = () => {
     const {
         anomaly,
         getAnomaly,
@@ -71,7 +71,7 @@ export const AnomaliesViewIndexV1Page: FunctionComponent = () => {
                 ],
             ]);
             navigate(
-                `${getAnomaliesAnomalyViewPath(
+                `${getAnomaliesAnomalyViewPathV2(
                     toNumber(params.id)
                 )}?${timeRangeQuery.toString()}`,
                 {

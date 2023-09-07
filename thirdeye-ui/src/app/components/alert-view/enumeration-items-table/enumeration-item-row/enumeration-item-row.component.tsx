@@ -23,21 +23,27 @@ import {
 } from "@material-ui/core";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import { useQuery } from "@tanstack/react-query";
 import { DateTime } from "luxon";
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useInView } from "react-intersection-observer";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
+import { SkeletonV1 } from "../../../../platform/components";
+import { getAlertEvaluation } from "../../../../rest/alerts/alerts.rest";
 import {
-    Link as RouterLink,
-    useNavigate,
-    useSearchParams,
-} from "react-router-dom";
-import { generateNameForDetectionResult } from "../../../../utils/enumeration-items/enumeration-items.util";
+    determineTimezoneFromAlertInEvaluation,
+    shouldHideTimeInDatetimeFormat,
+} from "../../../../utils/alerts/alerts.util";
+import { generateNameForEnumerationItem } from "../../../../utils/enumeration-items/enumeration-items.util";
 import {
     createPathWithRecognizedQueryString,
     getAlertsAlertAnomaliesPath,
     getAnomaliesCreatePath,
 } from "../../../../utils/routes/routes.util";
 import { AnomalyWizardQueryParams } from "../../../anomalies-create/create-anomaly-wizard/create-anomaly-wizard.utils";
+import { NoDataIndicator } from "../../../no-data-indicator/no-data-indicator.component";
+import { LoadingErrorStateSwitch } from "../../../page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { Pluralize } from "../../../pluralize/pluralize.component";
 import {
     CHART_SIZE_OPTIONS,
@@ -51,22 +57,48 @@ import { EnumerationItemRowProps } from "./enumeration-item-row.interfaces";
 import { useEnumerationItemRowStyles } from "./enumeration-item-row.style";
 
 export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
-    alertId,
-    detectionEvaluation,
     anomalies,
+    alertId,
+    enumerationItem,
+    startTime,
+    endTime,
     expanded,
     onExpandChange,
-    timezone,
-    hideTime,
 }) => {
     const navigate = useNavigate();
-
     const { t } = useTranslation();
-    const [searchParams] = useSearchParams();
+    const { ref, inView } = useInView({
+        triggerOnce: true,
+        delay: 150,
+    });
+
+    const getEvaluationQuery = useQuery({
+        enabled: false,
+        queryKey: [
+            "evaluation",
+            alertId,
+            enumerationItem.params,
+            startTime,
+            endTime,
+        ],
+        queryFn: () => {
+            return getAlertEvaluation(
+                {
+                    alert: { id: alertId },
+                    start: startTime,
+                    end: endTime,
+                },
+                undefined,
+                enumerationItem
+            );
+        },
+        refetchOnWindowFocus: false,
+    });
+
     const [expandedChartHeight, setExpandedChartHeight] =
         useState(SMALL_CHART_SIZE);
     const nameForDetectionEvaluation =
-        generateNameForDetectionResult(detectionEvaluation);
+        generateNameForEnumerationItem(enumerationItem);
     const [isExpanded, setIsExpanded] = useState(
         expanded.includes(nameForDetectionEvaluation)
     );
@@ -76,26 +108,24 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
         setIsExpanded(expanded.includes(nameForDetectionEvaluation));
     }, [expanded]);
 
+    useEffect(() => {
+        if (inView) {
+            getEvaluationQuery.refetch();
+        }
+    }, [inView]);
+
     const handleCreateAlertAnomaly = (): void => {
         // Use the selected start and end time for the anomaly
-
-        const alertChartStartTime = Number(
-            searchParams.get(TimeRangeQueryStringKey.START_TIME)
-        );
-        const alertChartEndTime = Number(
-            searchParams.get(TimeRangeQueryStringKey.END_TIME)
-        );
-
         const redirectSearchParams = new URLSearchParams([
-            [TimeRangeQueryStringKey.START_TIME, `${alertChartStartTime}`],
-            [TimeRangeQueryStringKey.END_TIME, `${alertChartEndTime}`],
+            [TimeRangeQueryStringKey.START_TIME, `${startTime}`],
+            [TimeRangeQueryStringKey.END_TIME, `${endTime}`],
         ] as string[][]);
 
         // Add the enumeration item ID as a query param if present
-        if (detectionEvaluation.enumerationId) {
+        if (enumerationItem.id) {
             redirectSearchParams.set(
                 AnomalyWizardQueryParams.EnumerationItemId,
-                `${detectionEvaluation.enumerationId}`
+                `${enumerationItem.id}`
             );
         }
 
@@ -107,186 +137,252 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
         navigate(path);
     };
 
-    const tsData = generateChartOptionsForAlert(
-        detectionEvaluation,
-        anomalies,
-        t,
-        navigate,
-        timezone,
-        hideTime
-    );
-    const tsDataForExpanded: TimeSeriesChartProps = {
-        ...tsData,
-    };
-    tsData.brush = false;
-    tsData.zoom = true;
-    tsData.legend = false;
-    tsData.yAxis = {
-        enabled: false,
-    };
-    tsData.margins = {
-        top: 0,
-        bottom: 10, // This needs to exist for the x axis
-        left: 0,
-        right: 0,
-    };
-    tsData.xAxis = {
-        ...tsData.xAxis,
-        tickFormatter: (d: string) => {
-            return DateTime.fromJSDate(new Date(d), {
-                zone: timezone,
-            }).toFormat("MMM dd");
-        },
-    };
+    const [chartData, chartDataForExpanded] = useMemo(() => {
+        if (!getEvaluationQuery.data) {
+            return [];
+        }
+
+        const timezone = determineTimezoneFromAlertInEvaluation(
+            getEvaluationQuery.data?.alert.template
+        );
+        const tsData = generateChartOptionsForAlert(
+            Object.values(getEvaluationQuery.data?.detectionEvaluations)[0],
+            anomalies,
+            t,
+            navigate,
+            timezone,
+            shouldHideTimeInDatetimeFormat(
+                getEvaluationQuery.data?.alert.template
+            )
+        );
+        const tsDataForExpanded: TimeSeriesChartProps = {
+            ...tsData,
+        };
+        tsData.brush = false;
+        tsData.zoom = true;
+        tsData.legend = false;
+        tsData.yAxis = {
+            enabled: false,
+        };
+        tsData.margins = {
+            top: 0,
+            bottom: 10, // This needs to exist for the x axis
+            left: 0,
+            right: 0,
+        };
+        tsData.xAxis = {
+            ...tsData.xAxis,
+            tickFormatter: (d: string) => {
+                return DateTime.fromJSDate(new Date(d), {
+                    zone: timezone,
+                }).toFormat("MMM dd");
+            },
+        };
+
+        return [tsData, tsDataForExpanded];
+    }, [getEvaluationQuery.data, anomalies]);
 
     return (
-        <Grid item key={nameForDetectionEvaluation} xs={12}>
-            <Card variant="outlined">
-                <CardContent>
-                    <Grid container alignItems="center">
-                        <Grid
-                            item
-                            {...(isExpanded
-                                ? { sm: 6, xs: 12 }
-                                : { sm: 4, xs: 12 })}
+        <Card innerRef={ref} variant="outlined">
+            <CardContent>
+                <Grid container alignItems="center">
+                    <Grid
+                        item
+                        {...(isExpanded
+                            ? { sm: 6, xs: 12 }
+                            : { sm: 4, xs: 12 })}
+                    >
+                        <Typography
+                            className={classes.name}
+                            variant="subtitle1"
                         >
-                            <Typography
-                                className={classes.name}
-                                variant="subtitle1"
-                            >
-                                {nameForDetectionEvaluation}
-                            </Typography>
-                        </Grid>
-                        {isExpanded && (
-                            <Grid item sm={2} xs={12}>
-                                <Button
-                                    color="primary"
-                                    variant="text"
-                                    onClick={() => {
-                                        handleCreateAlertAnomaly();
-                                    }}
-                                >
-                                    {t("label.report-missed-anomaly")}
-                                </Button>
-                            </Grid>
-                        )}
+                            {nameForDetectionEvaluation}
+                        </Typography>
+                    </Grid>
+                    {isExpanded && (
                         <Grid item sm={2} xs={12}>
                             <Button
                                 color="primary"
                                 variant="text"
-                                onClick={() =>
-                                    onExpandChange(
-                                        !isExpanded,
-                                        nameForDetectionEvaluation
-                                    )
-                                }
+                                onClick={() => {
+                                    handleCreateAlertAnomaly();
+                                }}
                             >
-                                <Box
-                                    alignItems="center"
-                                    component="span"
-                                    display="flex"
-                                >
-                                    {!isExpanded && (
-                                        <>
-                                            <span>
-                                                {t("label.view-details")}
-                                            </span>
-                                            <ExpandMoreIcon />
-                                        </>
-                                    )}
-                                    {isExpanded && (
-                                        <>
-                                            <span>
-                                                {t("label.hide-details")}
-                                            </span>
-                                            <ExpandLessIcon />
-                                        </>
-                                    )}
-                                </Box>
+                                {t("label.report-missed-anomaly")}
                             </Button>
                         </Grid>
-                        <Grid item sm={2} xs={12}>
-                            <Button
-                                color="primary"
-                                component={RouterLink}
-                                disabled={anomalies.length === 0}
-                                to={getAlertsAlertAnomaliesPath(
-                                    alertId,
-                                    detectionEvaluation.enumerationId
-                                )}
-                                variant="text"
+                    )}
+                    <Grid item sm={2} xs={12}>
+                        <Button
+                            color="primary"
+                            variant="text"
+                            onClick={() =>
+                                onExpandChange(
+                                    !isExpanded,
+                                    nameForDetectionEvaluation
+                                )
+                            }
+                        >
+                            <Box
+                                alignItems="center"
+                                component="span"
+                                display="flex"
                             >
-                                {anomalies.length > 0 && (
-                                    <span>
-                                        {t("label.view")}{" "}
-                                        <Pluralize
-                                            count={anomalies.length}
-                                            plural={t("label.anomalies")}
-                                            singular={t("label.anomaly")}
-                                        />
-                                    </span>
+                                {!isExpanded && (
+                                    <>
+                                        <span>{t("label.view-details")}</span>
+                                        <ExpandMoreIcon />
+                                    </>
                                 )}
-                                {anomalies.length === 0 && (
+                                {isExpanded && (
+                                    <>
+                                        <span>{t("label.hide-details")}</span>
+                                        <ExpandLessIcon />
+                                    </>
+                                )}
+                            </Box>
+                        </Button>
+                    </Grid>
+                    <Grid item sm={2} xs={12}>
+                        <Button
+                            color="primary"
+                            component={RouterLink}
+                            disabled={anomalies.length === 0}
+                            to={getAlertsAlertAnomaliesPath(
+                                alertId,
+                                enumerationItem.id
+                            )}
+                            variant="text"
+                        >
+                            {anomalies.length > 0 && (
+                                <span>
+                                    {t("label.view")}{" "}
                                     <Pluralize
                                         count={anomalies.length}
                                         plural={t("label.anomalies")}
                                         singular={t("label.anomaly")}
                                     />
-                                )}
-                            </Button>
-                        </Grid>
-                        {!isExpanded && (
-                            <Grid item sm={4} xs={12}>
-                                <TimeSeriesChart height={100} {...tsData} />
-                            </Grid>
-                        )}
+                                </span>
+                            )}
+                            {anomalies.length === 0 && (
+                                <Pluralize
+                                    count={anomalies.length}
+                                    plural={t("label.anomalies")}
+                                    singular={t("label.anomaly")}
+                                />
+                            )}
+                        </Button>
                     </Grid>
-                </CardContent>
-                {isExpanded && (
-                    <CardContent>
-                        <Grid
-                            container
-                            alignItems="center"
-                            justifyContent="flex-end"
-                        >
-                            <Grid item>{t("label.chart-height")}:</Grid>
-                            <Grid item>
-                                <Box textAlign="right">
-                                    <ButtonGroup
-                                        color="secondary"
-                                        variant="outlined"
-                                    >
-                                        {CHART_SIZE_OPTIONS.map(
-                                            (sizeOption) => (
-                                                <Button
-                                                    color="primary"
-                                                    disabled={
-                                                        expandedChartHeight ===
-                                                        sizeOption[1]
-                                                    }
-                                                    key={sizeOption[0]}
-                                                    onClick={() =>
-                                                        setExpandedChartHeight(
-                                                            sizeOption[1] as number
-                                                        )
-                                                    }
-                                                >
-                                                    {sizeOption[0]}
-                                                </Button>
-                                            )
+                    {!isExpanded && (
+                        <Grid item sm={4} xs={12}>
+                            <LoadingErrorStateSwitch
+                                errorState={
+                                    <NoDataIndicator>
+                                        {t(
+                                            "message.experienced-an-issue-fetching-chart-data"
                                         )}
-                                    </ButtonGroup>
-                                </Box>
-                            </Grid>
+                                    </NoDataIndicator>
+                                }
+                                isError={getEvaluationQuery.isError}
+                                isLoading={getEvaluationQuery.isLoading}
+                                loadingState={
+                                    <SkeletonV1
+                                        animation="pulse"
+                                        height={100}
+                                        variant="rect"
+                                        width={400}
+                                    />
+                                }
+                            >
+                                {!!chartData && (
+                                    <TimeSeriesChart
+                                        height={100}
+                                        {...chartData}
+                                    />
+                                )}
+                            </LoadingErrorStateSwitch>
                         </Grid>
+                    )}
+                </Grid>
+            </CardContent>
+            {isExpanded && (
+                <CardContent>
+                    <Grid
+                        container
+                        alignItems="center"
+                        justifyContent="flex-end"
+                    >
+                        <Grid item>{t("label.chart-height")}:</Grid>
+                        <Grid item>
+                            <Box textAlign="right">
+                                <ButtonGroup
+                                    color="secondary"
+                                    variant="outlined"
+                                >
+                                    {CHART_SIZE_OPTIONS.map((sizeOption) => (
+                                        <Button
+                                            color="primary"
+                                            disabled={
+                                                expandedChartHeight ===
+                                                sizeOption[1]
+                                            }
+                                            key={sizeOption[0]}
+                                            onClick={() =>
+                                                setExpandedChartHeight(
+                                                    sizeOption[1] as number
+                                                )
+                                            }
+                                        >
+                                            {sizeOption[0]}
+                                        </Button>
+                                    ))}
+                                </ButtonGroup>
+                            </Box>
+                        </Grid>
+                    </Grid>
 
-                        <TimeSeriesChart
-                            height={expandedChartHeight}
-                            {...tsDataForExpanded}
-                        />
-                    </CardContent>
-                )}
-            </Card>
-        </Grid>
+                    <LoadingErrorStateSwitch
+                        errorState={
+                            <Box pb={20} pt={20}>
+                                <NoDataIndicator>
+                                    <Typography>
+                                        {t(
+                                            "message.experienced-error-while-fetching-chart-data-try"
+                                        )}
+                                    </Typography>
+                                    <Box pt={3}>
+                                        <Button
+                                            color="primary"
+                                            variant="outlined"
+                                            onClick={() =>
+                                                getEvaluationQuery.refetch()
+                                            }
+                                        >
+                                            {t("label.reload-chart-data")}
+                                        </Button>
+                                    </Box>
+                                </NoDataIndicator>
+                            </Box>
+                        }
+                        isError={getEvaluationQuery.isError}
+                        isLoading={getEvaluationQuery.isLoading}
+                        loadingState={
+                            <SkeletonV1
+                                animation="pulse"
+                                height={550}
+                                variant="rect"
+                            />
+                        }
+                    >
+                        {!!chartDataForExpanded && (
+                            <TimeSeriesChart
+                                height={expandedChartHeight}
+                                {...chartDataForExpanded}
+                            />
+                        )}
+                    </LoadingErrorStateSwitch>
+                </CardContent>
+            )}
+        </Card>
     );
 };

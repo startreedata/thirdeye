@@ -12,21 +12,12 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import React from "react";
+
 import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
-import { DetectionEvaluation } from "../../../rest/dto/detection.interfaces";
 
-export interface EnumerationItemMergerProps {
+export interface AlertChartProps {
     anomalies: Anomaly[];
-    detectionEvaluations: DetectionEvaluation[];
-    children: (
-        detectionEvaluations: DetectionEvaluationForRender[]
-    ) => React.ReactElement;
-}
-
-export interface DetectionEvaluationForRender extends DetectionEvaluation {
-    enumerationId?: number;
-    firstAnomalyTs: number;
-    lastAnomalyTs: number;
-    name: string;
+    alertId: number;
+    startTime: number;
+    endTime: number;
 }

@@ -77,6 +77,16 @@ export const getAnomalies = async ({
         : response.data;
 };
 
+export const getAnomaliesCount = async (): Promise<{ count: number }> => {
+    const queryParams = new URLSearchParams([["isChild", "false"]]);
+
+    const response = await axios.get<{ count: number }>(
+        `${BASE_URL_ANOMALIES}/count?${queryParams.toString()}`
+    );
+
+    return response.data;
+};
+
 export const getAnomalyStats = async ({
     startTime,
     endTime,

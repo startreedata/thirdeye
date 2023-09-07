@@ -12,12 +12,12 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import type { ActionStatus } from "../../../rest/actions.interfaces";
+import { UseQueryResult } from "@tanstack/react-query/src/types";
+import { AxiosError } from "axios";
 import type { AnomalyStats } from "../../../rest/dto/anomaly.interfaces";
 
 export interface AnomaliesPendingFeedbackCountProps {
-    anomalyStats: AnomalyStats | null;
-    getAnomalyStatsStatus: ActionStatus;
+    anomalyStatsQuery: UseQueryResult<AnomalyStats, AxiosError>;
 
     classes?: {
         noDataIndicator?: string;

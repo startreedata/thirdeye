@@ -12,15 +12,16 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import type { Anomaly } from "../../../../rest/dto/anomaly.interfaces";
-import type { DetectionEvaluationForRender } from "../../enumeration-item-merger/enumeration-item-merger.interfaces";
+
+import { Anomaly } from "../../../../rest/dto/anomaly.interfaces";
+import { EnumerationItem } from "../../../../rest/dto/enumeration-item.interfaces";
 
 export interface EnumerationItemRowProps {
-    alertId: number;
-    detectionEvaluation: DetectionEvaluationForRender;
     anomalies: Anomaly[];
+    alertId: number;
+    enumerationItem: EnumerationItem;
+    startTime: number;
+    endTime: number;
     expanded: string[];
     onExpandChange: (isOpen: boolean, name: string) => void;
-    timezone?: string;
-    hideTime?: boolean;
 }

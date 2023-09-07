@@ -20,7 +20,7 @@ import {
     AlertStats,
     EditableAlert,
 } from "../dto/alert.interfaces";
-import { EnumerationItemParams } from "../dto/detection.interfaces";
+import { EnumerationItemInEvaluation } from "../dto/detection.interfaces";
 import { EnumerationItem } from "../dto/enumeration-item.interfaces";
 
 export interface GetEvaluation extends ActionHook {
@@ -78,7 +78,9 @@ export interface GetEvaluationRequestPayload extends GetAlertEvaluationPayload {
             | {
                   id: number;
               }
-            | EnumerationItemParams;
+            | EnumerationItem
+            | EnumerationItemInEvaluation;
+        listEnumerationItemsOnly?: boolean;
     };
 }
 

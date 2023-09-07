@@ -12,12 +12,12 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { ActionStatus } from "../../../rest/actions.interfaces";
+import { UseQueryResult } from "@tanstack/react-query/src/types";
+import { AxiosError } from "axios";
 import { AppAnalytics } from "../../../rest/dto/app-analytics.interfaces";
 
 export interface AlertAccuracyProps {
-    appAnalytics: AppAnalytics | null;
-    getAppAnalyticsStatus: ActionStatus;
+    appAnalyticsQuery: UseQueryResult<AppAnalytics, AxiosError>;
     classes?: {
         noDataIndicator?: string;
     };

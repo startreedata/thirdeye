@@ -19,6 +19,7 @@ import static ai.startree.thirdeye.spi.accessControl.ResourceIdentifier.DEFAULT_
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
+import ai.startree.thirdeye.auth.ThirdEyePrincipal.AuthenticationType;
 import ai.startree.thirdeye.datalayer.dao.SubEntities;
 import ai.startree.thirdeye.spi.accessControl.AccessControl;
 import ai.startree.thirdeye.spi.accessControl.AccessType;
@@ -50,7 +51,7 @@ public class AuthorizationManager {
       "thirdeye-root");
 
   private static final ThirdEyePrincipal INTERNAL_VALID_PRINCIPAL = new ThirdEyePrincipal(
-      "thirdeye-internal", RandomStringUtils.random(1024, true, true));
+      "thirdeye-internal", RandomStringUtils.random(1024, true, true), AuthenticationType.INTERNAL);
 
   private final AlertTemplateRenderer alertTemplateRenderer;
   private final AccessControl accessControl;
@@ -124,8 +125,13 @@ public class AuthorizationManager {
 
   public boolean hasAccess(final ThirdEyePrincipal principal,
       final ResourceIdentifier identifier, final AccessType accessType) {
-    return INTERNAL_VALID_PRINCIPAL.equals(principal) ||
-        accessControl.hasAccess(principal.getAuthToken(), identifier, accessType);
+    if (INTERNAL_VALID_PRINCIPAL.equals(principal)) {
+      return true;
+    } else if (principal.getAuthenticationType() == AuthenticationType.BASIC_AUTH) {
+      return true;
+    } else {
+      return accessControl.hasAccess(principal.getAuthToken(), identifier, accessType);
+    }
   }
 
   public void ensureHasRootAccess(final ThirdEyePrincipal principal) {

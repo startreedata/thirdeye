@@ -17,6 +17,7 @@ package ai.startree.thirdeye.auth;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
+import ai.startree.thirdeye.auth.ThirdEyePrincipal.AuthenticationType;
 import ai.startree.thirdeye.auth.oauth.OAuthConfiguration;
 import ai.startree.thirdeye.spi.auth.Authenticator.OauthAuthenticatorFactory;
 import ai.startree.thirdeye.spi.auth.OpenIdConfigurationProvider;
@@ -69,7 +70,7 @@ public class AuthRegistry {
     final var authenticator = requireNonNull(getDefaultOAuthFactory().build(oauthConfigMap),
         "failed to build authenticator");
     return credentials -> authenticator.authenticate(credentials)
-        .map(p -> new ThirdEyePrincipal(p.getName(), credentials));
+        .map(p -> new ThirdEyePrincipal(p.getName(), credentials, AuthenticationType.OAUTH));
   }
 
   public OpenIdConfigurationProvider createDefaultOpenIdConfigurationProvider(

@@ -17,12 +17,18 @@ import java.security.Principal;
 
 public class ThirdEyePrincipal implements Principal {
 
+  public enum AuthenticationType {
+    BASIC_AUTH, OAUTH, INTERNAL, DISABLED
+  }
+
   private final String name;
   private final String authToken;
+  private final AuthenticationType authenticationType;
 
-  public ThirdEyePrincipal(final String name, final String authToken) {
+  public ThirdEyePrincipal(final String name, final String authToken, final AuthenticationType authenticationType) {
     this.name = name;
     this.authToken = authToken;
+    this.authenticationType = authenticationType;
   }
 
   @Override
@@ -32,5 +38,9 @@ public class ThirdEyePrincipal implements Principal {
 
   public String getAuthToken() {
     return authToken;
+  }
+
+  public AuthenticationType getAuthenticationType() {
+    return authenticationType;
   }
 }

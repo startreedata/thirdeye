@@ -26,6 +26,7 @@ import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.auth.AccessControlProvider;
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.auth.ThirdEyePrincipal.AuthenticationType;
 import ai.startree.thirdeye.service.AlertService;
 import ai.startree.thirdeye.service.AppAnalyticsService;
 import ai.startree.thirdeye.spi.accessControl.AccessControl;
@@ -61,7 +62,7 @@ import org.testng.annotations.Test;
 public class AlertResourceTest {
 
   static ThirdEyePrincipal nobody() {
-    return new ThirdEyePrincipal("nobody", "");
+    return new ThirdEyePrincipal("nobody", "", AuthenticationType.OAUTH);
   }
 
   private static AlertResource newAlertResource(final AlertManager alertManager,
@@ -180,7 +181,7 @@ public class AlertResourceTest {
     newAlertResource(mock(AlertManager.class),
         alertTemplateRenderer,
         accessControl).validateMultiple(
-        new ThirdEyePrincipal("nobody", ""),
+        nobody(),
         Collections.singletonList(
             new AlertApi().setTemplate(new AlertTemplateApi().setId(1L)).setName("alert1")
         )

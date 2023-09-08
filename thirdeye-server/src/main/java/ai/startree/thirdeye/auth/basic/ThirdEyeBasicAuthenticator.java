@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.auth.basic;
 
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.auth.ThirdEyePrincipal.AuthenticationType;
 import com.google.inject.Inject;
 import io.dropwizard.auth.Authenticator;
 import io.dropwizard.auth.basic.BasicCredentials;
@@ -36,7 +37,7 @@ public class ThirdEyeBasicAuthenticator implements
         .setUsername(basicCredentials.getUsername())
         .setPassword(basicCredentials.getPassword());
     if (configuration.getUsers().contains(user)) {
-      return Optional.of(new ThirdEyePrincipal(basicCredentials.getUsername(), ""));
+      return Optional.of(new ThirdEyePrincipal(basicCredentials.getUsername(), "", AuthenticationType.BASIC_AUTH));
     }
     return Optional.empty();
   }

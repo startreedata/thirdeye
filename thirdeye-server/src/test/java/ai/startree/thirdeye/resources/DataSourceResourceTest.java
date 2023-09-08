@@ -21,6 +21,7 @@ import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.auth.AccessControlProvider;
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.auth.ThirdEyePrincipal.AuthenticationType;
 import ai.startree.thirdeye.core.DataSourceOnboarder;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.service.DataSourceService;
@@ -36,7 +37,7 @@ import org.testng.annotations.Test;
 public class DataSourceResourceTest {
 
   private final String dataSourceName = "test";
-  private final ThirdEyePrincipal principal = new ThirdEyePrincipal("test", "");
+  private final ThirdEyePrincipal principal = new ThirdEyePrincipal("test", "", AuthenticationType.OAUTH);
   private ThirdEyeDataSource dataSource;
   private DataSourceCache dataSourceCache;
   private DataSourceResource dataSourceResource;

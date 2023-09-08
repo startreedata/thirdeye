@@ -23,6 +23,7 @@ import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.auth.AccessControlProvider;
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.auth.ThirdEyePrincipal.AuthenticationType;
 import ai.startree.thirdeye.datalayer.bao.AbstractManagerImpl;
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.service.CrudService;
@@ -48,7 +49,7 @@ import org.testng.annotations.Test;
 public class CrudResourceTest {
 
   static ThirdEyePrincipal nobody() {
-    return new ThirdEyePrincipal("nobody", "");
+    return new ThirdEyePrincipal("nobody", "", AuthenticationType.OAUTH);
   }
 
   @Test
@@ -119,7 +120,7 @@ public class CrudResourceTest {
   }
 
   private ThirdEyePrincipal getPrincipal(String name) {
-    return new ThirdEyePrincipal(name, "");
+    return new ThirdEyePrincipal(name, "", AuthenticationType.OAUTH);
   }
 
   @Test
@@ -173,7 +174,7 @@ public class CrudResourceTest {
     when(manager.findById(1L)).thenReturn((DummyDto) new DummyDto().setId(1L));
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
         AccessControlProvider.ALWAYS_DENY);
-    resource.get(new ThirdEyePrincipal("nobody", ""), 1L);
+    resource.get(nobody(), 1L);
   }
 
   @Test(expectedExceptions = ForbiddenException.class)

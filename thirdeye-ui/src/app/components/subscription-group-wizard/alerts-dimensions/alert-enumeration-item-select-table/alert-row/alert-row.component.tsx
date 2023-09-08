@@ -115,6 +115,26 @@ export const AlertRow: FunctionComponent<AlertRowProps> = ({
         }
     };
 
+    const selectedDisplayString = useMemo(() => {
+        if (!isDimensionExplorationAlert) {
+            return "-";
+        }
+
+        if (isDimensionSelectOn) {
+            if (associatedEnumerationItems.length === 1) {
+                return `${associatedEnumerationItems.length} dimension`;
+            }
+
+            return `${associatedEnumerationItems.length} dimensions`;
+        }
+
+        if (isAlertChecked) {
+            return `Entire alert (${enumerationItems.length})`;
+        }
+
+        return 0;
+    }, [associatedEnumerationItems, enumerationItems, isDimensionSelectOn]);
+
     return (
         <TableBody>
             <TableRow>
@@ -148,15 +168,7 @@ export const AlertRow: FunctionComponent<AlertRowProps> = ({
                         ? enumerationItems.length
                         : "-"}
                 </TableCell>
-                <TableCell>
-                    {isDimensionExplorationAlert
-                        ? isDimensionSelectOn
-                            ? associatedEnumerationItems.length
-                            : isAlertChecked
-                            ? enumerationItems.length
-                            : 0
-                        : "-"}
-                </TableCell>
+                <TableCell>{selectedDisplayString}</TableCell>
                 <TableCell>{formatDateV1(alert.created)}</TableCell>
             </TableRow>
             {isOpen && (

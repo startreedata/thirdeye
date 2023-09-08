@@ -1,3 +1,18 @@
+## [2.38.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.37.0...thirdeye-ui-2.38.0) (2023-09-07)
+
+
+### Features
+
+* [TE-1650](https://cortexdata.atlassian.net/browse/TE-1650) support parallelizing enumeration item chart fetching in alert view page ([a838f96c3](https://github.com/startreedata/thirdeye/commit/a838f96c3d0b5ea0cca81157f9529c5e1563949d))
+* [TE-1759](https://cortexdata.atlassian.net/browse/TE-1759) make rca v2 the main flow ([599f664ff](https://github.com/startreedata/thirdeye/commit/599f664ff238f7a953500198b738198d4f49e891))
+* [TE-1813](https://cortexdata.atlassian.net/browse/TE-1813) add intercom support ([ee914fc6c](https://github.com/startreedata/thirdeye/commit/ee914fc6c6ce22083b4eff362e5cdc6fdacd0c78))
+
+
+### Bug Fixes
+
+* [TE-1818](https://cortexdata.atlassian.net/browse/TE-1818) use count api for anomaly count in home page ([340440f4e](https://github.com/startreedata/thirdeye/commit/340440f4e4ba5fe7ff1d6dd20a376aab65d82713))
+* ensure config api not refetched after window refocus ([f751b696b](https://github.com/startreedata/thirdeye/commit/f751b696b8610d3f8f61cd36c7a85e4b818c55ee))
+
 ## [2.37.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.36.0...thirdeye-ui-2.37.0) (2023-08-29)
 
 

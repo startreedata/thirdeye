@@ -23,9 +23,6 @@ import ai.startree.thirdeye.datalayer.dao.SubEntities;
 import ai.startree.thirdeye.spi.accessControl.AccessControl;
 import ai.startree.thirdeye.spi.accessControl.AccessType;
 import ai.startree.thirdeye.spi.accessControl.ResourceIdentifier;
-import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
-import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
-import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
@@ -57,12 +54,10 @@ public class AuthorizationManager {
   public AuthorizationManager(
       final AlertTemplateRenderer alertTemplateRenderer,
       final AccessControl accessControl,
-      final AlertManager alertManager,
-      final EnumerationItemManager enumerationItemManager,
-      final AnomalyManager anomalyManager) {
+      final NamespaceResolver namespaceResolver) {
     this.alertTemplateRenderer = alertTemplateRenderer;
     this.accessControl = accessControl;
-    this.namespaceResolver = new NamespaceResolver(alertManager, enumerationItemManager, anomalyManager);
+    this.namespaceResolver = namespaceResolver;
   }
 
   public <T extends AbstractDTO> void ensureCanCreate(final ThirdEyePrincipal principal,

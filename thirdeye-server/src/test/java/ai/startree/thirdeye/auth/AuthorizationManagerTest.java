@@ -31,7 +31,7 @@ public class AuthorizationManagerTest {
   @Test
   public void testResourceIdForNullDto() {
     final var authorizationManager = new AuthorizationManager(
-        null, null, null, null, null);
+        null, null, new NamespaceResolver(null, null, null));
     final var got = authorizationManager.resourceId(null);
     assertThat(got.getName()).isEqualTo(ResourceIdentifier.DEFAULT_NAME);
     assertThat(got.getNamespace()).isEqualTo(ResourceIdentifier.DEFAULT_NAMESPACE);
@@ -51,7 +51,7 @@ public class AuthorizationManagerTest {
     anomalyDto.setId(2L);
 
     final var authorizationManager = new AuthorizationManager(
-        null, null, alertManager, null, null);
+        null, null, new NamespaceResolver(alertManager, null, null));
 
     final var got = authorizationManager.resourceId(anomalyDto);
     assertThat(got.getName()).isEqualTo("2");
@@ -79,7 +79,7 @@ public class AuthorizationManagerTest {
     anomalyDto.setId(3L);
 
     final var authorizationManager = new AuthorizationManager(
-        null, null, alertManager, enumManager, null);
+        null, null, new NamespaceResolver(alertManager, enumManager, null));
 
     final var got = authorizationManager.resourceId(anomalyDto);
     assertThat(got.getName()).isEqualTo("3");

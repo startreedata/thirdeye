@@ -25,6 +25,7 @@ import ai.startree.thirdeye.alert.AlertInsightsProvider;
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.auth.AccessControlProvider;
 import ai.startree.thirdeye.auth.AuthorizationManager;
+import ai.startree.thirdeye.auth.NamespaceResolver;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal.AuthenticationType;
 import ai.startree.thirdeye.service.AlertService;
@@ -403,7 +404,7 @@ public class AlertResourceTest {
 
   private static AuthorizationManager newAuthorizationManager(
       final AlertTemplateRenderer alertTemplateRenderer, final AccessControl accessControl) {
-    return new AuthorizationManager(alertTemplateRenderer, accessControl, null, null, null);
+    return new AuthorizationManager(alertTemplateRenderer, accessControl, new NamespaceResolver(null, null, null));
   }
 
   @Test(expectedExceptions = ForbiddenException.class)

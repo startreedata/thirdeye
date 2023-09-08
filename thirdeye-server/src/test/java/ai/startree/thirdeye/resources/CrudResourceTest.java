@@ -22,6 +22,7 @@ import static org.mockito.Mockito.when;
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.auth.AccessControlProvider;
 import ai.startree.thirdeye.auth.AuthorizationManager;
+import ai.startree.thirdeye.auth.NamespaceResolver;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal.AuthenticationType;
 import ai.startree.thirdeye.datalayer.bao.AbstractManagerImpl;
@@ -384,7 +385,7 @@ class DummyResource extends CrudResource<DummyApi, DummyDto> {
       final ImmutableMap<String, String> apiToBeanMap,
       final AccessControl accessControl) {
     super(new DummyService(
-        new AuthorizationManager(mock(AlertTemplateRenderer.class), accessControl, null, null, null),
+        new AuthorizationManager(mock(AlertTemplateRenderer.class), accessControl, new NamespaceResolver(null, null, null)),
         dtoManager,
         apiToBeanMap));
   }

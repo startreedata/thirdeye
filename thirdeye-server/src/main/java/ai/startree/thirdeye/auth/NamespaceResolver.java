@@ -25,20 +25,24 @@ import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+@Singleton
 public class NamespaceResolver {
 
   private final AlertManager alertManager;
   private final EnumerationItemManager enumerationItemManager;
   private final AnomalyManager anomalyManager;
 
-  private static final Cache<Long, String> namespaceCache = CacheBuilder.newBuilder()
+  private final Cache<Long, String> namespaceCache = CacheBuilder.newBuilder()
       .maximumSize(2048)
       .expireAfterWrite(60, TimeUnit.SECONDS)
       .build();
 
+  @Inject
   public NamespaceResolver(final AlertManager alertManager, final EnumerationItemManager enumerationItemManager,
       final AnomalyManager anomalyManager) {
     this.alertManager = alertManager;
@@ -94,7 +98,7 @@ public class NamespaceResolver {
               .map(this::getNamespaceFromAuth)
               .orElse(DEFAULT_NAMESPACE));
     } catch (ExecutionException e) {
-      return DEFAULT_NAMESPACE;
+      throw new RuntimeException(e);
     }
   }
 
@@ -105,7 +109,7 @@ public class NamespaceResolver {
               .map(this::getNamespaceFromAuth)
               .orElse(DEFAULT_NAMESPACE));
     } catch (ExecutionException e) {
-      return DEFAULT_NAMESPACE;
+      throw new RuntimeException(e);
     }
   }
 
@@ -116,10 +120,10 @@ public class NamespaceResolver {
           .map(this::resolveAnomalyNamespace)
           .orElse(DEFAULT_NAMESPACE));
     } catch (ExecutionException e) {
-      return DEFAULT_NAMESPACE;
+      throw new RuntimeException(e);
     }
   }
-
+  
   private String getNamespaceFromAuth(final AbstractDTO dto) {
     return optional(dto)
         .map(AbstractDTO::getAuth)

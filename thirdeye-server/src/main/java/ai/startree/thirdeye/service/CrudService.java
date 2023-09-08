@@ -116,29 +116,31 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
   public List<ApiT> createMultiple(final ThirdEyePrincipal principal,
       final List<ApiT> list) {
     final RequestCache cache = createRequestCache();
-    return list.stream()
+    final var result = list.stream()
         .peek(api1 -> validate(api1, null))
         .peek(api -> authorizationManager.ensureCanCreate(principal, toDto(api)))
         .map(api -> createDto(principal, api))
         .map(dto -> createGateKeeper(principal, dto))
         .peek(dtoManager::save)
-        .peek(dto -> authorizationManager.invalidateCache())
         .peek(dto -> Objects.requireNonNull(dto.getId(), "DB update failed!"))
         .map(dto -> toApi(dto, cache))
         .collect(Collectors.toList());
+    authorizationManager.invalidateCache();
+    return result;
   }
 
   @NonNull
   public List<ApiT> editMultiple(final ThirdEyePrincipal principal,
       final List<ApiT> list) {
     final RequestCache cache = createRequestCache();
-    return list.stream()
+    final var result = list.stream()
         .map(o -> updateDto(principal, o))
         .peek(dtoManager::update)
         .peek(this::postUpdate)
-        .peek(dto -> authorizationManager.invalidateCache())
         .map(dto -> toApi(dto, cache))
         .collect(Collectors.toList());
+    authorizationManager.invalidateCache();
+    return result;
   }
 
   private DtoT updateDto(final ThirdEyePrincipal principal, final ApiT api) {

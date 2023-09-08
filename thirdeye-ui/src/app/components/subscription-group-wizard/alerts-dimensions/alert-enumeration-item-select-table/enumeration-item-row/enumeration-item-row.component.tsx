@@ -23,6 +23,8 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
     enumerationItem,
     associations,
     onAssociationChange,
+    isDimensionSelectOn,
+    overrideSelected,
 }) => {
     const handleEnumerationItemCheckChange = (
         enumerationItemId: number,
@@ -51,7 +53,9 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
         });
     };
 
+    // overrideSelected overrides the check
     const isChecked =
+        overrideSelected ||
         associations.find(
             (candidate) =>
                 candidate.alertId === alert.id &&
@@ -63,6 +67,8 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
             <TableCell align="left" padding="checkbox">
                 <Checkbox
                     checked={isChecked}
+                    color={isDimensionSelectOn ? "primary" : undefined}
+                    disabled={!isDimensionSelectOn}
                     onChange={(_, checked) =>
                         handleEnumerationItemCheckChange(
                             enumerationItem.id,

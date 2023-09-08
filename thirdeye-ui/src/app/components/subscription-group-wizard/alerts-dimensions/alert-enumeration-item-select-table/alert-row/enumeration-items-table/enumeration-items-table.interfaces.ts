@@ -14,15 +14,15 @@
  */
 
 import { Dispatch, SetStateAction } from "react";
-import { Alert } from "../../../../../rest/dto/alert.interfaces";
-import { EnumerationItem } from "../../../../../rest/dto/enumeration-item.interfaces";
-import { Association } from "../../../subscription-group-wizard.interfaces";
+import { Alert } from "../../../../../../rest/dto/alert.interfaces";
+import { EnumerationItem } from "../../../../../../rest/dto/enumeration-item.interfaces";
+import { Association } from "../../../../subscription-group-wizard.interfaces";
 
-export interface EnumerationItemRowProps {
+export interface EnumerationItemsTableProps {
     alert: Alert;
-    isDimensionSelectOn: boolean;
-    overrideSelected: boolean;
-    enumerationItem: EnumerationItem;
+    enumerationItems: EnumerationItem[];
     associations: Association[];
     onAssociationChange: Dispatch<SetStateAction<Association[]>>;
+    onSelectDimensionSwitchChange: (isOn: boolean) => void;
+    isDimensionSelectOn: boolean;
 }

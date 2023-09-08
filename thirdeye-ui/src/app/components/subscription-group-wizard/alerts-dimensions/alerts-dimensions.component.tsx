@@ -25,6 +25,7 @@ import {
     TextField,
     Typography,
 } from "@material-ui/core";
+import SearchIcon from "@material-ui/icons/Search";
 import React, { FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AlertEnumerationItemSelectTable } from "./alert-enumeration-item-select-table/alert-enumeration-item-select-table.component";
@@ -65,17 +66,6 @@ export const AlertsDimensions: FunctionComponent<AlertsDimensionsProps> = ({
                             justifyContent="space-between"
                         >
                             <Grid item>
-                                <TextField
-                                    placeholder={t(
-                                        "label.filter-alerts-by-name"
-                                    )}
-                                    value={filterTerm}
-                                    onChange={(e) =>
-                                        setFilterTerm(e.target.value)
-                                    }
-                                />
-                            </Grid>
-                            <Grid item>
                                 <RadioGroup row value={showOnly}>
                                     <FormControlLabel
                                         control={<Radio color="primary" />}
@@ -88,7 +78,7 @@ export const AlertsDimensions: FunctionComponent<AlertsDimensionsProps> = ({
                                     />
                                     <FormControlLabel
                                         control={<Radio color="primary" />}
-                                        label={t("label.basic-alerts-only")}
+                                        label={t("label.basic-alerts")}
                                         labelPlacement="end"
                                         value={FilterChoices.BASIC}
                                         onClick={() =>
@@ -98,7 +88,7 @@ export const AlertsDimensions: FunctionComponent<AlertsDimensionsProps> = ({
                                     <FormControlLabel
                                         control={<Radio color="primary" />}
                                         label={t(
-                                            "label.dimension-exploration-alerts-only"
+                                            "label.dimension-exploration-alerts"
                                         )}
                                         labelPlacement="end"
                                         value={FilterChoices.DIM}
@@ -107,6 +97,20 @@ export const AlertsDimensions: FunctionComponent<AlertsDimensionsProps> = ({
                                         }
                                     />
                                 </RadioGroup>
+                            </Grid>
+                            <Grid item>
+                                <TextField
+                                    InputProps={{
+                                        startAdornment: <SearchIcon />,
+                                    }}
+                                    placeholder={t(
+                                        "label.filter-alerts-by-name"
+                                    )}
+                                    value={filterTerm}
+                                    onChange={(e) =>
+                                        setFilterTerm(e.target.value)
+                                    }
+                                />
                             </Grid>
                         </Grid>
                         <Box pt={2}>

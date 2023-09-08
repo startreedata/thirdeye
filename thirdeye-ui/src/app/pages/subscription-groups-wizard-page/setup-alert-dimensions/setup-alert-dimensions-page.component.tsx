@@ -20,7 +20,10 @@ import { useNavigate, useOutletContext } from "react-router-dom";
 import { NoDataIndicator } from "../../../components/no-data-indicator/no-data-indicator.component";
 import { EmptyStateSwitch } from "../../../components/page-states/empty-state-switch/empty-state-switch.component";
 import { AlertsDimensions } from "../../../components/subscription-group-wizard/alerts-dimensions/alerts-dimensions.component";
-import { validateSubscriptionGroup } from "../../../components/subscription-group-wizard/subscription-group-wizard.utils";
+import {
+    cleanUpAssociations,
+    validateSubscriptionGroup,
+} from "../../../components/subscription-group-wizard/subscription-group-wizard.utils";
 import { WizardBottomBar } from "../../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import {
     PageContentsGridV1,
@@ -57,6 +60,11 @@ export const SetupAlertDimensionsPage: FunctionComponent = () => {
             // If there are no alert associations, show a dialog confirming if this is intended
             handleSubscriptionGroupWizardFinishDialog(subscriptionGroup);
         } else {
+            if (subscriptionGroup.alertAssociations) {
+                subscriptionGroup.alertAssociations = cleanUpAssociations(
+                    subscriptionGroup.alertAssociations
+                );
+            }
             // Otherwise, proceed with saving the data
             onFinish(subscriptionGroup);
         }

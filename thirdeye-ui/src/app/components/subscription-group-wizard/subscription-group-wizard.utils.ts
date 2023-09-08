@@ -15,7 +15,10 @@
 
 import CronValidator from "cron-expression-validator";
 import { isEmpty } from "lodash";
-import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
+import {
+    AlertAssociation,
+    SubscriptionGroup,
+} from "../../rest/dto/subscription-group.interfaces";
 import { getAssociationId } from "./alerts-dimensions/alerts-dimensions.utils";
 import { specTypeToUIConfig } from "./subscription-group-details/recipient-details/groups-editor/groups-editor.utils";
 import { Association } from "./subscription-group-wizard.interfaces";
@@ -66,4 +69,48 @@ export const getAssociations = (
     }
 
     return associations;
+};
+
+/**
+ *  If there are dimensions selected, then remove the alert level association
+ */
+export const cleanUpAssociations = (
+    alertAssociations: AlertAssociation[]
+): AlertAssociation[] => {
+    const alertLevelAssociationById: {
+        [key: number]: AlertAssociation;
+    } = {};
+    const enumerationItemsAssociationById: {
+        [key: number]: AlertAssociation[];
+    } = {};
+    const alertsSubscribedTo = new Set<number>();
+
+    alertAssociations.forEach((association) => {
+        alertsSubscribedTo.add(association.alert.id);
+
+        if (
+            association.enumerationItem === undefined ||
+            association.enumerationItem.id === undefined
+        ) {
+            alertLevelAssociationById[association.alert.id] = association;
+        } else {
+            const bucket =
+                enumerationItemsAssociationById[association.alert.id] || [];
+            bucket.push(association);
+            enumerationItemsAssociationById[association.alert.id] = bucket;
+        }
+    });
+
+    let newAssociationList: AlertAssociation[] = [];
+    alertsSubscribedTo.forEach((id) => {
+        if (enumerationItemsAssociationById[id]) {
+            newAssociationList = newAssociationList.concat(
+                enumerationItemsAssociationById[id]
+            );
+        } else {
+            newAssociationList.push(alertLevelAssociationById[id]);
+        }
+    });
+
+    return newAssociationList;
 };

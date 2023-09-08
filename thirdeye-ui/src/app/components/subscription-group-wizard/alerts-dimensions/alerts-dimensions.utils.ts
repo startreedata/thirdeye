@@ -13,6 +13,7 @@
  * the License.
  */
 
+import { Alert } from "../../../rest/dto/alert.interfaces";
 import { Association } from "../subscription-group-wizard.interfaces";
 
 export const getAssociationId = ({
@@ -20,3 +21,16 @@ export const getAssociationId = ({
     enumerationId,
 }: Pick<Association, "alertId" | "enumerationId">): string =>
     `${alertId}${enumerationId ? `-${enumerationId}` : ""}`;
+
+export const hasAlertAssociation = (
+    alert: Alert,
+    associations: Association[]
+): boolean => {
+    return (
+        associations.find(
+            (candidate) =>
+                candidate.alertId === alert.id &&
+                candidate.enumerationId === undefined
+        ) !== undefined
+    );
+};

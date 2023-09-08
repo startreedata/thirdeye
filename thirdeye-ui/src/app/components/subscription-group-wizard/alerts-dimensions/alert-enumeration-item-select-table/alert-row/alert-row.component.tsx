@@ -16,22 +16,21 @@
 import {
     Box,
     Checkbox,
-    Table,
     TableBody,
     TableCell,
-    TableHead,
     TableRow,
-    Typography,
 } from "@material-ui/core";
 import IconButton from "@material-ui/core/IconButton";
 import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@material-ui/icons/KeyboardArrowUp";
 import React, { FunctionComponent, useMemo } from "react";
-import { useTranslation } from "react-i18next";
 import { formatDateV1 } from "../../../../../platform/utils";
-import { getAssociationId } from "../../alerts-dimensions.utils";
-import { EnumerationItemRow } from "../enumeration-item-row/enumeration-item-row.component";
+import {
+    getAssociationId,
+    hasAlertAssociation,
+} from "../../alerts-dimensions.utils";
 import { AlertRowProps } from "./alert-row.interfaces";
+import { EnumerationItemsTable } from "./enumeration-items-table/enumeration-items-table.component";
 
 export const AlertRow: FunctionComponent<AlertRowProps> = ({
     alert,
@@ -39,9 +38,8 @@ export const AlertRow: FunctionComponent<AlertRowProps> = ({
     associations,
     onAssociationChange,
 }) => {
-    const { t } = useTranslation();
-    const [isOpen, setIsOpen] = React.useState(false);
     const isDimensionExplorationAlert = enumerationItems.length > 0;
+    const [isOpen, setIsOpen] = React.useState(false);
 
     const associatedEnumerationItems = useMemo(() => {
         return enumerationItems.filter((enumerationItem) =>
@@ -56,10 +54,26 @@ export const AlertRow: FunctionComponent<AlertRowProps> = ({
         );
     }, [alert, enumerationItems, associations]);
 
+    const [isDimensionSelectOn, setIsDimensionSelectOn] = React.useState(() => {
+        return associatedEnumerationItems.length > 0;
+    });
+
+    /**
+     * Alert checked means that there are dimensions subscribed to
+     * or the entire alert is subscribed to
+     */
+    const [isAlertChecked, setIsAlertChecked] = React.useState(() => {
+        return (
+            associatedEnumerationItems.length > 0 ||
+            hasAlertAssociation(alert, associations)
+        );
+    });
+
     const handleAlertRowCheckedChange = (
         _: unknown,
         checked: boolean
     ): void => {
+        // Remove all associations with enumeration items and alert level when unchecked
         onAssociationChange((currentAssociations) => {
             let copied = [...currentAssociations];
 
@@ -68,61 +82,43 @@ export const AlertRow: FunctionComponent<AlertRowProps> = ({
                 (association) => association.alertId !== alert.id
             );
 
+            // Add alert level if checked
             if (checked) {
-                if (isDimensionExplorationAlert) {
-                    enumerationItems.forEach((enumerationItem) => {
-                        copied.push({
-                            alertId: alert.id,
-                            enumerationId: enumerationItem.id,
-                            id: getAssociationId({
-                                alertId: alert.id,
-                                enumerationId: enumerationItem.id,
-                            }),
-                        });
-                    });
-                } else {
-                    copied.push({
+                copied.push({
+                    alertId: alert.id,
+                    id: getAssociationId({
                         alertId: alert.id,
-                        id: getAssociationId({
-                            alertId: alert.id,
-                            enumerationId: undefined,
-                        }),
-                    });
-                }
+                        enumerationId: undefined,
+                    }),
+                });
             }
 
             return copied;
         });
+        setIsAlertChecked(checked);
+
+        // If alert is unchecked, reset isDimensionSelectOn
+        if (!checked) {
+            setIsDimensionSelectOn(false);
+        }
     };
 
-    /**
-     * Being checked means that all dimension explorations match if alert is
-     * a dimension exploration alert or the alert itself is in the association
-     */
-    const isChecked = isDimensionExplorationAlert
-        ? associatedEnumerationItems.length === enumerationItems.length
-        : associations.find(
-              (candidate) =>
-                  candidate.alertId === alert.id &&
-                  candidate.enumerationId === undefined
-          ) !== undefined;
+    const handleSelectDimensionSwitchChange = (isOn: boolean): void => {
+        setIsDimensionSelectOn(isOn);
 
-    const isIndeterminate = isDimensionExplorationAlert
-        ? associatedEnumerationItems.length > 0 &&
-          associatedEnumerationItems.length !== enumerationItems.length
-        : false;
+        if (isOn) {
+            setIsAlertChecked(true);
+        } else {
+            if (!hasAlertAssociation(alert, associations)) {
+                setIsAlertChecked(false);
+            }
+        }
+    };
 
     return (
         <TableBody>
             <TableRow>
-                <TableCell align="left">
-                    <Checkbox
-                        checked={isChecked}
-                        indeterminate={isIndeterminate}
-                        onChange={handleAlertRowCheckedChange}
-                    />
-                </TableCell>
-                <TableCell align="left">
+                <TableCell align="left" padding="checkbox">
                     {enumerationItems.length > 0 && (
                         <IconButton
                             color="primary"
@@ -137,6 +133,13 @@ export const AlertRow: FunctionComponent<AlertRowProps> = ({
                         </IconButton>
                     )}
                 </TableCell>
+                <TableCell align="left" padding="checkbox">
+                    <Checkbox
+                        checked={isAlertChecked}
+                        color="primary"
+                        onChange={handleAlertRowCheckedChange}
+                    />
+                </TableCell>
                 <TableCell component="th" scope="row">
                     {alert.name}
                 </TableCell>
@@ -147,55 +150,37 @@ export const AlertRow: FunctionComponent<AlertRowProps> = ({
                 </TableCell>
                 <TableCell>
                     {isDimensionExplorationAlert
-                        ? associatedEnumerationItems.length
+                        ? isDimensionSelectOn
+                            ? associatedEnumerationItems.length
+                            : isAlertChecked
+                            ? enumerationItems.length
+                            : 0
                         : "-"}
                 </TableCell>
                 <TableCell>{formatDateV1(alert.created)}</TableCell>
             </TableRow>
             {isOpen && (
                 <TableRow>
+                    <TableCell padding="checkbox" />
+                    <TableCell padding="checkbox" />
                     <TableCell
-                        colSpan={6}
+                        colSpan={3}
                         style={{
                             paddingBottom: 0,
                             paddingTop: 0,
                         }}
                     >
                         <Box pb={2} pl={3} pr={3} pt={2}>
-                            <Typography
-                                gutterBottom
-                                component="div"
-                                variant="h6"
-                            >
-                                {t("label.dimensions")}
-                            </Typography>
-                            <Table size="small">
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell>
-                                            <strong>
-                                                {t("label.subscribe")}
-                                            </strong>
-                                        </TableCell>
-                                        <TableCell>
-                                            <strong>{t("label.name")}</strong>
-                                        </TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {enumerationItems.map((enumerationItem) => (
-                                        <EnumerationItemRow
-                                            alert={alert}
-                                            associations={associations}
-                                            enumerationItem={enumerationItem}
-                                            key={enumerationItem.id}
-                                            onAssociationChange={
-                                                onAssociationChange
-                                            }
-                                        />
-                                    ))}
-                                </TableBody>
-                            </Table>
+                            <EnumerationItemsTable
+                                alert={alert}
+                                associations={associations}
+                                enumerationItems={enumerationItems}
+                                isDimensionSelectOn={isDimensionSelectOn}
+                                onAssociationChange={onAssociationChange}
+                                onSelectDimensionSwitchChange={
+                                    handleSelectDimensionSwitchChange
+                                }
+                            />
                         </Box>
                     </TableCell>
                 </TableRow>

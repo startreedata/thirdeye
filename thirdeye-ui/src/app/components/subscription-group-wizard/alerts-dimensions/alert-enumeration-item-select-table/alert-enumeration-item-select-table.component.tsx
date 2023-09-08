@@ -82,8 +82,10 @@ export const AlertEnumerationItemSelectTable: FunctionComponent<AlertEnumeration
             <Table size="small">
                 <TableHead>
                     <TableRow>
-                        <TableCell />
-                        <TableCell />
+                        <TableCell padding="checkbox" />
+                        <TableCell padding="checkbox">
+                            <strong>{t("label.subscribe")}</strong>
+                        </TableCell>
                         <TableCell>
                             <strong>{t("label.alert-name")}</strong>
                         </TableCell>

@@ -15,7 +15,6 @@ package ai.startree.thirdeye.auth;
 
 import static ai.startree.thirdeye.spi.accessControl.ResourceIdentifier.DEFAULT_ENTITY_TYPE;
 import static ai.startree.thirdeye.spi.accessControl.ResourceIdentifier.DEFAULT_NAME;
-import static ai.startree.thirdeye.spi.accessControl.ResourceIdentifier.DEFAULT_NAMESPACE;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
@@ -24,15 +23,9 @@ import ai.startree.thirdeye.datalayer.dao.SubEntities;
 import ai.startree.thirdeye.spi.accessControl.AccessControl;
 import ai.startree.thirdeye.spi.accessControl.AccessType;
 import ai.startree.thirdeye.spi.accessControl.ResourceIdentifier;
-import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
-import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
-import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import com.google.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -55,22 +48,16 @@ public class AuthorizationManager {
 
   private final AlertTemplateRenderer alertTemplateRenderer;
   private final AccessControl accessControl;
-  private final AlertManager alertManager;
-  private final EnumerationItemManager enumerationItemManager;
-  private final AnomalyManager anomalyManager;
+  private final NamespaceResolver namespaceResolver;
 
   @Inject
   public AuthorizationManager(
       final AlertTemplateRenderer alertTemplateRenderer,
       final AccessControl accessControl,
-      final AlertManager alertManager,
-      final EnumerationItemManager enumerationItemManager,
-      final AnomalyManager anomalyManager) {
+      final NamespaceResolver namespaceResolver) {
     this.alertTemplateRenderer = alertTemplateRenderer;
     this.accessControl = accessControl;
-    this.alertManager = alertManager;
-    this.enumerationItemManager = enumerationItemManager;
-    this.anomalyManager = anomalyManager;
+    this.namespaceResolver = namespaceResolver;
   }
 
   public <T extends AbstractDTO> void ensureCanCreate(final ThirdEyePrincipal principal,
@@ -156,11 +143,7 @@ public class AuthorizationManager {
         .map(Objects::toString)
         .orElse(DEFAULT_NAME);
 
-    final var namespace = optional(dto)
-        .map(this::resolveAuthParentDto)
-        .map(AbstractDTO::getAuth)
-        .map(AuthorizationConfigurationDTO::getNamespace)
-        .orElse(DEFAULT_NAMESPACE);
+    final var namespace = namespaceResolver.resolveNamespace(dto);
 
     final var entityType = optional(dto)
         .map(AbstractDTO::getClass)
@@ -169,44 +152,6 @@ public class AuthorizationManager {
         .orElse(DEFAULT_ENTITY_TYPE);
 
     return ResourceIdentifier.from(name, namespace, entityType);
-  }
-
-  // Resolves the Authorization parent for certain dto classes.
-  // AnomalyDTO -> EnumerationItemDTO if exists, else AlertDTO
-  // Everything else -> itself
-  private AbstractDTO resolveAuthParentDto(final AbstractDTO dto) {
-    if (dto instanceof AnomalyDTO) {
-      return resolveAuthParentDto((AnomalyDTO) (dto));
-    } else if (dto instanceof RcaInvestigationDTO) {
-      return resolveAuthParentDto((RcaInvestigationDTO) (dto));
-    } else {
-      return dto;
-    }
-  }
-
-  private AbstractDTO resolveAuthParentDto(final AnomalyDTO dto) {
-    if (dto == null) {
-      return null;
-    }
-
-    if (dto.getEnumerationItem() != null) {
-      return optional(dto.getEnumerationItem().getId())
-          .map(enumerationItemManager::findById)
-          .orElse(null);
-    }
-
-    return optional(dto.getDetectionConfigId())
-        .map(alertManager::findById)
-        .orElse(null);
-  }
-
-  private AbstractDTO resolveAuthParentDto(final RcaInvestigationDTO dto) {
-    return optional(dto)
-        .map(RcaInvestigationDTO::getAnomaly)
-        .map(AbstractDTO::getId)
-        .map(anomalyManager::findById)
-        .map(this::resolveAuthParentDto)
-        .orElse(null);
   }
 
   private <T extends AbstractDTO> List<ResourceIdentifier> relatedEntities(T entity) {
@@ -232,5 +177,9 @@ public class AuthorizationManager {
 
   public static ThirdEyePrincipal getInternalValidPrincipal() {
     return INTERNAL_VALID_PRINCIPAL;
+  }
+
+  public void invalidateCache() {
+    namespaceResolver.invalidateCache();
   }
 }

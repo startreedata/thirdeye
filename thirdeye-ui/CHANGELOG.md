@@ -1,3 +1,11 @@
+## [2.39.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.38.0...thirdeye-ui-2.39.0) (2023-09-12)
+
+
+### Features
+
+* [TE-1807](https://cortexdata.atlassian.net/browse/TE-1807) enhance alert dimension selection for subscription groups ([077e81619](https://github.com/startreedata/thirdeye/commit/077e816193ff9a032c0065d65575b08b0f6df287))
+* [TE-1807](https://cortexdata.atlassian.net/browse/TE-1807) enhance selected alert and dimension text ([d221f5595](https://github.com/startreedata/thirdeye/commit/d221f5595d1933789232b6de7dce8740028e6ba0))
+
 ## [2.38.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.37.0...thirdeye-ui-2.38.0) (2023-09-07)
 
 

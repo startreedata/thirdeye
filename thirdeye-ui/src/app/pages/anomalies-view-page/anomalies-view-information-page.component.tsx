@@ -59,7 +59,7 @@ import { QUERY_PARAM_KEY_FOR_EXPANDED } from "../../utils/params/params.util";
 import {
     getAlertsAlertPath,
     getAnomaliesAllPath,
-    getAnomaliesAnomalyViewPath,
+    getAnomaliesAnomalyViewPathV1,
 } from "../../utils/routes/routes.util";
 import { AnomalyViewContainerPageOutletContext } from "./anomalies-view-page.interfaces";
 import { useAnomaliesViewPageStyles } from "./anomalies-view-page.styles";
@@ -229,7 +229,7 @@ export const AnomaliesViewInformationPage: FunctionComponent = () => {
                             )}
                             <Link
                                 component={RouterLink}
-                                to={getAnomaliesAnomalyViewPath(anomaly.id)}
+                                to={getAnomaliesAnomalyViewPathV1(anomaly.id)}
                             >
                                 {t("label.here")}
                             </Link>

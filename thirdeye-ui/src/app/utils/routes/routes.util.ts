@@ -346,6 +346,13 @@ export const getAnomaliesAnomalyViewPathV2 = (id: number): string => {
     return path;
 };
 
+export const getAnomaliesAnomalyViewPathV1 = (id: number): string => {
+    let path: string = AppRoute.ANOMALIES_VIEW;
+    path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
+
+    return createPathWithRecognizedQueryString(path);
+};
+
 export const getConfigurationPath = (): string => {
     return createPathWithRecognizedQueryString(AppRoute.CONFIGURATION);
 };

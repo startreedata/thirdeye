@@ -46,7 +46,7 @@ import {
 import { QUERY_PARAM_KEY_FOR_EXPANDED } from "../../utils/params/params.util";
 import {
     getAlertsAlertPath,
-    getAnomaliesAnomalyViewPath,
+    getAnomaliesAnomalyViewPathV1,
 } from "../../utils/routes/routes.util";
 import { RootCauseAnalysisForAnomalyPageParams } from "../root-cause-analysis-for-anomaly-page/root-cause-analysis-for-anomaly-page.interfaces";
 
@@ -256,7 +256,7 @@ export const InvestigationStateTracker: FunctionComponent = () => {
                         },
                         {
                             label: anomalyId,
-                            link: getAnomaliesAnomalyViewPath(
+                            link: getAnomaliesAnomalyViewPathV1(
                                 Number(anomalyId)
                             ),
                         },

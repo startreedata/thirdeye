@@ -1,3 +1,10 @@
+## [2.40.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.39.0...thirdeye-ui-2.40.0) (2023-09-15)
+
+
+### Features
+
+* fix broken link to anomaly view page ([10ba38908](https://github.com/startreedata/thirdeye/commit/10ba38908f4bc14fa81a8fb062d5475e7b46c018))
+
 ## [2.39.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.38.0...thirdeye-ui-2.39.0) (2023-09-12)
 
 

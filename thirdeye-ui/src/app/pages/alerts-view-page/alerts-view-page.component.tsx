@@ -144,7 +144,8 @@ export const AlertsViewPage: FunctionComponent = () => {
             (searchParams.get(
                 QUERY_PARAM_KEY_FOR_SORT
             ) as DataGridSortOrderV1) || DataGridSortOrderV1.DESC,
-            searchParams.get(QUERY_PARAM_KEY_FOR_SORT_KEY) ?? "lastAnomalyTs",
+            searchParams.get(QUERY_PARAM_KEY_FOR_SORT_KEY) ??
+                "enumerationItem.name",
         ],
         [searchParams]
     );

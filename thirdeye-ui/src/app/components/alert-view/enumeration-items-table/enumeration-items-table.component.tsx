@@ -40,7 +40,7 @@ import {
 const sortOptions = [
     {
         label: "Name",
-        key: "name",
+        key: "enumerationItem.name",
     },
     {
         label: "Latest Anomaly",

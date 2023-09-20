@@ -506,7 +506,7 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
                     </Grid>
 
                     <InputSection
-                        helperLabel={t("message.find-cohorts-that-are")}
+                        helperLabel={t("message.find-dimensions-that-are")}
                         inputComponent={
                             <>
                                 <TextField

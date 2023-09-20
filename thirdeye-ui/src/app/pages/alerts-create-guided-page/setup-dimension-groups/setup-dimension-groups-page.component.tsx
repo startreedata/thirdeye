@@ -60,7 +60,7 @@ export const SetupDimensionGroupsPage: FunctionComponent = () => {
             errorMessages,
             notify,
             t("message.error-while-fetching", {
-                entity: t("label.cohorts-data"),
+                entity: t("label.dimensions-data"),
             })
         );
     }, [status]);
@@ -140,7 +140,7 @@ export const SetupDimensionGroupsPage: FunctionComponent = () => {
                         subtitle={t(
                             "message.automatically-detects-dimensions-based-on-your-selection"
                         )}
-                        title={t("label.cohort-recommender")}
+                        title={t("label.dimensions-recommender")}
                         onMetricSelect={(
                             metric,
                             dataset,

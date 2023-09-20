@@ -36,6 +36,7 @@ import { createAlertConfigForInsights } from "../../../utils/cohort-detector/coh
 import {
     buildPinotDatasourcesTree,
     DatasetInfo,
+    STAR_COLUMN,
 } from "../../../utils/datasources/datasources.util";
 import { generateDateRangeMonthsFromNow } from "../../../utils/routes/routes.util";
 import { useAlertWizardV2Styles } from "../../alert-wizard-v2/alert-wizard-v2.styles";
@@ -334,11 +335,23 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
                                 value={selectedMetric}
                                 onChange={(_, metric) => {
                                     if (metric) {
+                                        const isStartColumn =
+                                            metric === STAR_COLUMN;
+
                                         setSelectedMetric(metric);
+
+                                        if (isStartColumn) {
+                                            setSelectedAggregationFunction(
+                                                MetricAggFunction.COUNT
+                                            );
+                                        }
+
                                         onMetricSelect?.(
                                             metric,
                                             selectedTable?.dataset as Dataset,
-                                            selectedAggregationFunction
+                                            isStartColumn
+                                                ? MetricAggFunction.COUNT
+                                                : selectedAggregationFunction
                                         );
                                     }
                                 }}
@@ -352,10 +365,15 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
                             <Autocomplete
                                 disableClearable
                                 fullWidth
-                                options={[
-                                    MetricAggFunction.SUM,
-                                    MetricAggFunction.COUNT,
-                                ]}
+                                disabled={selectedMetric === STAR_COLUMN}
+                                options={
+                                    selectedMetric === STAR_COLUMN
+                                        ? [MetricAggFunction.COUNT]
+                                        : [
+                                              MetricAggFunction.SUM,
+                                              MetricAggFunction.COUNT,
+                                          ]
+                                }
                                 renderInput={(params) => (
                                     <TextField
                                         {...params}

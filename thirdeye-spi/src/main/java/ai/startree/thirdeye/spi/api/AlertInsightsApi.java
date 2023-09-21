@@ -43,6 +43,7 @@ public class AlertInsightsApi {
    */
   private Long defaultStartTime;
   private Long defaultEndTime;
+  private AnalysisRunInfo analysisRunInfo;
 
   public Long getDatasetStartTime() {
     return datasetStartTime;
@@ -95,6 +96,16 @@ public class AlertInsightsApi {
 
   public AlertInsightsApi setSuspiciousDatasetEndTime(final Long suspiciousDatasetEndTime) {
     this.suspiciousDatasetEndTime = suspiciousDatasetEndTime;
+    return this;
+  }
+
+  public AnalysisRunInfo getAnalysisRunInfo() {
+    return analysisRunInfo;
+  }
+
+  public AlertInsightsApi setAnalysisRunInfo(
+      final AnalysisRunInfo analysisRunInfo) {
+    this.analysisRunInfo = analysisRunInfo;
     return this;
   }
 }

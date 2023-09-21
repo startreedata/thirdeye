@@ -20,13 +20,14 @@ import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_UNKNOWN;
 import static ai.startree.thirdeye.spi.util.AlertMetadataUtils.getGranularity;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.ResourceUtils.serverError;
-import static com.google.common.base.Preconditions.checkState;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertInsightsApi;
 import ai.startree.thirdeye.spi.api.AlertInsightsRequestApi;
+import ai.startree.thirdeye.spi.api.AnalysisRunInfo;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
@@ -38,7 +39,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import javax.ws.rs.WebApplicationException;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -105,8 +105,9 @@ public class AlertInsightsProvider {
       throws Exception {
     final AlertMetadataDTO metadata = templateWithProperties.getMetadata();
 
-    final AlertInsightsApi insights = new AlertInsightsApi().setTemplateWithProperties(
-        toAlertTemplateApi(templateWithProperties));
+    final AlertInsightsApi insights = new AlertInsightsApi()
+        .setAnalysisRunInfo(AnalysisRunInfo.success())
+        .setTemplateWithProperties(toAlertTemplateApi(templateWithProperties));
     addDatasetTimes(insights, metadata);
 
     return insights;
@@ -131,10 +132,6 @@ public class AlertInsightsProvider {
 
   private void addDatasetStartEndTimes(final AlertInsightsApi insights,
       final DatasetConfigDTO datasetConfigDTO) throws Exception {
-    final String dataSource = datasetConfigDTO.getDataSource();
-    checkState(dataSource != null, "Datasource is null in configuration of dataset: %s.",
-        datasetConfigDTO.getDataset());
-
     // launch min, max, safeMax queries async
     final Future<@Nullable Long> minTimeFuture = minMaxTimeLoader.fetchMinTimeAsync(
         datasetConfigDTO,
@@ -149,25 +146,23 @@ public class AlertInsightsProvider {
         safeInterval);
 
     // process futures
-    addDatasetStart(insights, minTimeFuture);
-    addDatasetEnd(insights, maxTimeFuture, safeMaxTimeFuture, maximumPossibleEndTime);
-  }
-
-  private void addDatasetStart(final AlertInsightsApi insights,
-      final Future<@Nullable Long> minTimeFuture) throws Exception {
-    final Long datasetStartTime = minTimeFuture.get(FETCH_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
-    insights.setDatasetStartTime(datasetStartTime);
-  }
-
-  private void addDatasetEnd(final AlertInsightsApi insights,
-      final Future<@Nullable Long> maxTimeFuture, final Future<@Nullable Long> safeMaxTimeFuture,
-      final long maximumPossibleEndTime) throws Exception {
-    final @Nullable Long datasetMaxTime = maxTimeFuture.get(FETCH_TIMEOUT_MILLIS,
-        TimeUnit.MILLISECONDS);
-    if (datasetMaxTime == null) {
+    // process startTime
+    final Long datasetStartTime = minTimeFuture.get(FETCH_TIMEOUT_MILLIS, MILLISECONDS);
+    if (datasetStartTime == null) {
+      insights.setAnalysisRunInfo(AnalysisRunInfo.failure(
+          String.format("Failed to fetch dataset start time. Table %s is empty or unavailable?",
+              datasetConfigDTO.getDataset())));
       return;
     }
-    if (datasetMaxTime <= maximumPossibleEndTime) {
+    insights.setDatasetStartTime(datasetStartTime);
+
+    // process endTime
+    final @Nullable Long datasetMaxTime = maxTimeFuture.get(FETCH_TIMEOUT_MILLIS, MILLISECONDS);
+    if (datasetMaxTime == null) {
+      insights.setAnalysisRunInfo(AnalysisRunInfo.failure(
+          String.format("Failed to fetch dataset end time. Table %s is empty or unavailable?",
+              datasetConfigDTO.getDataset())));
+    } else if (datasetMaxTime <= maximumPossibleEndTime) {
       insights.setDatasetEndTime(datasetMaxTime);
     } else {
       // there is bad data in the dataset, datasetMaxTime has an incorrect value, bigger than the current time - see TE-860
@@ -178,20 +173,24 @@ public class AlertInsightsProvider {
           datasetMaxTime,
           System.currentTimeMillis(),
           maximumPossibleEndTime);
-      final @Nullable Long safeMaxTime = safeMaxTimeFuture.get(FETCH_TIMEOUT_MILLIS,
-          TimeUnit.MILLISECONDS);
-      insights.setDatasetEndTime(safeMaxTime);
+      final @Nullable Long safeMaxTime = safeMaxTimeFuture.get(FETCH_TIMEOUT_MILLIS, MILLISECONDS);
+      if (safeMaxTime == null) {
+        insights.setAnalysisRunInfo(AnalysisRunInfo.failure(String.format(
+            "Failed to fetch dataset safe end time. The time configuration of the table %s may be incorrect.",
+            datasetConfigDTO.getDataset())));
+      } else {
+        insights.setDatasetEndTime(safeMaxTime);
+      }
     }
   }
 
   // default times for chart - to call after dataset times are set in insights
   private void addDefaultTimes(final AlertInsightsApi insights, final AlertMetadataDTO metadata) {
-    final Long datasetStartTime = insights.getDatasetStartTime();
-    final Long datasetEndTime = insights.getDatasetEndTime();
-    if (datasetStartTime == null || datasetEndTime == null) {
-      // cannot compute
+    if (!insights.getAnalysisRunInfo().isSuccess()) {
       return;
     }
+    final @NonNull Long datasetStartTime = insights.getDatasetStartTime();
+    final @NonNull Long datasetEndTime = insights.getDatasetEndTime();
     final Chronology chronology = optional(metadata.getTimezone()).map(DateTimeZone::forID)
         .map(ISOChronology::getInstance)
         .map(e -> (Chronology) e)
@@ -201,6 +200,11 @@ public class AlertInsightsProvider {
     final Period granularity = getGranularity(metadata);
     // compute default chart interval
     final Interval defaultInterval = getDefaultChartInterval(datasetInterval, granularity);
+    if (defaultInterval.toDurationMillis() == 0) {
+      insights.setAnalysisRunInfo(AnalysisRunInfo.failure(String.format(
+          "Default interval start is equal to default interval end: %s. There is not enough data or the granularity %s is too big.",
+          defaultInterval.getStartMillis(), granularity)));
+    }
     insights.setDefaultStartTime(defaultInterval.getStartMillis());
     insights.setDefaultEndTime(defaultInterval.getEndMillis());
   }

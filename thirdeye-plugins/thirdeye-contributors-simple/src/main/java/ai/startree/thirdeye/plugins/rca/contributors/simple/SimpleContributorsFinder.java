@@ -32,6 +32,7 @@ import ai.startree.thirdeye.spi.rca.ContributorsFinder;
 import ai.startree.thirdeye.spi.rca.ContributorsFinderResult;
 import ai.startree.thirdeye.spi.rca.ContributorsSearchConfiguration;
 import com.google.common.annotations.VisibleForTesting;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -110,7 +111,7 @@ public class SimpleContributorsFinder implements ContributorsFinder {
         searchConfiguration.getDatasetConfigDTO().getDataset());
   }
 
-  private ContributorsFinderResult cannotComputeResult(final String message) {
+  private ContributorsFinderResult cannotComputeResult(final @NonNull String message) {
     return () -> new DimensionAnalysisResultApi()
         .setAnalysisRunInfo(AnalysisRunInfo.failure(message));
   }

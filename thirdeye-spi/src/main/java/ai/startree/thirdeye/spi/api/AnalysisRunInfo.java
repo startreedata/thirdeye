@@ -13,6 +13,8 @@
  */
 package ai.startree.thirdeye.spi.api;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 /**
  * Should be a member of all apis that involve a data analysis that can fail because the data does
  * not match assumptions (eg missing data, too few data, invalid distributions, etc...)
@@ -20,13 +22,13 @@ package ai.startree.thirdeye.spi.api;
 public class AnalysisRunInfo {
 
   private boolean success = true;
-  private String message = "";
+  private @NonNull String message = "";
 
   public static AnalysisRunInfo success() {
     return new AnalysisRunInfo().setSuccess(true).setMessage("");
   }
 
-  public static AnalysisRunInfo failure(final String message) {
+  public static AnalysisRunInfo failure(final @NonNull String message) {
     return new AnalysisRunInfo().setSuccess(false).setMessage(message);
   }
 
@@ -39,11 +41,11 @@ public class AnalysisRunInfo {
     return this;
   }
 
-  public String getMessage() {
+  public @NonNull String getMessage() {
     return message;
   }
 
-  public AnalysisRunInfo setMessage(final String message) {
+  public AnalysisRunInfo setMessage(final @NonNull String message) {
     this.message = message;
     return this;
   }

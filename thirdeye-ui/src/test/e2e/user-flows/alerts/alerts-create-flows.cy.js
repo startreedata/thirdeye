@@ -286,9 +286,6 @@ describe("alert create flows", () => {
         cy.get("li").contains("Simple").click();
 
         /** Should be at tune alert page **/
-        cy.getByDataTestId("seasonalityPeriod-container")
-            .find("input[value='P1D']")
-            .should("exist");
         cy.getByDataTestId("lookback-container")
             .find("input[value='P14D']")
             .should("exist");

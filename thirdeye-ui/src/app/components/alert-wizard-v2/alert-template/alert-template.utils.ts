@@ -162,7 +162,6 @@ export function createNewStartingAlert(): EditableAlert {
             dataset: "sample_dataset",
             aggregationColumn: "sample_column_name",
             aggregationFunction: "SUM",
-            seasonalityPeriod: "P7D",
             lookback: "P28D",
             monitoringGranularity: "P1D",
             sensitivity: "3",

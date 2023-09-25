@@ -132,11 +132,6 @@ const SUPPORTED_SIMPLE_MODE_PROPERTIES: {
         label: i18n.t("label.maximum"),
         type: "number",
     },
-    seasonalityPeriod: {
-        templatePropertyName: "seasonalityPeriod",
-        label: i18n.t("label.seasonality-period"),
-        type: "string",
-    },
     lookback: {
         templatePropertyName: "lookback",
         label: i18n.t("label.lookback"),

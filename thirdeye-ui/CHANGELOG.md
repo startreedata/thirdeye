@@ -1,3 +1,18 @@
+## [2.41.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.40.0...thirdeye-ui-2.41.0) (2023-09-25)
+
+
+### Features
+
+* [TE-1825](https://cortexdata.atlassian.net/browse/TE-1825) rename cohort recommender to dimensions recommender ([f324f4be8](https://github.com/startreedata/thirdeye/commit/f324f4be8f72c879c0e77e7800c3a687dc1b1a22))
+
+
+### Bug Fixes
+
+* [TE-1783](https://cortexdata.atlassian.net/browse/TE-1783) remove seasonalityPeriod from create alert simple mode ([e6769c66c](https://github.com/startreedata/thirdeye/commit/e6769c66c3a8153a5da609ff9285df01aaef4a54))
+* [TE-1824](https://cortexdata.atlassian.net/browse/TE-1824) limit to COUNT aggregation func when using * in dimension select ([fc4657dcb](https://github.com/startreedata/thirdeye/commit/fc4657dcb04a675a5625bfbc6318f6a9c267e0da))
+* [TE-1826](https://cortexdata.atlassian.net/browse/TE-1826) fix sorting enumeration item by name ([3d395ef57](https://github.com/startreedata/thirdeye/commit/3d395ef5792d7b751d9ac35a25d6a8a00ac4a95e))
+* [TE-1827](https://cortexdata.atlassian.net/browse/TE-1827) default sorting enumeration item by name ([50408da7b](https://github.com/startreedata/thirdeye/commit/50408da7bda2dfada090f9a91b77624695b65c54))
+
 ## [2.40.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.39.0...thirdeye-ui-2.40.0) (2023-09-15)
 
 

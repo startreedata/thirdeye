@@ -143,7 +143,7 @@ export const AlertsViewPage: FunctionComponent = () => {
             searchParams.get(QUERY_PARAM_KEY_FOR_SEARCH),
             (searchParams.get(
                 QUERY_PARAM_KEY_FOR_SORT
-            ) as DataGridSortOrderV1) || DataGridSortOrderV1.DESC,
+            ) as DataGridSortOrderV1) || DataGridSortOrderV1.ASC,
             searchParams.get(QUERY_PARAM_KEY_FOR_SORT_KEY) ??
                 "enumerationItem.name",
         ],

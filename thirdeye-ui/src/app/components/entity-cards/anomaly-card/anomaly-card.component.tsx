@@ -145,8 +145,8 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = ({
                                             <>{/** Purposely empty **/}</>
                                         }
                                         isEmpty={
-                                            alert?.templateProperties
-                                                .seasonalityPeriod === undefined
+                                            !alert?.templateProperties
+                                                .seasonalityPeriod
                                         }
                                     >
                                         <AnomalySummaryCardDetail

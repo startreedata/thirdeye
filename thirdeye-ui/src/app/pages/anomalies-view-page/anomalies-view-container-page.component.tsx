@@ -148,7 +148,7 @@ export const AnomaliesViewContainerPage: FunctionComponent = () => {
         >
             <Outlet
                 context={{
-                    anomaly: currentAnomaly,
+                    anomaly: fetchedAnomaly,
                     enumerationItem,
                     handleFeedbackUpdateSuccess,
                     alertInsight,

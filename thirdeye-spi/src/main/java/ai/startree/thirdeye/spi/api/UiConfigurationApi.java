@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.spi.api;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UiConfigurationApi implements ThirdEyeApi {
@@ -22,6 +23,8 @@ public class UiConfigurationApi implements ThirdEyeApi {
   private boolean authEnabled;
   private HeapConfigurationApi heap;
   private SentryConfigurationApi sentry;
+
+  private Map<String, Object> intercom;
 
   public String getClientId() {
     return clientId;
@@ -56,6 +59,15 @@ public class UiConfigurationApi implements ThirdEyeApi {
 
   public UiConfigurationApi setSentry(SentryConfigurationApi sentry) {
     this.sentry = sentry;
+    return this;
+  }
+
+  public Map<String, Object> getIntercom() {
+    return intercom;
+  }
+
+  public UiConfigurationApi setIntercom(final Map<String, Object> intercom) {
+    this.intercom = intercom;
     return this;
   }
 

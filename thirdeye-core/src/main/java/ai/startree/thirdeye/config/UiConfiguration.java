@@ -13,6 +13,8 @@
  */
 package ai.startree.thirdeye.config;
 
+import java.util.Map;
+
 public class UiConfiguration {
 
   private String externalUrl;
@@ -20,6 +22,8 @@ public class UiConfiguration {
 
   private HeapConfiguration heap;
   private SentryConfiguration sentry;
+
+  private Map<String, Object> intercom;
 
   public String getExternalUrl() {
     return externalUrl;
@@ -54,6 +58,15 @@ public class UiConfiguration {
 
   public UiConfiguration setSentry(SentryConfiguration sentry) {
     this.sentry = sentry;
+    return this;
+  }
+
+  public Map<String, Object> getIntercom() {
+    return intercom;
+  }
+
+  public UiConfiguration setIntercom(final Map<String, Object> intercom) {
+    this.intercom = intercom;
     return this;
   }
 

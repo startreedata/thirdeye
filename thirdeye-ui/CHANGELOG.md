@@ -1,3 +1,13 @@
+### [2.41.1](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.41.0...thirdeye-ui-2.41.1) (2023-09-27)
+
+
+### Bug Fixes
+
+* [TE-1827](https://cortexdata.atlassian.net/browse/TE-1827) default to ascending order by name ([982db333d](https://github.com/startreedata/thirdeye/commit/982db333d0e2097c29347937e8a4f215a6bfbbed))
+* [TE-1837](https://cortexdata.atlassian.net/browse/TE-1837) fix app crash when going back to anomaly view from rca ([866a442da](https://github.com/startreedata/thirdeye/commit/866a442da61eb146c288ad45071e209f7ad2be1d))
+* [TE-1838](https://cortexdata.atlassian.net/browse/TE-1838) app crash when switching to simple mode when updating alert for an alert using a custom alert template ([5a480c725](https://github.com/startreedata/thirdeye/commit/5a480c725a80011f4094390c66b860203ee14b2b))
+* hide seasonality in anomaly card if missing in alert configuration ([23aedd5d0](https://github.com/startreedata/thirdeye/commit/23aedd5d0d5cf5d008763f750ff340c5b6560aea))
+
 ## [2.41.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.40.0...thirdeye-ui-2.41.0) (2023-09-25)
 
 

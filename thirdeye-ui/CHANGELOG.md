@@ -1,3 +1,10 @@
+### [2.41.2](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.41.1...thirdeye-ui-2.41.2) (2023-09-29)
+
+
+### Bug Fixes
+
+* [TE-1843](https://cortexdata.atlassian.net/browse/TE-1843) fix double loading of heap ([7519a0707](https://github.com/startreedata/thirdeye/commit/7519a07077d69c42df6eee4ccd6bbd4d6135d77c))
+
 ### [2.41.1](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.41.0...thirdeye-ui-2.41.1) (2023-09-27)
 
 

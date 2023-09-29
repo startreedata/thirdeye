@@ -53,7 +53,7 @@ export const AnalyticsAndErrorReportingProviderV1: FunctionComponent<AnalyticsAn
                 `for(var n=function(e){return function(){heap.push([e].concat(Array.prototype.slice.call(arguments,0)))}},` +
                 `p=["addEventProperties","addUserProperties","clearEventProperties","identify","resetIdentity","removeEventProperty","setEventProperties","track","unsetEventProperty"],` +
                 `o=0;o<p.length;o++)heap[p[o]]=n(p[o])};` +
-                `heap.load("${id}");`;
+                `heap.load("${id}", {secureCookie: true});`;
 
             if (userEmail) {
                 trackingScript += `heap.identify("${userEmail}");heap.addUserProperties({name:"${userName}",email:"${userEmail}",})`;

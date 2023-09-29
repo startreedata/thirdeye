@@ -40,52 +40,69 @@ export const AnalyticsAndErrorReportingProviderV1: FunctionComponent<AnalyticsAn
         });
         const { authUser } = useAuthProviderV1();
 
+        const [isScriptInjected, setIsScriptInjected] = useState(false);
+        const [isUserSetup, setIsUserSetup] = useState(false);
+
         // Provides tracking script to inject
-        const getTrackingScript = (
-            id: string | number,
-            userEmail: string,
-            userName: string
-        ): string => {
-            let trackingScript =
+        const generateTrackingScriptContent = (id: string | number): string => {
+            return (
                 `window.heap=window.heap||[],heap.load=function(e,t){window.heap.appid=e,window.heap.config=t=t||{};` +
                 `var r=document.createElement("script");r.type="text/javascript",r.async=!0,r.src="https://cdn.heapanalytics.com/js/heap-"+e+".js";` +
                 `var a=document.getElementsByTagName("script")[0];a.parentNode.insertBefore(r,a);` +
                 `for(var n=function(e){return function(){heap.push([e].concat(Array.prototype.slice.call(arguments,0)))}},` +
                 `p=["addEventProperties","addUserProperties","clearEventProperties","identify","resetIdentity","removeEventProperty","setEventProperties","track","unsetEventProperty"],` +
                 `o=0;o<p.length;o++)heap[p[o]]=n(p[o])};` +
-                `heap.load("${id}", {secureCookie: true});`;
+                `heap.load("${id}", {secureCookie: true});`
+            );
+        };
 
-            if (userEmail) {
-                trackingScript += `heap.identify("${userEmail}");heap.addUserProperties({name:"${userName}",email:"${userEmail}",})`;
-            }
-
-            return trackingScript;
+        const generateUserSetupScriptContent = (
+            userEmail: string,
+            userName: string
+        ): string => {
+            return `heap.identify("${userEmail}");heap.addUserProperties({name:"${userName}",email:"${userEmail}",})`;
         };
 
         // Initializes tracking
-        const initializeTracking = (appId: string): void => {
+        useEffect(() => {
+            if (!appConfig?.heap?.environmentId || isScriptInjected) {
+                return;
+            }
+
             if (!document || !document.head) {
                 return;
             }
 
             const trackingScript = document.createElement("script");
-            trackingScript.innerHTML = getTrackingScript(
-                appId,
-                authUser.email,
-                authUser.name
+            trackingScript.innerHTML = generateTrackingScriptContent(
+                appConfig?.heap?.environmentId
             );
-            trackingScript.async = true;
+            trackingScript.defer = true;
 
             document.head.appendChild(trackingScript);
-        };
+            setIsScriptInjected(true);
+        }, [appConfig]);
 
         useEffect(() => {
-            if (!authUser?.email || !appConfig?.heap?.environmentId) {
+            // Only set up when heap script is injected
+            if (isUserSetup || !isScriptInjected) {
                 return;
             }
 
-            initializeTracking(appConfig.heap.environmentId);
-        }, [authUser, appConfig]);
+            if (!authUser?.email) {
+                return;
+            }
+
+            const trackingScript = document.createElement("script");
+            trackingScript.innerHTML = generateUserSetupScriptContent(
+                authUser?.email,
+                authUser?.name
+            );
+            trackingScript.defer = true;
+
+            document.head.appendChild(trackingScript);
+            setIsUserSetup(true);
+        }, [isScriptInjected, authUser]);
 
         useEffect(() => {
             if (window.location.host.includes("localhost:7004")) {

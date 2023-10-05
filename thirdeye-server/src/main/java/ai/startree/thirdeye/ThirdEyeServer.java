@@ -49,9 +49,11 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.federecio.dropwizard.swagger.SwaggerBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
+import io.micrometer.core.instrument.Metrics;
+import io.micrometer.prometheus.PrometheusConfig;
+import io.micrometer.prometheus.PrometheusMeterRegistry;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.dropwizard.DropwizardExports;
-import io.prometheus.client.exporter.MetricsServlet;
 import java.util.EnumSet;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
@@ -119,10 +121,14 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
 
     // Expose dropwizard metrics in prometheus compatible format
     if (configuration.getPrometheusConfiguration().isEnabled()) {
-      final CollectorRegistry collectorRegistry = new CollectorRegistry();
-      collectorRegistry.register(new DropwizardExports(env.metrics()));
+      // new registry based on micrometers
+      final PrometheusMeterRegistry registry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
+      Metrics.globalRegistry.add(registry);
+      // old registry based on dropwizard-metrics
+      final CollectorRegistry legacyRegistry = new CollectorRegistry();
+      legacyRegistry.register(new DropwizardExports(env.metrics()));
       env.admin()
-          .addServlet("prometheus", new MetricsServlet(collectorRegistry))
+          .addServlet("prometheus", new MergingMetricsServlet(registry, legacyRegistry))
           .addMapping("/prometheus");
     }
 

@@ -33,9 +33,9 @@ public class PluginClassLoader extends URLClassLoader {
   public static final ImmutableList<String> SHARED_PACKAGES = ImmutableList.<String>builder()
       .add("ai.startree.thirdeye.spi")
       .add("com.google.common")
+      .add("io.micrometer")
       .add("org.joda.time")
       .add("org.slf4j")
-      .add("org.h2")
       .add("com.mysql")
       .add("javax.activation")
       .build();

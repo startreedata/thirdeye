@@ -89,6 +89,7 @@
     <slf4j-api.version>1.7.12</slf4j-api.version>
     <swagger.version>2.1.6-1</swagger.version>
     <testcontainers.version>1.18.3</testcontainers.version>
+    <micrometer.version>1.11.4</micrometer.version>
   </properties>
 
   <licenses>
@@ -916,10 +917,22 @@
         <artifactId>hsqldb</artifactId>
         <version>${hsqldb.version}</version>
       </dependency>
+      <!-- legacy metrics library-->
       <dependency>
         <groupId>io.dropwizard.metrics</groupId>
         <artifactId>metrics-core</artifactId>
         <version>4.2.19</version>
+      </dependency>
+      <!-- new metrics system - core is a facade, registry is the implementation -->
+      <dependency>
+        <groupId>io.micrometer</groupId>
+        <artifactId>micrometer-core</artifactId>
+        <version>${micrometer.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.micrometer</groupId>
+        <artifactId>micrometer-registry-prometheus</artifactId>
+        <version>${micrometer.version}</version>
       </dependency>
 
       <!-- checkers -->

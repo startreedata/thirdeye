@@ -44,7 +44,7 @@ public class TestGenericPojoDao {
 
   private static long getRandomLimit() {
     // avoid limit as 0
-    return new Random().nextInt(TOTAL_ANOMALIES-1)+1;
+    return new Random().nextInt(TOTAL_ANOMALIES - 1) + 1;
   }
 
   private static AnomalyDTO anomaly() {
@@ -54,7 +54,7 @@ public class TestGenericPojoDao {
   @BeforeClass
   void beforeClass() {
     dao = MySqlTestDatabase.sharedInjector().getInstance(GenericPojoDao.class);
-    for(int i=0; i<TOTAL_ANOMALIES; i++) {
+    for (int i = 0; i < TOTAL_ANOMALIES; i++) {
       dao.create(anomaly());
     }
   }
@@ -98,7 +98,9 @@ public class TestGenericPojoDao {
 
   @Test(dependsOnMethods = "saveEntityTest", timeOut = 60000L)
   public void updateEntityTest() {
-    final List<DataSourceDTO> dtos = dao.get(Predicate.EQ(TYPE, TEST_TYPES.get(0)), DataSourceDTO.class);
+    final List<DataSourceDTO> dtos = dao.filter(
+        new DaoFilter().setPredicate(Predicate.EQ(TYPE, TEST_TYPES.get(0)))
+            .setBeanClass(DataSourceDTO.class));
     assertThat(dtos.size()).isEqualTo(2);
     final DataSourceDTO dto = dtos.get(0);
     dto.setType(TEST_TYPES.get(1));
@@ -106,8 +108,9 @@ public class TestGenericPojoDao {
     final int rowsUpdated = dao.update(dto, Predicate.EQ(VERSION, 1));
     // only 1 row must be updated
     assertThat(rowsUpdated).isEqualTo(1);
-    final List<DataSourceDTO> dtoAfterUpdate = dao.get(Predicate.EQ(TYPE, TEST_TYPES.get(1)),
-        DataSourceDTO.class);
+    final List<DataSourceDTO> dtoAfterUpdate = dao.filter(
+        new DaoFilter().setPredicate(Predicate.EQ(TYPE, TEST_TYPES.get(1)))
+            .setBeanClass(DataSourceDTO.class));
     assertThat(dtoAfterUpdate.size()).isEqualTo(1);
     assertThat(dtoAfterUpdate.get(0).getId()).isEqualTo(idBeforeUpdate);
   }
@@ -148,7 +151,7 @@ public class TestGenericPojoDao {
 
   @Test
   public void filterWithOffsetWithoutLimitTest() {
-    final long offset = TOTAL_ANOMALIES/2;
+    final long offset = TOTAL_ANOMALIES / 2;
     final DaoFilter filter = new DaoFilter()
         .setOffset(offset)
         .setBeanClass(AnomalyDTO.class);
@@ -181,7 +184,7 @@ public class TestGenericPojoDao {
   @Test
   public void pageBoundariesTest() {
     // ensure more than 2 pages are formed
-    final long limit = TOTAL_ANOMALIES/3;
+    final long limit = TOTAL_ANOMALIES / 3;
     long offset = 0;
     long entryCount = 0;
     final DaoFilter filter = new DaoFilter()

@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.datalayer.bao;
 
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
+import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.DetectionStatusManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DetectionStatusDTO;
@@ -35,7 +36,8 @@ public class DetectionStatusManagerImpl extends AbstractManagerImpl<DetectionSta
   @Override
   public DetectionStatusDTO findLatestEntryForFunctionId(long functionId) {
     Predicate predicate = Predicate.EQ("functionId", functionId);
-    List<DetectionStatusDTO> list = genericPojoDao.get(predicate, DetectionStatusDTO.class);
+    List<DetectionStatusDTO> list = genericPojoDao.filter(
+        new DaoFilter().setPredicate(predicate).setBeanClass(DetectionStatusDTO.class));
     if (CollectionUtils.isNotEmpty(list)) {
       Collections.sort(list);
       return list.get(list.size() - 1);

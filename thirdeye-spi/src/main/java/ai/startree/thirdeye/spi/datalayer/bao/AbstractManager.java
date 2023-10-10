@@ -17,7 +17,6 @@ import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import java.util.List;
-import java.util.Map;
 
 public interface AbstractManager<E extends AbstractDTO> {
 
@@ -52,8 +51,6 @@ public interface AbstractManager<E extends AbstractDTO> {
   int deleteRecordsOlderThanDays(int days);
 
   List<E> findAll();
-
-  List<E> findByParams(Map<String, Object> filters);
 
   List<E> findByPredicate(Predicate predicate);
 

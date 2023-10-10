@@ -20,7 +20,6 @@ import ai.startree.thirdeye.spi.datalayer.bao.JobManager;
 import ai.startree.thirdeye.spi.datalayer.dto.JobDTO;
 import ai.startree.thirdeye.spi.task.TaskType;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.persist.Transactional;
@@ -47,7 +46,7 @@ public class JobManagerImpl extends AbstractManagerImpl<JobDTO> implements JobMa
   @Override
   @Transactional
   public List<JobDTO> findByStatus(JobStatus status) {
-    return super.findByParams(ImmutableMap.of("status", status.toString()));
+    return super.findByPredicate(Predicate.EQ("status", status.toString()));
   }
 
   @Override

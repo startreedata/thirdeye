@@ -230,10 +230,12 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
 
   @Override
   public AnomalyDTO findParent(final AnomalyDTO entity) {
-    final List<AnomalyDTO> candidates = genericPojoDao.get(Predicate.AND(
+    final Predicate predicate = Predicate.AND(
         Predicate.EQ("detectionConfigId", entity.getDetectionConfigId()),
         Predicate.LE("startTime", entity.getStartTime()),
-        Predicate.GE("endTime", entity.getEndTime())), AnomalyDTO.class);
+        Predicate.GE("endTime", entity.getEndTime()));
+    final List<AnomalyDTO> candidates = genericPojoDao.filter(
+        new DaoFilter().setPredicate(predicate).setBeanClass(AnomalyDTO.class));
     for (final AnomalyDTO candidate : candidates) {
       if (candidate.getChildIds() != null && !candidate.getChildIds().isEmpty()) {
         for (final Long id : candidate.getChildIds()) {
@@ -315,7 +317,8 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
         .filter(Objects::nonNull)
         .collect(Collectors.toList());
 
-    final List<AnomalyFeedbackDTO> feedbacks = genericPojoDao.get(feedbackIds, AnomalyFeedbackDTO.class);
+    final List<AnomalyFeedbackDTO> feedbacks = genericPojoDao.get(feedbackIds,
+        AnomalyFeedbackDTO.class);
     final Map<Long, AnomalyFeedbackDTO> feedbackMap = feedbacks.stream()
         .collect(Collectors.toMap(AnomalyFeedbackDTO::getId, Function.identity()));
     anomalies.stream()

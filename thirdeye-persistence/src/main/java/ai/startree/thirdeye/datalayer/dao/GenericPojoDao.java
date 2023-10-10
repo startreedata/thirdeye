@@ -48,7 +48,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import org.reflections.ReflectionUtils;
@@ -325,15 +324,15 @@ public class GenericPojoDao {
    * two-step operation to get the entities whereas {@link #getAll} gets the entities in a single
    * operation.
    *
-   * @param daoFilter required filters to filter the result
+   * @param daoFilter required filters to filter the result.
    */
   @SuppressWarnings("unchecked")
   public <E extends AbstractDTO> List<E> filter(final DaoFilter daoFilter) {
-    final Class<? extends AbstractDTO> beanClass = daoFilter.getBeanClass();
     final List<Long> ids = filterIds(daoFilter);
     if (ids.isEmpty()) {
       return emptyList();
     }
+    final Class<? extends AbstractDTO> beanClass = daoFilter.getBeanClass();
     return (List<E>) get(ids, beanClass);
   }
 
@@ -366,26 +365,10 @@ public class GenericPojoDao {
     return emptyList();
   }
 
-  public <E extends AbstractDTO> List<E> get(final Map<String, Object> filterParams,
-      final Class<E> pojoClass) {
-    final Predicate[] childPredicates = new Predicate[filterParams.size()];
-    int index = 0;
-    for (final Entry<String, Object> entry : filterParams.entrySet()) {
-      childPredicates[index] = Predicate.EQ(entry.getKey(), entry.getValue());
-      index = index + 1;
-    }
-    return get(Predicate.AND(childPredicates), pojoClass);
-  }
-
-  public <E extends AbstractDTO> List<E> get(final Predicate predicate, final Class<E> pojoClass) {
-    final List<Long> idsToFind = filterIds(
-        new DaoFilter().setPredicate(predicate).setBeanClass(pojoClass));
-    return get(idsToFind, pojoClass);
-  }
-
   public List<Long> filterIds(final DaoFilter daoFilter) {
     //apply the predicates and fetch the primary key ids
-    final Class<? extends AbstractIndexEntity> indexClass = BEAN_INDEX_MAP.get(daoFilter.getBeanClass());
+    final Class<? extends AbstractIndexEntity> indexClass = BEAN_INDEX_MAP.get(
+        daoFilter.getBeanClass());
     try {
       validate(daoFilter);
       //find the matching ids

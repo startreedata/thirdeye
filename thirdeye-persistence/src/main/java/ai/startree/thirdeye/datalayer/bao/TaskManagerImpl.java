@@ -406,11 +406,6 @@ public class TaskManagerImpl implements TaskManager {
   }
 
   @Override
-  public List<TaskDTO> findByParams(final Map<String, Object> filters) {
-    return dao.get(filters);
-  }
-
-  @Override
   public List<TaskDTO> findByPredicate(final Predicate predicate) {
     return dao.get(predicate);
   }

@@ -21,7 +21,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import com.google.inject.persist.Transactional;
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.Map;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
@@ -115,13 +114,9 @@ public abstract class AbstractManagerImpl<E extends AbstractDTO> implements Abst
   }
 
   @Override
-  public List<E> findByParams(final Map<String, Object> filters) {
-    return (List<E>) genericPojoDao.get(filters, dtoClass);
-  }
-
-  @Override
   public List<E> findByPredicate(final Predicate predicate) {
-    return (List<E>) genericPojoDao.get(predicate, dtoClass);
+    return (List<E>) genericPojoDao.filter(
+        new DaoFilter().setPredicate(predicate).setBeanClass(dtoClass));
   }
 
   @Override

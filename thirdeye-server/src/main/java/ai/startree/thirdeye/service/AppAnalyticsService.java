@@ -26,7 +26,6 @@ import ai.startree.thirdeye.core.ConfusionMatrix;
 import ai.startree.thirdeye.core.MonitoredMetricWrapper;
 import ai.startree.thirdeye.spi.api.AnomalyStatsApi;
 import ai.startree.thirdeye.spi.api.AppAnalyticsApi;
-import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
@@ -164,8 +163,7 @@ public class AppAnalyticsService {
     // filter to get anomalies without feedback and which are not ignored
     final Predicate unclassified = Predicate.AND(notIgnored(),
         Predicate.EQ("anomalyFeedbackId", 0));
-    matrix.addUnclassified((int) anomalyManager.countParentAnomalies(
-        new DaoFilter().setPredicate(unclassified)));
+    matrix.addUnclassified((int) anomalyManager.countParentAnomalies(unclassified));
 
     final List<AnomalyFeedback> allFeedbacks = anomalyFeedbacksSupplier.get();
     final Map<AnomalyFeedbackType, Long> typeMap = aggregateFeedbackTypes(allFeedbacks);
@@ -186,8 +184,7 @@ public class AppAnalyticsService {
     if (predicate != null) {
       finalPredicate = Predicate.AND(finalPredicate, predicate);
     }
-    return anomalyManager.findParentAnomaliesWithFeedback(
-            new DaoFilter().setPredicate(finalPredicate)).stream()
+    return anomalyManager.findParentAnomaliesWithFeedback(finalPredicate).stream()
         .map(AnomalyDTO::getFeedback)
         .collect(Collectors.toList());
   }
@@ -208,7 +205,7 @@ public class AppAnalyticsService {
     if (predicate != null) {
       finalPredicate = Predicate.AND(finalPredicate, predicate);
     }
-    return anomalyManager.countParentAnomalies(new DaoFilter().setPredicate(finalPredicate));
+    return anomalyManager.countParentAnomalies(finalPredicate);
   }
 
   private Long countFeedbacks(final Predicate predicate) {

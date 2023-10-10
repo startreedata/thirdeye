@@ -19,7 +19,6 @@ import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import java.util.List;
-import java.util.Map;
 
 /**
  * This class is generated using IntelliJ IDEA.
@@ -96,11 +95,6 @@ public class DelegateDatasetConfigManager implements DatasetConfigManager {
   @Override
   public List<DatasetConfigDTO> findAll() {
     return delegate.findAll();
-  }
-
-  @Override
-  public List<DatasetConfigDTO> findByParams(final Map<String, Object> filters) {
-    return delegate.findByParams(filters);
   }
 
   @Override

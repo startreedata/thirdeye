@@ -21,6 +21,11 @@ public class AnomalyFilter {
   private Interval createTimeWindow;
   private Long alertId;
   private Long enumerationItemId;
+  private Boolean isIgnored;
+  private Boolean hasFeedback;
+  private Boolean isChild;
+  /**Will match any anomaly that overlaps with the window*/
+  private Interval startEndWindow;
 
   public Interval getCreateTimeWindow() {
     return createTimeWindow;
@@ -46,6 +51,42 @@ public class AnomalyFilter {
 
   public AnomalyFilter setEnumerationItemId(final Long enumerationItemId) {
     this.enumerationItemId = enumerationItemId;
+    return this;
+  }
+
+  public Boolean isIgnored() {
+    return isIgnored;
+  }
+
+  public AnomalyFilter setIsIgnored(final Boolean ignored) {
+    this.isIgnored = ignored;
+    return this;
+  }
+
+  public Boolean hasFeedback() {
+    return hasFeedback;
+  }
+
+  public AnomalyFilter setHasFeedback(final Boolean hasFeedback) {
+    this.hasFeedback = hasFeedback;
+    return this;
+  }
+
+  public Boolean isChild() {
+    return isChild;
+  }
+
+  public AnomalyFilter setIsChild(final Boolean child) {
+    isChild = child;
+    return this;
+  }
+
+  public Interval getStartEndWindow() {
+    return startEndWindow;
+  }
+
+  public AnomalyFilter setStartEndWindow(final Interval startEndWindow) {
+    this.startEndWindow = startEndWindow;
     return this;
   }
 }

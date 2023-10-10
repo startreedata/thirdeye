@@ -27,6 +27,7 @@ import ai.startree.thirdeye.spi.api.EventApi;
 import ai.startree.thirdeye.spi.api.RelatedAnomaliesAnalysisApi;
 import ai.startree.thirdeye.spi.api.RelatedEventsAnalysisApi;
 import ai.startree.thirdeye.spi.api.TextualAnalysis;
+import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
@@ -243,11 +244,10 @@ public class RcaRelatedService {
     final long endWithLookahead = Math.max(anomalyInterval.getStart().plus(lookaround).getMillis(),
         anomalyInterval.getEnd().getMillis());
 
-    final List<AnomalyDTO> anomalies = anomalyDAO.findByTime(startWithLookback, endWithLookahead)
-        .stream()
-        // todo cyril - filter at the db level - not in the app
-        .filter(dto -> !dto.isChild())
-        .collect(Collectors.toList());
+    final List<AnomalyDTO> anomalies = anomalyDAO.filter(new AnomalyFilter()
+        .setStartEndWindow(new Interval(startWithLookback, endWithLookahead))
+        .setIsChild(false)
+    );
 
     final Comparator<AnomalyDTO> comparator = Comparator.comparingDouble(
         (ToDoubleFunction<AnomalyDTO>) dto -> scoring.score(anomalyInterval,

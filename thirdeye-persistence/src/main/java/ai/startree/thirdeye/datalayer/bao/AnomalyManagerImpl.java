@@ -30,7 +30,6 @@ import com.google.inject.Singleton;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +44,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
+import org.joda.time.Interval;
 import org.joda.time.base.AbstractInterval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,12 +54,6 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
     implements AnomalyManager {
 
   private static final Logger LOG = LoggerFactory.getLogger(AnomalyManagerImpl.class);
-
-  private static final String FIND_BY_TIME =
-      "where (startTime < :endTime and endTime > :startTime) "
-          + "order by endTime desc";
-
-  private static final String FIND_BY_FUNCTION_ID = "where functionId=:functionId";
 
   // TODO inject as dependency
   private static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(10,
@@ -191,52 +185,20 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
   }
 
   /**
-   * TODO spyne Refactor. Have a AnomalyFilter object to handle these. Else we'll keep adding params and methods.
+   * TODO cyril Refactor. A generic AnomalyFilter was introduced. reduce the number of methods in this class
    *
    * @return filtered list of anomalies
    */
   @Override
-  public List<AnomalyDTO> findByStartEndTimeInRangeAndDetectionConfigId(
-      final long startTime,
-      final long endTime,
-      final long alertId,
-      final Long enumerationItemId) {
-    final List<Predicate> predicates = new ArrayList<>(List.of(
-        Predicate.LT("startTime", endTime),
-        Predicate.GT("endTime", startTime),
-        Predicate.EQ("detectionConfigId", alertId)
-    ));
-    if (enumerationItemId != null) {
-      predicates.add(Predicate.EQ("enumerationItemId", enumerationItemId));
-    }
+  public List<AnomalyDTO> findByStartEndTimeInRangeAndDetectionConfigId(final long startTime,
+      final long endTime, final long alertId, final Long enumerationItemId) {
+    final AnomalyFilter filter = new AnomalyFilter()
+        .setAlertId(alertId)
+        .setEnumerationItemId(enumerationItemId)
+        .setStartEndWindow(new Interval(startTime, endTime));
+    final Predicate predicate = toPredicate(filter);
 
-    final List<AnomalyDTO> list = genericPojoDao
-        .get(Predicate.AND(predicates.toArray(new Predicate[0])), AnomalyDTO.class);
-    return decorate(list);
-  }
-
-  @Override
-  public List<AnomalyDTO> findByFunctionId(final Long functionId) {
-    final Map<String, Object> filterParams = new HashMap<>();
-    filterParams.put("functionId", functionId);
-
-    final List<AnomalyDTO> list = genericPojoDao.executeParameterizedSQL(
-        FIND_BY_FUNCTION_ID,
-        filterParams,
-        AnomalyDTO.class);
-    return decorate(list);
-  }
-
-  @Override
-  public List<AnomalyDTO> findByTime(final long startTime, final long endTime) {
-    final Map<String, Object> filterParams = new HashMap<>();
-    filterParams.put("startTime", startTime);
-    filterParams.put("endTime", endTime);
-
-    final List<AnomalyDTO> list =
-        genericPojoDao
-            .executeParameterizedSQL(FIND_BY_TIME, filterParams, AnomalyDTO.class);
-    return decorate(list);
+    return findByPredicate(predicate);
   }
 
   @Override
@@ -369,32 +331,35 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
   }
 
   @Override
-  public long countParentAnomalies(final DaoFilter filter) {
-    Predicate predicate = Predicate.EQ("child", false);
-    if (filter != null && filter.getPredicate() != null) {
-      predicate = Predicate.AND(predicate, filter.getPredicate());
-    }
-    return count(predicate);
+  public List<AnomalyDTO> filter(final AnomalyFilter af) {
+    final Predicate predicate = toPredicate(af);
+    final List<AnomalyDTO> list = filter(new DaoFilter().setPredicate(predicate));
+    return decorate(list);
   }
 
   @Override
-  public List<AnomalyDTO> findParentAnomaliesWithFeedback(final DaoFilter filters) {
-    Predicate predicate = Predicate.AND(
-        Predicate.NEQ("anomalyFeedbackId", 0),
-        Predicate.EQ("child", false)
-    );
-    if (filters != null && filters.getPredicate() != null) {
-      predicate = Predicate.AND(predicate, filters.getPredicate());
+  public long countParentAnomalies(final Predicate predicate) {
+    Predicate finalPredicate = toPredicate(new AnomalyFilter().setIsChild(false));
+    if (predicate != null) {
+      finalPredicate = Predicate.AND(finalPredicate, predicate);
     }
-    return findByPredicate(predicate).stream()
+    return count(finalPredicate);
+  }
+
+  @Override
+  public List<AnomalyDTO> findParentAnomaliesWithFeedback(final Predicate predicate) {
+    Predicate finalPredicate = toPredicate(
+        new AnomalyFilter().setHasFeedback(true).setIsChild(false));
+    if (predicate != null) {
+      finalPredicate = Predicate.AND(predicate, predicate);
+    }
+    return findByPredicate(finalPredicate).stream()
         .map(anomaly -> decorate(anomaly, new HashSet<>()))
         .collect(Collectors.toList());
   }
 
-  @Override
-  public List<AnomalyDTO> filter(final AnomalyFilter af) {
+  final Predicate toPredicate(final AnomalyFilter af) {
     final List<Predicate> predicates = new ArrayList<>();
-
     optional(af.getCreateTimeWindow())
         .map(AbstractInterval::getStartMillis)
         .map(Timestamp::new)
@@ -415,8 +380,23 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
         .map(id -> Predicate.EQ("enumerationItemId", id))
         .ifPresent(predicates::add);
 
-    final Predicate predicate = Predicate.AND(predicates.toArray(new Predicate[]{}));
-    final List<AnomalyDTO> list = filter(new DaoFilter().setPredicate(predicate));
-    return decorate(list);
+    optional(af.isChild())
+        .map(isChild -> Predicate.EQ("child", isChild))
+        .ifPresent(predicates::add);
+
+    optional(af.hasFeedback()).map(
+        hasFeedback -> hasFeedback ? Predicate.NEQ("anomalyFeedbackId", 0)
+            : Predicate.EQ("anomalyFeedbackId", 0)).ifPresent(predicates::add);
+
+    optional(af.isIgnored())
+        .map(isIgnored -> Predicate.EQ("ignored", isIgnored))
+        .ifPresent(predicates::add);
+
+    optional(af.getStartEndWindow())
+        .map(window -> Predicate.AND(Predicate.LT("startTime", window.getEndMillis()),
+            Predicate.GT("endTime", window.getStartMillis())))
+        .ifPresent(predicates::add);
+
+    return Predicate.AND(predicates.toArray(new Predicate[]{}));
   }
 }

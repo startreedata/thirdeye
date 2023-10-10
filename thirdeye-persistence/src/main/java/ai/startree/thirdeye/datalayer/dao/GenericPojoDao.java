@@ -378,13 +378,9 @@ public class GenericPojoDao {
   }
 
   public <E extends AbstractDTO> List<E> get(final Predicate predicate, final Class<E> pojoClass) {
-    final List<Long> idsToFind = getIdsByPredicate(predicate, pojoClass);
+    final List<Long> idsToFind = filterIds(
+        new DaoFilter().setPredicate(predicate).setBeanClass(pojoClass));
     return get(idsToFind, pojoClass);
-  }
-
-  public <E extends AbstractDTO> List<Long> getIdsByPredicate(final Predicate predicate,
-      final Class<E> pojoClass) {
-    return filterIds(new DaoFilter().setPredicate(predicate).setBeanClass(pojoClass));
   }
 
   public List<Long> filterIds(final DaoFilter daoFilter) {
@@ -467,7 +463,8 @@ public class GenericPojoDao {
 
   public <E extends AbstractDTO> int deleteByPredicate(final Predicate predicate,
       final Class<E> pojoClass) {
-    final List<Long> idsToDelete = getIdsByPredicate(predicate, pojoClass);
+    final List<Long> idsToDelete = filterIds(
+        new DaoFilter().setPredicate(predicate).setBeanClass(pojoClass));
     return delete(idsToDelete, pojoClass);
   }
 }

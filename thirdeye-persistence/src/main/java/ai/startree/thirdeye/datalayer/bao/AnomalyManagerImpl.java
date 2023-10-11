@@ -354,7 +354,7 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
     Predicate finalPredicate = toPredicate(
         new AnomalyFilter().setHasFeedback(true).setIsChild(false));
     if (predicate != null) {
-      finalPredicate = Predicate.AND(predicate, predicate);
+      finalPredicate = Predicate.AND(finalPredicate, predicate);
     }
     return findByPredicate(finalPredicate).stream()
         .map(anomaly -> decorate(anomaly, new HashSet<>()))

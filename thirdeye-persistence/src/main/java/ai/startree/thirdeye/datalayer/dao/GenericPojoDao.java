@@ -50,6 +50,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.reflections.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -220,19 +221,10 @@ public class GenericPojoDao {
   }
 
   public <E extends AbstractDTO> long count(final Class<E> beanClass) {
-    final Class<? extends AbstractIndexEntity> indexClass = BEAN_INDEX_MAP.get(
-        beanClass);
-    try {
-      return transactionService.executeTransaction(
-          (connection) -> databaseService.count(null, indexClass, connection),
-          -1L);
-    } catch (final SQLException e) {
-      LOG.error(e.getMessage(), e);
-      return -1L;
-    }
+    return count(null, beanClass);
   }
 
-  public <E extends AbstractDTO> long count(final Predicate predicate, final Class<E> beanClass) {
+  public <E extends AbstractDTO> long count(final @Nullable Predicate predicate, final Class<E> beanClass) {
     final Class<? extends AbstractIndexEntity> indexClass = BEAN_INDEX_MAP.get(beanClass);
     try {
       return transactionService.executeTransaction(
@@ -282,7 +274,7 @@ public class GenericPojoDao {
 
   public <E extends AbstractDTO> List<E> get(final List<Long> idList, final Class<E> pojoClass) {
     try {
-      return filter(pojoClass, Predicate.IN("id", idList.toArray()));
+      return fetchEntities(pojoClass, Predicate.IN("id", idList.toArray()));
     } catch (final JsonProcessingException | SQLException e) {
       LOG.error(e.getMessage(), e);
       return emptyList();
@@ -291,14 +283,33 @@ public class GenericPojoDao {
 
   public <E extends AbstractDTO> List<E> getAll(final Class<E> pojoClass) {
     try {
-      return filter(pojoClass, Predicate.EQ("type", SubEntities.getType(pojoClass)));
+      return fetchEntities(pojoClass, Predicate.EQ("type", SubEntities.getType(pojoClass)));
     } catch (final JsonProcessingException | SQLException e) {
       LOG.error(e.getMessage(), e);
       return emptyList();
     }
   }
 
-  private <E extends AbstractDTO> List<E> filter(final Class<E> pojoClass,
+  /**
+   * Use this method when you want to fetchEntities out a subset of the entities based on predicates,
+   * limits, offsets, etc.
+   * If you wish to get all the entities then please use {@link #getAll} as the fetchEntities method does a
+   * two-step operation to get the entities whereas {@link #getAll} gets the entities in a single
+   * operation.
+   *
+   * @param daoFilter required filters to fetchEntities the result.
+   */
+  @SuppressWarnings("unchecked")
+  public <E extends AbstractDTO> List<E> get(final DaoFilter daoFilter) {
+    final List<Long> ids = fetchIds(daoFilter);
+    if (ids.isEmpty()) {
+      return emptyList();
+    }
+    final Class<? extends AbstractDTO> beanClass = daoFilter.getBeanClass();
+    return (List<E>) get(ids, beanClass);
+  }
+
+  private <E extends AbstractDTO> List<E> fetchEntities(final Class<E> pojoClass,
       final Predicate predicate)
       throws SQLException, JsonProcessingException {
     final List<GenericJsonEntity> entities = transactionService.executeTransaction(
@@ -317,23 +328,30 @@ public class GenericPojoDao {
     return results;
   }
 
-  /**
-   * Use this method when you want to filter out a subset of the entities based on predicates,
-   * limits, offsets, etc.
-   * If you wish to get all the entities then please use {@link #getAll} as the filter method does a
-   * two-step operation to get the entities whereas {@link #getAll} gets the entities in a single
-   * operation.
-   *
-   * @param daoFilter required filters to filter the result.
-   */
-  @SuppressWarnings("unchecked")
-  public <E extends AbstractDTO> List<E> filter(final DaoFilter daoFilter) {
-    final List<Long> ids = filterIds(daoFilter);
-    if (ids.isEmpty()) {
+  private List<Long> fetchIds(final DaoFilter daoFilter) {
+    //apply the predicates and fetch the primary key ids
+    final Class<? extends AbstractIndexEntity> indexClass = BEAN_INDEX_MAP.get(
+        daoFilter.getBeanClass());
+    try {
+      validate(daoFilter);
+      //find the matching ids
+      final List<? extends AbstractIndexEntity> indexEntities = transactionService.executeTransaction(
+          (connection) -> databaseService.findAll(daoFilter.getPredicate(),
+              daoFilter.getLimit(),
+              daoFilter.getOffset(),
+              indexClass,
+              connection), emptyList());
+      final List<Long> idsToReturn = new ArrayList<>();
+      if (CollectionUtils.isNotEmpty(indexEntities)) {
+        for (final AbstractIndexEntity entity : indexEntities) {
+          idsToReturn.add(entity.getBaseId());
+        }
+      }
+      return idsToReturn;
+    } catch (final SQLException e) {
+      LOG.error(e.getMessage(), e);
       return emptyList();
     }
-    final Class<? extends AbstractDTO> beanClass = daoFilter.getBeanClass();
-    return (List<E>) get(ids, beanClass);
   }
 
   /**
@@ -363,32 +381,6 @@ public class GenericPojoDao {
       LOG.error(e.getMessage(), e);
     }
     return emptyList();
-  }
-
-  public List<Long> filterIds(final DaoFilter daoFilter) {
-    //apply the predicates and fetch the primary key ids
-    final Class<? extends AbstractIndexEntity> indexClass = BEAN_INDEX_MAP.get(
-        daoFilter.getBeanClass());
-    try {
-      validate(daoFilter);
-      //find the matching ids
-      final List<? extends AbstractIndexEntity> indexEntities = transactionService.executeTransaction(
-          (connection) -> databaseService.findAll(daoFilter.getPredicate(),
-              daoFilter.getLimit(),
-              daoFilter.getOffset(),
-              indexClass,
-              connection), emptyList());
-      final List<Long> idsToReturn = new ArrayList<>();
-      if (CollectionUtils.isNotEmpty(indexEntities)) {
-        for (final AbstractIndexEntity entity : indexEntities) {
-          idsToReturn.add(entity.getBaseId());
-        }
-      }
-      return idsToReturn;
-    } catch (final SQLException e) {
-      LOG.error(e.getMessage(), e);
-      return emptyList();
-    }
   }
 
   /**
@@ -446,7 +438,7 @@ public class GenericPojoDao {
 
   public <E extends AbstractDTO> int deleteByPredicate(final Predicate predicate,
       final Class<E> pojoClass) {
-    final List<Long> idsToDelete = filterIds(
+    final List<Long> idsToDelete = fetchIds(
         new DaoFilter().setPredicate(predicate).setBeanClass(pojoClass));
     return delete(idsToDelete, pojoClass);
   }

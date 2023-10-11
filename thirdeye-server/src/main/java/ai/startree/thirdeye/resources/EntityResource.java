@@ -142,7 +142,7 @@ public class EntityResource {
         final DaoFilter daoFilter = new DaoFilter()
             .setBeanClass(beanClass)
             .setPredicate(Predicate.AND(predicates.toArray(new Predicate[]{})));
-        abstractBeans = genericPojoDao.filter(daoFilter);
+        abstractBeans = genericPojoDao.get(daoFilter);
       } else {
         abstractBeans = genericPojoDao.list(beanClass, limit, offset);
       }

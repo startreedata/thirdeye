@@ -39,6 +39,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -235,7 +236,7 @@ public class SqlQueryBuilder {
     return prepareStatement;
   }
 
-  public PreparedStatement createCountStatement(final Connection connection, final Predicate predicate,
+  public PreparedStatement createCountStatement(final Connection connection, final @Nullable Predicate predicate,
       final Class<? extends AbstractEntity> entityClass) throws Exception {
     final String tableName =
         entityMappingHolder.tableToEntityNameMap.inverse().get(entityClass.getSimpleName());

@@ -28,6 +28,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.List;
 import java.util.Map;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Singleton
 public class DatabaseService {
@@ -150,7 +151,7 @@ public class DatabaseService {
     }
   }
 
-  public <E extends AbstractEntity> Long count(final Predicate predicate, final Class<E> clazz,
+  public <E extends AbstractEntity> Long count(final @Nullable Predicate predicate, final Class<E> clazz,
       final Connection connection)
       throws Exception {
     final long tStart = System.nanoTime();

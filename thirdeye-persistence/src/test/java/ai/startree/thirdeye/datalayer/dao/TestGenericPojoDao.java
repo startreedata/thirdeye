@@ -98,7 +98,7 @@ public class TestGenericPojoDao {
 
   @Test(dependsOnMethods = "saveEntityTest", timeOut = 60000L)
   public void updateEntityTest() {
-    final List<DataSourceDTO> dtos = dao.filter(
+    final List<DataSourceDTO> dtos = dao.get(
         new DaoFilter().setPredicate(Predicate.EQ(TYPE, TEST_TYPES.get(0)))
             .setBeanClass(DataSourceDTO.class));
     assertThat(dtos.size()).isEqualTo(2);
@@ -108,7 +108,7 @@ public class TestGenericPojoDao {
     final int rowsUpdated = dao.update(dto, Predicate.EQ(VERSION, 1));
     // only 1 row must be updated
     assertThat(rowsUpdated).isEqualTo(1);
-    final List<DataSourceDTO> dtoAfterUpdate = dao.filter(
+    final List<DataSourceDTO> dtoAfterUpdate = dao.get(
         new DaoFilter().setPredicate(Predicate.EQ(TYPE, TEST_TYPES.get(1)))
             .setBeanClass(DataSourceDTO.class));
     assertThat(dtoAfterUpdate.size()).isEqualTo(1);
@@ -130,7 +130,7 @@ public class TestGenericPojoDao {
     final DaoFilter filter = new DaoFilter()
         .setLimit(limit)
         .setBeanClass(AnomalyDTO.class);
-    final List<AnomalyDTO> anomalies = dao.filter(filter);
+    final List<AnomalyDTO> anomalies = dao.get(filter);
     assertThat(anomalies).isNotNull();
     assertThat(anomalies.size()).isEqualTo(limit);
   }
@@ -144,7 +144,7 @@ public class TestGenericPojoDao {
         .setLimit(limit)
         .setOffset(offset)
         .setBeanClass(AnomalyDTO.class);
-    final List<AnomalyDTO> anomalies = dao.filter(filter);
+    final List<AnomalyDTO> anomalies = dao.get(filter);
     assertThat(anomalies).isNotNull();
     assertThat(anomalies.size()).isEqualTo(TOTAL_ANOMALIES - offset);
   }
@@ -155,7 +155,7 @@ public class TestGenericPojoDao {
     final DaoFilter filter = new DaoFilter()
         .setOffset(offset)
         .setBeanClass(AnomalyDTO.class);
-    assertThatThrownBy(() -> dao.filter(filter))
+    assertThatThrownBy(() -> dao.get(filter))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage(ERR_OFFSET_WITHOUT_LIMIT.getMessage());
   }
@@ -165,7 +165,7 @@ public class TestGenericPojoDao {
     final DaoFilter filter = new DaoFilter()
         .setLimit(-5L)
         .setBeanClass(AnomalyDTO.class);
-    assertThatThrownBy(() -> dao.filter(filter))
+    assertThatThrownBy(() -> dao.get(filter))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage(ERR_NEGATIVE_LIMIT_VALUE.getMessage());
   }
@@ -176,7 +176,7 @@ public class TestGenericPojoDao {
         .setLimit((long) TOTAL_ANOMALIES)
         .setOffset(-5L)
         .setBeanClass(AnomalyDTO.class);
-    assertThatThrownBy(() -> dao.filter(filter))
+    assertThatThrownBy(() -> dao.get(filter))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage(ERR_NEGATIVE_OFFSET_VALUE.getMessage());
   }
@@ -193,7 +193,7 @@ public class TestGenericPojoDao {
 
     while (offset < TOTAL_ANOMALIES) {
       filter.setOffset(offset);
-      final List<AnomalyDTO> anomalies = dao.filter(filter);
+      final List<AnomalyDTO> anomalies = dao.get(filter);
       assertThat(anomalies).isNotNull();
       entryCount += anomalies.size();
       // limit -> for all but the last page

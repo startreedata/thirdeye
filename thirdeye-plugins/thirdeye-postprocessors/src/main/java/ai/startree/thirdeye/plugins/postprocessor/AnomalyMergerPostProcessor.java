@@ -21,6 +21,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 
+import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
@@ -250,11 +251,12 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
         enumerationItemId = requireNonNull(enumerationItem.getId(),
             "Enumeration item id is null. Cannot ensure enumeration item exists in persistence layer before merging anomalies by enumeration.");
       }
-      return anomalyManager.findByStartEndTimeInRangeAndDetectionConfigId(
-          mergeLowerBound,
-          mergeUpperBound,
-          alertId,
-          enumerationItemId);
+
+      return anomalyManager.filter(new AnomalyFilter()
+          .setAlertId(alertId)
+          .setEnumerationItemId(enumerationItemId)
+          .setStartEndWindow(new Interval(mergeLowerBound, mergeUpperBound))
+      );
     } else {
       throw new UnsupportedOperationException("Unknown DetectionPipelineUsage: " + usage);
     }

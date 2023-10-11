@@ -44,7 +44,6 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
-import org.joda.time.Interval;
 import org.joda.time.base.AbstractInterval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -181,6 +180,7 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
   @Override
   public List<AnomalyDTO> filter(final DaoFilter daoFilter) {
     final List<AnomalyDTO> anomalies = super.filter(daoFilter);
+    // FIXME this filter is only decorating with feedback - while some others decorate with feedback and children
     return decorateWithFeedback(anomalies);
   }
 
@@ -198,6 +198,7 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
     return decorate(list);
   }
 
+
   @Override
   public List<AnomalyDTO> findParentAnomaliesWithFeedback(final Predicate predicate) {
     Predicate finalPredicate = toPredicate(
@@ -208,23 +209,6 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
     return findByPredicate(finalPredicate).stream()
         .map(anomaly -> decorate(anomaly, new HashSet<>()))
         .collect(Collectors.toList());
-  }
-
-  /**
-   * TODO cyril Refactor. A generic AnomalyFilter was introduced. reduce the number of methods in this class
-   *
-   * @return filtered list of anomalies
-   */
-  @Override
-  public List<AnomalyDTO> findByStartEndTimeInRangeAndDetectionConfigId(final long startTime,
-      final long endTime, final long alertId, final Long enumerationItemId) {
-    final AnomalyFilter filter = new AnomalyFilter()
-        .setAlertId(alertId)
-        .setEnumerationItemId(enumerationItemId)
-        .setStartEndWindow(new Interval(startTime, endTime));
-    final Predicate predicate = toPredicate(filter);
-
-    return findByPredicate(predicate);
   }
 
   @Override
@@ -312,9 +296,7 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
     return outList;
   }
 
-  private AnomalyDTO decorate(final AnomalyDTO anomaly,
-      final Set<Long> visitedAnomalyIds) {
-
+  private AnomalyDTO decorate(final AnomalyDTO anomaly, final Set<Long> visitedAnomalyIds) {
     if (anomaly.getAnomalyFeedbackId() != null) {
       final AnomalyFeedbackDTO anomalyFeedbackDTO = genericPojoDao
           .get(anomaly.getAnomalyFeedbackId(), AnomalyFeedbackDTO.class);
@@ -322,8 +304,7 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
     }
 
     visitedAnomalyIds.add(anomaly.getId());
-    anomaly
-        .setChildren(getChildAnomalies(anomaly, visitedAnomalyIds));
+    anomaly.setChildren(getChildAnomalies(anomaly, visitedAnomalyIds));
 
     return anomaly;
   }

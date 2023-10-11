@@ -115,13 +115,13 @@ public abstract class AbstractManagerImpl<E extends AbstractDTO> implements Abst
 
   @Override
   public List<E> findByPredicate(final Predicate predicate) {
-    return (List<E>) genericPojoDao.filter(
+    return (List<E>) genericPojoDao.get(
         new DaoFilter().setPredicate(predicate).setBeanClass(dtoClass));
   }
 
   @Override
   public List<E> filter(final DaoFilter daoFilter) {
-    return genericPojoDao.filter(daoFilter.setBeanClass(dtoClass));
+    return genericPojoDao.get(daoFilter.setBeanClass(dtoClass));
   }
 
   @Override

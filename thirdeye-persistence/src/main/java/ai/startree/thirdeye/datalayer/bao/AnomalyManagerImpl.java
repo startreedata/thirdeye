@@ -234,7 +234,7 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
         Predicate.EQ("detectionConfigId", entity.getDetectionConfigId()),
         Predicate.LE("startTime", entity.getStartTime()),
         Predicate.GE("endTime", entity.getEndTime()));
-    final List<AnomalyDTO> candidates = genericPojoDao.filter(
+    final List<AnomalyDTO> candidates = genericPojoDao.get(
         new DaoFilter().setPredicate(predicate).setBeanClass(AnomalyDTO.class));
     for (final AnomalyDTO candidate : candidates) {
       if (candidate.getChildIds() != null && !candidate.getChildIds().isEmpty()) {

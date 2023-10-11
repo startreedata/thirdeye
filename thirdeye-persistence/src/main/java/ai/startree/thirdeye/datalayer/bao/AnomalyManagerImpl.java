@@ -180,7 +180,7 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
   @Override
   public List<AnomalyDTO> filter(final DaoFilter daoFilter) {
     final List<AnomalyDTO> anomalies = super.filter(daoFilter);
-    // FIXME this filter is only decorating with feedback - while some others decorate with feedback and children
+    // FIXME CYRIL this filter is only decorating with feedback - while some others decorate with feedback and children
     return decorateWithFeedback(anomalies);
   }
 
@@ -194,7 +194,7 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
   @Override
   public List<AnomalyDTO> filter(final AnomalyFilter af) {
     final Predicate predicate = toPredicate(af);
-    final List<AnomalyDTO> list = filter(new DaoFilter().setPredicate(predicate));
+    final List<AnomalyDTO> list = super.filter(new DaoFilter().setPredicate(predicate));
     return decorate(list);
   }
 

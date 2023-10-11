@@ -36,7 +36,7 @@ public class DetectionStatusManagerImpl extends AbstractManagerImpl<DetectionSta
   @Override
   public DetectionStatusDTO findLatestEntryForFunctionId(long functionId) {
     Predicate predicate = Predicate.EQ("functionId", functionId);
-    List<DetectionStatusDTO> list = genericPojoDao.filter(
+    List<DetectionStatusDTO> list = genericPojoDao.get(
         new DaoFilter().setPredicate(predicate).setBeanClass(DetectionStatusDTO.class));
     if (CollectionUtils.isNotEmpty(list)) {
       Collections.sort(list);

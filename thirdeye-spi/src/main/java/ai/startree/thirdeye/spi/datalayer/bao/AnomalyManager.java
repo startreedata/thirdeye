@@ -22,16 +22,6 @@ public interface AnomalyManager extends AbstractManager<AnomalyDTO> {
 
   AnomalyDTO findById(Long id);
 
-  /**
-   * TODO cyril Refactor. Use filter(AnomalyFilter) object to handle these. Else we'll keep adding params and methods.
-   *
-   * @return filtered list of anomalies
-   */
-  List<AnomalyDTO> findByStartEndTimeInRangeAndDetectionConfigId(long startTime,
-      long endTime,
-      long alertId,
-      final Long enumerationItemId);
-
   AnomalyDTO findParent(AnomalyDTO entity);
 
   void updateAnomalyFeedback(AnomalyDTO entity);

@@ -44,7 +44,6 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
-import org.joda.time.Interval;
 import org.joda.time.base.AbstractInterval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,18 +61,6 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
   @Inject
   public AnomalyManagerImpl(final GenericPojoDao genericPojoDao) {
     super(AnomalyDTO.class, genericPojoDao);
-  }
-
-  @Override
-  public List<AnomalyDTO> findAll() {
-    final List<AnomalyDTO> anomalies = super.findAll();
-    return decorateWithFeedback(anomalies);
-  }
-
-  @Override
-  public List<AnomalyDTO> filter(final DaoFilter daoFilter) {
-    final List<AnomalyDTO> anomalies = super.filter(daoFilter);
-    return decorateWithFeedback(anomalies);
   }
 
   @Override
@@ -184,21 +171,17 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
     }
   }
 
-  /**
-   * TODO cyril Refactor. A generic AnomalyFilter was introduced. reduce the number of methods in this class
-   *
-   * @return filtered list of anomalies
-   */
   @Override
-  public List<AnomalyDTO> findByStartEndTimeInRangeAndDetectionConfigId(final long startTime,
-      final long endTime, final long alertId, final Long enumerationItemId) {
-    final AnomalyFilter filter = new AnomalyFilter()
-        .setAlertId(alertId)
-        .setEnumerationItemId(enumerationItemId)
-        .setStartEndWindow(new Interval(startTime, endTime));
-    final Predicate predicate = toPredicate(filter);
+  public List<AnomalyDTO> findAll() {
+    final List<AnomalyDTO> anomalies = super.findAll();
+    return decorateWithFeedback(anomalies);
+  }
 
-    return findByPredicate(predicate);
+  @Override
+  public List<AnomalyDTO> filter(final DaoFilter daoFilter) {
+    final List<AnomalyDTO> anomalies = super.filter(daoFilter);
+    // FIXME CYRIL this filter is only decorating with feedback - while some others decorate with feedback and children
+    return decorateWithFeedback(anomalies);
   }
 
   @Override
@@ -259,9 +242,25 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
     return entity;
   }
 
-  public AnomalyDTO decorate(final AnomalyDTO anomaly,
-      final Set<Long> visitedAnomalyIds) {
+  @Override
+  public List<AnomalyDTO> decorate(final List<AnomalyDTO> l) {
+    final List<Future<AnomalyDTO>> fList = l.stream()
+        .map(anomalyDTO -> EXECUTOR_SERVICE.submit(() -> decorate(anomalyDTO, new HashSet<>())))
+        .collect(Collectors.toList());
 
+    final List<AnomalyDTO> outList = new ArrayList<>(l.size());
+    for (final Future<AnomalyDTO> f : fList) {
+      try {
+        outList.add(f.get(60, TimeUnit.SECONDS));
+      } catch (final InterruptedException | TimeoutException | ExecutionException e) {
+        LOG.warn("Failed to convert MergedAnomalyResultDTO from bean: {}", e.toString());
+      }
+    }
+
+    return outList;
+  }
+
+  private AnomalyDTO decorate(final AnomalyDTO anomaly, final Set<Long> visitedAnomalyIds) {
     if (anomaly.getAnomalyFeedbackId() != null) {
       final AnomalyFeedbackDTO anomalyFeedbackDTO = genericPojoDao
           .get(anomaly.getAnomalyFeedbackId(), AnomalyFeedbackDTO.class);
@@ -269,8 +268,7 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
     }
 
     visitedAnomalyIds.add(anomaly.getId());
-    anomaly
-        .setChildren(getChildAnomalies(anomaly, visitedAnomalyIds));
+    anomaly.setChildren(getChildAnomalies(anomaly, visitedAnomalyIds));
 
     return anomaly;
   }
@@ -291,24 +289,6 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
       }
     }
     return children;
-  }
-
-  @Override
-  public List<AnomalyDTO> decorate(final List<AnomalyDTO> l) {
-    final List<Future<AnomalyDTO>> fList = l.stream()
-        .map(anomalyDTO -> EXECUTOR_SERVICE.submit(() -> decorate(anomalyDTO, new HashSet<>())))
-        .collect(Collectors.toList());
-
-    final List<AnomalyDTO> outList = new ArrayList<>(l.size());
-    for (final Future<AnomalyDTO> f : fList) {
-      try {
-        outList.add(f.get(60, TimeUnit.SECONDS));
-      } catch (final InterruptedException | TimeoutException | ExecutionException e) {
-        LOG.warn("Failed to convert MergedAnomalyResultDTO from bean: {}", e.toString());
-      }
-    }
-
-    return outList;
   }
 
   private List<AnomalyDTO> decorateWithFeedback(final List<AnomalyDTO> anomalies) {
@@ -361,7 +341,7 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
         .collect(Collectors.toList());
   }
 
-  final Predicate toPredicate(final AnomalyFilter af) {
+  private Predicate toPredicate(final AnomalyFilter af) {
     final List<Predicate> predicates = new ArrayList<>();
     optional(af.getCreateTimeWindow())
         .map(AbstractInterval::getStartMillis)

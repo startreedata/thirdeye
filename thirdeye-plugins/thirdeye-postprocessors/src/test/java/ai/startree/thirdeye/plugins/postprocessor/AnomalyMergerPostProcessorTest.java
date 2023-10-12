@@ -21,12 +21,11 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.joda.time.DateTimeZone.UTC;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
@@ -95,19 +94,17 @@ public class AnomalyMergerPostProcessorTest {
   public void setUp() {
     existingAnomalies = new ArrayList<>();
     anomalyManager = mock(AnomalyManager.class);
-    when(anomalyManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(),
-        anyLong(), anyLong(), nullable(Long.class))).then(i -> {
-      final Object[] args = i.getArguments();
-      final long startTime =  (long) args[0];
-      final long endTime  = (long) args[1];
-      final Long enumerationItemId  = (Long) args[3];
-      // pseudo database that filters by start time, end time, enumerationItemId
-      return existingAnomalies.stream()
-          .filter(a -> a.getStartTime() >= startTime)
-          .filter(a -> a.getEndTime() <= endTime)
-          .filter(a -> enumerationItemId==null || enumerationItemId.equals(a.getEnumerationItem().getId()))
-          .collect(Collectors.toList());
-    });
+    when(anomalyManager.filter(any(AnomalyFilter.class)))
+        .then(i -> {
+          final AnomalyFilter filter = (AnomalyFilter) i.getArguments()[0];
+          // pseudo database that filters by start time, end time, enumerationItemId
+          return existingAnomalies.stream()
+              .filter(a -> a.getStartTime() >= filter.getStartEndWindow().getStartMillis())
+              .filter(a -> a.getEndTime() <= filter.getStartEndWindow().getEndMillis())
+              .filter(a -> filter.getEnumerationItemId() == null || filter.getEnumerationItemId()
+                  .equals(a.getEnumerationItem().getId()))
+              .collect(Collectors.toList());
+        });
     detectionSpec = new AnomalyMergerPostProcessorSpec().setAnomalyManager(
         anomalyManager).setAlertId(ALERT_ID).setUsage(DetectionPipelineUsage.DETECTION);
     detectionMerger = new AnomalyMergerPostProcessor(detectionSpec);
@@ -499,7 +496,7 @@ public class AnomalyMergerPostProcessorTest {
     detectionMerger = new AnomalyMergerPostProcessor(detectionSpec);
     final AnomalyDTO n1 = newAnomaly(JANUARY_1_2021_05H, JANUARY_1_2021_06H);
     // override behaviour to simplify test - interval is not respected when fetching from persistence layer
-    when(anomalyManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(), anyLong(), anyLong(), isNull())).thenReturn(existingAnomalies);
+    when(anomalyManager.filter(any(AnomalyFilter.class))).thenReturn(existingAnomalies);
     // detection only runs where the new anomaly happens - only tests rule 2, does not test rule 4
     final Interval detectionInterval = new Interval(JANUARY_1_2021_04H, JANUARY_1_2021_06H, UTC);
     final List<AnomalyDTO> output = detectionMerger.merge(listOf(n1), detectionInterval);
@@ -709,7 +706,7 @@ public class AnomalyMergerPostProcessorTest {
         .setScore(0.5)
         .setAnomalyLabels(listOf(label));
     // override behaviour to simplify test - interval is not respected when fetching from persistence layer
-    when(anomalyManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(), anyLong(), anyLong(), isNull())).thenReturn(existingAnomalies);
+    when(anomalyManager.filter(any(AnomalyFilter.class))).thenReturn(existingAnomalies);
     // detection only runs where the new anomaly happens - only tests rule 2, does not test rule 4
     final Interval detectionInterval = new Interval(JANUARY_1_2021_04H, JANUARY_1_2021_05H, UTC);
     final List<AnomalyDTO> output = detectionMerger.merge(listOf(n1), detectionInterval);
@@ -764,7 +761,7 @@ public class AnomalyMergerPostProcessorTest {
         .setScore(0.5)
         .setAnomalyLabels(listOf(label));
     // override behaviour to simplify test - interval is not respected when fetching from persistence layer
-    when(anomalyManager.findByStartEndTimeInRangeAndDetectionConfigId(anyLong(), anyLong(), anyLong(), isNull())).thenReturn(existingAnomalies);
+    when(anomalyManager.filter(any(AnomalyFilter.class))).thenReturn(existingAnomalies);
     // detection only runs where the new anomaly happens - only tests rule 2, does not test rule 4
     final Interval detectionInterval = new Interval(JANUARY_1_2021_03H, JANUARY_1_2021_04H, UTC);
     final List<AnomalyDTO> output = detectionMerger.merge(listOf(n1), detectionInterval);

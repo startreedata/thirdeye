@@ -54,9 +54,13 @@ function AlertTemplateWizard<NewOrExistingTemplate>({
                                     hideValidationSuccessIcon
                                     value={modifiedAlertTemplate}
                                     onChange={(value) => {
-                                        setModifiedAlertTemplate(
-                                            JSON.parse(value)
-                                        );
+                                        try {
+                                            setModifiedAlertTemplate(
+                                                JSON.parse(value)
+                                            );
+                                        } catch {
+                                            // do nothing if invalid JSON string
+                                        }
                                     }}
                                 />
                             </Grid>

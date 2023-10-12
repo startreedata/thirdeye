@@ -45,7 +45,7 @@ import {
 } from "../../platform/components";
 import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { deleteAnomaly } from "../../rest/anomalies/anomalies.rest";
-import { Anomaly } from "../../rest/dto/anomaly.interfaces";
+import { Anomaly, AnomalyFeedback } from "../../rest/dto/anomaly.interfaces";
 import {
     determineTimezoneFromAlertInEvaluation,
     shouldHideTimeInDatetimeFormat,
@@ -83,6 +83,9 @@ export const AnomaliesViewInformationPage: FunctionComponent = () => {
     } = containerContext;
 
     const [showV1Link, setShowV1Link] = useState(true);
+    const [feedback, setFeedback] = useState<AnomalyFeedback | undefined>(
+        anomaly?.feedback
+    );
 
     const handleAnomalyDelete = (): void => {
         if (!anomaly) {
@@ -172,6 +175,11 @@ export const AnomaliesViewInformationPage: FunctionComponent = () => {
         return pageTitle;
     };
 
+    const handleFeedbackChange = (feedback: AnomalyFeedback): void => {
+        setFeedback(feedback);
+        handleFeedbackUpdateSuccess(feedback);
+    };
+
     return (
         <PageV1>
             <PageHeader
@@ -236,7 +244,7 @@ export const AnomaliesViewInformationPage: FunctionComponent = () => {
                         </Alert>
                     </Grid>
                 )}
-                {anomaly.feedback && (
+                {feedback && (
                     <Grid item xs={12}>
                         <Card>
                             <CardContent>
@@ -245,7 +253,7 @@ export const AnomaliesViewInformationPage: FunctionComponent = () => {
                                         <FeedbackCard
                                             anomaly={anomaly}
                                             onFeedbackUpdate={
-                                                handleFeedbackUpdateSuccess
+                                                handleFeedbackChange
                                             }
                                         />
                                     </Grid>
@@ -280,11 +288,11 @@ export const AnomaliesViewInformationPage: FunctionComponent = () => {
                         )}
                     />
                 </Grid>
-                {!anomaly.feedback && (
+                {!feedback && (
                     <Grid item xs={12}>
                         <FeedbackCollector
                             anomaly={anomaly as Anomaly}
-                            onFeedbackUpdate={handleFeedbackUpdateSuccess}
+                            onFeedbackUpdate={handleFeedbackChange}
                         />
                     </Grid>
                 )}

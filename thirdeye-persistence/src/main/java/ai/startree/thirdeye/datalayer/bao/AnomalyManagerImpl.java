@@ -184,33 +184,6 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
     return decorateWithFeedback(anomalies);
   }
 
-
-  @Override
-  public List<AnomalyDTO> findByPredicate(final Predicate predicate) {
-    final List<AnomalyDTO> beanList = new ArrayList<>(super.findByPredicate(predicate));
-    return decorate(beanList);
-  }
-
-  @Override
-  public List<AnomalyDTO> filter(final AnomalyFilter af) {
-    final Predicate predicate = toPredicate(af);
-    final List<AnomalyDTO> list = super.filter(new DaoFilter().setPredicate(predicate));
-    return decorate(list);
-  }
-
-
-  @Override
-  public List<AnomalyDTO> findParentAnomaliesWithFeedback(final Predicate predicate) {
-    Predicate finalPredicate = toPredicate(
-        new AnomalyFilter().setHasFeedback(true).setIsChild(false));
-    if (predicate != null) {
-      finalPredicate = Predicate.AND(predicate, predicate);
-    }
-    return findByPredicate(finalPredicate).stream()
-        .map(anomaly -> decorate(anomaly, new HashSet<>()))
-        .collect(Collectors.toList());
-  }
-
   @Override
   public void updateAnomalyFeedback(final AnomalyDTO entity) {
     final AnomalyFeedbackDTO feedbackDTO = (AnomalyFeedbackDTO) entity.getFeedback();
@@ -257,15 +230,6 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
       }
     }
     return null;
-  }
-
-  @Override
-  public long countParentAnomalies(final Predicate predicate) {
-    Predicate finalPredicate = toPredicate(new AnomalyFilter().setIsChild(false));
-    if (predicate != null) {
-      finalPredicate = Predicate.AND(finalPredicate, predicate);
-    }
-    return count(finalPredicate);
   }
 
   @Override
@@ -343,7 +307,41 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
     return anomalies;
   }
 
-  private final Predicate toPredicate(final AnomalyFilter af) {
+  @Override
+  public List<AnomalyDTO> findByPredicate(final Predicate predicate) {
+    final List<AnomalyDTO> beanList = new ArrayList<>(super.findByPredicate(predicate));
+    return decorate(beanList);
+  }
+
+  @Override
+  public List<AnomalyDTO> filter(final AnomalyFilter af) {
+    final Predicate predicate = toPredicate(af);
+    final List<AnomalyDTO> list = filter(new DaoFilter().setPredicate(predicate));
+    return decorate(list);
+  }
+
+  @Override
+  public long countParentAnomalies(final Predicate predicate) {
+    Predicate finalPredicate = toPredicate(new AnomalyFilter().setIsChild(false));
+    if (predicate != null) {
+      finalPredicate = Predicate.AND(finalPredicate, predicate);
+    }
+    return count(finalPredicate);
+  }
+
+  @Override
+  public List<AnomalyDTO> findParentAnomaliesWithFeedback(final Predicate predicate) {
+    Predicate finalPredicate = toPredicate(
+        new AnomalyFilter().setHasFeedback(true).setIsChild(false));
+    if (predicate != null) {
+      finalPredicate = Predicate.AND(finalPredicate, predicate);
+    }
+    return findByPredicate(finalPredicate).stream()
+        .map(anomaly -> decorate(anomaly, new HashSet<>()))
+        .collect(Collectors.toList());
+  }
+
+  private Predicate toPredicate(final AnomalyFilter af) {
     final List<Predicate> predicates = new ArrayList<>();
     optional(af.getCreateTimeWindow())
         .map(AbstractInterval::getStartMillis)

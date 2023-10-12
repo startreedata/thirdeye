@@ -35,7 +35,11 @@ export const AlertJson: FunctionComponent<AlertJsonProps> = ({
     const [initialAlert] = useState<EditableAlert>(alert);
 
     const handleJSONChange = (json: string): void => {
-        onAlertPropertyChange(JSON.parse(json), true);
+        try {
+            onAlertPropertyChange(JSON.parse(json), true);
+        } catch {
+            // do nothing if invalid JSON string
+        }
     };
 
     return (

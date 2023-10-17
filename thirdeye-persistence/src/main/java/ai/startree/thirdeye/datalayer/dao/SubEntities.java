@@ -119,7 +119,6 @@ public class SubEntities {
         .put(RcaInvestigationDTO.class, SubEntityType.RCA_INVESTIGATION)
         .put(RootcauseTemplateDTO.class, SubEntityType.ROOT_CAUSE_TEMPLATE)
         .put(SubscriptionGroupDTO.class, SubEntityType.SUBSCRIPTION_GROUP)
-        .put(TaskDTO.class, SubEntityType.TASK)
         .build();
   }
 

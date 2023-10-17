@@ -104,7 +104,7 @@ time:
   minimumOnboardingStartTime: 946684800000
 
 mockEvents:
-  enabled: true
+  enabled: false
   generators:
     - type: HOLIDAY
       arrivalType: exponential

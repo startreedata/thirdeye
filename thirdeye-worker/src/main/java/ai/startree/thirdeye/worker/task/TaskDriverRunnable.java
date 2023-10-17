@@ -182,13 +182,15 @@ public class TaskDriverRunnable implements Runnable {
         e.getMessage());
   }
 
-  private void handleException(final TaskDTO taskDTO, final Exception e) {
+  private void handleException(final TaskDTO task, final Exception e) {
     taskExceptionCounter.inc();
     taskExceptionCounterNew.increment();
-    LOG.error("Exception in electing and executing task", e);
+    LOG.error(String.format("Exception in electing and executing task(id: %d, name: %s)",
+        task.getId(),
+        task.getJobName()), e);
 
     // update task status failed
-    updateTaskStatus(taskDTO.getId(),
+    updateTaskStatus(task.getId(),
         TaskStatus.FAILED,
         String.format("%s\n%s", ExceptionUtils.getMessage(e), ExceptionUtils.getStackTrace(e)));
   }

@@ -56,7 +56,6 @@ import ai.startree.thirdeye.datalayer.entity.OverrideConfigIndex;
 import ai.startree.thirdeye.datalayer.entity.RcaInvestigationIndex;
 import ai.startree.thirdeye.datalayer.entity.RootcauseTemplateIndex;
 import ai.startree.thirdeye.datalayer.entity.TaskEntity;
-import ai.startree.thirdeye.datalayer.entity.TaskIndex;
 import ai.startree.thirdeye.datalayer.util.EntityMappingHolder;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
@@ -111,7 +110,6 @@ public class ThirdEyePersistenceModule extends AbstractModule {
       OverrideConfigIndex.class,
       RcaInvestigationIndex.class,
       RootcauseTemplateIndex.class,
-      TaskIndex.class,
       TaskEntity.class
   );
 

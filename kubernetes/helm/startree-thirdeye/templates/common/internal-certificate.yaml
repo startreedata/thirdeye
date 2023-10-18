@@ -32,6 +32,6 @@ spec:
     group: cert-manager.io
     kind: ClusterIssuer
     name: startree-platform-issuer
-  secretName: {{ include "thirdeye.tls.internalCertSecretName" .}}
+  secretName: {{ .Values.tls.internalCertSecretName }}
 
 {{- end }}

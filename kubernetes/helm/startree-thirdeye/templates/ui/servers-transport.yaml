@@ -17,12 +17,12 @@
 apiVersion: traefik.containo.us/v1alpha1
 kind: ServersTransport
 metadata:
-  name: {{ include "thirdeye.tls.traefik.serversTransportName" .}}
+  name: {{ .Values.tls.traefik.serversTransportName }}
   namespace: {{ .Release.Namespace }}
 spec:
   insecureSkipVerify: false
   rootCAsSecrets:
-    - {{ include "thirdeye.tls.traefik.rootCaSecretName" . }}
+    - {{ .Values.tls.traefik.rootCaSecretName }}
   serverName: '{{ .Release.Namespace }}.svc'
 
 {{- end }}

@@ -12,7 +12,7 @@
 # the License.
 #
 
-{{- if and .Values.traefik.coordinator.enabled .Values.tls.enabled -}}
+{{- if and .Values.traefik.coordinator.enabled .Values.tls.enabled (not .Values.tls.v2) -}}
 #
 # Copyright 2022 StarTree Inc
 #

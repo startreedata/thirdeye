@@ -29,7 +29,7 @@ spec:
         namespace: {{ .Release.Namespace }}
         port: {{ .Values.ui.port }}
         scheme: https
-        serversTransport: {{ include "thirdeye.tls.traefik.serversTransportName" .}}
+        serversTransport: {{ .Values.tls.traefik.serversTransportName }}
   tls:
-    secretName: {{ include "thirdeye.tls.externalCertSecretName" . }}
+    secretName: {{ .Values.tls.externalCertSecretName }}
 {{- end }}

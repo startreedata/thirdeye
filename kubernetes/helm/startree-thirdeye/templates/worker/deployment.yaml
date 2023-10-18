@@ -153,7 +153,7 @@ spec:
             name: thirdeye-worker
         - name: tls-internal
           secret:
-            secretName: {{ .Values.tls.worker.secretName | default (printf "%s-internal-tls" (include "thirdeye.worker.fullname" .)) }}
+            secretName: {{ .Values.tls.internalCertSecretName | default (printf "%s-internal-tls" (include "thirdeye.worker.fullname" .)) }}
             optional: true
         - name: truststore
           emptyDir: {}

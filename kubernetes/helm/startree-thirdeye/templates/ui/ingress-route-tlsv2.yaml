@@ -12,21 +12,24 @@
 # the License.
 #
 
-{{- if and .Values.traefik.enabled .Values.tls.enabled (not .Values.tls.v2) -}}
+{{- if and .Values.traefik.enabled .Values.tls.enabled .Values.tls.v2 -}}
 
 apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRouteTCP
+kind: IngressRoute
 metadata:
   name: {{ include "thirdeye.ui.fullname" . }}
 spec:
   entryPoints:
   - websecure
   routes:
-  - match: HostSNI(`thirdeye.{{ required "domain is required." .Values.domain }}`)
-    services:
-    - name: {{ include "thirdeye.ui.headless" . }}
-      namespace: {{ .Release.Namespace }}
-      port: {{ .Values.ui.port }}
+    - kind: Rule
+      match: Host(`thirdeye.{{ required "domain is required." .Values.domain }}`)
+      services:
+      - name: {{ include "thirdeye.ui.headless" . }}
+        namespace: {{ .Release.Namespace }}
+        port: {{ .Values.ui.port }}
+        scheme: https
+        serversTransport: {{ include "thirdeye.tls.traefik.serversTransportName" .}}
   tls:
-    passthrough: true
+    secretName: {{ include "thirdeye.tls.externalCertSecretName" . }}
 {{- end }}

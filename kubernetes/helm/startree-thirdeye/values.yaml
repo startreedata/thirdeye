@@ -115,19 +115,11 @@ tls:
   type: PKCS12
   port: 8443
   ui: {}
-  # Uncomment the below config to override the default ui tls secret name ({ui full name}-tls)
-  #  secretName: tls-secret-name
   coordinator: {}
-  # Uncomment the below config to override the default coordinator tls secret name ({coordinator full name}-internal-tls)
-  #  secretName: tls-secret-name
   worker:
     enabled: false
-  # Uncomment the below config to override the default worker tls secret name ({worker full name}-internal-tls)
-  #  secretName: tls-secret-name
   scheduler:
     enabled: false
-  # Uncomment the below config to override the default scheduler tls secret name ({scheduler full name}-internal-tls)
-  #  secretName: tls-secret-name
 
 # Expose prometheus metrics.
 prometheus:

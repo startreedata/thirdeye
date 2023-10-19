@@ -66,6 +66,8 @@ public interface Constants {
   String COL_TIME = "timestamp";
   String COL_VALUE = "value"; // baseline value
   String COL_CURRENT = "current";
+  // used for masking. Should be of boolean type or castable to boolean. True corresponds to masked value.
+  String COL_MASK = "mask";
   String COL_UPPER_BOUND = "upper_bound";
   String COL_LOWER_BOUND = "lower_bound";
   String COL_ANOMALY = "anomaly";

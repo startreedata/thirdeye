@@ -1101,6 +1101,7 @@ public class DataFrame {
       return this;
     }
 
+    // FIXME CYRIL the fast index match and the logic below do not behave the same when null values are present in some Series
     // left join - on minimal structure
     DataFrame dfLeft = new DataFrame();
     for (String name : this.indexNames) {

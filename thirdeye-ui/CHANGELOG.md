@@ -1,3 +1,12 @@
+### [2.41.3](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.41.2...thirdeye-ui-2.41.3) (2023-10-19)
+
+
+### Bug Fixes
+
+* catch  parsing if invalid json error in alert-json component ([d8c035f73](https://github.com/startreedata/thirdeye/commit/d8c035f73de9802212d6cc956d1b77856f29b846))
+* catch parsing if invalid json error in alert-template-wizard component ([b917f6b9b](https://github.com/startreedata/thirdeye/commit/b917f6b9b67f0a53ba1b43ca4a5f8e45734f6350))
+* ui should change after user makes anomaly feedback choice ([a1d23314c](https://github.com/startreedata/thirdeye/commit/a1d23314c47d784818021a9e4bd65ea5660d3c57))
+
 ### [2.41.2](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.41.1...thirdeye-ui-2.41.2) (2023-09-29)
 
 

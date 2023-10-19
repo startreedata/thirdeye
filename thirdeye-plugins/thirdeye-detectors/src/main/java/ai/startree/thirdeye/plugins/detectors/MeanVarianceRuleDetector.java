@@ -163,8 +163,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
         .addSeries(COL_ANOMALY,
             pattern.isAnomaly(inputDf.getDoubles(COL_CURRENT), inputDf.getDoubles(COL_LOWER_BOUND),
                     inputDf.getDoubles(COL_UPPER_BOUND))
-                .and(windowMatch(inputDf.getLongs(COL_TIME), window))
-        );
+                .and(windowMatch(inputDf.getLongs(COL_TIME), window)));
 
     return new SimpleAnomalyDetectorResult(inputDf);
   }
@@ -261,16 +260,10 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     final int indexEnd = inputDF.getLongs(COL_TIME).find(endTimeMillis);
     checkArgument(indexEnd != -1,
         "Could not find index of endTime. endTime should exist in inputDf. This should not happen.");
-
-    final String[] columns = inputDF.contains(COL_MASK) ? new String[]{COL_TIME, COL_VALUE, COL_MASK}
-        : new String[]{COL_TIME, COL_VALUE};
-    DataFrame loobackDf = DataFrame.builder(columns).build();
     final int indexStart = indexEnd - lookback;
     checkArgument(indexStart >= 0,
         "Invalid index. Insufficient data to compute mean/variance on lookback. index: "
             + indexStart);
-    // TODO CYRIL - perf - slice is already doing a copy
-    loobackDf = loobackDf.append(inputDF.slice(indexStart, indexEnd));
-    return loobackDf;
+    return inputDF.slice(indexStart, indexEnd);
   }
 }

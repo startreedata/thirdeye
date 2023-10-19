@@ -21,9 +21,9 @@ import static ai.startree.thirdeye.spi.Constants.COL_LOWER_BOUND;
 import static ai.startree.thirdeye.spi.Constants.COL_TIME;
 import static ai.startree.thirdeye.spi.Constants.COL_UPPER_BOUND;
 import static ai.startree.thirdeye.spi.Constants.COL_VALUE;
-import static ai.startree.thirdeye.spi.dataframe.Series.LongConditional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.spi.dataframe.BooleanSeries;
@@ -34,6 +34,8 @@ import ai.startree.thirdeye.spi.detection.AnomalyDetector;
 import ai.startree.thirdeye.spi.detection.AnomalyDetectorResult;
 import ai.startree.thirdeye.spi.detection.Pattern;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
+import com.google.common.annotations.VisibleForTesting;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 import org.joda.time.DateTime;
@@ -73,6 +75,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     return 0.5 + 0.1 * (10 - sensitivity);
   }
 
+  @VisibleForTesting
   protected static int computeSteps(final String periodString,
       final String monitoringGranularityString) {
     // mind that computing lookback only once is not exactly correct when a day has 25 hours or 23 hours - but very minor issue
@@ -115,8 +118,8 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
           "monitoringGranularity is required when seasonalityPeriod is used");
       final Period seasonality = isoPeriod(spec.getSeasonalityPeriod());
       checkArgument(SUPPORTED_SEASONALITIES.contains(seasonality),
-              "Unsupported period %s. Supported periods are P7D and P1D, or PTOS for no seasonality.",
-              seasonality);
+          "Unsupported period %s. Supported periods are P7D and P1D, or PTOS for no seasonality.",
+          seasonality);
       int minimumLookbackRequired =
           2 * computeSteps(spec.getSeasonalityPeriod(), spec.getMonitoringGranularity());
       checkArgument(minimumLookbackRequired <= lookback,
@@ -130,7 +133,8 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
       this.seasonality = seasonality;
     }
 
-    checkArgument(lookback >= 5, "Lookback is %s points. Lookback should be greater than 5 points.", lookback);
+    checkArgument(lookback >= 5, "Lookback is %s points. Lookback should be greater than 5 points.",
+        lookback);
   }
 
   @Override
@@ -166,29 +170,34 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
   private DataFrame computeBaseline(final DataFrame inputDF, final long windowStartTime) {
 
     final DataFrame resultDF = new DataFrame();
-    //filter the data inside window for current values.
-    final DataFrame forecastDF = inputDF
-        .filter((LongConditional) values -> values[0] >= windowStartTime, COL_TIME)
-        .dropNull();
+    final int firstDetectionIndex = inputDF.getLongs(COL_TIME).find(windowStartTime);
+    checkState(firstDetectionIndex != -1,
+        "Runtime error. Could not build training data for the mean-variance algorithm.");
 
-    final int size = forecastDF.size();
+    final int size = inputDF.size();
     final double[] baselineArray = new double[size];
+    Arrays.fill(baselineArray, DoubleSeries.NULL);
     final double[] upperBoundArray = new double[size];
+    Arrays.fill(upperBoundArray, DoubleSeries.NULL);
     final double[] lowerBoundArray = new double[size];
-    final long[] resultTimeArray = new long[size];
+    Arrays.fill(lowerBoundArray, DoubleSeries.NULL);
 
     // todo cyril compute mean and std in a single pass
     // https://nestedsoftware.com/2018/03/20/calculating-a-moving-average-on-streaming-data-5a7k.22879.html
     // https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_online_algorithm
-    for (int k = 0; k < size; k++) {
-      final long forecastTime = forecastDF.getLong(COL_TIME, k);
+    for (int k = firstDetectionIndex; k < size; k++) {
+      final long forecastTime = inputDF.getLong(COL_TIME, k);
       final DataFrame lookbackDf = getLookbackDf(inputDF, forecastTime);
       final DoubleSeries periodMask = buildPeriodMask(lookbackDf, forecastTime);
-      // todo cyril implement median
-      final double mean = lookbackDf.getDoubles(COL_VALUE).multiply(periodMask).mean().value();
-      final double std = lookbackDf.getDoubles(COL_VALUE).multiply(periodMask).std().value();
+      final DoubleSeries maskedValues = lookbackDf.getDoubles(COL_VALUE).multiply(periodMask);
+      double mean = maskedValues.mean().value();
+      double std = maskedValues.std().value();
+      if (Double.isNaN(mean)) {
+        // mean and std can be null if all values are masked or null
+        mean = 0.0;
+        std = 0.0;
+      }
       //calculate baseline, error , upper and lower bound for prediction window.
-      resultTimeArray[k] = forecastTime;
       baselineArray[k] = mean;
       final double error = sigma(sensitivity) * std;
       upperBoundArray[k] = baselineArray[k] + error;
@@ -196,7 +205,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     }
     //Construct the dataframe.
     resultDF
-        .addSeries(COL_TIME, LongSeries.buildFrom(resultTimeArray))
+        .addSeries(COL_TIME, inputDF.getLongs(COL_TIME))
         .setIndex(COL_TIME);
 
     resultDF

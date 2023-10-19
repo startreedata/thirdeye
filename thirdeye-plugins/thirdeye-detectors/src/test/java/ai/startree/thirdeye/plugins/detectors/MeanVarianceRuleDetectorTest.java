@@ -28,6 +28,7 @@ import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.SimpleDataTable;
 import java.util.HashMap;
 import java.util.Map;
+import org.assertj.core.data.Offset;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.testng.annotations.Test;
@@ -228,6 +229,54 @@ public class MeanVarianceRuleDetectorTest {
         .append(BooleanSeries.buildFrom(
             BooleanSeries.TRUE, // change is up
             BooleanSeries.TRUE, // change is down
+            BooleanSeries.FALSE,
+            BooleanSeries.TRUE, // change is up
+            BooleanSeries.TRUE)); // change is down
+    assertThat(outputAnomalySeries).isEqualTo(expectedAnomalySeries);
+  }
+
+  // Note: the exact behaviour when values are missing is not specified for ThirdEye.
+  // Users should use the masking feature, the index filler or the combination of both.
+  // This test is used to: ensure that predictions are not impacted by null values.
+  //                       catch behavior changes of null management for this operator
+  @Test
+  public void testWithMissingValues() {
+    Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021, DateTimeZone.UTC);
+    Map<String, DataTable> timeSeriesMap = new HashMap<>();
+    DataFrame currentDf = new DataFrame()
+        .addSeries(Constants.COL_TIME,
+            JANUARY_1_2021,
+            JANUARY_2_2021,
+            JANUARY_3_2021,
+            JANUARY_4_2021,
+            JANUARY_5_2021)
+        // there is a null in the series
+        .addSeries(Constants.COL_VALUE, DoubleSeries.builder().addValues(120., null, 100., 120., 80.).build())
+        .append(historicalData)
+        .sortedBy(Constants.COL_TIME);
+    timeSeriesMap.put(AnomalyDetector.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
+
+    MeanVarianceRuleDetectorSpec spec = new MeanVarianceRuleDetectorSpec();
+    spec.setMonitoringGranularity("P1D");
+    spec.setLookbackPeriod("P10D");
+    spec.setSensitivity(5); // corresponds to multiplying std by 1 to get the bounds
+    MeanVarianceRuleDetector detector = new MeanVarianceRuleDetector();
+    detector.init(spec);
+
+    AnomalyDetectorResult output = detector.runDetection(interval, timeSeriesMap);
+    // check everything in the dataframe
+    DataFrame outputDf = output.getDataFrame();
+
+    final double[] values = outputDf.getDoubles(Constants.COL_VALUE).dropNull().values();
+    final double[] expectedValues = new double[]{100.0, 102.0, 100.0, 102.222, 104.444};
+    assertThat(values).containsExactly(expectedValues, Offset.offset(1e-3));
+
+
+    final BooleanSeries outputAnomalySeries = outputDf.getBooleans(Constants.COL_ANOMALY);
+    final BooleanSeries expectedAnomalySeries = BooleanSeries.nulls(10)
+        .append(BooleanSeries.buildFrom(
+            BooleanSeries.TRUE, // change is up
+            BooleanSeries.NULL, // value is missing
             BooleanSeries.FALSE,
             BooleanSeries.TRUE, // change is up
             BooleanSeries.TRUE)); // change is down

@@ -251,7 +251,8 @@ public class MeanVarianceRuleDetectorTest {
             JANUARY_4_2021,
             JANUARY_5_2021)
         // there is a null in the series
-        .addSeries(Constants.COL_VALUE, DoubleSeries.builder().addValues(120., null, 100., 120., 80.).build())
+        .addSeries(Constants.COL_VALUE,
+            DoubleSeries.builder().addValues(120., null, 100., 120., 80.).build())
         .append(historicalData)
         .sortedBy(Constants.COL_TIME);
     timeSeriesMap.put(AnomalyDetector.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
@@ -267,10 +268,10 @@ public class MeanVarianceRuleDetectorTest {
     // check everything in the dataframe
     DataFrame outputDf = output.getDataFrame();
 
-    final double[] values = outputDf.getDoubles(Constants.COL_VALUE).dropNull().values();
-    final double[] expectedValues = new double[]{100.0, 102.0, 100.0, 102.222, 104.444};
-    assertThat(values).containsExactly(expectedValues, Offset.offset(1e-3));
-
+    final double[] values = outputDf.getDoubles(Constants.COL_VALUE).values();
+    final double[] expectedValues = DoubleSeries.nulls(10)
+        .append(DoubleSeries.buildFrom(100.0, 102.0, 100.0, 102.222, 104.444)).values();
+    assertThatContainsExactlyOrNan(values, expectedValues, Offset.offset(1e-3));
 
     final BooleanSeries outputAnomalySeries = outputDf.getBooleans(Constants.COL_ANOMALY);
     final BooleanSeries expectedAnomalySeries = BooleanSeries.nulls(10)
@@ -281,6 +282,67 @@ public class MeanVarianceRuleDetectorTest {
             BooleanSeries.TRUE, // change is up
             BooleanSeries.TRUE)); // change is down
     assertThat(outputAnomalySeries).isEqualTo(expectedAnomalySeries);
+  }
+
+  @Test
+  public void testWithMaskedValue() {
+    Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021, DateTimeZone.UTC);
+    Map<String, DataTable> timeSeriesMap = new HashMap<>();
+    final int valueToIgnore = 10_000;
+    DataFrame currentDf = new DataFrame()
+        .addSeries(Constants.COL_TIME,
+            JANUARY_1_2021,
+            JANUARY_2_2021,
+            JANUARY_3_2021,
+            JANUARY_4_2021,
+            JANUARY_5_2021)
+        .addSeries(Constants.COL_VALUE,
+            DoubleSeries.builder().addValues(120., valueToIgnore, 100., 120., 80.).build())
+        // mask null should be resolved to false
+        .addSeries(Constants.COL_MASK,
+            BooleanSeries.builder().addBooleanValues(false, true, false, false, null).build())
+        .append(historicalData)
+        .sortedBy(Constants.COL_TIME);
+    timeSeriesMap.put(AnomalyDetector.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
+
+    MeanVarianceRuleDetectorSpec spec = new MeanVarianceRuleDetectorSpec();
+    spec.setMonitoringGranularity("P1D");
+    spec.setLookbackPeriod("P10D");
+    spec.setSensitivity(5); // corresponds to multiplying std by 1 to get the bounds
+    MeanVarianceRuleDetector detector = new MeanVarianceRuleDetector();
+    detector.init(spec);
+
+    AnomalyDetectorResult output = detector.runDetection(interval, timeSeriesMap);
+    // check everything in the dataframe
+    DataFrame outputDf = output.getDataFrame();
+
+    final double[] values = outputDf.getDoubles(Constants.COL_VALUE)
+        .slice(outputDf.size() - 5, outputDf.size())
+        .values();
+    final double[] expectedValues = new double[]{100.0, Double.NaN, 100.0, 102.222, 104.444};
+    assertThatContainsExactlyOrNan(expectedValues, values, Offset.offset(1e-3));
+
+    final BooleanSeries outputAnomalySeries = outputDf.getBooleans(Constants.COL_ANOMALY);
+    final BooleanSeries expectedAnomalySeries = BooleanSeries.nulls(10)
+        .append(BooleanSeries.buildFrom(
+            BooleanSeries.TRUE, // change is up
+            BooleanSeries.NULL, // mask is applied
+            BooleanSeries.FALSE,
+            BooleanSeries.TRUE, // change is up
+            BooleanSeries.TRUE)); // change is down
+    assertThat(outputAnomalySeries).isEqualTo(expectedAnomalySeries);
+  }
+
+  private static void assertThatContainsExactlyOrNan(final double[] values,
+      final double[] expectedValues,
+      final Offset<Double> offset) {
+    for (int i = 0; i < expectedValues.length; i++) {
+      if (Double.isNaN(expectedValues[i])) {
+        assertThat(values[i]).isNaN();
+      } else {
+        assertThat(values[i]).isEqualTo(expectedValues[i], offset);
+      }
+    }
   }
 
   @Test

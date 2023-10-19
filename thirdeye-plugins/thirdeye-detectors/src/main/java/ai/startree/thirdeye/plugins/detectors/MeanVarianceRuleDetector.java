@@ -18,6 +18,7 @@ import static ai.startree.thirdeye.spi.Constants.COL_ANOMALY;
 import static ai.startree.thirdeye.spi.Constants.COL_CURRENT;
 import static ai.startree.thirdeye.spi.Constants.COL_DIFF;
 import static ai.startree.thirdeye.spi.Constants.COL_LOWER_BOUND;
+import static ai.startree.thirdeye.spi.Constants.COL_MASK;
 import static ai.startree.thirdeye.spi.Constants.COL_TIME;
 import static ai.startree.thirdeye.spi.Constants.COL_UPPER_BOUND;
 import static ai.startree.thirdeye.spi.Constants.COL_VALUE;
@@ -162,7 +163,8 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
         .addSeries(COL_ANOMALY,
             pattern.isAnomaly(inputDf.getDoubles(COL_CURRENT), inputDf.getDoubles(COL_LOWER_BOUND),
                     inputDf.getDoubles(COL_UPPER_BOUND))
-                .and(windowMatch(inputDf.getLongs(COL_TIME), window)));
+                .and(windowMatch(inputDf.getLongs(COL_TIME), window))
+        );
 
     return new SimpleAnomalyDetectorResult(inputDf);
   }
@@ -185,11 +187,20 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     // todo cyril compute mean and std in a single pass
     // https://nestedsoftware.com/2018/03/20/calculating-a-moving-average-on-streaming-data-5a7k.22879.html
     // https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_online_algorithm
+    final boolean applyMask = inputDF.contains(COL_MASK);
     for (int k = firstDetectionIndex; k < size; k++) {
+      if (applyMask && BooleanSeries.isTrue(inputDF.getBoolean(COL_MASK, k))) {
+        // this point is masked - skip it
+        continue;
+      }
       final long forecastTime = inputDF.getLong(COL_TIME, k);
       final DataFrame lookbackDf = getLookbackDf(inputDF, forecastTime);
       final DoubleSeries periodMask = buildPeriodMask(lookbackDf, forecastTime);
-      final DoubleSeries maskedValues = lookbackDf.getDoubles(COL_VALUE).multiply(periodMask);
+      DoubleSeries maskedValues = lookbackDf.getDoubles(COL_VALUE).multiply(periodMask);
+      if (applyMask) {
+        // todo cyril perf - COL_MASK.fillNull().not() can be computed once outside of the loop
+        maskedValues = maskedValues.filter(lookbackDf.getBooleans(COL_MASK).fillNull().not());
+      }
       double mean = maskedValues.mean().value();
       double std = maskedValues.std().value();
       if (Double.isNaN(mean)) {
@@ -251,11 +262,14 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     checkArgument(indexEnd != -1,
         "Could not find index of endTime. endTime should exist in inputDf. This should not happen.");
 
-    DataFrame loobackDf = DataFrame.builder(COL_TIME, COL_VALUE).build();
+    final String[] columns = inputDF.contains(COL_MASK) ? new String[]{COL_TIME, COL_VALUE, COL_MASK}
+        : new String[]{COL_TIME, COL_VALUE};
+    DataFrame loobackDf = DataFrame.builder(columns).build();
     final int indexStart = indexEnd - lookback;
     checkArgument(indexStart >= 0,
         "Invalid index. Insufficient data to compute mean/variance on lookback. index: "
             + indexStart);
+    // TODO CYRIL - perf - slice is already doing a copy
     loobackDf = loobackDf.append(inputDF.slice(indexStart, indexEnd));
     return loobackDf;
   }

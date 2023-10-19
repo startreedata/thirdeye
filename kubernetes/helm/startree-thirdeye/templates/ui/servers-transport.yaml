@@ -12,8 +12,7 @@
 # the License.
 #
 
-{{- if and .Values.traefik.enabled .Values.tls.enabled .Values.tls.v2 -}}
-
+{{ if and .Values.traefik.enabled .Values.tls.enabled .Values.tls.v2 -}}
 apiVersion: traefik.containo.us/v1alpha1
 kind: ServersTransport
 metadata:
@@ -22,7 +21,7 @@ metadata:
 spec:
   insecureSkipVerify: false
   rootCAsSecrets:
-    - {{ .Values.tls.traefik.rootCaSecretName }}
+    - {{ .Values.tls.rootCaSecretName }}
   serverName: '{{ .Release.Namespace }}.svc'
 
 {{- end }}

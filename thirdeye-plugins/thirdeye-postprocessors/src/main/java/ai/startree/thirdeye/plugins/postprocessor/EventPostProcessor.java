@@ -22,11 +22,11 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 import static com.google.common.base.Preconditions.checkArgument;
 
-import ai.startree.thirdeye.spi.datastructures.Interval1D;
-import ai.startree.thirdeye.spi.datastructures.IntervalSearchTree;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
+import ai.startree.thirdeye.spi.datastructures.Interval1D;
+import ai.startree.thirdeye.spi.datastructures.IntervalSearchTree;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessor;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessorFactory;
 import ai.startree.thirdeye.spi.detection.postprocessing.PostProcessingContext;

@@ -41,22 +41,19 @@ export const AlertUpdateResetModal: FunctionComponent<AlertUpdateResetModalProps
                 trigger={() => <></>}
                 onSubmit={() => onUpdateAlertClick(shouldDeleteAnomalies)}
             >
-                <p>
-                    By updating the alert you can reset all additional data such
-                    as anomalies to start from scratch. Do you want to reset?
-                </p>
+                <p>Alert Update Options:</p>
                 <Box pl={3}>
-                    <FormControlLabel
-                        checked={shouldDeleteAnomalies}
-                        control={<Radio color="primary" />}
-                        label="Yes, I want to reset and remove additional data"
-                        onClick={() => setShouldDeleteAnomalies(true)}
-                    />
                     <FormControlLabel
                         checked={!shouldDeleteAnomalies}
                         control={<Radio color="primary" />}
-                        label="No, just update and rerun anomaly detection"
+                        label="Keep past investigations, no new notifications for historical anomalies."
                         onClick={() => setShouldDeleteAnomalies(false)}
+                    />
+                    <FormControlLabel
+                        checked={shouldDeleteAnomalies}
+                        control={<Radio color="primary" />}
+                        label="Delete past results, notify for all historical anomalies"
+                        onClick={() => setShouldDeleteAnomalies(true)}
                     />
                 </Box>
             </Modal>

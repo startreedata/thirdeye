@@ -1,3 +1,10 @@
+### [2.41.4](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.41.3...thirdeye-ui-2.41.4) (2023-10-24)
+
+
+### Bug Fixes
+
+* change wording in alert update confirmation modal ([d5badb435](https://github.com/startreedata/thirdeye/commit/d5badb4359f3c57a7cc8f42024bb3bd93b26cb21))
+
 ### [2.41.2](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.41.1...thirdeye-ui-2.41.2) (2023-09-29)
 
 

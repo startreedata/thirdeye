@@ -19,7 +19,7 @@ metadata:
   name: {{ .Values.tls.traefik.serversTransportName }}
   namespace: {{ .Release.Namespace }}
 spec:
-  insecureSkipVerify: false
+  insecureSkipVerify: {{ default false .Values.tls.traefik.skipVerify }}
   rootCAsSecrets:
     - {{ .Values.tls.rootCaSecretName }}
   serverName: '{{ .Release.Namespace }}.svc'

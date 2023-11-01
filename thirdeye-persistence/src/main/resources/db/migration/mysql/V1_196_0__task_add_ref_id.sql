@@ -11,23 +11,11 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.spi.task;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
-/**
- * Interface for task info of the various types of tasks
- */
-public interface TaskInfo {
+-- Add ref_id to task entity
+-- ref_id is nullable and refers to the id of the alert or subscription group
+ALTER TABLE task_entity ADD COLUMN ref_id BIGINT(20) UNSIGNED DEFAULT NULL;
 
-  /**
-   * refId is the id of the entity that the task is associated with.
-   * For example, if the task is to run a detection pipeline, the refId is the id of the alert. In
-   * case of a notification task, the refId is the id of the subscription group.
-   * @return the id of the reference entity
-   */
-  @JsonIgnore
-  default Long getRefId() {
-    return null;
-  }
-}
+-- Create index on ref_id
+CREATE INDEX task_ref_id_idx ON task_entity (ref_id);

@@ -25,7 +25,7 @@ import java.util.Set;
 
 public interface TaskManager extends AbstractManager<TaskDTO> {
 
-  TaskDTO createTaskDto(final long alertId, final TaskInfo taskInfo, final TaskType taskType)
+  TaskDTO createTaskDto(final long refId, final TaskInfo taskInfo, final TaskType taskType)
       throws JsonProcessingException;
 
   List<TaskDTO> findByJobIdStatusNotIn(Long jobId, TaskStatus status);

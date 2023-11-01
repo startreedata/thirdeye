@@ -39,6 +39,8 @@ public class TaskDTO extends AbstractDTO {
   private Timestamp lastModified;
   private Timestamp lastActive;
 
+  private Long refId;
+
   public Long getWorkerId() {
     return workerId;
   }
@@ -135,6 +137,15 @@ public class TaskDTO extends AbstractDTO {
 
   public TaskDTO setJobId(Long jobId) {
     this.jobId = jobId;
+    return this;
+  }
+
+  public Long getRefId() {
+    return refId;
+  }
+
+  public TaskDTO setRefId(final Long refId) {
+    this.refId = refId;
     return this;
   }
 

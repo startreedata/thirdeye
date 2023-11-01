@@ -15,7 +15,7 @@ package ai.startree.thirdeye.datalayer.entity;
 
 import java.sql.Timestamp;
 
-public class TaskEntity extends AbstractEntity implements HasJsonVal<TaskEntity>{
+public class TaskEntity extends AbstractEntity implements HasJsonVal<TaskEntity> {
 
   private String name;
   private String status;
@@ -26,6 +26,8 @@ public class TaskEntity extends AbstractEntity implements HasJsonVal<TaskEntity>
   private long workerId;
   private Timestamp lastActive;
   private String jsonVal;
+
+  private Long refId;
 
   @Override
   public String getJsonVal() {
@@ -107,6 +109,15 @@ public class TaskEntity extends AbstractEntity implements HasJsonVal<TaskEntity>
 
   public TaskEntity setLastActive(final Timestamp lastActive) {
     this.lastActive = lastActive;
+    return this;
+  }
+
+  public Long getRefId() {
+    return refId;
+  }
+
+  public TaskEntity setRefId(final Long refId) {
+    this.refId = refId;
     return this;
   }
 }

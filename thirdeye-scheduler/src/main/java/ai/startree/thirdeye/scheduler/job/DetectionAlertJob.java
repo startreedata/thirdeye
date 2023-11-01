@@ -37,22 +37,22 @@ public class DetectionAlertJob extends ThirdEyeAbstractJob {
 
   @Override
   public void execute(final JobExecutionContext ctx) {
-    final SubscriptionGroupManager alertConfigDAO = getInstance(ctx,
+    final SubscriptionGroupManager subscriptionGroupManager = getInstance(ctx,
         SubscriptionGroupManager.class);
 
     final JobSchedulerService service = getInstance(ctx, JobSchedulerService.class);
 
     final String jobKey = ctx.getJobDetail().getKey().getName();
-    final long detectionAlertConfigId = getIdFromJobKey(jobKey);
-    final SubscriptionGroupDTO configDTO = alertConfigDAO.findById(detectionAlertConfigId);
+    final long subscriptionGroupId = getIdFromJobKey(jobKey);
+    final SubscriptionGroupDTO configDTO = subscriptionGroupManager.findById(subscriptionGroupId);
     if (configDTO == null) {
-      LOG.error("Subscription config {} does not exist", detectionAlertConfigId);
+      LOG.error("Subscription config {} does not exist", subscriptionGroupId);
     }
 
-    final DetectionAlertTaskInfo taskInfo = new DetectionAlertTaskInfo(detectionAlertConfigId);
+    final DetectionAlertTaskInfo taskInfo = new DetectionAlertTaskInfo(subscriptionGroupId);
 
     // if a task is pending and not time out yet, don't schedule more
-    final String jobName = String.format("%s_%d", TaskType.NOTIFICATION, detectionAlertConfigId);
+    final String jobName = String.format("%s_%d", TaskType.NOTIFICATION, subscriptionGroupId);
     if (service.taskAlreadyRunning(jobName)) {
       LOG.trace("Skip scheduling subscription task {}. Already queued", jobName);
       return;
@@ -65,7 +65,7 @@ public class DetectionAlertJob extends ThirdEyeAbstractJob {
 
     try {
       final TaskManager taskManager = getInstance(ctx, TaskManager.class);
-      final TaskDTO taskDTO = taskManager.createTaskDto(detectionAlertConfigId,
+      final TaskDTO taskDTO = taskManager.createTaskDto(subscriptionGroupId,
           taskInfo,
           TaskType.NOTIFICATION);
 

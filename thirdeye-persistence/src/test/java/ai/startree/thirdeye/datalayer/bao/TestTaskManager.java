@@ -15,19 +15,61 @@ package ai.startree.thirdeye.datalayer.bao;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.datalayer.dao.TaskDao;
+import ai.startree.thirdeye.spi.datalayer.Predicate;
+import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
+import ai.startree.thirdeye.spi.task.TaskInfo;
 import ai.startree.thirdeye.spi.task.TaskStatus;
 import ai.startree.thirdeye.spi.task.TaskType;
 import com.codahale.metrics.MetricRegistry;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.inject.Injector;
 import java.sql.Timestamp;
 import java.util.List;
-import org.mockito.Mockito;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class TestTaskManager {
+
+  private TaskManager taskManager;
+
+  private static Long getGaugeValue(final List<TaskDTO> tasks, final String gaugeName) {
+    final TaskDao dao = mock(TaskDao.class);
+    when(dao.filter(any())).thenReturn(tasks);
+
+    final MetricRegistry metricRegistry = new MetricRegistry();
+    new TaskManagerImpl(dao, metricRegistry);
+    return (Long) metricRegistry.getGauges().get(gaugeName).getValue();
+  }
+
+  private static TaskDTO buildTask(final String name,
+      final TaskType type,
+      final TaskStatus status,
+      final Timestamp createTime) {
+    return (TaskDTO) new TaskDTO()
+        .setJobName(name)
+        .setTaskType(type)
+        .setStatus(status)
+        .setCreateTime(createTime);
+  }
+
+  @BeforeClass
+  void beforeClass() {
+    final Injector injector = MySqlTestDatabase.sharedInjector();
+    taskManager = injector.getInstance(TaskManager.class);
+  }
+
+  @AfterClass
+  public void tearDown() {
+    // delete all tasks
+    taskManager.deleteByPredicate(Predicate.GE("id", 0L));
+  }
 
   @Test
   public void notificationTaskLatencyMetricTest() {
@@ -63,19 +105,23 @@ public class TestTaskManager {
     assertThat(getGaugeValue(List.of(), "notificationTaskLatencyInMillis")).isZero();
   }
 
-  private Long getGaugeValue(final List<TaskDTO> tasks, final String gaugeName) {
-    final TaskDao dao = Mockito.mock(TaskDao.class);
-    when(dao.filter(any())).thenReturn(tasks);
-    final MetricRegistry metricRegistry = new MetricRegistry();
-    new TaskManagerImpl(dao, metricRegistry);
-    return (Long) metricRegistry.getGauges().get(gaugeName).getValue();
-  }
+  @Test
+  public void testRefId() throws JsonProcessingException {
+    final long refId = 4321L;
+    final TaskDTO taskDto = taskManager.createTaskDto(refId,
+        new TaskInfo() {
+          @SuppressWarnings("unused")
+          public final int dummyVariable = 0; // required for jackson json serialization
+          @Override
+          public Long getRefId() {
+            return refId;
+          }
+        },
+        TaskType.NOTIFICATION);
+    assertThat(taskDto.getRefId()).isEqualTo(refId);
 
-  private TaskDTO buildTask(String name, TaskType type, TaskStatus status, Timestamp createTme) {
-    return (TaskDTO) new TaskDTO()
-        .setJobName(name)
-        .setTaskType(type)
-        .setStatus(status)
-        .setCreateTime(createTme);
+    final TaskDTO byId = taskManager.findById(taskDto.getId());
+    assertThat(byId).isNotNull();
+    assertThat(byId.getRefId()).isEqualTo(refId);
   }
 }

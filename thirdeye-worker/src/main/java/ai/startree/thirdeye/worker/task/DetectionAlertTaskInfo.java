@@ -36,4 +36,9 @@ public class DetectionAlertTaskInfo implements TaskInfo {
   public void setDetectionAlertConfigId(long detectionAlertConfigId) {
     this.detectionAlertConfigId = detectionAlertConfigId;
   }
+
+  @Override
+  public Long getRefId() {
+    return getDetectionAlertConfigId();
+  }
 }

@@ -82,16 +82,16 @@ public class TaskManagerImpl implements TaskManager {
     registerMetrics();
   }
 
-  public TaskDTO createTaskDto(final long alertId, final TaskInfo taskInfo, final TaskType taskType)
+  public TaskDTO createTaskDto(final long refId, final TaskInfo taskInfo, final TaskType taskType)
       throws JsonProcessingException {
-    final String taskInfoJson;
-    taskInfoJson = OBJECT_MAPPER.writeValueAsString(taskInfo);
+    final String taskInfoJson = OBJECT_MAPPER.writeValueAsString(taskInfo);
 
-    TaskDTO task = new TaskDTO()
+    final TaskDTO task = new TaskDTO()
         .setTaskType(taskType)
-        .setJobName(taskType.toString() + "_" + alertId)
+        .setJobName(taskType.toString() + "_" + refId)
         .setStatus(TaskStatus.WAITING)
-        .setTaskInfo(taskInfoJson);
+        .setTaskInfo(taskInfoJson)
+        .setRefId(taskInfo.getRefId());
     save(task);
     return task;
   }
@@ -236,7 +236,7 @@ public class TaskManagerImpl implements TaskManager {
     return findByPredicate(Predicate.AND(statusPredicate, workerIdPredicate));
   }
 
-  public void purge(@Nullable Duration expiryDurationOptional, @Nullable Integer limitOptional) {
+  public void purge(@Nullable final Duration expiryDurationOptional, @Nullable final Integer limitOptional) {
     final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
     final Duration expiryDuration = optional(expiryDurationOptional).orElse(TASK_EXPIRY_DURATION);
     final long twoMonthsBack = System.currentTimeMillis() - expiryDuration.toMillis();
@@ -253,7 +253,7 @@ public class TaskManagerImpl implements TaskManager {
     /* Delete each task */
     tasksToBeDeleted.forEach(this::delete);
 
-    double totalTime = (System.nanoTime() - startTime) / 1e9;
+    final double totalTime = (System.nanoTime() - startTime) / 1e9;
 
     LOG.info(String.format("Task cleanup complete. removed %d tasks. (time taken: %.2fs)",
         tasksToBeDeleted.size(),
@@ -310,12 +310,12 @@ public class TaskManagerImpl implements TaskManager {
       }
     });
 
-    for (TaskStatus status : TaskStatus.values()) {
+    for (final TaskStatus status : TaskStatus.values()) {
       registerStatusMetric(status);
     }
   }
 
-  private long getTaskLatency(TaskType type) {
+  private long getTaskLatency(final TaskType type) {
     // fetch pending tasks from DB of the given type
     final List<TaskStatus> pendingStatus = List.of(TaskStatus.WAITING, TaskStatus.RUNNING);
     final DaoFilter filter = new DaoFilter()

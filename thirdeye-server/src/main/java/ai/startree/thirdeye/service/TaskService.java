@@ -35,6 +35,7 @@ public class TaskService extends CrudService<TaskApi, TaskDTO> {
       .put("updated", "updateTime")
       .put("startTime", "startTime")
       .put("endTime", "endTime")
+      .put("refId", "refId")
       .build();
 
   private final TaskManager taskManager;

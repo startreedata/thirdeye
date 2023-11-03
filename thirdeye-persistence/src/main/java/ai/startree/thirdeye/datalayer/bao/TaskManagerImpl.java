@@ -117,17 +117,6 @@ public class TaskManagerImpl implements TaskManager {
   }
 
   @Override
-  public List<TaskDTO> findByNameOrderByCreateTime(
-      final String name, final int fetchSize, final boolean asc) {
-    final Map<String, Object> parameterMap = new HashMap<>();
-    parameterMap.put("name", name);
-    final String queryClause = (asc)
-        ? FIND_BY_NAME_ORDER_BY_CREATE_TIME_ASC + fetchSize
-        : FIND_BY_NAME_ORDER_BY_CREATE_TIME_DESC + fetchSize;
-    return dao.executeParameterizedSQL(queryClause, parameterMap);
-  }
-
-  @Override
   public List<TaskDTO> findByStatusOrderByCreateTime(final TaskStatus status, final int fetchSize,
       final boolean asc) {
     final Map<String, Object> parameterMap = new HashMap<>();
@@ -202,18 +191,6 @@ public class TaskManagerImpl implements TaskManager {
     final Predicate statusPredicate = Predicate.EQ("status", status.toString());
     final Predicate timestampPredicate = Predicate.GE("createTime", activeTimestamp);
     return findByPredicate(Predicate.AND(statusPredicate, timestampPredicate));
-  }
-
-  @Override
-  public List<TaskDTO> findByStatusesAndTypeWithinDays(final List<TaskStatus> statuses,
-      final TaskType type, final int days) {
-    final DateTime activeDate = new DateTime(DateTimeZone.UTC).minusDays(days);
-    final Timestamp activeTimestamp = new Timestamp(activeDate.getMillis());
-    final Predicate statusPredicate = Predicate
-        .IN("status", statuses.stream().map(Enum::toString).toArray());
-    final Predicate typePredicate = Predicate.EQ("type", type.toString());
-    final Predicate timestampPredicate = Predicate.GE("createTime", activeTimestamp);
-    return findByPredicate(Predicate.AND(statusPredicate, typePredicate, timestampPredicate));
   }
 
   @Override

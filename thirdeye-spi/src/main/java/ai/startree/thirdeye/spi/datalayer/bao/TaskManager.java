@@ -30,12 +30,7 @@ public interface TaskManager extends AbstractManager<TaskDTO> {
 
   List<TaskDTO> findByJobIdStatusNotIn(Long jobId, TaskStatus status);
 
-  List<TaskDTO> findByNameOrderByCreateTime(String name, int fetchSize, boolean asc);
-
   List<TaskDTO> findByStatusWithinDays(TaskStatus status, int days);
-
-  List<TaskDTO> findByStatusesAndTypeWithinDays(List<TaskStatus> statuses,
-      TaskType type, int days);
 
   List<TaskDTO> findTimeoutTasksWithinDays(int days, long maxTaskTime);
 

@@ -26,7 +26,7 @@ import ai.startree.thirdeye.notification.NotificationServiceRegistry;
 import ai.startree.thirdeye.rootcause.ContributorsFinderRunner;
 import ai.startree.thirdeye.spi.Plugin;
 import ai.startree.thirdeye.spi.PluginClassLoader;
-import ai.startree.thirdeye.spi.accessControl.AccessControlFactory;
+import ai.startree.thirdeye.spi.auth.AccessControlFactory;
 import ai.startree.thirdeye.spi.auth.Authenticator.OauthAuthenticatorFactory;
 import ai.startree.thirdeye.spi.auth.OpenIdConfigurationProvider;
 import ai.startree.thirdeye.spi.bootstrap.BootstrapResourcesProviderFactory;

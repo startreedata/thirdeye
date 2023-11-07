@@ -21,7 +21,7 @@ import ai.startree.thirdeye.detectionpipeline.ThirdEyeDetectionPipelineModule;
 import ai.startree.thirdeye.notification.ThirdEyeNotificationModule;
 import ai.startree.thirdeye.scheduler.ThirdEyeSchedulerModule;
 import ai.startree.thirdeye.scheduler.events.MockEventsConfiguration;
-import ai.startree.thirdeye.spi.accessControl.AccessControl;
+import ai.startree.thirdeye.spi.auth.AccessControl;
 import ai.startree.thirdeye.worker.ThirdEyeWorkerModule;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.AbstractModule;

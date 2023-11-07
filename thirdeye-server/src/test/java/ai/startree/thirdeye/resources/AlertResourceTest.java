@@ -30,9 +30,6 @@ import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal.AuthenticationType;
 import ai.startree.thirdeye.service.AlertService;
 import ai.startree.thirdeye.service.AppAnalyticsService;
-import ai.startree.thirdeye.spi.accessControl.AccessControl;
-import ai.startree.thirdeye.spi.accessControl.AccessType;
-import ai.startree.thirdeye.spi.accessControl.ResourceIdentifier;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
@@ -40,6 +37,9 @@ import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
 import ai.startree.thirdeye.spi.api.DetectionEvaluationApi;
 import ai.startree.thirdeye.spi.api.EnumerationItemApi;
 import ai.startree.thirdeye.spi.api.PlanNodeApi;
+import ai.startree.thirdeye.spi.auth.AccessControl;
+import ai.startree.thirdeye.spi.auth.AccessType;
+import ai.startree.thirdeye.spi.auth.ResourceIdentifier;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
@@ -299,7 +299,7 @@ public class AlertResourceTest {
                 accessType == AccessType.READ && id.getNamespace().equals("allowedNamespace")))
     );
 
-    try (Response resp = alertResource.evaluate(nobody(), alertEvaluationApi)) {
+    try (final Response resp = alertResource.evaluate(nobody(), alertEvaluationApi)) {
       assertThat(resp.getStatus()).isEqualTo(200);
 
       final var results = ((AlertEvaluationApi) resp.getEntity());
@@ -393,7 +393,7 @@ public class AlertResourceTest {
                 id.getNamespace().equals("allowedNamespace")))
     );
 
-    try (Response resp = resource.evaluate(nobody(), alertEvaluationApi)) {
+    try (final Response resp = resource.evaluate(nobody(), alertEvaluationApi)) {
       assertThat(resp.getStatus()).isEqualTo(200);
 
       final var results = ((AlertEvaluationApi) resp.getEntity());

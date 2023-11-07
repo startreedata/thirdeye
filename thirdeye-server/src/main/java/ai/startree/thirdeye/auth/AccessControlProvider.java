@@ -15,10 +15,10 @@ package ai.startree.thirdeye.auth;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import ai.startree.thirdeye.spi.accessControl.AccessControl;
-import ai.startree.thirdeye.spi.accessControl.AccessControlFactory;
-import ai.startree.thirdeye.spi.accessControl.AccessType;
-import ai.startree.thirdeye.spi.accessControl.ResourceIdentifier;
+import ai.startree.thirdeye.spi.auth.AccessControl;
+import ai.startree.thirdeye.spi.auth.AccessControlFactory;
+import ai.startree.thirdeye.spi.auth.AccessType;
+import ai.startree.thirdeye.spi.auth.ResourceIdentifier;
 
 /**
  * AccessControlProvider serves as a mutable layer between Guice bindings and the access control
@@ -41,17 +41,17 @@ public class AccessControlProvider implements AccessControl {
   private final AccessControlConfiguration config;
   private AccessControl accessControl = null;
 
-  public AccessControlProvider(AccessControlConfiguration config) {
+  public AccessControlProvider(final AccessControlConfiguration config) {
     this.config = config;
   }
 
-  public void addAccessControlFactory(AccessControlFactory f) {
+  public void addAccessControlFactory(final AccessControlFactory f) {
     // No lazy-loading here. Immediately build the access control handler.
     if (!config.isEnabled()) {
       return;
     }
 
-    var accessControl = f.build(config.getPlugins().get(f.getName()));
+    final var accessControl = f.build(config.getPlugins().get(f.getName()));
     if (accessControl == null) {
       return;
     }

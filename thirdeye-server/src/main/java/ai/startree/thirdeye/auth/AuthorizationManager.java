@@ -13,16 +13,16 @@
  */
 package ai.startree.thirdeye.auth;
 
-import static ai.startree.thirdeye.spi.accessControl.ResourceIdentifier.DEFAULT_ENTITY_TYPE;
-import static ai.startree.thirdeye.spi.accessControl.ResourceIdentifier.DEFAULT_NAME;
+import static ai.startree.thirdeye.spi.auth.ResourceIdentifier.DEFAULT_ENTITY_TYPE;
+import static ai.startree.thirdeye.spi.auth.ResourceIdentifier.DEFAULT_NAME;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal.AuthenticationType;
 import ai.startree.thirdeye.datalayer.dao.SubEntities;
-import ai.startree.thirdeye.spi.accessControl.AccessControl;
-import ai.startree.thirdeye.spi.accessControl.AccessType;
-import ai.startree.thirdeye.spi.accessControl.ResourceIdentifier;
+import ai.startree.thirdeye.spi.auth.AccessControl;
+import ai.startree.thirdeye.spi.auth.AccessType;
+import ai.startree.thirdeye.spi.auth.ResourceIdentifier;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;

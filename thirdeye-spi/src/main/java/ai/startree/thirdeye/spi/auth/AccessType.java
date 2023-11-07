@@ -11,9 +11,8 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.spi.accessControl;
+package ai.startree.thirdeye.spi.auth;
 
-import ai.startree.thirdeye.spi.PluginServiceFactory;
-import java.util.Map;
-
-public interface AccessControlFactory extends PluginServiceFactory<AccessControl, Map<String, Object>> {}
+public enum AccessType {
+  READ, WRITE
+}

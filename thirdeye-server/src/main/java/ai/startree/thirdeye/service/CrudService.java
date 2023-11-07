@@ -29,9 +29,9 @@ import ai.startree.thirdeye.DaoFilterBuilder;
 import ai.startree.thirdeye.RequestCache;
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
-import ai.startree.thirdeye.spi.accessControl.AccessType;
 import ai.startree.thirdeye.spi.api.CountApi;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
+import ai.startree.thirdeye.spi.auth.AccessType;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AbstractManager;
@@ -93,7 +93,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
     if (byName.size() > 1) {
       throw serverError(ERR_UNKNOWN, "Error. Multiple objects with name: " + name);
     }
-    DtoT dtoT = byName.iterator().next();
+    final DtoT dtoT = byName.iterator().next();
     authorizationManager.ensureCanRead(principal, dtoT);
     return toApi(dtoT, cache);
   }
@@ -294,7 +294,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
     // default is a no-op
   }
 
-  protected void deleteDto(DtoT dto) {
+  protected void deleteDto(final DtoT dto) {
     dtoManager.delete(dto);
   }
 }

@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.spi.detection;
 
+// FIXME CYRIL - remove - just use AnomalyFeedbackDTO directly
 public interface AnomalyFeedback {
 
   /**

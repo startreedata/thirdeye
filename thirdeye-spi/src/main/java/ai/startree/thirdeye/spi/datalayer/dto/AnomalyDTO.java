@@ -289,8 +289,9 @@ public class AnomalyDTO extends AbstractDTO implements Comparable<AnomalyDTO>, S
   }
 
   @Deprecated
-  public void setType(String type) {
+  public AnomalyDTO setType(String type) {
     this.type = type;
+    return this;
   }
 
   public AnomalySeverity getSeverityLabel() {
@@ -366,7 +367,7 @@ public class AnomalyDTO extends AbstractDTO implements Comparable<AnomalyDTO>, S
     return this.feedback;
   }
 
-  public void setFeedback(AnomalyFeedback anomalyFeedback) {
+  public AnomalyDTO setFeedback(AnomalyFeedback anomalyFeedback) {
     if (anomalyFeedback == null) {
       this.feedback = null;
     } else if (anomalyFeedback instanceof AnomalyFeedbackDTO) {
@@ -374,22 +375,25 @@ public class AnomalyDTO extends AbstractDTO implements Comparable<AnomalyDTO>, S
     } else {
       this.feedback = new AnomalyFeedbackDTO(anomalyFeedback);
     }
+    return this;
   }
 
   public Set<AnomalyDTO> getChildren() {
     return children;
   }
 
-  public void setChildren(Set<AnomalyDTO> children) {
+  public AnomalyDTO setChildren(Set<AnomalyDTO> children) {
     this.children = children;
+    return this;
   }
 
   public boolean isRenotify() {
     return renotify;
   }
 
-  public void setRenotify(boolean renotify) {
+  public AnomalyDTO setRenotify(boolean renotify) {
     this.renotify = renotify;
+    return this;
   }
 
   public String getSource() {

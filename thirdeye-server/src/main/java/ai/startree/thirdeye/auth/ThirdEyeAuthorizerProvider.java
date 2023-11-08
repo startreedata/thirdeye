@@ -15,7 +15,6 @@ package ai.startree.thirdeye.auth;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import ai.startree.thirdeye.spi.auth.AccessControlFactory;
 import ai.startree.thirdeye.spi.auth.AccessType;
 import ai.startree.thirdeye.spi.auth.IThirdEyePrincipal;
 import ai.startree.thirdeye.spi.auth.ResourceIdentifier;
@@ -46,7 +45,7 @@ public class ThirdEyeAuthorizerProvider implements ThirdEyeAuthorizer {
     this.config = config;
   }
 
-  public void addAccessControlFactory(final AccessControlFactory f) {
+  public void addAccessControlFactory(final ThirdEyeAuthorizerFactory f) {
     // No lazy-loading here. Immediately build the access control handler.
     if (!config.isEnabled()) {
       return;

@@ -28,7 +28,7 @@ public class ThirdEyeOAuthPlugin implements Plugin {
   }
 
   @Override
-  public Iterable<OauthThirdEyeAuthenticatorFactory> getOAuthAuthenticatorFactories() {
+  public Iterable<OauthThirdEyeAuthenticatorFactory> getOAuthThirdEyeAuthenticatorFactories() {
     return List.of(new DefaultOauthThirdEyeAuthenticatorFactory());
   }
 }

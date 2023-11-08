@@ -26,9 +26,9 @@ import ai.startree.thirdeye.notification.NotificationServiceRegistry;
 import ai.startree.thirdeye.rootcause.ContributorsFinderRunner;
 import ai.startree.thirdeye.spi.Plugin;
 import ai.startree.thirdeye.spi.PluginClassLoader;
-import ai.startree.thirdeye.spi.auth.AccessControlFactory;
 import ai.startree.thirdeye.spi.auth.OpenIdConfigurationProvider;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthenticator.OauthThirdEyeAuthenticatorFactory;
+import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer.ThirdEyeAuthorizerFactory;
 import ai.startree.thirdeye.spi.bootstrap.BootstrapResourcesProviderFactory;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceFactory;
 import ai.startree.thirdeye.spi.detection.AnomalyDetectorFactory;
@@ -133,7 +133,7 @@ public class PluginLoader {
     for(OpenIdConfigurationProvider.Factory f : plugin.getOpenIdConfigurationProviderFactories()) {
       authRegistry.registerOpenIdConfigurationFactory(f);
     }
-    for(OauthThirdEyeAuthenticatorFactory f : plugin.getOAuthAuthenticatorFactories()) {
+    for(OauthThirdEyeAuthenticatorFactory f : plugin.getOAuthThirdEyeAuthenticatorFactories()) {
       authRegistry.registerOAuthFactory(f);
     }
     for (ThirdEyeDataSourceFactory f : plugin.getDataSourceFactories()) {
@@ -160,7 +160,7 @@ public class PluginLoader {
     for (EnumeratorFactory f : plugin.getEnumeratorFactories()) {
       detectionRegistry.addEnumeratorFactory(f);
     }
-    for (AccessControlFactory f: plugin.getAccessControlFactories()) {
+    for (ThirdEyeAuthorizerFactory f: plugin.getThirdEyeAuthorizerFactories()) {
       accessControlProvider.addAccessControlFactory(f);
     }
 

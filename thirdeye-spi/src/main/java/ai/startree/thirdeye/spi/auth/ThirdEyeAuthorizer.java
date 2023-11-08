@@ -13,6 +13,9 @@
  */
 package ai.startree.thirdeye.spi.auth;
 
+import ai.startree.thirdeye.spi.PluginServiceFactory;
+import java.util.Map;
+
 public interface ThirdEyeAuthorizer {
 
   /**
@@ -28,4 +31,7 @@ public interface ThirdEyeAuthorizer {
       ResourceIdentifier identifier,
       AccessType accessType
   );
+
+  interface ThirdEyeAuthorizerFactory extends
+      PluginServiceFactory<ThirdEyeAuthorizer, Map<String, Object>> {}
 }

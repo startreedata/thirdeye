@@ -20,18 +20,18 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
-import ai.startree.thirdeye.auth.AccessControlProvider;
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.NamespaceResolver;
+import ai.startree.thirdeye.auth.ThirdEyeAuthorizerProvider;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.datalayer.bao.AbstractManagerImpl;
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.service.CrudService;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
-import ai.startree.thirdeye.spi.auth.AccessControl;
 import ai.startree.thirdeye.spi.auth.AccessType;
 import ai.startree.thirdeye.spi.auth.AuthenticationType;
 import ai.startree.thirdeye.spi.auth.ResourceIdentifier;
+import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
 import ai.startree.thirdeye.spi.datalayer.bao.AbstractManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import com.google.common.collect.ImmutableMap;
@@ -62,7 +62,7 @@ public class CrudResourceTest {
     });
     when(manager.update(any(DummyDto.class))).thenReturn(1);
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
-        AccessControlProvider.ALWAYS_ALLOW);
+        ThirdEyeAuthorizerProvider.ALWAYS_ALLOW);
 
     final List<String> emails = List.of("tester1@testing.com", "tester2@testing.com");
     final ThirdEyePrincipal owner = getPrincipal(emails.get(0));
@@ -90,7 +90,7 @@ public class CrudResourceTest {
     });
     when(manager.update(any(DummyDto.class))).thenReturn(1);
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
-        AccessControlProvider.ALWAYS_ALLOW);
+        ThirdEyeAuthorizerProvider.ALWAYS_ALLOW);
 
     final List<String> emails = List.of("tester1@testing.com", "tester2@testing.com");
     final Timestamp before = new Timestamp(1671476530000L);
@@ -136,7 +136,7 @@ public class CrudResourceTest {
     ));
 
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
-        AccessControlProvider.ALWAYS_DENY);
+        ThirdEyeAuthorizerProvider.ALWAYS_DENY);
     try (Response resp = resource.list(nobody(), uriInfo)) {
       assertThat(resp.getStatus()).isEqualTo(200);
 
@@ -174,7 +174,7 @@ public class CrudResourceTest {
     final DummyManager manager = mock(DummyManager.class);
     when(manager.findById(1L)).thenReturn((DummyDto) new DummyDto().setId(1L));
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
-        AccessControlProvider.ALWAYS_DENY);
+        ThirdEyeAuthorizerProvider.ALWAYS_DENY);
     resource.get(nobody(), 1L);
   }
 
@@ -183,7 +183,7 @@ public class CrudResourceTest {
     final DummyManager manager = mock(DummyManager.class);
     when(manager.findById(1L)).thenReturn((DummyDto) new DummyDto().setId(1L));
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
-        AccessControlProvider.ALWAYS_DENY);
+        ThirdEyeAuthorizerProvider.ALWAYS_DENY);
     resource.delete(nobody(), 1L);
   }
 
@@ -196,7 +196,7 @@ public class CrudResourceTest {
         (DummyDto) new DummyDto().setId(3L)
     ));
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
-        AccessControlProvider.ALWAYS_DENY);
+        ThirdEyeAuthorizerProvider.ALWAYS_DENY);
     resource.deleteAll(nobody());
   }
 
@@ -220,7 +220,7 @@ public class CrudResourceTest {
   public void testCreateMultiple_withNoAccess() {
     final DummyManager manager = mock(DummyManager.class);
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
-        AccessControlProvider.ALWAYS_DENY);
+        ThirdEyeAuthorizerProvider.ALWAYS_DENY);
 
     resource.createMultiple(nobody(),
         Arrays.asList(new DummyApi(), new DummyApi(), new DummyApi()));
@@ -230,7 +230,7 @@ public class CrudResourceTest {
   public void testCreateMultiple_withNoAccessToRelatedResources() {
     final DummyManager manager = mock(DummyManager.class);
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
-        AccessControlProvider.ALWAYS_DENY);
+        ThirdEyeAuthorizerProvider.ALWAYS_DENY);
 
     resource.createMultiple(
         nobody(),
@@ -246,7 +246,7 @@ public class CrudResourceTest {
     when(manager.findById(3L)).thenReturn((DummyDto) new DummyDto().setId(3L));
 
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
-        AccessControlProvider.ALWAYS_DENY);
+        ThirdEyeAuthorizerProvider.ALWAYS_DENY);
 
     resource.editMultiple(nobody(), Arrays.asList(
         new DummyApi().setId(1L),
@@ -383,9 +383,10 @@ class DummyResource extends CrudResource<DummyApi, DummyDto> {
   public DummyResource(
       final DummyManager dtoManager,
       final ImmutableMap<String, String> apiToBeanMap,
-      final AccessControl accessControl) {
+      final ThirdEyeAuthorizer thirdEyeAuthorizer) {
     super(new DummyService(
-        new AuthorizationManager(mock(AlertTemplateRenderer.class), accessControl, new NamespaceResolver(null, null, null)),
+        new AuthorizationManager(mock(AlertTemplateRenderer.class),
+            thirdEyeAuthorizer, new NamespaceResolver(null, null, null)),
         dtoManager,
         apiToBeanMap));
   }

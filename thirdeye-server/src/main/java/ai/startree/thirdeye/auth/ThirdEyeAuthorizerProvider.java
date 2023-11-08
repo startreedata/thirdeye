@@ -15,33 +15,33 @@ package ai.startree.thirdeye.auth;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import ai.startree.thirdeye.spi.auth.AccessControl;
 import ai.startree.thirdeye.spi.auth.AccessControlFactory;
 import ai.startree.thirdeye.spi.auth.AccessType;
 import ai.startree.thirdeye.spi.auth.ResourceIdentifier;
+import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
 
 /**
  * AccessControlProvider serves as a mutable layer between Guice bindings and the access control
  * implementation from plugins.
  */
-public class AccessControlProvider implements AccessControl {
+public class ThirdEyeAuthorizerProvider implements ThirdEyeAuthorizer {
 
-  public final static AccessControl ALWAYS_ALLOW = (
+  public final static ThirdEyeAuthorizer ALWAYS_ALLOW = (
       final String token,
       final ResourceIdentifier identifiers,
       final AccessType accessType
   ) -> true;
 
-  public final static AccessControl ALWAYS_DENY = (
+  public final static ThirdEyeAuthorizer ALWAYS_DENY = (
       final String token,
       final ResourceIdentifier identifiers,
       final AccessType accessType
   ) -> false;
 
   private final AccessControlConfiguration config;
-  private AccessControl accessControl = null;
+  private ThirdEyeAuthorizer thirdEyeAuthorizer = null;
 
-  public AccessControlProvider(final AccessControlConfiguration config) {
+  public ThirdEyeAuthorizerProvider(final AccessControlConfiguration config) {
     this.config = config;
   }
 
@@ -56,20 +56,20 @@ public class AccessControlProvider implements AccessControl {
       return;
     }
 
-    if (this.accessControl != null) {
+    if (this.thirdEyeAuthorizer != null) {
       throw new RuntimeException("Access control source can only be set once!");
     }
-    this.accessControl = accessControl;
+    this.thirdEyeAuthorizer = accessControl;
   }
 
-  public AccessControl getAccessControl() {
+  public ThirdEyeAuthorizer getAccessControl() {
     if (!config.isEnabled()) {
       return ALWAYS_ALLOW;
     }
 
-    checkState(this.accessControl != null,
+    checkState(this.thirdEyeAuthorizer != null,
         "Access control is enabled, but no provider has been configured!");
-    return this.accessControl;
+    return this.thirdEyeAuthorizer;
   }
 
   public AccessControlConfiguration getConfig() {
@@ -77,8 +77,8 @@ public class AccessControlProvider implements AccessControl {
   }
 
   @Override
-  public boolean hasAccess(final String token, final ResourceIdentifier identifier,
+  public boolean authorize(final String token, final ResourceIdentifier identifier,
       final AccessType accessType) {
-    return getAccessControl().hasAccess(token, identifier, accessType);
+    return getAccessControl().authorize(token, identifier, accessType);
   }
 }

@@ -16,4 +16,5 @@ package ai.startree.thirdeye.spi.auth;
 import ai.startree.thirdeye.spi.PluginServiceFactory;
 import java.util.Map;
 
-public interface AccessControlFactory extends PluginServiceFactory<AccessControl, Map<String, Object>> {}
+public interface AccessControlFactory extends
+    PluginServiceFactory<ThirdEyeAuthorizer, Map<String, Object>> {}

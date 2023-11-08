@@ -13,9 +13,9 @@
  */
 package ai.startree.thirdeye.spi.auth;
 
-public interface AccessControl {
+public interface ThirdEyeAuthorizer {
 
-  boolean hasAccess(
+  boolean authorize(
       String token,
       ResourceIdentifier identifier,
       AccessType accessType

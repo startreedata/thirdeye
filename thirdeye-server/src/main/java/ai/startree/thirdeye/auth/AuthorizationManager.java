@@ -19,10 +19,10 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.datalayer.dao.SubEntities;
-import ai.startree.thirdeye.spi.auth.AccessControl;
 import ai.startree.thirdeye.spi.auth.AccessType;
 import ai.startree.thirdeye.spi.auth.AuthenticationType;
 import ai.startree.thirdeye.spi.auth.ResourceIdentifier;
+import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
@@ -47,16 +47,16 @@ public class AuthorizationManager {
       "thirdeye-internal", RandomStringUtils.random(1024, true, true), AuthenticationType.INTERNAL);
 
   private final AlertTemplateRenderer alertTemplateRenderer;
-  private final AccessControl accessControl;
+  private final ThirdEyeAuthorizer thirdEyeAuthorizer;
   private final NamespaceResolver namespaceResolver;
 
   @Inject
   public AuthorizationManager(
       final AlertTemplateRenderer alertTemplateRenderer,
-      final AccessControl accessControl,
+      final ThirdEyeAuthorizer thirdEyeAuthorizer,
       final NamespaceResolver namespaceResolver) {
     this.alertTemplateRenderer = alertTemplateRenderer;
-    this.accessControl = accessControl;
+    this.thirdEyeAuthorizer = thirdEyeAuthorizer;
     this.namespaceResolver = namespaceResolver;
   }
 
@@ -117,7 +117,7 @@ public class AuthorizationManager {
     } else if (principal.getAuthenticationType() == AuthenticationType.BASIC_AUTH) {
       return true;
     } else {
-      return accessControl.hasAccess(principal.getAuthToken(), identifier, accessType);
+      return thirdEyeAuthorizer.authorize(principal.getAuthToken(), identifier, accessType);
     }
   }
 
@@ -132,7 +132,7 @@ public class AuthorizationManager {
 
   public boolean hasRootAccess(final ThirdEyePrincipal principal) {
     return INTERNAL_VALID_PRINCIPAL.equals(principal) ||
-        accessControl.hasAccess(principal.getAuthToken(), ROOT_RESOURCE_ID, AccessType.WRITE);
+        thirdEyeAuthorizer.authorize(principal.getAuthToken(), ROOT_RESOURCE_ID, AccessType.WRITE);
   }
 
   // Returns the resource identifier for a dto.

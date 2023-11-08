@@ -16,8 +16,8 @@ package ai.startree.thirdeye;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.auth.AccessControlProvider;
 import ai.startree.thirdeye.auth.AuthRegistry;
+import ai.startree.thirdeye.auth.ThirdEyeAuthorizerProvider;
 import ai.startree.thirdeye.core.BootstrapResourcesRegistry;
 import ai.startree.thirdeye.datasource.DataSourcesLoader;
 import ai.startree.thirdeye.detectionpipeline.DetectionRegistry;
@@ -71,7 +71,7 @@ public class PluginLoader {
   private final ContributorsFinderRunner contributorsFinderRunner;
   private final BootstrapResourcesRegistry bootstrapResourcesRegistry;
   private final PostProcessorRegistry postProcessorRegistry;
-  private final AccessControlProvider accessControlProvider;
+  private final ThirdEyeAuthorizerProvider accessControlProvider;
 
   private final AtomicBoolean loading = new AtomicBoolean();
   private final File pluginsDir;
@@ -85,7 +85,7 @@ public class PluginLoader {
       final ContributorsFinderRunner contributorsFinderRunner,
       final BootstrapResourcesRegistry bootstrapResourcesRegistry,
       final PostProcessorRegistry postProcessorRegistry,
-      final AccessControlProvider accessControlProvider,
+      final ThirdEyeAuthorizerProvider accessControlProvider,
       final PluginLoaderConfiguration config) {
     this.authRegistry = authRegistry;
     this.dataSourcesLoader = dataSourcesLoader;

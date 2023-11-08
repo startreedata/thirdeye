@@ -13,15 +13,15 @@
  */
 package ai.startree.thirdeye;
 
-import ai.startree.thirdeye.auth.AccessControlProvider;
 import ai.startree.thirdeye.auth.AuthConfiguration;
 import ai.startree.thirdeye.auth.ThirdEyeAuthModule;
+import ai.startree.thirdeye.auth.ThirdEyeAuthorizerProvider;
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.detectionpipeline.ThirdEyeDetectionPipelineModule;
 import ai.startree.thirdeye.notification.ThirdEyeNotificationModule;
 import ai.startree.thirdeye.scheduler.ThirdEyeSchedulerModule;
 import ai.startree.thirdeye.scheduler.events.MockEventsConfiguration;
-import ai.startree.thirdeye.spi.auth.AccessControl;
+import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
 import ai.startree.thirdeye.worker.ThirdEyeWorkerModule;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.AbstractModule;
@@ -34,7 +34,7 @@ public class ThirdEyeServerModule extends AbstractModule {
   private final ThirdEyeServerConfiguration configuration;
   private final DataSource dataSource;
   private final MetricRegistry metricRegistry;
-  private final AccessControlProvider accessControlProvider;
+  private final ThirdEyeAuthorizerProvider accessControlProvider;
 
   public ThirdEyeServerModule(
       final ThirdEyeServerConfiguration configuration,
@@ -44,7 +44,7 @@ public class ThirdEyeServerModule extends AbstractModule {
     this.dataSource = dataSource;
     this.metricRegistry = metricRegistry;
 
-    this.accessControlProvider = new AccessControlProvider(
+    this.accessControlProvider = new ThirdEyeAuthorizerProvider(
         configuration.getAccessControlConfiguration());
   }
 
@@ -76,13 +76,13 @@ public class ThirdEyeServerModule extends AbstractModule {
 
   @Singleton
   @Provides
-  public AccessControlProvider getAccessControlProvider() {
+  public ThirdEyeAuthorizerProvider getAccessControlProvider() {
     return this.accessControlProvider;
   }
 
   @Singleton
   @Provides
-  public AccessControl getAccessControl() {
+  public ThirdEyeAuthorizer getAccessControl() {
     return this.accessControlProvider;
   }
 }

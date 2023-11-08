@@ -23,9 +23,9 @@ import ai.startree.thirdeye.alert.AlertDeleter;
 import ai.startree.thirdeye.alert.AlertEvaluator;
 import ai.startree.thirdeye.alert.AlertInsightsProvider;
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
-import ai.startree.thirdeye.auth.AccessControlProvider;
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.NamespaceResolver;
+import ai.startree.thirdeye.auth.ThirdEyeAuthorizerProvider;
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.service.AlertService;
 import ai.startree.thirdeye.service.AppAnalyticsService;
@@ -36,10 +36,10 @@ import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
 import ai.startree.thirdeye.spi.api.DetectionEvaluationApi;
 import ai.startree.thirdeye.spi.api.EnumerationItemApi;
 import ai.startree.thirdeye.spi.api.PlanNodeApi;
-import ai.startree.thirdeye.spi.auth.AccessControl;
 import ai.startree.thirdeye.spi.auth.AccessType;
 import ai.startree.thirdeye.spi.auth.AuthenticationType;
 import ai.startree.thirdeye.spi.auth.ResourceIdentifier;
+import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
@@ -68,8 +68,9 @@ public class AlertResourceTest {
 
   private static AlertResource newAlertResource(final AlertManager alertManager,
       final AlertTemplateRenderer alertTemplateRenderer,
-      final AccessControl accessControl) {
-    final AuthorizationManager authorizationManager = newAuthorizationManager(alertTemplateRenderer, accessControl);
+      final ThirdEyeAuthorizer thirdEyeAuthorizer) {
+    final AuthorizationManager authorizationManager = newAuthorizationManager(alertTemplateRenderer,
+        thirdEyeAuthorizer);
     return new AlertResource(newAlertService(alertManager, authorizationManager));
   }
 
@@ -132,10 +133,12 @@ public class AlertResourceTest {
     final AlertTemplateRenderer alertTemplateRenderer = new AlertTemplateRenderer(
         mock(AlertManager.class), alertTemplateManager);
 
-    final AccessControl accessControl = (String token, ResourceIdentifier identifier, AccessType accessType)
+    final ThirdEyeAuthorizer thirdEyeAuthorizer = (String token, ResourceIdentifier identifier, AccessType accessType)
         -> identifier.getName().equals("0");
 
-    newAlertResource(mock(AlertManager.class), alertTemplateRenderer, accessControl).createMultiple(
+    newAlertResource(mock(AlertManager.class),
+        alertTemplateRenderer,
+        thirdEyeAuthorizer).createMultiple(
         nobody(),
         Collections.singletonList(
             new AlertApi().setName("alert1").setTemplate(new AlertTemplateApi().setId(2L))
@@ -149,7 +152,9 @@ public class AlertResourceTest {
     final AlertTemplateRenderer alertTemplateRenderer = new AlertTemplateRenderer(alertManager,
         mock(AlertTemplateManager.class));
 
-    newAlertResource(alertManager, alertTemplateRenderer, AccessControlProvider.ALWAYS_DENY).runTask(
+    newAlertResource(alertManager,
+        alertTemplateRenderer,
+        ThirdEyeAuthorizerProvider.ALWAYS_DENY).runTask(
         nobody(),
         1L,
         0L,
@@ -160,7 +165,7 @@ public class AlertResourceTest {
   public void testValidate_withNoAccess() {
     newAlertResource(mock(AlertManager.class),
         mock(AlertTemplateRenderer.class),
-        AccessControlProvider.ALWAYS_DENY).validateMultiple(
+        ThirdEyeAuthorizerProvider.ALWAYS_DENY).validateMultiple(
         nobody(),
         Collections.singletonList(
             new AlertApi().setTemplate(new AlertTemplateApi().setId(1L)).setName("alert1")
@@ -176,12 +181,12 @@ public class AlertResourceTest {
     final AlertTemplateRenderer alertTemplateRenderer = new AlertTemplateRenderer(
         mock(AlertManager.class), alertTemplateManager);
 
-    final AccessControl accessControl = (String token, ResourceIdentifier identifier, AccessType accessType)
+    final ThirdEyeAuthorizer thirdEyeAuthorizer = (String token, ResourceIdentifier identifier, AccessType accessType)
         -> identifier.getName().equals("alert1");
 
     newAlertResource(mock(AlertManager.class),
         alertTemplateRenderer,
-        accessControl).validateMultiple(
+        thirdEyeAuthorizer).validateMultiple(
         nobody(),
         Collections.singletonList(
             new AlertApi().setTemplate(new AlertTemplateApi().setId(1L)).setName("alert1")
@@ -200,7 +205,7 @@ public class AlertResourceTest {
 
     newAlertResource(mock(AlertManager.class),
         alertTemplateRenderer,
-        AccessControlProvider.ALWAYS_DENY).evaluate(nobody(),
+        ThirdEyeAuthorizerProvider.ALWAYS_DENY).evaluate(nobody(),
         new AlertEvaluationApi()
             .setAlert(new AlertApi().setTemplate(new AlertTemplateApi().setId(1L)))
             .setStart(new Date())
@@ -403,8 +408,10 @@ public class AlertResourceTest {
   }
 
   private static AuthorizationManager newAuthorizationManager(
-      final AlertTemplateRenderer alertTemplateRenderer, final AccessControl accessControl) {
-    return new AuthorizationManager(alertTemplateRenderer, accessControl, new NamespaceResolver(null, null, null));
+      final AlertTemplateRenderer alertTemplateRenderer,
+      final ThirdEyeAuthorizer thirdEyeAuthorizer) {
+    return new AuthorizationManager(alertTemplateRenderer,
+        thirdEyeAuthorizer, new NamespaceResolver(null, null, null));
   }
 
   @Test(expectedExceptions = ForbiddenException.class)
@@ -414,7 +421,9 @@ public class AlertResourceTest {
     final AlertTemplateRenderer alertTemplateRenderer = new AlertTemplateRenderer(alertManager,
         mock(AlertTemplateManager.class));
 
-    newAlertResource(alertManager, alertTemplateRenderer, AccessControlProvider.ALWAYS_DENY).reset(
+    newAlertResource(alertManager,
+        alertTemplateRenderer,
+        ThirdEyeAuthorizerProvider.ALWAYS_DENY).reset(
         nobody(),
         1L);
   }

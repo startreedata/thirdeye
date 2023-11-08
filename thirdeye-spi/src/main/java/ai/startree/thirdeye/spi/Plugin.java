@@ -14,8 +14,8 @@
 package ai.startree.thirdeye.spi;
 
 import ai.startree.thirdeye.spi.auth.AccessControlFactory;
-import ai.startree.thirdeye.spi.auth.Authenticator.OauthAuthenticatorFactory;
 import ai.startree.thirdeye.spi.auth.OpenIdConfigurationProvider;
+import ai.startree.thirdeye.spi.auth.ThirdEyeAuthenticator.OauthThirdEyeAuthenticatorFactory;
 import ai.startree.thirdeye.spi.bootstrap.BootstrapResourcesProviderFactory;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceFactory;
 import ai.startree.thirdeye.spi.detection.AnomalyDetectorFactory;
@@ -32,7 +32,7 @@ public interface Plugin {
     return Collections.emptyList();
   }
 
-  default Iterable<OauthAuthenticatorFactory> getOAuthAuthenticatorFactories() {
+  default Iterable<OauthThirdEyeAuthenticatorFactory> getOAuthAuthenticatorFactories() {
     return Collections.emptyList();
   }
 

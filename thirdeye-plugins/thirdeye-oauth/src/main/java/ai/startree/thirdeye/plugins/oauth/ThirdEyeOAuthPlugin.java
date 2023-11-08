@@ -14,8 +14,8 @@
 package ai.startree.thirdeye.plugins.oauth;
 
 import ai.startree.thirdeye.spi.Plugin;
-import ai.startree.thirdeye.spi.auth.Authenticator.OauthAuthenticatorFactory;
 import ai.startree.thirdeye.spi.auth.OpenIdConfigurationProvider.Factory;
+import ai.startree.thirdeye.spi.auth.ThirdEyeAuthenticator.OauthThirdEyeAuthenticatorFactory;
 import com.google.auto.service.AutoService;
 import java.util.List;
 
@@ -28,7 +28,7 @@ public class ThirdEyeOAuthPlugin implements Plugin {
   }
 
   @Override
-  public Iterable<OauthAuthenticatorFactory> getOAuthAuthenticatorFactories() {
-    return List.of(new DefaultOauthAuthenticatorFactory());
+  public Iterable<OauthThirdEyeAuthenticatorFactory> getOAuthAuthenticatorFactories() {
+    return List.of(new DefaultOauthThirdEyeAuthenticatorFactory());
   }
 }

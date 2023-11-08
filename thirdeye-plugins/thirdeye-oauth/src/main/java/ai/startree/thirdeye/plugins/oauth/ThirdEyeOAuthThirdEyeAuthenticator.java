@@ -16,31 +16,31 @@ package ai.startree.thirdeye.plugins.oauth;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.spi.auth.Authenticator;
+import ai.startree.thirdeye.spi.auth.IThirdEyePrincipal;
+import ai.startree.thirdeye.spi.auth.ThirdEyeAuthenticator;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.inject.Inject;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import java.security.Principal;
 import java.text.ParseException;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ThirdEyeOAuthAuthenticator implements Authenticator<String, Principal> {
+public class ThirdEyeOAuthThirdEyeAuthenticator implements ThirdEyeAuthenticator<String> {
 
   public static final String NAME_CLAIM = "email";
-  private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeOAuthAuthenticator.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeOAuthThirdEyeAuthenticator.class);
 
   private final OidcJWTProcessor processor;
   private final OidcContext oidcContext;
-  private final LoadingCache<String, ThirdEyePrincipal> tokenPrincipalCache;
+  private final LoadingCache<String, IThirdEyePrincipal> tokenPrincipalCache;
 
   @Inject
-  public ThirdEyeOAuthAuthenticator(final OidcJWTProcessor processor,
+  public ThirdEyeOAuthThirdEyeAuthenticator(final OidcJWTProcessor processor,
       final OidcContext oidcContext,
       final OAuthConfiguration config) {
     this.processor = processor;
@@ -62,7 +62,7 @@ public class ThirdEyeOAuthAuthenticator implements Authenticator<String, Princip
   }
 
   @Override
-  public Optional<Principal> authenticate(final String authToken) {
+  public Optional<IThirdEyePrincipal> authenticate(final String authToken) {
     try {
       return optional(tokenPrincipalCache.get(authToken));
     } catch (final Exception exception) {
@@ -71,7 +71,7 @@ public class ThirdEyeOAuthAuthenticator implements Authenticator<String, Princip
     }
   }
 
-  CacheLoader<String, ThirdEyePrincipal> getCacheLoader() {
+  CacheLoader<String, IThirdEyePrincipal> getCacheLoader() {
     return new CacheLoader<>() {
 
       @Override

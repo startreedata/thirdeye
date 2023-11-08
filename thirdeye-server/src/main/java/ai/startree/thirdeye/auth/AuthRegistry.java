@@ -19,9 +19,9 @@ import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.auth.oauth.OAuthConfiguration;
 import ai.startree.thirdeye.spi.auth.AuthenticationType;
-import ai.startree.thirdeye.spi.auth.Authenticator.OauthAuthenticatorFactory;
 import ai.startree.thirdeye.spi.auth.OpenIdConfigurationProvider;
 import ai.startree.thirdeye.spi.auth.OpenIdConfigurationProvider.Factory;
+import ai.startree.thirdeye.spi.auth.ThirdEyeAuthenticator.OauthThirdEyeAuthenticatorFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Singleton;
 import io.dropwizard.auth.Authenticator;
@@ -34,7 +34,7 @@ public class AuthRegistry {
   public static final String OAUTH_DEFAULT = "oauth-default";
   public static final String OPENID_DEFAULT = "openid-default";
   public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-  private final Map<String, OauthAuthenticatorFactory> oauthFactories = new HashMap<>();
+  private final Map<String, OauthThirdEyeAuthenticatorFactory> oauthFactories = new HashMap<>();
   private final Map<String, OpenIdConfigurationProvider.Factory> openIdConfigurationFactories = new HashMap<>();
 
   @SuppressWarnings("unchecked")
@@ -43,7 +43,7 @@ public class AuthRegistry {
     return OBJECT_MAPPER.convertValue(oauthConfig, Map.class);
   }
 
-  public void registerOAuthFactory(OauthAuthenticatorFactory f) {
+  public void registerOAuthFactory(OauthThirdEyeAuthenticatorFactory f) {
     checkState(!oauthFactories.containsKey(f.getName()),
         "Duplicate OauthAuthenticatorFactory: " + f.getName());
 
@@ -58,7 +58,7 @@ public class AuthRegistry {
     openIdConfigurationFactories.put(f.getName(), f);
   }
 
-  private OauthAuthenticatorFactory getDefaultOAuthFactory() {
+  private OauthThirdEyeAuthenticatorFactory getDefaultOAuthFactory() {
     return requireNonNull(oauthFactories.get(OAUTH_DEFAULT), "oauth plugin not loaded!");
   }
 

@@ -13,9 +13,10 @@
  */
 package ai.startree.thirdeye.plugins.oauth;
 
-import java.security.Principal;
+import ai.startree.thirdeye.spi.auth.AuthenticationType;
+import ai.startree.thirdeye.spi.auth.IThirdEyePrincipal;
 
-public class ThirdEyePrincipal implements Principal {
+public class ThirdEyePrincipal implements IThirdEyePrincipal {
 
   private final String name;
 
@@ -26,5 +27,15 @@ public class ThirdEyePrincipal implements Principal {
   @Override
   public String getName() {
     return name;
+  }
+
+  @Override
+  public String getAuthToken() {
+    return null;
+  }
+
+  @Override
+  public AuthenticationType getAuthenticationType() {
+    return null;
   }
 }

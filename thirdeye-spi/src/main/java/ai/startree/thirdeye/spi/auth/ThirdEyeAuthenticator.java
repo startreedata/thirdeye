@@ -17,11 +17,10 @@ package ai.startree.thirdeye.spi.auth;
 import ai.startree.thirdeye.spi.PluginServiceFactory;
 import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.ThirdEyeStatus;
-import java.security.Principal;
 import java.util.Map;
 import java.util.Optional;
 
-public interface Authenticator<CredentialsT, PrincipalT extends Principal> {
+public interface ThirdEyeAuthenticator<CredentialsT> {
 
   /**
    * Authenticates the given credentials. Returns an empty optional if the credentials could not be
@@ -32,9 +31,9 @@ public interface Authenticator<CredentialsT, PrincipalT extends Principal> {
    * @throws ThirdEyeException thrown if there is an error authenticating the credentials
    *     typically using a {@link ThirdEyeStatus#ERR_UNAUTHENTICATED} status
    */
-  Optional<PrincipalT> authenticate(CredentialsT credentials) throws ThirdEyeException;
+  Optional<IThirdEyePrincipal> authenticate(CredentialsT credentials) throws ThirdEyeException;
 
-  interface OauthAuthenticatorFactory extends
-      PluginServiceFactory<Authenticator<String, Principal>, Map> {
+  interface OauthThirdEyeAuthenticatorFactory extends
+      PluginServiceFactory<ThirdEyeAuthenticator<String>, Map> {
   }
 }

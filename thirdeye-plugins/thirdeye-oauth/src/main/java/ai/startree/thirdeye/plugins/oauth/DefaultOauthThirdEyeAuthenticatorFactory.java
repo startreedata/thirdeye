@@ -18,16 +18,15 @@ import static ai.startree.thirdeye.spi.Constants.OAUTH_JWKS_URI;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.spi.api.AuthInfoApi;
-import ai.startree.thirdeye.spi.auth.Authenticator;
-import ai.startree.thirdeye.spi.auth.Authenticator.OauthAuthenticatorFactory;
 import ai.startree.thirdeye.spi.auth.OpenIdConfigurationProvider;
+import ai.startree.thirdeye.spi.auth.ThirdEyeAuthenticator;
+import ai.startree.thirdeye.spi.auth.ThirdEyeAuthenticator.OauthThirdEyeAuthenticatorFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import java.security.Principal;
 import java.util.Map;
 
-public class DefaultOauthAuthenticatorFactory implements OauthAuthenticatorFactory {
+public class DefaultOauthThirdEyeAuthenticatorFactory implements OauthThirdEyeAuthenticatorFactory {
 
   @Override
   public String getName() {
@@ -35,7 +34,7 @@ public class DefaultOauthAuthenticatorFactory implements OauthAuthenticatorFacto
   }
 
   @Override
-  public Authenticator<String, Principal> build(final Map configMap) {
+  public ThirdEyeAuthenticator<String> build(final Map configMap) {
     final OAuthConfiguration oAuthConfiguration = new ObjectMapper().convertValue(configMap,
         OAuthConfiguration.class);
     final Injector injector = Guice.createInjector(new OAuthModule(oAuthConfiguration));
@@ -57,6 +56,6 @@ public class DefaultOauthAuthenticatorFactory implements OauthAuthenticatorFacto
       oAuthConfiguration.setCache(new OauthCacheConfiguration());
     }
 
-    return injector.getInstance(ThirdEyeOAuthAuthenticator.class);
+    return injector.getInstance(ThirdEyeOAuthThirdEyeAuthenticator.class);
   }
 }

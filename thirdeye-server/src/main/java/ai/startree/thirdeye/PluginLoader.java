@@ -27,8 +27,8 @@ import ai.startree.thirdeye.rootcause.ContributorsFinderRunner;
 import ai.startree.thirdeye.spi.Plugin;
 import ai.startree.thirdeye.spi.PluginClassLoader;
 import ai.startree.thirdeye.spi.auth.AccessControlFactory;
-import ai.startree.thirdeye.spi.auth.Authenticator.OauthAuthenticatorFactory;
 import ai.startree.thirdeye.spi.auth.OpenIdConfigurationProvider;
+import ai.startree.thirdeye.spi.auth.ThirdEyeAuthenticator.OauthThirdEyeAuthenticatorFactory;
 import ai.startree.thirdeye.spi.bootstrap.BootstrapResourcesProviderFactory;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceFactory;
 import ai.startree.thirdeye.spi.detection.AnomalyDetectorFactory;
@@ -133,7 +133,7 @@ public class PluginLoader {
     for(OpenIdConfigurationProvider.Factory f : plugin.getOpenIdConfigurationProviderFactories()) {
       authRegistry.registerOpenIdConfigurationFactory(f);
     }
-    for(OauthAuthenticatorFactory f : plugin.getOAuthAuthenticatorFactories()) {
+    for(OauthThirdEyeAuthenticatorFactory f : plugin.getOAuthAuthenticatorFactories()) {
       authRegistry.registerOAuthFactory(f);
     }
     for (ThirdEyeDataSourceFactory f : plugin.getDataSourceFactories()) {

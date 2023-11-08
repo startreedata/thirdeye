@@ -21,6 +21,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.expectThrows;
 
+import ai.startree.thirdeye.spi.auth.IThirdEyePrincipal;
 import com.google.common.cache.CacheLoader;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -38,7 +39,7 @@ import org.testng.annotations.Test;
 
 public class ThirdEyeOAuthAuthenticatorTest {
 
-  private CacheLoader<String, ThirdEyePrincipal> cache;
+  private CacheLoader<String, IThirdEyePrincipal> cache;
 
   public static JWK getJWK(String kid) throws JOSEException {
     return new RSAKeyGenerator(2048)
@@ -61,7 +62,7 @@ public class ThirdEyeOAuthAuthenticatorTest {
         .thenReturn(new JWTClaimsSet.Builder().claim("email", "test")
         .build());
 
-    final ThirdEyeOAuthAuthenticator authenticator = new ThirdEyeOAuthAuthenticator(
+    final ThirdEyeOAuthThirdEyeAuthenticator authenticator = new ThirdEyeOAuthThirdEyeAuthenticator(
         processor,
         mock(OidcContext.class),
         new OAuthConfiguration()
@@ -71,7 +72,7 @@ public class ThirdEyeOAuthAuthenticatorTest {
 
   @Test
   public void cachedEntriesTest() throws Exception {
-    ThirdEyePrincipal principal = cache.load(getToken(getJWK(
+    IThirdEyePrincipal principal = cache.load(getToken(getJWK(
             RandomStringUtils.randomAlphanumeric(16)),
         new JWTClaimsSet.Builder().build()));
     assertNotNull(principal);

@@ -17,8 +17,8 @@ package ai.startree.thirdeye.auth;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.auth.ThirdEyePrincipal.AuthenticationType;
 import ai.startree.thirdeye.auth.oauth.OAuthConfiguration;
+import ai.startree.thirdeye.spi.auth.AuthenticationType;
 import ai.startree.thirdeye.spi.auth.Authenticator.OauthAuthenticatorFactory;
 import ai.startree.thirdeye.spi.auth.OpenIdConfigurationProvider;
 import ai.startree.thirdeye.spi.auth.OpenIdConfigurationProvider.Factory;

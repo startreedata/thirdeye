@@ -13,19 +13,18 @@
  */
 package ai.startree.thirdeye.auth;
 
-import java.security.Principal;
+import ai.startree.thirdeye.spi.auth.AuthenticationType;
+import ai.startree.thirdeye.spi.auth.IThirdEyePrincipal;
 
-public class ThirdEyePrincipal implements Principal {
-
-  public enum AuthenticationType {
-    BASIC_AUTH, OAUTH, INTERNAL, DISABLED
-  }
+public class ThirdEyePrincipal implements IThirdEyePrincipal {
 
   private final String name;
   private final String authToken;
   private final AuthenticationType authenticationType;
 
-  public ThirdEyePrincipal(final String name, final String authToken, final AuthenticationType authenticationType) {
+  public ThirdEyePrincipal(final String name,
+      final String authToken,
+      final AuthenticationType authenticationType) {
     this.name = name;
     this.authToken = authToken;
     this.authenticationType = authenticationType;
@@ -36,10 +35,12 @@ public class ThirdEyePrincipal implements Principal {
     return name;
   }
 
+  @Override
   public String getAuthToken() {
     return authToken;
   }
 
+  @Override
   public AuthenticationType getAuthenticationType() {
     return authenticationType;
   }

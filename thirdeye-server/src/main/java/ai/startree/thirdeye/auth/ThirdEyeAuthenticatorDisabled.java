@@ -15,7 +15,7 @@ package ai.startree.thirdeye.auth;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
-import ai.startree.thirdeye.auth.ThirdEyePrincipal.AuthenticationType;
+import ai.startree.thirdeye.spi.auth.AuthenticationType;
 import io.dropwizard.auth.Authenticator;
 import java.util.Optional;
 

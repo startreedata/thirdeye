@@ -14,7 +14,7 @@
 package ai.startree.thirdeye.auth.basic;
 
 import ai.startree.thirdeye.auth.ThirdEyePrincipal;
-import ai.startree.thirdeye.auth.ThirdEyePrincipal.AuthenticationType;
+import ai.startree.thirdeye.spi.auth.AuthenticationType;
 import com.google.inject.Inject;
 import io.dropwizard.auth.Authenticator;
 import io.dropwizard.auth.basic.BasicCredentials;

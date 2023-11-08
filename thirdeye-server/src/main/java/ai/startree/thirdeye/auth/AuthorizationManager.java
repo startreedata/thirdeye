@@ -117,7 +117,7 @@ public class AuthorizationManager {
     } else if (principal.getAuthenticationType() == AuthenticationType.BASIC_AUTH) {
       return true;
     } else {
-      return thirdEyeAuthorizer.authorize(principal.getAuthToken(), identifier, accessType);
+      return thirdEyeAuthorizer.authorize(principal, identifier, accessType);
     }
   }
 
@@ -132,7 +132,7 @@ public class AuthorizationManager {
 
   public boolean hasRootAccess(final ThirdEyePrincipal principal) {
     return INTERNAL_VALID_PRINCIPAL.equals(principal) ||
-        thirdEyeAuthorizer.authorize(principal.getAuthToken(), ROOT_RESOURCE_ID, AccessType.WRITE);
+        thirdEyeAuthorizer.authorize(principal, ROOT_RESOURCE_ID, AccessType.WRITE);
   }
 
   // Returns the resource identifier for a dto.

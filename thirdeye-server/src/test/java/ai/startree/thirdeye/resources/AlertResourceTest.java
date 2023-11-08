@@ -38,6 +38,7 @@ import ai.startree.thirdeye.spi.api.EnumerationItemApi;
 import ai.startree.thirdeye.spi.api.PlanNodeApi;
 import ai.startree.thirdeye.spi.auth.AccessType;
 import ai.startree.thirdeye.spi.auth.AuthenticationType;
+import ai.startree.thirdeye.spi.auth.IThirdEyePrincipal;
 import ai.startree.thirdeye.spi.auth.ResourceIdentifier;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
@@ -133,7 +134,7 @@ public class AlertResourceTest {
     final AlertTemplateRenderer alertTemplateRenderer = new AlertTemplateRenderer(
         mock(AlertManager.class), alertTemplateManager);
 
-    final ThirdEyeAuthorizer thirdEyeAuthorizer = (String token, ResourceIdentifier identifier, AccessType accessType)
+    final ThirdEyeAuthorizer thirdEyeAuthorizer = (IThirdEyePrincipal principal, ResourceIdentifier identifier, AccessType accessType)
         -> identifier.getName().equals("0");
 
     newAlertResource(mock(AlertManager.class),
@@ -181,7 +182,7 @@ public class AlertResourceTest {
     final AlertTemplateRenderer alertTemplateRenderer = new AlertTemplateRenderer(
         mock(AlertManager.class), alertTemplateManager);
 
-    final ThirdEyeAuthorizer thirdEyeAuthorizer = (String token, ResourceIdentifier identifier, AccessType accessType)
+    final ThirdEyeAuthorizer thirdEyeAuthorizer = (IThirdEyePrincipal principal, ResourceIdentifier identifier, AccessType accessType)
         -> identifier.getName().equals("alert1");
 
     newAlertResource(mock(AlertManager.class),
@@ -248,7 +249,7 @@ public class AlertResourceTest {
         mock(AppAnalyticsService.class),
         mock(AlertInsightsProvider.class),
         newAuthorizationManager(alertTemplateRenderer,
-            (String token, ResourceIdentifier id, AccessType accessType) ->
+            (IThirdEyePrincipal p, ResourceIdentifier id, AccessType accessType) ->
                 id.getNamespace().equals("allowedNamespace")))
     ).evaluate(nobody(), alertEvaluationApi);
   }
@@ -300,7 +301,7 @@ public class AlertResourceTest {
         mock(AppAnalyticsService.class),
         mock(AlertInsightsProvider.class),
         newAuthorizationManager(alertTemplateRenderer,
-            (String token, ResourceIdentifier id, AccessType accessType) ->
+            (IThirdEyePrincipal p, ResourceIdentifier id, AccessType accessType) ->
                 accessType == AccessType.READ && id.getNamespace().equals("allowedNamespace")))
     );
 
@@ -345,7 +346,7 @@ public class AlertResourceTest {
         mock(AppAnalyticsService.class),
         mock(AlertInsightsProvider.class),
         newAuthorizationManager(alertTemplateRenderer,
-            (String token, ResourceIdentifier id, AccessType accessType) ->
+            (IThirdEyePrincipal p, ResourceIdentifier id, AccessType accessType) ->
                 id.getNamespace().equals("readonlyNamespace") && accessType == AccessType.READ))
     ).evaluate(nobody(), alertEvaluationApi);
   }
@@ -394,7 +395,7 @@ public class AlertResourceTest {
         mock(AppAnalyticsService.class),
         mock(AlertInsightsProvider.class),
         newAuthorizationManager(alertTemplateRenderer,
-            (String token, ResourceIdentifier id, AccessType accessType) ->
+            (IThirdEyePrincipal p, ResourceIdentifier id, AccessType accessType) ->
                 id.getNamespace().equals("allowedNamespace")))
     );
 

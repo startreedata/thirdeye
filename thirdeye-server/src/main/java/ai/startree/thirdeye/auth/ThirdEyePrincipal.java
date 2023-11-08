@@ -30,6 +30,9 @@ public class ThirdEyePrincipal implements IThirdEyePrincipal {
     this.authenticationType = authenticationType;
   }
 
+  public static ThirdEyePrincipal thirdEyePrincipal(final String authToken) {
+    return new ThirdEyePrincipal("unknown", authToken, null);
+  }
   @Override
   public String getName() {
     return name;

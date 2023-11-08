@@ -17,6 +17,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import ai.startree.thirdeye.spi.auth.AccessControlFactory;
 import ai.startree.thirdeye.spi.auth.AccessType;
+import ai.startree.thirdeye.spi.auth.IThirdEyePrincipal;
 import ai.startree.thirdeye.spi.auth.ResourceIdentifier;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
 
@@ -27,13 +28,13 @@ import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
 public class ThirdEyeAuthorizerProvider implements ThirdEyeAuthorizer {
 
   public final static ThirdEyeAuthorizer ALWAYS_ALLOW = (
-      final String token,
+      final IThirdEyePrincipal principal,
       final ResourceIdentifier identifiers,
       final AccessType accessType
   ) -> true;
 
   public final static ThirdEyeAuthorizer ALWAYS_DENY = (
-      final String token,
+      final IThirdEyePrincipal principal,
       final ResourceIdentifier identifiers,
       final AccessType accessType
   ) -> false;
@@ -77,8 +78,8 @@ public class ThirdEyeAuthorizerProvider implements ThirdEyeAuthorizer {
   }
 
   @Override
-  public boolean authorize(final String token, final ResourceIdentifier identifier,
+  public boolean authorize(final IThirdEyePrincipal principal, final ResourceIdentifier identifier,
       final AccessType accessType) {
-    return getAccessControl().authorize(token, identifier, accessType);
+    return getAccessControl().authorize(principal, identifier, accessType);
   }
 }

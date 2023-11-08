@@ -30,6 +30,7 @@ import ai.startree.thirdeye.service.CrudService;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
 import ai.startree.thirdeye.spi.auth.AccessType;
 import ai.startree.thirdeye.spi.auth.AuthenticationType;
+import ai.startree.thirdeye.spi.auth.IThirdEyePrincipal;
 import ai.startree.thirdeye.spi.auth.ResourceIdentifier;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
 import ai.startree.thirdeye.spi.datalayer.bao.AbstractManager;
@@ -157,8 +158,8 @@ public class CrudResourceTest {
     ));
 
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
-        (String token, ResourceIdentifier identifiers, AccessType accessType)
-            -> identifiers.getName().equals("2"));
+        (IThirdEyePrincipal p, ResourceIdentifier id, AccessType accessType) ->
+            id.getName().equals("2"));
 
     try (Response resp = resource.list(nobody(), uriInfo)) {
       assertThat(resp.getStatus()).isEqualTo(200);
@@ -211,8 +212,8 @@ public class CrudResourceTest {
     when(manager.findAll()).thenReturn(dtos);
 
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
-        (String token, ResourceIdentifier identifiers, AccessType accessType)
-            -> identifiers.getName().equals("2"));
+        (IThirdEyePrincipal p, ResourceIdentifier id, AccessType accessType) ->
+            id.getName().equals("2"));
     resource.deleteAll(nobody());
   }
 
@@ -263,8 +264,8 @@ public class CrudResourceTest {
     when(manager.findById(3L)).thenReturn((DummyDto) new DummyDto().setId(3L));
 
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
-        (String token, ResourceIdentifier identifiers, AccessType accessType)
-            -> identifiers.getName().equals("2"));
+        (IThirdEyePrincipal p, ResourceIdentifier id, AccessType accessType)
+            -> id.getName().equals("2"));
 
     resource.editMultiple(nobody(), Arrays.asList(
         new DummyApi().setId(1L),

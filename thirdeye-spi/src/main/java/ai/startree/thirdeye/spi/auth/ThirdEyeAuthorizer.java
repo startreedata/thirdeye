@@ -15,8 +15,16 @@ package ai.startree.thirdeye.spi.auth;
 
 public interface ThirdEyeAuthorizer {
 
+  /**
+   * Authorizes the given principal to access the given resource with the given access type.
+   *
+   * @param principal the principal to authorize
+   * @param identifier the resource to authorize access to
+   * @param accessType the type of access to authorize
+   * @return true if the principal is authorized to access the resource with the given access type
+   */
   boolean authorize(
-      String token,
+      IThirdEyePrincipal principal,
       ResourceIdentifier identifier,
       AccessType accessType
   );

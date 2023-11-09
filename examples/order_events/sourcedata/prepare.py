@@ -72,6 +72,8 @@ epoch_hours = (event_df[EVENT_TIME_COLUMN] - pd.Timestamp("1970-01-01")) // pd.T
 event_df[EVENT_TIME_COLUMN] = epoch_millis
 event_df[EVENT_TIME_HOUR_BUCKET] = epoch_hours
 event_df.sort_values(EVENT_TIME_COLUMN, inplace=True)
+event_df.sort_values(EVENT_TIME_COLUMN, inplace=True)
+event_df = event_df[event_df[EVENT_TIME_COLUMN] < 1630300000000]
 event_df.to_csv("./data.csv", index=False)
 print("Move data.csv to the rawdata folder when it's ready.")
 

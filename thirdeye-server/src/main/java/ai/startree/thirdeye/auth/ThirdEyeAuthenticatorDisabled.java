@@ -19,10 +19,11 @@ import ai.startree.thirdeye.spi.auth.AuthenticationType;
 import io.dropwizard.auth.Authenticator;
 import java.util.Optional;
 
-public class ThirdEyeAuthenticatorDisabled implements Authenticator<String, ThirdEyePrincipal> {
+public class ThirdEyeAuthenticatorDisabled implements
+    Authenticator<String, ThirdEyeServerPrincipal> {
 
   @Override
-  public Optional<ThirdEyePrincipal> authenticate(final String s) {
-    return optional(new ThirdEyePrincipal(s, "", AuthenticationType.DISABLED));
+  public Optional<ThirdEyeServerPrincipal> authenticate(final String s) {
+    return optional(new ThirdEyeServerPrincipal(s, "", AuthenticationType.DISABLED));
   }
 }

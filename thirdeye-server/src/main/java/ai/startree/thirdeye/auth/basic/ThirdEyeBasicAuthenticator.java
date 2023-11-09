@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.auth.basic;
 
-import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.spi.auth.AuthenticationType;
 import com.google.inject.Inject;
 import io.dropwizard.auth.Authenticator;
@@ -22,7 +22,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 public class ThirdEyeBasicAuthenticator implements
-    Authenticator<BasicCredentials, ThirdEyePrincipal> {
+    Authenticator<BasicCredentials, ThirdEyeServerPrincipal> {
 
   private final BasicAuthConfiguration configuration;
 
@@ -32,12 +32,14 @@ public class ThirdEyeBasicAuthenticator implements
   }
 
   @Override
-  public Optional<ThirdEyePrincipal> authenticate(final BasicCredentials basicCredentials) {
+  public Optional<ThirdEyeServerPrincipal> authenticate(final BasicCredentials basicCredentials) {
     final UserCredentialConfiguration user = new UserCredentialConfiguration()
         .setUsername(basicCredentials.getUsername())
         .setPassword(basicCredentials.getPassword());
     if (configuration.getUsers().contains(user)) {
-      return Optional.of(new ThirdEyePrincipal(basicCredentials.getUsername(), "", AuthenticationType.BASIC_AUTH));
+      return Optional.of(new ThirdEyeServerPrincipal(basicCredentials.getUsername(),
+          "",
+          AuthenticationType.BASIC_AUTH));
     }
     return Optional.empty();
   }

@@ -16,8 +16,8 @@ package ai.startree.thirdeye.plugins.oauth;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.spi.auth.IThirdEyePrincipal;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthenticator;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -37,7 +37,7 @@ public class ThirdEyeOAuthThirdEyeAuthenticator implements ThirdEyeAuthenticator
 
   private final OidcJWTProcessor processor;
   private final OidcContext oidcContext;
-  private final LoadingCache<String, IThirdEyePrincipal> tokenPrincipalCache;
+  private final LoadingCache<String, ThirdEyePrincipal> tokenPrincipalCache;
 
   @Inject
   public ThirdEyeOAuthThirdEyeAuthenticator(final OidcJWTProcessor processor,
@@ -62,7 +62,7 @@ public class ThirdEyeOAuthThirdEyeAuthenticator implements ThirdEyeAuthenticator
   }
 
   @Override
-  public Optional<IThirdEyePrincipal> authenticate(final String authToken) {
+  public Optional<ThirdEyePrincipal> authenticate(final String authToken) {
     try {
       return optional(tokenPrincipalCache.get(authToken));
     } catch (final Exception exception) {
@@ -71,15 +71,15 @@ public class ThirdEyeOAuthThirdEyeAuthenticator implements ThirdEyeAuthenticator
     }
   }
 
-  CacheLoader<String, IThirdEyePrincipal> getCacheLoader() {
+  CacheLoader<String, ThirdEyePrincipal> getCacheLoader() {
     return new CacheLoader<>() {
 
       @Override
-      public ThirdEyePrincipal load(String authToken)
+      public ai.startree.thirdeye.plugins.oauth.ThirdEyePrincipal load(String authToken)
           throws Exception {
         final SignedJWT jwt = SignedJWT.parse(authToken);
         final JWTClaimsSet claims = processor.process(jwt, oidcContext);
-        return new ThirdEyePrincipal(getName(claims));
+        return new ai.startree.thirdeye.plugins.oauth.ThirdEyePrincipal(getName(claims));
       }
     };
   }

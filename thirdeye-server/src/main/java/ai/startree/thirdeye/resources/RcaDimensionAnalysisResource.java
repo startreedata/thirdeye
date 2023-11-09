@@ -15,7 +15,7 @@ package ai.startree.thirdeye.resources;
 
 import static ai.startree.thirdeye.core.ExceptionHandler.handleRcaAlgorithmException;
 
-import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.rca.RcaInfoFetcher;
 import ai.startree.thirdeye.service.RcaDimensionAnalysisService;
 import com.google.inject.Inject;
@@ -72,7 +72,7 @@ public class RcaDimensionAnalysisResource {
   @GET
   @Operation(summary = "Retrieve the likely root causes behind an anomaly")
   public Response dataCubeSummary(
-      @Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
+      @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
       @Parameter(description = "id of the anomaly") @QueryParam("id") long anomalyId,
       @Parameter(description = "baseline offset identifier in ISO 8601 format(e.g. \"P1W\").")
       @QueryParam("baselineOffset") @DefaultValue(DEFAULT_BASELINE_OFFSET) String baselineOffset,

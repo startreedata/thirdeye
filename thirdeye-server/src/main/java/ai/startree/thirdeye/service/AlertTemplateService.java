@@ -15,7 +15,7 @@
 package ai.startree.thirdeye.service;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
-import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.core.BootstrapResourcesRegistry;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
@@ -46,7 +46,7 @@ public class AlertTemplateService extends CrudService<AlertTemplateApi, AlertTem
   }
 
   @Override
-  protected AlertTemplateDTO createDto(final ThirdEyePrincipal principal,
+  protected AlertTemplateDTO createDto(final ThirdEyeServerPrincipal principal,
       final AlertTemplateApi api) {
     final AlertTemplateDTO alertTemplateDTO = ApiBeanMapper.toAlertTemplateDto(api);
     alertTemplateDTO.setCreatedBy(principal.getName());
@@ -63,7 +63,7 @@ public class AlertTemplateService extends CrudService<AlertTemplateApi, AlertTem
     return ApiBeanMapper.toAlertTemplateApi(dto);
   }
 
-  public List<AlertTemplateApi> loadRecommendedTemplates(final ThirdEyePrincipal principal,
+  public List<AlertTemplateApi> loadRecommendedTemplates(final ThirdEyeServerPrincipal principal,
       final boolean updateExisting) {
     LOG.info("Loading recommended templates: START.");
     final List<AlertTemplateApi> alertTemplates = bootstrapResourcesRegistry.getAlertTemplates();
@@ -76,7 +76,7 @@ public class AlertTemplateService extends CrudService<AlertTemplateApi, AlertTem
     return loadedTemplates;
   }
 
-  private List<AlertTemplateApi> loadTemplates(final ThirdEyePrincipal principal,
+  private List<AlertTemplateApi> loadTemplates(final ThirdEyeServerPrincipal principal,
       final List<AlertTemplateApi> alertTemplates, final boolean updateExisting) {
     final List<AlertTemplateApi> toCreateTemplates = new ArrayList<>();
     final List<AlertTemplateApi> toUpdateTemplates = new ArrayList<>();

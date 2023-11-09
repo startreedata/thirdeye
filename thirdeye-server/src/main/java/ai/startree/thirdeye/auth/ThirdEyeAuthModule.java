@@ -43,10 +43,10 @@ public class ThirdEyeAuthModule extends AbstractModule {
 
   @Singleton
   @Provides
-  public OAuthCredentialAuthFilter<ThirdEyePrincipal> getOAuthFilter(
+  public OAuthCredentialAuthFilter<ThirdEyeServerPrincipal> getOAuthFilter(
       final AuthRegistry authRegistry,
       final OAuthConfiguration oauthConfig) {
-    return new OAuthCredentialAuthFilter.Builder<ThirdEyePrincipal>()
+    return new OAuthCredentialAuthFilter.Builder<ThirdEyeServerPrincipal>()
         .setAuthenticator(authRegistry.createOAuthAuthenticator(oauthConfig))
         .setPrefix(AUTH_BEARER)
         .buildAuthFilter();
@@ -71,8 +71,8 @@ public class ThirdEyeAuthModule extends AbstractModule {
       final AuthConfiguration authConfig,
       @Nullable final BasicAuthConfiguration basicAuthConfig,
       @Nullable final OAuthConfiguration oauthConfig,
-      final Provider<BasicCredentialAuthFilter<ThirdEyePrincipal>> basicAuthFilter,
-      final Provider<OAuthCredentialAuthFilter<ThirdEyePrincipal>> oAuthFilter) {
+      final Provider<BasicCredentialAuthFilter<ThirdEyeServerPrincipal>> basicAuthFilter,
+      final Provider<OAuthCredentialAuthFilter<ThirdEyeServerPrincipal>> oAuthFilter) {
     final List<AuthFilter> filters = new ArrayList<>();
     if (authConfig.isEnabled()) {
       if (oauthConfig != null && oauthConfig.isEnabled()) {
@@ -88,9 +88,9 @@ public class ThirdEyeAuthModule extends AbstractModule {
     return new ChainedAuthFilter<>(filters);
   }
 
-  private OAuthCredentialAuthFilter<ThirdEyePrincipal> getNoAuthFilter() {
+  private OAuthCredentialAuthFilter<ThirdEyeServerPrincipal> getNoAuthFilter() {
     final ThirdEyeAuthenticatorDisabled authenticator = new ThirdEyeAuthenticatorDisabled();
-    return new OAuthCredentialAuthFilter.Builder<ThirdEyePrincipal>()
+    return new OAuthCredentialAuthFilter.Builder<ThirdEyeServerPrincipal>()
         .setAuthenticator(authenticator)
         .setPrefix(AUTH_BEARER)
         .buildAuthFilter();
@@ -98,9 +98,9 @@ public class ThirdEyeAuthModule extends AbstractModule {
 
   @Singleton
   @Provides
-  public BasicCredentialAuthFilter<ThirdEyePrincipal> getBasicAuthFilter(
+  public BasicCredentialAuthFilter<ThirdEyeServerPrincipal> getBasicAuthFilter(
       final ThirdEyeBasicAuthenticator authenticator) {
-    return new BasicCredentialAuthFilter.Builder<ThirdEyePrincipal>()
+    return new BasicCredentialAuthFilter.Builder<ThirdEyeServerPrincipal>()
         .setAuthenticator(authenticator)
         .setPrefix(AUTH_BASIC)
         .buildAuthFilter();

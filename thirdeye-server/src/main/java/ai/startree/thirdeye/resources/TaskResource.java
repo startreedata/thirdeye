@@ -15,7 +15,7 @@ package ai.startree.thirdeye.resources;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
-import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.service.TaskService;
 import ai.startree.thirdeye.spi.api.TaskApi;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
@@ -72,7 +72,7 @@ public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response createMultiple(
-      @Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,
+      @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
       final List<TaskApi> list) {
     throw new UnsupportedOperationException();
   }
@@ -84,7 +84,7 @@ public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response editMultiple(
-      @Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,
+      @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
       final List<TaskApi> list) {
     throw new UnsupportedOperationException();
   }
@@ -93,7 +93,7 @@ public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
   @Path("/purge")
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
-  public Response purge(@Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,
+  public Response purge(@Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
       @Parameter(description = "Older than (number of days)", example = N_DAYS_TO_DELETE) @QueryParam("olderThanInDays") Integer nDays,
       @Parameter(description = "Max Entries to delete", example = MAX_ENTRIES_TO_DELETE) @QueryParam("limit") Integer limitOptional
   ) {

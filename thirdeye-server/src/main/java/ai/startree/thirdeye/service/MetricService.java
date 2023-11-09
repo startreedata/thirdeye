@@ -20,7 +20,7 @@ import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
-import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.MetricApi;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
@@ -46,7 +46,8 @@ public class MetricService extends CrudService<MetricApi, MetricConfigDTO> {
   }
 
   @Override
-  protected MetricConfigDTO createDto(final ThirdEyePrincipal principal, final MetricApi api) {
+  protected MetricConfigDTO createDto(final ThirdEyeServerPrincipal principal,
+      final MetricApi api) {
     final MetricConfigDTO dto = toDto(api);
     dto.setCreatedBy(principal.getName());
 

@@ -39,7 +39,7 @@ public class BasicAuthenticatorTest {
 
     //valid user
     final BasicCredentials validUser = new BasicCredentials("user1", "password1");
-    assertThat(authenticator.authenticate(validUser)).containsInstanceOf(ThirdEyePrincipal.class);
+    assertThat(authenticator.authenticate(validUser)).containsInstanceOf(ThirdEyeServerPrincipal.class);
     assertThat(authenticator.authenticate(validUser).get().getName()).isEqualTo("user1");
 
     //invalid user

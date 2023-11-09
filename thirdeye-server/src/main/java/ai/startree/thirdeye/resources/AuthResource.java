@@ -16,7 +16,7 @@ package ai.startree.thirdeye.resources;
 import static ai.startree.thirdeye.spi.Constants.NO_AUTH_USER;
 import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 
-import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.spi.api.AuthApi;
 import ai.startree.thirdeye.spi.api.UserApi;
 import com.codahale.metrics.annotation.Timed;
@@ -46,7 +46,7 @@ import javax.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 public class AuthResource {
 
-  private static AuthApi authApi(final ThirdEyePrincipal thirdEyePrincipal) {
+  private static AuthApi authApi(final ThirdEyeServerPrincipal thirdEyePrincipal) {
     final String principal = thirdEyePrincipal.getName();
     return new AuthApi()
         .setUser(new UserApi()
@@ -57,14 +57,14 @@ public class AuthResource {
   @Timed
   @Path("/login")
   @POST
-  public Response login(@Parameter(hidden = true) @Auth ThirdEyePrincipal principal) {
+  public Response login(@Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal) {
     return respondOk(authApi(principal));
   }
 
   @Timed
   @Path("/logout")
   @POST
-  public Response logout(@Parameter(hidden = true) @Auth ThirdEyePrincipal principal) {
+  public Response logout(@Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal) {
     // TODO spyne to be implemented.
     return Response.ok().build();
   }

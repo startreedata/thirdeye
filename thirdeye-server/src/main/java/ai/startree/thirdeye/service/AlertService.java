@@ -27,7 +27,7 @@ import ai.startree.thirdeye.alert.AlertDeleter;
 import ai.startree.thirdeye.alert.AlertEvaluator;
 import ai.startree.thirdeye.alert.AlertInsightsProvider;
 import ai.startree.thirdeye.auth.AuthorizationManager;
-import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
@@ -89,7 +89,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
   }
 
   @Override
-  protected AlertDTO createDto(final ThirdEyePrincipal principal, final AlertApi api) {
+  protected AlertDTO createDto(final ThirdEyeServerPrincipal principal, final AlertApi api) {
     if (api.getCron() == null) {
       api.setCron(CRON_EVERY_HOUR);
     }
@@ -119,7 +119,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
   }
 
   @Override
-  protected void prepareUpdatedDto(final ThirdEyePrincipal principal,
+  protected void prepareUpdatedDto(final ThirdEyeServerPrincipal principal,
       final AlertDTO existing,
       final AlertDTO updated) {
     // prevent manual update of lastTimestamp
@@ -151,7 +151,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     return ApiBeanMapper.toApi(dto);
   }
 
-  public AlertInsightsApi getInsightsById(final ThirdEyePrincipal principal, final Long id) {
+  public AlertInsightsApi getInsightsById(final ThirdEyeServerPrincipal principal, final Long id) {
     final AlertDTO dto = getDto(id);
     authorizationManager.ensureHasAccess(principal, dto, AccessType.READ);
     return alertInsightsProvider.getInsights(dto);
@@ -163,7 +163,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
   }
 
   public void runTask(
-      final ThirdEyePrincipal principal,
+      final ThirdEyeServerPrincipal principal,
       final Long id,
       final Long startTime,
       final Long endTime
@@ -192,7 +192,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     return endTime;
   }
 
-  public void validateMultiple(final ThirdEyePrincipal principal, final List<AlertApi> list) {
+  public void validateMultiple(final ThirdEyeServerPrincipal principal, final List<AlertApi> list) {
     for (final AlertApi api : list) {
       final AlertDTO existing =
           api.getId() == null ? null : ensureExists(dtoManager.findById(api.getId()));
@@ -202,7 +202,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
   }
 
   public AlertEvaluationApi evaluate(
-      final ThirdEyePrincipal principal,
+      final ThirdEyeServerPrincipal principal,
       final AlertEvaluationApi request
   ) throws ExecutionException {
     final long safeEndTime = safeEndTime(request.getEnd().getTime());
@@ -225,7 +225,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
   }
 
   private Map<String, DetectionEvaluationApi> allowedEvaluations(
-      final ThirdEyePrincipal principal, final Map<String, DetectionEvaluationApi> gotEvals) {
+      final ThirdEyeServerPrincipal principal, final Map<String, DetectionEvaluationApi> gotEvals) {
     final Map<String, DetectionEvaluationApi> allowedEvals = new HashMap<>();
 
     // Assume entries without an enumeration item are allowed because the evaluation was executed.
@@ -245,7 +245,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
   }
 
   public AlertApi reset(
-      final ThirdEyePrincipal principal,
+      final ThirdEyeServerPrincipal principal,
       final Long id) {
     final AlertDTO dto = getDto(id);
     authorizationManager.ensureHasAccess(principal, dto, AccessType.WRITE);

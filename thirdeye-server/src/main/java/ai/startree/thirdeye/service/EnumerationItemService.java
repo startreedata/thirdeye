@@ -18,7 +18,7 @@ import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_OPERATION_UNSUPPORTED;
 import static ai.startree.thirdeye.util.ResourceUtils.badRequest;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
-import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.datalayer.core.EnumerationItemDeleter;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.EnumerationItemApi;
@@ -46,7 +46,7 @@ public class EnumerationItemService extends CrudService<EnumerationItemApi, Enum
   }
 
   @Override
-  protected EnumerationItemDTO createDto(final ThirdEyePrincipal principal,
+  protected EnumerationItemDTO createDto(final ThirdEyeServerPrincipal principal,
       final EnumerationItemApi api) {
     final EnumerationItemDTO dto = ApiBeanMapper.toEnumerationItemDTO(api);
     dto.setCreatedBy(principal.getName());

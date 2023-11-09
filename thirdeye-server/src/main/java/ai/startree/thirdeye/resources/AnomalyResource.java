@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.resources;
 
-import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.service.AnomalyService;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.AnomalyFeedbackApi;
@@ -63,7 +63,7 @@ public class AnomalyResource extends CrudResource<AnomalyApi, AnomalyDTO> {
   @POST
   @Timed
   public Response setFeedback(
-      @Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,
+      @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
       @PathParam("id") final Long id,
       final AnomalyFeedbackApi api) {
     anomalyService.setFeedback(principal, id, api);
@@ -78,7 +78,7 @@ public class AnomalyResource extends CrudResource<AnomalyApi, AnomalyDTO> {
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response getAnomalyStats(
-      @Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,
+      @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
       @QueryParam("startTime") final Long startTime,
       @QueryParam("endTime") final Long endTime
   ) {

@@ -27,7 +27,7 @@ public interface ThirdEyeAuthorizer {
    * @return true if the principal is authorized to access the resource with the given access type
    */
   boolean authorize(
-      IThirdEyePrincipal principal,
+      ThirdEyePrincipal principal,
       ResourceIdentifier identifier,
       AccessType accessType
   );

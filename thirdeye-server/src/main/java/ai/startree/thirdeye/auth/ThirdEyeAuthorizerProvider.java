@@ -16,9 +16,9 @@ package ai.startree.thirdeye.auth;
 import static com.google.common.base.Preconditions.checkState;
 
 import ai.startree.thirdeye.spi.auth.AccessType;
-import ai.startree.thirdeye.spi.auth.IThirdEyePrincipal;
 import ai.startree.thirdeye.spi.auth.ResourceIdentifier;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 
 /**
  * AccessControlProvider serves as a mutable layer between Guice bindings and the access control
@@ -27,13 +27,13 @@ import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
 public class ThirdEyeAuthorizerProvider implements ThirdEyeAuthorizer {
 
   public final static ThirdEyeAuthorizer ALWAYS_ALLOW = (
-      final IThirdEyePrincipal principal,
+      final ThirdEyePrincipal principal,
       final ResourceIdentifier identifiers,
       final AccessType accessType
   ) -> true;
 
   public final static ThirdEyeAuthorizer ALWAYS_DENY = (
-      final IThirdEyePrincipal principal,
+      final ThirdEyePrincipal principal,
       final ResourceIdentifier identifiers,
       final AccessType accessType
   ) -> false;
@@ -77,7 +77,7 @@ public class ThirdEyeAuthorizerProvider implements ThirdEyeAuthorizer {
   }
 
   @Override
-  public boolean authorize(final IThirdEyePrincipal principal, final ResourceIdentifier identifier,
+  public boolean authorize(final ThirdEyePrincipal principal, final ResourceIdentifier identifier,
       final AccessType accessType) {
     return getAccessControl().authorize(principal, identifier, accessType);
   }

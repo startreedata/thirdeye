@@ -63,14 +63,14 @@ public class AuthRegistry {
   }
 
   @SuppressWarnings("unchecked")
-  public Authenticator<String, ThirdEyePrincipal> createOAuthAuthenticator(
+  public Authenticator<String, ThirdEyeServerPrincipal> createOAuthAuthenticator(
       final OAuthConfiguration oauthConfig) {
     final Map<String, Object> oauthConfigMap = toMap(oauthConfig);
 
     final var authenticator = requireNonNull(getDefaultOAuthFactory().build(oauthConfigMap),
         "failed to build authenticator");
     return credentials -> authenticator.authenticate(credentials)
-        .map(p -> new ThirdEyePrincipal(p.getName(), credentials, AuthenticationType.OAUTH));
+        .map(p -> new ThirdEyeServerPrincipal(p.getName(), credentials, AuthenticationType.OAUTH));
   }
 
   public OpenIdConfigurationProvider createDefaultOpenIdConfigurationProvider(

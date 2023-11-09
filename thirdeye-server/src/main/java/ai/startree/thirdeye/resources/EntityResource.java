@@ -17,7 +17,7 @@ import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.ResourceUtils.serverError;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
-import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
@@ -70,7 +70,7 @@ public class EntityResource {
   @GET
   @Path("{id}")
   public Response getRawEntity(
-      @Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
+      @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
       @PathParam("id") Long id) {
     authorizationManager.ensureHasRootAccess(principal);
     return Response.ok(ensureExists(genericPojoDao.getRaw(id))).build();
@@ -78,7 +78,7 @@ public class EntityResource {
 
   @GET
   @Path("types")
-  public Response listEntities(@Parameter(hidden = true) @Auth ThirdEyePrincipal principal) {
+  public Response listEntities(@Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal) {
     authorizationManager.ensureHasRootAccess(principal);
     final Map<String, Long> entityCountMap = new TreeMap<>();
     final Set<Class<? extends AbstractDTO>> beanClasses = genericPojoDao.getAllBeanClasses();
@@ -92,7 +92,7 @@ public class EntityResource {
   @GET
   @Path("types/{bean_class}/info")
   public Response getEntityInfo(
-      @Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
+      @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
       @PathParam("bean_class") String beanClass) {
     authorizationManager.ensureHasRootAccess(principal);
     try {
@@ -107,7 +107,7 @@ public class EntityResource {
   @GET
   @Path("types/{bean_class}")
   public Response getEntity(
-      @Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
+      @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
       @PathParam("bean_class") String beanClassRef,
       @Context UriInfo uriInfo
   ) {

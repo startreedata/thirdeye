@@ -18,7 +18,7 @@ import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 import static ai.startree.thirdeye.util.ResourceUtils.statusResponse;
 
-import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.service.DataSourceService;
 import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.ThirdEyeStatus;
@@ -74,7 +74,7 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
   @GET
   @Path("/name/{name}/datasets")
   public Response getDatasets(
-      @Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
+      @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
       @PathParam("name") String name) {
     return respondOk(dataSourceService.getDatasets(name));
   }
@@ -85,7 +85,7 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response onboardDataset(
-      @Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
+      @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
       @FormParam("dataSourceName") String dataSourceName,
       @FormParam("datasetName") String datasetName) {
 
@@ -101,7 +101,7 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response onboardAll(
-      @Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
+      @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
       @FormParam("name") String name) {
 
     ensureExists(name, "name is a required field");
@@ -115,7 +115,7 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response offboardAll(
-      @Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
+      @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
       @FormParam("name") String name) {
     ensureExists(name, "name is a required field");
     return respondOk(dataSourceService.offboardAll(name));
@@ -126,7 +126,7 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response clearDataSourceCache(
-      @Parameter(hidden = true) @Auth ThirdEyePrincipal principal) {
+      @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal) {
     dataSourceService.clearDataSourceCache();
     return Response.ok().build();
   }
@@ -135,7 +135,7 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
   @Path("validate")
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
-  public Response validate(@Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
+  public Response validate(@Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
       @QueryParam("name") String name) {
     ensureExists(name, "name is a required field");
     try {

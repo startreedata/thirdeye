@@ -28,7 +28,7 @@ import static ai.startree.thirdeye.util.ResourceUtils.serverError;
 import ai.startree.thirdeye.DaoFilterBuilder;
 import ai.startree.thirdeye.RequestCache;
 import ai.startree.thirdeye.auth.AuthorizationManager;
-import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.spi.api.CountApi;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
 import ai.startree.thirdeye.spi.auth.AccessType;
@@ -69,7 +69,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
   }
 
   public ApiT get(
-      final ThirdEyePrincipal principal,
+      final ThirdEyeServerPrincipal principal,
       final Long id) {
     final DtoT dto = getDto(id);
     authorizationManager.ensureCanRead(principal, dto);
@@ -79,7 +79,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
   }
 
   public ApiT findByName(
-      final ThirdEyePrincipal principal,
+      final ThirdEyeServerPrincipal principal,
       final String name) {
     final RequestCache cache = createRequestCache();
     ensureExists(name, ERR_MISSING_NAME);
@@ -99,7 +99,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
   }
 
   public Stream<ApiT> list(
-      final ThirdEyePrincipal principal,
+      final ThirdEyeServerPrincipal principal,
       final MultivaluedMap<String, String> queryParameters
   ) {
     final List<DtoT> results = queryParameters.size() > 0
@@ -113,7 +113,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
   }
 
   @NonNull
-  public List<ApiT> createMultiple(final ThirdEyePrincipal principal,
+  public List<ApiT> createMultiple(final ThirdEyeServerPrincipal principal,
       final List<ApiT> list) {
     final RequestCache cache = createRequestCache();
     final var result = list.stream()
@@ -130,7 +130,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
   }
 
   @NonNull
-  public List<ApiT> editMultiple(final ThirdEyePrincipal principal,
+  public List<ApiT> editMultiple(final ThirdEyeServerPrincipal principal,
       final List<ApiT> list) {
     final RequestCache cache = createRequestCache();
     final var result = list.stream()
@@ -143,7 +143,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
     return result;
   }
 
-  private DtoT updateDto(final ThirdEyePrincipal principal, final ApiT api) {
+  private DtoT updateDto(final ThirdEyeServerPrincipal principal, final ApiT api) {
     final Long id = ensureExists(api.getId(), ERR_MISSING_ID);
     final DtoT existing = ensureExists(dtoManager.findById(id));
     validate(api, existing);
@@ -177,13 +177,13 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
    * @param updated the updated object (which is yet to be persisted)
    */
   protected void prepareUpdatedDto(
-      final ThirdEyePrincipal principal,
+      final ThirdEyeServerPrincipal principal,
       final DtoT existing,
       final DtoT updated) {
     // By default, do nothing.
   }
 
-  private DtoT updateGateKeeper(final ThirdEyePrincipal principal,
+  private DtoT updateGateKeeper(final ThirdEyeServerPrincipal principal,
       final DtoT existing,
       final DtoT updated) {
     updated.setCreatedBy(existing.getCreatedBy())
@@ -193,7 +193,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
     return updated;
   }
 
-  public ApiT delete(final ThirdEyePrincipal principal, final Long id) {
+  public ApiT delete(final ThirdEyeServerPrincipal principal, final Long id) {
     final DtoT dto = dtoManager.findById(id);
     if (dto != null) {
       authorizationManager.ensureCanDelete(principal, dto);
@@ -208,7 +208,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
     return null;
   }
 
-  public void deleteAll(final ThirdEyePrincipal principal) {
+  public void deleteAll(final ThirdEyeServerPrincipal principal) {
     dtoManager.findAll()
         .stream()
         .peek(dto -> authorizationManager.ensureCanDelete(principal, dto))
@@ -279,9 +279,9 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
     }
   }
 
-  protected abstract DtoT createDto(final ThirdEyePrincipal principal, final ApiT api);
+  protected abstract DtoT createDto(final ThirdEyeServerPrincipal principal, final ApiT api);
 
-  private DtoT createGateKeeper(final ThirdEyePrincipal principal, final DtoT dto) {
+  private DtoT createGateKeeper(final ThirdEyeServerPrincipal principal, final DtoT dto) {
     final Timestamp currentTime = new Timestamp(new Date().getTime());
     dto.setCreatedBy(principal.getName())
         .setCreateTime(currentTime)

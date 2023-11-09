@@ -14,15 +14,15 @@
 package ai.startree.thirdeye.auth;
 
 import ai.startree.thirdeye.spi.auth.AuthenticationType;
-import ai.startree.thirdeye.spi.auth.IThirdEyePrincipal;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 
-public class ThirdEyePrincipal implements IThirdEyePrincipal {
+public class ThirdEyeServerPrincipal implements ThirdEyePrincipal {
 
   private final String name;
   private final String authToken;
   private final AuthenticationType authenticationType;
 
-  public ThirdEyePrincipal(final String name,
+  public ThirdEyeServerPrincipal(final String name,
       final String authToken,
       final AuthenticationType authenticationType) {
     this.name = name;
@@ -30,9 +30,6 @@ public class ThirdEyePrincipal implements IThirdEyePrincipal {
     this.authenticationType = authenticationType;
   }
 
-  public static ThirdEyePrincipal thirdEyePrincipal(final String authToken) {
-    return new ThirdEyePrincipal("unknown", authToken, null);
-  }
   @Override
   public String getName() {
     return name;

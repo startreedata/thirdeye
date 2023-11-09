@@ -16,7 +16,7 @@ package ai.startree.thirdeye.resources;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 
-import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.service.AlertService;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
@@ -99,7 +99,8 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   @Deprecated(forRemoval = true)
-  public Response getInsights(@Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,
+  public Response getInsights(
+      @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
       @PathParam("id") final Long id) {
     return Response.ok(alertService.getInsightsById(principal, id)).build();
   }
@@ -108,7 +109,8 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @POST
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
-  public Response getInsights(@Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,
+  public Response getInsights(
+      @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
       final AlertInsightsRequestApi request) {
     final AlertApi alert = request.getAlert();
     ensureExists(alert);
@@ -120,7 +122,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Timed
   public Response runTask(
-      @Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,
+      @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
       @PathParam("id") final Long id,
       @FormParam("start") final Long startTime,
       @FormParam("end") final Long endTime
@@ -135,7 +137,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @Produces(MediaType.APPLICATION_JSON)
   // can be moved to CrudResource if /validate is needed for other entities.
   public Response validateMultiple(
-      @Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,
+      @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
       final List<AlertApi> list) {
     ensureExists(list, "Invalid request");
 
@@ -147,7 +149,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @POST
   @Timed
   public Response evaluate(
-      @Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,
+      @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
       @Schema(example = EVALUATE_SWAGGER_EXAMPLE) final AlertEvaluationApi request
   ) throws ExecutionException {
     ensureExists(request.getStart(), "start");
@@ -163,7 +165,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @Timed
   @Produces(MediaType.APPLICATION_JSON)
   public Response reset(
-      @Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,
+      @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
       @PathParam("id") final Long id) {
     return respondOk(alertService.reset(principal, id));
   }
@@ -173,7 +175,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @Path("{id}/stats")
   @Produces(MediaType.APPLICATION_JSON)
   public Response stats(
-      @Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,
+      @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
       @PathParam("id") final Long id,
       @QueryParam("enumerationItem.id") final Long enumerationId,
       @QueryParam("startTime") final Long startTime,

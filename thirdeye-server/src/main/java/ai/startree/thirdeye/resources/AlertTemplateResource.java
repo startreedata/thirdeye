@@ -15,7 +15,7 @@ package ai.startree.thirdeye.resources;
 
 import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 
-import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.service.AlertTemplateService;
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
@@ -63,7 +63,7 @@ public class AlertTemplateResource extends CrudResource<AlertTemplateApi, AlertT
   @Path("load-defaults")
   @Timed
   public Response loadRecommendedTemplates(
-      @Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,
+      @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
       @FormParam("updateExisting") final boolean updateExisting) {
 
     return respondOk(alertTemplateService.loadRecommendedTemplates(principal, updateExisting));

@@ -23,7 +23,7 @@ import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureNull;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
-import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
@@ -51,7 +51,7 @@ public class SubscriptionGroupService extends
   }
 
   @Override
-  protected SubscriptionGroupDTO createDto(final ThirdEyePrincipal principal,
+  protected SubscriptionGroupDTO createDto(final ThirdEyeServerPrincipal principal,
       final SubscriptionGroupApi api) {
     ensureNull(api.getId(), ERR_ID_UNEXPECTED_AT_CREATION);
     if (Strings.isNullOrEmpty(api.getCron())) {
@@ -81,7 +81,7 @@ public class SubscriptionGroupService extends
   }
 
   @Override
-  protected void prepareUpdatedDto(final ThirdEyePrincipal principal,
+  protected void prepareUpdatedDto(final ThirdEyeServerPrincipal principal,
       final SubscriptionGroupDTO existing,
       final SubscriptionGroupDTO updated) {
     // Always set a default cron if not present.

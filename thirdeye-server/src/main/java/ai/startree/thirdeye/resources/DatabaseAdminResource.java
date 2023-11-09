@@ -15,7 +15,7 @@ package ai.startree.thirdeye.resources;
 
 import static ai.startree.thirdeye.util.ResourceUtils.resultSetToMap;
 
-import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.datalayer.DatabaseAdministrator;
 import com.google.inject.Inject;
 import io.dropwizard.auth.Auth;
@@ -57,7 +57,8 @@ public class DatabaseAdminResource {
 
   @GET
   @Path("tables")
-  public Response getTables(@Parameter(hidden = true) @Auth ThirdEyePrincipal principal) throws Exception {
+  public Response getTables(@Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal)
+      throws Exception {
     return Response
         .ok(databaseAdministrator.getTables())
         .build();
@@ -66,7 +67,7 @@ public class DatabaseAdminResource {
   @GET
   @Path("execute-query")
   public Response executeQuery(
-      @Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
+      @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
       @QueryParam("sql") String sql
   ) throws Exception {
     return Response
@@ -76,14 +77,16 @@ public class DatabaseAdminResource {
 
   @POST
   @Path("create-all-tables")
-  public Response createAllTables(@Parameter(hidden = true) @Auth ThirdEyePrincipal principal) throws Exception {
+  public Response createAllTables(@Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal)
+      throws Exception {
     databaseAdministrator.createAllTables();
     return Response.ok().build();
   }
 
   @DELETE
   @Path("truncate-all-tables")
-  public Response deleteAllData(@Parameter(hidden = true) @Auth ThirdEyePrincipal principal) throws Exception {
+  public Response deleteAllData(@Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal)
+      throws Exception {
     log.warn("DELETING ALL DATABASE DATA!!! TRUNCATING TABLES!!!");
     databaseAdministrator.truncateTables();
     return Response.ok().build();
@@ -91,7 +94,8 @@ public class DatabaseAdminResource {
 
   @DELETE
   @Path("drop-all-tables")
-  public Response deleteAllTables(@Parameter(hidden = true) @Auth ThirdEyePrincipal principal) throws Exception {
+  public Response deleteAllTables(@Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal)
+      throws Exception {
     log.warn("DELETING ALL DATABASE TABLES!!! DROPPING TABLES!!!");
     databaseAdministrator.dropTables();
     return Response.ok().build();

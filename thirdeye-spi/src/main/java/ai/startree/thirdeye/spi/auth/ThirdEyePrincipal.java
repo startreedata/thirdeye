@@ -15,7 +15,7 @@ package ai.startree.thirdeye.spi.auth;
 
 import java.security.Principal;
 
-public interface IThirdEyePrincipal extends Principal {
+public interface ThirdEyePrincipal extends Principal {
 
   @Override
   String getName();

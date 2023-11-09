@@ -31,7 +31,7 @@ public interface ThirdEyeAuthenticator<CredentialsT> {
    * @throws ThirdEyeException thrown if there is an error authenticating the credentials
    *     typically using a {@link ThirdEyeStatus#ERR_UNAUTHENTICATED} status
    */
-  Optional<IThirdEyePrincipal> authenticate(CredentialsT credentials) throws ThirdEyeException;
+  Optional<ThirdEyePrincipal> authenticate(CredentialsT credentials) throws ThirdEyeException;
 
   interface OauthThirdEyeAuthenticatorFactory extends
       PluginServiceFactory<ThirdEyeAuthenticator<String>, Map> {

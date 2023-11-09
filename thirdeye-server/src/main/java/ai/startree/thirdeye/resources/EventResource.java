@@ -15,7 +15,7 @@ package ai.startree.thirdeye.resources;
 
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 
-import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.scheduler.events.HolidayEventsLoaderConfiguration;
 import ai.startree.thirdeye.service.EventService;
 import ai.startree.thirdeye.spi.ThirdEyeStatus;
@@ -73,7 +73,7 @@ public class EventResource extends CrudResource<EventApi, EventDTO> {
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Path("/holidays/load")
   public Response loadHolidays(
-      @Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
+      @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
       @FormParam("start_time") long startTime,
       @FormParam("end_time") long endTime
   ) {
@@ -88,7 +88,7 @@ public class EventResource extends CrudResource<EventApi, EventDTO> {
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Path("/create-from-anomaly")
   public Response loadHolidays(
-      @Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
+      @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
       @FormParam("anomalyId") long anomalyId
   ) {
     return Response.ok(eventService.loadHolidays(anomalyId)).build();

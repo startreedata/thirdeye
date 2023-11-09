@@ -15,7 +15,7 @@ package ai.startree.thirdeye.resources;
 
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 
-import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.rootcause.events.IntervalSimilarityScoring;
 import ai.startree.thirdeye.service.RcaRelatedService;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
@@ -67,7 +67,8 @@ public class RcaRelatedResource {
   @GET
   @Path("/events")
   @Operation(summary = "Returns calendar events related to the anomaly. Events are ordered by the scoring function.")
-  public Response getRelatedEvents(@Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
+  public Response getRelatedEvents(
+      @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
       @Parameter(description = "id of the anomaly") @NotNull @QueryParam("anomalyId") Long anomalyId,
       @Parameter(description = "Type of event.") @QueryParam("type") @Nullable String type,
       @Parameter(description = "Scoring function") @QueryParam("scoring") @DefaultValue(DEFAULT_SCORING) IntervalSimilarityScoring scoring,
@@ -84,7 +85,8 @@ public class RcaRelatedResource {
   @GET
   @Path("/events-analysis")
   @Operation(summary = "Returns calendar events related to the anomaly. Events are ordered by the scoring function.")
-  public Response getEventsAnalysis(@Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
+  public Response getEventsAnalysis(
+      @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
       @Parameter(description = "id of the anomaly") @NotNull @QueryParam("anomalyId") Long anomalyId,
       @Parameter(description = "Type of event.") @QueryParam("type") @Nullable String type,
       @Parameter(description = "Scoring function") @QueryParam("scoring") @DefaultValue(DEFAULT_SCORING) IntervalSimilarityScoring scoring,
@@ -101,7 +103,8 @@ public class RcaRelatedResource {
   @GET
   @Path("/anomalies")
   @Operation(summary = "Returns anomalies related to the anomaly. Anomalies are ordered by the scoring function.")
-  public Response getAnomaliesEvents(@Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
+  public Response getAnomaliesEvents(
+      @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
       @Parameter(description = "id of the anomaly") @NotNull @QueryParam("anomalyId") Long anomalyId,
       @Parameter(description = "Scoring function") @QueryParam("scoring") @DefaultValue(DEFAULT_SCORING) IntervalSimilarityScoring scoring,
       @Parameter(description = "Limit number of anomalies to return.") @QueryParam("limit") @DefaultValue(DEFAULT_LIMIT) int limit,
@@ -116,7 +119,8 @@ public class RcaRelatedResource {
   @GET
   @Path("/anomalies-analysis")
   @Operation(summary = "Returns anomalies related to the anomaly. Anomalies are ordered by the scoring function.")
-  public Response getAnomaliesAnalysis(@Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
+  public Response getAnomaliesAnalysis(
+      @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
       @Parameter(description = "id of the anomaly") @NotNull @QueryParam("anomalyId") Long anomalyId,
       @Parameter(description = "Scoring function") @QueryParam("scoring") @DefaultValue(DEFAULT_SCORING) IntervalSimilarityScoring scoring,
       @Parameter(description = "Limit number of anomalies to return.") @QueryParam("limit") @DefaultValue(DEFAULT_LIMIT) int limit,

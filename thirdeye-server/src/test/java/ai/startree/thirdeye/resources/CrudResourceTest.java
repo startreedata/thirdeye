@@ -23,16 +23,16 @@ import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.NamespaceResolver;
 import ai.startree.thirdeye.auth.ThirdEyeAuthorizerProvider;
-import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.datalayer.bao.AbstractManagerImpl;
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.service.CrudService;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
 import ai.startree.thirdeye.spi.auth.AccessType;
 import ai.startree.thirdeye.spi.auth.AuthenticationType;
-import ai.startree.thirdeye.spi.auth.IThirdEyePrincipal;
 import ai.startree.thirdeye.spi.auth.ResourceIdentifier;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.bao.AbstractManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import com.google.common.collect.ImmutableMap;
@@ -50,8 +50,8 @@ import org.testng.annotations.Test;
 
 public class CrudResourceTest {
 
-  static ThirdEyePrincipal nobody() {
-    return new ThirdEyePrincipal("nobody", "", AuthenticationType.OAUTH);
+  static ThirdEyeServerPrincipal nobody() {
+    return new ThirdEyeServerPrincipal("nobody", "", AuthenticationType.OAUTH);
   }
 
   @Test
@@ -66,7 +66,7 @@ public class CrudResourceTest {
         ThirdEyeAuthorizerProvider.ALWAYS_ALLOW);
 
     final List<String> emails = List.of("tester1@testing.com", "tester2@testing.com");
-    final ThirdEyePrincipal owner = getPrincipal(emails.get(0));
+    final ThirdEyeServerPrincipal owner = getPrincipal(emails.get(0));
     final DummyApi api = new DummyApi().setData("testData");
 
     final Timestamp before = new Timestamp(1671476530000L);
@@ -95,8 +95,8 @@ public class CrudResourceTest {
 
     final List<String> emails = List.of("tester1@testing.com", "tester2@testing.com");
     final Timestamp before = new Timestamp(1671476530000L);
-    final ThirdEyePrincipal owner = getPrincipal(emails.get(0));
-    final ThirdEyePrincipal updater = getPrincipal(emails.get(1));
+    final ThirdEyeServerPrincipal owner = getPrincipal(emails.get(0));
+    final ThirdEyeServerPrincipal updater = getPrincipal(emails.get(1));
 
     final DummyDto dbDto = new DummyDto().setData("testData");
     dbDto.setId(1L)
@@ -121,8 +121,8 @@ public class CrudResourceTest {
     assertThat(responseApi.getCreateTime().before(responseApi.getUpdateTime())).isTrue();
   }
 
-  private ThirdEyePrincipal getPrincipal(String name) {
-    return new ThirdEyePrincipal(name, "", AuthenticationType.OAUTH);
+  private ThirdEyeServerPrincipal getPrincipal(String name) {
+    return new ThirdEyeServerPrincipal(name, "", AuthenticationType.OAUTH);
   }
 
   @Test
@@ -158,7 +158,7 @@ public class CrudResourceTest {
     ));
 
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
-        (IThirdEyePrincipal p, ResourceIdentifier id, AccessType accessType) ->
+        (ThirdEyePrincipal p, ResourceIdentifier id, AccessType accessType) ->
             id.getName().equals("2"));
 
     try (Response resp = resource.list(nobody(), uriInfo)) {
@@ -212,7 +212,7 @@ public class CrudResourceTest {
     when(manager.findAll()).thenReturn(dtos);
 
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
-        (IThirdEyePrincipal p, ResourceIdentifier id, AccessType accessType) ->
+        (ThirdEyePrincipal p, ResourceIdentifier id, AccessType accessType) ->
             id.getName().equals("2"));
     resource.deleteAll(nobody());
   }
@@ -264,7 +264,7 @@ public class CrudResourceTest {
     when(manager.findById(3L)).thenReturn((DummyDto) new DummyDto().setId(3L));
 
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
-        (IThirdEyePrincipal p, ResourceIdentifier id, AccessType accessType)
+        (ThirdEyePrincipal p, ResourceIdentifier id, AccessType accessType)
             -> id.getName().equals("2"));
 
     resource.editMultiple(nobody(), Arrays.asList(
@@ -364,7 +364,7 @@ class DummyService extends CrudService<DummyApi, DummyDto> {
   }
 
   @Override
-  protected DummyDto createDto(final ThirdEyePrincipal principal, final DummyApi api) {
+  protected DummyDto createDto(final ThirdEyeServerPrincipal principal, final DummyApi api) {
     return mapper.toDto(api);
   }
 

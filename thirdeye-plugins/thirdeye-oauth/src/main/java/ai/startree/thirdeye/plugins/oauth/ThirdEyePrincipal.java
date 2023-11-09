@@ -14,9 +14,8 @@
 package ai.startree.thirdeye.plugins.oauth;
 
 import ai.startree.thirdeye.spi.auth.AuthenticationType;
-import ai.startree.thirdeye.spi.auth.IThirdEyePrincipal;
 
-public class ThirdEyePrincipal implements IThirdEyePrincipal {
+public class ThirdEyePrincipal implements ai.startree.thirdeye.spi.auth.ThirdEyePrincipal {
 
   private final String name;
 

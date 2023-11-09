@@ -17,7 +17,7 @@ package ai.startree.thirdeye.service;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
-import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.scheduler.events.HolidayEventsLoader;
 import ai.startree.thirdeye.spi.api.EventApi;
@@ -52,7 +52,7 @@ public class EventService extends CrudService<EventApi, EventDTO> {
   }
 
   @Override
-  protected EventDTO createDto(final ThirdEyePrincipal principal, final EventApi api) {
+  protected EventDTO createDto(final ThirdEyeServerPrincipal principal, final EventApi api) {
     return ApiBeanMapper.toEventDto(api);
   }
 

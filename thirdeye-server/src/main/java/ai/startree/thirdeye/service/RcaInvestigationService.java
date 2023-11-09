@@ -14,18 +14,16 @@
 
 package ai.startree.thirdeye.service;
 
-import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureNull;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
-import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
 import ai.startree.thirdeye.spi.api.RcaInvestigationApi;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.RcaInvestigationManager;
-import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
@@ -51,7 +49,7 @@ public class RcaInvestigationService extends CrudService<RcaInvestigationApi, Rc
   }
 
   @Override
-  protected RcaInvestigationDTO createDto(final ThirdEyePrincipal principal,
+  protected RcaInvestigationDTO createDto(final ThirdEyeServerPrincipal principal,
       final RcaInvestigationApi api) {
     final RcaInvestigationDTO rcaInvestigationDTO = toDto(api);
     rcaInvestigationDTO.setCreatedBy(principal.getName());

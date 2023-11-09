@@ -19,7 +19,7 @@ import static ai.startree.thirdeye.util.SecurityUtils.hmacSHA512;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.notification.NotificationPayloadBuilder;
 import ai.startree.thirdeye.notification.NotificationServiceRegistry;
 import ai.startree.thirdeye.notification.SubscriptionGroupFilter;
@@ -131,7 +131,7 @@ public class InternalResource {
   @Path("email/html")
   @Produces({MediaType.TEXT_HTML, MediaType.APPLICATION_JSON})
   public Response generateHtmlEmail(
-      @Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,
+      @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
       @QueryParam("subscriptionGroupId") final Long subscriptionGroupManagerById,
       @QueryParam("reset") final Boolean reset) {
     ensureExists(subscriptionGroupManagerById, "Query parameter required: alertId !");
@@ -161,13 +161,15 @@ public class InternalResource {
   @GET
   @Path("package-info")
   @JacksonFeatures(serializationEnable = {SerializationFeature.INDENT_OUTPUT})
-  public Response getPackageInfo(@Parameter(hidden = true) @Auth final ThirdEyePrincipal principal) {
+  public Response getPackageInfo(
+      @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal) {
     return Response.ok(PACKAGE).build();
   }
 
   @POST
   @Path("trigger/webhook")
-  public Response triggerWebhook(@Parameter(hidden = true) @Auth final ThirdEyePrincipal principal) {
+  public Response triggerWebhook(
+      @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal) {
     final ImmutableMap<String, Object> properties = ImmutableMap.of(
         "url", "http://localhost:8080/internal/webhook"
     );
@@ -183,7 +185,7 @@ public class InternalResource {
   @POST
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Path("notify")
-  public Response notify(@Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,
+  public Response notify(@Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
       @FormParam("subscriptionGroupId") final Long subscriptionGroupId,
       @QueryParam("reset") final Boolean reset) throws Exception {
     ensureExists(subscriptionGroupId, "Query parameter required: alertId !");
@@ -218,7 +220,8 @@ public class InternalResource {
 
   @GET
   @Path("worker/id")
-  public Response workerId(@Parameter(hidden = true) @Auth final ThirdEyePrincipal principal) {
+  public Response workerId(
+      @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal) {
     if (taskDriverConfiguration.isEnabled()) {
       return Response.ok(taskDriver.getWorkerId()).build();
     } else {
@@ -231,7 +234,7 @@ public class InternalResource {
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Timed
   public Response runTask(
-      @Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,
+      @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
       @FormParam("alertId") final Long alertId,
       @FormParam("start") Long startTime,
       @FormParam("end") Long endTime

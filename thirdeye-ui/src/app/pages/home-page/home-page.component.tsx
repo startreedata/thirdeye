@@ -12,13 +12,8 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import {
-    Box,
-    Grid,
-    Typography,
-    useMediaQuery,
-    useTheme,
-} from "@material-ui/core";
+import { Box, Grid, Tooltip, Typography } from "@material-ui/core";
+import InfoIconOutlined from "@material-ui/icons/InfoOutlined";
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { DateTime } from "luxon";
@@ -76,9 +71,7 @@ export const HomePage: FunctionComponent = () => {
     const { t } = useTranslation();
     const { showDialog } = useDialogProviderV1();
     const [searchParams, setSearchParams] = useSearchParams();
-    const theme = useTheme();
     const style = useHomePageStyles();
-    const screenWidthSmUp = useMediaQuery(theme.breakpoints.up("md"));
 
     const getAppAnalyticsQuery = useQuery<AppAnalytics, AxiosError>({
         queryKey: ["appAnalytics"],
@@ -180,9 +173,10 @@ export const HomePage: FunctionComponent = () => {
         <PageV1>
             <PageHeader
                 transparentBackground
+                actionsGridContainProps={{ xs: 12, sm: 12, md: 12, lg: 3 }}
                 customActions={
                     <PageHeaderActionsV1>
-                        <Box width={screenWidthSmUp ? 500 : "100%"}>
+                        <Box width="100%">
                             <EntitySearch
                                 alerts={getAlertsQuery.data || []}
                                 subscriptionGroups={
@@ -192,10 +186,41 @@ export const HomePage: FunctionComponent = () => {
                         </Box>
                     </PageHeaderActionsV1>
                 }
-                subtitle={t(
-                    "message.alerts-monitor-your-kpis-and-anomalies-help-you-to-find-outliers-in-the-kpis"
+                headerGridContainerProps={{
+                    xs: 12,
+                    sm: 12,
+                    md: true,
+                    lg: true,
+                }}
+                subtitle={
+                    <Grid container alignItems="center">
+                        <Grid item>
+                            {t("message.effortless-alert-configuration")}
+                        </Grid>
+                        <Grid item>
+                            <Tooltip
+                                arrow
+                                interactive
+                                placement="top"
+                                title={
+                                    <Typography variant="caption">
+                                        {t(
+                                            "message.experience-streamlined-monitoring"
+                                        )}
+                                    </Typography>
+                                }
+                            >
+                                <InfoIconOutlined
+                                    color="secondary"
+                                    fontSize="small"
+                                />
+                            </Tooltip>
+                        </Grid>
+                    </Grid>
+                }
+                title={t(
+                    "message.automated-metrics-monitoring-and-anomaly-detection"
                 )}
-                title={t("message.kpis-monitor-and-outliers")}
             />
             <PageContentsGridV1>
                 <Grid item sm={12} xs={12}>

@@ -50,6 +50,8 @@ export const PageHeader: FunctionComponent<PageHeaderProps> = ({
     customActions,
     subNavigation,
     subNavigationSelected,
+    headerGridContainerProps,
+    actionsGridContainProps,
 }) => {
     const {
         timeRangeDuration,
@@ -110,9 +112,9 @@ export const PageHeader: FunctionComponent<PageHeaderProps> = ({
 
                     <Grid item xs={12}>
                         <Grid container justifyContent="space-between">
-                            <Grid item>
+                            <Grid item {...(headerGridContainerProps || {})}>
                                 {title && (
-                                    <Typography noWrap variant="h4">
+                                    <Typography variant="h4">
                                         {title}
                                     </Typography>
                                 )}
@@ -124,7 +126,7 @@ export const PageHeader: FunctionComponent<PageHeaderProps> = ({
                                 )}
                             </Grid>
 
-                            <Grid item>
+                            <Grid item {...(actionsGridContainProps || {})}>
                                 {(showTimeRange || showCreateButton) && (
                                     <PageHeaderActionsV1>
                                         {/* Time range selector */}

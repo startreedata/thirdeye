@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { GridProps } from "@material-ui/core";
 import { ReactNode } from "react";
 import { Crumb } from "../breadcrumbs/breadcrumbs.interfaces";
 
@@ -26,6 +27,8 @@ export interface PageHeaderProps {
     customActions?: ReactNode;
     subNavigation?: SubNavigationConfiguration[];
     subNavigationSelected?: number;
+    headerGridContainerProps?: GridProps;
+    actionsGridContainProps?: GridProps;
 }
 
 export interface SubNavigationConfiguration extends Crumb {

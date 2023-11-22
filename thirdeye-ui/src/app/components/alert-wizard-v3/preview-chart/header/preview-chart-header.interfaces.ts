@@ -16,9 +16,10 @@ import { ActionStatus } from "../../../../rest/actions.interfaces";
 import { AlertInsight } from "../../../../rest/dto/alert.interfaces";
 
 export interface PreviewChartHeaderProps {
-    alertInsight: AlertInsight | null;
+    alertInsight: AlertInsight | undefined | null;
     getEvaluationStatus: ActionStatus;
 
+    disableReload?: boolean;
     onReloadClick: () => void;
     onStartEndChange: (start: number, end: number) => void;
     showConfigurationNotReflective?: boolean;

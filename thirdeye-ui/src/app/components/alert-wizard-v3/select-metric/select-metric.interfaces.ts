@@ -13,15 +13,24 @@
  * the License.
  */
 import { EditableAlert } from "../../../rest/dto/alert.interfaces";
+import { MetricAggFunction } from "../../../rest/dto/metric.interfaces";
+import { DatasetInfo } from "../../../utils/datasources/datasources.util";
 import { AvailableAlgorithmOption } from "../alert-type-selection/alert-type-selection.interfaces";
 
 export interface SelectMetricProps {
     alert: EditableAlert;
-    onAlertPropertyChange: (
-        contents: Partial<EditableAlert>,
-        isTotalReplace?: boolean
-    ) => void;
     algorithmOptionConfig: AvailableAlgorithmOption | undefined;
+
+    selectedTable: DatasetInfo | null;
+    selectedMetric: string | null;
+    selectedAggregationFunction: MetricAggFunction;
+    selectedGranularity: { label: string; value: string } | null;
+    onSelectionChange: (
+        table: DatasetInfo | null,
+        metric: string | null,
+        aggregationFunction: MetricAggFunction,
+        granularity: { label: string; value: string } | null
+    ) => void;
 }
 
 export interface AlgorithmOptionInputFieldConfig {

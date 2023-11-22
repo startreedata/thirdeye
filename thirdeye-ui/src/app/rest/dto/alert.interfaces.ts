@@ -130,6 +130,7 @@ export interface AlertInEvaluation extends EditableAlert {
     id?: number;
     template: {
         metadata: EvaluatedTemplateMetadata;
+        name: string;
     };
 }
 

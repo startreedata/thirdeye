@@ -25,6 +25,7 @@ import { PreviewChartHeaderProps } from "./preview-chart-header.interfaces";
 export const PreviewChartHeader: FunctionComponent<PreviewChartHeaderProps> = ({
     alertInsight,
     getEvaluationStatus,
+    disableReload,
     onReloadClick,
     onStartEndChange,
     showConfigurationNotReflective,
@@ -42,6 +43,7 @@ export const PreviewChartHeader: FunctionComponent<PreviewChartHeaderProps> = ({
                     <Grid item>
                         <Button
                             color="primary"
+                            disabled={disableReload}
                             variant="outlined"
                             onClick={onReloadClick}
                         >
@@ -49,13 +51,14 @@ export const PreviewChartHeader: FunctionComponent<PreviewChartHeaderProps> = ({
                             {t("label.reload-preview")}
                         </Button>
                     </Grid>
-                    {showConfigurationNotReflective && (
-                        <Grid item>
-                            <Alert severity="warning" variant="outlined">
-                                {t("message.chart-data-not-reflective")}
-                            </Alert>
-                        </Grid>
-                    )}
+                    {showConfigurationNotReflective &&
+                        getEvaluationStatus !== ActionStatus.Working && (
+                            <Grid item>
+                                <Alert severity="warning" variant="outlined">
+                                    {t("message.chart-data-not-reflective")}
+                                </Alert>
+                            </Grid>
+                        )}
                     <Grid item>
                         <TimeRangeButtonWithContext
                             hideQuickExtend

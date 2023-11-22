@@ -26,7 +26,6 @@
  * the License.
  */
 import i18n from "i18next";
-import { Dispatch, SetStateAction } from "react";
 import {
     AlertTemplate,
     MetadataProperty,
@@ -36,7 +35,6 @@ import {
     TemplatePropertiesObject,
 } from "../../../rest/dto/alert.interfaces";
 import { Dataset } from "../../../rest/dto/dataset.interfaces";
-import { MetricAggFunction } from "../../../rest/dto/metric.interfaces";
 import { DatasetInfo } from "../../../utils/datasources/datasources.util";
 import {
     AlgorithmOptionInputFieldConfig,
@@ -46,13 +44,15 @@ import {
 export function generateTemplateProperties(
     metric: string,
     dataset: Dataset,
-    aggregationFunction: string
+    aggregationFunction: string,
+    granularity: string
 ): TemplatePropertiesObject {
     const templateProperties: TemplatePropertiesObject = {
         dataSource: dataset.dataSource.name,
         dataset: dataset.name,
         aggregationColumn: metric,
         aggregationFunction: aggregationFunction,
+        monitoringGranularity: granularity,
     };
 
     templateProperties.timezone = dataset.timeColumn.timezone;
@@ -60,14 +60,11 @@ export function generateTemplateProperties(
     return templateProperties;
 }
 
-export function resetSelectedMetrics(
+export function determineDatasetInitialSelectionsFromServerData(
     datasetsInfo: DatasetInfo[],
-    alertConfiguration: EditableAlert,
-    setSelectedTable: Dispatch<SetStateAction<DatasetInfo | null>>,
-    setSelectedMetric: Dispatch<SetStateAction<string | null>>,
-    setSelectedAggregationFunction: Dispatch<SetStateAction<MetricAggFunction>>
-): void {
-    const newlySelectedDataset = datasetsInfo.find((candidate) => {
+    alertConfiguration: EditableAlert
+): [DatasetInfo | null, string | null] {
+    const matchingDataset = datasetsInfo.find((candidate) => {
         return (
             candidate.dataset.name ===
                 alertConfiguration.templateProperties?.dataset &&
@@ -76,23 +73,15 @@ export function resetSelectedMetrics(
         );
     });
 
-    setSelectedTable(newlySelectedDataset || null);
-
-    if (newlySelectedDataset) {
-        setSelectedMetric(
+    if (matchingDataset) {
+        return [
+            matchingDataset,
             (alertConfiguration.templateProperties
-                ?.aggregationColumn as string) || null
-        );
-    } else {
-        setSelectedMetric(null);
+                ?.aggregationColumn as string) || null,
+        ];
     }
 
-    if (alertConfiguration.templateProperties?.aggregationFunction) {
-        setSelectedAggregationFunction(
-            alertConfiguration.templateProperties
-                .aggregationFunction as MetricAggFunction
-        );
-    }
+    return [null, null];
 }
 
 const SUPPORTED_SIMPLE_MODE_PROPERTIES: {

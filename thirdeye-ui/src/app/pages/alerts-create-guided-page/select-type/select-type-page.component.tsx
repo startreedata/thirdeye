@@ -13,13 +13,7 @@
  * the License.
  */
 import { Box, Button, Grid, Typography } from "@material-ui/core";
-import {
-    default as React,
-    FunctionComponent,
-    useEffect,
-    useMemo,
-    useState,
-} from "react";
+import { default as React, FunctionComponent, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
     useNavigate,
@@ -33,18 +27,14 @@ import { filterOptionWithTemplateNames } from "../../../components/alert-wizard-
 import { NavigateAlertCreationFlowsDropdown } from "../../../components/alert-wizard-v3/navigate-alert-creation-flows-dropdown/navigate-alert-creation-flows-dropdown";
 import { NoDataIndicator } from "../../../components/no-data-indicator/no-data-indicator.component";
 import { EmptyStateSwitch } from "../../../components/page-states/empty-state-switch/empty-state-switch.component";
-import { LoadingErrorStateSwitch } from "../../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { WizardBottomBar } from "../../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import {
     PageContentsCardV1,
     PageContentsGridV1,
-    SkeletonV1,
 } from "../../../platform/components";
 import { createDefaultAlertTemplates } from "../../../rest/alert-templates/alert-templates.rest";
 import { AppRouteRelative } from "../../../utils/routes/routes.util";
 import { AlertCreatedGuidedPageOutletContext } from "../alerts-create-guided-page.interfaces";
-
-const SKELETON_HEIGHT = 300;
 
 export const SelectTypePage: FunctionComponent = () => {
     const [searchParams] = useSearchParams();
@@ -60,11 +50,9 @@ export const SelectTypePage: FunctionComponent = () => {
         alert,
         isMultiDimensionAlert,
 
+        getAlertRecommendation,
         alertRecommendations,
-        getAlertRecommendationIsLoading,
     } = useOutletContext<AlertCreatedGuidedPageOutletContext>();
-
-    const [isLoading, setIsLoading] = useState(getAlertRecommendationIsLoading);
 
     const firstRecommendedAlertTemplate = useMemo(() => {
         if (alertRecommendations && alertRecommendations.length > 0) {
@@ -74,19 +62,8 @@ export const SelectTypePage: FunctionComponent = () => {
         return undefined;
     }, [alertRecommendations]);
 
-    // At most wait 2 seconds for the alert recommendation api to complete
     useEffect(() => {
-        if (getAlertRecommendationIsLoading) {
-            const timer = setTimeout(() => {
-                setIsLoading(false);
-            }, 2000);
-
-            return () => clearTimeout(timer);
-        } else {
-            setIsLoading(false);
-
-            return () => null;
-        }
+        getAlertRecommendation(alert);
     }, []);
 
     useEffect(() => {
@@ -136,77 +113,47 @@ export const SelectTypePage: FunctionComponent = () => {
                 </Grid>
 
                 <Grid item xs={12}>
-                    <LoadingErrorStateSwitch
-                        isError={false}
-                        isLoading={isLoading}
-                        loadingState={
-                            <Grid container spacing={2}>
-                                {[...Array(4)].map((idx) => {
-                                    return (
-                                        <Grid
-                                            item
-                                            key={idx}
-                                            md={6}
-                                            sm={12}
-                                            xs={12}
-                                        >
-                                            <PageContentsCardV1>
-                                                <SkeletonV1
-                                                    height={SKELETON_HEIGHT}
-                                                    variant="rect"
-                                                />
-                                            </PageContentsCardV1>
-                                        </Grid>
-                                    );
-                                })}
-                            </Grid>
+                    <EmptyStateSwitch
+                        emptyState={
+                            <PageContentsCardV1>
+                                <Box padding={10}>
+                                    <NoDataIndicator>
+                                        <Box textAlign="center">
+                                            {t(
+                                                "message.in-order-to-continue-you-will-need-to-load"
+                                            )}
+                                        </Box>
+                                        <Box marginTop={2} textAlign="center">
+                                            <Button
+                                                color="primary"
+                                                onClick={
+                                                    handleCreateDefaultAlertTemplates
+                                                }
+                                            >
+                                                {t("label.load-defaults")}
+                                            </Button>
+                                        </Box>
+                                    </NoDataIndicator>
+                                </Box>
+                            </PageContentsCardV1>
+                        }
+                        isEmpty={
+                            filterOptionWithTemplateNames(
+                                alertTypeOptions,
+                                isMultiDimensionAlert
+                            ).length === 0
                         }
                     >
-                        <EmptyStateSwitch
-                            emptyState={
-                                <PageContentsCardV1>
-                                    <Box padding={10}>
-                                        <NoDataIndicator>
-                                            <Box textAlign="center">
-                                                {t(
-                                                    "message.in-order-to-continue-you-will-need-to-load"
-                                                )}
-                                            </Box>
-                                            <Box
-                                                marginTop={2}
-                                                textAlign="center"
-                                            >
-                                                <Button
-                                                    color="primary"
-                                                    onClick={
-                                                        handleCreateDefaultAlertTemplates
-                                                    }
-                                                >
-                                                    {t("label.load-defaults")}
-                                                </Button>
-                                            </Box>
-                                        </NoDataIndicator>
-                                    </Box>
-                                </PageContentsCardV1>
+                        <AlertTypeSelection
+                            alertTemplates={alertTemplates}
+                            isMultiDimensionAlert={isMultiDimensionAlert}
+                            recommendedAlertTemplate={
+                                firstRecommendedAlertTemplate
                             }
-                            isEmpty={
-                                filterOptionWithTemplateNames(
-                                    alertTypeOptions,
-                                    isMultiDimensionAlert
-                                ).length === 0
-                            }
-                        >
-                            <AlertTypeSelection
-                                alertTemplates={alertTemplates}
-                                isMultiDimensionAlert={isMultiDimensionAlert}
-                                recommendedAlertTemplate={
-                                    firstRecommendedAlertTemplate
-                                }
-                                selectedAlertTemplateName={alert.template?.name}
-                                onAlertPropertyChange={onAlertPropertyChange}
-                            />
-                        </EmptyStateSwitch>
-                    </LoadingErrorStateSwitch>
+                            selectedAlertTemplateName={alert.template?.name}
+                            onAlertPropertyChange={onAlertPropertyChange}
+                        />
+                    </EmptyStateSwitch>
                 </Grid>
             </PageContentsGridV1>
 

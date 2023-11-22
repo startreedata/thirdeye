@@ -13,6 +13,8 @@
  * the License.
  */
 import { Box, Divider, Grid, Typography } from "@material-ui/core";
+import { useQuery } from "@tanstack/react-query";
+import { isEqual } from "lodash";
 import {
     default as React,
     FunctionComponent,
@@ -21,12 +23,20 @@ import {
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import { useOutletContext, useSearchParams } from "react-router-dom";
+import {
+    useNavigate,
+    useOutletContext,
+    useSearchParams,
+} from "react-router-dom";
 import { createNewStartingAlert } from "../../../components/alert-wizard-v2/alert-template/alert-template.utils";
 import { NavigateAlertCreationFlowsDropdown } from "../../../components/alert-wizard-v3/navigate-alert-creation-flows-dropdown/navigate-alert-creation-flows-dropdown";
 import { ChartContent } from "../../../components/alert-wizard-v3/preview-chart/chart-content/chart-content.component";
 import { PreviewChartHeader } from "../../../components/alert-wizard-v3/preview-chart/header/preview-chart-header.component";
 import { SelectMetric } from "../../../components/alert-wizard-v3/select-metric/select-metric.component";
+import {
+    generateTemplateProperties,
+    GRANULARITY_OPTIONS,
+} from "../../../components/alert-wizard-v3/select-metric/select-metric.utils";
 import { NoDataIndicator } from "../../../components/no-data-indicator/no-data-indicator.component";
 import { LoadingErrorStateSwitch } from "../../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { TimeRangeQueryStringKey } from "../../../components/time-range/time-range-provider/time-range-provider.interfaces";
@@ -39,8 +49,11 @@ import {
 } from "../../../platform/components";
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { useGetEvaluation } from "../../../rest/alerts/alerts.actions";
+import { getAlertInsight } from "../../../rest/alerts/alerts.rest";
 import { EditableAlert } from "../../../rest/dto/alert.interfaces";
+import { MetricAggFunction } from "../../../rest/dto/metric.interfaces";
 import { createAlertEvaluation } from "../../../utils/alerts/alerts.util";
+import { DatasetInfo } from "../../../utils/datasources/datasources.util";
 import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
 import {
     AppRouteRelative,
@@ -62,6 +75,7 @@ const PROPERTIES_TO_COPY = [
 ];
 
 export const SetupMetricPage: FunctionComponent = () => {
+    const navigate = useNavigate();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
     const [searchParams, setSearchParams] = useSearchParams();
@@ -73,36 +87,18 @@ export const SetupMetricPage: FunctionComponent = () => {
         [searchParams]
     );
 
+    const [selectedTable, setSelectedTable] = useState<DatasetInfo | null>(
+        null
+    );
+    const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
+
     const {
         alert,
         onAlertPropertyChange,
         selectedAlgorithmOption,
         alertTemplates,
-        alertInsight,
-        getAlertInsight,
-        getAlertInsightStatus,
         isMultiDimensionAlert,
-
-        getAlertRecommendation,
     } = useOutletContext<AlertCreatedGuidedPageOutletContext>();
-
-    const {
-        evaluation,
-        getEvaluation,
-        errorMessages: getEvaluationRequestErrors,
-        status: getEvaluationStatus,
-    } = useGetEvaluation();
-
-    useEffect(() => {
-        notifyIfErrors(
-            getEvaluationStatus,
-            getEvaluationRequestErrors,
-            notify,
-            t("message.error-while-fetching", {
-                entity: t("label.chart-data"),
-            })
-        );
-    }, [getEvaluationStatus]);
 
     const alertTemplateForEvaluate = useMemo(() => {
         const alertTemplateToFind = isMultiDimensionAlert
@@ -118,6 +114,10 @@ export const SetupMetricPage: FunctionComponent = () => {
         useState<EditableAlert>(() => {
             const workingAlert = createNewStartingAlert();
 
+            workingAlert.template = {
+                name: alertTemplateForEvaluate?.name,
+            };
+
             PROPERTIES_TO_COPY.forEach((propKey) => {
                 if (alert.templateProperties[propKey]) {
                     workingAlert.templateProperties[propKey] =
@@ -125,84 +125,149 @@ export const SetupMetricPage: FunctionComponent = () => {
                 }
             });
 
-            if (workingAlert.template) {
-                workingAlert.template.name = alertTemplateForEvaluate?.name;
-            }
-
             workingAlert.templateProperties.min = 0;
             workingAlert.templateProperties.max = 0;
 
             return workingAlert;
         });
 
-    const shouldShowLoadButton = useMemo(() => {
-        const newAlert = createNewStartingAlert();
+    const { data: alertInsight } = useQuery({
+        queryKey: [
+            "alertInsight",
+            alertConfigForPreview.templateProperties?.dataset,
+        ],
+        queryFn: () => {
+            return getAlertInsight({ alert: alertConfigForPreview });
+        },
+        enabled:
+            createNewStartingAlert().templateProperties.dataset !==
+            alertConfigForPreview.templateProperties?.dataset,
+        refetchOnWindowFocus: false,
+    });
 
-        return (
-            newAlert.templateProperties.dataset !==
-                alertConfigForPreview.templateProperties.dataset &&
-            newAlert.templateProperties.aggregationColumn !==
-                alertConfigForPreview.templateProperties.aggregationColumn
+    const [selectedAggregationFunction, setSelectedAggregationFunction] =
+        useState<MetricAggFunction>(() => {
+            if (alert?.templateProperties?.aggregationFunction) {
+                return alert.templateProperties
+                    .aggregationFunction as MetricAggFunction;
+            }
+
+            return MetricAggFunction.SUM;
+        });
+
+    const [selectedGranularity, setSelectedGranularity] = useState<{
+        label: string;
+        value: string;
+    } | null>(() => {
+        let selected = null;
+
+        if (alert?.templateProperties?.monitoringGranularity) {
+            selected = GRANULARITY_OPTIONS.find(
+                (candidate) =>
+                    candidate.value ===
+                    alert?.templateProperties?.monitoringGranularity
+            );
+        }
+
+        return selected || GRANULARITY_OPTIONS[0];
+    });
+
+    const [alertUsedForEvaluation, setAlertUsedForEvaulation] =
+        useState<EditableAlert | null>(null);
+    const {
+        evaluation,
+        getEvaluation,
+        errorMessages: getEvaluationRequestErrors,
+        status: getEvaluationStatus,
+    } = useGetEvaluation();
+
+    const shouldShowConfigurationNotReflectiveMsg = useMemo(() => {
+        // If evaluation has not been fetch yet, don't show
+        if (!evaluation) {
+            return false;
+        }
+
+        return !isEqual(
+            alertUsedForEvaluation?.templateProperties,
+            alertConfigForPreview.templateProperties
         );
-    }, [alertConfigForPreview]);
+    }, [evaluation, alertConfigForPreview, alertUsedForEvaluation]);
 
-    const handleAlertPropertyChange = (
-        newConfiguration: Partial<EditableAlert>
-    ): void => {
-        onAlertPropertyChange(newConfiguration);
+    useEffect(() => {
+        notifyIfErrors(
+            getEvaluationStatus,
+            getEvaluationRequestErrors,
+            notify,
+            t("message.error-while-fetching", {
+                entity: t("label.chart-data"),
+            })
+        );
+    }, [getEvaluationStatus]);
+
+    const shouldShowLoadButton = useMemo(() => {
+        return !!selectedTable && !!selectedMetric;
+    }, [selectedTable, selectedMetric]);
+
+    // Update the preview config if selections change
+    useEffect(() => {
+        if (!selectedTable || !selectedMetric || !selectedGranularity) {
+            return;
+        }
 
         setAlertConfigForPreview((currentConfig) => {
             const copied = {
                 ...currentConfig,
+                template: {
+                    name: alertTemplateForEvaluate?.name,
+                },
             };
 
-            if (newConfiguration.templateProperties) {
-                copied.templateProperties = newConfiguration.templateProperties;
+            copied.templateProperties = {
+                ...copied.templateProperties,
+                ...generateTemplateProperties(
+                    selectedMetric,
+                    selectedTable?.dataset,
+                    selectedAggregationFunction,
+                    selectedGranularity.value
+                ),
+            };
 
-                copied.templateProperties.min = 0;
-                copied.templateProperties.max = 0;
-            }
-
-            getAlertRecommendation(copied);
+            copied.templateProperties.min = 0;
+            copied.templateProperties.max = 0;
 
             return copied;
         });
-    };
+    }, [
+        selectedTable,
+        selectedMetric,
+        selectedGranularity,
+        selectedAggregationFunction,
+        alertTemplateForEvaluate,
+    ]);
+
+    useEffect(() => {
+        let [start, end] = generateDateRangeMonthsFromNow(3);
+
+        if (alertInsight) {
+            start = alertInsight.defaultStartTime;
+            end = alertInsight.defaultEndTime;
+        }
+
+        searchParams.set(TimeRangeQueryStringKey.START_TIME, start.toString());
+        searchParams.set(TimeRangeQueryStringKey.END_TIME, end.toString());
+
+        setSearchParams(searchParams);
+    }, [alertInsight]);
 
     const fetchAlertEvaluation = (start: number, end: number): void => {
         const copiedAlert = { ...alertConfigForPreview };
         delete copiedAlert.id;
+        setAlertUsedForEvaulation(copiedAlert);
         getEvaluation(createAlertEvaluation(copiedAlert, start, end));
     };
 
     const handleReloadPreviewClick = (): void => {
-        if (
-            getAlertInsightStatus === ActionStatus.Initial ||
-            getAlertInsightStatus === ActionStatus.Error
-        ) {
-            getAlertInsight({ alert: alertConfigForPreview }).then(
-                (alertInsight) => {
-                    let [start, end] = generateDateRangeMonthsFromNow(3);
-
-                    if (alertInsight) {
-                        start = alertInsight.defaultStartTime;
-                        end = alertInsight.defaultEndTime;
-                    }
-
-                    fetchAlertEvaluation(start, end);
-                    searchParams.set(
-                        TimeRangeQueryStringKey.START_TIME,
-                        start.toString()
-                    );
-                    searchParams.set(
-                        TimeRangeQueryStringKey.END_TIME,
-                        end.toString()
-                    );
-
-                    setSearchParams(searchParams);
-                }
-            );
-        } else if ((!startTime || !endTime) && alertInsight) {
+        if ((!startTime || !endTime) && alertInsight) {
             // If start or end is missing and there exists an alert insight
             fetchAlertEvaluation(
                 alertInsight.defaultStartTime,
@@ -211,6 +276,39 @@ export const SetupMetricPage: FunctionComponent = () => {
         } else {
             fetchAlertEvaluation(startTime, endTime);
         }
+    };
+
+    const handleMetricDatasetSelectionChange = (
+        table: DatasetInfo | null,
+        metric: string | null,
+        aggregationFunction: MetricAggFunction,
+        granularity: { label: string; value: string } | null
+    ): void => {
+        setSelectedTable(table);
+        setSelectedMetric(metric);
+        setSelectedAggregationFunction(aggregationFunction);
+        setSelectedGranularity(granularity);
+    };
+
+    const handleNextClick = (): void => {
+        const url = `../${
+            AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE
+        }?${searchParams.toString()}`;
+
+        if (selectedMetric && selectedTable && selectedGranularity) {
+            onAlertPropertyChange({
+                templateProperties: {
+                    ...alert.templateProperties,
+                    ...generateTemplateProperties(
+                        selectedMetric,
+                        selectedTable?.dataset,
+                        selectedAggregationFunction,
+                        selectedGranularity.value
+                    ),
+                },
+            });
+        }
+        navigate(url);
     };
 
     return (
@@ -240,7 +338,15 @@ export const SetupMetricPage: FunctionComponent = () => {
                         <SelectMetric
                             alert={alert}
                             algorithmOptionConfig={selectedAlgorithmOption}
-                            onAlertPropertyChange={handleAlertPropertyChange}
+                            selectedAggregationFunction={
+                                selectedAggregationFunction
+                            }
+                            selectedGranularity={selectedGranularity}
+                            selectedMetric={selectedMetric}
+                            selectedTable={selectedTable}
+                            onSelectionChange={
+                                handleMetricDatasetSelectionChange
+                            }
                         />
 
                         <Grid item xs={12}>
@@ -252,7 +358,13 @@ export const SetupMetricPage: FunctionComponent = () => {
                         <Grid item xs={12}>
                             <PreviewChartHeader
                                 alertInsight={alertInsight}
+                                disableReload={
+                                    !selectedTable || !selectedMetric
+                                }
                                 getEvaluationStatus={getEvaluationStatus}
+                                showConfigurationNotReflective={
+                                    shouldShowConfigurationNotReflectiveMsg
+                                }
                                 onReloadClick={handleReloadPreviewClick}
                                 onStartEndChange={(newStart, newEnd) => {
                                     fetchAlertEvaluation(newStart, newEnd);
@@ -275,10 +387,7 @@ export const SetupMetricPage: FunctionComponent = () => {
                                     getEvaluationStatus === ActionStatus.Error
                                 }
                                 isLoading={
-                                    getEvaluationStatus ===
-                                        ActionStatus.Working ||
-                                    getAlertInsightStatus ===
-                                        ActionStatus.Working
+                                    getEvaluationStatus === ActionStatus.Working
                                 }
                                 loadingState={
                                     <Box paddingTop={1}>
@@ -315,9 +424,7 @@ export const SetupMetricPage: FunctionComponent = () => {
                         ? `../${AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_DIMENSION_EXPLORATION}`
                         : "../"
                 }
-                nextBtnLink={`../${
-                    AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE
-                }?${searchParams.toString()}`}
+                handleNextClick={handleNextClick}
                 nextButtonIsDisabled={!shouldShowLoadButton}
             />
         </>

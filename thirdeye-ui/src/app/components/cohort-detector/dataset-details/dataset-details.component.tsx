@@ -286,6 +286,7 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
                                         return;
                                     }
 
+                                    setSelectedDimensions([]);
                                     setSelectedMetric(null);
                                     setSelectedTable(selectedTableInfo);
                                     setShouldFetchInsight(true);

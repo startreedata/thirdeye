@@ -15,7 +15,7 @@
 import { Box, Divider, Grid, TextField, Typography } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
 import { toLower } from "lodash";
-import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { MetricAggFunction } from "../../../rest/dto/metric.interfaces";
@@ -29,46 +29,22 @@ import { InputSection } from "../../form-basics/input-section/input-section.comp
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { SelectMetricProps } from "./select-metric.interfaces";
 import {
-    generateTemplateProperties,
+    determineDatasetInitialSelectionsFromServerData,
     GRANULARITY_OPTIONS,
-    resetSelectedMetrics,
 } from "./select-metric.utils";
 
 export const SelectMetric: FunctionComponent<SelectMetricProps> = ({
-    onAlertPropertyChange,
     alert,
+    selectedTable,
+    selectedAggregationFunction,
+    selectedMetric,
+    selectedGranularity,
+    onSelectionChange,
 }) => {
     const classes = useAlertWizardV2Styles();
     const { t } = useTranslation();
 
     const [isPinotInfraLoading, setIsPinotInfraLoading] = useState(true);
-    const [selectedTable, setSelectedTable] = useState<DatasetInfo | null>(
-        null
-    );
-    const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
-    const [selectedAggregationFunction, setSelectedAggregationFunction] =
-        useState<MetricAggFunction>(() => {
-            if (alert?.templateProperties?.aggregationFunction) {
-                return alert.templateProperties
-                    .aggregationFunction as MetricAggFunction;
-            }
-
-            return MetricAggFunction.SUM;
-        });
-
-    const selectedGranularity = useMemo(() => {
-        let selected = undefined;
-
-        if (alert?.templateProperties?.monitoringGranularity) {
-            selected = GRANULARITY_OPTIONS.find(
-                (candidate) =>
-                    candidate.value ===
-                    alert?.templateProperties?.monitoringGranularity
-            );
-        }
-
-        return selected || GRANULARITY_OPTIONS[1];
-    }, [alert]);
 
     const {
         datasetsInfo,
@@ -85,12 +61,17 @@ export const SelectMetric: FunctionComponent<SelectMetricProps> = ({
             return;
         }
 
-        resetSelectedMetrics(
-            datasetsInfo,
-            alert,
-            setSelectedTable,
-            setSelectedMetric,
-            setSelectedAggregationFunction
+        const [selectedDatasetInfo, metric] =
+            determineDatasetInitialSelectionsFromServerData(
+                datasetsInfo,
+                alert
+            );
+
+        onSelectionChange(
+            selectedDatasetInfo,
+            metric,
+            selectedAggregationFunction,
+            selectedGranularity
         );
 
         setIsPinotInfraLoading(false);
@@ -104,48 +85,38 @@ export const SelectMetric: FunctionComponent<SelectMetricProps> = ({
 
         // If metric is * set the aggregation function to COUNT
         if (metric === STAR_COLUMN) {
-            setSelectedAggregationFunction(MetricAggFunction.COUNT);
             aggregationColumn = MetricAggFunction.COUNT;
         }
 
-        setSelectedMetric(metric);
-
-        onAlertPropertyChange({
-            templateProperties: {
-                ...alert.templateProperties,
-                ...generateTemplateProperties(
-                    metric,
-                    selectedTable.dataset,
-                    aggregationColumn
-                ),
-            },
-        });
+        onSelectionChange(
+            selectedTable,
+            metric,
+            aggregationColumn,
+            selectedGranularity
+        );
     };
 
     const handleAggregationFunctionSelect = (
         aggregationFunction: MetricAggFunction
     ): void => {
-        setSelectedAggregationFunction(
-            aggregationFunction as MetricAggFunction
+        onSelectionChange(
+            selectedTable,
+            selectedMetric,
+            aggregationFunction,
+            selectedGranularity
         );
-        onAlertPropertyChange({
-            templateProperties: {
-                ...alert.templateProperties,
-                aggregationFunction: aggregationFunction,
-            },
-        });
     };
 
     const handleGranularityChange = (
         _: unknown,
-        granularityOption: { value: string }
+        granularityOption: { label: string; value: string }
     ): void => {
-        onAlertPropertyChange({
-            templateProperties: {
-                ...alert.templateProperties,
-                monitoringGranularity: granularityOption.value,
-            },
-        });
+        onSelectionChange(
+            selectedTable,
+            selectedMetric,
+            selectedAggregationFunction,
+            granularityOption
+        );
     };
 
     return (
@@ -224,8 +195,12 @@ export const SelectMetric: FunctionComponent<SelectMetricProps> = ({
                                         return;
                                     }
 
-                                    setSelectedMetric(null);
-                                    setSelectedTable(selectedTableInfo);
+                                    onSelectionChange(
+                                        selectedTableInfo,
+                                        null,
+                                        selectedAggregationFunction,
+                                        selectedGranularity
+                                    );
                                 }}
                             />
                         }
@@ -318,7 +293,7 @@ export const SelectMetric: FunctionComponent<SelectMetricProps> = ({
                                         variant="outlined"
                                     />
                                 )}
-                                value={selectedAggregationFunction}
+                                value={selectedAggregationFunction || undefined}
                                 onChange={(_, aggregationFunction) => {
                                     aggregationFunction &&
                                         handleAggregationFunctionSelect(
@@ -361,7 +336,7 @@ export const SelectMetric: FunctionComponent<SelectMetricProps> = ({
                                         variant="outlined"
                                     />
                                 )}
-                                value={selectedGranularity}
+                                value={selectedGranularity || undefined}
                                 onChange={handleGranularityChange}
                             />
                         }

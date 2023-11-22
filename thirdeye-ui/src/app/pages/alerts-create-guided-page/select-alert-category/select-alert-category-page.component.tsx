@@ -53,8 +53,12 @@ export const SelectAlertCategoryPage: FunctionComponent<SelectAlertCategoryPageP
         const { t } = useTranslation();
         const { datasets, getDatasets } = useGetDatasets();
 
-        const { alertTemplates, setShouldShowStepper } =
-            useOutletContext<AlertCreatedGuidedPageOutletContext>();
+        const {
+            alertTemplates,
+            setShouldShowStepper,
+            alert,
+            onAlertPropertyChange,
+        } = useOutletContext<AlertCreatedGuidedPageOutletContext>();
 
         const [hasBasicAlertSamples, hasMultiDimensionSamples] = useMemo(() => {
             if (datasets === null || alertTemplates === null) {
@@ -106,6 +110,31 @@ export const SelectAlertCategoryPage: FunctionComponent<SelectAlertCategoryPageP
                 `${AppRouteRelative.WELCOME_CREATE_ALERT_SAMPLE_ALERT}?${QUERY_PARAM_KEY_FOR_SAMPLE_ALERT_FILTER}=${SAMPLE_ALERT_TYPES.MULTIDIMENSION}`,
             ];
         }, []);
+
+        const ensureCorrectTemplateIsUsed = (
+            isMultidimension: boolean
+        ): void => {
+            if (isMultidimension) {
+                if (
+                    alert.template?.name &&
+                    !alert.template?.name?.endsWith("-dx")
+                ) {
+                    onAlertPropertyChange({
+                        template: {
+                            name: alert.template?.name + "-dx",
+                        },
+                    });
+                }
+            } else {
+                if (alert.template?.name?.endsWith("-dx")) {
+                    onAlertPropertyChange({
+                        template: {
+                            name: alert.template?.name.replace("-dx", ""),
+                        },
+                    });
+                }
+            }
+        };
 
         return (
             <>
@@ -160,6 +189,11 @@ export const SelectAlertCategoryPage: FunctionComponent<SelectAlertCategoryPageP
                                                                 to={
                                                                     AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_METRIC
                                                                 }
+                                                                onClick={() => {
+                                                                    ensureCorrectTemplateIsUsed(
+                                                                        false
+                                                                    );
+                                                                }}
                                                             >
                                                                 {t(
                                                                     "label.create"
@@ -236,6 +270,11 @@ export const SelectAlertCategoryPage: FunctionComponent<SelectAlertCategoryPageP
                                                                 to={
                                                                     AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_DIMENSION_EXPLORATION
                                                                 }
+                                                                onClick={() => {
+                                                                    ensureCorrectTemplateIsUsed(
+                                                                        true
+                                                                    );
+                                                                }}
                                                             >
                                                                 {t(
                                                                     "label.create"

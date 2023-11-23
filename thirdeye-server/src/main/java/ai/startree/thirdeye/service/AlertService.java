@@ -164,9 +164,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
      * In this case the start and end timestamp is the same to ensure that we update the enumeration
      * items but we don't actually run the detection task.
      */
-    this.createDetectionTask(dto.getId(),
-        dto.getLastTimestamp(),
-        dto.getLastTimestamp());
+    createDetectionTask(dto.getId(), dto.getLastTimestamp(), dto.getLastTimestamp());
   }
 
   @Override
@@ -196,7 +194,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     ensureExists(startTime, "start");
     authorizationManager.ensureHasAccess(principal, dto, AccessType.WRITE);
 
-    this.createDetectionTask(id, startTime, safeEndTime(endTime));
+    createDetectionTask(id, startTime, safeEndTime(endTime));
   }
 
   private long safeEndTime(final @Nullable Long endTime) {

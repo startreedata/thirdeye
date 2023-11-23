@@ -78,7 +78,7 @@ public class SubscriptionGroupService extends
     return ApiBeanMapper.toApi(dto);
   }
 
-  public SubscriptionGroupApi reset(final ThirdEyeServerPrincipal principal, Long id) {
+  public SubscriptionGroupApi reset(Long id) {
     final SubscriptionGroupDTO sg = getDto(id);
     sg.setVectorClocks(null);
     dtoManager.save(sg);

@@ -65,6 +65,6 @@ public class SubscriptionGroupResource extends
   public Response reset(
       @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
       @PathParam("id") Long id) {
-    return Response.ok(subscriptionGroupService.reset(principal, id)).build();
+    return Response.ok(subscriptionGroupService.reset(id)).build();
   }
 }

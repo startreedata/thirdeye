@@ -58,6 +58,7 @@ export const SelectAlertCategoryPage: FunctionComponent<SelectAlertCategoryPageP
             setShouldShowStepper,
             alert,
             onAlertPropertyChange,
+            setIsMultiDimensionAlert,
         } = useOutletContext<AlertCreatedGuidedPageOutletContext>();
 
         const [hasBasicAlertSamples, hasMultiDimensionSamples] = useMemo(() => {
@@ -124,14 +125,24 @@ export const SelectAlertCategoryPage: FunctionComponent<SelectAlertCategoryPageP
                             name: alert.template?.name + "-dx",
                         },
                     });
+                    setIsMultiDimensionAlert(true);
                 }
             } else {
                 if (alert.template?.name?.endsWith("-dx")) {
+                    if (alert.templateProperties.queryFilters) {
+                        delete alert.templateProperties.queryFilters;
+                        delete alert.templateProperties.enumerationItems;
+                    }
+
                     onAlertPropertyChange({
                         template: {
                             name: alert.template?.name.replace("-dx", ""),
                         },
+                        templateProperties: {
+                            ...alert.templateProperties,
+                        },
                     });
+                    setIsMultiDimensionAlert(false);
                 }
             }
         };

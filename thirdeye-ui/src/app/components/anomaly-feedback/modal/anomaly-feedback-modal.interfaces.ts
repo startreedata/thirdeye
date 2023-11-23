@@ -20,6 +20,7 @@ export interface AnomalyFeedbackModalProps {
     anomalyFeedback?: AnomalyFeedback;
     trigger: (callback: () => void) => ReactNode;
     showNo?: boolean;
+    noOnly?: boolean;
     onFeedbackUpdate: (feedback: AnomalyFeedback) => void;
 }
 

@@ -13,9 +13,10 @@
  * the License.
  */
 
-import { Anomaly, AnomalyFeedback } from "../../../rest/dto/anomaly.interfaces";
+import { AnomalyFeedback } from "../../../rest/dto/anomaly.interfaces";
 
 export interface FeedbackCardProps {
-    anomaly: Anomaly;
+    feedback: AnomalyFeedback;
+    anomalyId: number;
     onFeedbackUpdate: (feedback: AnomalyFeedback) => void;
 }

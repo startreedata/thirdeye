@@ -24,27 +24,28 @@ import { AnomalyFeedbackModal } from "../../anomaly-feedback/modal/anomaly-feedb
 import { FeedbackCardProps } from "./feedback-card.interfaces";
 
 export const FeedbackCard: FunctionComponent<FeedbackCardProps> = ({
-    anomaly,
+    anomalyId,
+    feedback,
     onFeedbackUpdate,
 }) => {
     const { t } = useTranslation();
     const theme = useTheme();
 
     const lastUpdatedStr = useMemo(() => {
-        if (anomaly.feedback?.updated) {
-            return formatDateAndTimeV1(anomaly.feedback?.updated);
-        } else if (anomaly.feedback?.created) {
-            return formatDateAndTimeV1(anomaly.feedback?.created);
+        if (feedback?.updated) {
+            return formatDateAndTimeV1(feedback?.updated);
+        } else if (feedback?.created) {
+            return formatDateAndTimeV1(feedback?.created);
         }
 
         return null;
-    }, [anomaly]);
+    }, [feedback]);
 
     return (
         <Grid container alignItems="center" justifyContent="space-between">
             <Grid item>
                 {t("message.anomaly-confirmed-to-be-a")}
-                {anomaly.feedback?.type === AnomalyFeedbackType.NOT_ANOMALY ? (
+                {feedback?.type === AnomalyFeedbackType.NOT_ANOMALY ? (
                     <Typography color="error" component="span" variant="body2">
                         {t("message.false-positive")}
                     </Typography>
@@ -57,9 +58,9 @@ export const FeedbackCard: FunctionComponent<FeedbackCardProps> = ({
                         {t("message.true-anomaly")}
                     </Typography>
                 )}
-                {anomaly.feedback?.updatedBy &&
+                {feedback?.updatedBy &&
                     t("message.by", {
-                        name: anomaly.feedback.updatedBy.principal,
+                        name: feedback.updatedBy.principal,
                     })}
                 {lastUpdatedStr &&
                     t("message.on", { lastUpdatedStr: lastUpdatedStr })}
@@ -73,8 +74,8 @@ export const FeedbackCard: FunctionComponent<FeedbackCardProps> = ({
                     <Grid item>
                         <AnomalyFeedbackModal
                             showNo
-                            anomalyFeedback={anomaly.feedback}
-                            anomalyId={anomaly.id}
+                            anomalyFeedback={feedback}
+                            anomalyId={anomalyId}
                             trigger={(openCallback) => {
                                 return (
                                     <Button
@@ -98,7 +99,7 @@ export const FeedbackCard: FunctionComponent<FeedbackCardProps> = ({
                             component={RouterLink}
                             size="medium"
                             to={`${getRootCauseAnalysisForAnomalyInvestigateV2Path(
-                                anomaly.id
+                                anomalyId
                             )}`}
                             variant="contained"
                         >

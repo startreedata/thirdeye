@@ -251,7 +251,8 @@ export const AnomaliesViewInformationPage: FunctionComponent = () => {
                                 <Grid container>
                                     <Grid item xs={12}>
                                         <FeedbackCard
-                                            anomaly={anomaly}
+                                            anomalyId={anomaly.id}
+                                            feedback={feedback}
                                             onFeedbackUpdate={
                                                 handleFeedbackChange
                                             }

@@ -27,6 +27,7 @@ import {
     Typography,
 } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
+import i18n from "i18next";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -53,7 +54,14 @@ import {
 import { REASONS } from "./anomaly-feedback-modal.utils";
 
 export const AnomalyFeedbackModal: FunctionComponent<AnomalyFeedbackModalProps> =
-    ({ anomalyId, anomalyFeedback, trigger, showNo, onFeedbackUpdate }) => {
+    ({
+        anomalyId,
+        anomalyFeedback,
+        trigger,
+        showNo,
+        noOnly,
+        onFeedbackUpdate,
+    }) => {
         const { t } = useTranslation();
         const [isOpen, setIsOpen] = useState(false);
         const { notify } = useNotificationProviderV1();
@@ -65,6 +73,8 @@ export const AnomalyFeedbackModal: FunctionComponent<AnomalyFeedbackModalProps> 
             useState<AnomalyFeedbackType>(() => {
                 if (anomalyFeedback) {
                     return anomalyFeedback.type;
+                } else if (noOnly) {
+                    return AnomalyFeedbackType.NOT_ANOMALY;
                 }
 
                 return AnomalyFeedbackType.ANOMALY.valueOf() as AnomalyFeedbackType;
@@ -165,7 +175,13 @@ export const AnomalyFeedbackModal: FunctionComponent<AnomalyFeedbackModalProps> 
             });
         };
 
-        const descriptionListToUse = showNo
+        const descriptionListToUse = noOnly
+            ? {
+                  [AnomalyFeedbackType.NOT_ANOMALY.valueOf()]: i18n.t(
+                      "message.no-this-is-an-anomaly"
+                  ),
+              }
+            : showNo
             ? ALL_OPTIONS_TO_DESCRIPTIONS
             : ANOMALY_OPTIONS_TO_DESCRIPTIONS;
 

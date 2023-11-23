@@ -635,6 +635,7 @@ public class HappyPathTest {
   private static AlertApi newRunnableAlertApiWithAuth(final String name, final String namespace) {
     return new AlertApi()
         .setName(name)
+        .setCron("0 0 * * * ? *")
         .setTemplate(new AlertTemplateApi().setName("startree-threshold"))
         .setAuth(new AuthorizationConfigurationApi().setNamespace(namespace))
         .setTemplateProperties(Map.of(

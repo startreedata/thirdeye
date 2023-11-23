@@ -18,16 +18,18 @@ import static ai.startree.thirdeye.alert.AlertInsightsProvider.currentMaximumPos
 import static ai.startree.thirdeye.mapper.ApiBeanMapper.toEnumerationItemDTO;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_CRON_INVALID;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DUPLICATE_NAME;
+import static ai.startree.thirdeye.spi.task.TaskType.DETECTION;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Collections.singleton;
 
-import ai.startree.thirdeye.alert.AlertCreater;
-import ai.startree.thirdeye.alert.AlertDeleter;
 import ai.startree.thirdeye.alert.AlertEvaluator;
 import ai.startree.thirdeye.alert.AlertInsightsProvider;
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
+import ai.startree.thirdeye.config.TimeConfiguration;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
@@ -37,18 +39,33 @@ import ai.startree.thirdeye.spi.api.AnomalyStatsApi;
 import ai.startree.thirdeye.spi.api.DetectionEvaluationApi;
 import ai.startree.thirdeye.spi.api.UserApi;
 import ai.startree.thirdeye.spi.auth.AccessType;
+import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
+import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
+import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
+import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
+import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.DetectionPipelineTaskInfo;
+import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
+import javax.ws.rs.WebApplicationException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.quartz.CronExpression;
 import org.slf4j.Logger;
@@ -59,43 +76,55 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
 
   private static final Logger LOG = LoggerFactory.getLogger(AlertService.class);
 
-  private static final String CRON_EVERY_HOUR = "0 0 * * * ? *";
-
-  private final AlertCreater alertCreater;
-  private final AlertDeleter alertDeleter;
+  private final TaskManager taskManager;
+  private final AnomalyManager anomalyManager;
   private final AlertEvaluator alertEvaluator;
   private final AppAnalyticsService analyticsService;
   private final AlertInsightsProvider alertInsightsProvider;
+  private final SubscriptionGroupManager subscriptionGroupManager;
+  private final EnumerationItemManager enumerationItemManager;
+
+  private final long minimumOnboardingStartTime;
 
   @Inject
-  public AlertService(final AlertCreater alertCreater,
-      final AlertDeleter alertDeleter,
-      final AlertEvaluator alertEvaluator,
+  public AlertService(
       final AlertManager alertManager,
+      final AnomalyManager anomalyManager,
+      final AlertEvaluator alertEvaluator,
       final AppAnalyticsService analyticsService,
       final AlertInsightsProvider alertInsightsProvider,
+      final SubscriptionGroupManager subscriptionGroupManager,
+      final EnumerationItemManager enumerationItemManager,
+      final TaskManager taskManager,
+      final TimeConfiguration timeConfiguration,
       final AuthorizationManager authorizationManager) {
     super(authorizationManager, alertManager, ImmutableMap.of());
-    this.alertCreater = alertCreater;
-    this.alertDeleter = alertDeleter;
     this.alertEvaluator = alertEvaluator;
     this.analyticsService = analyticsService;
     this.alertInsightsProvider = alertInsightsProvider;
+    this.anomalyManager = anomalyManager;
+    this.subscriptionGroupManager = subscriptionGroupManager;
+    this.enumerationItemManager = enumerationItemManager;
+    this.taskManager = taskManager;
+    this.minimumOnboardingStartTime = timeConfiguration.getMinimumOnboardingStartTime();
   }
 
   @Override
   protected void deleteDto(final AlertDTO dto) {
-    alertDeleter.delete(dto);
+    final Long alertId = dto.getId();
+
+    disassociateFromSubscriptionGroups(alertId);
+    deleteAssociatedAnomalies(alertId);
+    deleteAssociatedEnumerationItems(alertId);
+
+    dtoManager.delete(dto);
   }
 
   @Override
   protected AlertDTO createDto(final ThirdEyeServerPrincipal principal, final AlertApi api) {
-    if (api.getCron() == null) {
-      api.setCron(CRON_EVERY_HOUR);
-    }
-
     // TODO spyne: Slight bug here. Alert is saved twice! once here and once in CrudResource
-    return alertCreater.create(api
+    // FIXME CYRIL - biggest problem is the first creation does not go through access control
+    return this.create(api
         .setOwner(new UserApi().setPrincipal(principal.getName()))
     );
   }
@@ -108,10 +137,9 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
   @Override
   protected void validate(final AlertApi api, final AlertDTO existing) {
     super.validate(api, existing);
-    ensureExists(api.getName(), "Name must be present");
-    optional(api.getCron()).ifPresent(cron ->
-        ensure(CronExpression.isValidExpression(cron), ERR_CRON_INVALID, api.getCron()));
-
+    ensureExists(api.getName(), "name value must be set.");
+    ensureExists(api.getCron(), "cron value must be set.");
+    ensure(CronExpression.isValidExpression(api.getCron()), ERR_CRON_INVALID, api.getCron());
     /* new entity creation or name change in existing entity */
     if (existing == null || !existing.getName().equals(api.getName())) {
       ensure(dtoManager.findByName(api.getName()).size() == 0, ERR_DUPLICATE_NAME, api.getName());
@@ -124,11 +152,6 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
       final AlertDTO updated) {
     // prevent manual update of lastTimestamp
     updated.setLastTimestamp(existing.getLastTimestamp());
-
-    // Always set a default cron if not present.
-    if (updated.getCron() == null) {
-      updated.setCron(CRON_EVERY_HOUR);
-    }
   }
 
   @Override
@@ -141,7 +164,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
      * In this case the start and end timestamp is the same to ensure that we update the enumeration
      * items but we don't actually run the detection task.
      */
-    alertCreater.createDetectionTask(dto.getId(),
+    this.createDetectionTask(dto.getId(),
         dto.getLastTimestamp(),
         dto.getLastTimestamp());
   }
@@ -173,7 +196,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     ensureExists(startTime, "start");
     authorizationManager.ensureHasAccess(principal, dto, AccessType.WRITE);
 
-    alertCreater.createDetectionTask(id, startTime, safeEndTime(endTime));
+    this.createDetectionTask(id, startTime, safeEndTime(endTime));
   }
 
   private long safeEndTime(final @Nullable Long endTime) {
@@ -257,8 +280,8 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
      * with subscription groups. This is taken care automatically after the reset when the pipeline
      * is executed and the enumerator operator cleans the existing enumeration items
      */
-    alertDeleter.deleteAssociatedAnomalies(dto.getId());
-    final AlertDTO resetAlert = alertCreater.reset(dto);
+    this.deleteAssociatedAnomalies(dto.getId());
+    final AlertDTO resetAlert = this.softReset(dto);
 
     return toApi(resetAlert);
   }
@@ -282,5 +305,113 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
 
     return analyticsService.computeAnomalyStats(
         Predicate.AND(predicates.toArray(Predicate[]::new)));
+  }
+
+  private void deleteAssociatedAnomalies(final Long alertId) {
+    final List<AnomalyDTO> anomalies = anomalyManager.findByPredicate(
+        Predicate.EQ("detectionConfigId", alertId));
+    anomalies.forEach(anomalyManager::delete);
+  }
+
+  @SuppressWarnings("unchecked")
+  private void disassociateFromSubscriptionGroups(final Long alertId) {
+    final List<SubscriptionGroupDTO> allSubscriptionGroups = subscriptionGroupManager.findAll();
+
+    final Set<SubscriptionGroupDTO> updated = new HashSet<>();
+    for (final SubscriptionGroupDTO sg : allSubscriptionGroups) {
+      final List<Long> alertIds = (List<Long>) sg.getProperties().get("detectionConfigIds");
+      if (alertIds.contains(alertId)) {
+        alertIds.removeAll(singleton(alertId));
+        updated.add(sg);
+      }
+      optional(sg.getAlertAssociations())
+          .map(aas -> aas.removeIf(aa -> alertId.equals(aa.getAlert().getId())))
+          .filter(b -> b)
+          .ifPresent(b -> updated.add(sg));
+    }
+    subscriptionGroupManager.update(new ArrayList<>(updated));
+  }
+
+  private void deleteAssociatedEnumerationItems(final Long alertId) {
+    final List<Long> ids = enumerationItemManager.filter(new DaoFilter()
+            .setPredicate(Predicate.EQ("alertId", alertId)))
+        .stream()
+        .map(AbstractDTO::getId)
+        .collect(Collectors.toList());
+    enumerationItemManager.deleteByIds(ids);
+  }
+
+  /**
+   * Create a new alert. Basic validations should be done before calling this method.
+   *
+   * @param api the alert api
+   * @return the created alert
+   */
+  private AlertDTO create(AlertApi api) {
+    final AlertDTO dto = ApiBeanMapper.toAlertDto(api);
+    final AlertDTO savedAlert = saveAlert(dto);
+
+    createDetectionTask(savedAlert.getId(), dto.getLastTimestamp(), System.currentTimeMillis());
+
+    return dto;
+  }
+
+  /**
+   * soft reset - does not delete related entities
+   */
+  private AlertDTO softReset(AlertDTO dto) {
+    // reset lastTimestamp
+    dto.setLastTimestamp(0);
+    final AlertDTO savedAlert = saveAlert(dto);
+
+    createDetectionTask(savedAlert.getId(), dto.getLastTimestamp(), System.currentTimeMillis());
+
+    return dto;
+  }
+
+  private AlertDTO saveAlert(final AlertDTO dto) {
+    if (dto.getLastTimestamp() < minimumOnboardingStartTime) {
+      dto.setLastTimestamp(minimumLastTimestamp(dto));
+    }
+    dtoManager.save(dto);
+    return dto;
+  }
+
+  private long minimumLastTimestamp(final AlertDTO dto) {
+    try {
+      final AlertInsightsApi insights = alertInsightsProvider.getInsights(dto);
+      final Long datasetStartTime = insights.getDatasetStartTime();
+      if (datasetStartTime < minimumOnboardingStartTime) {
+        LOG.warn(
+            "Dataset start time {} is smaller than the minimum onboarding time allowed {}. Using the minimum time allowed.",
+            datasetStartTime, minimumOnboardingStartTime);
+        return minimumOnboardingStartTime;
+      }
+      return datasetStartTime;
+    } catch (final WebApplicationException e) {
+      throw e;
+    } catch (Exception e) {
+      // replay from JAN 1 2000 because replaying from 1970 is too slow with small granularity
+      LOG.error("Could not fetch insights for alert {}. Using the minimum time allowed. {}",
+          dto,
+          minimumOnboardingStartTime);
+      return minimumOnboardingStartTime;
+    }
+  }
+
+  private void createDetectionTask(final Long alertId, final long start, final long end) {
+    checkArgument(alertId != null && alertId >= 0);
+    checkArgument(start <= end);
+    final DetectionPipelineTaskInfo info = new DetectionPipelineTaskInfo(alertId, start,
+        end);
+
+    try {
+      final TaskDTO t = taskManager.createTaskDto(alertId, info, DETECTION);
+      LOG.info("Created {} task {} with settings {}", DETECTION, t.getId(), t);
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(String.format("Error while serializing %s: %s",
+          DetectionPipelineTaskInfo.class.getSimpleName(),
+          info), e);
+    }
   }
 }

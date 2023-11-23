@@ -36,14 +36,11 @@ import org.quartz.CronExpression;
 public class SubscriptionGroupService extends
     CrudService<SubscriptionGroupApi, SubscriptionGroupDTO> {
 
-  private final SubscriptionGroupManager subscriptionGroupManager;
-
   @Inject
   public SubscriptionGroupService(
       final SubscriptionGroupManager subscriptionGroupManager,
       final AuthorizationManager authorizationManager) {
     super(authorizationManager, subscriptionGroupManager, ImmutableMap.of());
-    this.subscriptionGroupManager = subscriptionGroupManager;
   }
 
   @Override
@@ -81,10 +78,10 @@ public class SubscriptionGroupService extends
     return ApiBeanMapper.toApi(dto);
   }
 
-  public SubscriptionGroupApi reset(Long id) {
+  public SubscriptionGroupApi reset(final ThirdEyeServerPrincipal principal, Long id) {
     final SubscriptionGroupDTO sg = getDto(id);
     sg.setVectorClocks(null);
-    subscriptionGroupManager.save(sg);
+    dtoManager.save(sg);
 
     return toApi(sg);
   }

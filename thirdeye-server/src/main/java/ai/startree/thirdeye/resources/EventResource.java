@@ -87,10 +87,10 @@ public class EventResource extends CrudResource<EventApi, EventDTO> {
   @POST
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Path("/create-from-anomaly")
-  public Response loadHolidays(
+  public Response createFromAnomaly(
       @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
       @FormParam("anomalyId") long anomalyId
   ) {
-    return Response.ok(eventService.loadHolidays(anomalyId)).build();
+    return Response.ok(eventService.createFromAnomaly(anomalyId)).build();
   }
 }

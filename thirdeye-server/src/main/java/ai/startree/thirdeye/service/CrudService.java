@@ -78,6 +78,16 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
     return toApi(dto, cache);
   }
 
+  /**
+   * Get the dto by id
+   *
+   * @param id id
+   * @return dto
+   */
+  protected DtoT getDto(final Long id) {
+    return ensureExists(dtoManager.findById(ensureExists(id, ERR_MISSING_ID)), "id");
+  }
+
   public ApiT findByName(
       final ThirdEyeServerPrincipal principal,
       final String name) {
@@ -255,16 +265,6 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
 
   protected DtoT toDto(final ApiT api) {
     throw new UnsupportedOperationException("Not implemented");
-  }
-
-  /**
-   * Get the dto by id
-   *
-   * @param id id
-   * @return dto
-   */
-  protected DtoT getDto(final Long id) {
-    return ensureExists(dtoManager.findById(ensureExists(id, ERR_MISSING_ID)), "id");
   }
 
   /**

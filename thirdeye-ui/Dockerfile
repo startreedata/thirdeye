@@ -13,7 +13,7 @@
 # the License.
 #
 
-FROM nginx:1.24-alpine
+FROM nginx:1.25.3-alpine
 
 RUN addgroup -S thirdeye && \
     adduser -S thirdeye -G thirdeye && \

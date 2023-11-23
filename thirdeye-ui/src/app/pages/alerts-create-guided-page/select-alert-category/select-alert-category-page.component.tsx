@@ -24,7 +24,7 @@ import {
 import { some } from "lodash";
 import { default as React, FunctionComponent, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { Link, useOutletContext } from "react-router-dom";
+import { Link, useNavigate, useOutletContext } from "react-router-dom";
 import { generateAvailableAlgorithmOptions } from "../../../components/alert-wizard-v3/alert-type-selection/alert-type-selection.utils";
 import {
     QUERY_PARAM_KEY_FOR_SAMPLE_ALERT_FILTER,
@@ -50,6 +50,7 @@ const OutlineCardComponent: FunctionComponent<CardProps> = (props) => {
 
 export const SelectAlertCategoryPage: FunctionComponent<SelectAlertCategoryPageProps> =
     ({ hideBottomBar }) => {
+        const navigate = useNavigate();
         const { t } = useTranslation();
         const { datasets, getDatasets } = useGetDatasets();
 
@@ -125,8 +126,11 @@ export const SelectAlertCategoryPage: FunctionComponent<SelectAlertCategoryPageP
                             name: alert.template?.name + "-dx",
                         },
                     });
-                    setIsMultiDimensionAlert(true);
                 }
+                setIsMultiDimensionAlert(true);
+                navigate(
+                    AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_DIMENSION_EXPLORATION
+                );
             } else {
                 if (alert.template?.name?.endsWith("-dx")) {
                     if (alert.templateProperties.queryFilters) {
@@ -142,8 +146,9 @@ export const SelectAlertCategoryPage: FunctionComponent<SelectAlertCategoryPageP
                             ...alert.templateProperties,
                         },
                     });
-                    setIsMultiDimensionAlert(false);
                 }
+                setIsMultiDimensionAlert(false);
+                navigate(AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_METRIC);
             }
         };
 
@@ -193,12 +198,8 @@ export const SelectAlertCategoryPage: FunctionComponent<SelectAlertCategoryPageP
                                                         <CardContent>
                                                             <Button
                                                                 color="primary"
-                                                                component={Link}
                                                                 data-testid={
                                                                     SELECT_ALERT_CATEGORY_TEST_IDS.BASIC_ALERT_BTN
-                                                                }
-                                                                to={
-                                                                    AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_METRIC
                                                                 }
                                                                 onClick={() => {
                                                                     ensureCorrectTemplateIsUsed(
@@ -271,15 +272,11 @@ export const SelectAlertCategoryPage: FunctionComponent<SelectAlertCategoryPageP
                                                         <CardContent>
                                                             <Button
                                                                 color="primary"
-                                                                component={Link}
                                                                 data-testid={
                                                                     SELECT_ALERT_CATEGORY_TEST_IDS.MULTIDIMENSION_ALERT_BTN
                                                                 }
                                                                 disabled={
                                                                     !hasMultiDimension
-                                                                }
-                                                                to={
-                                                                    AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_DIMENSION_EXPLORATION
                                                                 }
                                                                 onClick={() => {
                                                                     ensureCorrectTemplateIsUsed(

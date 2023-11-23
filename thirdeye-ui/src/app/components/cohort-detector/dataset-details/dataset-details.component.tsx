@@ -22,6 +22,7 @@ import {
     Typography,
 } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
+import { sortBy } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { PageContentsCardV1 } from "../../../platform/components";
@@ -150,7 +151,9 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
             }
         }
 
-        setDatasetsInfo(datasetInfo);
+        setDatasetsInfo(
+            sortBy(datasetInfo, [(d) => d.dataset.name.toLowerCase()])
+        );
 
         setIsPinotInfraLoading(false);
     }, [metrics, datasets, datasources]);

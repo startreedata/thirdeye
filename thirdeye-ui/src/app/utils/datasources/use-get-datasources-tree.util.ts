@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { sortBy } from "lodash";
 import { useCallback, useEffect, useState } from "react";
 import { GetDatasets } from "../../rest/datasets/dataset.interfaces";
 import { useGetDatasets } from "../../rest/datasets/datasets.actions";
@@ -67,11 +68,11 @@ function useGetDatasourcesTree(): UseGetDatasourcesTreeHook {
             getDatasetsHook.datasets,
             getMetricsHook.metrics
         );
-        const datasetInfo = datasourceInfo.reduce(
-            (previous: DatasetInfo[], dSource) => {
+        const datasetInfo = sortBy(
+            datasourceInfo.reduce((previous: DatasetInfo[], dSource) => {
                 return [...previous, ...dSource.tables];
-            },
-            []
+            }, []),
+            [(d) => d.dataset.name.toLowerCase()]
         );
 
         setDatasetsInfo(datasetInfo);

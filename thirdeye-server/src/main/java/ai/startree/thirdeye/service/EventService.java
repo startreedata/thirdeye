@@ -70,9 +70,8 @@ public class EventService extends CrudService<EventApi, EventDTO> {
     holidayEventsLoader.loadHolidays(startTime, endTime);
   }
 
-  public EventApi loadHolidays(long anomalyId) {
-    final AnomalyDTO anomalyDto = ensureExists(anomalyManager.findById(
-        anomalyId));
+  public EventApi createFromAnomaly(long anomalyId) {
+    final AnomalyDTO anomalyDto = ensureExists(anomalyManager.findById(anomalyId));
     final EventDTO eventDTO = new EventDTO()
         .setName("Anomaly " + anomalyId)
         .setEventType("ANOMALY")

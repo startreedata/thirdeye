@@ -76,8 +76,6 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
 
   private static final Logger LOG = LoggerFactory.getLogger(AlertService.class);
 
-  private static final String CRON_EVERY_HOUR = "0 0 * * * ? *";
-
   private final TaskManager taskManager;
   private final AnomalyManager anomalyManager;
   private final AlertEvaluator alertEvaluator;
@@ -124,11 +122,8 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
 
   @Override
   protected AlertDTO createDto(final ThirdEyeServerPrincipal principal, final AlertApi api) {
-    if (api.getCron() == null) {
-      api.setCron(CRON_EVERY_HOUR);
-    }
-
     // TODO spyne: Slight bug here. Alert is saved twice! once here and once in CrudResource
+    // FIXME CYRIL - biggest problem is the first creation does not go through access control
     return this.create(api
         .setOwner(new UserApi().setPrincipal(principal.getName()))
     );
@@ -142,10 +137,9 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
   @Override
   protected void validate(final AlertApi api, final AlertDTO existing) {
     super.validate(api, existing);
-    ensureExists(api.getName(), "Name must be present");
-    optional(api.getCron()).ifPresent(cron ->
-        ensure(CronExpression.isValidExpression(cron), ERR_CRON_INVALID, api.getCron()));
-
+    ensureExists(api.getName(), "name value must be set.");
+    ensureExists(api.getCron(), "cron value must be set.");
+    ensure(CronExpression.isValidExpression(api.getCron()), ERR_CRON_INVALID, api.getCron());
     /* new entity creation or name change in existing entity */
     if (existing == null || !existing.getName().equals(api.getName())) {
       ensure(dtoManager.findByName(api.getName()).size() == 0, ERR_DUPLICATE_NAME, api.getName());
@@ -158,11 +152,6 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
       final AlertDTO updated) {
     // prevent manual update of lastTimestamp
     updated.setLastTimestamp(existing.getLastTimestamp());
-
-    // Always set a default cron if not present.
-    if (updated.getCron() == null) {
-      updated.setCron(CRON_EVERY_HOUR);
-    }
   }
 
   @Override

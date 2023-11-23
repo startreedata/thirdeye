@@ -79,6 +79,7 @@ public class AnomalyPaginationTest {
     var alertId = request("api/alerts")
         .post(Entity.json(List.of(new AlertApi()
             .setName("test_alert")
+                .setCron("0 0 * * * ? *")
             .setLastTimestamp(new Date())
             .setTemplate(new AlertTemplateApi().setNodes(List.of(new PlanNodeApi()))))))
         .readEntity(new GenericType<List<AlertApi>>() {})

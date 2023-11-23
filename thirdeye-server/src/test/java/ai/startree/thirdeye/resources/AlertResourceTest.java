@@ -66,6 +66,8 @@ import org.testng.annotations.Test;
 
 public class AlertResourceTest {
 
+  private static final String VALID_CRON = "0 0 * * * ? *";
+
   static ThirdEyeServerPrincipal nobody() {
     return new ThirdEyeServerPrincipal("nobody", "", AuthenticationType.OAUTH);
   }
@@ -148,7 +150,7 @@ public class AlertResourceTest {
         thirdEyeAuthorizer).createMultiple(
         nobody(),
         Collections.singletonList(
-            new AlertApi().setName("alert1").setTemplate(new AlertTemplateApi().setId(2L))
+            new AlertApi().setName("alert1").setCron(VALID_CRON).setTemplate(new AlertTemplateApi().setId(2L))
         ));
   }
 
@@ -175,7 +177,7 @@ public class AlertResourceTest {
         ThirdEyeAuthorizerProvider.ALWAYS_DENY).validateMultiple(
         nobody(),
         Collections.singletonList(
-            new AlertApi().setTemplate(new AlertTemplateApi().setId(1L)).setName("alert1")
+            new AlertApi().setTemplate(new AlertTemplateApi().setId(1L)).setName("alert1").setCron(VALID_CRON)
         )
     );
   }
@@ -184,7 +186,7 @@ public class AlertResourceTest {
   public void testValidate_withNoAccessToTemplate() {
     final AlertTemplateManager alertTemplateManager = mock(AlertTemplateManager.class);
     when(alertTemplateManager.findById(1L))
-        .thenReturn(((AlertTemplateDTO) new AlertTemplateDTO().setId(1L)).setName("template1"));
+        .thenReturn(((AlertTemplateDTO) new AlertTemplateDTO().setId(1L)).setName("template1").setCron(VALID_CRON));
     final AlertTemplateRenderer alertTemplateRenderer = new AlertTemplateRenderer(
         mock(AlertManager.class), alertTemplateManager);
 
@@ -196,7 +198,7 @@ public class AlertResourceTest {
         thirdEyeAuthorizer).validateMultiple(
         nobody(),
         Collections.singletonList(
-            new AlertApi().setTemplate(new AlertTemplateApi().setId(1L)).setName("alert1")
+            new AlertApi().setTemplate(new AlertTemplateApi().setId(1L)).setName("alert1").setCron(VALID_CRON)
         )
     );
   }

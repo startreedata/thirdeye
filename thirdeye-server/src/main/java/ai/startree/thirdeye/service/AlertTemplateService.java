@@ -48,9 +48,7 @@ public class AlertTemplateService extends CrudService<AlertTemplateApi, AlertTem
   @Override
   protected AlertTemplateDTO createDto(final ThirdEyeServerPrincipal principal,
       final AlertTemplateApi api) {
-    final AlertTemplateDTO alertTemplateDTO = ApiBeanMapper.toAlertTemplateDto(api);
-    alertTemplateDTO.setCreatedBy(principal.getName());
-    return alertTemplateDTO;
+    return toDto(api);
   }
 
   @Override

@@ -48,10 +48,7 @@ public class MetricService extends CrudService<MetricApi, MetricConfigDTO> {
   @Override
   protected MetricConfigDTO createDto(final ThirdEyeServerPrincipal principal,
       final MetricApi api) {
-    final MetricConfigDTO dto = toDto(api);
-    dto.setCreatedBy(principal.getName());
-
-    return dto;
+    return toDto(api);
   }
 
   @Override

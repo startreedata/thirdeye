@@ -40,9 +40,7 @@ public class DatasetService extends CrudService<DatasetApi, DatasetConfigDTO> {
   @Override
   protected DatasetConfigDTO createDto(final ThirdEyeServerPrincipal principal,
       final DatasetApi api) {
-    final DatasetConfigDTO dto = toDto(api);
-    dto.setCreatedBy(principal.getName());
-    return dto;
+    return toDto(api);
   }
 
   @Override

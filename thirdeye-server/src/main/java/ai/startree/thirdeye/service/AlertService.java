@@ -124,9 +124,13 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
   protected AlertDTO createDto(final ThirdEyeServerPrincipal principal, final AlertApi api) {
     // TODO spyne: Slight bug here. Alert is saved twice! once here and once in CrudResource
     // FIXME CYRIL - biggest problem is the first creation does not go through access control
-    return this.create(api
-        .setOwner(new UserApi().setPrincipal(principal.getName()))
-    );
+    api.setOwner(new UserApi().setPrincipal(principal.getName()));
+    final AlertDTO dto = ApiBeanMapper.toAlertDto(api);
+    final AlertDTO savedAlert = saveAlert(dto);
+
+    createDetectionTask(savedAlert.getId(), dto.getLastTimestamp(), System.currentTimeMillis());
+
+    return dto;
   }
 
   @Override
@@ -142,7 +146,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     ensure(CronExpression.isValidExpression(api.getCron()), ERR_CRON_INVALID, api.getCron());
     /* new entity creation or name change in existing entity */
     if (existing == null || !existing.getName().equals(api.getName())) {
-      ensure(dtoManager.findByName(api.getName()).size() == 0, ERR_DUPLICATE_NAME, api.getName());
+      ensure(dtoManager.findByName(api.getName()).isEmpty(), ERR_DUPLICATE_NAME, api.getName());
     }
   }
 
@@ -164,9 +168,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
      * In this case the start and end timestamp is the same to ensure that we update the enumeration
      * items but we don't actually run the detection task.
      */
-    this.createDetectionTask(dto.getId(),
-        dto.getLastTimestamp(),
-        dto.getLastTimestamp());
+    createDetectionTask(dto.getId(), dto.getLastTimestamp(), dto.getLastTimestamp());
   }
 
   @Override
@@ -196,7 +198,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     ensureExists(startTime, "start");
     authorizationManager.ensureHasAccess(principal, dto, AccessType.WRITE);
 
-    this.createDetectionTask(id, startTime, safeEndTime(endTime));
+    createDetectionTask(id, startTime, safeEndTime(endTime));
   }
 
   private long safeEndTime(final @Nullable Long endTime) {
@@ -339,21 +341,6 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
         .map(AbstractDTO::getId)
         .collect(Collectors.toList());
     enumerationItemManager.deleteByIds(ids);
-  }
-
-  /**
-   * Create a new alert. Basic validations should be done before calling this method.
-   *
-   * @param api the alert api
-   * @return the created alert
-   */
-  private AlertDTO create(AlertApi api) {
-    final AlertDTO dto = ApiBeanMapper.toAlertDto(api);
-    final AlertDTO savedAlert = saveAlert(dto);
-
-    createDetectionTask(savedAlert.getId(), dto.getLastTimestamp(), System.currentTimeMillis());
-
-    return dto;
   }
 
   /**

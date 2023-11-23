@@ -286,7 +286,7 @@ public class HappyPathTest {
   public void testCreateSubscription() {
     final SubscriptionGroupApi subscriptionGroupApi = new SubscriptionGroupApi().setName(
             "testSubscription")
-        .setCron("")
+        .setCron("0 0/5 0 ? * * *")
         .setNotificationSchemes(new NotificationSchemesApi().setEmail(
             new EmailSchemeApi().setTo(List.of("analyst@fake.mail"))))
         .setAlerts(List.of(new AlertApi().setId(alertId)));

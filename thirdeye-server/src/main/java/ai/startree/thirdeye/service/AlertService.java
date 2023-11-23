@@ -281,7 +281,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
      * is executed and the enumerator operator cleans the existing enumeration items
      */
     this.deleteAssociatedAnomalies(dto.getId());
-    final AlertDTO resetAlert = this.reset(dto);
+    final AlertDTO resetAlert = this.softReset(dto);
 
     return toApi(resetAlert);
   }
@@ -359,7 +359,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
   /**
    * soft reset - does not delete related entities
    */
-  private AlertDTO reset(AlertDTO dto) {
+  private AlertDTO softReset(AlertDTO dto) {
     // reset lastTimestamp
     dto.setLastTimestamp(0);
     final AlertDTO savedAlert = saveAlert(dto);

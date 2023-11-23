@@ -53,7 +53,7 @@ public class EventService extends CrudService<EventApi, EventDTO> {
 
   @Override
   protected EventDTO createDto(final ThirdEyeServerPrincipal principal, final EventApi api) {
-    return ApiBeanMapper.toEventDto(api);
+    return toDto(api);
   }
 
   @Override

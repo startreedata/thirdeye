@@ -64,9 +64,7 @@ public class DataSourceService extends CrudService<DataSourceApi, DataSourceDTO>
   @Override
   protected DataSourceDTO createDto(final ThirdEyeServerPrincipal principal,
       final DataSourceApi api) {
-    final DataSourceDTO dto = toDto(api);
-    dto.setCreatedBy(principal.getName());
-    return dto;
+    return toDto(api);
   }
 
   @Override

@@ -365,7 +365,7 @@ class DummyService extends CrudService<DummyApi, DummyDto> {
 
   @Override
   protected DummyDto createDto(final ThirdEyeServerPrincipal principal, final DummyApi api) {
-    return mapper.toDto(api);
+    return toDto(api);
   }
 
   @Override

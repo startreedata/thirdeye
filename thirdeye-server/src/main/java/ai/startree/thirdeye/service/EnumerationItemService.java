@@ -48,9 +48,7 @@ public class EnumerationItemService extends CrudService<EnumerationItemApi, Enum
   @Override
   protected EnumerationItemDTO createDto(final ThirdEyeServerPrincipal principal,
       final EnumerationItemApi api) {
-    final EnumerationItemDTO dto = ApiBeanMapper.toEnumerationItemDTO(api);
-    dto.setCreatedBy(principal.getName());
-    return dto;
+    return ApiBeanMapper.toEnumerationItemDTO(api);
   }
 
   @Override

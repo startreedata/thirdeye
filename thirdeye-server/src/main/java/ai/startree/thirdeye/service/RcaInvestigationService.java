@@ -51,9 +51,7 @@ public class RcaInvestigationService extends CrudService<RcaInvestigationApi, Rc
   @Override
   protected RcaInvestigationDTO createDto(final ThirdEyeServerPrincipal principal,
       final RcaInvestigationApi api) {
-    final RcaInvestigationDTO rcaInvestigationDTO = toDto(api);
-    rcaInvestigationDTO.setCreatedBy(principal.getName());
-    return rcaInvestigationDTO;
+    return toDto(api);
   }
 
   @Override

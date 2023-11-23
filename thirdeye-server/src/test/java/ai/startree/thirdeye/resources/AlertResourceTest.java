@@ -18,8 +18,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import ai.startree.thirdeye.alert.AlertCreater;
-import ai.startree.thirdeye.alert.AlertDeleter;
 import ai.startree.thirdeye.alert.AlertEvaluator;
 import ai.startree.thirdeye.alert.AlertInsightsProvider;
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
@@ -27,6 +25,7 @@ import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.NamespaceResolver;
 import ai.startree.thirdeye.auth.ThirdEyeAuthorizerProvider;
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
+import ai.startree.thirdeye.config.TimeConfiguration;
 import ai.startree.thirdeye.service.AlertService;
 import ai.startree.thirdeye.service.AppAnalyticsService;
 import ai.startree.thirdeye.spi.api.AlertApi;
@@ -43,6 +42,10 @@ import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
+import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
+import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
+import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
+import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
@@ -78,12 +81,15 @@ public class AlertResourceTest {
   private static AlertService newAlertService(final AlertManager alertManager,
       final AuthorizationManager authorizationManager) {
     return new AlertService(
-        mock(AlertCreater.class),
-        mock(AlertDeleter.class),
-        mock(AlertEvaluator.class),
         alertManager,
+        mock(AnomalyManager.class),
+        mock(AlertEvaluator.class),
         mock(AppAnalyticsService.class),
         mock(AlertInsightsProvider.class),
+        mock(SubscriptionGroupManager.class),
+        mock(EnumerationItemManager.class),
+        mock(TaskManager.class),
+        new TimeConfiguration(),
         authorizationManager
     );
   }
@@ -242,12 +248,15 @@ public class AlertResourceTest {
         .thenReturn(new AlertEvaluationApi().setDetectionEvaluations(new HashMap<>()));
 
     new AlertResource(new AlertService(
-        mock(AlertCreater.class),
-        mock(AlertDeleter.class),
-        alertEvaluator,
         alertManager,
+        mock(AnomalyManager.class),
+        alertEvaluator,
         mock(AppAnalyticsService.class),
         mock(AlertInsightsProvider.class),
+        mock(SubscriptionGroupManager.class),
+        mock(EnumerationItemManager.class),
+        mock(TaskManager.class),
+        new TimeConfiguration(),
         newAuthorizationManager(alertTemplateRenderer,
             (ThirdEyePrincipal p, ResourceIdentifier id, AccessType accessType) ->
                 id.getNamespace().equals("allowedNamespace")))
@@ -294,12 +303,15 @@ public class AlertResourceTest {
         ));
 
     final var alertResource = new AlertResource(new AlertService(
-        mock(AlertCreater.class),
-        mock(AlertDeleter.class),
-        alertEvaluator,
         alertManager,
+        mock(AnomalyManager.class),
+        alertEvaluator,
         mock(AppAnalyticsService.class),
         mock(AlertInsightsProvider.class),
+        mock(SubscriptionGroupManager.class),
+        mock(EnumerationItemManager.class),
+        mock(TaskManager.class),
+        new TimeConfiguration(),
         newAuthorizationManager(alertTemplateRenderer,
             (ThirdEyePrincipal p, ResourceIdentifier id, AccessType accessType) ->
                 accessType == AccessType.READ && id.getNamespace().equals("allowedNamespace")))
@@ -339,12 +351,15 @@ public class AlertResourceTest {
         .thenReturn(new AlertEvaluationApi().setDetectionEvaluations(new HashMap<>()));
 
     new AlertResource(new AlertService(
-        mock(AlertCreater.class),
-        mock(AlertDeleter.class),
-        alertEvaluator,
         mock(AlertManager.class),
+        mock(AnomalyManager.class),
+        alertEvaluator,
         mock(AppAnalyticsService.class),
         mock(AlertInsightsProvider.class),
+        mock(SubscriptionGroupManager.class),
+        mock(EnumerationItemManager.class),
+        mock(TaskManager.class),
+        new TimeConfiguration(),
         newAuthorizationManager(alertTemplateRenderer,
             (ThirdEyePrincipal p, ResourceIdentifier id, AccessType accessType) ->
                 id.getNamespace().equals("readonlyNamespace") && accessType == AccessType.READ))
@@ -388,12 +403,15 @@ public class AlertResourceTest {
         ));
 
     final var resource = new AlertResource(new AlertService(
-        mock(AlertCreater.class),
-        mock(AlertDeleter.class),
-        alertEvaluator,
         mock(AlertManager.class),
+        mock(AnomalyManager.class),
+        alertEvaluator,
         mock(AppAnalyticsService.class),
         mock(AlertInsightsProvider.class),
+        mock(SubscriptionGroupManager.class),
+        mock(EnumerationItemManager.class),
+        mock(TaskManager.class),
+        new TimeConfiguration(),
         newAuthorizationManager(alertTemplateRenderer,
             (ThirdEyePrincipal p, ResourceIdentifier id, AccessType accessType) ->
                 id.getNamespace().equals("allowedNamespace")))

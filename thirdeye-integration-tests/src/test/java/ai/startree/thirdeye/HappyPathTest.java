@@ -19,6 +19,7 @@ import static ai.startree.thirdeye.DropwizardTestUtils.buildSupport;
 import static ai.startree.thirdeye.DropwizardTestUtils.loadAlertApi;
 import static ai.startree.thirdeye.IntegrationTestUtils.NODE_NAME_CHILD_ROOT;
 import static ai.startree.thirdeye.IntegrationTestUtils.NODE_NAME_ROOT;
+import static ai.startree.thirdeye.IntegrationTestUtils.assertAnomalyEquals;
 import static ai.startree.thirdeye.IntegrationTestUtils.combinerNode;
 import static ai.startree.thirdeye.IntegrationTestUtils.enumeratorNode;
 import static ai.startree.thirdeye.IntegrationTestUtils.forkJoinNode;
@@ -69,7 +70,6 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
-import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 /**
@@ -415,8 +415,6 @@ public class HappyPathTest {
   }
 
   @Test(dependsOnMethods = "testAnomalyCount")
-  // FIXME CYRIL - TEST IS IGNORED UNTIL updatedTime is fixed
-  @Ignore
   public void testReplayIsIdemPotent() throws InterruptedException {
     // use update time as a way to know when the replay is done
     final long lastUpdatedTime = getAlertLastUpdatedTime();
@@ -440,7 +438,10 @@ public class HappyPathTest {
     final List<AnomalyApi> afterReplayAnomalies = afterReplayResponse.readEntity(
         ANOMALIES_LIST_TYPE);
     // the only contract of the replay is to be user-facing idempotent - hence this test can break if we chose in the implementation to save all anomalies, even the ones at replay
-    assertThat(beforeReplayAnomalies).isEqualTo(afterReplayAnomalies);
+    assertThat(afterReplayAnomalies).hasSize(beforeReplayAnomalies.size());
+    for (int i = 0; i < beforeReplayAnomalies.size(); i++){
+      assertAnomalyEquals(afterReplayAnomalies.get(i), beforeReplayAnomalies.get(i));
+    }
   }
 
   @Test(dependsOnMethods = "testGetSingleAnomaly")
@@ -499,7 +500,8 @@ public class HappyPathTest {
 
   @Test(timeOut = 60000, dependsOnMethods = "testAnomalyCount")
   public void TestGetAnomalyAuth() throws InterruptedException {
-    var alertId = mustCreateAlert(newRunnableAlertApiWithAuth("TestGetAnomalyAuth", "alert-namespace"));
+    var alertId = mustCreateAlert(
+        newRunnableAlertApiWithAuth("TestGetAnomalyAuth", "alert-namespace"));
 
     waitForAnyAnomalies(alertId);
     final var anomalyApi = mustGetAnomaliesForAlert(alertId).get(0);
@@ -509,7 +511,8 @@ public class HappyPathTest {
 
   @Test(timeOut = 60000, dependsOnMethods = "testAnomalyCount")
   public void TestGetRcaInvestigationAuth() throws InterruptedException {
-    final var alertId = mustCreateAlert(newRunnableAlertApiWithAuth("TestGetRcaInvestigationAuth", "alert-namespace"));
+    final var alertId = mustCreateAlert(
+        newRunnableAlertApiWithAuth("TestGetRcaInvestigationAuth", "alert-namespace"));
 
     waitForAnyAnomalies(alertId);
     final var anomalyId = mustGetAnomaliesForAlert(alertId).get(0).getId();
@@ -524,7 +527,8 @@ public class HappyPathTest {
 
   @Test(timeOut = 60000, dependsOnMethods = "testAnomalyCount")
   public void TestUpdateAlertAuth() throws InterruptedException {
-    final var alertId = mustCreateAlert(newRunnableAlertApiWithAuth("TestUpdateAlertAuth", "alert-namespace"));
+    final var alertId = mustCreateAlert(
+        newRunnableAlertApiWithAuth("TestUpdateAlertAuth", "alert-namespace"));
 
     waitForAnyAnomalies(alertId);
     final var anomalyId = mustGetAnomaliesForAlert(alertId).get(0).getId();
@@ -532,7 +536,8 @@ public class HappyPathTest {
         .setName("my-investigation")
         .setAnomaly(new AnomalyApi().setId(anomalyId)));
 
-    final var alertApi = newRunnableAlertApiWithAuth("test-alert", "new-alert-namespace").setId(alertId);
+    final var alertApi = newRunnableAlertApiWithAuth("test-alert", "new-alert-namespace").setId(
+        alertId);
     final var updateAlertResp = request("api/alerts").put(Entity.json(List.of(alertApi)));
     assertThat(updateAlertResp.getStatus()).isEqualTo(200);
 

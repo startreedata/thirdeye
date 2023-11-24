@@ -17,7 +17,9 @@ import static ai.startree.thirdeye.spi.Constants.SYS_PROP_THIRDEYE_PLUGINS_DIR;
 import static ai.startree.thirdeye.spi.datalayer.TemplatableMap.fromValueMap;
 import static com.google.api.client.util.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
+import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.PlanNodeApi;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -106,5 +108,16 @@ public class IntegrationTestUtils {
         "Could not find plugins directory %s. Try to rebuild TE?", pluginsPath);
 
     System.setProperty(SYS_PROP_THIRDEYE_PLUGINS_DIR, pluginsDir.getAbsolutePath());
+  }
+
+
+  public static void assertAnomalyEquals(final AnomalyApi actual, final AnomalyApi expected) {
+    assertThat(actual.getStartTime()).isEqualTo(expected.getStartTime());
+    assertThat(actual.getEndTime()).isEqualTo(expected.getEndTime());
+    assertThat(actual.getAvgBaselineVal()).isEqualTo(expected.getAvgBaselineVal());
+    assertThat(actual.getAvgCurrentVal()).isEqualTo(expected.getAvgCurrentVal());
+    if (expected.getAnomalyLabels() != null) {
+      assertThat(actual.getAnomalyLabels()).hasSize(expected.getAnomalyLabels().size());
+    }
   }
 }

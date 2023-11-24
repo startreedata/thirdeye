@@ -19,7 +19,7 @@ import static ai.startree.thirdeye.DropwizardTestUtils.buildSupport;
 import static ai.startree.thirdeye.DropwizardTestUtils.loadAlertApi;
 import static ai.startree.thirdeye.IntegrationTestUtils.NODE_NAME_CHILD_ROOT;
 import static ai.startree.thirdeye.IntegrationTestUtils.NODE_NAME_ROOT;
-import static ai.startree.thirdeye.IntegrationTestUtils.assertAnomalyEquals;
+import static ai.startree.thirdeye.IntegrationTestUtils.assertAnomalyAreTheSame;
 import static ai.startree.thirdeye.IntegrationTestUtils.combinerNode;
 import static ai.startree.thirdeye.IntegrationTestUtils.enumeratorNode;
 import static ai.startree.thirdeye.IntegrationTestUtils.forkJoinNode;
@@ -440,7 +440,7 @@ public class HappyPathTest {
     // the only contract of the replay is to be user-facing idempotent - hence this test can break if we chose in the implementation to save all anomalies, even the ones at replay
     assertThat(afterReplayAnomalies).hasSize(beforeReplayAnomalies.size());
     for (int i = 0; i < beforeReplayAnomalies.size(); i++){
-      assertAnomalyEquals(afterReplayAnomalies.get(i), beforeReplayAnomalies.get(i));
+      assertAnomalyAreTheSame(afterReplayAnomalies.get(i), beforeReplayAnomalies.get(i));
     }
   }
 

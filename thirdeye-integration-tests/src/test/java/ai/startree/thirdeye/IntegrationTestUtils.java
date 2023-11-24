@@ -111,7 +111,8 @@ public class IntegrationTestUtils {
   }
 
 
-  public static void assertAnomalyEquals(final AnomalyApi actual, final AnomalyApi expected) {
+  public static void assertAnomalyAreTheSame(final AnomalyApi actual, final AnomalyApi expected) {
+    assertThat(actual.getId()).isEqualTo(expected.getId());
     assertThat(actual.getStartTime()).isEqualTo(expected.getStartTime());
     assertThat(actual.getEndTime()).isEqualTo(expected.getEndTime());
     assertThat(actual.getAvgBaselineVal()).isEqualTo(expected.getAvgBaselineVal());

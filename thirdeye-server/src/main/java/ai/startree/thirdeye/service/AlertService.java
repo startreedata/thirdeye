@@ -123,7 +123,6 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
   @Override
   protected AlertDTO createDto(final ThirdEyeServerPrincipal principal, final AlertApi api) {
     // TODO spyne: Slight bug here. Alert is saved twice! once here and once in CrudResource
-    // FIXME CYRIL - biggest problem is the first creation does not go through access control
     api.setOwner(new UserApi().setPrincipal(principal.getName()));
     final AlertDTO dto = ApiBeanMapper.toAlertDto(api);
     final AlertDTO savedAlert = saveAlert(dto);

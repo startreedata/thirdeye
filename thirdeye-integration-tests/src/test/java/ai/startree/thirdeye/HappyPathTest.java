@@ -331,7 +331,7 @@ public class HappyPathTest {
   }
 
   @Test(dependsOnMethods = "testGetAnomalies")
-  public void testAnomalyFeedback() {
+  public void testCreateAnomalyFeedback() {
     final Response responseBeforeFeedback = request("api/anomalies/" + anomalyId).get();
     assertThat(responseBeforeFeedback.getStatus()).isEqualTo(200);
     final AnomalyApi anomalyApiBefore = responseBeforeFeedback.readEntity(AnomalyApi.class);
@@ -360,8 +360,8 @@ public class HappyPathTest {
     assertThat(actual.getUpdatedBy().getPrincipal()).isEqualTo("no-auth-user");
   }
 
-  @Test(dependsOnMethods = "testAnomalyFeedback")
-  public void testAnomalyFeedback_updateFeedback() {
+  @Test(dependsOnMethods = "testCreateAnomalyFeedback")
+  public void testUpdateAnomalyFeedback() {
     final Response responseBeforeFeedback = request("api/anomalies/" + anomalyId).get();
     assertThat(responseBeforeFeedback.getStatus()).isEqualTo(200);
     final AnomalyApi anomalyApiBefore = responseBeforeFeedback.readEntity(AnomalyApi.class);

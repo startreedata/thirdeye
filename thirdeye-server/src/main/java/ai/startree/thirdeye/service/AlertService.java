@@ -121,15 +121,10 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
   }
 
   @Override
-  protected AlertDTO createDto(final ThirdEyeServerPrincipal principal, final AlertApi api) {
-    // TODO spyne: Slight bug here. Alert is saved twice! once here and once in CrudResource
-    api.setOwner(new UserApi().setPrincipal(principal.getName()));
-    final AlertDTO dto = ApiBeanMapper.toAlertDto(api);
-    final AlertDTO savedAlert = saveAlert(dto);
-
-    createDetectionTask(savedAlert.getId(), dto.getLastTimestamp(), System.currentTimeMillis());
-
-    return dto;
+  protected void prepareCreatedDto(final ThirdEyeServerPrincipal principal, final AlertDTO dto) {
+    if (dto.getLastTimestamp() < minimumOnboardingStartTime) {
+      dto.setLastTimestamp(minimumLastTimestamp(dto));
+    }
   }
 
   @Override
@@ -158,6 +153,12 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
   }
 
   @Override
+  protected void postCreate(final AlertDTO dto) {
+    // run the detection task on the historical data
+    createDetectionTask(dto.getId(), dto.getLastTimestamp(), System.currentTimeMillis());
+  }
+
+  @Override
   protected void postUpdate(final AlertDTO dto) {
     /*
      * Running the detection task after updating an alert ensures that enumeration items if
@@ -168,6 +169,10 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
      * items but we don't actually run the detection task.
      */
     createDetectionTask(dto.getId(), dto.getLastTimestamp(), dto.getLastTimestamp());
+    // perform a soft-reset - rerun the detection on the whole historical data - existing and new anomalies will be merged
+    // note: the 2 detection tasks can run concurrently, the order does not matter because the last timestamp after the run of the 2 tasks is the same
+    //   we could remove the first one but this would make the UI feel less snappy, because a new enumeration would not appear until the full historical replay is finished
+    createDetectionTask(dto.getId(), minimumLastTimestamp(dto), dto.getLastTimestamp());
   }
 
   @Override
@@ -282,9 +287,12 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
      * is executed and the enumerator operator cleans the existing enumeration items
      */
     this.deleteAssociatedAnomalies(dto.getId());
-    final AlertDTO resetAlert = this.softReset(dto);
+    // reset lastTimestamp
+    dto.setLastTimestamp(minimumLastTimestamp(dto));
+    dtoManager.update(dto);
+    postCreate(dto);
 
-    return toApi(resetAlert);
+    return toApi(dto);
   }
 
   public AnomalyStatsApi stats(
@@ -340,27 +348,6 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
         .map(AbstractDTO::getId)
         .collect(Collectors.toList());
     enumerationItemManager.deleteByIds(ids);
-  }
-
-  /**
-   * soft reset - does not delete related entities
-   */
-  private AlertDTO softReset(AlertDTO dto) {
-    // reset lastTimestamp
-    dto.setLastTimestamp(0);
-    final AlertDTO savedAlert = saveAlert(dto);
-
-    createDetectionTask(savedAlert.getId(), dto.getLastTimestamp(), System.currentTimeMillis());
-
-    return dto;
-  }
-
-  private AlertDTO saveAlert(final AlertDTO dto) {
-    if (dto.getLastTimestamp() < minimumOnboardingStartTime) {
-      dto.setLastTimestamp(minimumLastTimestamp(dto));
-    }
-    dtoManager.save(dto);
-    return dto;
   }
 
   private long minimumLastTimestamp(final AlertDTO dto) {

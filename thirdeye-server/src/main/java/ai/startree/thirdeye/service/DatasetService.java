@@ -15,7 +15,6 @@
 package ai.startree.thirdeye.service;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
-import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.DatasetApi;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
@@ -35,12 +34,6 @@ public class DatasetService extends CrudService<DatasetApi, DatasetConfigDTO> {
   public DatasetService(final DatasetConfigManager datasetConfigManager,
       final AuthorizationManager authorizationManager) {
     super(authorizationManager, datasetConfigManager, API_TO_INDEX_FILTER_MAP);
-  }
-
-  @Override
-  protected DatasetConfigDTO createDto(final ThirdEyeServerPrincipal principal,
-      final DatasetApi api) {
-    return toDto(api);
   }
 
   @Override

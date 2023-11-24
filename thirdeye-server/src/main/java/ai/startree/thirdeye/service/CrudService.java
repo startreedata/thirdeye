@@ -127,12 +127,14 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
       final List<ApiT> list) {
     final RequestCache cache = createRequestCache();
     final var result = list.stream()
-        .peek(api1 -> validate(api1, null))
-        .peek(api -> authorizationManager.ensureCanCreate(principal, toDto(api)))
-        .map(api -> createDto(principal, api))
+        .peek(api -> validate(api, null))
+        .map(this::toDto)
+        .peek(dto -> authorizationManager.ensureCanCreate(principal, dto))
+        .peek(dto -> prepareCreatedDto(principal, dto))
         .map(dto -> createGateKeeper(principal, dto))
         .peek(dtoManager::save)
         .peek(dto -> Objects.requireNonNull(dto.getId(), "DB update failed!"))
+        .peek(this::postCreate)
         .map(dto -> toApi(dto, cache))
         .collect(Collectors.toList());
     authorizationManager.invalidateCache();
@@ -190,6 +192,14 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
       final ThirdEyeServerPrincipal principal,
       final DtoT existing,
       final DtoT updated) {
+    // By default, do nothing.
+  }
+
+  /**
+   * Override this method to set default values to a dto being created.
+   * You can also throw in this method to prevent the creation of dto.
+   */
+  protected void prepareCreatedDto(final ThirdEyeServerPrincipal principal, final DtoT dto) {
     // By default, do nothing.
   }
 
@@ -279,8 +289,6 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
     }
   }
 
-  protected abstract DtoT createDto(final ThirdEyeServerPrincipal principal, final ApiT api);
-
   private DtoT createGateKeeper(final ThirdEyeServerPrincipal principal, final DtoT dto) {
     final Timestamp currentTime = new Timestamp(new Date().getTime());
     dto.setCreatedBy(principal.getName())
@@ -291,6 +299,10 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
   }
 
   protected void postUpdate(final DtoT dto) {
+    // default is a no-op
+  }
+
+  protected void postCreate(final DtoT dtoT) {
     // default is a no-op
   }
 

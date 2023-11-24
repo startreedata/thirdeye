@@ -49,7 +49,7 @@ public class TaskService extends CrudService<TaskApi, TaskDTO> {
 
   // Operation not supported to prevent create of tasks
   @Override
-  protected TaskDTO createDto(final ThirdEyeServerPrincipal principal, final TaskApi taskApi) {
+  protected void prepareCreatedDto(final ThirdEyeServerPrincipal principal, final TaskDTO taskDTO) {
     throw new UnsupportedOperationException();
   }
 

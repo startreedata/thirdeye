@@ -273,6 +273,16 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     return allowedEvals;
   }
 
+  // note cyril: currently the reset is used after a call to update
+  // but the update triggers a soft-reset already - so there may be some concurrency between
+  // the soft-reset detection task and the reset detection task. I suspect there are edge cases
+  // but in most cases it should work fine.
+  // The only correct design is to:
+  // 1. expose an atomic update and reset(soft=hard/true)
+  // OR
+  // 2.have update not triggering a soft reset.
+  // Solution 2. was the first design but puts too much work on the client side and already resulted
+  // in an important regression so is strongly discouraged
   public AlertApi reset(
       final ThirdEyeServerPrincipal principal,
       final Long id) {

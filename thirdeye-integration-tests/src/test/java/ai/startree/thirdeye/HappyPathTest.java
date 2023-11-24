@@ -476,7 +476,7 @@ public class HappyPathTest {
   }
 
   @Test(dependsOnMethods = "testAnomalyCount")
-  public void TestCreateAnomalyWithAuth() {
+  public void testCreateAnomalyWithAuth() {
     final var createAnomalyResp = request("api/anomalies").put(Entity.json(List.of(
         new AnomalyApi()
             .setAlert(new AlertApi().setId(alertId))
@@ -487,7 +487,7 @@ public class HappyPathTest {
   }
 
   @Test(dependsOnMethods = "testAnomalyCount")
-  public void TestCreateInvestigationWithAuth() throws InterruptedException {
+  public void testCreateInvestigationWithAuth() throws InterruptedException {
     final var createInvestigationResp = request("api/rca/investigations").post(Entity.json(List.of(
         new RcaInvestigationApi()
             .setName("my-investigation")
@@ -499,7 +499,7 @@ public class HappyPathTest {
   }
 
   @Test(timeOut = 60000, dependsOnMethods = "testAnomalyCount")
-  public void TestGetAnomalyAuth() throws InterruptedException {
+  public void testGetAnomalyAuth() throws InterruptedException {
     var alertId = mustCreateAlert(
         newRunnableAlertApiWithAuth("TestGetAnomalyAuth", "alert-namespace"));
 
@@ -510,7 +510,7 @@ public class HappyPathTest {
   }
 
   @Test(timeOut = 60000, dependsOnMethods = "testAnomalyCount")
-  public void TestGetRcaInvestigationAuth() throws InterruptedException {
+  public void testGetRcaInvestigationAuth() throws InterruptedException {
     final var alertId = mustCreateAlert(
         newRunnableAlertApiWithAuth("TestGetRcaInvestigationAuth", "alert-namespace"));
 
@@ -526,7 +526,7 @@ public class HappyPathTest {
   }
 
   @Test(timeOut = 60000, dependsOnMethods = "testAnomalyCount")
-  public void TestUpdateAlertAuth() throws InterruptedException {
+  public void testUpdateAlertAuth() throws InterruptedException {
     final var alertId = mustCreateAlert(
         newRunnableAlertApiWithAuth("TestUpdateAlertAuth", "alert-namespace"));
 

@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.datalayer.util;
+package ai.startree.thirdeye.spi.util;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.time.Duration;
@@ -22,11 +22,11 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PersistenceUtils {
+public class ExecutorUtils {
 
-  private static final Logger LOG = LoggerFactory.getLogger(PersistenceUtils.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ExecutorUtils.class);
 
-  private PersistenceUtils() {
+  private ExecutorUtils() {
     // left blank
   }
 

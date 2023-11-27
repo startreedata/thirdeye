@@ -18,9 +18,9 @@
 
 package ai.startree.thirdeye.datasource.cache;
 
-import static ai.startree.thirdeye.datalayer.util.PersistenceUtils.shutdownExecutionService;
-import static ai.startree.thirdeye.datalayer.util.PersistenceUtils.threadsNamed;
 import static ai.startree.thirdeye.spi.Constants.METRICS_CACHE_TIMEOUT;
+import static ai.startree.thirdeye.spi.util.ExecutorUtils.shutdownExecutionService;
+import static ai.startree.thirdeye.spi.util.ExecutorUtils.threadsNamed;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;

@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.scheduler.monitor;
 
-import static ai.startree.thirdeye.datalayer.util.PersistenceUtils.shutdownExecutionService;
+import static ai.startree.thirdeye.spi.util.ExecutorUtils.shutdownExecutionService;
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 
 import ai.startree.thirdeye.spi.datalayer.bao.JobManager;

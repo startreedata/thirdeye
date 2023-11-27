@@ -14,8 +14,8 @@
 
 package ai.startree.thirdeye.datalayer.core;
 
-import static ai.startree.thirdeye.datalayer.util.PersistenceUtils.shutdownExecutionService;
-import static ai.startree.thirdeye.datalayer.util.PersistenceUtils.threadsNamed;
+import static ai.startree.thirdeye.spi.util.ExecutorUtils.shutdownExecutionService;
+import static ai.startree.thirdeye.spi.util.ExecutorUtils.threadsNamed;
 import static ai.startree.thirdeye.spi.util.SpiUtils.alertRef;
 import static ai.startree.thirdeye.spi.util.SpiUtils.enumerationItemRef;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;

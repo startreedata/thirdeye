@@ -13,9 +13,9 @@
  */
 package ai.startree.thirdeye.scheduler;
 
-import static ai.startree.thirdeye.datalayer.util.PersistenceUtils.shutdownExecutionService;
 import static ai.startree.thirdeye.scheduler.JobSchedulerService.getIdFromJobKey;
 import static ai.startree.thirdeye.spi.Constants.CRON_TIMEZONE;
+import static ai.startree.thirdeye.spi.util.ExecutorUtils.shutdownExecutionService;
 
 import ai.startree.thirdeye.scheduler.job.DetectionPipelineJob;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;

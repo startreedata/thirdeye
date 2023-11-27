@@ -93,10 +93,8 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
   protected static final Period DEFAULT_MERGE_MAX_GAP = Period.hours(2);
   @VisibleForTesting
   protected static final Period DEFAULT_ANOMALY_MAX_DURATION = Period.days(7);
-  @VisibleForTesting
-  protected static final String NEW_AFTER_REPLAY_LABEL_NAME = "NEW_AFTER_REPLAY";
-  @VisibleForTesting
-  protected static final String OUTDATED_AFTER_REPLAY_LABEL_NAME = "OUTDATED_AFTER_REPLAY";
+  public static final String NEW_AFTER_REPLAY_LABEL_NAME = "NEW_AFTER_REPLAY";
+  public static final String OUTDATED_AFTER_REPLAY_LABEL_NAME = "OUTDATED_AFTER_REPLAY";
   private static final Set<String> REPLAY_LABELS = Set.of(NEW_AFTER_REPLAY_LABEL_NAME, OUTDATED_AFTER_REPLAY_LABEL_NAME);
 
   private final Period mergeMaxGap;

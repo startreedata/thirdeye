@@ -30,12 +30,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.datalayer.util.DatabaseConfiguration;
+import ai.startree.thirdeye.plugins.postprocessor.AnomalyMergerPostProcessor;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.api.AlertInsightsApi;
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.AnomalyFeedbackApi;
+import ai.startree.thirdeye.spi.api.AnomalyLabelApi;
 import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
 import ai.startree.thirdeye.spi.api.CountApi;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
@@ -53,6 +55,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.dropwizard.testing.DropwizardTestSupport;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
@@ -81,8 +84,14 @@ import org.testng.annotations.Test;
  * - create an alert
  * - create a subscription
  * - get anomalies
+ * - update the alert
+ * - get the anomalies again
  * - get a single anomaly
+ * - create a feedback for the anomaly
+ * - update the feedback for the anomaly
+ * - get the count of anomalies for the alert
  * - get the anomaly breakdown (heatmap)
+ * - test authorization
  */
 public class HappyPathTest {
 
@@ -91,7 +100,8 @@ public class HappyPathTest {
   public static final String THRESHOLD_TEMPLATE_NAME = "startree-threshold";
   private static final Logger log = LoggerFactory.getLogger(HappyPathTest.class);
 
-  private static final AlertApi MAIN_ALERT_API;
+  private static final AlertApi CREATE_ALERT_API;
+  private static final AlertApi UPDATE_ALERT_API;
   private static final long EVALUATE_END_TIME = 1596326400000L;
   private static final long PAGEVIEWS_DATASET_START_TIME_PLUS_ONE_DAY = 1580688000000L;
   private static final long PAGEVIEWS_DATASET_END_TIME_PLUS_ONE_DAY = 1596153600000L;
@@ -100,7 +110,8 @@ public class HappyPathTest {
 
   static {
     try {
-      MAIN_ALERT_API = loadAlertApi("/happypath/payloads/" + "alert.json");
+      CREATE_ALERT_API = loadAlertApi("/happypath/payloads/" + "alert_create.json");
+      UPDATE_ALERT_API = loadAlertApi("/happypath/payloads/" + "alert_update.json");
     } catch (final IOException e) {
       throw new RuntimeException(String.format("Could not load alert json: %s", e));
     }
@@ -112,6 +123,7 @@ public class HappyPathTest {
 
   // this attribute is shared between tests
   private long anomalyId;
+  private long alertLastUpdateTime;
   private long alertId;
 
   @BeforeClass
@@ -228,7 +240,7 @@ public class HappyPathTest {
 
   @Test(dependsOnMethods = "testCreateDataset", timeOut = 7000)
   public void testEvaluateAlert() {
-    final AlertEvaluationApi alertEvaluationApi = alertEvaluationApi(MAIN_ALERT_API,
+    final AlertEvaluationApi alertEvaluationApi = alertEvaluationApi(UPDATE_ALERT_API,
         PAGEVIEWS_DATASET_START_TIME, EVALUATE_END_TIME);
 
     final Response response = request("api/alerts/evaluate").post(Entity.json(alertEvaluationApi));
@@ -237,11 +249,12 @@ public class HappyPathTest {
 
   @Test(dependsOnMethods = "testEvaluateAlert")
   public void testCreateAlert() {
-    final Response response = request("api/alerts").post(Entity.json(List.of(MAIN_ALERT_API)));
+    final Response response = request("api/alerts").post(Entity.json(List.of(CREATE_ALERT_API)));
 
     assert200(response);
     final List<AlertApi> alerts = response.readEntity(ALERT_LIST_TYPE);
     alertId = alerts.get(0).getId();
+    UPDATE_ALERT_API.setId(alertId);
   }
 
   @DataProvider(name = "happyPathAlerts")
@@ -296,7 +309,7 @@ public class HappyPathTest {
   }
 
   @Test(dependsOnMethods = "testCreateAlert", timeOut = 50000L)
-  public void testGetAnomalies() throws InterruptedException {
+  public void testGetAnomaliesCreate() throws InterruptedException {
     // test get anomalies
     // need to wait for the taskRunner to run the onboard task - can take some time
     List<AnomalyApi> anomalies = List.of();
@@ -307,20 +320,66 @@ public class HappyPathTest {
       assert200(response);
       anomalies = response.readEntity(ANOMALIES_LIST_TYPE);
     }
-    // the third anomaly is the March 21 - March 23 anomaly
-    assertThat(anomalies.get(2).getStartTime().getTime()).isEqualTo(1584748800000L);
-    assertThat(anomalies.get(2).getEndTime().getTime()).isEqualTo(1584921600000L);
-    anomalyId = anomalies.get(2).getId();
+
+    assertThat(anomalies).hasSize(8);
+    // the fifth anomaly is the March 21 - March 23 anomaly
+    assertThat(anomalies.get(4).getStartTime().getTime()).isEqualTo(1584748800000L);
+    assertThat(anomalies.get(4).getEndTime().getTime()).isEqualTo(1584921600000L);
+    anomalyId = anomalies.get(4).getId();
   }
 
-  @Test(dependsOnMethods = "testGetAnomalies")
+  @Test(dependsOnMethods = "testGetAnomaliesCreate", timeOut = 50000L)
+  public void testUpdateAlert() throws InterruptedException {
+    final Response response = request("api/alerts").put(Entity.json(List.of(UPDATE_ALERT_API)));
+    assert200(response);
+    final List<AlertApi> alerts = response.readEntity(ALERT_LIST_TYPE);
+    assertThat(alerts.get(0).getId()).isEqualTo(alertId);
+    alertLastUpdateTime = alerts.get(0).getUpdated().getTime();
+  }
+
+  @Test(dependsOnMethods = "testUpdateAlert", timeOut = 50000L)
+  public void testGetAnomaliesAfterUpdate() throws InterruptedException {
+    // test get anomalies after the update
+    // need to wait for the taskRunner to run the soft-reset - can take some time
+    long newAlertLastUpdateTime = alertLastUpdateTime;
+    while (newAlertLastUpdateTime == alertLastUpdateTime) {
+      // see taskDriver server config for optimization
+      Thread.sleep(1000);
+      newAlertLastUpdateTime = getAlertLastUpdatedTime();
+    }
+    final Response response = request("api/anomalies?isChild=false").get();
+    final List<AnomalyApi> anomalies = response.readEntity(ANOMALIES_LIST_TYPE);
+    final List<AnomalyApi> outdatedAnomalies = new ArrayList<>();
+    final List<AnomalyApi> remainingAnomalies = new ArrayList<>();
+    outer: for (final var a : anomalies) {
+      if (a.getAnomalyLabels() != null) {
+        for (final AnomalyLabelApi l : a.getAnomalyLabels()) {
+          if (AnomalyMergerPostProcessor.OUTDATED_AFTER_REPLAY_LABEL_NAME.equals(l.getName())) {
+            outdatedAnomalies.add(a);
+            continue outer;
+          }
+        }
+      }
+      remainingAnomalies.add(a);
+    }
+    // the update alert is less sensitive 2 anomalies are now outdated
+    assertThat(outdatedAnomalies).hasSize(2);
+    assertThat(remainingAnomalies).hasSize(6);
+    // the third anomaly is the March 21 - March 23 anomaly
+    assertThat(remainingAnomalies.get(2).getStartTime().getTime()).isEqualTo(1584748800000L);
+    assertThat(remainingAnomalies.get(2).getEndTime().getTime()).isEqualTo(1584921600000L);
+    // the id should not be changed by a soft-reset
+    assertThat(remainingAnomalies.get(2).getId()).isEqualTo(anomalyId);
+  }
+
+  @Test(dependsOnMethods = "testGetAnomaliesAfterUpdate")
   public void testGetSingleAnomaly() {
     // test get a single anomaly
     final Response response = request("api/anomalies/" + anomalyId).get();
     assert200(response);
   }
 
-  @Test(dependsOnMethods = "testGetAnomalies")
+  @Test(dependsOnMethods = "testGetAnomaliesAfterUpdate")
   public void testEvaluateWithAlertIdOnly() {
     // corresponds to the evaluate call performed from an anomaly page - only the alertId is passed
     final AlertEvaluationApi alertEvaluationApi = alertEvaluationApi(new AlertApi().setId(alertId),
@@ -330,7 +389,7 @@ public class HappyPathTest {
     assert200(response);
   }
 
-  @Test(dependsOnMethods = "testGetAnomalies")
+  @Test(dependsOnMethods = "testGetAnomaliesAfterUpdate")
   public void testCreateAnomalyFeedback() {
     final Response responseBeforeFeedback = request("api/anomalies/" + anomalyId).get();
     assertThat(responseBeforeFeedback.getStatus()).isEqualTo(200);
@@ -392,17 +451,18 @@ public class HappyPathTest {
 
   @Test(dependsOnMethods = "testGetSingleAnomaly")
   public void testAnomalyCount() {
+    // +2 below is the number of outdated anomalies
     // without filters
     Response response = request("api/anomalies/count").get();
     assert200(response);
     Long anomalyCount = response.readEntity(CountApi.class).getCount();
-    assertThat(anomalyCount).isEqualTo(22);
+    assertThat(anomalyCount).isEqualTo(22 + 2);
 
     // there are only 6 parent anomalies
     response = request("api/anomalies/count?isChild=false").get();
     assert200(response);
     anomalyCount = response.readEntity(CountApi.class).getCount();
-    assertThat(anomalyCount).isEqualTo(6);
+    assertThat(anomalyCount).isEqualTo(6 + 2);
 
     // there are only 2 anomalies that have startTime greater than or equal this value
     long startTime = 1585353600000L;
@@ -418,7 +478,8 @@ public class HappyPathTest {
   public void testReplayIsIdemPotent() throws InterruptedException {
     // use update time as a way to know when the replay is done
     final long lastUpdatedTime = getAlertLastUpdatedTime();
-    final Response beforeReplayResponse = request("api/anomalies").get();
+    final String alertAnomaliesRoute = "api/anomalies?alert.id=" + alertId;
+    final Response beforeReplayResponse = request(alertAnomaliesRoute).get();
     assertThat(beforeReplayResponse.getStatus()).isEqualTo(200);
     final List<AnomalyApi> beforeReplayAnomalies = beforeReplayResponse.readEntity(
         ANOMALIES_LIST_TYPE);
@@ -433,7 +494,7 @@ public class HappyPathTest {
       Thread.sleep(1000);
     }
 
-    final Response afterReplayResponse = request("api/anomalies").get();
+    final Response afterReplayResponse = request(alertAnomaliesRoute).get();
     assertThat(afterReplayResponse.getStatus()).isEqualTo(200);
     final List<AnomalyApi> afterReplayAnomalies = afterReplayResponse.readEntity(
         ANOMALIES_LIST_TYPE);

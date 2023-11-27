@@ -77,12 +77,6 @@ public class AnomalyService extends CrudService<AnomalyApi, AnomalyDTO> {
   }
 
   @Override
-  protected AnomalyDTO createDto(final ThirdEyeServerPrincipal principal,
-      final AnomalyApi api) {
-    return toDto(api);
-  }
-
-  @Override
   protected void validate(final AnomalyApi api, @Nullable final AnomalyDTO existing) {
     super.validate(api, existing);
     ensureNull(api.getAuth(), "cannot set auth for anomalies");

@@ -20,7 +20,6 @@ import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
-import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.MetricApi;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
@@ -43,12 +42,6 @@ public class MetricService extends CrudService<MetricApi, MetricConfigDTO> {
     super(authorizationManager, metricConfigManager, ImmutableMap.of());
     this.datasetConfigManager = datasetConfigManager;
     this.metricConfigManager = metricConfigManager;
-  }
-
-  @Override
-  protected MetricConfigDTO createDto(final ThirdEyeServerPrincipal principal,
-      final MetricApi api) {
-    return toDto(api);
   }
 
   @Override

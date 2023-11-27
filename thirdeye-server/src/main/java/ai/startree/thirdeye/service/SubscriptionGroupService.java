@@ -21,7 +21,6 @@ import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
-import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
@@ -41,12 +40,6 @@ public class SubscriptionGroupService extends
       final SubscriptionGroupManager subscriptionGroupManager,
       final AuthorizationManager authorizationManager) {
     super(authorizationManager, subscriptionGroupManager, ImmutableMap.of());
-  }
-
-  @Override
-  protected SubscriptionGroupDTO createDto(final ThirdEyeServerPrincipal principal,
-      final SubscriptionGroupApi api) {
-    return toDto(api);
   }
 
   @Override

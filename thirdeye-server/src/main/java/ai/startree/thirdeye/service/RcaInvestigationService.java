@@ -18,7 +18,6 @@ import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureNull;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
-import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
 import ai.startree.thirdeye.spi.api.RcaInvestigationApi;
@@ -46,12 +45,6 @@ public class RcaInvestigationService extends CrudService<RcaInvestigationApi, Rc
       final AuthorizationManager authorizationManager) {
     super(authorizationManager, rootCauseSessionDAO, API_TO_INDEX_FILTER_MAP);
     this.anomalyManager = anomalyManager;
-  }
-
-  @Override
-  protected RcaInvestigationDTO createDto(final ThirdEyeServerPrincipal principal,
-      final RcaInvestigationApi api) {
-    return toDto(api);
   }
 
   @Override

@@ -143,11 +143,13 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
       final long newLastTimestamp = Math.max(detectionInterval.getEndMillis(),
           alert.getLastTimestamp());
       alert.setLastTimestamp(newLastTimestamp);
-      alertManager.update(alert);
-
+      // TODO CYRIL: lastTimestamp and updateTime are used by consumers to known when an alert has run
+      //  to improve consistency the anomaly save and the update of the alert should be in a single transaction
+      //  this would also improve failure cases
       optional(result.getAnomalies())
           .orElse(Collections.emptyList())
           .forEach(anomalyDao::save);
+      alertManager.update(alert);
 
       detectionTaskSuccessCounter.inc();
       LOG.info("Completed detection task for id {} between {} and {}. Detected {} anomalies.",

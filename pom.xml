@@ -85,7 +85,7 @@
     <reflections.version>0.10.2</reflections.version>
     <retrofit2.version>2.9.0</retrofit2.version>
     <sendgrid.version>4.0.1</sendgrid.version>
-    <slack.version>1.20.2</slack.version>
+    <slack.version>1.29.2</slack.version>
     <slf4j-api.version>1.7.12</slf4j-api.version>
     <swagger.version>2.1.6-1</swagger.version>
     <testcontainers.version>1.18.3</testcontainers.version>

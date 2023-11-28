@@ -54,7 +54,6 @@
     <aspectj.version>1.9.6</aspectj.version>
     <assertj.version>3.17.2</assertj.version>
     <auto-service.version>1.0.1</auto-service.version>
-    <avro.version>1.7.7</avro.version>
     <calcite.version>1.36.0</calcite.version>
     <calendar-api.version>v3-rev300-1.23.0</calendar-api.version>
     <checkerframework.version>3.39.0</checkerframework.version>
@@ -594,11 +593,6 @@
             <artifactId>jersey-server</artifactId>
           </exclusion>
         </exclusions>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.avro</groupId>
-        <artifactId>avro</artifactId>
-        <version>${avro.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.httpcomponents</groupId>

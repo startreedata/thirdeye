@@ -14,7 +14,7 @@
 package ai.startree.thirdeye.detectionpipeline.sql.filter;
 
 import ai.startree.thirdeye.IntegrationTestUtils;
-import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
+import ai.startree.thirdeye.datasource.query.QueryPredicate;
 import ai.startree.thirdeye.plugins.datasource.pinot.PinotSqlLanguage;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.Predicate.OPER;

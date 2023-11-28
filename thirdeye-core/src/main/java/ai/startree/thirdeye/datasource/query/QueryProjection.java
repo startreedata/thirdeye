@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.datasource.calcite;
+package ai.startree.thirdeye.datasource.query;
 
 import static ai.startree.thirdeye.spi.Constants.DEFAULT_LOCALE;
 import static ai.startree.thirdeye.spi.metric.MetricAggFunction.AVAILABLE_METRIC_AGG_FUNCTIONS_NAMES;

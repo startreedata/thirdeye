@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.calcite.dataframe;
+package ai.startree.thirdeye.detectionpipeline.operator.sql;
 
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import com.google.common.collect.ImmutableMap;

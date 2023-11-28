@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.calcite.dataframe;
+package ai.startree.thirdeye.detectionpipeline.operator.sql;
 
 import static org.apache.calcite.linq4j.Nullness.castNonNull;
 
@@ -33,10 +33,6 @@ public class DataFrameEnumerator implements Enumerator<Object[]> {
   private @Nullable Object[] current;
   private int currentIndex = -1;
   List<String> columnNames;
-
-  public DataFrameEnumerator(DataFrame dataFrame, AtomicBoolean cancelFlag) {
-    this(dataFrame, cancelFlag, null);
-  }
 
   public DataFrameEnumerator(DataFrame dataFrame, AtomicBoolean cancelFlag,
       @Nullable Object @Nullable [] filterValues) {

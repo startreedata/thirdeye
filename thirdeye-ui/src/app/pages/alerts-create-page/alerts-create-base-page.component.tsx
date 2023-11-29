@@ -29,6 +29,7 @@ import { createEmptySubscriptionGroup } from "../../utils/subscription-groups/su
 import { AlertsEditCreateBasePageComponent } from "../alerts-edit-create-common/alerts-edit-create-base-page.component";
 import { QUERY_PARAM_KEY_ANOMALIES_RETRY } from "../alerts-view-page/alerts-view-page.utils";
 import { AlertsCreatePageProps } from "./alerts-create-page.interfaces";
+import { AxiosError } from "axios/index";
 
 export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
     startingAlertConfiguration,
@@ -74,7 +75,7 @@ export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
             } catch (error) {
                 notifyIfErrors(
                     ActionStatus.Error,
-                    getErrorMessages(error),
+                    getErrorMessages(error as AxiosError),
                     notify,
                     t(
                         "message.experienced-error-creating-subscription-group-while-creating-alert"

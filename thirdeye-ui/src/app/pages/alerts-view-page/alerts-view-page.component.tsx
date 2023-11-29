@@ -262,7 +262,7 @@ export const AlertsViewPage: FunctionComponent = () => {
             return;
         }
 
-        if (alert && searchParams.has(QUERY_PARAM_KEY_ANOMALIES_RETRY)) {
+        if (!!alert && searchParams.has(QUERY_PARAM_KEY_ANOMALIES_RETRY)) {
             if (refreshAttempts < 3) {
                 setTimeout(() => {
                     setRefreshAttempts(refreshAttempts + 1);

@@ -207,7 +207,7 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
             } catch (error) {
                 notifyIfErrors(
                     ActionStatus.Error,
-                    getErrorMessages(error),
+                    getErrorMessages(error as AxiosError),
                     notify,
                     t(
                         "message.experienced-error-creating-subscription-group-while-creating-alert"
@@ -279,7 +279,7 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
         } catch (error) {
             notifyIfErrors(
                 ActionStatus.Error,
-                getErrorMessages(error),
+                getErrorMessages(error as AxiosError),
                 notify,
                 t("message.update-error", {
                     entity: t("label.subscription-groups"),

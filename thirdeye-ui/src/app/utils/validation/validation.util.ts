@@ -14,6 +14,7 @@
  */
 import i18n from "i18next";
 import * as yup from "yup";
+import { ValidationError } from "yup";
 
 export interface ValidationResult {
     valid: boolean;
@@ -38,8 +39,10 @@ export const validateEmail = (email: string): ValidationResult => {
             email: email,
         });
     } catch (error) {
-        validationResult.valid = false;
-        validationResult.message = error && error.message;
+        if (error instanceof ValidationError) {
+            validationResult.valid = false;
+            validationResult.message = error && error.message;
+        }
     }
 
     return validationResult;

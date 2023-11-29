@@ -212,7 +212,7 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
                         dropdownMenuItems={shortcutCreateMenuItems}
                         open={Boolean(feedbackMenuAnchorEl)}
                         onClick={(menuItemId: number | string): void => {
-                            handleFeedbackChangeOk &&
+                            !!handleFeedbackChangeOk &&
                                 handleLabelChange(
                                     menuItemId as unknown as AnomalyFeedbackType
                                 );

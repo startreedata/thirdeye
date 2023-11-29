@@ -89,10 +89,6 @@
       <artifactId>httpclient</artifactId>
       <version>4.5.9</version>
     </dependency>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-collections4</artifactId>
-    </dependency>
 
     <!-- test dependencies -->
     <dependency>

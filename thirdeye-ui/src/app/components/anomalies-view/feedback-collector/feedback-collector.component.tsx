@@ -15,10 +15,12 @@
 import { Button, Grid, Typography } from "@material-ui/core";
 import React, { FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Link as RouterLink } from "react-router-dom";
 import {
     AnomalyFeedback,
     AnomalyFeedbackType,
 } from "../../../rest/dto/anomaly.interfaces";
+import { getRootCauseAnalysisForAnomalyInvestigateV2Path } from "../../../utils/routes/routes.util";
 import { AnomalyFeedbackModal } from "../../anomaly-feedback/modal/anomaly-feedback-modal.component";
 import { FeedbackCollectorProps } from "./feedback-collector.interfaces";
 
@@ -35,7 +37,7 @@ export const FeedbackCollector: FunctionComponent<FeedbackCollectorProps> = ({
     return (
         <>
             <Grid container alignItems="center" justifyContent="space-between">
-                <Grid item>
+                <Grid item lg md={5} sm={12}>
                     <Typography variant="h4">
                         {t("label.confirm-anomaly")}
                     </Typography>
@@ -45,8 +47,8 @@ export const FeedbackCollector: FunctionComponent<FeedbackCollectorProps> = ({
                         )}
                     </Typography>
                 </Grid>
-                <Grid item>
-                    <Grid container>
+                <Grid item lg md={7} sm={12}>
+                    <Grid container justifyContent="flex-end">
                         <Grid item>
                             <AnomalyFeedbackModal
                                 noOnly
@@ -82,6 +84,7 @@ export const FeedbackCollector: FunctionComponent<FeedbackCollectorProps> = ({
                                     return (
                                         <Button
                                             color="primary"
+                                            variant="outlined"
                                             onClick={openCallback}
                                         >
                                             {t(
@@ -92,6 +95,21 @@ export const FeedbackCollector: FunctionComponent<FeedbackCollectorProps> = ({
                                 }}
                                 onFeedbackUpdate={onFeedbackUpdate}
                             />
+                        </Grid>
+                        <Grid item>
+                            <Button
+                                color="primary"
+                                component={RouterLink}
+                                size="medium"
+                                to={`${getRootCauseAnalysisForAnomalyInvestigateV2Path(
+                                    anomaly?.id
+                                )}`}
+                                variant="contained"
+                            >
+                                {t("label.investigate-entity", {
+                                    entity: t("label.anomaly"),
+                                })}
+                            </Button>
                         </Grid>
                     </Grid>
                 </Grid>

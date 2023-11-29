@@ -36,6 +36,8 @@ public enum ThirdEyeStatus {
   ERR_MISSING_NAME("name is null!"),
   ERR_MULTIPLE_DATASETS_FOUND(
       "Multiple datasets found based on the dataset's display name %s, candidates: %s"),
+  ERR_MULTIPLE_DATASOURCES_FOUND(
+      "Multiple data sources found with the same name: %s"),
   ERR_NOTIFICATION_DISPATCH("%s"),
   ERR_NOT_ENOUGH_DATA_FOR_RCA("Not enough data for RCA algorithm: %s"),
   ERR_OBJECT_DOES_NOT_EXIST("Object does not exist! %s"),

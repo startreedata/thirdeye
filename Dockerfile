@@ -13,6 +13,8 @@
 #
 
 FROM eclipse-temurin:11-jdk-alpine as builder
+# build jcmd tools to make them available at runtime
+RUN ${JAVA_HOME}/bin/jlink --module-path jmods --add-modules jdk.jcmd --output /jcmd
 WORKDIR /build
 RUN apk add --no-cache git
 COPY ./ ./
@@ -31,5 +33,8 @@ EXPOSE 8081
 EXPOSE 8443
 
 COPY --from=builder --chown=1000:1000 /build/thirdeye-distribution/target/thirdeye-distribution-*-dist/thirdeye-distribution-*/ ./
+# add jcmd tools
+COPY --from=builder --chown=1000:1000 /jcmd /jcmd
+ENV PATH="${PATH}:/jcmd/bin"
 
 ENTRYPOINT ["sh", "bin/thirdeye.sh"]

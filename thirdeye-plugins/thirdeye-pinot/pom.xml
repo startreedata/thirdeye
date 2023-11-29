@@ -18,7 +18,7 @@
   <parent>
     <artifactId>thirdeye-plugins</artifactId>
     <groupId>ai.startree.thirdeye.plugins</groupId>
-    <version>1.203.0-SNAPSHOT</version>
+    <version>1.208.0-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -26,9 +26,6 @@
   <artifactId>thirdeye-pinot</artifactId>
 
   <properties>
-    <!--    Should match the helix version here -->
-    <!--    https://github.com/apache/incubator-pinot/blob/master/pom.xml#L120 -->
-    <helix.version>0.9.8</helix.version>
   </properties>
 
   <dependencies>
@@ -84,40 +81,8 @@
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>org.apache.helix</groupId>
-      <artifactId>helix-core</artifactId>
-      <version>${helix.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>com.github.sgroschupf</groupId>
-          <artifactId>zkclient</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.jboss.netty</groupId>
-          <artifactId>netty</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>log4j</groupId>
-          <artifactId>log4j</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-log4j12</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>io.dropwizard</groupId>
-      <artifactId>dropwizard-db</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
-      <version>4.5.9</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-collections4</artifactId>
     </dependency>
 
     <!-- test dependencies -->

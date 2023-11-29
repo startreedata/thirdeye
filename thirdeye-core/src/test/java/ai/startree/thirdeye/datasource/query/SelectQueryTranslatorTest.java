@@ -11,9 +11,9 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.datasource.calcite;
+package ai.startree.thirdeye.datasource.query;
 
-import static ai.startree.thirdeye.datasource.calcite.SelectQueryTranslator.TIME_AGGREGATION_ALIAS;
+import static ai.startree.thirdeye.datasource.query.SelectQueryTranslator.TIME_AGGREGATION_ALIAS;
 import static ai.startree.thirdeye.spi.Constants.UTC_TIMEZONE;
 import static ai.startree.thirdeye.spi.util.TimeUtils.timezonesAreEquivalent;
 import static ai.startree.thirdeye.util.CalciteUtils.EQUALS_OPERATOR;

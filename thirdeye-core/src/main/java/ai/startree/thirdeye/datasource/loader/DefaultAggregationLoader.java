@@ -13,15 +13,15 @@
  */
 package ai.startree.thirdeye.datasource.loader;
 
-import static ai.startree.thirdeye.datasource.calcite.QueryProjection.getFunctionName;
+import static ai.startree.thirdeye.datasource.query.QueryProjection.getFunctionName;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.CalciteUtils.identifierDescOf;
 import static ai.startree.thirdeye.util.CalciteUtils.identifierOf;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
-import ai.startree.thirdeye.datasource.calcite.QueryProjection;
-import ai.startree.thirdeye.datasource.calcite.SelectQuery;
-import ai.startree.thirdeye.datasource.calcite.SelectQueryTranslator;
+import ai.startree.thirdeye.datasource.query.QueryProjection;
+import ai.startree.thirdeye.datasource.query.SelectQuery;
+import ai.startree.thirdeye.datasource.query.SelectQueryTranslator;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.LongSeries;

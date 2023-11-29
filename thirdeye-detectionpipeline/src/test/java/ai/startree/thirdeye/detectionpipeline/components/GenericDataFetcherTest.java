@@ -15,7 +15,7 @@ package ai.startree.thirdeye.detectionpipeline.components;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import ai.startree.thirdeye.datasource.calcite.QueryPredicate;
+import ai.startree.thirdeye.datasource.query.QueryPredicate;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.Predicate.OPER;
 import ai.startree.thirdeye.spi.metric.DimensionType;

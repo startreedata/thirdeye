@@ -43,7 +43,7 @@ export const FeedbackCard: FunctionComponent<FeedbackCardProps> = ({
 
     return (
         <Grid container alignItems="center" justifyContent="space-between">
-            <Grid item>
+            <Grid item md sm={6} xs={12}>
                 {t("message.anomaly-confirmed-to-be-a")}
                 {feedback?.type === AnomalyFeedbackType.NOT_ANOMALY ? (
                     <Typography color="error" component="span" variant="body2">
@@ -65,12 +65,8 @@ export const FeedbackCard: FunctionComponent<FeedbackCardProps> = ({
                 {lastUpdatedStr &&
                     t("message.on", { lastUpdatedStr: lastUpdatedStr })}
             </Grid>
-            <Grid item>
-                <Grid
-                    container
-                    alignItems="center"
-                    justifyContent="space-between"
-                >
+            <Grid item md sm={6} xs={12}>
+                <Grid container alignItems="center" justifyContent="flex-end">
                     <Grid item>
                         <AnomalyFeedbackModal
                             showNo

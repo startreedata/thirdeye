@@ -1,7 +1,14 @@
-### [2.41.5](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.41.4...thirdeye-ui-2.41.5) (2023-11-27)
-
+### [2.41.6](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.41.5...thirdeye-ui-2.41.6) (2023-11-29)
 
 ### Bug Fixes
+
+* [TE-1951](https://cortexdata.atlassian.net/browse/TE-1951) always show investigate button ([b45d21527](https://github.com/startreedata/thirdeye/commit/b45d215279920426d45a27ff811de1fb70eb4f15))
+
+
+### [2.41.5](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.41.4...thirdeye-ui-2.41.5) (2023-11-27)
+
+### Bug Fixes
+
 
 * [TE-1834](https://cortexdata.atlassian.net/browse/TE-1834) switching back from basic to multi and vice versa shouldn't break simple ui ([1f3c2ee0c](https://github.com/startreedata/thirdeye/commit/1f3c2ee0c51945c55d902a799c704890beabbd2c))
 * [TE-1919](https://cortexdata.atlassian.net/browse/TE-1919) label changes in the home page ([eb86fcbef](https://github.com/startreedata/thirdeye/commit/eb86fcbef337e5efb40dbb72694d0d95dafacdf1))
@@ -10,6 +17,7 @@
 * [TE-1925](https://cortexdata.atlassian.net/browse/TE-1925) prompt user when user says not anomaly ([e81231760](https://github.com/startreedata/thirdeye/commit/e81231760517d2e34deb5c5e28143b9ab8420e62))
 * [TE-1932](https://cortexdata.atlassian.net/browse/TE-1932) fix not calling alert insights when dataset changes ([66556df01](https://github.com/startreedata/thirdeye/commit/66556df016c8b1582b90e8c3216fe45e52bdeadd))
 * [TE-1940](https://cortexdata.atlassian.net/browse/TE-1940) ensure alert uses correct template name for dx when switching to json view ([e6b4b2cc6](https://github.com/startreedata/thirdeye/commit/e6b4b2cc6a1ac2679e17e3c0402a874eba4b4c19))
+
 
 ### [2.41.4](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.41.3...thirdeye-ui-2.41.4) (2023-10-24)
 

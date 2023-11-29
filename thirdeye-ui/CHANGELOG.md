@@ -1,3 +1,10 @@
+### [2.41.6](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.41.5...thirdeye-ui-2.41.6) (2023-11-29)
+
+
+### Bug Fixes
+
+* [TE-1951](https://cortexdata.atlassian.net/browse/TE-1951) always show investigate button ([b45d21527](https://github.com/startreedata/thirdeye/commit/b45d215279920426d45a27ff811de1fb70eb4f15))
+
 ### [2.41.4](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.41.3...thirdeye-ui-2.41.4) (2023-10-24)
 
 

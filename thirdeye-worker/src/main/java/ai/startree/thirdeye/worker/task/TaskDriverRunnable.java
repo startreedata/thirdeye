@@ -213,9 +213,9 @@ public class TaskDriverRunnable implements Runnable {
         }
       }
       taskFetchMissCounter.inc();
-      final long idleStart = System.currentTimeMillis();
+      final long idleStart = System.nanoTime();
       sleep(!tasksFound);
-      workerIdleTimeInSeconds.inc((System.currentTimeMillis() - idleStart) / 1000);
+      workerIdleTimeInSeconds.inc(TimeUnit.SECONDS.convert(System.nanoTime() - idleStart, TimeUnit.NANOSECONDS));
     }
     return null;
   }

@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.datasource.query;
 
+import static ai.startree.thirdeye.datasource.query.AggregateProjections.aggProjection;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -75,18 +76,18 @@ public class SelectQuery {
    * Generates a query for a metric. The metric is aliased as {@link  Constants}.COL_VALUE.
    */
   public static SelectQuery from(final MetricSlice slice) {
-    DatasetConfigDTO datasetConfigDTO = slice.getDatasetConfigDTO();
-    MetricConfigDTO metricConfigDTO = slice.getMetricConfigDTO();
+    final DatasetConfigDTO datasetConfigDTO = slice.getDatasetConfigDTO();
+    final MetricConfigDTO metricConfigDTO = slice.getMetricConfigDTO();
     final SelectQuery builder = new SelectQuery(datasetConfigDTO.getDataset())
         .whereTimeFilter(slice.getInterval(),
             datasetConfigDTO.getTimeColumn(),
             datasetConfigDTO.getTimeFormat())
-        .select(QueryProjection.fromMetricConfig(metricConfigDTO)
+        .select(aggProjection(metricConfigDTO)
             .withAlias(Constants.COL_VALUE));
     if (isNotBlank(metricConfigDTO.getWhere())) {
       builder.where(metricConfigDTO.getWhere());
     }
-    for (Predicate predicate : slice.getPredicates()) {
+    for (final Predicate predicate : slice.getPredicates()) {
       builder.where(QueryPredicate.of(predicate, DimensionType.STRING));
     }
 

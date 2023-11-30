@@ -23,6 +23,7 @@ import static ai.startree.thirdeye.util.CalciteUtils.quoteIdentifierIfReserved;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.detectionpipeline.sql.SqlLanguageTranslator;
+import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
 import com.google.common.base.MoreObjects;
@@ -135,6 +136,10 @@ public class SelectQueryTranslator {
     sqlNodeOrderByProjections = List.copyOf(selectQuery.sqlNodeOrderByProjections);
 
     limit = selectQuery.limit;
+  }
+
+  public String toSql(final ThirdEyeDataSource ds) {
+    return getSql(ds.getSqlLanguage(), ds.getSqlExpressionBuilder());
   }
 
   public String getSql(final SqlLanguage sqlLanguage,

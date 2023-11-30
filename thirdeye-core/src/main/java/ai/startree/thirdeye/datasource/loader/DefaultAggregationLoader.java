@@ -13,13 +13,14 @@
  */
 package ai.startree.thirdeye.datasource.loader;
 
-import static ai.startree.thirdeye.datasource.query.QueryProjection.getFunctionName;
+import static ai.startree.thirdeye.datasource.query.AggregateProjections.aggProjection;
+import static ai.startree.thirdeye.datasource.query.AggregateProjections.countStar;
+import static ai.startree.thirdeye.datasource.query.QueryProjection.getColName;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.CalciteUtils.identifierDescOf;
 import static ai.startree.thirdeye.util.CalciteUtils.identifierOf;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
-import ai.startree.thirdeye.datasource.query.QueryProjection;
 import ai.startree.thirdeye.datasource.query.SelectQuery;
 import ai.startree.thirdeye.datasource.query.SelectQueryTranslator;
 import ai.startree.thirdeye.spi.Constants;
@@ -176,7 +177,7 @@ public class DefaultAggregationLoader implements AggregationLoader {
   public Future<DataFrame> loadAggregateAsync(final MetricSlice slice,
       final List<String> dimensions, final int limit) {
     LOG.info("Aggregating '{}'", slice);
-    final SelectQuery requestBuilder = SelectQuery
+    final SelectQuery selectQuery = SelectQuery
         .from(slice)
         .limit(limit);
     if (dimensions.isEmpty()) {
@@ -184,21 +185,20 @@ public class DefaultAggregationLoader implements AggregationLoader {
       // can return a value even if there is no data see
       // https://docs.pinot.apache.org/users/user-guide-query/supported-aggregations
       // count rows non null
-      requestBuilder.select(QueryProjection.of("COUNT",
-          List.of(getFunctionName(slice.getMetricConfigDTO()))).withAlias(
+      selectQuery.select(aggProjection("COUNT",
+          List.of(getColName(slice.getMetricConfigDTO()))).withAlias(
           COL_AGGREGATION_ONLY_NON_NULL_ROWS_COUNT));
       // count all rows
-      requestBuilder.select(QueryProjection.of("COUNT", List.of("*")).withAlias(
-          COL_AGGREGATION_ONLY_ROWS_COUNT));
+      selectQuery.select(countStar());
     }
     for (final String dimension : dimensions) {
       final SqlIdentifier dimensionIdentifier = identifierOf(dimension);
-      requestBuilder
+      selectQuery
           .select(dimensionIdentifier)
           .groupBy(dimensionIdentifier);
     }
     final String dataSource = slice.getDatasetConfigDTO().getDataSource();
-    return getQueryResultAsync(requestBuilder.build(), dataSource);
+    return getQueryResultAsync(selectQuery.build(), dataSource);
   }
 
   private Future<DataFrame> getQueryResultAsync(final SelectQueryTranslator request,

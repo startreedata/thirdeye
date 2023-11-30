@@ -25,10 +25,10 @@ import static ai.startree.thirdeye.util.CalciteUtils.symbolLiteralOf;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import ai.startree.thirdeye.spi.metric.MetricAggFunction;
-import ai.startree.thirdeye.util.CalciteUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import org.apache.calcite.sql.SqlBasicCall;
 import org.apache.calcite.sql.SqlFunctionCategory;
 import org.apache.calcite.sql.SqlNode;
@@ -37,7 +37,10 @@ import org.apache.calcite.sql.parser.SqlParser.Config;
 import org.apache.calcite.sql.parser.SqlParserPos;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-// todo cyril refactor to limit usage of this class - limit to aggregations
+/**
+ * TODO spyne QueryProjection is used as a builder and implementor.
+ *    This is an anti-pattern needs to be addressed
+ */
 public class QueryProjection {
 
   @Nullable
@@ -49,8 +52,11 @@ public class QueryProjection {
   final private String alias;
   final private boolean isDescOrder;
 
-  private QueryProjection(@Nullable final String operator, final List<String> operands,
-      @Nullable final String quantifier, @Nullable final String alias, final boolean isDescOrder) {
+  QueryProjection(@Nullable final String operator,
+      final List<String> operands,
+      @Nullable final String quantifier,
+      @Nullable final String alias,
+      final boolean isDescOrder) {
     this.operator = operator;
     this.operands = List.copyOf(operands);
     this.quantifier = quantifier;
@@ -58,42 +64,41 @@ public class QueryProjection {
     this.isDescOrder = isDescOrder;
   }
 
-  public static QueryProjection of(@Nullable final String operator, final List<String> operands,
-      @Nullable final String quantifier) {
-    return new QueryProjection(operator, operands, quantifier, null, false);
-  }
-
-  public static QueryProjection of(@Nullable final String operator, final List<String> operands) {
-    return new QueryProjection(operator, operands, null, null, false);
-  }
-
   /**
    * Not robust to columns with special characters that are not quoted.
    * Use for derived metric and sql snippets only, or with quoted column names.
    * For simple columns, prefer CalciteUtils.identifierOf().
-   * */
+   * --
+   * TODO cyril remove this
+   * - enforce operator not null in other constructors
+   * - make it clear operands should be safe sql snippets - update tests
+   */
   @Deprecated
-  // todo cyril remove this - enforce operator not null in other constructors - make it clear operands should be safe sql snippets - update tests
   public static QueryProjection of(final String sqlSnippet) {
     return new QueryProjection(null, List.of(sqlSnippet), null, null, false);
+  }
+
+  // todo cyril see if it's possible to deprecrate aggregation column
+  public static String getColName(final MetricConfigDTO metricConfigDTO) {
+    return optional(metricConfigDTO.getAggregationColumn()).orElse(metricConfigDTO.getName());
   }
 
   public QueryProjection withAlias(@Nullable final String alias) {
     if (isDescOrder) {
       throw new IllegalStateException("isDescOrder is true. Cannot combine alias and desc order.");
     }
-    return new QueryProjection(this.operator,
-        this.operands,
-        this.quantifier,
+    return new QueryProjection(operator,
+        operands,
+        quantifier,
         alias,
-        this.isDescOrder);
+        isDescOrder);
   }
 
   public QueryProjection withDescOrder() {
     if (alias != null) {
       throw new IllegalStateException("alias is not null. Cannot combine alias and desc order.");
     }
-    return new QueryProjection(this.operator, this.operands, this.quantifier, this.alias, true);
+    return new QueryProjection(operator, operands, quantifier, alias, true);
   }
 
   private SqlNode toSqlNode(final Config sqlParserConfig) {
@@ -118,11 +123,9 @@ public class QueryProjection {
   }
 
   private List<SqlNode> operandNodes(final Config sqlParserConfig) {
-    final List<SqlNode> operandNodes = new ArrayList<>(this.operands.size());
-    for (final String operand : operands) {
-      operandNodes.add(CalciteUtils.expressionToNode(operand, sqlParserConfig));
-    }
-    return operandNodes;
+    return operands.stream()
+        .map(operand -> expressionToNode(operand, sqlParserConfig))
+        .collect(Collectors.toCollection(() -> new ArrayList<>(operands.size())));
   }
 
   public SqlNode toDialectSpecificSqlNode(final Config sqlParserConfig,
@@ -133,7 +136,7 @@ public class QueryProjection {
       if (AVAILABLE_METRIC_AGG_FUNCTIONS_NAMES.contains(operatorUpper)) {
         final MetricAggFunction metricAggFunction = MetricAggFunction.valueOf(operatorUpper);
         if (expressionBuilder.needsCustomDialect(metricAggFunction)) {
-          String customDialectSql = expressionBuilder.getCustomDialectSql(metricAggFunction,
+          final String customDialectSql = expressionBuilder.getCustomDialectSql(metricAggFunction,
               operands,
               quantifier);
           return applySpecialOperators(expressionToNode(customDialectSql, sqlParserConfig));
@@ -141,7 +144,11 @@ public class QueryProjection {
       }
       // 2. COUNT DISTINCT is transformed in COUNT (DISTINCT ...)
       if (MetricAggFunction.COUNT_DISTINCT.name().equals(operator)) {
-        return applySpecialOperators(QueryProjection.of("COUNT", operands, "DISTINCT")
+        return applySpecialOperators(new QueryProjection("COUNT",
+            operands,
+            "DISTINCT",
+            null,
+            false)
             .toDialectSpecificSqlNode(sqlParserConfig, expressionBuilder));
       }
     }
@@ -158,27 +165,6 @@ public class QueryProjection {
     }
 
     return node;
-  }
-
-  /**
-   * Creates an aggregation projection based on a metricConfig.
-   */
-  public static QueryProjection fromMetricConfig(MetricConfigDTO metricConfigDTO) {
-    String aggFunction = Objects.requireNonNull(metricConfigDTO.getDefaultAggFunction());
-    List<String> operands;
-    // not sure why the logic below - kept it from legacy
-    if (metricConfigDTO.getName().equals("*")) {
-      operands = List.of("*");
-    } else {
-      operands = List.of(getFunctionName(metricConfigDTO));
-    }
-
-    return QueryProjection.of(aggFunction, operands);
-  }
-
-  // todo cyril see if it's possible to deprecrate aggregation column
-  public static String getFunctionName(final MetricConfigDTO metricConfigDTO) {
-    return optional(metricConfigDTO.getAggregationColumn()).orElse(metricConfigDTO.getName());
   }
 
   @Override

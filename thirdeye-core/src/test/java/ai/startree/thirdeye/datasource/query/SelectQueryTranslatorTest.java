@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.datasource.query;
 
+import static ai.startree.thirdeye.datasource.query.AggregateProjections.aggProjection;
 import static ai.startree.thirdeye.datasource.query.SelectQueryTranslator.TIME_AGGREGATION_ALIAS;
 import static ai.startree.thirdeye.spi.Constants.UTC_TIMEZONE;
 import static ai.startree.thirdeye.spi.util.TimeUtils.timezonesAreEquivalent;
@@ -57,18 +58,18 @@ public class SelectQueryTranslatorTest {
   private static final String DATABASE = "db1";
   private static final String TABLE = "table1";
   private static final String COLUMN_NAME_1 = "col1";
-  public static final QueryProjection DIALECT_SPECIFIC_AGGREGATION_PROJECTION = QueryProjection.of(
+  public static final QueryProjection DIALECT_SPECIFIC_AGGREGATION_PROJECTION = aggProjection(
       MetricAggFunction.PCT90.name(),
       List.of(COLUMN_NAME_1));
-  public static final QueryProjection COUNT_DISTINCT_AGGREGATION_PROJECTION = QueryProjection.of(
+  public static final QueryProjection COUNT_DISTINCT_AGGREGATION_PROJECTION = aggProjection(
       MetricAggFunction.COUNT_DISTINCT.name(),
       List.of(COLUMN_NAME_1));
-  public static final QueryProjection STANDARD_AGGREGATION_PROJECTION = QueryProjection.of(
+  public static final QueryProjection STANDARD_AGGREGATION_PROJECTION = aggProjection(
       MetricAggFunction.SUM.name(),
       List.of(COLUMN_NAME_1));
   public static final QueryProjection SIMPLE_PROJECTION = QueryProjection.of(COLUMN_NAME_1);
   private static final String COLUMN_NAME_2 = "col2";
-  public static final QueryProjection UNKNOWN_FUNCTION_PROJECTION = QueryProjection.of("UNKNOWN_MOD",
+  public static final QueryProjection UNKNOWN_FUNCTION_PROJECTION = aggProjection("UNKNOWN_MOD",
       List.of(COLUMN_NAME_1, COLUMN_NAME_2));
   private static final String COLUMN_NAME_3 = "col3";
   public static final SqlNode SIMPLE_SQL_NODE_PROJECTION = identifierOf(COLUMN_NAME_3);
@@ -758,7 +759,7 @@ public class SelectQueryTranslatorTest {
   public void testGroupByWithHaving() {
     final SelectQueryTranslator selectQueryTranslator = new SelectQuery("table")
         .select("dimension")
-        .select(QueryProjection.of("SUM", List.of("metric")).withAlias("agg"))
+        .select(aggProjection("SUM", List.of("metric")).withAlias("agg"))
         .groupBy("dimension")
         .having(QueryPredicate.of(Predicate.GT("agg", "3"), DimensionType.NUMERIC))
         .build();

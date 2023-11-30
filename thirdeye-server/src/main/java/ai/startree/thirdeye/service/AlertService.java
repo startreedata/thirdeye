@@ -48,7 +48,6 @@ import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DetectionPipelineTaskInfo;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
@@ -327,9 +326,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
   }
 
   private void deleteAssociatedAnomalies(final Long alertId) {
-    final List<AnomalyDTO> anomalies = anomalyManager.findByPredicate(
-        Predicate.EQ("detectionConfigId", alertId));
-    anomalies.forEach(anomalyManager::delete);
+    anomalyManager.deleteByPredicate(Predicate.EQ("detectionConfigId", alertId));
   }
 
   @SuppressWarnings("unchecked")

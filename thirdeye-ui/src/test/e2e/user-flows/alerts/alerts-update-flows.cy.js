@@ -74,7 +74,9 @@ describe("alert update flows", () => {
         );
         // Modal asking for reset popped up, click Update Alert
         cy.get("span")
-            .contains("Yes, I want to reset and remove additional data")
+            .contains(
+                "Delete past results, notify for all historical anomalies"
+            )
             .click();
         cy.get(".MuiDialog-container  button")
             .contains("Update & reset alert")
@@ -124,7 +126,9 @@ describe("alert update flows", () => {
         );
         // Modal asking for reset popped up, click submit
         cy.get("span")
-            .contains("Yes, I want to reset and remove additional data")
+            .contains(
+                "Delete past results, notify for all historical anomalies"
+            )
             .click();
         cy.get(".MuiDialog-container  button")
             .contains("Update & reset alert")

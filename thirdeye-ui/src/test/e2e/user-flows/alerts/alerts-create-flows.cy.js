@@ -44,6 +44,11 @@ describe("alert create flows", () => {
             SELECT_ALERT_CATEGORY_TEST_IDS.BASIC_ALERT_BTN
         ).click();
 
+        // Wait for this to finish after selecting metric in order to preview chaert
+        cy.intercept("http://localhost:7004/api/alerts/insights").as(
+            "getInsights"
+        );
+
         /** Select metric page **/
         // Open the dataset autocomplete dropdown
         cy.getByDataTestId("datasource-select").click();
@@ -64,6 +69,7 @@ describe("alert create flows", () => {
             "getChartData"
         );
 
+        cy.wait("@getInsights");
         // Click on button to initiate API call for chart data
         cy.getByDataTestId(PREVIEW_CHART_TEST_IDS.PREVIEW_BUTTON).click();
 
@@ -402,7 +408,7 @@ describe("alert create flows", () => {
         // Ensure threshold has the recommended banner
         cy.getByDataTestId("startree-threshold-option-container").should(
             "contain",
-            "This type best fits with your data"
+            "This algorithm best fits with your data"
         );
 
         // Select the threshold option

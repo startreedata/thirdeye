@@ -74,9 +74,14 @@ public class ThirdEyeResultSetDataTable extends AbstractDataTableImpl {
         return thirdEyeResultSet.getDouble(rowIdx, colIdx - groupKeyLength);
       case STRING:
         return thirdEyeResultSet.getString(rowIdx, colIdx - groupKeyLength);
+      case OBJECT:
+        // hotfix for https://github.com/apache/pinot/issues/12091 and https://startree.atlassian.net/browse/TE-1955?focusedCommentId=24634
+        // for the moment datetimeconvert can return an incorrect type `OBJECT` or STRING.
+        LOG.warn("Encountered OBJECT type. This should never happen. Trying to parse as a STRING as a hotfix, see comments in the codebase. This may cause exceptions downstream.");
+        return thirdEyeResultSet.getString(rowIdx, colIdx - groupKeyLength);
       default:
         throw new RuntimeException(
-            "Unrecognized column type - " + type + ", only supports LONG/DOUBLE/STRING.");
+            "Unrecognized column type - " + type + ", only supports BOOLEAN/INT/LONG/FLOAT/DOUBLE/STRING, and partially supports OBJECT.");
     }
   }
 

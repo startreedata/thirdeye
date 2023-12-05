@@ -26,7 +26,7 @@ import {
     useTheme,
 } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import * as yup from "yup";
 import { LocalThemeProviderV1 } from "../../../../../../platform/components";
@@ -45,7 +45,10 @@ export const Slack: FunctionComponent<SlackProps> = ({
 }) => {
     const { t } = useTranslation();
     const theme = useTheme();
-    const { register, errors } = useForm<SlackFormEntries>({
+    const {
+        control,
+        formState: { errors },
+    } = useForm<SlackFormEntries>({
         mode: "onChange",
         reValidateMode: "onChange",
         defaultValues: configuration.params,
@@ -113,32 +116,40 @@ export const Slack: FunctionComponent<SlackProps> = ({
                 <Grid container>
                     <InputSection
                         inputComponent={
-                            <>
-                                <TextField
-                                    fullWidth
-                                    data-testid="slack-input-container"
-                                    error={Boolean(errors && errors.webhookUrl)}
-                                    helperText={
-                                        errors &&
-                                        errors.webhookUrl &&
-                                        errors.webhookUrl.message
-                                    }
-                                    inputRef={register}
-                                    name="webhookUrl"
-                                    type="string"
-                                    variant="outlined"
-                                    onChange={(e) =>
-                                        handleWebhookUrlChange(
-                                            e.currentTarget.value
-                                        )
-                                    }
-                                />
+                            <Controller
+                                control={control}
+                                name="webhookUrl"
+                                render={({ field }) => (
+                                    <>
+                                        <TextField
+                                            {...field}
+                                            fullWidth
+                                            data-testid="slack-input-container"
+                                            error={Boolean(
+                                                errors && errors.webhookUrl
+                                            )}
+                                            helperText={
+                                                errors &&
+                                                errors.webhookUrl &&
+                                                errors.webhookUrl.message
+                                            }
+                                            name="webhookUrl"
+                                            type="string"
+                                            variant="outlined"
+                                            onChange={(e) =>
+                                                handleWebhookUrlChange(
+                                                    e.currentTarget.value
+                                                )
+                                            }
+                                        />
 
-                                <FormHelperText>
-                                    e.g.
-                                    https://hooks.slack.com/services/T1234567/AAAAAAAA/ZZZZZZ
-                                </FormHelperText>
-                            </>
+                                        <FormHelperText>
+                                            e.g.
+                                            https://hooks.slack.com/services/T1234567/AAAAAAAA/ZZZZZZ
+                                        </FormHelperText>
+                                    </>
+                                )}
+                            />
                         }
                         label={t("label.slack-url")}
                     />

@@ -63,7 +63,12 @@ export const EventsWizardModal: FunctionComponent<EventWizardModalProps> = ({
         ];
     });
 
-    const { register, handleSubmit, errors, control } = useForm<Event>({
+    const {
+        handleSubmit,
+        control,
+
+        formState: { errors },
+    } = useForm<Event>({
         defaultValues: editedEvent,
         resolver: yupResolver(
             yup.object().shape({
@@ -136,7 +141,6 @@ export const EventsWizardModal: FunctionComponent<EventWizardModalProps> = ({
                             fullWidth
                             formControl={control}
                             formErrors={errors}
-                            formRegister={register}
                         />
                     </PageContentsCardV1>
                 </Grid>

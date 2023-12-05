@@ -23,7 +23,7 @@ import { DateTimePickerToolbar } from "../../time-range/time-range-selector/date
 import { EventPropertiesFormProps } from "./event-properties-form.interfaces";
 
 export const EventPropertiesForm: FunctionComponent<EventPropertiesFormProps> =
-    ({ formRegister, formErrors, formControl, fullWidth }) => {
+    ({ formErrors, formControl, fullWidth }) => {
         const { t } = useTranslation();
 
         return (
@@ -38,20 +38,30 @@ export const EventPropertiesForm: FunctionComponent<EventPropertiesFormProps> =
                     <InputSection
                         fullWidth={fullWidth}
                         inputComponent={
-                            <TextField
-                                fullWidth
-                                required
-                                error={Boolean(formErrors && formErrors.name)}
-                                helperText={
-                                    formErrors &&
-                                    formErrors.name &&
-                                    formErrors.name.message
-                                }
-                                inputRef={formRegister}
+                            <Controller
+                                control={formControl}
                                 name="name"
-                                placeholder={t("label.enter-name-of-event")}
-                                type="string"
-                                variant="outlined"
+                                render={({ field }) => (
+                                    <TextField
+                                        {...field}
+                                        fullWidth
+                                        required
+                                        error={Boolean(
+                                            formErrors && formErrors.name
+                                        )}
+                                        helperText={
+                                            formErrors &&
+                                            formErrors.name &&
+                                            formErrors.name.message
+                                        }
+                                        name="name"
+                                        placeholder={t(
+                                            "label.enter-name-of-event"
+                                        )}
+                                        type="string"
+                                        variant="outlined"
+                                    />
+                                )}
                             />
                         }
                         label={t("label.name")}
@@ -61,14 +71,22 @@ export const EventPropertiesForm: FunctionComponent<EventPropertiesFormProps> =
                     <InputSection
                         fullWidth={fullWidth}
                         inputComponent={
-                            <TextField
-                                fullWidth
-                                required
-                                inputRef={formRegister}
+                            <Controller
+                                control={formControl}
                                 name="type"
-                                placeholder={t("label.enter-a-type-event")}
-                                type="string"
-                                variant="outlined"
+                                render={({ field }) => (
+                                    <TextField
+                                        {...field}
+                                        fullWidth
+                                        required
+                                        name="type"
+                                        placeholder={t(
+                                            "label.enter-a-type-event"
+                                        )}
+                                        type="string"
+                                        variant="outlined"
+                                    />
+                                )}
                             />
                         }
                         label={t("label.type")}
@@ -81,7 +99,7 @@ export const EventPropertiesForm: FunctionComponent<EventPropertiesFormProps> =
                             <Controller
                                 control={formControl}
                                 name="startTime"
-                                render={({ onChange, value }) => (
+                                render={({ field }) => (
                                     <MuiPickersUtilsProvider utils={LuxonUtils}>
                                         <DateTimePicker
                                             autoOk
@@ -96,10 +114,10 @@ export const EventPropertiesForm: FunctionComponent<EventPropertiesFormProps> =
                                                 formErrors.startTime &&
                                                 formErrors.startTime.message
                                             }
-                                            value={new Date(value)}
+                                            value={new Date(field.value)}
                                             variant="inline"
                                             onChange={(e) => {
-                                                onChange(e?.valueOf());
+                                                field.onChange(e?.valueOf());
                                             }}
                                         />
                                     </MuiPickersUtilsProvider>
@@ -116,7 +134,7 @@ export const EventPropertiesForm: FunctionComponent<EventPropertiesFormProps> =
                             <Controller
                                 control={formControl}
                                 name="endTime"
-                                render={({ onChange, value }) => (
+                                render={({ field }) => (
                                     <MuiPickersUtilsProvider utils={LuxonUtils}>
                                         <DateTimePicker
                                             autoOk
@@ -129,10 +147,10 @@ export const EventPropertiesForm: FunctionComponent<EventPropertiesFormProps> =
                                                 formErrors.endTime &&
                                                 formErrors.endTime.message
                                             }
-                                            value={new Date(value)}
+                                            value={new Date(field.value)}
                                             variant="inline"
                                             onChange={(e) =>
-                                                onChange(e?.valueOf())
+                                                field.onChange(e?.valueOf())
                                             }
                                         />
                                     </MuiPickersUtilsProvider>

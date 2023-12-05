@@ -33,44 +33,45 @@ import * as yup from "yup";
 import { LogicalMetric } from "../../../rest/dto/metric.interfaces";
 import { createEmptyMetric } from "../../../utils/metrics/metrics.util";
 import { MetricsPropertiesFormProps } from "./metrics-renderer-form.interfaces";
+import { DefaultValues } from "react-hook-form/dist/types/form";
 
 export const MetricsPropertiesForm: FunctionComponent<MetricsPropertiesFormProps> =
     (props: MetricsPropertiesFormProps) => {
         const { t } = useTranslation();
         const defaultValues = props.metric || createEmptyMetric();
-        const { register, handleSubmit, errors, control } =
-            useForm<LogicalMetric>({
-                defaultValues,
-                resolver: yupResolver(
-                    yup.object().shape({
+        const {
+            handleSubmit,
+            control,
+
+            formState: { errors },
+        } = useForm<LogicalMetric>({
+            defaultValues: defaultValues as DefaultValues<LogicalMetric>,
+            resolver: yupResolver(
+                yup.object().shape({
+                    name: yup
+                        .string()
+                        .trim()
+                        .required(t("message.metrics-name-required")),
+                    rollupThreshold: yup
+                        .number()
+                        .typeError(t("message.metrics-threshold-required"))
+                        .required(t("message.metrics-threshold-required")),
+                    aggregationFunction: yup
+                        .string()
+                        .trim()
+                        .required(
+                            t("message.metrics-aggregation-function-required")
+                        ),
+                    active: yup.boolean(),
+                    dataset: yup.object().shape({
                         name: yup
                             .string()
                             .trim()
-                            .required(t("message.metrics-name-required")),
-                        rollupThreshold: yup
-                            .number()
-                            .typeError(t("message.metrics-threshold-required"))
-                            .required(t("message.metrics-threshold-required")),
-                        aggregationFunction: yup
-                            .string()
-                            .trim()
-                            .required(
-                                t(
-                                    "message.metrics-aggregation-function-required"
-                                )
-                            ),
-                        active: yup.boolean(),
-                        dataset: yup.object().shape({
-                            name: yup
-                                .string()
-                                .trim()
-                                .required(
-                                    t("message.metrics-dataset-required")
-                                ),
-                        }),
-                    })
-                ),
-            });
+                            .required(t("message.metrics-dataset-required")),
+                    }),
+                })
+            ),
+        });
 
         const onSubmitSusbcriptionGroupPropertiesForm = (
             metric: LogicalMetric
@@ -109,17 +110,25 @@ export const MetricsPropertiesForm: FunctionComponent<MetricsPropertiesFormProps
 
                     {/* Name input */}
                     <Grid item lg={4} md={5} sm={6} xs={12}>
-                        <TextField
-                            fullWidth
-                            required
-                            error={Boolean(errors && errors.name)}
-                            helperText={
-                                errors && errors.name && errors.name.message
-                            }
-                            inputRef={register}
+                        <Controller
+                            control={control}
                             name="name"
-                            type="string"
-                            variant="outlined"
+                            render={({ field }) => (
+                                <TextField
+                                    {...field}
+                                    fullWidth
+                                    required
+                                    error={Boolean(errors && errors.name)}
+                                    helperText={
+                                        errors &&
+                                        errors.name &&
+                                        errors.name.message
+                                    }
+                                    name="name"
+                                    type="string"
+                                    variant="outlined"
+                                />
+                            )}
                         />
                     </Grid>
 
@@ -134,21 +143,27 @@ export const MetricsPropertiesForm: FunctionComponent<MetricsPropertiesFormProps
 
                     {/* Aggregation Function Input */}
                     <Grid item lg={4} md={5} sm={6} xs={12}>
-                        <TextField
-                            fullWidth
-                            required
-                            error={Boolean(
-                                errors && errors.aggregationFunction
-                            )}
-                            helperText={
-                                errors &&
-                                errors.aggregationFunction &&
-                                errors.aggregationFunction.message
-                            }
-                            inputRef={register}
+                        <Controller
+                            control={control}
                             name="aggregationFunction"
-                            type="string"
-                            variant="outlined"
+                            render={({ field }) => (
+                                <TextField
+                                    {...field}
+                                    fullWidth
+                                    required
+                                    error={Boolean(
+                                        errors && errors.aggregationFunction
+                                    )}
+                                    helperText={
+                                        errors &&
+                                        errors.aggregationFunction &&
+                                        errors.aggregationFunction.message
+                                    }
+                                    name="aggregationFunction"
+                                    type="string"
+                                    variant="outlined"
+                                />
+                            )}
                         />
                     </Grid>
 
@@ -172,10 +187,10 @@ export const MetricsPropertiesForm: FunctionComponent<MetricsPropertiesFormProps
                             <Controller
                                 control={control}
                                 name="dataset"
-                                render={({ onChange, value }) => (
+                                render={({ field: { onChange, value } }) => (
                                     <Select
                                         fullWidth
-                                        value={value.name}
+                                        value={value?.name}
                                         variant="outlined"
                                         onChange={(e) =>
                                             onChange({ name: e.target.value })
@@ -214,19 +229,27 @@ export const MetricsPropertiesForm: FunctionComponent<MetricsPropertiesFormProps
 
                     {/* Threshold input */}
                     <Grid item lg={4} md={5} sm={6} xs={12}>
-                        <TextField
-                            fullWidth
-                            required
-                            error={Boolean(errors && errors.rollupThreshold)}
-                            helperText={
-                                errors &&
-                                errors.rollupThreshold &&
-                                errors.rollupThreshold.message
-                            }
-                            inputRef={register}
+                        <Controller
+                            control={control}
                             name="rollupThreshold"
-                            type="number"
-                            variant="outlined"
+                            render={({ field }) => (
+                                <TextField
+                                    {...field}
+                                    fullWidth
+                                    required
+                                    error={Boolean(
+                                        errors && errors.rollupThreshold
+                                    )}
+                                    helperText={
+                                        errors &&
+                                        errors.rollupThreshold &&
+                                        errors.rollupThreshold.message
+                                    }
+                                    name="rollupThreshold"
+                                    type="number"
+                                    variant="outlined"
+                                />
+                            )}
                         />
                     </Grid>
                 </Grid>
@@ -238,9 +261,10 @@ export const MetricsPropertiesForm: FunctionComponent<MetricsPropertiesFormProps
                             control={
                                 <Controller
                                     control={control}
-                                    inputRef={register}
                                     name="active"
-                                    render={({ onChange, value }) => (
+                                    render={({
+                                        field: { value, onChange },
+                                    }) => (
                                         <Checkbox
                                             checked={value}
                                             color="primary"

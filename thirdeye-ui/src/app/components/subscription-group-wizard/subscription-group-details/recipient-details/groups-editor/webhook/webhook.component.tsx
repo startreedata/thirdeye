@@ -26,7 +26,7 @@ import {
     useTheme,
 } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import * as yup from "yup";
 import { LocalThemeProviderV1 } from "../../../../../../platform/components";
@@ -45,7 +45,10 @@ export const Webhook: FunctionComponent<WebhookProps> = ({
 }) => {
     const { t } = useTranslation();
     const theme = useTheme();
-    const { register, errors } = useForm<WebhookFormEntries>({
+    const {
+        control,
+        formState: { errors },
+    } = useForm<WebhookFormEntries>({
         mode: "onChange",
         reValidateMode: "onChange",
         defaultValues: configuration.params,
@@ -110,29 +113,39 @@ export const Webhook: FunctionComponent<WebhookProps> = ({
                 <Grid>
                     <InputSection
                         inputComponent={
-                            <>
-                                <TextField
-                                    fullWidth
-                                    data-testid="webhook-input-container"
-                                    error={Boolean(errors && errors.url)}
-                                    helperText={
-                                        errors &&
-                                        errors.url &&
-                                        errors.url.message
-                                    }
-                                    inputRef={register}
-                                    name="url"
-                                    type="string"
-                                    variant="outlined"
-                                    onChange={(e) =>
-                                        handleUrlChange(e.currentTarget.value)
-                                    }
-                                />
-                                <FormHelperText>
-                                    e.g.
-                                    https://hooks.com/services/T000000/B000000/XXXXX
-                                </FormHelperText>
-                            </>
+                            <Controller
+                                control={control}
+                                name="url"
+                                render={({ field }) => (
+                                    <>
+                                        <TextField
+                                            {...field}
+                                            fullWidth
+                                            data-testid="webhook-input-container"
+                                            error={Boolean(
+                                                errors && errors.url
+                                            )}
+                                            helperText={
+                                                errors &&
+                                                errors.url &&
+                                                errors.url.message
+                                            }
+                                            name="url"
+                                            type="string"
+                                            variant="outlined"
+                                            onChange={(e) =>
+                                                handleUrlChange(
+                                                    e.currentTarget.value
+                                                )
+                                            }
+                                        />
+                                        <FormHelperText>
+                                            e.g.
+                                            https://hooks.com/services/T000000/B000000/XXXXX
+                                        </FormHelperText>
+                                    </>
+                                )}
+                            />
                         }
                         label={t("label.webhook-url")}
                     />

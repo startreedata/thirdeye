@@ -31,7 +31,7 @@ public class ThirdEyeDataFrameResultSet extends AbstractThirdEyeResultSet {
   private final DataFrame dataFrame;
 
   public ThirdEyeDataFrameResultSet(ThirdEyeResultSetMetaData thirdEyeResultSetMetaData,
-      DataFrame dataFrame) {
+      final DataFrame dataFrame) {
     Preconditions.checkState(isMetaDataAndDataHaveSameColumns(thirdEyeResultSetMetaData, dataFrame),
         "Meta data and data's columns do not match.");
 

@@ -141,7 +141,7 @@ public class PinotQueryExecutor extends CacheLoader<PinotQuery, ThirdEyeResultSe
             groupKeyColumnTypes,
             metricColumnTypes);
 
-    // Build the DataFrame
+    // Build the DataFrame - FIXME CYRIL - this is not necessary to build a DataFrame at this point
     final List<String> columnNameWithDataType = new ArrayList<>();
     //   Always cast dimension values to STRING type
     for (final String groupColumnName : thirdEyeResultSetMetaData.getGroupKeyColumnNames()) {

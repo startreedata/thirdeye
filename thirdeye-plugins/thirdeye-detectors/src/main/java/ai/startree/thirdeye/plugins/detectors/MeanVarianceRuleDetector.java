@@ -16,7 +16,6 @@ package ai.startree.thirdeye.plugins.detectors;
 import static ai.startree.thirdeye.plugins.detectors.AbsoluteChangeRuleDetector.windowMatch;
 import static ai.startree.thirdeye.spi.Constants.COL_ANOMALY;
 import static ai.startree.thirdeye.spi.Constants.COL_CURRENT;
-import static ai.startree.thirdeye.spi.Constants.COL_DIFF;
 import static ai.startree.thirdeye.spi.Constants.COL_LOWER_BOUND;
 import static ai.startree.thirdeye.spi.Constants.COL_MASK;
 import static ai.startree.thirdeye.spi.Constants.COL_TIME;
@@ -85,17 +84,6 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
 
     return (int) (lookbackPeriod.toStandardDuration().getMillis()
         / monitoringGranularity.toStandardDuration().getMillis());
-  }
-
-  //todo cyril move this as utils/shared method
-  public static BooleanSeries patternMatch(final Pattern pattern, final DataFrame dfInput) {
-    // series of boolean that are true if the anomaly direction matches the pattern
-    if (pattern.equals(Pattern.UP_OR_DOWN)) {
-      return BooleanSeries.fillValues(dfInput.size(), true);
-    }
-    return pattern.equals(Pattern.UP) ?
-        dfInput.getDoubles(COL_DIFF).gt(0) :
-        dfInput.getDoubles(COL_DIFF).lt(0);
   }
 
   @Override
@@ -171,9 +159,11 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
   private DataFrame computeBaseline(final DataFrame inputDF, final long windowStartTime) {
 
     final DataFrame resultDF = new DataFrame();
-    final int firstDetectionIndex = inputDF.getLongs(COL_TIME).find(windowStartTime);
+    final LongSeries inputTimes = inputDF.getLongs(COL_TIME);
+    final int firstDetectionIndex = inputTimes.find(windowStartTime);
     checkState(firstDetectionIndex != -1,
-        "Runtime error. Could not build training data for the mean-variance algorithm.");
+        "Runtime error. Could not build training data for the mean-variance algorithm. Expected to run detection on time: %s but this time was not found in the input times %s",
+        windowStartTime, inputTimes.toString());
 
     final int size = inputDF.size();
     final double[] baselineArray = new double[size];
@@ -192,7 +182,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
         // this point is masked - skip it
         continue;
       }
-      final long forecastTime = inputDF.getLong(COL_TIME, k);
+      final long forecastTime = inputTimes.getLong(k);
       final DataFrame lookbackDf = getLookbackDf(inputDF, forecastTime);
       final DoubleSeries periodMask = buildPeriodMask(lookbackDf, forecastTime);
       DoubleSeries maskedValues = lookbackDf.getDoubles(COL_VALUE).multiply(periodMask);
@@ -259,7 +249,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
   private DataFrame getLookbackDf(final DataFrame inputDF, final long endTimeMillis) {
     final int indexEnd = inputDF.getLongs(COL_TIME).find(endTimeMillis);
     checkArgument(indexEnd != -1,
-        "Could not find index of endTime. endTime should exist in inputDf. This should not happen.");
+        "Could not find index of endTime %s. endTime should exist in inputDf. This should not happen.", endTimeMillis);
     final int indexStart = indexEnd - lookback;
     checkArgument(indexStart >= 0,
         "Invalid index. Insufficient data to compute mean/variance on lookback. index: "

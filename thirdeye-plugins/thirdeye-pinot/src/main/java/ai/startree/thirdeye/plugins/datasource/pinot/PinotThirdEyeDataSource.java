@@ -88,7 +88,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
     this.config = config;
   }
 
-  public static LoadingCache<PinotQuery, ThirdEyeResultSetGroup> buildQueryCache(
+  private static LoadingCache<PinotQuery, ThirdEyeResultSetGroup> buildQueryCache(
       final CacheLoader<PinotQuery, ThirdEyeResultSetGroup> cacheLoader) {
     Preconditions.checkNotNull(cacheLoader, "A cache loader is required.");
 
@@ -154,7 +154,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
    * @throws ExecutionException is thrown if failed to connect to Pinot or gets results from
    *     Pinot.
    */
-  public ThirdEyeResultSetGroup executeSQL(final PinotQuery pinotQuery) throws ExecutionException {
+  private ThirdEyeResultSetGroup executeSQL(final PinotQuery pinotQuery) throws ExecutionException {
     try {
       final ThirdEyeResultSetGroup thirdEyeResultSetGroup = queryCache.get(pinotQuery);
       final long current = System.currentTimeMillis();

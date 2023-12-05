@@ -21,12 +21,20 @@ import ai.startree.thirdeye.spi.dataframe.StringSeries;
 import ai.startree.thirdeye.spi.datasource.resultset.ThirdEyeResultSet;
 import ai.startree.thirdeye.spi.detection.v2.AbstractDataTableImpl;
 import ai.startree.thirdeye.spi.detection.v2.ColumnType.ColumnDataType;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.Metrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ThirdEyeResultSetDataTable extends AbstractDataTableImpl {
 
   private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeResultSetDataTable.class);
+  // this counter tracks the object type bug - see comment where it is used. Can be removed once the bug is fixed.
+  private final Counter incorrectObjectDataTypeCounter = Metrics.counter("pinot_object_type_bug_total");
+  // this counter should always be zero - if it's not, then the type fetching is incorrect, the parsing in this class is not implemented correctly or some behaviour changed in Pinot
+  private final Counter unknownDataTypeCounter = Metrics.counter("pinot_unknown_data_type_error_total");
+  // this counter should always be zero - if it's not, then the parsing in this class is not implemented correctly or some behaviour changed in Pinot
+  private final Counter parsingErrorCounter = Metrics.counter("pinot_value_parsing_error_total");
 
   private final DataFrame dataFrame;
 
@@ -98,6 +106,7 @@ public class ThirdEyeResultSetDataTable extends AbstractDataTableImpl {
           // the issue does not happen in pinot 1.0.0. It happens on [1.1.?-ST , ..., 1.1.0-ST.19.3, ... 1.1.0-ST.29, ..., ?]
           LOG.warn(
               "Encountered OBJECT type. This should never happen. Assuming it is caused by a bug in DATETIMECONVERT. See comments of this log in the public codebase. Attempting to parse as a LONG. If an exception is raised downstream, please reach out to support.");
+          incorrectObjectDataTypeCounter.increment();
           final long[] oVals = new long[rowCount];
           for (int rowIdx = 0; rowIdx < rowCount; rowIdx++) {
             oVals[rowIdx] = longOrNull(thirdEyeResultSet, rowIdx, colIdx);
@@ -105,6 +114,7 @@ public class ThirdEyeResultSetDataTable extends AbstractDataTableImpl {
           df.addSeries(columnName, LongSeries.buildFrom(oVals));
           break;
         default:
+          unknownDataTypeCounter.increment();
           throw new RuntimeException("Unrecognized column type: " + type
               + ". Supported types are BOOLEAN/INT/LONG/FLOAT/DOUBLE/STRING.");
       }
@@ -138,6 +148,7 @@ public class ThirdEyeResultSetDataTable extends AbstractDataTableImpl {
     catch (NumberFormatException e) {
       LOG.error("Could not get value of position {},{}. Replacing by null. Error: ", rowIdx, colIdx,
           e);
+      parsingErrorCounter.increment();
       return DoubleSeries.NULL;
     }
   }
@@ -152,6 +163,7 @@ public class ThirdEyeResultSetDataTable extends AbstractDataTableImpl {
     catch (NumberFormatException e) {
       LOG.error("Could not get value of position {},{}. Replacing by null. Error: ", rowIdx, colIdx,
           e);
+      parsingErrorCounter.increment();
       return LongSeries.NULL;
     }
   }
@@ -165,6 +177,7 @@ public class ThirdEyeResultSetDataTable extends AbstractDataTableImpl {
     } catch (NumberFormatException e) {
       LOG.error("Could not get value of position {},{}. Replacing by null. Error: ", rowIdx, colIdx,
           e);
+      parsingErrorCounter.increment();
       return LongSeries.NULL;
     }
   }

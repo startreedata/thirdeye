@@ -18,23 +18,22 @@ import TableCell from "@material-ui/core/TableCell";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import { sortBy } from "lodash";
-import React, { FunctionComponent, useEffect, useMemo } from "react";
+import React, { FunctionComponent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import { PageContentsCardV1, SkeletonV1 } from "../../../platform/components";
-import { ActionStatus } from "../../../rest/actions.interfaces";
 import { TaskStatus, TaskType } from "../../../rest/dto/taks.interface";
-import { useGetTasks } from "../../../rest/tasks/tasks.actions";
 import { WEEK_IN_MILLISECONDS } from "../../../utils/time/time.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { TimeRangeQueryStringKey } from "../../time-range/time-range-provider/time-range-provider.interfaces";
 import { TimeRangeSelectorButton } from "../../time-range/v2/time-range-selector-button/time-range-selector-button.component";
 import { TaskRow } from "./task-row/task-row.component";
+import { useQuery } from "@tanstack/react-query";
+import { getTasks } from "../../../rest/tasks/tasks.rest";
 
 export const RecentFailures: FunctionComponent = () => {
     const { t } = useTranslation();
-    const { tasks, getTasks, status } = useGetTasks();
     const [searchParams, setSearchParams] = useSearchParams();
 
     const [startTime, endTime] = useMemo(() => {
@@ -60,18 +59,21 @@ export const RecentFailures: FunctionComponent = () => {
         return [returnStartTime, returnEndTime];
     }, [searchParams]);
 
-    const fetchTasks = (): void => {
-        getTasks({
-            status: [TaskStatus.TIMEOUT, TaskStatus.FAILED],
-            type: [TaskType.DETECTION],
-            startTime: Number(startTime),
-            endTime: Number(endTime),
-        });
-    };
-
-    useEffect(() => {
-        fetchTasks();
-    }, [startTime, endTime]);
+    const {
+        data: tasks,
+        isLoading,
+        isError,
+    } = useQuery({
+        queryKey: ["tasks", startTime, endTime],
+        queryFn: () => {
+            return getTasks({
+                status: [TaskStatus.TIMEOUT, TaskStatus.FAILED],
+                type: [TaskType.DETECTION],
+                startTime: Number(startTime),
+                endTime: Number(endTime),
+            });
+        },
+    });
 
     const onHandleTimeRangeChange = (
         startProp: number,
@@ -105,10 +107,7 @@ export const RecentFailures: FunctionComponent = () => {
                     <Typography variant="body1">
                         <LoadingErrorStateSwitch
                             isError={false}
-                            isLoading={
-                                status === ActionStatus.Working ||
-                                status === ActionStatus.Initial
-                            }
+                            isLoading={isLoading}
                             loadingState={<SkeletonV1 animation="pulse" />}
                         >
                             {t("label.latest-errors-in-your-alerts")}
@@ -145,11 +144,8 @@ export const RecentFailures: FunctionComponent = () => {
                             </Box>
                         </Box>
                     }
-                    isError={status === ActionStatus.Error}
-                    isLoading={
-                        status === ActionStatus.Working ||
-                        status === ActionStatus.Initial
-                    }
+                    isError={isError}
+                    isLoading={isLoading}
                     loadingState={
                         <>
                             <SkeletonV1 animation="pulse" />

@@ -78,14 +78,12 @@ export const HomePage: FunctionComponent = () => {
         queryFn: () => {
             return getAppAnalytics();
         },
-        refetchOnWindowFocus: false,
     });
     const getAlertsQuery = useQuery<Alert[], AxiosError>({
         queryKey: ["alerts"],
         queryFn: () => {
             return getAllAlerts();
         },
-        refetchOnWindowFocus: false,
     });
     const getSubscriptionGroupsQuery = useQuery<
         SubscriptionGroup[],
@@ -95,7 +93,6 @@ export const HomePage: FunctionComponent = () => {
         queryFn: () => {
             return getAllSubscriptionGroups();
         },
-        refetchOnWindowFocus: false,
     });
     const getAnomalyStatsQuery = useQuery<AnomalyStats, AxiosError>({
         queryKey: ["anomalyStats"],
@@ -105,7 +102,6 @@ export const HomePage: FunctionComponent = () => {
                 endTime: DateTime.local().endOf("hour").toMillis(),
             });
         },
-        refetchOnWindowFocus: false,
     });
     const { setPreference, getPreference } = useUserPreferences();
 

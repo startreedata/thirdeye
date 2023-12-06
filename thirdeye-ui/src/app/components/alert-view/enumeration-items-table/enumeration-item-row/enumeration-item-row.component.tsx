@@ -92,7 +92,6 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
                 enumerationItem
             );
         },
-        refetchOnWindowFocus: false,
     });
 
     const [expandedChartHeight, setExpandedChartHeight] =

@@ -66,7 +66,6 @@ export const AlertChart: FunctionComponent<AlertChartProps> = ({
                 end: endTime,
             });
         },
-        refetchOnWindowFocus: false,
     });
 
     const [expandedChartHeight, setExpandedChartHeight] =

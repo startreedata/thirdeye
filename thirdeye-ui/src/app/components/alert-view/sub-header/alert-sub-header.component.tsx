@@ -40,7 +40,6 @@ export const AlertViewSubHeader: FunctionComponent<AlertViewSubHeaderProps> = ({
         queryFn: () => {
             return getAlertInsight({ alertId: alert.id });
         },
-        refetchOnWindowFocus: false,
     });
 
     return (

@@ -115,7 +115,6 @@ export const AlertsViewPage: FunctionComponent = () => {
         queryFn: () => {
             return getAlert(Number(alertId));
         },
-        refetchOnWindowFocus: false,
     });
 
     const getEnumerationItemsQuery = useQuery({
@@ -123,7 +122,6 @@ export const AlertsViewPage: FunctionComponent = () => {
         queryFn: () => {
             return getEnumerationItems({ alertId: Number(alertId) });
         },
-        refetchOnWindowFocus: false,
     });
 
     const getAnomaliesQuery = useQuery({
@@ -135,7 +133,6 @@ export const AlertsViewPage: FunctionComponent = () => {
                 endTime,
             });
         },
-        refetchOnWindowFocus: false,
     });
 
     const [searchTerm, sortOrder, sortKey] = useMemo(

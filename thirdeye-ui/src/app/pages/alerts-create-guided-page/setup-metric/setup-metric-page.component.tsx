@@ -142,7 +142,6 @@ export const SetupMetricPage: FunctionComponent = () => {
         enabled:
             createNewStartingAlert().templateProperties.dataset !==
             alertConfigForPreview.templateProperties?.dataset,
-        refetchOnWindowFocus: false,
     });
 
     const [selectedAggregationFunction, setSelectedAggregationFunction] =

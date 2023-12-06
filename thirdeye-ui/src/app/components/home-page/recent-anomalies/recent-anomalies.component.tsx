@@ -51,7 +51,6 @@ export const RecentAnomalies: FunctionComponent = () => {
                 endTime,
             });
         },
-        refetchOnWindowFocus: false,
     });
 
     const getAnomaliesCountQuery = useQuery({
@@ -59,7 +58,6 @@ export const RecentAnomalies: FunctionComponent = () => {
         queryFn: () => {
             return getAnomaliesCount();
         },
-        refetchOnWindowFocus: false,
     });
 
     const anomaliesToDisplay = useMemo(() => {

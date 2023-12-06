@@ -62,6 +62,8 @@ export const Chart: FunctionComponent<ChartProps> = ({
     hideTime,
     hideChartBrush,
     chartHeight,
+    minDate,
+    maxDate,
 }) => {
     const offset = iso8601ToMilliseconds(startEndShift);
 
@@ -185,6 +187,8 @@ export const Chart: FunctionComponent<ChartProps> = ({
                             <Grid item>
                                 <TimeRangeButtonWithContext
                                     btnGroupColor="primary"
+                                    maxDate={maxDate}
+                                    minDate={minDate}
                                     timezone={timezone}
                                     onTimeRangeChange={(
                                         start: number,

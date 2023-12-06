@@ -124,6 +124,8 @@ export const AnomaliesViewValidatePage: FunctionComponent = () => {
                         hideTime={shouldHideTimeInDatetimeFormat(
                             alertInsight?.templateWithProperties
                         )}
+                        maxDate={alertInsight?.datasetEndTime}
+                        minDate={alertInsight?.datasetStartTime}
                         start={start}
                         timezone={determineTimezoneFromAlertInEvaluation(
                             alertInsight?.templateWithProperties

@@ -116,6 +116,10 @@ export const AlertViewSubHeader: FunctionComponent<AlertViewSubHeaderProps> = ({
                     <Grid item>
                         <TimeRangeButtonWithContext
                             btnGroupColor="primary"
+                            maxDate={getAlertInsightQuery.data?.datasetEndTime}
+                            minDate={
+                                getAlertInsightQuery.data?.datasetStartTime
+                            }
                             timezone={determineTimezoneFromAlertInEvaluation(
                                 getAlertInsightQuery.data
                                     ?.templateWithProperties

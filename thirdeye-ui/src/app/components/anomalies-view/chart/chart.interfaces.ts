@@ -27,4 +27,6 @@ export interface ChartProps {
     timezone?: string;
     hideTime: boolean;
     hideChartBrush?: boolean;
+    minDate?: number;
+    maxDate?: number;
 }

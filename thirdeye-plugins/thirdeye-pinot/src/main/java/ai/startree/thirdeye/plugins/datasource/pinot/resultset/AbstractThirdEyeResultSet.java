@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.spi.datasource.resultset;
+package ai.startree.thirdeye.plugins.datasource.pinot.resultset;
 
 public abstract class AbstractThirdEyeResultSet implements ThirdEyeResultSet {
 

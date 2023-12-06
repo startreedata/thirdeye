@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.spi.datasource.resultset;
+package ai.startree.thirdeye.plugins.datasource.pinot.resultset;
 
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.detection.v2.ColumnType;
@@ -30,7 +30,8 @@ public class ThirdEyeDataFrameResultSet extends AbstractThirdEyeResultSet {
   private final ThirdEyeResultSetMetaData thirdEyeResultSetMetaData;
   private final DataFrame dataFrame;
 
-  public ThirdEyeDataFrameResultSet(ThirdEyeResultSetMetaData thirdEyeResultSetMetaData,
+  public ThirdEyeDataFrameResultSet(
+      ThirdEyeResultSetMetaData thirdEyeResultSetMetaData,
       final DataFrame dataFrame) {
     Preconditions.checkState(isMetaDataAndDataHaveSameColumns(thirdEyeResultSetMetaData, dataFrame),
         "Meta data and data's columns do not match.");

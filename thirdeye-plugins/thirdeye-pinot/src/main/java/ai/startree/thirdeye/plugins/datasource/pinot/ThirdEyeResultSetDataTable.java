@@ -13,12 +13,12 @@
  */
 package ai.startree.thirdeye.plugins.datasource.pinot;
 
+import ai.startree.thirdeye.plugins.datasource.pinot.resultset.ThirdEyeResultSet;
 import ai.startree.thirdeye.spi.dataframe.BooleanSeries;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import ai.startree.thirdeye.spi.dataframe.LongSeries;
 import ai.startree.thirdeye.spi.dataframe.StringSeries;
-import ai.startree.thirdeye.spi.datasource.resultset.ThirdEyeResultSet;
 import ai.startree.thirdeye.spi.detection.v2.AbstractDataTableImpl;
 import ai.startree.thirdeye.spi.detection.v2.ColumnType.ColumnDataType;
 import io.micrometer.core.instrument.Counter;

@@ -67,4 +67,15 @@ public class SubscriptionGroupResource extends
       @PathParam("id") Long id) {
     return Response.ok(subscriptionGroupService.reset(id)).build();
   }
+
+  @POST
+  @Timed
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path("{id}/test")
+  public Response test(
+      @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
+      @PathParam("id") Long id) {
+    subscriptionGroupService.sendTestMessage(id);
+    return Response.ok().build();
+  }
 }

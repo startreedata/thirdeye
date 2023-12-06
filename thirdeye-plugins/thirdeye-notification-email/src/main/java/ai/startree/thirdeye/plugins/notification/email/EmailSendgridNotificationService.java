@@ -120,4 +120,17 @@ public class EmailSendgridNotificationService implements NotificationService {
     final Map<String, Object> emailTemplateData = emailContentBuilder.constructTemplateData(api);
     return emailContentBuilder.buildHtml(DEFAULT_EMAIL_TEMPLATE, emailTemplateData);
   }
+
+  @Override
+  public void sendTestMessage() throws ThirdEyeException {
+    final EmailContent emailContent = new EmailContent()
+        .setSubject("Thirdeye Alert : Test Message")
+        .setHtmlBody("This is a test message from Thirdeye");
+
+    try {
+      sendEmail(emailContent);
+    } catch (final IOException e) {
+      throw new ThirdEyeException(e, ERR_NOTIFICATION_DISPATCH, "sendgrid dispatch failed!");
+    }
+  }
 }

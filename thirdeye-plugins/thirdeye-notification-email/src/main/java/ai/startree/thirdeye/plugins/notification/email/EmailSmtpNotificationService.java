@@ -81,11 +81,25 @@ public class EmailSmtpNotificationService implements NotificationService {
     }
   }
 
+  @Override
+  public void sendTestMessage() throws ThirdEyeException {
+    try {
+      final EmailContent emailContent = new EmailContent()
+          .setSubject("Thirdeye Alert : Test Message")
+          .setHtmlBody("This is a test email from ThirdEye");
+
+      final HtmlEmail email = buildHtmlEmail(emailContent);
+      sendEmail(email);
+    } catch (final Exception e) {
+      throw new ThirdEyeException(e, ERR_NOTIFICATION_DISPATCH, "Email dispatch failed!");
+    }
+  }
+
   private HtmlEmail buildHtmlEmail(final EmailContent emailContent)
       throws EmailException {
     final EmailRecipientsConfiguration recipients = configuration.getEmailRecipients();
     requireNonNull(recipients.getTo(), "to field in email scheme is null");
-    checkArgument(recipients.getTo().size() > 0, "'to' field in email scheme is empty");
+    checkArgument(!recipients.getTo().isEmpty(), "'to' field in email scheme is empty");
 
     final HtmlEmail email = new HtmlEmail();
     email.setSubject(emailContent.getSubject());

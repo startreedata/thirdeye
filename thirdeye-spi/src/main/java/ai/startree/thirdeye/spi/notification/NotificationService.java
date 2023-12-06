@@ -21,6 +21,14 @@ public interface NotificationService {
   void notify(NotificationPayloadApi api) throws ThirdEyeException;
 
   /**
+   * Test whether the subscription group is set up correctly and is able to send out notifications
+   * @throws ThirdEyeException {@link ai.startree.thirdeye.spi.ThirdEyeStatus} contains the error
+   */
+  default void sendTestMessage() throws ThirdEyeException {
+    throw new UnsupportedOperationException("Operation not implemented");
+  }
+
+  /**
    * Currently used to debug email notification service
    *
    * TODO spyne remove API

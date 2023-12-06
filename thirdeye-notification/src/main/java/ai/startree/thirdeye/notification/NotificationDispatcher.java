@@ -82,6 +82,16 @@ public class NotificationDispatcher {
     }
   }
 
+  public void sendTestMessage(final SubscriptionGroupDTO sg) {
+    optional(sg.getSpecs())
+        .orElseGet(() -> notificationSchemesMigrator.getSpecsFromNotificationSchemes(
+            sg))
+        .stream()
+        .map(this::substituteEnvironmentVariables)
+        .map(this::getNotificationService)
+        .forEach(NotificationService::sendTestMessage);
+  }
+
   private NotificationService getNotificationService(final NotificationSpecDTO spec) {
     return notificationServiceRegistry.get(spec.getType(), spec.getParams());
   }

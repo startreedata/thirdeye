@@ -22,6 +22,7 @@ import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
+import ai.startree.thirdeye.notification.NotificationDispatcher;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
@@ -35,11 +36,15 @@ import org.quartz.CronExpression;
 public class SubscriptionGroupService extends
     CrudService<SubscriptionGroupApi, SubscriptionGroupDTO> {
 
+  private final NotificationDispatcher notificationDispatcher;
+
   @Inject
   public SubscriptionGroupService(
       final SubscriptionGroupManager subscriptionGroupManager,
-      final AuthorizationManager authorizationManager) {
+      final AuthorizationManager authorizationManager,
+      final NotificationDispatcher notificationDispatcher) {
     super(authorizationManager, subscriptionGroupManager, ImmutableMap.of());
+    this.notificationDispatcher = notificationDispatcher;
   }
 
   @Override
@@ -77,6 +82,11 @@ public class SubscriptionGroupService extends
     dtoManager.save(sg);
 
     return toApi(sg);
+  }
+
+  public void sendTestMessage(final Long id) {
+    final SubscriptionGroupDTO sg = getDto(id);
+    notificationDispatcher.sendTestMessage(sg);
   }
 }
 

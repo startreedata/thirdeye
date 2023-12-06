@@ -72,7 +72,7 @@
     <hsqldb.version>2.7.1</hsqldb.version>
     <jackson.version>2.13.5</jackson.version>
     <jetty.version>9.4.48.v20220622</jetty.version>
-    <jodatime.version>2.7</jodatime.version>
+    <jodatime.version>2.12.5</jodatime.version>
     <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
     <mockito.version>4.3.1</mockito.version>
     <modelmapper.version>3.1.1</modelmapper.version>
@@ -1024,7 +1024,7 @@
             <format>html</format>
             <format>xml</format>
           </formats>
-          <check />
+          <check/>
         </configuration>
       </plugin>
       <plugin>

@@ -30,18 +30,25 @@ import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyResultSource;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.joda.time.Interval;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The Subscription Group filter collects all anomalies and returns back a Result
  */
 @Singleton
 public class SubscriptionGroupFilter {
+
+  private static final Logger LOG = LoggerFactory.getLogger(SubscriptionGroupFilter.class);
 
   private static final String PROP_DETECTION_CONFIG_IDS = "detectionConfigIds";
   private static final Set<AnomalyResultSource> ANOMALY_RESULT_SOURCES = Set.of(
@@ -85,6 +92,12 @@ public class SubscriptionGroupFilter {
     return alert;
   }
 
+  private static String toFormattedDate(long ts) {
+    return DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        .withZone(ZoneId.systemDefault())
+        .format(Instant.ofEpochMilli(ts));
+  }
+
   /**
    * Find anomalies for the given subscription group given an end time.
    *
@@ -101,6 +114,7 @@ public class SubscriptionGroupFilter {
     return alertAssociations.stream()
         .filter(aa -> isAlertActive(aa.getAlert().getId()))
         .map(alertAssociation -> findAnomaliesForAlertAssociation(alertAssociation,
+            sg.getId(),
             vectorClocks,
             endTime))
         .flatMap(Collection::stream)
@@ -129,6 +143,7 @@ public class SubscriptionGroupFilter {
 
   private Set<AnomalyDTO> findAnomaliesForAlertAssociation(
       final AlertAssociationDto aa,
+      final Long id,
       final Map<Long, Long> vectorClocks,
       final long endTime) {
     final long alertId = aa.getAlert().getId();
@@ -144,8 +159,21 @@ public class SubscriptionGroupFilter {
 
     final Collection<AnomalyDTO> candidates = anomalyManager.filter(anomalyFilter);
 
-    return candidates.stream()
+    final Set<AnomalyDTO> anomaliesToBeNotified = candidates.stream()
         .filter(anomaly -> shouldFilter(anomaly, startTime))
         .collect(toSet());
+
+    LOG.info("Subscription Group: {} Alert: {}. "
+            + "Found {} out of {} anomalies to be notified from {} to {} ({} to {} System Time)",
+        id,
+        alertId,
+        anomaliesToBeNotified.size(),
+        candidates.size(),
+        startTime,
+        endTime,
+        toFormattedDate(startTime),
+        toFormattedDate(endTime));
+
+    return anomaliesToBeNotified;
   }
 }

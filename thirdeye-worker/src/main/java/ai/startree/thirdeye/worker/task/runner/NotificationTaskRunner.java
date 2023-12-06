@@ -114,7 +114,7 @@ public class NotificationTaskRunner implements TaskRunner {
         subscriptionGroup,
         System.currentTimeMillis());
 
-    if (anomalies.size() == 0) {
+    if (anomalies.isEmpty()) {
       LOG.debug("Zero anomalies found, skipping notification for subscription group: {}",
           subscriptionGroup.getId());
       return;

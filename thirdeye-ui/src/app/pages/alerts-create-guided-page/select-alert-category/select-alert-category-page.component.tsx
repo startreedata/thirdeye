@@ -231,7 +231,7 @@ export const SelectAlertCategoryPage: FunctionComponent<SelectAlertCategoryPageP
                                                                         variant="text"
                                                                     >
                                                                         {t(
-                                                                            "label.create-sample-alert"
+                                                                            "label.view-analyze-sample-alert"
                                                                         )}
                                                                     </Button>
                                                                 </>
@@ -308,7 +308,7 @@ export const SelectAlertCategoryPage: FunctionComponent<SelectAlertCategoryPageP
                                                                         variant="text"
                                                                     >
                                                                         {t(
-                                                                            "label.create-sample-alert"
+                                                                            "label.view-analyze-sample-alert"
                                                                         )}
                                                                     </Button>
                                                                 </>

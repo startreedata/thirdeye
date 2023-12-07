@@ -16,22 +16,23 @@ package ai.startree.thirdeye.scheduler;
 import static ai.startree.thirdeye.scheduler.JobSchedulerService.getIdFromJobKey;
 import static ai.startree.thirdeye.spi.Constants.CRON_TIMEZONE;
 import static ai.startree.thirdeye.spi.util.ExecutorUtils.shutdownExecutionService;
+import static java.util.stream.Collectors.toList;
 
 import ai.startree.thirdeye.scheduler.job.DetectionAlertJob;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
-import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.task.TaskType;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.time.Duration;
 import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
 import org.quartz.JobBuilder;
@@ -56,153 +57,165 @@ import org.slf4j.LoggerFactory;
 public class SubscriptionCronScheduler implements Runnable {
 
   private static final Logger LOG = LoggerFactory.getLogger(SubscriptionCronScheduler.class);
-  private static final String QUARTZ_SUBSCRIPTION_GROUPER = TaskType.NOTIFICATION
-      .toString();
-  private static final int DEFAULT_ALERT_DELAY = 1;
-  private static final TimeUnit DEFAULT_ALERT_DELAY_UNIT = TimeUnit.MINUTES;
+  private static final String Q_JOB_GROUP = TaskType.NOTIFICATION.toString();
+  private static final Duration INTERVAL = Duration.ofMinutes(1);
 
   private final Scheduler scheduler;
-  private final ScheduledExecutorService scheduledExecutorService;
+  private final ScheduledExecutorService executorService;
   private final SubscriptionGroupManager subscriptionGroupManager;
 
   @Inject
   public SubscriptionCronScheduler(final SubscriptionGroupManager subscriptionGroupManager) {
+    this(subscriptionGroupManager, createScheduler());
+  }
+
+  @VisibleForTesting
+  SubscriptionCronScheduler(final SubscriptionGroupManager subscriptionGroupManager,
+      final Scheduler scheduler) {
     this.subscriptionGroupManager = subscriptionGroupManager;
-    scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat(
-        "subscription-scheduler-%d").build());
+    this.scheduler = scheduler;
+    executorService = createExecutorService();
+  }
+
+  private static ScheduledExecutorService createExecutorService() {
+    return Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder()
+        .setNameFormat("subscription-scheduler-%d")
+        .build());
+  }
+
+  private static Scheduler createScheduler() {
     try {
-      scheduler = StdSchedulerFactory.getDefaultScheduler();
+      return StdSchedulerFactory.getDefaultScheduler();
     } catch (final SchedulerException e) {
-      throw new RuntimeException(e);
+      throw new RuntimeException("Failed to initialize the scheduler", e);
     }
+  }
+
+  private static JobDetail buildJobDetail(final JobKey jobKey) {
+    return JobBuilder.newJob(DetectionAlertJob.class)
+        .withIdentity(jobKey)
+        .build();
+  }
+
+  private static Trigger buildTrigger(final String cron) {
+    return TriggerBuilder.newTrigger()
+        .withSchedule(CronScheduleBuilder.cronSchedule(cron)
+            .inTimeZone(TimeZone.getTimeZone(CRON_TIMEZONE)))
+        .build();
+  }
+
+  @VisibleForTesting
+  static JobKey jobKey(final Long id) {
+    return new JobKey(String.format("%s_%d", TaskType.NOTIFICATION, id), Q_JOB_GROUP);
   }
 
   public void addToContext(final String identifier, final Object instance) {
     try {
       scheduler.getContext().put(identifier, instance);
     } catch (final SchedulerException e) {
-      throw new RuntimeException(e);
+      throw new RuntimeException("Failed to add to scheduler context", e);
     }
   }
 
   public void start() throws SchedulerException {
     scheduler.start();
-    scheduledExecutorService
-        .scheduleWithFixedDelay(this, 0, DEFAULT_ALERT_DELAY, DEFAULT_ALERT_DELAY_UNIT);
+    executorService.scheduleWithFixedDelay(this, 0, INTERVAL.toMinutes(), TimeUnit.MINUTES);
+  }
+
+  public void shutdown() throws SchedulerException {
+    shutdownExecutionService(executorService);
+    scheduler.shutdown();
   }
 
   @Override
   public void run() {
     try {
-      // read all alert configs
-      LOG.info("Scheduling all the subscription configs");
-      final List<SubscriptionGroupDTO> alertConfigs = subscriptionGroupManager.findAll();
-
-      // get active jobs
-      final Set<JobKey> scheduledJobs = getScheduledJobs();
-      LOG.info("Scheduled jobs {}",
-          scheduledJobs.stream().map(Key::getName).collect(Collectors.toList()));
-
-      for (final SubscriptionGroupDTO alertConfig : alertConfigs) {
-        try {
-          createOrUpdateAlertJob(scheduledJobs, alertConfig);
-        } catch (final Exception e) {
-          LOG.error("Could not write job for alert config id {}. Skipping. {}", alertConfig.getId(),
-              alertConfig, e);
-        }
-      }
-
-      // for any scheduled jobs, not having a function in the database,
-      // stop the schedule, as function has been deleted
-      for (final JobKey scheduledJobKey : scheduledJobs) {
-        try {
-          deleteAlertJob(scheduledJobKey);
-        } catch (final Exception e) {
-          LOG.error("Could not delete alert job '{}'. Skipping.", scheduledJobKey, e);
-        }
-      }
+      updateScheduledJobs();
     } catch (final Exception e) {
       LOG.error("Error running scheduler", e);
     }
   }
 
-  public Set<JobKey> getScheduledJobs() throws SchedulerException {
-    return scheduler.getJobKeys(GroupMatcher.jobGroupEquals(QUARTZ_SUBSCRIPTION_GROUPER));
+  private void updateScheduledJobs() throws SchedulerException {
+    final Set<JobKey> scheduledJobs = getScheduledJobs();
+    LOG.info("Scheduled jobs {}", scheduledJobs.stream()
+        .map(Key::getName)
+        .collect(toList()));
+
+    final List<SubscriptionGroupDTO> subscriptionGroups = subscriptionGroupManager.findAll();
+    subscriptionGroups.forEach(sg -> processSubscriptionGroup(sg, scheduledJobs));
+    scheduledJobs.forEach(this::deleteIfNotInDatabase);
   }
 
-  public void shutdown() throws SchedulerException {
-    shutdownExecutionService(scheduledExecutorService);
-    scheduler.shutdown();
-  }
-
-  public void startJob(final AbstractDTO config, final JobDetail job) throws SchedulerException {
-    final Trigger trigger = TriggerBuilder.newTrigger().withSchedule(
-            CronScheduleBuilder.cronSchedule(((SubscriptionGroupDTO) config).getCronExpression())
-                .inTimeZone(TimeZone.getTimeZone(CRON_TIMEZONE)))
-        .build();
-    scheduler.scheduleJob(job, trigger);
-    LOG.info(String.format("scheduled subscription pipeline job %s", job.getKey().getName()));
-  }
-
-  public void stopJob(final JobKey key) throws SchedulerException {
-    if (!scheduler.checkExists(key)) {
-      throw new IllegalStateException(
-          "Cannot stop alert config " + key + ", it has not been scheduled");
-    }
-    scheduler.deleteJob(key);
-    LOG.info("Stopped alert config {}", key);
-  }
-
-  public String getJobKey(final Long id, final TaskType taskType) {
-    return String.format("%s_%d", taskType, id);
-  }
-
-  private void deleteAlertJob(final JobKey scheduledJobKey) throws SchedulerException {
-    final Long configId = getIdFromJobKey(scheduledJobKey.getName());
-    final SubscriptionGroupDTO alertConfigSpec = subscriptionGroupManager.findById(configId);
-    if (alertConfigSpec == null) {
-      LOG.info("Found scheduled, but not in database {}", configId);
-      stopJob(scheduledJobKey);
+  @VisibleForTesting
+  void processSubscriptionGroup(final SubscriptionGroupDTO sg,
+      final Set<JobKey> scheduledJobs) {
+    try {
+      final Long id = sg.getId();
+      final JobKey jobKey = jobKey(id);
+      final boolean isScheduled = scheduledJobs.contains(jobKey);
+      handleJobScheduling(sg, isScheduled, jobKey);
+    } catch (final Exception e) {
+      LOG.error("Could not process subscription group ({}): {}", sg.getId(), sg, e);
     }
   }
 
-  private void createOrUpdateAlertJob(final Set<JobKey> scheduledJobs,
-      final SubscriptionGroupDTO subscriptionGroupDTO)
-      throws SchedulerException {
-    final Long id = subscriptionGroupDTO.getId();
-    final boolean isActive = subscriptionGroupDTO.isActive();
-
-    final JobKey key = new JobKey(getJobKey(id, TaskType.NOTIFICATION),
-        QUARTZ_SUBSCRIPTION_GROUPER);
-    final JobDetail job = JobBuilder.newJob(DetectionAlertJob.class).withIdentity(key).build();
-    final boolean isScheduled = scheduledJobs.contains(key);
-
-    if (isActive) {
-      if (isScheduled) {
-        final String cronInDatabase = subscriptionGroupDTO.getCronExpression();
-
-        final List<Trigger> triggers = (List<Trigger>) scheduler.getTriggersOfJob(key);
-        final CronTrigger cronTrigger = (CronTrigger) triggers.get(0);
-        final String cronInSchedule = cronTrigger.getCronExpression();
-        // cron expression has been updated, restart this job
-        if (!cronInDatabase.equals(cronInSchedule)) {
-          LOG.info(
-              "Cron expression for config {} with jobKey {} has been changed from {}  to {}. "
-                  + "Restarting schedule",
-              id, key, cronInSchedule, cronInDatabase);
-          stopJob(key);
-          startJob(subscriptionGroupDTO, job);
-        }
+  private void handleJobScheduling(final SubscriptionGroupDTO sg,
+      final boolean isScheduled,
+      final JobKey jobKey) throws SchedulerException {
+    if (sg.isActive()) {
+      if (!isScheduled) {
+        startJob(jobKey, sg.getCronExpression());
       } else {
-        LOG.info("Found active but not scheduled {}", id);
-        startJob(subscriptionGroupDTO, job);
+        updateJobIfNecessary(jobKey, sg.getCronExpression());
       }
-    } else {
-      if (isScheduled) {
-        LOG.info("Found inactive but scheduled {}", id);
-        stopJob(key);
-      }
-      // for all jobs with not isActive, and not isScheduled, no change required
+    } else if (isScheduled) {
+      // stop the job if it is no longer active and is scheduled
+      stopJob(jobKey);
     }
+  }
+
+  private void startJob(final JobKey jobKey, final String cron)
+      throws SchedulerException {
+    final JobDetail job = buildJobDetail(jobKey);
+    final Trigger trigger = buildTrigger(cron);
+    scheduler.scheduleJob(job, trigger);
+    LOG.info("Started job: {}", jobKey);
+  }
+
+  private void updateJobIfNecessary(final JobKey jobKey, final String cron)
+      throws SchedulerException {
+    final List<? extends Trigger> triggers = scheduler.getTriggersOfJob(jobKey);
+    if (!triggers.isEmpty()) {
+      final CronTrigger cronTrigger = (CronTrigger) triggers.get(0);
+      final String currentCron = cronTrigger.getCronExpression();
+      if (!currentCron.equals(cron)) {
+        stopJob(jobKey);
+        startJob(jobKey, cron);
+        LOG.info("Updated job: {}", jobKey);
+      }
+    }
+  }
+
+  @VisibleForTesting
+  void deleteIfNotInDatabase(final JobKey jobKey) {
+    try {
+      final Long id = getIdFromJobKey(jobKey.getName());
+      if (subscriptionGroupManager.findById(id) == null) {
+        stopJob(jobKey);
+        LOG.info("Deleted job not in database: {}", jobKey);
+      }
+    } catch (final SchedulerException e) {
+      LOG.error("Failed to delete job '{}'", jobKey, e);
+    }
+  }
+
+  private void stopJob(final JobKey jobKey) throws SchedulerException {
+    scheduler.deleteJob(jobKey);
+    LOG.info("Stopped job: {}", jobKey);
+  }
+
+  private Set<JobKey> getScheduledJobs() throws SchedulerException {
+    return scheduler.getJobKeys(GroupMatcher.jobGroupEquals(Q_JOB_GROUP));
   }
 }

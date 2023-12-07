@@ -16,12 +16,7 @@ import { Button, Grid, Link } from "@material-ui/core";
 import React, { FunctionComponent, ReactElement, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import {
-    DataGridScrollV1,
-    DataGridSelectionModelV1,
-    DataGridV1,
-    PageContentsCardV1,
-} from "../../platform/components";
+import { PageContentsCardV1 } from "../../platform/components";
 import { UiDataset } from "../../rest/dto/ui-dataset.interfaces";
 import {
     getDatasetsUpdatePath,
@@ -29,106 +24,111 @@ import {
 } from "../../utils/routes/routes.util";
 import { ActiveIndicator } from "../active-indicator/active-indicator.component";
 import { DatasetListV1Props, TEST_IDS } from "./dataset-list-v1.interfaces";
+import { StyledDataGrid } from "../data-grid/styled-data-grid.component";
+import {
+    GridColumns,
+    GridRenderCellParams,
+    GridSelectionModel,
+} from "@mui/x-data-grid";
 
 export const DatasetListV1: FunctionComponent<DatasetListV1Props> = ({
     datasets,
     onDelete,
 }) => {
     const { t } = useTranslation();
-    const [selectedDataset, setSelectedDataset] =
-        useState<DataGridSelectionModelV1<UiDataset>>();
+    const [selectedDatasetIds, setSelectedDatasetIds] =
+        useState<GridSelectionModel>();
     const navigate = useNavigate();
 
     const handleDatasetDelete = (): void => {
-        if (!selectedDataset || !selectedDataset.rowKeyValueMap) {
+        if (!selectedDatasetIds || selectedDatasetIds.length === 0) {
             return;
         }
 
-        onDelete &&
-            onDelete(Array.from(selectedDataset.rowKeyValueMap.values()));
+        const selectedDatasets = datasets?.filter((dataset) => {
+            return selectedDatasetIds.includes(dataset.id);
+        });
+
+        onDelete && selectedDatasets && onDelete(selectedDatasets);
     };
 
     const handleDatasetEdit = (): void => {
-        if (!selectedDataset) {
+        if (!selectedDatasetIds) {
             return;
         }
-        const selectedDatasetId = selectedDataset.rowKeyValues[0] as number;
+        const selectedDatasetId = selectedDatasetIds[0];
 
-        navigate(getDatasetsUpdatePath(selectedDatasetId));
+        navigate(getDatasetsUpdatePath(selectedDatasetId as number));
     };
 
     const isActionButtonDisable = !(
-        selectedDataset && selectedDataset.rowKeyValues.length === 1
+        selectedDatasetIds && selectedDatasetIds.length === 1
     );
 
     const handleDatasetViewDetailsById = (id: number): void => {
         navigate(getDatasetsViewPath(id));
     };
 
-    const renderLink = (
-        cellValue: Record<string, unknown>,
-        data: UiDataset
-    ): ReactElement => {
+    const renderLink = (params: GridRenderCellParams): ReactElement => {
         return (
-            <Link onClick={() => handleDatasetViewDetailsById(data.id)}>
-                {cellValue}
+            <Link onClick={() => handleDatasetViewDetailsById(params.row.id)}>
+                {params.row.name}
             </Link>
         );
     };
 
-    const renderMetricStatus = (
-        _: Record<string, unknown>,
-        data: UiDataset
-    ): ReactElement => {
+    const renderMetricStatus = (params: GridRenderCellParams): ReactElement => {
         // Default to true of the active status is missing
-        const active = data.active === undefined ? true : data.active;
+        const active =
+            params.row.active === undefined ? true : params.row.active;
 
         return <ActiveIndicator active={active} />;
     };
 
-    const datasetColumns = [
+    const datasetColumns: GridColumns = [
         {
-            key: "name",
-            dataKey: "name",
-            header: t("label.name"),
-            minWidth: 0,
+            field: "name",
+            headerName: t("label.name"),
             flex: 1,
             sortable: true,
-            customCellRenderer: renderLink,
+            renderCell: renderLink,
         },
         {
-            key: "datasourceName",
-            dataKey: "datasourceName",
-            header: t("label.datasource"),
-            minWidth: 0,
+            field: "datasourceName",
+            headerName: t("label.datasource"),
             sortable: true,
             flex: 1,
         },
         {
-            key: "active",
-            dataKey: "active",
+            field: "active",
             sortable: true,
-            header: t("label.active"),
-            minWidth: 0,
+            headerName: t("label.active"),
             flex: 0.5,
-            customCellRenderer: renderMetricStatus,
+            renderCell: renderMetricStatus,
         },
     ];
 
     return (
         <Grid item xs={12}>
-            <PageContentsCardV1 disablePadding fullHeight>
-                <DataGridV1<UiDataset>
-                    hideBorder
+            <PageContentsCardV1 disablePadding>
+                <StyledDataGrid
+                    autoHeight
+                    autoPageSize
+                    checkboxSelection
+                    disableColumnFilter
+                    disableColumnSelector
+                    disableSelectionOnClick
                     columns={datasetColumns}
-                    data={datasets as UiDataset[]}
-                    data-testId={TEST_IDS.TABLE}
-                    rowKey="id"
-                    scroll={DataGridScrollV1.Contents}
-                    searchPlaceholder={t("label.search-entity", {
-                        entity: t("label.datasets"),
-                    })}
-                    toolbarComponent={
+                    data-testid={TEST_IDS.TABLE}
+                    rows={datasets as UiDataset[]}
+                    searchBarProps={{
+                        searchKey: "name",
+                        placeholder: t("label.search-entity", {
+                            entity: t("label.datasets"),
+                        }),
+                    }}
+                    selectionModel={selectedDatasetIds}
+                    toolbar={
                         <Grid container alignItems="center" spacing={2}>
                             <Grid item>
                                 <Button
@@ -145,9 +145,8 @@ export const DatasetListV1: FunctionComponent<DatasetListV1Props> = ({
                                 <Button
                                     data-testId={TEST_IDS.DELETE_BUTTON}
                                     disabled={
-                                        !selectedDataset ||
-                                        selectedDataset.rowKeyValues.length ===
-                                            0
+                                        !selectedDatasetIds ||
+                                        selectedDatasetIds.length === 0
                                     }
                                     variant="contained"
                                     onClick={handleDatasetDelete}
@@ -157,7 +156,7 @@ export const DatasetListV1: FunctionComponent<DatasetListV1Props> = ({
                             </Grid>
                         </Grid>
                     }
-                    onSelectionChange={setSelectedDataset}
+                    onSelectionModelChange={setSelectedDatasetIds}
                 />
             </PageContentsCardV1>
         </Grid>

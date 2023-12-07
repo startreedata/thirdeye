@@ -12,12 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { TaskStatus, TaskType } from "../dto/taks.interface";
 
-export interface GetTasksProps {
-    status?: TaskStatus[];
-    type?: TaskType[];
-    startTime?: number;
-    endTime?: number;
-    alertId?: number;
+export interface TaskTableProps {
+    alertId: number;
 }

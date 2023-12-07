@@ -24,8 +24,13 @@ export const getTasks = async ({
     type,
     startTime,
     endTime,
+    alertId,
 }: GetTasksProps = {}): Promise<Task[]> => {
     const queryParams = new URLSearchParams();
+
+    if (alertId) {
+        queryParams.set("refId", `${alertId}`);
+    }
 
     if (status) {
         queryParams.set("status", `[in]${status.join(LIST_SEPARATOR)}`);

@@ -18,13 +18,17 @@ import React, { FunctionComponent } from "react";
 import { LocalThemeProviderV1Props } from "./local-theme-provider-v1.interfaces";
 
 export const LocalThemeProviderV1: FunctionComponent<LocalThemeProviderV1Props> =
-    ({ primary, children }) => {
+    ({ primary, children, secondary }) => {
         const theme = useTheme();
         const localTheme = cloneDeep(theme);
 
         // Customize theme
         if (primary) {
             localTheme.palette.primary = primary;
+        }
+
+        if (secondary) {
+            localTheme.palette.secondary = secondary;
         }
 
         return <ThemeProvider theme={localTheme}>{children}</ThemeProvider>;

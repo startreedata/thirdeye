@@ -59,6 +59,7 @@
         "@material-ui/icons": "^4.11.2",
         "@material-ui/lab": "4.0.0-alpha.60",
         "@material-ui/pickers": "^3.2.10",
+        "@mui/x-data-grid": "4.0.2",
         "@sentry/react": "^7.64.0",
         "@tanstack/react-query": "^4.29.19",
         "@tippyjs/react": "^4.2.6",

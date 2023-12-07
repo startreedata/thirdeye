@@ -39,6 +39,7 @@ import {
 import { Modal } from "../../modal/modal.component";
 import { TimeRangeQueryStringKey } from "../../time-range/time-range-provider/time-range-provider.interfaces";
 import { AlertOptionsButtonProps } from "./alert-options-button.interfaces";
+import { TasksTable } from "../tasks-table/tasks-table.component";
 
 export const AlertOptionsButton: FunctionComponent<AlertOptionsButtonProps> = ({
     alert,
@@ -277,6 +278,19 @@ export const AlertOptionsButton: FunctionComponent<AlertOptionsButtonProps> = ({
                             alertName: alert.name,
                         })}
                     </p>
+                </Modal>
+
+                {/* View tasks for alert */}
+                <Modal
+                    cancelButtonLabel={t("label.close")}
+                    maxWidth="lg"
+                    trigger={(onClick) => (
+                        <MenuItem onClick={onClick}>
+                            View Task Statuses for Alert
+                        </MenuItem>
+                    )}
+                >
+                    <TasksTable alertId={alert.id} />
                 </Modal>
             </Menu>
         </>

@@ -14,7 +14,7 @@
  */
 
 export enum TaskStatus {
-    COMPLETE = "COMPLETE",
+    COMPLETED = "COMPLETED",
     FAILED = "FAILED",
     WAITING = "WAITING",
     TIMEOUT = "TIMEOUT",

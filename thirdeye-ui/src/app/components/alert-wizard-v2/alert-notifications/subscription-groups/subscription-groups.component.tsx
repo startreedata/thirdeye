@@ -149,10 +149,7 @@ export const SubscriptionGroups: FunctionComponent<SubscriptionGroupsProps> = ({
                         <>
                             <Grid container item xs={12}>
                                 <Grid item lg={5} md={6} xs={12}>
-                                    <Grid
-                                        container
-                                        justifyContent="space-between"
-                                    >
+                                    <Grid container1>
                                         <Grid item>
                                             <Typography variant="h6">
                                                 {t(

@@ -22,55 +22,60 @@ import React, {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import {
-    DataGridColumnV1,
-    DataGridScrollV1,
-    DataGridSelectionModelV1,
-    DataGridV1,
-    PageContentsCardV1,
-} from "../../platform/components";
+import { PageContentsCardV1 } from "../../platform/components";
 import { UiSubscriptionGroup } from "../../rest/dto/ui-subscription-group.interfaces";
 import {
     getSubscriptionGroupsUpdatePath,
     getSubscriptionGroupsViewPath,
 } from "../../utils/routes/routes.util";
-import { getUiAssociation } from "../subscription-group-view/alert-associations-view-table/alert-associations-view-table.utils";
 import { subscriptionGroupChannelIconsMap } from "../subscription-group-view/notification-channels-card/notification-channels-card.utils";
 import {
     SubscriptionGroupListV1Props,
     TEST_IDS,
 } from "./subscription-group-list-v1.interfaces";
+import {
+    GridSelectionModel,
+    GridColumns,
+    GridRenderCellParams,
+} from "@mui/x-data-grid";
+import { StyledDataGrid } from "../data-grid/styled-data-grid.component";
+import {
+    NotificationSpec,
+    SpecType,
+} from "../../rest/dto/subscription-group.interfaces";
 
 export const SubscriptionGroupListV1: FunctionComponent<SubscriptionGroupListV1Props> =
     ({ onDelete, subscriptionGroups }) => {
         const { t } = useTranslation();
-        const [selectedSubscriptionGroup, setSelectedSubscriptionGroup] =
-            useState<DataGridSelectionModelV1<UiSubscriptionGroup>>();
+        const [selectedSubscriptionGroupIds, setSelectedSubscriptionGroupIds] =
+            useState<GridSelectionModel>();
         const navigate = useNavigate();
         const theme = useTheme();
 
         const handleSubscriptionGroupDelete = (): void => {
             if (
-                !selectedSubscriptionGroup ||
-                !selectedSubscriptionGroup.rowKeyValueMap
+                !selectedSubscriptionGroupIds ||
+                !selectedSubscriptionGroupIds.length
             ) {
                 return;
             }
 
+            const selectedSubscriptionGroup = subscriptionGroups?.filter(
+                (subGroup) => {
+                    return selectedSubscriptionGroupIds.includes(subGroup.id);
+                }
+            );
             onDelete &&
-                onDelete(
-                    Array.from(
-                        selectedSubscriptionGroup.rowKeyValueMap.values()
-                    )
-                );
+                selectedSubscriptionGroup &&
+                onDelete(selectedSubscriptionGroup);
         };
 
         const handleSubscriptionGroupEdit = (): void => {
-            if (!selectedSubscriptionGroup) {
+            if (!selectedSubscriptionGroupIds) {
                 return;
             }
-            const selectedSubscriptionGroupId = selectedSubscriptionGroup
-                .rowKeyValues[0] as number;
+            const selectedSubscriptionGroupId =
+                selectedSubscriptionGroupIds[0] as number;
 
             navigate(
                 getSubscriptionGroupsUpdatePath(selectedSubscriptionGroupId)
@@ -78,38 +83,43 @@ export const SubscriptionGroupListV1: FunctionComponent<SubscriptionGroupListV1P
         };
 
         const isActionButtonDisable = !(
-            selectedSubscriptionGroup &&
-            selectedSubscriptionGroup.rowKeyValues.length === 1
+            selectedSubscriptionGroupIds &&
+            selectedSubscriptionGroupIds.length === 1
         );
 
         const handleSubscriptionGroupViewDetailsById = (id: number): void => {
             navigate(getSubscriptionGroupsViewPath(id));
         };
 
-        const renderLink = (
-            cellValue: Record<string, unknown>,
-            data: UiSubscriptionGroup
-        ): ReactElement => {
+        const renderLink = (params: GridRenderCellParams): ReactElement => {
             return (
                 <Link
                     onClick={() =>
-                        handleSubscriptionGroupViewDetailsById(data.id)
+                        handleSubscriptionGroupViewDetailsById(params.row.id)
                     }
                 >
-                    {cellValue}
+                    {params.row.name}
                 </Link>
             );
         };
 
         const activeChannelsRenderer = useCallback(
-            (_, data: UiSubscriptionGroup) => {
+            (params: GridRenderCellParams) => {
                 return (
                     <Box display="flex" gridGap={6} justifyContent="center">
-                        {[...new Set(data.activeChannels.map((c) => c.type))]
+                        {[
+                            ...new Set(
+                                params.row.activeChannels.map(
+                                    (c: NotificationSpec) => c.type
+                                )
+                            ),
+                        ]
                             .sort()
                             .map(
-                                (iconType) =>
-                                    subscriptionGroupChannelIconsMap[iconType]
+                                (iconType: unknown) =>
+                                    subscriptionGroupChannelIconsMap[
+                                        iconType as SpecType
+                                    ]
                             )
                             .map((iconName) => (
                                 <Icon
@@ -126,117 +136,72 @@ export const SubscriptionGroupListV1: FunctionComponent<SubscriptionGroupListV1P
         );
 
         const alertsCountRenderer = useCallback(
-            (_, data: UiSubscriptionGroup) => {
-                return data.alerts.length;
+            (params: GridRenderCellParams) => {
+                return params.row.alerts.length;
             },
             []
         );
 
-        const alertsCountTooltipRenderer = useCallback(
-            (_, data: UiSubscriptionGroup) => {
-                return data.alerts
-                    .map((a) => a.name)
-                    .reduce(
-                        (sum, val) => (
-                            <>
-                                {sum}
-                                {val}
-                                <br />
-                            </>
-                        ),
-                        <></>
-                    );
+        const subscriptionGroupColumns: GridColumns = [
+            {
+                field: "name",
+                headerName: t("label.group-name"),
+                flex: 2,
+                sortable: true,
+                renderCell: renderLink,
             },
-            []
-        );
-
-        const dimensionCountTooltipRenderer = useCallback(
-            (_, data: UiSubscriptionGroup) => {
-                return getUiAssociation(data.alerts || [], t)
-                    .filter((a) => a.enumerationId)
-                    .map((a) => a.enumerationName)
-                    .reduce(
-                        (sum, val) => (
-                            <>
-                                {sum}
-                                {val}
-                                <br />
-                            </>
-                        ),
-                        <></>
-                    );
+            {
+                field: "activeChannels",
+                headerName: t("label.active-channels"),
+                flex: 1,
+                sortable: false,
+                renderCell: activeChannelsRenderer,
             },
-            []
-        );
-
-        const subscriptionGroupColumns: DataGridColumnV1<UiSubscriptionGroup>[] =
-            [
-                {
-                    key: "name",
-                    dataKey: "name",
-                    header: t("label.group-name"),
-                    minWidth: 0,
-                    flex: 1.5,
-                    sortable: true,
-                    customCellRenderer: renderLink,
-                },
-                {
-                    key: "activeChannels",
-                    dataKey: "activeChannels",
-                    header: t("label.active-channels"),
-                    minWidth: 0,
-                    flex: 1,
-                    sortable: true,
-                    cellTooltip: false,
-                    customCellRenderer: activeChannelsRenderer,
-                },
-                {
-                    key: "alertCount",
-                    dataKey: "alertCount",
-                    header: t("label.subscribed-alerts"),
-                    minWidth: 0,
-                    flex: 1,
-                    sortable: true,
-                    customCellRenderer: alertsCountRenderer,
-                    customCellTooltipRenderer: alertsCountTooltipRenderer,
-                },
-                {
-                    key: "dimensionCount",
-                    dataKey: "dimensionCount",
-                    header: t("label.subscribed-dimensions"),
-                    minWidth: 0,
-                    flex: 1,
-                    sortable: true,
-                    customCellTooltipRenderer: dimensionCountTooltipRenderer,
-                },
-                {
-                    key: "cron",
-                    dataKey: "cron",
-                    header: t("label.schedule"),
-                    minWidth: 0,
-                    flex: 1,
-                },
-            ];
+            {
+                field: "alertCount",
+                headerName: t("label.subscribed-alerts"),
+                flex: 1,
+                sortable: true,
+                renderCell: alertsCountRenderer,
+            },
+            {
+                field: "dimensionCount",
+                headerName: t("label.subscribed-dimensions"),
+                flex: 1,
+                sortable: true,
+            },
+            {
+                field: "cron",
+                headerName: t("label.schedule"),
+                flex: 1,
+            },
+        ];
 
         return (
             <Grid item xs={12}>
-                <PageContentsCardV1 disablePadding fullHeight>
-                    <DataGridV1<UiSubscriptionGroup>
-                        hideBorder
+                <PageContentsCardV1 disablePadding>
+                    <StyledDataGrid
+                        autoHeight
+                        autoPageSize
+                        checkboxSelection
+                        disableColumnFilter
+                        disableColumnSelector
+                        disableSelectionOnClick
                         columns={subscriptionGroupColumns}
-                        data={subscriptionGroups as UiSubscriptionGroup[]}
                         data-testid={TEST_IDS.TABLE}
-                        rowKey="id"
-                        scroll={DataGridScrollV1.Contents}
-                        searchPlaceholder={t("label.search-entity", {
-                            entity: t("label.subscription-groups"),
-                        })}
-                        toolbarComponent={
+                        rows={subscriptionGroups as UiSubscriptionGroup[]}
+                        searchBarProps={{
+                            searchKey: "name",
+                            placeholder: "Search by name",
+                        }}
+                        selectionModel={selectedSubscriptionGroupIds}
+                        toolbar={
                             <Grid container alignItems="center" spacing={2}>
                                 <Grid item>
                                     <Button
                                         data-testid={TEST_IDS.EDIT_BUTTON}
                                         disabled={isActionButtonDisable}
+                                        size="large"
                                         variant="contained"
                                         onClick={handleSubscriptionGroupEdit}
                                     >
@@ -248,10 +213,11 @@ export const SubscriptionGroupListV1: FunctionComponent<SubscriptionGroupListV1P
                                     <Button
                                         data-testid={TEST_IDS.DELETE_BUTTON}
                                         disabled={
-                                            !selectedSubscriptionGroup ||
-                                            selectedSubscriptionGroup
-                                                .rowKeyValues.length === 0
+                                            !selectedSubscriptionGroupIds ||
+                                            selectedSubscriptionGroupIds.length ===
+                                                0
                                         }
+                                        size="large"
                                         variant="contained"
                                         onClick={handleSubscriptionGroupDelete}
                                     >
@@ -260,7 +226,7 @@ export const SubscriptionGroupListV1: FunctionComponent<SubscriptionGroupListV1P
                                 </Grid>
                             </Grid>
                         }
-                        onSelectionChange={setSelectedSubscriptionGroup}
+                        onSelectionModelChange={setSelectedSubscriptionGroupIds}
                     />
                 </PageContentsCardV1>
             </Grid>

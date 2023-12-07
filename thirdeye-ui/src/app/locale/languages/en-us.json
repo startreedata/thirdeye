@@ -334,6 +334,8 @@
         "recent-anomaly-detection-failures": "Recent anomaly detection failures",
         "recent-custom": "Recent Custom",
         "recent-entity": "Recent {{entity}}",
+        "recent-task-statuses-for-alert": "Recent task statuses for alert",
+        "recent-task-statuses-for-subscription-group": "Recent task statuses for subscription group",
         "recipient-details": "Recipient Details",
         "recommended-documentation": "Recommended Documentation",
         "recommended-type": "Recommended type",

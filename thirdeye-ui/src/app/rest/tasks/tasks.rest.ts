@@ -24,12 +24,12 @@ export const getTasks = async ({
     type,
     startTime,
     endTime,
-    alertId,
+    alertOrSubGroupId,
 }: GetTasksProps = {}): Promise<Task[]> => {
     const queryParams = new URLSearchParams();
 
-    if (alertId) {
-        queryParams.set("refId", `${alertId}`);
+    if (alertOrSubGroupId) {
+        queryParams.set("refId", `${alertOrSubGroupId}`);
     }
 
     if (status) {

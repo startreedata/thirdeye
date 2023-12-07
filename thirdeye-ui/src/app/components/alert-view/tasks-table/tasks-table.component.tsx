@@ -31,7 +31,10 @@ import { formatDateAndTimeV1, lightV1 } from "../../../platform/utils";
 import { Task, TaskStatus } from "../../../rest/dto/taks.interface";
 import { DialogType } from "../../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 
-export const TasksTable: FunctionComponent<TaskTableProps> = ({ alertId }) => {
+export const TasksTable: FunctionComponent<TaskTableProps> = ({
+    alertId,
+    headerName,
+}) => {
     const { t } = useTranslation();
     const { showDialog } = useDialogProviderV1();
     const [start, end] = generateDateRangeDaysFromNow(7);
@@ -52,7 +55,7 @@ export const TasksTable: FunctionComponent<TaskTableProps> = ({ alertId }) => {
             return getTasks({
                 startTime: start,
                 endTime: end,
-                alertId,
+                alertOrSubGroupId: alertId,
             });
         },
     });
@@ -148,16 +151,8 @@ export const TasksTable: FunctionComponent<TaskTableProps> = ({ alertId }) => {
     };
 
     return (
-        <Box
-            width={{
-                xs: "100%",
-                sm: "100%",
-                md: "800px",
-                lg: "1000px",
-                xl: "1000px",
-            }}
-        >
-            <Typography variant="h5">Recent task statuses for alert</Typography>
+        <>
+            <Typography variant="h5">{headerName}</Typography>
             <Typography variant="caption">In the last 7 days</Typography>
             <Box paddingTop={2} />
             <LoadingErrorStateSwitch
@@ -203,6 +198,6 @@ export const TasksTable: FunctionComponent<TaskTableProps> = ({ alertId }) => {
                     />
                 </Box>
             </LoadingErrorStateSwitch>
-        </Box>
+        </>
     );
 };

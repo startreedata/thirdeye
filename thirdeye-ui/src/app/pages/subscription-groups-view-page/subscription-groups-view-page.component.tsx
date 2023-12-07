@@ -65,6 +65,7 @@ import {
 } from "../../utils/routes/routes.util";
 import { getUiSubscriptionGroup } from "../../utils/subscription-groups/subscription-groups.util";
 import { SubscriptionGroupsViewPageParams } from "./subscription-groups-view-page.interfaces";
+import { TasksTable } from "../../components/alert-view/tasks-table/tasks-table.component";
 
 export const SubscriptionGroupsViewPage: FunctionComponent = () => {
     const [uiSubscriptionGroup, setUiSubscriptionGroup] =
@@ -341,6 +342,18 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
                         <NotificationChannelsCard
                             activeChannels={uiSubscriptionGroup.activeChannels}
                         />
+                        <Grid item xs={12}>
+                            <Card>
+                                <CardContent>
+                                    <TasksTable
+                                        alertId={uiSubscriptionGroup.id}
+                                        headerName={t(
+                                            "label.recent-task-statuses-for-subscription-group"
+                                        )}
+                                    />
+                                </CardContent>
+                            </Card>
+                        </Grid>
                     </PageContentsGridV1>
                 ) : null}
             </LoadingErrorStateSwitch>

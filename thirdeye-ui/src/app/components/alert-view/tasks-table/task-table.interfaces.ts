@@ -15,4 +15,5 @@
 
 export interface TaskTableProps {
     alertId: number;
+    headerName: string;
 }

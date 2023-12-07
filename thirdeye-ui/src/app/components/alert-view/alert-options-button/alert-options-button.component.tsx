@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { IconButton, Menu, MenuItem } from "@material-ui/core";
+import { Box, IconButton, Menu, MenuItem } from "@material-ui/core";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import { Alert } from "@material-ui/lab";
 import { useMutation } from "@tanstack/react-query";
@@ -290,7 +290,22 @@ export const AlertOptionsButton: FunctionComponent<AlertOptionsButtonProps> = ({
                         </MenuItem>
                     )}
                 >
-                    <TasksTable alertId={alert.id} />
+                    <Box
+                        width={{
+                            xs: "100%",
+                            sm: "100%",
+                            md: "800px",
+                            lg: "1000px",
+                            xl: "1000px",
+                        }}
+                    >
+                        <TasksTable
+                            alertId={alert.id}
+                            headerName={t(
+                                "label.recent-task-statuses-for-alert"
+                            )}
+                        />
+                    </Box>
                 </Modal>
             </Menu>
         </>

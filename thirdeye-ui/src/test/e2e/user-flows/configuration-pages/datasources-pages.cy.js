@@ -15,8 +15,7 @@
 
 import { TEST_IDS } from "../../../../app/components/datasource-list-v1/datasource-list-v1.interfaces";
 
-const CHECKBOX_SELECTOR =
-    ".BaseTable__body [role='row'] input[type='checkbox']";
+const CHECKBOX_SELECTOR = ".MuiDataGrid-cell input[type='checkbox']";
 
 describe("configuration datasources pages", () => {
     beforeEach(() => {
@@ -30,8 +29,8 @@ describe("configuration datasources pages", () => {
         const searchInputSelector = "input[placeholder='Search Datasources']";
 
         // There should be 1 alert (table should show something)
-        cy.getByDataTestId(TEST_IDS.TABLE)
-            .find(".BaseTable__body [role='row']")
+        cy.get(".MuiDataGrid-main")
+            .find(".MuiDataGrid-cell")
             .contains("mypinot")
             .should("be.visible");
 
@@ -40,8 +39,8 @@ describe("configuration datasources pages", () => {
         // Make sure input value is propagated after debounce
         // eslint-disable-next-line cypress/no-unnecessary-waiting
         cy.wait(500);
-        cy.getByDataTestId(TEST_IDS.TABLE)
-            .find(".BaseTable__body [role='row']")
+        cy.get(".MuiDataGrid-main")
+            .find(".MuiDataGrid-cell")
             .contains("mypinot")
             .should("be.visible");
 
@@ -50,13 +49,13 @@ describe("configuration datasources pages", () => {
         // Make sure input value is propagated after debounce
         // eslint-disable-next-line cypress/no-unnecessary-waiting
         cy.wait(500);
-        cy.getByDataTestId(TEST_IDS.TABLE)
-            .find(".BaseTable__body [role='row']")
+        cy.get(".MuiDataGrid-main")
+            .find(".MuiDataGrid-cell")
             .should("not.exist");
     });
 
     it("user can edit datasource", () => {
-        cy.getByDataTestId(TEST_IDS.TABLE).find(CHECKBOX_SELECTOR).click();
+        cy.get(".MuiDataGrid-main").find(CHECKBOX_SELECTOR).click();
 
         cy.getByDataTestId(TEST_IDS.EDIT_BUTTON).click();
 
@@ -66,7 +65,7 @@ describe("configuration datasources pages", () => {
     });
 
     it("user can delete datasource", () => {
-        cy.getByDataTestId(TEST_IDS.TABLE).find(CHECKBOX_SELECTOR).click();
+        cy.get(".MuiDataGrid-main").find(CHECKBOX_SELECTOR).click();
 
         cy.getByDataTestId(TEST_IDS.DELETE_BUTTON).click();
 
@@ -85,7 +84,7 @@ describe("configuration datasources pages", () => {
             .should("eq", 200);
 
         // Since there is only one datasource, the table should no longer exist after deleting
-        cy.getByDataTestId(TEST_IDS.TABLE).should("not.exist");
+        cy.get(".MuiDataGrid-main").should("not.exist");
     });
 
     it("user can create datasource", () => {

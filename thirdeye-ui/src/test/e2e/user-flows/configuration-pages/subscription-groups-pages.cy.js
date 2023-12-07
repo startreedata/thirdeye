@@ -15,8 +15,7 @@
 
 import { TEST_IDS } from "../../../../app/components/subscription-group-list-v1/subscription-group-list-v1.interfaces";
 
-const CHECKBOX_SELECTOR =
-    ".BaseTable__body [role='row'] input[type='checkbox']";
+const CHECKBOX_SELECTOR = ".MuiDataGrid-cell input[type='checkbox']";
 const DEFAULT_SUBSCRIPTION_GROUP_NAME = "default-test-subscription-group";
 
 describe("configuration subscription groups pages", () => {
@@ -87,8 +86,8 @@ describe("configuration subscription groups pages", () => {
             "input[placeholder='Search Subscription Groups']";
 
         // There should be 1 alert (table should show something)
-        cy.getByDataTestId(TEST_IDS.TABLE)
-            .find(".BaseTable__body [role='row']")
+        cy.get(".MuiDataGrid-main")
+            .find(".MuiDataGrid-cell")
             .contains(DEFAULT_SUBSCRIPTION_GROUP_NAME)
             .should("be.visible");
 
@@ -98,8 +97,8 @@ describe("configuration subscription groups pages", () => {
         // Make sure input value is propagated after debounce
         // eslint-disable-next-line cypress/no-unnecessary-waiting
         cy.wait(500);
-        cy.getByDataTestId(TEST_IDS.TABLE)
-            .find(".BaseTable__body [role='row']")
+        cy.get(".MuiDataGrid-main")
+            .find(".MuiDataGrid-cell")
             .contains(DEFAULT_SUBSCRIPTION_GROUP_NAME)
             .should("be.visible");
 
@@ -109,13 +108,13 @@ describe("configuration subscription groups pages", () => {
         // Make sure input value is propagated after debounce
         // eslint-disable-next-line cypress/no-unnecessary-waiting
         cy.wait(500);
-        cy.getByDataTestId(TEST_IDS.TABLE)
-            .find(".BaseTable__body [role='row']")
+        cy.get(".MuiDataGrid-main")
+            .find(".MuiDataGrid-cell")
             .should("not.exist");
     });
 
     it("user can edit subscription groups", () => {
-        cy.getByDataTestId(TEST_IDS.TABLE).find(CHECKBOX_SELECTOR).click();
+        cy.get(".MuiDataGrid-main").find(CHECKBOX_SELECTOR).click();
 
         cy.getByDataTestId(TEST_IDS.EDIT_BUTTON).click();
 
@@ -125,7 +124,7 @@ describe("configuration subscription groups pages", () => {
     });
 
     it("user can delete subscription groups", () => {
-        cy.getByDataTestId(TEST_IDS.TABLE).find(CHECKBOX_SELECTOR).click();
+        cy.get(".MuiDataGrid-main").find(CHECKBOX_SELECTOR).click();
 
         cy.getByDataTestId(TEST_IDS.DELETE_BUTTON).click();
 
@@ -133,11 +132,11 @@ describe("configuration subscription groups pages", () => {
         cy.get("[role='dialog']").contains("Confirm").click();
 
         // Since there is only one datasource, the table should no longer exist after deleting
-        cy.getByDataTestId(TEST_IDS.TABLE).should("not.exist");
+        cy.get(".MuiDataGrid-main").should("not.exist");
     });
 
     it("user goes to edit page from subscription group details page", () => {
-        cy.getByDataTestId(TEST_IDS.TABLE)
+        cy.get(".MuiDataGrid-main")
             .find("a")
             .contains(DEFAULT_SUBSCRIPTION_GROUP_NAME)
             .click();
@@ -178,7 +177,7 @@ describe("configuration subscription groups pages", () => {
     });
 
     it("user can delete subscription group from details page", () => {
-        cy.getByDataTestId(TEST_IDS.TABLE)
+        cy.get(".MuiDataGrid-main")
             .find("a")
             .contains(DEFAULT_SUBSCRIPTION_GROUP_NAME)
             .click();
@@ -194,6 +193,6 @@ describe("configuration subscription groups pages", () => {
         // Click confirm button in the dialog
         // In Github env, the dialog takes a long time to show up
         cy.get("button .MuiButton-label").contains("Confirm").click();
-        cy.getByDataTestId(TEST_IDS.TABLE).should("not.exist");
+        cy.get(".MuiDataGrid-main").should("not.exist");
     });
 });

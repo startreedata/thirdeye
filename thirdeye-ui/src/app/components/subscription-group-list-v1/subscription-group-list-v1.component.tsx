@@ -188,11 +188,13 @@ export const SubscriptionGroupListV1: FunctionComponent<SubscriptionGroupListV1P
                         disableColumnSelector
                         disableSelectionOnClick
                         columns={subscriptionGroupColumns}
-                        data-testid={TEST_IDS.TABLE}
+                        data-id={TEST_IDS.TABLE}
                         rows={subscriptionGroups as UiSubscriptionGroup[]}
                         searchBarProps={{
                             searchKey: "name",
-                            placeholder: "Search by name",
+                            placeholder: t("label.search-entity", {
+                                entity: t("label.subscription-groups"),
+                            }),
                         }}
                         selectionModel={selectedSubscriptionGroupIds}
                         toolbar={

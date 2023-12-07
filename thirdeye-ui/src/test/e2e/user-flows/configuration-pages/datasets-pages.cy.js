@@ -16,8 +16,7 @@
 import { DATASET_FORM_TEST_IDS } from "../../../../app/components/dataset-create-wizard/dataset-properties-form/dataset-properties-form.interfaces";
 import { TEST_IDS } from "../../../../app/components/dataset-list-v1/dataset-list-v1.interfaces";
 
-const CHECKBOX_SELECTOR =
-    ".BaseTable__body [role='row'] input[type='checkbox']";
+const CHECKBOX_SELECTOR = ".MuiDataGrid-cell input[type='checkbox']";
 
 describe("configuration datasets pages", () => {
     beforeEach(() => {
@@ -28,7 +27,7 @@ describe("configuration datasets pages", () => {
     });
 
     it("user can edit dataset", () => {
-        cy.getByDataTestId(TEST_IDS.TABLE).find(CHECKBOX_SELECTOR).click();
+        cy.get(".MuiDataGrid-main").find(CHECKBOX_SELECTOR).click();
 
         cy.getByDataTestId(TEST_IDS.EDIT_BUTTON).click();
 
@@ -38,7 +37,7 @@ describe("configuration datasets pages", () => {
     });
 
     it("user can delete dataset", () => {
-        cy.getByDataTestId(TEST_IDS.TABLE).find(CHECKBOX_SELECTOR).click();
+        cy.get(".MuiDataGrid-main").find(CHECKBOX_SELECTOR).click();
 
         cy.getByDataTestId(TEST_IDS.DELETE_BUTTON).click();
 
@@ -57,7 +56,7 @@ describe("configuration datasets pages", () => {
             .should("eq", 200);
 
         // Since there is only one datasource, the table should no longer exist after deleting
-        cy.getByDataTestId(TEST_IDS.TABLE).should("not.exist");
+        cy.get(".MuiDataGrid-main").should("not.exist");
     });
 
     it("user can create multiple datasets", () => {

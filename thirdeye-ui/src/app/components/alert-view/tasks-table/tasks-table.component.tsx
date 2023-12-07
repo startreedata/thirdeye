@@ -26,10 +26,11 @@ import { useQuery } from "@tanstack/react-query";
 import { getTasks } from "../../../rest/tasks/tasks.rest";
 import { generateDateRangeDaysFromNow } from "../../../utils/routes/routes.util";
 import { TaskTableProps } from "./task-table.interfaces";
-import { DataGrid, GridColumns, GridSortModel } from "@mui/x-data-grid";
+import { GridColumns, GridSortModel } from "@mui/x-data-grid";
 import { formatDateAndTimeV1, lightV1 } from "../../../platform/utils";
 import { Task, TaskStatus } from "../../../rest/dto/taks.interface";
 import { DialogType } from "../../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
+import { StyledDataGrid } from "../../data-grid/styled-data-grid.component";
 
 export const TasksTable: FunctionComponent<TaskTableProps> = ({
     alertId,
@@ -185,7 +186,7 @@ export const TasksTable: FunctionComponent<TaskTableProps> = ({
                 }
             >
                 <Box width="100%">
-                    <DataGrid
+                    <StyledDataGrid
                         autoHeight
                         disableColumnFilter
                         disableColumnSelector

@@ -20,13 +20,7 @@ import { useTranslation } from "react-i18next";
 import { AppBarConfigProvider } from "./components/app-bar/app-bar-config-provider/app-bar-config-provider.component";
 import { AnalyticsAndErrorReportingProviderV1 } from "./components/third-party-lib-setup-providers/analytics-and-error-reporting-provider-v1/analytics-and-error-reporting-provider-v1.component";
 import { AppCrashPage } from "./pages/app-crash-page/app-crash-page.component";
-import {
-    AppContainerV1,
-    NotificationScopeV1,
-    NotificationTypeV1,
-    useAuthProviderV1,
-    useNotificationProviderV1,
-} from "./platform/components";
+import { AppContainerV1, useAuthProviderV1 } from "./platform/components";
 import { AppRouter } from "./routers/app/app.router";
 
 const queryClient = new QueryClient({
@@ -40,24 +34,13 @@ const queryClient = new QueryClient({
 
 // ThirdEye UI app
 export const App: FunctionComponent = () => {
-    const {
-        authDisabled,
-        authDisabledNotification,
-        clearAuthDisabledNotification,
-    } = useAuthProviderV1();
+    const { authDisabled, authDisabledNotification } = useAuthProviderV1();
     const { t } = useTranslation();
-    const { notify } = useNotificationProviderV1();
 
     useEffect(() => {
         if (authDisabled && authDisabledNotification) {
-            // Auth disabled and user not yet notified
-            notify(
-                NotificationTypeV1.Info,
-                t("message.authentication-disabled"),
-                false,
-                NotificationScopeV1.Global,
-                clearAuthDisabledNotification
-            );
+            // eslint-disable-next-line no-console
+            console.log(t("message.authentication-disabled"));
         }
     }, [authDisabled, authDisabledNotification]);
 

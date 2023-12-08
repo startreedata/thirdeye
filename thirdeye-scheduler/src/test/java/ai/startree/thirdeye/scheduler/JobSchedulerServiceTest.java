@@ -37,7 +37,7 @@ public class JobSchedulerServiceTest {
     final AlertTemplateRenderer alertTemplateRenderer = mock(AlertTemplateRenderer.class);
     when(alertTemplateRenderer.renderAlert(any(AlertDTO.class), any())).then(
         i -> ((AlertDTO) i.getArguments()[0]).getTemplate());
-    jobSchedulerService = new JobSchedulerService(null, null, null, null, alertTemplateRenderer);
+    jobSchedulerService = new JobSchedulerService(null, null, alertTemplateRenderer);
   }
 
   @DataProvider(name = "computeTaskStartTestCases")

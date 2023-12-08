@@ -18,19 +18,14 @@ import static ai.startree.thirdeye.spi.util.AlertMetadataUtils.getDateTimeZone;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
-import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
-import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
-import ai.startree.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotificationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DetectionPipelineTaskInfo;
-import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskStatus;
 import ai.startree.thirdeye.spi.util.TimeUtils;
@@ -39,7 +34,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.joda.time.Chronology;
 import org.joda.time.DateTime;
@@ -52,30 +46,39 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class JobSchedulerService {
 
-  private static final Logger LOG = LoggerFactory.getLogger(JobSchedulerService.class);
   public static final Interval UNUSED_DETECTION_INTERVAL = new Interval(0, 0, DEFAULT_CHRONOLOGY);
+  private static final Logger LOG = LoggerFactory.getLogger(JobSchedulerService.class);
   private final TaskManager taskManager;
   private final AlertManager alertManager;
-  private final AnomalyManager anomalyManager;
-  private final AnomalySubscriptionGroupNotificationManager notificationManager;
   private final AlertTemplateRenderer alertTemplateRenderer;
 
   @Inject
   public JobSchedulerService(final TaskManager taskManager,
       final AlertManager alertManager,
-      final AnomalyManager anomalyManager,
-      final AnomalySubscriptionGroupNotificationManager notificationManager,
       final AlertTemplateRenderer alertTemplateRenderer) {
     this.taskManager = taskManager;
     this.alertManager = alertManager;
-    this.anomalyManager = anomalyManager;
-    this.notificationManager = notificationManager;
     this.alertTemplateRenderer = alertTemplateRenderer;
   }
 
-  public boolean taskAlreadyRunning(final String jobName) {
+  public static Long getIdFromJobKey(String jobKey) {
+    final String[] tokens = jobKey.split("_");
+    final String id = tokens[tokens.length - 1];
+    return Long.valueOf(id);
+  }
+
+  @NonNull
+  private static Period getMutabilityPeriod(final AlertTemplateDTO templateWithProperties) {
+    return optional(templateWithProperties.getMetadata())
+        .map(AlertMetadataDTO::getDataset)
+        .map(DatasetConfigDTO::getMutabilityPeriod)
+        .map(TimeUtils::isoPeriod)
+        .orElse(Period.ZERO);
+  }
+
+  public boolean taskAlreadyRunning(final String taskName) {
     List<TaskDTO> scheduledTasks = taskManager.findByPredicate(Predicate.AND(
-        Predicate.EQ("name", jobName),
+        Predicate.EQ("name", taskName),
         Predicate.OR(
             Predicate.EQ("status", TaskStatus.RUNNING.toString()),
             Predicate.EQ("status", TaskStatus.WAITING.toString())
@@ -124,61 +127,5 @@ public class JobSchedulerService {
     } catch (IOException | ClassNotFoundException e) {
       throw new RuntimeException(e);
     }
-  }
-
-  public static Long getIdFromJobKey(String jobKey) {
-    final String[] tokens = jobKey.split("_");
-    final String id = tokens[tokens.length - 1];
-    return Long.valueOf(id);
-  }
-
-  /**
-   * Check if we need to create a subscription task.
-   * If there is no anomaly generated (by looking at anomaly create_time) between last notification
-   * time
-   * till now (left inclusive, right exclusive) then no need to create this task.
-   *
-   * Even if an anomaly gets merged (end_time updated) it will not renotify this anomaly as the
-   * create_time is not
-   * modified.
-   * For example, if previous anomaly is from t1 to t2 generated at t3, then the timestamp in
-   * vectorLock is t3.
-   * If there is a new anomaly from t2 to t4 generated at t5, then we can still get this anomaly as
-   * t5 > t3.
-   *
-   * Also, check if there is any anomaly that needs re-notifying
-   *
-   * @param configDTO The Subscription Configuration.
-   * @return true if it needs notification task. false otherwise.
-   */
-  public boolean needNotification(final SubscriptionGroupDTO configDTO) {
-    Map<Long, Long> vectorClocks = configDTO.getVectorClocks();
-    if (vectorClocks == null || vectorClocks.size() == 0) {
-      return true;
-    }
-    for (Map.Entry<Long, Long> e : vectorClocks.entrySet()) {
-      long configId = e.getKey();
-      long lastNotifiedTime = e.getValue();
-      if (anomalyManager.filter(new AnomalyFilter()
-              .setCreateTimeWindow(new Interval(lastNotifiedTime, System.currentTimeMillis()))
-              .setAlertId(configId))
-          .stream().anyMatch(x -> !x.isChild())) {
-        return true;
-      }
-    }
-    // in addition to checking the watermarks, check if any anomalies need to be re-notified by querying the anomaly subscription group notification table
-    List<AnomalySubscriptionGroupNotificationDTO> anomalySubscriptionGroupNotifications =
-        notificationManager.findByPredicate(
-            Predicate.IN("detectionConfigId", vectorClocks.keySet().toArray()));
-    return !anomalySubscriptionGroupNotifications.isEmpty();
-  }
-
-  @NonNull
-  private static Period getMutabilityPeriod(final AlertTemplateDTO templateWithProperties) {
-    return optional(templateWithProperties.getMetadata())
-        .map(AlertMetadataDTO::getDataset)
-        .map(DatasetConfigDTO::getMutabilityPeriod)
-        .map(TimeUtils::isoPeriod)
-        .orElse(Period.ZERO);
   }
 }

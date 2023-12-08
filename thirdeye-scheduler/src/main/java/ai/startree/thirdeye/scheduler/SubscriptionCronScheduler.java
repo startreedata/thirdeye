@@ -18,7 +18,7 @@ import static ai.startree.thirdeye.spi.Constants.CRON_TIMEZONE;
 import static ai.startree.thirdeye.spi.util.ExecutorUtils.shutdownExecutionService;
 import static java.util.stream.Collectors.toList;
 
-import ai.startree.thirdeye.scheduler.job.DetectionAlertJob;
+import ai.startree.thirdeye.scheduler.job.NotificationPipelineJob;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.task.TaskType;
@@ -92,7 +92,7 @@ public class SubscriptionCronScheduler implements Runnable {
   }
 
   private static JobDetail buildJobDetail(final JobKey jobKey) {
-    return JobBuilder.newJob(DetectionAlertJob.class)
+    return JobBuilder.newJob(NotificationPipelineJob.class)
         .withIdentity(jobKey)
         .build();
   }

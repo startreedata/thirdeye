@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import type { Alert } from "./alert.interfaces";
 import type { Application } from "./application.interfaces";
 import type { User } from "./user.interfaces";
 
@@ -25,6 +26,7 @@ export interface SubscriptionGroup {
     name: string;
     cron: string;
     application: Application;
+    alerts?: Alert[]; // deprecated
     alertAssociations?: AlertAssociation[];
     created: number;
     updated: number;

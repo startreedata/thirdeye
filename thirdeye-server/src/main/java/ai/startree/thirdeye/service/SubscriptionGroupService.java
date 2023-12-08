@@ -21,6 +21,7 @@ import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
+import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.notification.NotificationDispatcher;
 import ai.startree.thirdeye.spi.api.AlertApi;
@@ -64,6 +65,15 @@ public class SubscriptionGroupService extends
           ensureExists(alert, "alert missing in alert association");
           ensureExists(alert.getId(), "alert.id is missing in alert association");
         }));
+  }
+
+  @Override
+  protected void prepareUpdatedDto(final ThirdEyeServerPrincipal principal,
+      final SubscriptionGroupDTO existing,
+      final SubscriptionGroupDTO updated) {
+
+    /* This is a system field which is managed by the notification pipeline */
+    updated.setVectorClocks(existing.getVectorClocks());
   }
 
   @Override

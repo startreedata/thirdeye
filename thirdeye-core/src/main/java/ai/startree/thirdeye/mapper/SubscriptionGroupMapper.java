@@ -50,7 +50,6 @@ public interface SubscriptionGroupMapper {
 
   @Mapping(source = "alertSuppressors", target = "alertSuppressors", qualifiedByName = "alertSuppressors")
   @Mapping(source = "alerts", target = "properties", qualifiedByName = "properties")
-  @Mapping(source = "alerts", target = "vectorClocks", qualifiedByName = "vectorClocks")
   @Mapping(source = "type", target = "type", defaultValue = DEFAULT_ALERTER_PIPELINE)
   @Mapping(source = "active", target = "active", defaultValue = "true")
   @Mapping(source = "cron", target = "cronExpression")
@@ -77,17 +76,6 @@ public interface SubscriptionGroupMapper {
   default Map<String, Object> mapProperties(final List<AlertApi> alerts) {
     final List<Long> alertIds = getAlertIds(alerts);
     return new HashMap<>(Map.of("detectionConfigIds", alertIds));
-  }
-
-  @Named("vectorClocks")
-  default Map<Long, Long> mapVectorClocks(final List<AlertApi> alerts) {
-    final List<Long> alertIds = getAlertIds(alerts);
-    long currentTimestamp = 0L;
-    Map<Long, Long> vectorClocks = new HashMap<>();
-    for (long detectionConfigId : alertIds) {
-      vectorClocks.put(detectionConfigId, currentTimestamp);
-    }
-    return vectorClocks;
   }
 
   @SuppressWarnings("unchecked")

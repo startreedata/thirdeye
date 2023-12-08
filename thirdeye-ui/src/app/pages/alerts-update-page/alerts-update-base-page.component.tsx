@@ -243,9 +243,12 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
         const subscriptionGroupsToBeAdded = subscriptionGroupsAdded.map(
             (subscriptionGroup) => ({
                 ...subscriptionGroup,
-                alerts: subscriptionGroup.alerts
-                    ? [...subscriptionGroup.alerts, alert] // Add to existing list
-                    : [alert], // Create new list
+                alertAssociations: subscriptionGroup.alertAssociations
+                    ? [
+                          ...subscriptionGroup.alertAssociations,
+                          { alert: { id: alert.id } },
+                      ] // Add to existing list
+                    : [{ alert: { id: alert.id } }], // Create new list
             })
         );
 
@@ -253,10 +256,10 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
         const subscriptionGroupsToBeOmitted = subscriptionGroupsRemoved.map(
             (subscriptionGroup) => ({
                 ...subscriptionGroup,
-                alerts: getSubscriptionGroupAlertsList(
-                    subscriptionGroup
-                ).filter(
-                    (subGroupAlert) => subGroupAlert.id !== alert.id // Remove alert from list
+                alertAssociations: subscriptionGroup.alertAssociations?.filter(
+                    (association) => {
+                        return association.alert?.id !== alert.id;
+                    }
                 ),
             })
         );

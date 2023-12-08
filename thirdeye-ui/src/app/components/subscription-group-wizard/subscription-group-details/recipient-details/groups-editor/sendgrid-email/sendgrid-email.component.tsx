@@ -26,7 +26,7 @@ import {
 } from "@material-ui/core";
 import { cloneDeep } from "lodash";
 import React, { FunctionComponent } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import * as yup from "yup";
 import { LocalThemeProviderV1 } from "../../../../../../platform/components";
@@ -50,7 +50,7 @@ export const SendgridEmail: FunctionComponent<SendgridEmailProps> = ({
     const { t } = useTranslation();
     const theme = useTheme();
     const {
-        control,
+        register,
         formState: { errors },
     } = useForm<SendgridEmailFormEntries>({
         mode: "onChange",
@@ -129,32 +129,25 @@ export const SendgridEmail: FunctionComponent<SendgridEmailProps> = ({
                     <InputSection
                         helperLabel={`(${t("label.optional")})`}
                         inputComponent={
-                            <Controller
-                                control={control}
+                            <TextField
+                                fullWidth
+                                data-testid="api-key-input-container"
+                                error={Boolean(errors && errors.apiKey)}
+                                helperText={
+                                    errors &&
+                                    errors.apiKey &&
+                                    errors.apiKey.message
+                                }
+                                inputProps={register("apiKey")}
                                 name="apiKey"
-                                render={({ field }) => (
-                                    <TextField
-                                        {...field}
-                                        fullWidth
-                                        data-testid="api-key-input-container"
-                                        error={Boolean(errors && errors.apiKey)}
-                                        helperText={
-                                            errors &&
-                                            errors.apiKey &&
-                                            errors.apiKey.message
-                                        }
-                                        name="apiKey"
-                                        type="string"
-                                        variant="outlined"
-                                        onChange={(e) => {
-                                            const copied =
-                                                cloneDeep(configuration);
-                                            copied.params.apiKey =
-                                                e.currentTarget.value;
-                                            onSpecChange(copied);
-                                        }}
-                                    />
-                                )}
+                                type="string"
+                                variant="outlined"
+                                onChange={(e) => {
+                                    const copied = cloneDeep(configuration);
+                                    copied.params.apiKey =
+                                        e.currentTarget.value;
+                                    onSpecChange(copied);
+                                }}
                             />
                         }
                         label={t("label.sendgrid-api-key")}
@@ -163,32 +156,23 @@ export const SendgridEmail: FunctionComponent<SendgridEmailProps> = ({
                     <InputSection
                         helperLabel={`(${t("label.optional")})`}
                         inputComponent={
-                            <Controller
-                                control={control}
+                            <TextField
+                                fullWidth
+                                data-testid="from-input-container"
+                                error={Boolean(errors && errors.from)}
+                                helperText={
+                                    errors && errors.from && errors.from.message
+                                }
+                                inputProps={register("from")}
                                 name="from"
-                                render={({ field }) => (
-                                    <TextField
-                                        {...field}
-                                        fullWidth
-                                        data-testid="from-input-container"
-                                        error={Boolean(errors && errors.from)}
-                                        helperText={
-                                            errors &&
-                                            errors.from &&
-                                            errors.from.message
-                                        }
-                                        name="from"
-                                        type="string"
-                                        variant="outlined"
-                                        onChange={(e) => {
-                                            const copied =
-                                                cloneDeep(configuration);
-                                            copied.params.emailRecipients.from =
-                                                e.currentTarget.value;
-                                            onSpecChange(copied);
-                                        }}
-                                    />
-                                )}
+                                type="string"
+                                variant="outlined"
+                                onChange={(e) => {
+                                    const copied = cloneDeep(configuration);
+                                    copied.params.emailRecipients.from =
+                                        e.currentTarget.value;
+                                    onSpecChange(copied);
+                                }}
                             />
                         }
                         label={t("label.from")}

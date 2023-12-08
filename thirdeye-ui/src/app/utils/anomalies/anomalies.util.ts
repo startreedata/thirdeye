@@ -496,12 +496,15 @@ export const handleCreateAlertClickGenerator = (
 
                 // Update subscription groups with new alert
                 for (const subscriptionGroup of subscriptionGroups) {
-                    if (subscriptionGroup.alerts) {
+                    const association = {
+                        alert: { id: alert.id },
+                    };
+                    if (subscriptionGroup.alertAssociations) {
                         // Add to existing list
-                        subscriptionGroup.alerts.push(alert);
+                        subscriptionGroup.alertAssociations.push(association);
                     } else {
                         // Create and add to list
-                        subscriptionGroup.alerts = [alert];
+                        subscriptionGroup.alertAssociations = [association];
                     }
                 }
 

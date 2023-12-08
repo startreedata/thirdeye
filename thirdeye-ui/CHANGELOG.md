@@ -1,3 +1,25 @@
+## [2.42.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.41.6...thirdeye-ui-2.42.0) (2023-12-08)
+
+
+### Features
+
+* [TE-1707](https://cortexdata.atlassian.net/browse/TE-1707) provide option to show recent tasks for alert in modal ([c0a7e05fc](https://github.com/startreedata/thirdeye/commit/c0a7e05fcfd763391432923cba85f3090803a3b6))
+* [TE-1757](https://cortexdata.atlassian.net/browse/TE-1757) add tasks to subscription group details page ([72546ca5b](https://github.com/startreedata/thirdeye/commit/72546ca5ba47f1c97834ae00ad0d489713e47c3e))
+* style new datagrid table to match existing old tables ([a793443ba](https://github.com/startreedata/thirdeye/commit/a793443badbb45fb62563298c2dd124b57424295))
+
+
+### Bug Fixes
+
+* [TE-1707](https://cortexdata.atlassian.net/browse/TE-1707) add back missing task id string ([94d604af3](https://github.com/startreedata/thirdeye/commit/94d604af33ae0ad781414d2fab05b0c8e1e0cde6))
+* [TE-1920](https://cortexdata.atlassian.net/browse/TE-1920) labeling changes when selecting type of alert to create ([0c8128f0a](https://github.com/startreedata/thirdeye/commit/0c8128f0a01e74fd4ecd4dfa776b3e5a6ee4ce3d))
+* [TE-1965](https://cortexdata.atlassian.net/browse/TE-1965) min and max dates for anomalies and alerts details view ([41c9dc61a](https://github.com/startreedata/thirdeye/commit/41c9dc61ae80e996586eed476dc562d10b845f41))
+* [TE-1968](https://cortexdata.atlassian.net/browse/TE-1968) fix build issue ([d21b14f10](https://github.com/startreedata/thirdeye/commit/d21b14f10582a8a5d57684a292961d2ce4ea2ec8))
+* [TE-1968](https://cortexdata.atlassian.net/browse/TE-1968) only use alertAssociation when create new subscription group ([9357da069](https://github.com/startreedata/thirdeye/commit/9357da069f7afc590fc653229ef948ff56295142))
+* [TE-1971](https://cortexdata.atlassian.net/browse/TE-1971) move disabled auth to console log ([59a053134](https://github.com/startreedata/thirdeye/commit/59a053134927da752bb1bf09ab9346cbd5693af1))
+* fix issues related to react-hook-form upgrade ([657c10836](https://github.com/startreedata/thirdeye/commit/657c10836dcf148810da24703f56d40ccf9cd267))
+* fix typo ([b5cf91c68](https://github.com/startreedata/thirdeye/commit/b5cf91c68cb5806a1dddb1845d2b1d0a37070c36))
+* refactor DatasetListV1 to use new datagrid ([398bd4813](https://github.com/startreedata/thirdeye/commit/398bd48133e4247d211283eabfd6128d91db23e9))
+
 ### [2.41.6](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.41.5...thirdeye-ui-2.41.6) (2023-11-29)
 
 ### Bug Fixes

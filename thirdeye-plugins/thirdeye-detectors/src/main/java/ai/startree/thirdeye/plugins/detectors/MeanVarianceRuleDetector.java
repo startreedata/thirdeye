@@ -162,8 +162,8 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     final LongSeries inputTimes = inputDF.getLongs(COL_TIME);
     final int firstDetectionIndex = inputTimes.find(windowStartTime);
     checkState(firstDetectionIndex != -1,
-        "Runtime error. Could not build training data for the mean-variance algorithm. Expected to run detection on time: %s but this time was not found in the input times %s",
-        windowStartTime, inputTimes.toString());
+        "Runtime error. Could not build training data for the mean-variance algorithm. Expected to run detection on time: %s but this time was not found in the input times. Last 100 input times: %s",
+        windowStartTime, inputTimes.sliceFrom(Math.max(0,inputTimes.size()-100)).toString());
 
     final int size = inputDF.size();
     final double[] baselineArray = new double[size];

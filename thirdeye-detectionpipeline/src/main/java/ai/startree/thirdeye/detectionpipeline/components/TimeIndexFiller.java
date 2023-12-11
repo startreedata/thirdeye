@@ -21,6 +21,7 @@ import static ai.startree.thirdeye.spi.dataframe.Series.SeriesType.STRING;
 import static ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys.GRANULARITY;
 import static ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys.MAX_TIME_MILLIS;
 import static ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys.MIN_TIME_MILLIS;
+import static ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys.QUERY;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -61,14 +62,11 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
    * Available strategies to compute minTime and maxTime constraints of the timeseries.
    */
   public enum TimeLimitInferenceStrategy {
-    FROM_DATA,
-    FROM_DETECTION_TIME,
-    FROM_DETECTION_TIME_WITH_LOOKBACK,
+    FROM_DATA, FROM_DETECTION_TIME, FROM_DETECTION_TIME_WITH_LOOKBACK,
   }
 
   private static final NullReplacer WITH_ZERO_NULL_REPLACER = new NullReplacerRegistry().buildNullReplacer(
-      "FILL_WITH_ZEROES",
-      new HashMap<>());
+      "FILL_WITH_ZEROES", new HashMap<>());
 
   private static final TimeLimitInferenceStrategy DEFAULT_MIN_TIME_INFERENCE_STRATEGY = TimeLimitInferenceStrategy.FROM_DATA;
   private static final TimeLimitInferenceStrategy DEFAULT_MAX_TIME_INFERENCE_STRATEGY = TimeLimitInferenceStrategy.FROM_DETECTION_TIME;
@@ -98,17 +96,18 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
     final Map<String, String> properties = dataTable.getProperties();
     timeColumn = Objects.requireNonNull(spec.getTimestamp());
 
-    final String granularitySpec = optional(spec.getMonitoringGranularity())
-        .orElseGet(() -> optional(properties.get(GRANULARITY.toString()))
-            .orElseThrow(() -> new IllegalArgumentException(
+    final String granularitySpec = optional(spec.getMonitoringGranularity()).orElseGet(
+        () -> optional(properties.get(GRANULARITY.toString())).orElseThrow(
+            () -> new IllegalArgumentException(
                 "monitoringGranularity is missing from spec and DataTable properties")));
     granularity = isoPeriod(granularitySpec);
 
     nullReplacer = new NullReplacerRegistry().buildNullReplacer(
         spec.getFillNullMethod().toUpperCase(), spec.getFillNullParams());
 
-    boolean allTimeLimitsAreInProperties = properties.containsKey(MIN_TIME_MILLIS.toString())
-        && properties.containsKey(MAX_TIME_MILLIS.toString());
+    boolean allTimeLimitsAreInProperties =
+        properties.containsKey(MIN_TIME_MILLIS.toString()) && properties.containsKey(
+            MAX_TIME_MILLIS.toString());
     boolean noTimeLimitIsCustom = spec.getLookback() == null && spec.getMinTimeInference() == null
         && spec.getMaxTimeInference() == null;
     if (allTimeLimitsAreInProperties && noTimeLimitIsCustom) {
@@ -122,25 +121,21 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
 
   private void inferTimeLimits(final Interval detectionInterval, final DataFrame rawDataFrame) {
     final Period lookback = isoPeriod(spec.getLookback(), DEFAULT_LOOKBACK);
-    TimeLimitInferenceStrategy minTimeInference = spec.getMinTimeInference() != null ?
-        TimeLimitInferenceStrategy.valueOf(spec.getMinTimeInference().toUpperCase()) :
-        DEFAULT_MIN_TIME_INFERENCE_STRATEGY;
+    TimeLimitInferenceStrategy minTimeInference =
+        spec.getMinTimeInference() != null ? TimeLimitInferenceStrategy.valueOf(
+            spec.getMinTimeInference().toUpperCase()) : DEFAULT_MIN_TIME_INFERENCE_STRATEGY;
     checkArgument(isValidInferenceConfig(minTimeInference, lookback),
         "minTime inference based on lookback requires a valid `lookback` parameter");
-    TimeLimitInferenceStrategy maxTimeInference = spec.getMaxTimeInference() != null ?
-        TimeLimitInferenceStrategy.valueOf(spec.getMaxTimeInference().toUpperCase()) :
-        DEFAULT_MAX_TIME_INFERENCE_STRATEGY;
+    TimeLimitInferenceStrategy maxTimeInference =
+        spec.getMaxTimeInference() != null ? TimeLimitInferenceStrategy.valueOf(
+            spec.getMaxTimeInference().toUpperCase()) : DEFAULT_MAX_TIME_INFERENCE_STRATEGY;
     checkArgument(isValidInferenceConfig(maxTimeInference, lookback),
         "maxTime inference based on lookback requires a valid `lookback` parameter");
 
-    minTime = inferMinTime(detectionInterval.getStart(),
-        rawDataFrame.get(timeColumn),
-        minTimeInference,
-        lookback);
-    maxTime = inferMaxTime(detectionInterval.getEnd(),
-        rawDataFrame.get(timeColumn),
-        maxTimeInference,
-        lookback);
+    minTime = inferMinTime(detectionInterval.getStart(), rawDataFrame.get(timeColumn),
+        minTimeInference, lookback);
+    maxTime = inferMaxTime(detectionInterval.getEnd(), rawDataFrame.get(timeColumn),
+        maxTimeInference, lookback);
   }
 
   private static boolean isValidInferenceConfig(TimeLimitInferenceStrategy strategy,
@@ -162,25 +157,36 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
     final DataFrame filledData = joinOnTimeIndex(correctIndex, rawData);
     final DataFrame nullReplacedData = replaceNullData(detectionInterval.getStart(), filledData);
 
+    if (dataTable.getProperties().get(QUERY.toString()) != null) {
+      final String query = dataTable.getProperties().get(QUERY.toString());
+      LOG.info(
+          "Ran time index filler from query {} with minTime: {} and maxTime: {}. With last datapoint of input table {}. With last datapoint of prepared table: {}",
+          query, minTime, maxTime, dataTable.getDataFrame().isEmpty() ? -1
+              : dataTable.getDataFrame().getLong(timeColumn, dataTable.getDataFrame().size() - 1),
+          nullReplacedData.isEmpty() ? -1
+              : nullReplacedData.getLong(timeColumn, nullReplacedData.size() - 1));
+    }
+
     return SimpleDataTable.fromDataFrame(nullReplacedData);
   }
 
   private DataFrame replaceNullData(final DateTime start, final DataFrame dataFrame) {
     // only apply replacer *before* the detection period - on detection period, replace nulls by zeroes
-    DataFrame beforeDetectionStart = dataFrame.filter((LongConditional) values ->
-        values[0] < start.getMillis(), timeColumn).dropNull(timeColumn);
-    DataFrame afterDetectionStart = dataFrame.filter((LongConditional) values ->
-        values[0] >= start.getMillis(), timeColumn).dropNull(timeColumn);
+    DataFrame beforeDetectionStart = dataFrame.filter(
+        (LongConditional) values -> values[0] < start.getMillis(), timeColumn).dropNull(timeColumn);
+    DataFrame afterDetectionStart = dataFrame.filter(
+            (LongConditional) values -> values[0] >= start.getMillis(), timeColumn)
+        .dropNull(timeColumn);
 
-    return DataFrame.concatenate(
-        nullReplacer.replaceNulls(beforeDetectionStart),
-        WITH_ZERO_NULL_REPLACER.replaceNulls(afterDetectionStart)
-    );
+    return DataFrame.concatenate(nullReplacer.replaceNulls(beforeDetectionStart),
+        WITH_ZERO_NULL_REPLACER.replaceNulls(afterDetectionStart));
   }
 
   private DataFrame generateCorrectIndex(Chronology chronology) {
-    final DateTime firstIndexValue = TimeUtils.getSmallestDatetime(new DateTime(minTime, chronology), granularity);
-    final DateTime lastIndexValue = TimeUtils.getBiggestDatetime(new DateTime(maxTime, chronology), granularity);
+    final DateTime firstIndexValue = TimeUtils.getSmallestDatetime(
+        new DateTime(minTime, chronology), granularity);
+    final DateTime lastIndexValue = TimeUtils.getBiggestDatetime(new DateTime(maxTime, chronology),
+        granularity);
     LOG.info(
         "Generating time index for minTime: {}, maxTime: {}. Computed first value: {}, last value: {}",
         minTime, maxTime, firstIndexValue.getMillis(), lastIndexValue.getMillis());
@@ -244,7 +250,8 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
         int rawIdx = 0;
         int correctIdx = 0;
         while (correctIdx < correctSize && rawIdx < rawTimeIndex.length) {
-          final int timeComparison = Long.compare(correctTimeIndex[correctIdx], rawTimeIndex[rawIdx]);
+          final int timeComparison = Long.compare(correctTimeIndex[correctIdx],
+              rawTimeIndex[rawIdx]);
           if (timeComparison == 0) {
             filledValues[correctIdx++] = rawValues[rawIdx++];
           } else if (timeComparison > 0) {
@@ -395,8 +402,7 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
         Map<String, Object> fillNullParams) {
       //fillNullParams to be used by factories when pluginized - eg method=SPLINE, params={order=3, kind="smooth"}
       checkArgument(nullReplacerMap.containsKey(fillNullMethod),
-          "fillNull Method not registered: %s. Available null replacers: %s",
-          fillNullMethod,
+          "fillNull Method not registered: %s. Available null replacers: %s", fillNullMethod,
           nullReplacerMap.keySet());
 
       return nullReplacerMap.get(fillNullMethod);

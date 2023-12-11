@@ -380,7 +380,7 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
       indexValue = indexValue.plus(timePeriod);
     }
     final LongSeries correctIndex = correctIndexBuilder.build();
-    if (correctIndex.get(correctIndex.size() - 1) != lastValueIncluded.getMillis()) {
+    if (!correctIndex.isEmpty() && correctIndex.get(correctIndex.size() - 1) != lastValueIncluded.getMillis()) {
       LOG.error(
           "Error when creating time index. Mismatch between the input lastValue: {} and the generated last value: {}. This should never happen.",
           lastValueIncluded, correctIndex.get(correctIndex.size()

@@ -19,7 +19,8 @@ package ai.startree.thirdeye.spi.datasource.macro;
 public enum MacroMetadataKeys {
   MIN_TIME_MILLIS("metadata.minTimeMillis"),
   MAX_TIME_MILLIS("metadata.maxTimeMillis"),
-  GRANULARITY("metadata.granularity");
+  GRANULARITY("metadata.granularity"),
+  QUERY("metadata.query");
 
   private final String key;
 

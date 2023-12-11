@@ -104,7 +104,7 @@ public class TimeUtils {
    * Floors correctly only if 1 Time unit is used in the Period.
    * Takes the DateTimeZone in account. See testFloorByPeriodWithCustomTimezone.
    */
-  public static DateTime floorByPeriod(DateTime dt, Period period) {
+  public static DateTime floorByPeriod(final DateTime dt, final Period period) {
     if (period.getYears() != 0) {
       return dt.yearOfEra().roundFloorCopy().minusYears(dt.getYearOfEra() % period.getYears());
     } else if (period.getMonths() != 0) {
@@ -183,8 +183,8 @@ public class TimeUtils {
    * eg: exclusion: maxTimeConstraint is < Monday 0 am - period is 1 DAY --> returns Sunday.
    */
   @VisibleForTesting
-  public static DateTime getBiggestDatetime(DateTime maxTimeConstraint, Period timePeriod) {
-    DateTime dateTimeFloored = TimeUtils.floorByPeriod(maxTimeConstraint, timePeriod.toPeriod());
+  public static DateTime getBiggestDatetime(final DateTime maxTimeConstraint, final Period timePeriod) {
+    final DateTime dateTimeFloored = TimeUtils.floorByPeriod(maxTimeConstraint, timePeriod.toPeriod());
 
     if (maxTimeConstraint.equals(dateTimeFloored)) {
       // dateTimeConstraint equals floor --> should be excluded

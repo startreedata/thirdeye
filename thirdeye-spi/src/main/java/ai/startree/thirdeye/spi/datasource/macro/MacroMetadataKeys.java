@@ -15,6 +15,7 @@ package ai.startree.thirdeye.spi.datasource.macro;
 
 /**
  * String keys to use by a macro function when it writes to the properties map.
+ * TODO CYRIL replace by STRING constants
  * */
 public enum MacroMetadataKeys {
   MIN_TIME_MILLIS("metadata.minTimeMillis"),

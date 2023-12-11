@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.detectionpipeline.sql.macro;
 
+import static ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys.QUERY;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.CalciteUtils.expressionToNode;
 import static ai.startree.thirdeye.util.CalciteUtils.nodeToQuery;
@@ -89,6 +90,7 @@ public class MacroEngine {
     final String preparedQuery = nodeToQuery(appliedMacrosNode, sqlDialect, QUOTE_IDENTIFIERS);
 
     final Map<String, String> customOptions = Map.of(); // custom query options not implemented in MinMaxTimeLoader
+    properties.put(QUERY.toString(), preparedQuery);
     return new DataSourceRequest(tableName, preparedQuery, customOptions, properties);
   }
 

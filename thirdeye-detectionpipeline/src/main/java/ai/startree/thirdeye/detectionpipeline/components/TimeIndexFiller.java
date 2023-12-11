@@ -21,6 +21,7 @@ import static ai.startree.thirdeye.spi.dataframe.Series.SeriesType.STRING;
 import static ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys.GRANULARITY;
 import static ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys.MAX_TIME_MILLIS;
 import static ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys.MIN_TIME_MILLIS;
+import static ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys.QUERY;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -50,21 +51,22 @@ import org.joda.time.Chronology;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.Period;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
+
+  private static final Logger LOG = LoggerFactory.getLogger(TimeIndexFiller.class);
 
   /**
    * Available strategies to compute minTime and maxTime constraints of the timeseries.
    */
   public enum TimeLimitInferenceStrategy {
-    FROM_DATA,
-    FROM_DETECTION_TIME,
-    FROM_DETECTION_TIME_WITH_LOOKBACK,
+    FROM_DATA, FROM_DETECTION_TIME, FROM_DETECTION_TIME_WITH_LOOKBACK,
   }
 
   private static final NullReplacer WITH_ZERO_NULL_REPLACER = new NullReplacerRegistry().buildNullReplacer(
-      "FILL_WITH_ZEROES",
-      new HashMap<>());
+      "FILL_WITH_ZEROES", new HashMap<>());
 
   private static final TimeLimitInferenceStrategy DEFAULT_MIN_TIME_INFERENCE_STRATEGY = TimeLimitInferenceStrategy.FROM_DATA;
   private static final TimeLimitInferenceStrategy DEFAULT_MAX_TIME_INFERENCE_STRATEGY = TimeLimitInferenceStrategy.FROM_DETECTION_TIME;
@@ -91,51 +93,49 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
 
   private void initWithRuntimeInfo(final Interval detectionInterval, final DataTable dataTable) {
     // principle: custom config takes precedence over dataTable properties. If both config and properties are not set: use default config.
-    Map<String, String> properties = dataTable.getProperties();
+    final Map<String, String> properties = dataTable.getProperties();
     timeColumn = Objects.requireNonNull(spec.getTimestamp());
 
-    String granularitySpec = optional(spec.getMonitoringGranularity())
-        .orElseGet(() -> optional(properties.get(GRANULARITY.toString()))
-            .orElseThrow(() -> new IllegalArgumentException(
+    final String granularitySpec = optional(spec.getMonitoringGranularity()).orElseGet(
+        () -> optional(properties.get(GRANULARITY.toString())).orElseThrow(
+            () -> new IllegalArgumentException(
                 "monitoringGranularity is missing from spec and DataTable properties")));
     granularity = isoPeriod(granularitySpec);
 
     nullReplacer = new NullReplacerRegistry().buildNullReplacer(
         spec.getFillNullMethod().toUpperCase(), spec.getFillNullParams());
 
-    boolean allTimeLimitsAreInProperties = properties.containsKey(MIN_TIME_MILLIS.toString())
-        && properties.containsKey(MAX_TIME_MILLIS.toString());
+    boolean allTimeLimitsAreInProperties =
+        properties.containsKey(MIN_TIME_MILLIS.toString()) && properties.containsKey(
+            MAX_TIME_MILLIS.toString());
     boolean noTimeLimitIsCustom = spec.getLookback() == null && spec.getMinTimeInference() == null
         && spec.getMaxTimeInference() == null;
     if (allTimeLimitsAreInProperties && noTimeLimitIsCustom) {
       minTime = Long.parseLong(properties.get(MIN_TIME_MILLIS.toString()));
       maxTime = Long.parseLong(properties.get(MAX_TIME_MILLIS.toString()));
+      LOG.info("Using min time and max time provided by the DataTable properties.");
     } else {
       inferTimeLimits(detectionInterval, dataTable.getDataFrame());
     }
   }
 
   private void inferTimeLimits(final Interval detectionInterval, final DataFrame rawDataFrame) {
-    Period lookback = isoPeriod(spec.getLookback(), DEFAULT_LOOKBACK);
-    TimeLimitInferenceStrategy minTimeInference = spec.getMinTimeInference() != null ?
-        TimeLimitInferenceStrategy.valueOf(spec.getMinTimeInference().toUpperCase()) :
-        DEFAULT_MIN_TIME_INFERENCE_STRATEGY;
+    final Period lookback = isoPeriod(spec.getLookback(), DEFAULT_LOOKBACK);
+    TimeLimitInferenceStrategy minTimeInference =
+        spec.getMinTimeInference() != null ? TimeLimitInferenceStrategy.valueOf(
+            spec.getMinTimeInference().toUpperCase()) : DEFAULT_MIN_TIME_INFERENCE_STRATEGY;
     checkArgument(isValidInferenceConfig(minTimeInference, lookback),
         "minTime inference based on lookback requires a valid `lookback` parameter");
-    TimeLimitInferenceStrategy maxTimeInference = spec.getMaxTimeInference() != null ?
-        TimeLimitInferenceStrategy.valueOf(spec.getMaxTimeInference().toUpperCase()) :
-        DEFAULT_MAX_TIME_INFERENCE_STRATEGY;
+    TimeLimitInferenceStrategy maxTimeInference =
+        spec.getMaxTimeInference() != null ? TimeLimitInferenceStrategy.valueOf(
+            spec.getMaxTimeInference().toUpperCase()) : DEFAULT_MAX_TIME_INFERENCE_STRATEGY;
     checkArgument(isValidInferenceConfig(maxTimeInference, lookback),
         "maxTime inference based on lookback requires a valid `lookback` parameter");
 
-    minTime = inferMinTime(detectionInterval.getStart(),
-        rawDataFrame.get(timeColumn),
-        minTimeInference,
-        lookback);
-    maxTime = inferMaxTime(detectionInterval.getEnd(),
-        rawDataFrame.get(timeColumn),
-        maxTimeInference,
-        lookback);
+    minTime = inferMinTime(detectionInterval.getStart(), rawDataFrame.get(timeColumn),
+        minTimeInference, lookback);
+    maxTime = inferMaxTime(detectionInterval.getEnd(), rawDataFrame.get(timeColumn),
+        maxTimeInference, lookback);
   }
 
   private static boolean isValidInferenceConfig(TimeLimitInferenceStrategy strategy,
@@ -145,7 +145,7 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
   }
 
   @Override
-  public DataTable fillIndex(Interval detectionInterval, final DataTable dataTable)
+  public DataTable fillIndex(final Interval detectionInterval, final DataTable dataTable)
       throws Exception {
     Objects.requireNonNull(detectionInterval);
     initWithRuntimeInfo(detectionInterval, dataTable);
@@ -157,30 +157,42 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
     final DataFrame filledData = joinOnTimeIndex(correctIndex, rawData);
     final DataFrame nullReplacedData = replaceNullData(detectionInterval.getStart(), filledData);
 
+    if (dataTable.getProperties().get(QUERY.toString()) != null) {
+      final String query = dataTable.getProperties().get(QUERY.toString());
+      LOG.info(
+          "Ran time index filler from query {} with minTime: {} and maxTime: {}. With last datapoint of input table {}. With last datapoint of prepared table: {}. With detection interval start {}, end {}",
+          query, minTime, maxTime, dataTable.getDataFrame().isEmpty() ? -1
+              : dataTable.getDataFrame().getLong(timeColumn, dataTable.getDataFrame().size() - 1),
+          nullReplacedData.isEmpty() ? -1
+              : nullReplacedData.getLong(timeColumn, nullReplacedData.size() - 1),
+          detectionInterval.getStartMillis(), detectionInterval.getEndMillis());
+    }
+
     return SimpleDataTable.fromDataFrame(nullReplacedData);
   }
 
   private DataFrame replaceNullData(final DateTime start, final DataFrame dataFrame) {
     // only apply replacer *before* the detection period - on detection period, replace nulls by zeroes
-    DataFrame beforeDetectionStart = dataFrame.filter((LongConditional) values ->
-        values[0] < start.getMillis(), timeColumn).dropNull(timeColumn);
-    DataFrame afterDetectionStart = dataFrame.filter((LongConditional) values ->
-        values[0] >= start.getMillis(), timeColumn).dropNull(timeColumn);
+    DataFrame beforeDetectionStart = dataFrame.filter(
+        (LongConditional) values -> values[0] < start.getMillis(), timeColumn).dropNull(timeColumn);
+    DataFrame afterDetectionStart = dataFrame.filter(
+            (LongConditional) values -> values[0] >= start.getMillis(), timeColumn)
+        .dropNull(timeColumn);
 
-    return DataFrame.concatenate(
-        nullReplacer.replaceNulls(beforeDetectionStart),
-        WITH_ZERO_NULL_REPLACER.replaceNulls(afterDetectionStart)
-    );
+    return DataFrame.concatenate(nullReplacer.replaceNulls(beforeDetectionStart),
+        WITH_ZERO_NULL_REPLACER.replaceNulls(afterDetectionStart));
   }
 
   private DataFrame generateCorrectIndex(Chronology chronology) {
-
-    DateTime firstIndexValue = TimeUtils.getSmallestDatetime(
+    final DateTime firstIndexValue = TimeUtils.getSmallestDatetime(
         new DateTime(minTime, chronology), granularity);
-    DateTime lastIndexValue = TimeUtils.getBiggestDatetime(
-        new DateTime(maxTime, chronology), granularity);
-    Series correctIndexSeries = generateSeries(firstIndexValue, lastIndexValue, granularity);
-    DataFrame dataFrame = new DataFrame();
+    final DateTime lastIndexValue = TimeUtils.getBiggestDatetime(new DateTime(maxTime, chronology),
+        granularity);
+    LOG.info(
+        "Generating time index for minTime: {}, maxTime: {}. Computed first value: {}, last value: {}",
+        minTime, maxTime, firstIndexValue.getMillis(), lastIndexValue.getMillis());
+    final Series correctIndexSeries = generateSeries(firstIndexValue, lastIndexValue, granularity);
+    final DataFrame dataFrame = new DataFrame();
     dataFrame.addSeries(timeColumn, correctIndexSeries);
 
     return dataFrame;
@@ -217,6 +229,12 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
     final long[] correctTimeIndex = correctIndex.getLongs(timeColumn).values();
     final int correctSize = correctTimeIndex.length;
     final long[] rawTimeIndex = rawData.getLongs(timeColumn).values();
+    if (rawTimeIndex.length > 0 &&  correctTimeIndex.length > 0 && rawTimeIndex[rawTimeIndex.length - 1] > correctTimeIndex[correctTimeIndex.length - 1]) {
+      LOG.error(
+          "The last value of the time index of the raw data is bigger than the last value of the expected time index. This should never happen. {} > {}",
+          rawTimeIndex[rawTimeIndex.length - 1], correctTimeIndex[correctTimeIndex.length
+              - 1]); // TODO CYRIL can be removed once this is fixed - or add metric
+    }
 
     for (final Entry<String, Series> entry : rawData.getSeries().entrySet()) {
       final String seriesName = entry.getKey();
@@ -233,7 +251,8 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
         int rawIdx = 0;
         int correctIdx = 0;
         while (correctIdx < correctSize && rawIdx < rawTimeIndex.length) {
-          final int timeComparison = Long.compare(correctTimeIndex[correctIdx], rawTimeIndex[rawIdx]);
+          final int timeComparison = Long.compare(correctTimeIndex[correctIdx],
+              rawTimeIndex[rawIdx]);
           if (timeComparison == 0) {
             filledValues[correctIdx++] = rawValues[rawIdx++];
           } else if (timeComparison > 0) {
@@ -250,7 +269,8 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
         int rawIdx = 0;
         int correctIdx = 0;
         while (correctIdx < correctSize && rawIdx < rawTimeIndex.length) {
-          final int timeComparison = Long.compare(correctTimeIndex[correctIdx], rawTimeIndex[rawIdx]);
+          final int timeComparison = Long.compare(correctTimeIndex[correctIdx],
+              rawTimeIndex[rawIdx]);
           if (timeComparison == 0) {
             filledValues[correctIdx++] = rawValues[rawIdx++];
           } else if (timeComparison > 0) {
@@ -267,7 +287,8 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
         int rawIdx = 0;
         int correctIdx = 0;
         while (correctIdx < correctSize && rawIdx < rawTimeIndex.length) {
-          final int timeComparison = Long.compare(correctTimeIndex[correctIdx], rawTimeIndex[rawIdx]);
+          final int timeComparison = Long.compare(correctTimeIndex[correctIdx],
+              rawTimeIndex[rawIdx]);
           if (timeComparison == 0) {
             filledValues[correctIdx++] = rawValues[rawIdx++];
           } else if (timeComparison > 0) {
@@ -284,7 +305,8 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
         int rawIdx = 0;
         int correctIdx = 0;
         while (correctIdx < correctSize && rawIdx < rawTimeIndex.length) {
-          final int timeComparison = Long.compare(correctTimeIndex[correctIdx], rawTimeIndex[rawIdx]);
+          final int timeComparison = Long.compare(correctTimeIndex[correctIdx],
+              rawTimeIndex[rawIdx]);
           if (timeComparison == 0) {
             filledValues[correctIdx++] = rawValues[rawIdx++];
           } else if (timeComparison > 0) {
@@ -301,7 +323,8 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
         int rawIdx = 0;
         int correctIdx = 0;
         while (correctIdx < correctSize && rawIdx < rawTimeIndex.length) {
-          final int timeComparison = Long.compare(correctTimeIndex[correctIdx], rawTimeIndex[rawIdx]);
+          final int timeComparison = Long.compare(correctTimeIndex[correctIdx],
+              rawTimeIndex[rawIdx]);
           if (timeComparison == 0) {
             filledValues[correctIdx++] = rawValues[rawIdx++];
           } else if (timeComparison > 0) {
@@ -350,13 +373,20 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
 
   private Series generateSeries(final DateTime firstValue, final DateTime lastValueIncluded,
       final Period timePeriod) {
-    Builder correctIndexSeries = LongSeries.builder();
+    final Builder correctIndexBuilder = LongSeries.builder();
     DateTime indexValue = new DateTime(firstValue);
     while (!indexValue.isAfter(lastValueIncluded)) {
-      correctIndexSeries.addValues(indexValue.getMillis());
+      correctIndexBuilder.addValues(indexValue.getMillis());
       indexValue = indexValue.plus(timePeriod);
     }
-    return correctIndexSeries.build();
+    final LongSeries correctIndex = correctIndexBuilder.build();
+    if (!correctIndex.isEmpty() && correctIndex.get(correctIndex.size() - 1) != lastValueIncluded.getMillis()) {
+      LOG.error(
+          "Error when creating time index. Mismatch between the input lastValue: {} and the generated last value: {}. This should never happen.",
+          lastValueIncluded, correctIndex.get(correctIndex.size()
+              - 1)); // TODO CYRIL can be removed once debugging session is done or throw
+    }
+    return correctIndex;
   }
 
   private static class NullReplacerRegistry {
@@ -372,9 +402,9 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
     public NullReplacer buildNullReplacer(String fillNullMethod,
         Map<String, Object> fillNullParams) {
       //fillNullParams to be used by factories when pluginized - eg method=SPLINE, params={order=3, kind="smooth"}
-      checkArgument(nullReplacerMap.containsKey(fillNullMethod), "fillNull Method not registered: %s. Available null replacers: %s",
-              fillNullMethod,
-              nullReplacerMap.keySet());
+      checkArgument(nullReplacerMap.containsKey(fillNullMethod),
+          "fillNull Method not registered: %s. Available null replacers: %s", fillNullMethod,
+          nullReplacerMap.keySet());
 
       return nullReplacerMap.get(fillNullMethod);
     }

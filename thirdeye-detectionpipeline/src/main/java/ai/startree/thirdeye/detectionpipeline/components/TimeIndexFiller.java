@@ -50,8 +50,12 @@ import org.joda.time.Chronology;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.Period;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
+
+  private static final Logger LOG = LoggerFactory.getLogger(TimeIndexFiller.class);
 
   /**
    * Available strategies to compute minTime and maxTime constraints of the timeseries.
@@ -91,10 +95,10 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
 
   private void initWithRuntimeInfo(final Interval detectionInterval, final DataTable dataTable) {
     // principle: custom config takes precedence over dataTable properties. If both config and properties are not set: use default config.
-    Map<String, String> properties = dataTable.getProperties();
+    final Map<String, String> properties = dataTable.getProperties();
     timeColumn = Objects.requireNonNull(spec.getTimestamp());
 
-    String granularitySpec = optional(spec.getMonitoringGranularity())
+    final String granularitySpec = optional(spec.getMonitoringGranularity())
         .orElseGet(() -> optional(properties.get(GRANULARITY.toString()))
             .orElseThrow(() -> new IllegalArgumentException(
                 "monitoringGranularity is missing from spec and DataTable properties")));
@@ -110,13 +114,14 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
     if (allTimeLimitsAreInProperties && noTimeLimitIsCustom) {
       minTime = Long.parseLong(properties.get(MIN_TIME_MILLIS.toString()));
       maxTime = Long.parseLong(properties.get(MAX_TIME_MILLIS.toString()));
+      LOG.info("Using min time and max time provided by the DataTable properties.");
     } else {
       inferTimeLimits(detectionInterval, dataTable.getDataFrame());
     }
   }
 
   private void inferTimeLimits(final Interval detectionInterval, final DataFrame rawDataFrame) {
-    Period lookback = isoPeriod(spec.getLookback(), DEFAULT_LOOKBACK);
+    final Period lookback = isoPeriod(spec.getLookback(), DEFAULT_LOOKBACK);
     TimeLimitInferenceStrategy minTimeInference = spec.getMinTimeInference() != null ?
         TimeLimitInferenceStrategy.valueOf(spec.getMinTimeInference().toUpperCase()) :
         DEFAULT_MIN_TIME_INFERENCE_STRATEGY;
@@ -174,13 +179,13 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
   }
 
   private DataFrame generateCorrectIndex(Chronology chronology) {
-
-    DateTime firstIndexValue = TimeUtils.getSmallestDatetime(
-        new DateTime(minTime, chronology), granularity);
-    DateTime lastIndexValue = TimeUtils.getBiggestDatetime(
-        new DateTime(maxTime, chronology), granularity);
-    Series correctIndexSeries = generateSeries(firstIndexValue, lastIndexValue, granularity);
-    DataFrame dataFrame = new DataFrame();
+    final DateTime firstIndexValue = TimeUtils.getSmallestDatetime(new DateTime(minTime, chronology), granularity);
+    final DateTime lastIndexValue = TimeUtils.getBiggestDatetime(new DateTime(maxTime, chronology), granularity);
+    LOG.info(
+        "Generating time index for minTime: {}, maxTime: {}. Computed first value: {}, last value: {}",
+        minTime, maxTime, firstIndexValue.getMillis(), lastIndexValue.getMillis());
+    final Series correctIndexSeries = generateSeries(firstIndexValue, lastIndexValue, granularity);
+    final DataFrame dataFrame = new DataFrame();
     dataFrame.addSeries(timeColumn, correctIndexSeries);
 
     return dataFrame;
@@ -217,6 +222,12 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
     final long[] correctTimeIndex = correctIndex.getLongs(timeColumn).values();
     final int correctSize = correctTimeIndex.length;
     final long[] rawTimeIndex = rawData.getLongs(timeColumn).values();
+    if (rawTimeIndex[rawTimeIndex.length - 1] > correctTimeIndex[correctTimeIndex.length - 1]) {
+      LOG.error(
+          "The last value of the time index of the raw data is bigger than the last value of the expected time index. This should never happen. {} > {}",
+          rawTimeIndex[rawTimeIndex.length - 1], correctTimeIndex[correctTimeIndex.length
+              - 1]); // TODO CYRIL can be removed once this is fixed - or add metric
+    }
 
     for (final Entry<String, Series> entry : rawData.getSeries().entrySet()) {
       final String seriesName = entry.getKey();
@@ -250,7 +261,8 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
         int rawIdx = 0;
         int correctIdx = 0;
         while (correctIdx < correctSize && rawIdx < rawTimeIndex.length) {
-          final int timeComparison = Long.compare(correctTimeIndex[correctIdx], rawTimeIndex[rawIdx]);
+          final int timeComparison = Long.compare(correctTimeIndex[correctIdx],
+              rawTimeIndex[rawIdx]);
           if (timeComparison == 0) {
             filledValues[correctIdx++] = rawValues[rawIdx++];
           } else if (timeComparison > 0) {
@@ -267,7 +279,8 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
         int rawIdx = 0;
         int correctIdx = 0;
         while (correctIdx < correctSize && rawIdx < rawTimeIndex.length) {
-          final int timeComparison = Long.compare(correctTimeIndex[correctIdx], rawTimeIndex[rawIdx]);
+          final int timeComparison = Long.compare(correctTimeIndex[correctIdx],
+              rawTimeIndex[rawIdx]);
           if (timeComparison == 0) {
             filledValues[correctIdx++] = rawValues[rawIdx++];
           } else if (timeComparison > 0) {
@@ -284,7 +297,8 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
         int rawIdx = 0;
         int correctIdx = 0;
         while (correctIdx < correctSize && rawIdx < rawTimeIndex.length) {
-          final int timeComparison = Long.compare(correctTimeIndex[correctIdx], rawTimeIndex[rawIdx]);
+          final int timeComparison = Long.compare(correctTimeIndex[correctIdx],
+              rawTimeIndex[rawIdx]);
           if (timeComparison == 0) {
             filledValues[correctIdx++] = rawValues[rawIdx++];
           } else if (timeComparison > 0) {
@@ -301,7 +315,8 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
         int rawIdx = 0;
         int correctIdx = 0;
         while (correctIdx < correctSize && rawIdx < rawTimeIndex.length) {
-          final int timeComparison = Long.compare(correctTimeIndex[correctIdx], rawTimeIndex[rawIdx]);
+          final int timeComparison = Long.compare(correctTimeIndex[correctIdx],
+              rawTimeIndex[rawIdx]);
           if (timeComparison == 0) {
             filledValues[correctIdx++] = rawValues[rawIdx++];
           } else if (timeComparison > 0) {
@@ -350,13 +365,20 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
 
   private Series generateSeries(final DateTime firstValue, final DateTime lastValueIncluded,
       final Period timePeriod) {
-    Builder correctIndexSeries = LongSeries.builder();
+    final Builder correctIndexBuilder = LongSeries.builder();
     DateTime indexValue = new DateTime(firstValue);
     while (!indexValue.isAfter(lastValueIncluded)) {
-      correctIndexSeries.addValues(indexValue.getMillis());
+      correctIndexBuilder.addValues(indexValue.getMillis());
       indexValue = indexValue.plus(timePeriod);
     }
-    return correctIndexSeries.build();
+    final LongSeries correctIndex = correctIndexBuilder.build();
+    if (correctIndex.get(correctIndex.size() - 1) != lastValueIncluded.getMillis()) {
+      LOG.error(
+          "Error when creating time index. Mismatch between the input lastValue: {} and the generated last value: {}. This should never happen.",
+          lastValueIncluded, correctIndex.get(correctIndex.size()
+              - 1)); // TODO CYRIL can be removed once debugging session is done or throw
+    }
+    return correctIndex;
   }
 
   private static class NullReplacerRegistry {
@@ -372,9 +394,10 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
     public NullReplacer buildNullReplacer(String fillNullMethod,
         Map<String, Object> fillNullParams) {
       //fillNullParams to be used by factories when pluginized - eg method=SPLINE, params={order=3, kind="smooth"}
-      checkArgument(nullReplacerMap.containsKey(fillNullMethod), "fillNull Method not registered: %s. Available null replacers: %s",
-              fillNullMethod,
-              nullReplacerMap.keySet());
+      checkArgument(nullReplacerMap.containsKey(fillNullMethod),
+          "fillNull Method not registered: %s. Available null replacers: %s",
+          fillNullMethod,
+          nullReplacerMap.keySet());
 
       return nullReplacerMap.get(fillNullMethod);
     }

@@ -145,7 +145,7 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
   }
 
   @Override
-  public DataTable fillIndex(Interval detectionInterval, final DataTable dataTable)
+  public DataTable fillIndex(final Interval detectionInterval, final DataTable dataTable)
       throws Exception {
     Objects.requireNonNull(detectionInterval);
     initWithRuntimeInfo(detectionInterval, dataTable);
@@ -160,11 +160,12 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
     if (dataTable.getProperties().get(QUERY.toString()) != null) {
       final String query = dataTable.getProperties().get(QUERY.toString());
       LOG.info(
-          "Ran time index filler from query {} with minTime: {} and maxTime: {}. With last datapoint of input table {}. With last datapoint of prepared table: {}",
+          "Ran time index filler from query {} with minTime: {} and maxTime: {}. With last datapoint of input table {}. With last datapoint of prepared table: {}. With detection interval start {}, end {}",
           query, minTime, maxTime, dataTable.getDataFrame().isEmpty() ? -1
               : dataTable.getDataFrame().getLong(timeColumn, dataTable.getDataFrame().size() - 1),
           nullReplacedData.isEmpty() ? -1
-              : nullReplacedData.getLong(timeColumn, nullReplacedData.size() - 1));
+              : nullReplacedData.getLong(timeColumn, nullReplacedData.size() - 1),
+          detectionInterval.getStartMillis(), detectionInterval.getEndMillis());
     }
 
     return SimpleDataTable.fromDataFrame(nullReplacedData);
@@ -228,7 +229,7 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
     final long[] correctTimeIndex = correctIndex.getLongs(timeColumn).values();
     final int correctSize = correctTimeIndex.length;
     final long[] rawTimeIndex = rawData.getLongs(timeColumn).values();
-    if (rawTimeIndex[rawTimeIndex.length - 1] > correctTimeIndex[correctTimeIndex.length - 1]) {
+    if (rawTimeIndex.length > 0 &&  correctTimeIndex.length > 0 && rawTimeIndex[rawTimeIndex.length - 1] > correctTimeIndex[correctTimeIndex.length - 1]) {
       LOG.error(
           "The last value of the time index of the raw data is bigger than the last value of the expected time index. This should never happen. {} > {}",
           rawTimeIndex[rawTimeIndex.length - 1], correctTimeIndex[correctTimeIndex.length

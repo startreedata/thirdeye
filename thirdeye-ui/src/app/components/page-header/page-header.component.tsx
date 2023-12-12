@@ -111,7 +111,11 @@ export const PageHeader: FunctionComponent<PageHeaderProps> = ({
                     </Grid>
 
                     <Grid item xs={12}>
-                        <Grid container justifyContent="space-between">
+                        <Grid
+                            container
+                            justifyContent="space-between"
+                            wrap="nowrap"
+                        >
                             <Grid item {...(headerGridContainerProps || {})}>
                                 {title && (
                                     <Typography variant="h4">

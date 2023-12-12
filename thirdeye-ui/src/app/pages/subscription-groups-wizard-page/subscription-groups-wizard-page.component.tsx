@@ -159,11 +159,11 @@ export const SubscriptionGroupsWizardPage: FunctionComponent<SubscriptionGroupsW
             subNavigation: [
                 {
                     label: t("label.group-details"),
-                    link: AppRouteRelative.SUBSCRIPTION_GROUPS_WIZARD_DETAILS,
+                    link: `../${AppRouteRelative.SUBSCRIPTION_GROUPS_WIZARD_DETAILS}`,
                 },
                 {
                     label: t("label.alerts-and-dimensions"),
-                    link: AppRouteRelative.SUBSCRIPTION_GROUPS_WIZARD_ALERT_DIMENSIONS,
+                    link: `../${AppRouteRelative.SUBSCRIPTION_GROUPS_WIZARD_ALERT_DIMENSIONS}`,
                 },
             ],
             subNavigationSelected: pathname.includes(

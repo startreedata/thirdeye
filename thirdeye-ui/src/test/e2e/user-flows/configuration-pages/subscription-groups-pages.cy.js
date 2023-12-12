@@ -119,8 +119,20 @@ describe("configuration subscription groups pages", () => {
         cy.getByDataTestId(TEST_IDS.EDIT_BUTTON).click();
 
         // Should match something like
-        // `http://localhost:7004/configuration/datasources/update/id/30521`
-        cy.url().should("contain", "/configuration/subscription-groups/");
+        // `http://localhost:7004/configuration/subscription-groups/update/id/30521`
+        cy.url().should(
+            "match",
+            /.*\/configuration\/subscription-groups\/[0-9]*\/update/
+        );
+
+        // User can switch tab and it loads
+        cy.get(".MuiTab-wrapper").contains("Alerts & dimensions").click();
+        cy.get(".MuiTable-root").find("input[type='checkbox']").click();
+        cy.get("button").contains("Update").click();
+        cy.get("button").contains("Yes").click();
+        cy.get(".MuiDataGrid-main")
+            .find(".MuiDataGrid-cell")
+            .should("not.exist");
     });
 
     it("user can delete subscription groups", () => {

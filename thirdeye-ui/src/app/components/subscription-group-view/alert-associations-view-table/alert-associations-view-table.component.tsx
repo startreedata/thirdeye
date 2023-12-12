@@ -15,7 +15,7 @@
 
 import { Icon } from "@iconify/react";
 import { Box, Typography, useTheme } from "@material-ui/core";
-import { capitalize, sortBy } from "lodash";
+import { sortBy } from "lodash";
 import React, { FunctionComponent, ReactNode, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { DataGridColumnV1, DataGridV1 } from "../../../platform/components";
@@ -96,28 +96,11 @@ export const AlertAssociationsViewTable: FunctionComponent<AlertAssociationsView
                                 icon="mdi:chart-line-variant"
                             />
                             <Typography variant="body2">
-                                {capitalize(
-                                    t(
-                                        "message.no-children-present-for-this-parent",
-                                        {
-                                            children: t("label.active-entity", {
-                                                entity: t("label.dimensions"),
-                                            }),
-                                            parent: t(
-                                                "label.subscription-group"
-                                            ),
-                                        }
-                                    )
-                                )}
+                                {t("message.no-alerts-were-subscribed-to")}
                             </Typography>
                             <Typography color="textSecondary" variant="caption">
-                                {capitalize(
-                                    t(
-                                        "message.active-entity-will-be-listed-here",
-                                        {
-                                            entity: t("label.dimensions"),
-                                        }
-                                    )
+                                {t(
+                                    "message.edit-the-subscription-group-to-add-alerts"
                                 )}
                             </Typography>
                         </Box>

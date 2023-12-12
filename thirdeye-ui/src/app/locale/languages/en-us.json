@@ -1,7 +1,9 @@
 {
     "label": {
+        "1-minute": "1 Minute",
         "15-minutes": "15 Minutes",
         "404": "404",
+        "5-minutes": "5 Minutes",
         "about": "About",
         "absolute-change": "Absolute change",
         "absolute-change-rule": "Absolute change rule",

@@ -48,6 +48,16 @@ export const COLOR_PALETTE = [
 ];
 
 /**
+ * Taken from https://stackoverflow.com/questions/42623071/
+ * maximum-call-stack-size-exceeded-with-math-min-and-math-max
+ */
+const arrayMinMax = (arr: number[]): [number, number] =>
+    arr.reduce(
+        ([min, max], val) => [Math.min(min, val), Math.max(max, val)],
+        [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY]
+    );
+
+/**
  * Helper function to extract the values from the `data` array of objects
  */
 export function getMinMax(
@@ -76,8 +86,9 @@ export function getMinMax(
     });
 
     arrayOfArrayOfValues.forEach((values: number[]) => {
-        minSoFar = Math.min(...values, minSoFar);
-        maxSoFar = Math.max(...values, maxSoFar);
+        const [arrayMin, arrayMax] = arrayMinMax(values);
+        minSoFar = Math.min(arrayMin, minSoFar);
+        maxSoFar = Math.max(arrayMax, maxSoFar);
     });
 
     return [minSoFar, maxSoFar];

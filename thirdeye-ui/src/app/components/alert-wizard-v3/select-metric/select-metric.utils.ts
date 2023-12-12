@@ -185,4 +185,12 @@ export const GRANULARITY_OPTIONS = [
         label: i18n.t("label.15-minutes"),
         value: "PT15M",
     },
+    {
+        label: i18n.t("label.5-minutes"),
+        value: "PT5M",
+    },
+    {
+        label: i18n.t("label.1-minute"),
+        value: "PT1M",
+    },
 ];

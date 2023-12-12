@@ -15,7 +15,7 @@
 
 import { Icon } from "@iconify/react";
 import { Box, Button, Divider, Grid, Typography } from "@material-ui/core";
-import React, { FunctionComponent, useEffect, useMemo } from "react";
+import React, { FunctionComponent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { CreateAnomalyWizard } from "../../components/anomalies-create/create-anomaly-wizard/create-anomaly-wizard.component";
@@ -35,7 +35,6 @@ import {
     useNotificationProviderV1,
 } from "../../platform/components";
 import { ActionStatus } from "../../platform/rest/actions.interfaces";
-import { useGetAlerts } from "../../rest/alerts/alerts.actions";
 import { createAnomaly } from "../../rest/anomalies/anomalies.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { EditableAnomaly } from "../../rest/dto/anomaly.interfaces";
@@ -47,17 +46,25 @@ import {
     getAnomaliesCreatePath,
     getAnomaliesViewPath,
 } from "../../utils/routes/routes.util";
+import { useQuery } from "@tanstack/react-query";
+import { AxiosError } from "axios/index";
+import { getAllAlerts } from "../../rest/alerts/alerts.rest";
 
 export const AnomaliesCreatePage: FunctionComponent = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const { notify } = useNotificationProviderV1();
-    const { alerts, getAlerts, status: alertsStatus } = useGetAlerts();
+    const {
+        data: alerts,
+        isInitialLoading: isGetAlertLoading,
+        isError: isGetAlertError,
+    } = useQuery<Alert[], AxiosError>({
+        queryKey: ["alerts"],
+        queryFn: () => {
+            return getAllAlerts();
+        },
+    });
     const { id: selectedAlertId } = useParams<{ id?: string }>();
-
-    useEffect(() => {
-        getAlerts();
-    }, []);
 
     const selectedAlert = useMemo<Alert | null>(() => {
         if (alerts) {
@@ -156,15 +163,12 @@ export const AnomaliesCreatePage: FunctionComponent = () => {
             <PageHeader {...pageHeaderProps} />
 
             <LoadingErrorStateSwitch
-                isError={alertsStatus === ActionStatus.Error}
-                isLoading={[
-                    ActionStatus.Initial,
-                    ActionStatus.Working,
-                ].includes(alertsStatus)}
+                isError={isGetAlertError}
+                isLoading={isGetAlertLoading}
                 loadingState={
-                    <PageContentsGridV1 fullHeight>
+                    <PageContentsGridV1>
                         <Grid item xs={12}>
-                            <PageContentsCardV1 fullHeight>
+                            <PageContentsCardV1>
                                 <Grid container alignItems="stretch">
                                     <Grid item xs={12}>
                                         <Typography variant="h5">
@@ -183,7 +187,7 @@ export const AnomaliesCreatePage: FunctionComponent = () => {
                                     </Grid>
                                     <Grid item xs={12}>
                                         <SkeletonV1
-                                            height={250}
+                                            height={120}
                                             variant="rect"
                                             width="100%"
                                         />

@@ -591,9 +591,9 @@ export const CreateAnomalyWizard: FunctionComponent<CreateAnomalyWizardProps> =
 
         return (
             <>
-                <PageContentsGridV1 fullHeight>
+                <PageContentsGridV1>
                     <Grid item xs={12}>
-                        <PageContentsCardV1 fullHeight>
+                        <PageContentsCardV1>
                             <Grid container alignItems="stretch">
                                 <Grid item xs={12}>
                                     <Typography variant="h5">

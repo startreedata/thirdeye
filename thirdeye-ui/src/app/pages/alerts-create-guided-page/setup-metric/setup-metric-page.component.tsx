@@ -60,6 +60,7 @@ import {
     generateDateRangeMonthsFromNow,
 } from "../../../utils/routes/routes.util";
 import { AlertCreatedGuidedPageOutletContext } from "../alerts-create-guided-page.interfaces";
+import { DateTime, Duration } from "luxon";
 
 const ALERT_TEMPLATE_FOR_EVALUATE = "startree-threshold";
 const ALERT_TEMPLATE_FOR_EVALUATE_DX = "startree-threshold-dx";
@@ -283,10 +284,46 @@ export const SetupMetricPage: FunctionComponent = () => {
         aggregationFunction: MetricAggFunction,
         granularity: { label: string; value: string } | null
     ): void => {
+        const prevGranularity = selectedGranularity?.value;
         setSelectedTable(table);
         setSelectedMetric(metric);
         setSelectedAggregationFunction(aggregationFunction);
         setSelectedGranularity(granularity);
+
+        /**
+         * If user picks a granularity that is smaller and the range is too wide,
+         * set to a smaller range
+         */
+        if (
+            prevGranularity &&
+            granularity &&
+            !Duration.fromISO(granularity.value).equals(
+                Duration.fromISO(prevGranularity)
+            )
+        ) {
+            const newStartTime = startTime;
+            let newEndTime = DateTime.fromMillis(newStartTime)
+                .plus({
+                    milliseconds:
+                        Duration.fromISO(granularity.value).toMillis() * 30,
+                })
+                .toMillis();
+
+            if (alertInsight?.datasetEndTime) {
+                newEndTime = Math.min(newEndTime, alertInsight?.datasetEndTime);
+            }
+
+            searchParams.set(
+                TimeRangeQueryStringKey.START_TIME,
+                newStartTime.toString()
+            );
+            searchParams.set(
+                TimeRangeQueryStringKey.END_TIME,
+                newEndTime.toString()
+            );
+
+            setSearchParams(searchParams);
+        }
     };
 
     const handleNextClick = (): void => {

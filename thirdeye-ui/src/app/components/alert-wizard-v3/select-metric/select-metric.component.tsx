@@ -313,32 +313,39 @@ export const SelectMetric: FunctionComponent<SelectMetricProps> = ({
 
                     <InputSection
                         inputComponent={
-                            <Autocomplete
-                                disableClearable
-                                fullWidth
-                                getOptionLabel={(option) => option.label}
-                                options={GRANULARITY_OPTIONS}
-                                renderInput={(params) => (
-                                    <TextField
-                                        {...params}
-                                        InputProps={{
-                                            ...params.InputProps,
-                                            /**
-                                             * Override class name so
-                                             * the size of input is smaller
-                                             */
-                                            className:
-                                                classes.autoCompleteInput,
-                                        }}
-                                        placeholder={t(
-                                            "label.select-granularity"
-                                        )}
-                                        variant="outlined"
-                                    />
-                                )}
-                                value={selectedGranularity || undefined}
-                                onChange={handleGranularityChange}
-                            />
+                            <>
+                                <Autocomplete
+                                    disableClearable
+                                    fullWidth
+                                    getOptionLabel={(option) => option.label}
+                                    options={GRANULARITY_OPTIONS}
+                                    renderInput={(params) => (
+                                        <TextField
+                                            {...params}
+                                            InputProps={{
+                                                ...params.InputProps,
+                                                /**
+                                                 * Override class name so
+                                                 * the size of input is smaller
+                                                 */
+                                                className:
+                                                    classes.autoCompleteInput,
+                                            }}
+                                            placeholder={t(
+                                                "label.select-granularity"
+                                            )}
+                                            variant="outlined"
+                                        />
+                                    )}
+                                    value={selectedGranularity || undefined}
+                                    onChange={handleGranularityChange}
+                                />
+                                <Typography variant="caption">
+                                    {t(
+                                        "message.change-granularity-change-date-range"
+                                    )}
+                                </Typography>
+                            </>
                         }
                         label="Granularity"
                     />

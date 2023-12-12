@@ -524,6 +524,7 @@
         "by-creating-an-alert-youll-be-able": "By creating an Alert you’ll be able to Monitor your KPIs.",
         "change-confirmation-to": "Are you sure you want to change to {{value}}?",
         "change-cron-warning": "Using simple mode will cause the current cron string to change since it is more advanced",
+        "change-granularity-change-date-range": "Changing the granularity will change the preview date range. You can always change the date range and click on `Reload Preview` button to change the date range.",
         "changes-added-to-template-properties": "Changes added to the properties won’t be saved in the template. To edit the template go to ",
         "changes-not-saved": "Changes have not been saved",
         "channels-subtitle": "Setup the channels and the people you want to receive notifications from this group",

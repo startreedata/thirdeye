@@ -16,10 +16,12 @@ package ai.startree.thirdeye.service;
 
 import static ai.startree.thirdeye.alert.AlertInsightsProvider.currentMaximumPossibleEndTime;
 import static ai.startree.thirdeye.mapper.ApiBeanMapper.toEnumerationItemDTO;
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_CRON_FREQUENCY_TOO_HIGH;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_CRON_INVALID;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DUPLICATE_NAME;
 import static ai.startree.thirdeye.spi.task.TaskType.DETECTION;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static ai.startree.thirdeye.spi.util.TimeUtils.maximumTriggersPerMinute;
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -74,6 +76,7 @@ import org.slf4j.LoggerFactory;
 public class AlertService extends CrudService<AlertApi, AlertDTO> {
 
   private static final Logger LOG = LoggerFactory.getLogger(AlertService.class);
+  public static final int ALERT_CRON_MAX_TRIGGERS_PER_MINUTE = 6;
 
   private final TaskManager taskManager;
   private final AnomalyManager anomalyManager;
@@ -137,6 +140,8 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     ensureExists(api.getName(), "name value must be set.");
     ensureExists(api.getCron(), "cron value must be set.");
     ensure(CronExpression.isValidExpression(api.getCron()), ERR_CRON_INVALID, api.getCron());
+    final int maxTriggersPerMinute = maximumTriggersPerMinute(api.getCron());
+    ensure(maxTriggersPerMinute <= ALERT_CRON_MAX_TRIGGERS_PER_MINUTE, ERR_CRON_FREQUENCY_TOO_HIGH,  api.getCron(), maxTriggersPerMinute, ALERT_CRON_MAX_TRIGGERS_PER_MINUTE);
     /* new entity creation or name change in existing entity */
     if (existing == null || !existing.getName().equals(api.getName())) {
       ensure(dtoManager.findByName(api.getName()).isEmpty(), ERR_DUPLICATE_NAME, api.getName());

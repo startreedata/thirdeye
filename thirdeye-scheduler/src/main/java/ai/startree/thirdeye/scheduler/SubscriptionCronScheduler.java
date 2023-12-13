@@ -16,6 +16,7 @@ package ai.startree.thirdeye.scheduler;
 import static ai.startree.thirdeye.scheduler.JobSchedulerService.getIdFromJobKey;
 import static ai.startree.thirdeye.spi.Constants.CRON_TIMEZONE;
 import static ai.startree.thirdeye.spi.util.ExecutorUtils.shutdownExecutionService;
+import static ai.startree.thirdeye.spi.util.TimeUtils.maximumTriggersPerMinute;
 import static java.util.stream.Collectors.toList;
 
 import ai.startree.thirdeye.scheduler.job.NotificationPipelineJob;
@@ -59,6 +60,8 @@ public class SubscriptionCronScheduler implements Runnable {
   private static final Logger LOG = LoggerFactory.getLogger(SubscriptionCronScheduler.class);
   private static final String Q_JOB_GROUP = TaskType.NOTIFICATION.toString();
   private static final Duration INTERVAL = Duration.ofMinutes(1);
+  // todo cyril make this a config file parameter, and throw when it is not respected
+  private static final int SUBSCRIPTION_SCHEDULER_CRON_MAX_TRIGGERS_PER_MINUTE = 10;
 
   private final Scheduler scheduler;
   private final ScheduledExecutorService executorService;
@@ -98,6 +101,13 @@ public class SubscriptionCronScheduler implements Runnable {
   }
 
   private static Trigger buildTrigger(final String cron) {
+    final int maxTriggersPerMinute = maximumTriggersPerMinute(cron);
+    if (maxTriggersPerMinute > SUBSCRIPTION_SCHEDULER_CRON_MAX_TRIGGERS_PER_MINUTE) {
+      LOG.warn(
+          "Scheduling a subscription job that can trigger up to {} times per minute. The limit is {}."
+              + "This will be forbidden and throw an exception in the future. Please update the cron {}",
+          maxTriggersPerMinute, SUBSCRIPTION_SCHEDULER_CRON_MAX_TRIGGERS_PER_MINUTE, cron);
+    }
     return TriggerBuilder.newTrigger()
         .withSchedule(CronScheduleBuilder.cronSchedule(cron)
             .inTimeZone(TimeZone.getTimeZone(CRON_TIMEZONE)))

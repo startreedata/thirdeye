@@ -142,7 +142,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
 
   private AnomalyDetectorResult runDetectionOnSingleDataTable(final DataFrame inputDf,
       final ReadableInterval window) {
-    final DataFrame baselineDf = computeBaseline(inputDf, window.getStartMillis());
+    final DataFrame baselineDf = computeBaseline(inputDf, window);
     inputDf
         // rename current which is still called "value" to "current"
         .renameSeries(COL_VALUE, COL_CURRENT)
@@ -156,15 +156,8 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     return new SimpleAnomalyDetectorResult(inputDf);
   }
 
-  private DataFrame computeBaseline(final DataFrame inputDF, final long windowStartTime) {
-
+  private DataFrame computeBaseline(final DataFrame inputDF, final ReadableInterval detectionInterval) {
     final DataFrame resultDF = new DataFrame();
-    final LongSeries inputTimes = inputDF.getLongs(COL_TIME);
-    final int firstDetectionIndex = inputTimes.find(windowStartTime);
-    checkState(firstDetectionIndex != -1,
-        "Runtime error. Could not build training data for the mean-variance algorithm. Expected to run detection on time: %s but this time was not found in the input times. Last 10 input times: %s",
-        windowStartTime, inputTimes.sliceFrom(Math.max(0,inputTimes.size()-10)).toString());
-
     final int size = inputDF.size();
     final double[] baselineArray = new double[size];
     Arrays.fill(baselineArray, DoubleSeries.NULL);
@@ -172,6 +165,18 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     Arrays.fill(upperBoundArray, DoubleSeries.NULL);
     final double[] lowerBoundArray = new double[size];
     Arrays.fill(lowerBoundArray, DoubleSeries.NULL);
+
+    final LongSeries inputTimes = inputDF.getLongs(COL_TIME);
+    final int firstDetectionIndex;
+    if (detectionInterval.toDurationMillis() <= 0) {
+      // the detection interval is empty - set the firstDetectionIndex such that the loop is not entered, but still build the df of historical data - some consumers in ThirdEye use empty detection interval
+      firstDetectionIndex = size;
+    } else {
+      firstDetectionIndex = inputTimes.find(detectionInterval.getStartMillis());
+      checkState(firstDetectionIndex != -1,
+          "Runtime error. Could not build training data for the mean-variance algorithm. Expected to run detection on time: %s but this time was not found in the input times. Last 10 input times: %s",
+          detectionInterval.getStartMillis(), inputTimes.sliceFrom(Math.max(0,inputTimes.size()-10)).toString());
+    }
 
     // todo cyril compute mean and std in a single pass
     // https://nestedsoftware.com/2018/03/20/calculating-a-moving-average-on-streaming-data-5a7k.22879.html

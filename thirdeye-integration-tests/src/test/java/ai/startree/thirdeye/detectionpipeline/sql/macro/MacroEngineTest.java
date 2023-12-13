@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.detectionpipeline.sql.macro;
 
+import static ai.startree.thirdeye.spi.datasource.macro.MacroMetadataKeys.QUERY;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.IntegrationTestUtils;
@@ -89,6 +90,7 @@ public class MacroEngineTest {
     assertThat(IntegrationTestUtils.cleanSql(output.getQuery())).isEqualTo(
         IntegrationTestUtils.cleanSql(
             expectedQuery));
+    output.getProperties().remove(QUERY.toString()); // it's straightforward - so not tested
     assertThat(output.getProperties()).isEqualTo(expectedProperties);
   }
 

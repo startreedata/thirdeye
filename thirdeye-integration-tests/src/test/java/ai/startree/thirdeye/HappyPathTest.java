@@ -41,6 +41,7 @@ import ai.startree.thirdeye.spi.api.AnomalyLabelApi;
 import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
 import ai.startree.thirdeye.spi.api.CountApi;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
+import ai.startree.thirdeye.spi.api.DetectionEvaluationApi;
 import ai.startree.thirdeye.spi.api.DimensionAnalysisResultApi;
 import ai.startree.thirdeye.spi.api.EmailSchemeApi;
 import ai.startree.thirdeye.spi.api.HeatMapResponseApi;
@@ -280,6 +281,28 @@ public class HappyPathTest {
 
     final Response response = request("api/alerts/evaluate").post(Entity.json(alertEvaluationApi));
     assert200(response);
+  }
+
+  @Test(dependsOnMethods = "testEvaluateAlert", timeOut = 10000L, dataProvider = "happyPathAlerts")
+  public void testEvaluateAllHappyPathAlertsOnEmptyTimeframe(final String alertJson) throws IOException {
+    // a detection pipeline should always work on an empty timeframe, and return an empty list
+    final AlertApi alertApi = loadAlertApi("/happypath/payloads/" + alertJson);
+    final AlertEvaluationApi alertEvaluationApi = alertEvaluationApi(alertApi,
+        PAGEVIEWS_DATASET_START_TIME, PAGEVIEWS_DATASET_START_TIME);
+
+    final Response response = request("api/alerts/evaluate").post(Entity.json(alertEvaluationApi));
+    assert200(response);
+    final AlertEvaluationApi alertEvaluation = response.readEntity(AlertEvaluationApi.class);
+    assertThat(alertEvaluation.getDetectionEvaluations()).isNotEmpty();
+    final DetectionEvaluationApi detectionEvaluation = alertEvaluation.getDetectionEvaluations()
+        .values()
+        .iterator()
+        .next();
+    assertThat(detectionEvaluation.getData().getTimestamp()).isEmpty();
+    assertThat(detectionEvaluation.getData().getCurrent()).isEmpty();
+    assertThat(detectionEvaluation.getData().getExpected()).isEmpty();
+    assertThat(detectionEvaluation.getData().getLowerBound()).isEmpty();
+    assertThat(detectionEvaluation.getData().getUpperBound()).isEmpty();
   }
 
   @Test(dependsOnMethods = "testCreateAlert")

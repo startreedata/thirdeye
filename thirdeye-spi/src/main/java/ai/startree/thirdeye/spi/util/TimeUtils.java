@@ -14,12 +14,14 @@
 package ai.startree.thirdeye.spi.util;
 
 import static ai.startree.thirdeye.spi.Constants.UTC_TIMEZONE;
+import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -34,8 +36,7 @@ public class TimeUtils {
 
   private final static LoadingCache<Set<String>, Boolean> equivalentTimezonesCache = CacheBuilder.newBuilder()
       // see computeTimezonesAreEquivalent
-      .expireAfterWrite(7, TimeUnit.DAYS)
-      .build(new CacheLoader<>() {
+      .expireAfterWrite(7, TimeUnit.DAYS).build(new CacheLoader<>() {
         @Override
         public Boolean load(@NonNull Set<String> key) {
           final Iterator<String> iterator = key.iterator();
@@ -43,7 +44,8 @@ public class TimeUtils {
         }
       });
 
-  public static boolean timezonesAreEquivalent(final @NonNull String tz1, final @NonNull String tz2) {
+  public static boolean timezonesAreEquivalent(final @NonNull String tz1,
+      final @NonNull String tz2) {
     if (tz1.equals(tz2)) {
       return true;
     }
@@ -60,7 +62,8 @@ public class TimeUtils {
    * We consider two timezones are equivalent if they have the same offset every hour for a year,
    * around the date of execution of the function.
    * The computation is pretty slow (a few milliseconds) so we cache the results.
-   * Results are cached for 7 days, so we compute the timezone equivalence on (now+7days - 1 year, now + 7 days).
+   * Results are cached for 7 days, so we compute the timezone equivalence on (now+7days - 1 year,
+   * now + 7 days).
    * In effect, this means if there are two timezone tz1, tz2, such that tz1=tz2 currently, and
    * this equality is exploited by the user, then any change to one of the tz such that tz1!=tz2
    * should be anticipated in TE at least 7 days prior. In effect this may never happen in the life
@@ -145,7 +148,8 @@ public class TimeUtils {
    * in datetimeconvert.
    */
   private static DateTime pinotFloorByDay(final DateTime dt, final Period period) {
-    if (period.getDays() > 1 && timezonesAreEquivalent(UTC_TIMEZONE, dt.getChronology().getZone().getID())) {
+    if (period.getDays() > 1 && timezonesAreEquivalent(UTC_TIMEZONE,
+        dt.getChronology().getZone().getID())) {
       // assumes datetimeconverter was used in Pinot query. groups from thursday to thursday by doing direct operation on the millis
       // see BaseDateTimeTransformer.transformToOutputGranularity
       final long epochRounded =
@@ -183,13 +187,51 @@ public class TimeUtils {
    * eg: exclusion: maxTimeConstraint is < Monday 0 am - period is 1 DAY --> returns Sunday.
    */
   @VisibleForTesting
-  public static DateTime getBiggestDatetime(final DateTime maxTimeConstraint, final Period timePeriod) {
-    final DateTime dateTimeFloored = TimeUtils.floorByPeriod(maxTimeConstraint, timePeriod.toPeriod());
+  public static DateTime getBiggestDatetime(final DateTime maxTimeConstraint,
+      final Period timePeriod) {
+    final DateTime dateTimeFloored = TimeUtils.floorByPeriod(maxTimeConstraint,
+        timePeriod.toPeriod());
 
     if (maxTimeConstraint.equals(dateTimeFloored)) {
       // dateTimeConstraint equals floor --> should be excluded
       return dateTimeFloored.minus(timePeriod);
     }
     return dateTimeFloored;
+  }
+
+  // compute the maximum number of times a cron can be triggered in a minute.
+  // see spec https://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html
+  public static int maximumTriggersPerMinute(final String cron) {
+    final String[] cronComponents = cron.split(" ");
+    if (cronComponents.length < 6) {
+      throw new IllegalArgumentException(
+          String.format("Invalid cron: %s. Could not parse cron.", cron));
+    }
+    final String secondsComponent = cronComponents[0];
+    return maximumTriggersPerMinuteOfSecondComponent(secondsComponent);
+  }
+
+  private static int maximumTriggersPerMinuteOfSecondComponent(final String secondsComponent) {
+    if (secondsComponent.equals("0")) {
+      return 1;
+    } else if (secondsComponent.equals("*")) {
+      return 60;
+    } else if (secondsComponent.contains(",")) {
+      return Arrays.stream(secondsComponent.split(","))
+          .mapToInt(TimeUtils::maximumTriggersPerMinuteOfSecondComponent)
+          .sum();
+    } else if (secondsComponent.contains("/")) {
+      final String[] startFrequency = secondsComponent.split("/");
+      final int start = startFrequency[0].equals("*") ? 0 : Integer.parseInt(startFrequency[0]);
+      checkState(startFrequency.length == 2);
+      return (59 - start) / Integer.parseInt(startFrequency[1]) + 1;
+    } else if (secondsComponent.contains("-")) {
+      final String[] startEnd = secondsComponent.split("-");
+      checkState(startEnd.length == 2);
+      return Integer.parseInt(startEnd[1]) - Integer.parseInt(startEnd[0]) + 1;
+    } else {
+      // should be a specific second
+      return 1;
+    }
   }
 }

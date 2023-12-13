@@ -13,8 +13,11 @@
  */
 package ai.startree.thirdeye.spi.util;
 
+import static ai.startree.thirdeye.spi.util.TimeUtils.maximumTriggersPerMinute;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.Set;
-import org.assertj.core.api.Assertions;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class TimeUtilsTest {
@@ -33,21 +36,41 @@ public class TimeUtilsTest {
   @Test
   public void testTimezonesAreEquivalent() {
     UTC_LIKE_TIMEZONES.forEach(e -> {
-      Assertions.assertThat(TimeUtils.timezonesAreEquivalent(e, "UTC")).isTrue();
-      Assertions.assertThat(TimeUtils.timezonesAreEquivalent(e, "Europe/Paris")).isFalse();
-      Assertions.assertThat(TimeUtils.timezonesAreEquivalent(e, "America/Los_Angeles")).isFalse();
+      assertThat(TimeUtils.timezonesAreEquivalent(e, "UTC")).isTrue();
+      assertThat(TimeUtils.timezonesAreEquivalent(e, "Europe/Paris")).isFalse();
+      assertThat(TimeUtils.timezonesAreEquivalent(e, "America/Los_Angeles")).isFalse();
     });
 
     BRUSSELS_LIKE_TIMEZONES.forEach(e -> {
-      Assertions.assertThat(TimeUtils.timezonesAreEquivalent(e, "UTC")).isFalse();
-      Assertions.assertThat(TimeUtils.timezonesAreEquivalent(e, "Europe/Paris")).isTrue();
-      Assertions.assertThat(TimeUtils.timezonesAreEquivalent(e, "America/Los_Angeles")).isFalse();
+      assertThat(TimeUtils.timezonesAreEquivalent(e, "UTC")).isFalse();
+      assertThat(TimeUtils.timezonesAreEquivalent(e, "Europe/Paris")).isTrue();
+      assertThat(TimeUtils.timezonesAreEquivalent(e, "America/Los_Angeles")).isFalse();
     });
 
     PST_LIKE_TIMEZONES.forEach(e -> {
-      Assertions.assertThat(TimeUtils.timezonesAreEquivalent(e, "UTC")).isFalse();
-      Assertions.assertThat(TimeUtils.timezonesAreEquivalent(e, "Europe/Paris")).isFalse();
-      Assertions.assertThat(TimeUtils.timezonesAreEquivalent(e, "America/Los_Angeles")).isTrue();
+      assertThat(TimeUtils.timezonesAreEquivalent(e, "UTC")).isFalse();
+      assertThat(TimeUtils.timezonesAreEquivalent(e, "Europe/Paris")).isFalse();
+      assertThat(TimeUtils.timezonesAreEquivalent(e, "America/Los_Angeles")).isTrue();
     });
+  }
+
+  @DataProvider
+  public static Object[][] cronCases() {
+    return new Object[][]{
+        {"* 0 * * ? *", 60},
+        {"*/10 * 0 * ? *", 6},
+        {"30/10 * * * ? *", 3},
+        {"0-10 * * * ? *", 11},
+        {"0 * * * ? *", 1},
+        {"20 * * * ? *", 1},
+        {"0,1,2 * * * ? *", 3},
+        {"0,5/10,17-19 * * * ? *", 10},
+        {"* */10 * ? * * *", 60}
+    };
+  }
+
+  @Test(dataProvider = "cronCases")
+  public void testMaximumTriggersPerMinute(final String cron, final int expectedMaxTriggers) {
+    assertThat(maximumTriggersPerMinute(cron)).isEqualTo(expectedMaxTriggers);
   }
 }

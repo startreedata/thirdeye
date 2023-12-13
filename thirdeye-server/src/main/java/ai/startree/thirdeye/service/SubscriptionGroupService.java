@@ -14,9 +14,11 @@
 
 package ai.startree.thirdeye.service;
 
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_CRON_FREQUENCY_TOO_HIGH;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_CRON_INVALID;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DUPLICATE_NAME;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static ai.startree.thirdeye.spi.util.TimeUtils.maximumTriggersPerMinute;
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
@@ -37,6 +39,7 @@ import org.quartz.CronExpression;
 public class SubscriptionGroupService extends
     CrudService<SubscriptionGroupApi, SubscriptionGroupDTO> {
 
+  private static final int SUBSCRIPTION_CRON_MAX_TRIGGERS_PER_MINUTE = 6;
   private final NotificationDispatcher notificationDispatcher;
 
   @Inject
@@ -54,6 +57,8 @@ public class SubscriptionGroupService extends
     ensureExists(api.getName(), "name value must be set.");
     ensureExists(api.getCron(), "cron value must be set.");
     ensure(CronExpression.isValidExpression(api.getCron()), ERR_CRON_INVALID, api.getCron());
+    final int maxTriggersPerMinute = maximumTriggersPerMinute(api.getCron());
+    ensure(maxTriggersPerMinute <= SUBSCRIPTION_CRON_MAX_TRIGGERS_PER_MINUTE, ERR_CRON_FREQUENCY_TOO_HIGH,  api.getCron(), maxTriggersPerMinute, SUBSCRIPTION_CRON_MAX_TRIGGERS_PER_MINUTE);
 
     // For new Subscription Group or existing Subscription Group with different name
     if (existing == null || !existing.getName().equals(api.getName())) {

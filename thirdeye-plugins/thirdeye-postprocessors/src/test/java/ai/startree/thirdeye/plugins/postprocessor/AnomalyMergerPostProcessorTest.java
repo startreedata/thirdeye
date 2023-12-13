@@ -99,8 +99,8 @@ public class AnomalyMergerPostProcessorTest {
           final AnomalyFilter filter = (AnomalyFilter) i.getArguments()[0];
           // pseudo database that filters by start time, end time, enumerationItemId
           return existingAnomalies.stream()
-              .filter(a -> a.getStartTime() >= filter.getStartEndWindow().getStartMillis())
-              .filter(a -> a.getEndTime() <= filter.getStartEndWindow().getEndMillis())
+              .filter(a -> a.getStartTime() < filter.getStartEndWindow().getEndMillis())
+              .filter(a -> a.getEndTime() > filter.getStartEndWindow().getStartMillis())
               .filter(a -> filter.getEnumerationItemId() == null || filter.getEnumerationItemId()
                   .equals(a.getEnumerationItem().getId()))
               .collect(Collectors.toList());
@@ -255,7 +255,7 @@ public class AnomalyMergerPostProcessorTest {
     final long newEndTime = new DateTime(JANUARY_1_2021_02H, UTC).plus(Period.hours(2))
         .getMillis();
     final AnomalyDTO new1 = newAnomaly(
-        new DateTime(JANUARY_1_2021_02H, UTC).plus(Period.hours(1)).getMillis(),
+        new DateTime(JANUARY_1_2021_02H, UTC).getMillis(),
         newEndTime);
     final List<AnomalyDTO> merged = detectionMerger.doMerge(List.of(new1), List.of(existing1));
 
@@ -369,8 +369,7 @@ public class AnomalyMergerPostProcessorTest {
     final AnomalyDTO new1 = newAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H);
     final long newEndTime = new DateTime(JANUARY_1_2021_02H, UTC).plus(Period.hours(2))
         .getMillis();
-    final AnomalyDTO existing1 = existingAnomaly(
-        new DateTime(JANUARY_1_2021_02H, UTC).plus(Period.hours(1)).getMillis(),
+    final AnomalyDTO existing1 = existingAnomaly(new DateTime(JANUARY_1_2021_02H, UTC).getMillis(),
         newEndTime);
     final List<AnomalyDTO> merged = detectionMerger.doMerge(List.of(new1), List.of(existing1));
 

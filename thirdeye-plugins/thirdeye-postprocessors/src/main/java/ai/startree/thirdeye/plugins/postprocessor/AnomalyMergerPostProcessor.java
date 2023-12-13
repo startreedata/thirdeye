@@ -89,8 +89,9 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     // more children first
     return -1 * Integer.compare(o1.getChildren().size(), o2.getChildren().size());
   };
+  // by default, only merge consecutive anomalies. And P0D is a special value to disable merging entirely
   @VisibleForTesting
-  protected static final Period DEFAULT_MERGE_MAX_GAP = Period.hours(2);
+  protected static final Period DEFAULT_MERGE_MAX_GAP = Period.seconds(1);
   @VisibleForTesting
   protected static final Period DEFAULT_ANOMALY_MAX_DURATION = Period.days(7);
   public static final String NEW_AFTER_REPLAY_LABEL_NAME = "NEW_AFTER_REPLAY";

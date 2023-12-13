@@ -33,6 +33,9 @@ public class MeanVarianceRuleDetectorSpec extends AbstractSpec {
   private Double upperSensitivity;
   private Double lowerSensitivity;
 
+  private Double metricMaximumValue;
+  private Double metricMinimumValue;
+
   public int getLookback() {
     return lookback;
   }
@@ -94,6 +97,24 @@ public class MeanVarianceRuleDetectorSpec extends AbstractSpec {
 
   public MeanVarianceRuleDetectorSpec setLowerSensitivity(final Double lowerSensitivity) {
     this.lowerSensitivity = lowerSensitivity;
+    return this;
+  }
+
+  public Double getMetricMaximumValue() {
+    return metricMaximumValue;
+  }
+
+  public MeanVarianceRuleDetectorSpec setMetricMaximumValue(final Double metricMaximumValue) {
+    this.metricMaximumValue = metricMaximumValue;
+    return this;
+  }
+
+  public Double getMetricMinimumValue() {
+    return metricMinimumValue;
+  }
+
+  public MeanVarianceRuleDetectorSpec setMetricMinimumValue(final Double metricMinimumValue) {
+    this.metricMinimumValue = metricMinimumValue;
     return this;
   }
 }

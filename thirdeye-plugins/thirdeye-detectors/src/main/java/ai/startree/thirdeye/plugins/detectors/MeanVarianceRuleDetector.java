@@ -21,6 +21,7 @@ import static ai.startree.thirdeye.spi.Constants.COL_MASK;
 import static ai.startree.thirdeye.spi.Constants.COL_TIME;
 import static ai.startree.thirdeye.spi.Constants.COL_UPPER_BOUND;
 import static ai.startree.thirdeye.spi.Constants.COL_VALUE;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
@@ -66,6 +67,9 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
   private MeanVarianceRuleDetectorSpec spec;
   private Period seasonality = Period.ZERO; // PT0S: special period for no seasonality
 
+  private double metricMaximumValue;
+  private double metricMinimumValue;
+
   /**
    * Mapping of sensitivity to sigma on range of 0.5 - 1.5
    * 10 corresponds to sigma of 0.5
@@ -100,6 +104,8 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
       this.lowerSensitivity = spec.getSensitivity();
       this.upperSensitivity = spec.getSensitivity();
     }
+    this.metricMinimumValue = optional(spec.getMetricMinimumValue()).orElse(Double.NEGATIVE_INFINITY);
+    this.metricMaximumValue = optional(spec.getMetricMaximumValue()).orElse(Double.POSITIVE_INFINITY);
 
     if (spec.getLookbackPeriod() != null) {
       checkArgument(spec.getMonitoringGranularity() != null,
@@ -212,11 +218,11 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
         std = 0.0;
       }
       //calculate baseline, error , upper and lower bound for prediction window.
-      baselineArray[k] = mean;
+      baselineArray[k] = bounded(mean);
       final double upperError = sigma(upperSensitivity) * std;
       final double lowerError = sigma(lowerSensitivity) * std;
-      upperBoundArray[k] = baselineArray[k] + upperError;
-      lowerBoundArray[k] = baselineArray[k] - lowerError;
+      upperBoundArray[k] = bounded(baselineArray[k] + upperError);
+      lowerBoundArray[k] = bounded(baselineArray[k] - lowerError);
     }
     //Construct the dataframe.
     resultDF
@@ -270,5 +276,9 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
         "Invalid index. Insufficient data to compute mean/variance on lookback. index: "
             + indexStart);
     return inputDF.slice(indexStart, indexEnd);
+  }
+
+  private double bounded(final double val) {
+    return Math.min(metricMaximumValue, Math.max(val, metricMinimumValue));
   }
 }

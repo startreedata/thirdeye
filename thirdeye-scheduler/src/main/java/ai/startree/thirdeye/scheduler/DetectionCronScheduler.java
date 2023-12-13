@@ -16,6 +16,7 @@ package ai.startree.thirdeye.scheduler;
 import static ai.startree.thirdeye.scheduler.JobSchedulerService.getIdFromJobKey;
 import static ai.startree.thirdeye.spi.Constants.CRON_TIMEZONE;
 import static ai.startree.thirdeye.spi.util.ExecutorUtils.shutdownExecutionService;
+import static ai.startree.thirdeye.spi.util.TimeUtils.maximumTriggersPerMinute;
 
 import ai.startree.thirdeye.scheduler.job.DetectionPipelineJob;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
@@ -52,6 +53,8 @@ public class DetectionCronScheduler implements Runnable {
   public static final String QUARTZ_DETECTION_GROUPER = TaskType.DETECTION.toString();
 
   private static final Logger LOG = LoggerFactory.getLogger(DetectionCronScheduler.class);
+  // todo cyril make this a config file parameter, and throw when it is not respected
+  private static final int DETECTION_SCHEDULER_CRON_MAX_TRIGGERS_PER_MINUTE = 10;
 
   private final AlertManager alertManager;
   private final Scheduler scheduler;
@@ -59,10 +62,12 @@ public class DetectionCronScheduler implements Runnable {
   private final int alertDelay;
 
   @Inject
-  public DetectionCronScheduler(final ThirdEyeSchedulerConfiguration thirdEyeSchedulerConfiguration, final AlertManager alertManager) {
+  public DetectionCronScheduler(final ThirdEyeSchedulerConfiguration thirdEyeSchedulerConfiguration,
+      final AlertManager alertManager) {
     this.alertManager = alertManager;
     alertDelay = thirdEyeSchedulerConfiguration.getAlertUpdateDelay();
-    executorService = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("detection-cron-%d").build());
+    executorService = Executors.newSingleThreadScheduledExecutor(
+        new ThreadFactoryBuilder().setNameFormat("detection-cron-%d").build());
     try {
       scheduler = StdSchedulerFactory.getDefaultScheduler();
     } catch (final SchedulerException e) {
@@ -159,6 +164,13 @@ public class DetectionCronScheduler implements Runnable {
 
   public void startJob(final AbstractDTO config, final JobDetail job) throws SchedulerException {
     final String cron = ((AlertDTO) config).getCron();
+    final int maxTriggersPerMinute = maximumTriggersPerMinute(cron);
+    if (maxTriggersPerMinute > DETECTION_SCHEDULER_CRON_MAX_TRIGGERS_PER_MINUTE) {
+      LOG.warn(
+          "Scheduling a detection job for alert {} that can trigger up to {} times per minute. The limit is {}."
+              + "This will be forbidden and throw an exception in the future. Please update the cron {}", config.getId(),
+          maxTriggersPerMinute, DETECTION_SCHEDULER_CRON_MAX_TRIGGERS_PER_MINUTE, cron);
+    }
     final CronScheduleBuilder cronScheduleBuilder = CronScheduleBuilder
         .cronSchedule(cron)
         .inTimeZone(TimeZone.getTimeZone(CRON_TIMEZONE));

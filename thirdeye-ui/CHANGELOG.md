@@ -1,3 +1,19 @@
+## [2.43.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.42.0...thirdeye-ui-2.43.0) (2023-12-13)
+
+
+### Features
+
+* [TE-1983](https://cortexdata.atlassian.net/browse/TE-1983) add 1 minute and 5 minute options to granularity selection ([6a034fbf9](https://github.com/startreedata/thirdeye/commit/6a034fbf93c8e40f5829d48016eb676b09e014ea))
+
+
+### Bug Fixes
+
+* [TE-1980](https://cortexdata.atlassian.net/browse/TE-1980) fix subscription group routing bug ([a38524342](https://github.com/startreedata/thirdeye/commit/a38524342207997f9ee4beacd5843b1dc9dbcfa4))
+* [TE-1984](https://cortexdata.atlassian.net/browse/TE-1984) change start and end when granularity changes in create alert ([116c76e0a](https://github.com/startreedata/thirdeye/commit/116c76e0a2480a9531f9335b11020c7e3effcc70))
+* add missing i18n values ([cf938fcdc](https://github.com/startreedata/thirdeye/commit/cf938fcdc849ecfb0c78d56c18d2ead74937f4dc))
+* page header defaults to no wrap ([47fc99f95](https://github.com/startreedata/thirdeye/commit/47fc99f95b6b76dd55be3f935ab1ff77616d2730))
+* style fixes for create anomaly page ([478f0207f](https://github.com/startreedata/thirdeye/commit/478f0207f5a45cd6382cb6085771489a3ddc01fb))
+
 ## [2.42.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.41.6...thirdeye-ui-2.42.0) (2023-12-08)
 
 

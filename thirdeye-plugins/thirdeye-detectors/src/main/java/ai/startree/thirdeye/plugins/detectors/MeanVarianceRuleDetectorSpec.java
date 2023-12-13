@@ -29,6 +29,13 @@ public class MeanVarianceRuleDetectorSpec extends AbstractSpec {
   /**Biggest period in ISO-8601 format. Possible values are P7D and P1D. Used to take into account seasonality when computing mean-variance.*/
   private String seasonalityPeriod = null;
 
+  // TODO CYRIL add tests for this feature
+  private Double upperSensitivity;
+  private Double lowerSensitivity;
+
+  private Double metricMaximumValue;
+  private Double metricMinimumValue;
+
   public int getLookback() {
     return lookback;
   }
@@ -72,6 +79,42 @@ public class MeanVarianceRuleDetectorSpec extends AbstractSpec {
 
   public MeanVarianceRuleDetectorSpec setSeasonalityPeriod(final String seasonalityPeriod) {
     this.seasonalityPeriod = seasonalityPeriod;
+    return this;
+  }
+
+  public Double getUpperSensitivity() {
+    return upperSensitivity;
+  }
+
+  public MeanVarianceRuleDetectorSpec setUpperSensitivity(final Double upperSensitivity) {
+    this.upperSensitivity = upperSensitivity;
+    return this;
+  }
+
+  public Double getLowerSensitivity() {
+    return lowerSensitivity;
+  }
+
+  public MeanVarianceRuleDetectorSpec setLowerSensitivity(final Double lowerSensitivity) {
+    this.lowerSensitivity = lowerSensitivity;
+    return this;
+  }
+
+  public Double getMetricMaximumValue() {
+    return metricMaximumValue;
+  }
+
+  public MeanVarianceRuleDetectorSpec setMetricMaximumValue(final Double metricMaximumValue) {
+    this.metricMaximumValue = metricMaximumValue;
+    return this;
+  }
+
+  public Double getMetricMinimumValue() {
+    return metricMinimumValue;
+  }
+
+  public MeanVarianceRuleDetectorSpec setMetricMinimumValue(final Double metricMinimumValue) {
+    this.metricMinimumValue = metricMinimumValue;
     return this;
   }
 }

@@ -21,6 +21,7 @@ import static ai.startree.thirdeye.spi.Constants.COL_MASK;
 import static ai.startree.thirdeye.spi.Constants.COL_TIME;
 import static ai.startree.thirdeye.spi.Constants.COL_UPPER_BOUND;
 import static ai.startree.thirdeye.spi.Constants.COL_VALUE;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
@@ -60,10 +61,14 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
   );
 
   private Pattern pattern;
-  private double sensitivity;
+  private double lowerSensitivity;
+  private double upperSensitivity;
   private int lookback;
   private MeanVarianceRuleDetectorSpec spec;
   private Period seasonality = Period.ZERO; // PT0S: special period for no seasonality
+
+  private double metricMaximumValue;
+  private double metricMinimumValue;
 
   /**
    * Mapping of sensitivity to sigma on range of 0.5 - 1.5
@@ -89,8 +94,18 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
   @Override
   public void init(final MeanVarianceRuleDetectorSpec spec) {
     this.spec = spec;
-    pattern = spec.getPattern();
-    sensitivity = spec.getSensitivity();
+    this.pattern = spec.getPattern();
+    if (spec.getLowerSensitivity() != null || spec.getUpperSensitivity() != null) {
+      checkArgument(spec.getLowerSensitivity() != null, "lowerSensitivity is null. lowerSensitivity must be set when upperSensitivity is set.");
+      checkArgument(spec.getUpperSensitivity() != null, "upperSensitivity is null. upperSensitivity must be set when lowerSensitivity is set.");
+      this.lowerSensitivity = spec.getLowerSensitivity();
+      this.upperSensitivity = spec.getUpperSensitivity();
+    } else {
+      this.lowerSensitivity = spec.getSensitivity();
+      this.upperSensitivity = spec.getSensitivity();
+    }
+    this.metricMinimumValue = optional(spec.getMetricMinimumValue()).orElse(Double.NEGATIVE_INFINITY);
+    this.metricMaximumValue = optional(spec.getMetricMaximumValue()).orElse(Double.POSITIVE_INFINITY);
 
     if (spec.getLookbackPeriod() != null) {
       checkArgument(spec.getMonitoringGranularity() != null,
@@ -203,10 +218,11 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
         std = 0.0;
       }
       //calculate baseline, error , upper and lower bound for prediction window.
-      baselineArray[k] = mean;
-      final double error = sigma(sensitivity) * std;
-      upperBoundArray[k] = baselineArray[k] + error;
-      lowerBoundArray[k] = baselineArray[k] - error;
+      baselineArray[k] = bounded(mean);
+      final double upperError = sigma(upperSensitivity) * std;
+      final double lowerError = sigma(lowerSensitivity) * std;
+      upperBoundArray[k] = bounded(baselineArray[k] + upperError);
+      lowerBoundArray[k] = bounded(baselineArray[k] - lowerError);
     }
     //Construct the dataframe.
     resultDF
@@ -260,5 +276,9 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
         "Invalid index. Insufficient data to compute mean/variance on lookback. index: "
             + indexStart);
     return inputDF.slice(indexStart, indexEnd);
+  }
+
+  private double bounded(final double val) {
+    return Math.min(metricMaximumValue, Math.max(val, metricMinimumValue));
   }
 }

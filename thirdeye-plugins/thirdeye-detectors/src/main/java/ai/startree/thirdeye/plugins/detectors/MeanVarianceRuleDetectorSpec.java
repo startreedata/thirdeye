@@ -29,6 +29,10 @@ public class MeanVarianceRuleDetectorSpec extends AbstractSpec {
   /**Biggest period in ISO-8601 format. Possible values are P7D and P1D. Used to take into account seasonality when computing mean-variance.*/
   private String seasonalityPeriod = null;
 
+  // TODO CYRIL add tests for this feature
+  private Double upperSensitivity;
+  private Double lowerSensitivity;
+
   public int getLookback() {
     return lookback;
   }
@@ -72,6 +76,24 @@ public class MeanVarianceRuleDetectorSpec extends AbstractSpec {
 
   public MeanVarianceRuleDetectorSpec setSeasonalityPeriod(final String seasonalityPeriod) {
     this.seasonalityPeriod = seasonalityPeriod;
+    return this;
+  }
+
+  public Double getUpperSensitivity() {
+    return upperSensitivity;
+  }
+
+  public MeanVarianceRuleDetectorSpec setUpperSensitivity(final Double upperSensitivity) {
+    this.upperSensitivity = upperSensitivity;
+    return this;
+  }
+
+  public Double getLowerSensitivity() {
+    return lowerSensitivity;
+  }
+
+  public MeanVarianceRuleDetectorSpec setLowerSensitivity(final Double lowerSensitivity) {
+    this.lowerSensitivity = lowerSensitivity;
     return this;
   }
 }

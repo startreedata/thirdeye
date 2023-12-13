@@ -60,7 +60,8 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
   );
 
   private Pattern pattern;
-  private double sensitivity;
+  private double lowerSensitivity;
+  private double upperSensitivity;
   private int lookback;
   private MeanVarianceRuleDetectorSpec spec;
   private Period seasonality = Period.ZERO; // PT0S: special period for no seasonality
@@ -89,8 +90,16 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
   @Override
   public void init(final MeanVarianceRuleDetectorSpec spec) {
     this.spec = spec;
-    pattern = spec.getPattern();
-    sensitivity = spec.getSensitivity();
+    this.pattern = spec.getPattern();
+    if (spec.getLowerSensitivity() != null || spec.getUpperSensitivity() != null) {
+      checkArgument(spec.getLowerSensitivity() != null, "lowerSensitivity is null. lowerSensitivity must be set when upperSensitivity is set.");
+      checkArgument(spec.getUpperSensitivity() != null, "upperSensitivity is null. upperSensitivity must be set when lowerSensitivity is set.");
+      this.lowerSensitivity = spec.getLowerSensitivity();
+      this.upperSensitivity = spec.getUpperSensitivity();
+    } else {
+      this.lowerSensitivity = spec.getSensitivity();
+      this.upperSensitivity = spec.getSensitivity();
+    }
 
     if (spec.getLookbackPeriod() != null) {
       checkArgument(spec.getMonitoringGranularity() != null,
@@ -204,9 +213,10 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
       }
       //calculate baseline, error , upper and lower bound for prediction window.
       baselineArray[k] = mean;
-      final double error = sigma(sensitivity) * std;
-      upperBoundArray[k] = baselineArray[k] + error;
-      lowerBoundArray[k] = baselineArray[k] - error;
+      final double upperError = sigma(upperSensitivity) * std;
+      final double lowerError = sigma(lowerSensitivity) * std;
+      upperBoundArray[k] = baselineArray[k] + upperError;
+      lowerBoundArray[k] = baselineArray[k] - lowerError;
     }
     //Construct the dataframe.
     resultDF

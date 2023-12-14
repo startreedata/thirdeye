@@ -89,7 +89,7 @@
     <slack.version>1.29.2</slack.version>
     <slf4j-api.version>1.7.12</slf4j-api.version>
     <swagger.version>2.1.6-1</swagger.version>
-    <testcontainers.version>1.18.3</testcontainers.version>
+    <testcontainers.version>1.19.3</testcontainers.version>
     <micrometer.version>1.11.4</micrometer.version>
   </properties>
 
@@ -1026,7 +1026,7 @@
             <format>html</format>
             <format>xml</format>
           </formats>
-          <check />
+          <check/>
         </configuration>
       </plugin>
       <plugin>

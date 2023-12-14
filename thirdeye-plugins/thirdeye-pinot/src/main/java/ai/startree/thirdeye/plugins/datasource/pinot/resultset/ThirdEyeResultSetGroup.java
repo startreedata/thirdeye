@@ -11,12 +11,11 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.spi.datasource.resultset;
+package ai.startree.thirdeye.plugins.datasource.pinot.resultset;
 
-import com.google.common.collect.ImmutableList;
 import java.util.List;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.pinot.client.ResultSetGroup;
 
 /**
  * The ThirdEye's own {@link ResultSetGroup} for storing multiple {@link ThirdEyeResultSet} (i.e.,
@@ -25,7 +24,8 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  */
 public class ThirdEyeResultSetGroup {
 
-  private ImmutableList<ThirdEyeResultSet> resultSets = ImmutableList.of();
+  // the list implementation should be immutable
+  private List<ThirdEyeResultSet> resultSets = List.of();
 
   public ThirdEyeResultSetGroup(List<ThirdEyeResultSet> resultSets) {
     this.setResultSets(resultSets);
@@ -40,11 +40,7 @@ public class ThirdEyeResultSetGroup {
   }
 
   public void setResultSets(List<ThirdEyeResultSet> resultSets) {
-    if (CollectionUtils.isNotEmpty(resultSets)) {
-      this.resultSets = ImmutableList.copyOf(resultSets);
-    } else {
-      this.resultSets = ImmutableList.of();
-    }
+    this.resultSets = List.copyOf(resultSets);
   }
 
   public List<ThirdEyeResultSet> getResultSets() {

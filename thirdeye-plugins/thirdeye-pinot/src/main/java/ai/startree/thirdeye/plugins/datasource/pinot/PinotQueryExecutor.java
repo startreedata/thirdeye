@@ -13,11 +13,11 @@
  */
 package ai.startree.thirdeye.plugins.datasource.pinot;
 
+import ai.startree.thirdeye.plugins.datasource.pinot.resultset.ThirdEyeDataFrameResultSet;
+import ai.startree.thirdeye.plugins.datasource.pinot.resultset.ThirdEyeResultSet;
+import ai.startree.thirdeye.plugins.datasource.pinot.resultset.ThirdEyeResultSetGroup;
+import ai.startree.thirdeye.plugins.datasource.pinot.resultset.ThirdEyeResultSetMetaData;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
-import ai.startree.thirdeye.spi.datasource.resultset.ThirdEyeDataFrameResultSet;
-import ai.startree.thirdeye.spi.datasource.resultset.ThirdEyeResultSet;
-import ai.startree.thirdeye.spi.datasource.resultset.ThirdEyeResultSetGroup;
-import ai.startree.thirdeye.spi.datasource.resultset.ThirdEyeResultSetMetaData;
 import ai.startree.thirdeye.spi.detection.v2.ColumnType;
 import ai.startree.thirdeye.spi.detection.v2.ColumnType.ColumnDataType;
 import ai.startree.thirdeye.spi.util.Pair;

@@ -345,17 +345,4 @@ public class AlertInsightsProvider {
     // for monthly granularity: 36 points
     return Period.years(3);
   }
-
-  public static void main(String[] args) {
-    final int zoneOffsetSeconds =
-        DateTimeZone.forID("Asia/Calcutta").getOffset(TIME_ORIGIN_FOR_TZ_DIFF_1) / 1000;
-    System.out.println(zoneOffsetSeconds);
-    final int completenessSecondsWithOffset = zoneOffsetSeconds % 60;
-    final int completenessMinutesWithOffset = (zoneOffsetSeconds % 3600) / 60;
-    final int completenessHoursWithOffset = (zoneOffsetSeconds % 86_400) / 3600;
-    System.out.println(completenessSecondsWithOffset);
-    System.out.println(completenessMinutesWithOffset);
-    System.out.println(completenessHoursWithOffset);
-    System.out.println(Duration.millis(-1000));
-  }
 }

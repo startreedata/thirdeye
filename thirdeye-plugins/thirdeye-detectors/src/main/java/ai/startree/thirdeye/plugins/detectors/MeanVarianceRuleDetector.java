@@ -63,6 +63,8 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
   private Pattern pattern;
   private double lowerSensitivity;
   private double upperSensitivity;
+  private double lowerBoundMultiplier;
+  private double upperBoundMultiplier;
   private int lookback;
   private MeanVarianceRuleDetectorSpec spec;
   private Period seasonality = Period.ZERO; // PT0S: special period for no seasonality
@@ -106,6 +108,8 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     }
     this.metricMinimumValue = optional(spec.getMetricMinimumValue()).orElse(Double.NEGATIVE_INFINITY);
     this.metricMaximumValue = optional(spec.getMetricMaximumValue()).orElse(Double.POSITIVE_INFINITY);
+    this.lowerBoundMultiplier = optional(spec.getLowerBoundMultiplier()).orElse(1.);
+    this.upperBoundMultiplier = optional(spec.getUpperBoundMultiplier()).orElse(1.);
 
     if (spec.getLookbackPeriod() != null) {
       checkArgument(spec.getMonitoringGranularity() != null,
@@ -221,8 +225,8 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
       baselineArray[k] = bounded(mean);
       final double upperError = sigma(upperSensitivity) * std;
       final double lowerError = sigma(lowerSensitivity) * std;
-      upperBoundArray[k] = bounded(baselineArray[k] + upperError);
-      lowerBoundArray[k] = bounded(baselineArray[k] - lowerError);
+      upperBoundArray[k] = bounded((baselineArray[k] + upperError) * upperBoundMultiplier);
+      lowerBoundArray[k] = bounded((baselineArray[k] - lowerError) * lowerBoundMultiplier);
     }
     //Construct the dataframe.
     resultDF

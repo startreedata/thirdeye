@@ -169,7 +169,7 @@ public class ThresholdPostProcessor implements AnomalyPostProcessor {
       final double value = df.getDouble(colName, index);
       final boolean isInThreshold =
           (!minIsActivated || value > min) && (!maxIsActivated || value < max);
-      if (!isInThreshold) {
+      if (isInThreshold) {
         return false;
       }
     }

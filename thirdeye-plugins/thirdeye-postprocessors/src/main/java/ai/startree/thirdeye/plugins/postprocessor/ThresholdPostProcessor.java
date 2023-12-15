@@ -77,8 +77,7 @@ public class ThresholdPostProcessor implements AnomalyPostProcessor {
     this.min = optional(spec.getMin()).orElse(NOT_ACTIVATED_VALUE);
     this.max = optional(spec.getMax()).orElse(NOT_ACTIVATED_VALUE);
     this.timestampColum = optional(spec.getTimestamp()).orElse(DEFAULT_TIMESTAMP);
-    if (spec.getMetrics() != null) {
-      checkArgument(!spec.getMetrics().isEmpty());
+    if (spec.getMetrics() != null && !spec.getMetrics().isEmpty()) {
       this.valueColumns = spec.getMetrics();
     } else {
       this.valueColumns = List.of(optional(spec.getMetric()).orElse(DEFAULT_METRIC));

@@ -14,12 +14,16 @@
 package ai.startree.thirdeye.alert;
 
 import static ai.startree.thirdeye.alert.AlertInsightsProvider.defaultChartTimeframe;
+import static ai.startree.thirdeye.alert.AlertInsightsProvider.defaultCronFor;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.joda.time.Chronology;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.Period;
+import org.joda.time.chrono.ISOChronology;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class AlertInsightsProviderTest {
@@ -36,8 +40,7 @@ public class AlertInsightsProviderTest {
 
   @Test
   public void testDefaultIntervalWithDailyGranularity() {
-    final Interval datasetInterval = new Interval(JANUARY_1_2019_OAM,
-        JANUARY_1_2022_2AM,
+    final Interval datasetInterval = new Interval(JANUARY_1_2019_OAM, JANUARY_1_2022_2AM,
         DateTimeZone.UTC);
     final Interval res = AlertInsightsProvider.getDefaultChartInterval(datasetInterval,
         DAILY_GRANULARITY);
@@ -52,12 +55,10 @@ public class AlertInsightsProviderTest {
 
   @Test
   public void testDefaultIntervalWithDailyGranularityWithParisTimezone() {
-    final Interval datasetInterval = new Interval(JANUARY_1_2019_OAM,
-        JANUARY_1_2022_2AM,
+    final Interval datasetInterval = new Interval(JANUARY_1_2019_OAM, JANUARY_1_2022_2AM,
         PARIS_TIMEZONE);
     final Interval res = AlertInsightsProvider.getDefaultChartInterval(datasetInterval,
         DAILY_GRANULARITY);
-
 
     // end of end bucket
     final DateTime expectedEnd = new DateTime(JAN_1_2022_11PM, PARIS_TIMEZONE);
@@ -69,8 +70,7 @@ public class AlertInsightsProviderTest {
 
   @Test
   public void testDefaultIntervalWithDailyGranularityWithStartOfDatasetBeforeDefaultStart() {
-    final Interval datasetInterval = new Interval(JULY_1_2021_4AM,
-        JANUARY_1_2022_2AM,
+    final Interval datasetInterval = new Interval(JULY_1_2021_4AM, JANUARY_1_2022_2AM,
         DateTimeZone.UTC);
     final Interval res = AlertInsightsProvider.getDefaultChartInterval(datasetInterval,
         DAILY_GRANULARITY);
@@ -93,5 +93,127 @@ public class AlertInsightsProviderTest {
     // test input contains variable length period units: month and year
     assertThat(defaultChartTimeframe(Period.months(2))).isEqualTo(Period.years(4));
     assertThat(defaultChartTimeframe(Period.years(1))).isEqualTo(Period.years(4));
+  }
+
+  @DataProvider
+  public static Object[][] defaultCronCases() {
+    final ISOChronology utc_tz = ISOChronology.getInstanceUTC();
+    // 30 minute positive offset
+    final ISOChronology india_tz = ISOChronology.getInstance(DateTimeZone.forID("Asia/Calcutta"));
+    // positive offset
+    final ISOChronology france_tz = ISOChronology.getInstance(DateTimeZone.forID("Europe/Paris"));
+    // negative offset
+    final ISOChronology pst_tz = ISOChronology.getInstance(DateTimeZone.forID("America/Los_Angeles"));
+    // 30 minute negative offset
+    final ISOChronology st_johns_tz = ISOChronology.getInstance(DateTimeZone.forID("America/St_Johns"));
+    // 45 minute offset
+    final ISOChronology aus_eucla_tz = ISOChronology.getInstance(DateTimeZone.forID("Australia/Eucla"));
+    return new Object[][]{
+        // granularity, timezone, completenessDelay, expectedCron
+        {"PT1M", utc_tz, Period.millis(300), "1 * * * * ? *"},
+        {"PT1M", utc_tz, Period.ZERO, "0 * * * * ? *"},
+        {"PT1M", utc_tz, Period.seconds(25), "25 * * * * ? *"},
+        {"PT1M", utc_tz, Period.minutes(10), "0 * * * * ? *"},
+        {"PT1M", utc_tz, Period.seconds(10).withMinutes(2), "10 * * * * ? *"},
+
+        {"PT5M", utc_tz, Period.ZERO, "0 0/5 * * * ? *"},
+        {"PT5M", utc_tz, Period.hours(1), "0 0/5 * * * ? *"},
+        {"PT5M", utc_tz, Period.seconds(25), "25 0/5 * * * ? *"},
+        {"PT5M", utc_tz, Period.minutes(10), "0 0/5 * * * ? *"},
+        {"PT5M", utc_tz, Period.minutes(8), "0 3/5 * * * ? *"},
+        {"PT5M", utc_tz, Period.seconds(10).withMinutes(2), "10 2/5 * * * ? *"},
+
+        {"PT10M", utc_tz, Period.ZERO, "0 0/10 * * * ? *"},
+        {"PT10M", utc_tz, Period.hours(1), "0 0/10 * * * ? *"},
+        {"PT10M", utc_tz, Period.seconds(25), "25 0/10 * * * ? *"},
+        {"PT10M", utc_tz, Period.minutes(10), "0 0/10 * * * ? *"},
+        {"PT10M", utc_tz, Period.minutes(12), "0 2/10 * * * ? *"},
+        {"PT10M", utc_tz, Period.seconds(10).withMinutes(2), "10 2/10 * * * ? *"},
+
+        {"PT15M", utc_tz, Period.ZERO, "0 0/15 * * * ? *"},
+        {"PT15M", utc_tz, Period.hours(1), "0 0/15 * * * ? *"},
+        {"PT15M", utc_tz, Period.seconds(25), "25 0/15 * * * ? *"},
+        {"PT15M", utc_tz, Period.minutes(30), "0 0/15 * * * ? *"},
+        {"PT15M", utc_tz, Period.minutes(21), "0 6/15 * * * ? *"},
+        {"PT15M", utc_tz, Period.seconds(10).withMinutes(2), "10 2/15 * * * ? *"},
+
+        {"PT30M", utc_tz, Period.ZERO, "0 0/30 * * * ? *"},
+        {"PT30M", utc_tz, Period.hours(1), "0 0/30 * * * ? *"},
+        {"PT30M", utc_tz, Period.seconds(25), "25 0/30 * * * ? *"},
+        {"PT30M", utc_tz, Period.minutes(30), "0 0/30 * * * ? *"},
+        {"PT30M", utc_tz, Period.minutes(47), "0 17/30 * * * ? *"},
+        {"PT30M", utc_tz, Period.seconds(10).withMinutes(2), "10 2/30 * * * ? *"},
+
+        // for france, pst and utc, crons should be the same
+        {"PT1H", utc_tz, Period.ZERO, "0 0 * * * ? *"},
+        {"PT1H", utc_tz, Period.days(1), "0 0 * * * ? *"},
+        {"PT1H", utc_tz, Period.seconds(25), "25 0 * * * ? *"},
+        {"PT1H", utc_tz, Period.minutes(30), "0 30 * * * ? *"},
+        {"PT1H", utc_tz, Period.seconds(10).withMinutes(2).withHours(3), "10 2 * * * ? *"},
+        {"PT1H", france_tz, Period.ZERO, "0 0 * * * ? *"},
+        {"PT1H", france_tz, Period.days(1), "0 0 * * * ? *"},
+        {"PT1H", france_tz, Period.seconds(25), "25 0 * * * ? *"},
+        {"PT1H", france_tz, Period.minutes(30), "0 30 * * * ? *"},
+        {"PT1H", france_tz, Period.seconds(10).withMinutes(2).withHours(3), "10 2 * * * ? *"},
+        {"PT1H", pst_tz, Period.ZERO, "0 0 * * * ? *"},
+        {"PT1H", pst_tz, Period.days(1), "0 0 * * * ? *"},
+        {"PT1H", pst_tz, Period.seconds(25), "25 0 * * * ? *"},
+        {"PT1H", pst_tz, Period.minutes(30), "0 30 * * * ? *"},
+        {"PT1H", pst_tz, Period.seconds(10).withMinutes(2).withHours(3), "10 2 * * * ? *"},
+        // for india and st jones, crons should be offset by 30 minutes
+        {"PT1H", india_tz, Period.ZERO, "0 30 * * * ? *"},
+        {"PT1H", india_tz, Period.days(1), "0 30 * * * ? *"},
+        {"PT1H", india_tz, Period.seconds(25), "25 30 * * * ? *"},
+        {"PT1H", india_tz, Period.minutes(30), "0 0 * * * ? *"},
+        {"PT1H", india_tz, Period.seconds(10).withMinutes(2).withHours(3), "10 32 * * * ? *"},
+        {"PT1H", st_johns_tz, Period.ZERO, "0 30 * * * ? *"},
+        {"PT1H", st_johns_tz, Period.days(1), "0 30 * * * ? *"},
+        {"PT1H", st_johns_tz, Period.seconds(25), "25 30 * * * ? *"},
+        {"PT1H", st_johns_tz, Period.minutes(30), "0 0 * * * ? *"},
+        {"PT1H", st_johns_tz, Period.seconds(10).withMinutes(2).withHours(3), "10 32 * * * ? *"},
+        // for australia eucla, crons should be offset by 45 minutes
+        {"PT1H", aus_eucla_tz, Period.ZERO, "0 15 * * * ? *"},
+        {"PT1H", aus_eucla_tz, Period.days(1), "0 15 * * * ? *"},
+        {"PT1H", aus_eucla_tz, Period.seconds(25), "25 15 * * * ? *"},
+        {"PT1H", aus_eucla_tz, Period.minutes(30), "0 45 * * * ? *"},
+        {"PT1H", aus_eucla_tz, Period.seconds(10).withMinutes(2).withHours(3), "10 17 * * * ? *"},
+
+        {"P1D", utc_tz, Period.ZERO, "0 0 0 * * ? *"},
+        {"P1D", utc_tz, Period.days(1), "0 0 0 * * ? *"},
+        {"P1D", utc_tz, Period.seconds(25), "25 0 0 * * ? *"},
+        {"P1D", utc_tz, Period.minutes(30), "0 30 0 * * ? *"},
+        {"P1D", utc_tz, Period.seconds(10).withMinutes(2).withHours(3), "10 2 3 * * ? *"},
+        {"P1D", france_tz, Period.ZERO, "0 0 23 * * ? *"},
+        {"P1D", france_tz, Period.days(1), "0 0 23 * * ? *"},
+        {"P1D", france_tz, Period.seconds(25), "25 0 23 * * ? *"},
+        {"P1D", france_tz, Period.minutes(30), "0 30 23 * * ? *"},
+        {"P1D", france_tz, Period.seconds(10).withMinutes(2).withHours(3), "10 2 2 * * ? *"},
+        {"P1D", pst_tz, Period.ZERO, "0 0 8 * * ? *"},
+        {"P1D", pst_tz, Period.days(1), "0 0 8 * * ? *"},
+        {"P1D", pst_tz, Period.seconds(25), "25 0 8 * * ? *"},
+        {"P1D", pst_tz, Period.minutes(30), "0 30 8 * * ? *"},
+        {"P1D", pst_tz, Period.seconds(10).withMinutes(2).withHours(3), "10 2 11 * * ? *"},
+        {"P1D", india_tz, Period.ZERO, "0 30 18 * * ? *"},
+        {"P1D", india_tz, Period.days(1), "0 30 18 * * ? *"},
+        {"P1D", india_tz, Period.seconds(25), "25 30 18 * * ? *"},
+        {"P1D", india_tz, Period.minutes(30), "0 0 19 * * ? *"},
+        {"P1D", india_tz, Period.seconds(10).withMinutes(2).withHours(3), "10 32 21 * * ? *"},
+        {"P1D", st_johns_tz, Period.ZERO, "0 30 3 * * ? *"},
+        {"P1D", st_johns_tz, Period.days(1), "0 30 3 * * ? *"},
+        {"P1D", st_johns_tz, Period.seconds(25), "25 30 3 * * ? *"},
+        {"P1D", st_johns_tz, Period.minutes(30), "0 0 4 * * ? *"},
+        {"P1D", st_johns_tz, Period.seconds(10).withMinutes(2).withHours(3), "10 32 6 * * ? *"},
+        {"P1D", aus_eucla_tz, Period.ZERO, "0 15 15 * * ? *"},
+        {"P1D", aus_eucla_tz, Period.days(1), "0 15 15 * * ? *"},
+        {"P1D", aus_eucla_tz, Period.seconds(25), "25 15 15 * * ? *"},
+        {"P1D", aus_eucla_tz, Period.minutes(30), "0 45 15 * * ? *"},
+        {"P1D", aus_eucla_tz, Period.seconds(10).withMinutes(2).withHours(3), "10 17 18 * * ? *"},
+    };
+  }
+
+  @Test(dataProvider = "defaultCronCases")
+  public void testDefaultCronFor(final String granularity, final Chronology chronology,
+      final Period completenessDelay, final String expectedCron) {
+    assertThat(defaultCronFor(granularity, chronology, completenessDelay)).isEqualTo(expectedCron);
   }
 }

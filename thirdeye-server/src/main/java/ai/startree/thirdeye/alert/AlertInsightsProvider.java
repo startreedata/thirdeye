@@ -14,11 +14,14 @@
 package ai.startree.thirdeye.alert;
 
 import static ai.startree.thirdeye.mapper.ApiBeanMapper.toAlertTemplateApi;
+import static ai.startree.thirdeye.spi.Constants.UTC_TIMEZONE;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DATASET_NOT_FOUND;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_CONFIGURATION_FIELD;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_UNKNOWN;
+import static ai.startree.thirdeye.spi.util.AlertMetadataUtils.getDelay;
 import static ai.startree.thirdeye.spi.util.AlertMetadataUtils.getGranularity;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static ai.startree.thirdeye.spi.util.TimeUtils.timezonesAreEquivalent;
 import static ai.startree.thirdeye.util.ResourceUtils.serverError;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
@@ -45,6 +48,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.Chronology;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.joda.time.Duration;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.joda.time.chrono.ISOChronology;
@@ -55,6 +59,13 @@ import org.slf4j.LoggerFactory;
 public class AlertInsightsProvider {
 
   private static final Logger LOG = LoggerFactory.getLogger(AlertInsightsProvider.class);
+  // assumes this time has no DST happening for all timezones - did not check but should be the case
+  private static final DateTime TIME_ORIGIN_FOR_TZ_DIFF_1 = new DateTime(2023, 1, 12, 0, 0, 0,
+      ISOChronology.getInstanceUTC());
+  private static final DateTime TIME_ORIGIN_FOR_TZ_DIFF_2 = new DateTime(2023, 5, 12, 0, 0, 0,
+      ISOChronology.getInstanceUTC());
+  private static final DateTime TIME_ORIGIN_FOR_TZ_DIFF_3 = new DateTime(2023, 9, 12, 0, 0, 0,
+      ISOChronology.getInstanceUTC());
 
   private static final Interval NOT_USED_INTERVAL = new Interval(0L, 0L, DateTimeZone.UTC);
   // computer clock difference is usually order of seconds - but here taking 1 hour is safe and does not impact the logic
@@ -67,8 +78,7 @@ public class AlertInsightsProvider {
 
   @Inject
   public AlertInsightsProvider(final AlertTemplateRenderer alertTemplateRenderer,
-      final DatasetConfigManager datasetConfigManager,
-      final MinMaxTimeLoader minMaxTimeLoader) {
+      final DatasetConfigManager datasetConfigManager, final MinMaxTimeLoader minMaxTimeLoader) {
     this.alertTemplateRenderer = alertTemplateRenderer;
     this.datasetConfigManager = datasetConfigManager;
     this.minMaxTimeLoader = minMaxTimeLoader;
@@ -105,8 +115,8 @@ public class AlertInsightsProvider {
       throws Exception {
     final AlertMetadataDTO metadata = templateWithProperties.getMetadata();
 
-    final AlertInsightsApi insights = new AlertInsightsApi()
-        .setAnalysisRunInfo(AnalysisRunInfo.success())
+    final AlertInsightsApi insights = new AlertInsightsApi().setAnalysisRunInfo(
+            AnalysisRunInfo.success())
         .setTemplateWithProperties(toAlertTemplateApi(templateWithProperties));
     addDatasetTimes(insights, metadata);
 
@@ -127,23 +137,20 @@ public class AlertInsightsProvider {
 
     // fetch dataset interval
     addDatasetStartEndTimes(insights, datasetConfigDTO);
-    addDefaultTimes(insights, metadata);
+    addDefaults(insights, metadata);
   }
 
   private void addDatasetStartEndTimes(final AlertInsightsApi insights,
       final DatasetConfigDTO datasetConfigDTO) throws Exception {
     // launch min, max, safeMax queries async
     final Future<@Nullable Long> minTimeFuture = minMaxTimeLoader.fetchMinTimeAsync(
-        datasetConfigDTO,
-        null);
+        datasetConfigDTO, null);
     final Future<@Nullable Long> maxTimeFuture = minMaxTimeLoader.fetchMaxTimeAsync(
-        datasetConfigDTO,
-        null);
+        datasetConfigDTO, null);
     final long maximumPossibleEndTime = currentMaximumPossibleEndTime();
     final Interval safeInterval = new Interval(0L, maximumPossibleEndTime);
     final Future<@Nullable Long> safeMaxTimeFuture = minMaxTimeLoader.fetchMaxTimeAsync(
-        datasetConfigDTO,
-        safeInterval);
+        datasetConfigDTO, safeInterval);
 
     // process futures
     // process startTime
@@ -170,9 +177,7 @@ public class AlertInsightsProvider {
       insights.setSuspiciousDatasetEndTime(datasetMaxTime);
       LOG.warn(
           "Dataset maxTime is too big: {}. Current system time: {}.Most likely a data issue in the dataset. Rerunning query with a filter < safeEndTime={} to get a safe maxTime.",
-          datasetMaxTime,
-          System.currentTimeMillis(),
-          maximumPossibleEndTime);
+          datasetMaxTime, System.currentTimeMillis(), maximumPossibleEndTime);
       final @Nullable Long safeMaxTime = safeMaxTimeFuture.get(FETCH_TIMEOUT_MILLIS, MILLISECONDS);
       if (safeMaxTime == null) {
         insights.setAnalysisRunInfo(AnalysisRunInfo.failure(String.format(
@@ -185,7 +190,7 @@ public class AlertInsightsProvider {
   }
 
   // default times for chart - to call after dataset times are set in insights
-  private void addDefaultTimes(final AlertInsightsApi insights, final AlertMetadataDTO metadata) {
+  private void addDefaults(final AlertInsightsApi insights, final AlertMetadataDTO metadata) {
     if (!insights.getAnalysisRunInfo().isSuccess()) {
       return;
     }
@@ -196,8 +201,11 @@ public class AlertInsightsProvider {
         .map(e -> (Chronology) e)
         .orElse(Constants.DEFAULT_CHRONOLOGY);
     final Interval datasetInterval = new Interval(datasetStartTime, datasetEndTime, chronology);
-    // FIXME CYRIL internalize this?
     final Period granularity = getGranularity(metadata);
+    final Period completenessDelay = getDelay(metadata);
+    final String defaultCron = defaultCronFor(granularity.toString(), chronology,
+        completenessDelay);
+    insights.setDefaultCron(defaultCron);
     // compute default chart interval
     final Interval defaultInterval = getDefaultChartInterval(datasetInterval, granularity);
     if (defaultInterval.toDurationMillis() == 0) {
@@ -211,6 +219,69 @@ public class AlertInsightsProvider {
 
   public static long currentMaximumPossibleEndTime() {
     return System.currentTimeMillis() + COMPUTER_CLOCK_MARGIN_MILLIS;
+  }
+
+  @VisibleForTesting
+  protected static @Nullable String defaultCronFor(final String granularity,
+      final Chronology chronology, final Period completenessDelay) {
+    Period roundedCompletenessDelay = completenessDelay;
+    if (completenessDelay.getMillis() != 0) {
+      // ceil to the nearest second
+      roundedCompletenessDelay = completenessDelay.withMillis(0)
+          .withSeconds(completenessDelay.getSeconds() + 1);
+    }
+    final Duration completenessDuration = roundedCompletenessDelay.toStandardDuration();
+    long completenessHours = completenessDuration.getStandardHours() % 24;
+    long completenessMinutes = completenessDuration.getStandardMinutes() % 60;
+    long completenessSeconds = completenessDuration.getStandardSeconds() % 60;
+
+    switch (granularity) {
+      case "PT1M":
+        return String.format("%s * * * * ? *", completenessSeconds);
+      case "PT5M":
+      case "PT10M":
+      case "PT15M":
+      case "PT30M":
+        final String everyNMinutes = granularity.substring(2, granularity.length() - 1);
+        return String.format("%s %s/%s * * * ? *", completenessSeconds,
+            completenessMinutes % Integer.parseInt(everyNMinutes), everyNMinutes);
+      case "PT1H":
+        final int zoneOffsetSeconds =
+            chronology.getZone().getOffset(TIME_ORIGIN_FOR_TZ_DIFF_1) / 1000;
+        final long minutesOfOffset = (zoneOffsetSeconds / 60) % 60;
+        final long cronMinutes = (completenessMinutes - minutesOfOffset + 60)
+            % 60; // FIXME CYRIL PLUS OR MINUTE FOR THE OFFSET - need to do 45 to know
+        return String.format("%s %s * * * ? *", completenessSeconds, cronMinutes);
+      case "P1D":
+        ;
+        long minutesOfOffset1 = 0;
+        long hoursOfOffset1 = 0;
+        if (!timezonesAreEquivalent(chronology.getZone().toString(), UTC_TIMEZONE)) {
+          // need to check if there is DST in the country - take 3 offsets at different times in the year to find offsets
+          final int zoneOffset1 = chronology.getZone().getOffset(TIME_ORIGIN_FOR_TZ_DIFF_1);
+          final int zoneOffset2 = chronology.getZone().getOffset(TIME_ORIGIN_FOR_TZ_DIFF_2);
+          final int zoneOffset3 = chronology.getZone().getOffset(TIME_ORIGIN_FOR_TZ_DIFF_3);
+          // assume all offsets have the same sign - as of 2023 it is the case and I don't think this will ever change. Only use case would be if some country changes to -00:30 | +00:30
+          final int smallestOffsetSeconds =
+              Math.min(Math.min(zoneOffset1, zoneOffset2), zoneOffset3) / 1000;
+          minutesOfOffset1 = (smallestOffsetSeconds / 60) % 60;
+          hoursOfOffset1 = (smallestOffsetSeconds / 3600) % 24;
+        }
+        hoursOfOffset1 -= (completenessMinutes - minutesOfOffset1) / 60;
+        long cronMinutes1 = (completenessMinutes - minutesOfOffset1) % 60;
+        if (cronMinutes1 < 0) {
+          cronMinutes1 += 60;
+          hoursOfOffset1++;
+        }
+        final long cronHours1 = (completenessHours - hoursOfOffset1 + 24) % 24;
+        return String.format("%s %s %s * * ? *", completenessSeconds, cronMinutes1, cronHours1);
+      default:
+        // P7D is a bit tricky to implement and no users use P7D, so it's not implemented
+        LOG.warn(
+            "Unusual granularity {}. Consider reaching out to ThirdEye team to improve the support of this granularity.",
+            granularity);
+        return null;
+    }
   }
 
   @VisibleForTesting
@@ -273,5 +344,18 @@ public class AlertInsightsProvider {
     }
     // for monthly granularity: 36 points
     return Period.years(3);
+  }
+
+  public static void main(String[] args) {
+    final int zoneOffsetSeconds =
+        DateTimeZone.forID("Asia/Calcutta").getOffset(TIME_ORIGIN_FOR_TZ_DIFF_1) / 1000;
+    System.out.println(zoneOffsetSeconds);
+    final int completenessSecondsWithOffset = zoneOffsetSeconds % 60;
+    final int completenessMinutesWithOffset = (zoneOffsetSeconds % 3600) / 60;
+    final int completenessHoursWithOffset = (zoneOffsetSeconds % 86_400) / 3600;
+    System.out.println(completenessSecondsWithOffset);
+    System.out.println(completenessMinutesWithOffset);
+    System.out.println(completenessHoursWithOffset);
+    System.out.println(Duration.millis(-1000));
   }
 }

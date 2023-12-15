@@ -23,7 +23,7 @@ public class AlertInsightsApi {
   private Long datasetStartTime;
   /**
    * Biggest observed value. Does not necessarily correspond to the biggest event true physical
-   * time. Ie does not necessarilly correspond to the close time of the bucket.
+   * time. Ie does not necessarily correspond to the close time of the bucket.
    * In a batch setting it will actually most often correspond to the last bucket start.
    * For instance, if the timeColumn granularity is daily (eg format is yyyy-MM-dd),
    * and data is loaded in batch, then if the biggest observed value is 2023-11-20,
@@ -43,6 +43,7 @@ public class AlertInsightsApi {
    */
   private Long defaultStartTime;
   private Long defaultEndTime;
+  private String defaultCron;
   private AnalysisRunInfo analysisRunInfo;
 
   public Long getDatasetStartTime() {
@@ -106,6 +107,16 @@ public class AlertInsightsApi {
   public AlertInsightsApi setAnalysisRunInfo(
       final AnalysisRunInfo analysisRunInfo) {
     this.analysisRunInfo = analysisRunInfo;
+    return this;
+  }
+
+  public String getDefaultCron() {
+    return defaultCron;
+  }
+
+  public AlertInsightsApi setDefaultCron(
+      final String defaultCron) {
+    this.defaultCron = defaultCron;
     return this;
   }
 }

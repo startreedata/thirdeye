@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.plugins.postprocessor;
 
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
+import java.util.List;
 
 public class ThresholdPostProcessorSpec extends AbstractSpec {
 
@@ -21,10 +22,13 @@ public class ThresholdPostProcessorSpec extends AbstractSpec {
   private Double min;
   private Double max;
   /**
-   * The name/description of the value used for thresholding.
+   * The name/description of the value(s) used for thresholding.
    * Used in the label.
    */
   private String valueName;
+
+  /**A list of metrics to filter on. Filter when all metrics are out of the [min,max] range (AND operation)*/
+  private List<String> metrics;
 
   public Double getMin() {
     return min;
@@ -59,6 +63,15 @@ public class ThresholdPostProcessorSpec extends AbstractSpec {
 
   public ThresholdPostProcessorSpec setIgnore(final Boolean ignore) {
     this.ignore = ignore;
+    return this;
+  }
+
+  public List<String> getMetrics() {
+    return metrics;
+  }
+
+  public ThresholdPostProcessorSpec setMetrics(final List<String> metrics) {
+    this.metrics = metrics;
     return this;
   }
 }

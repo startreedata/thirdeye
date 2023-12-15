@@ -66,7 +66,8 @@ public class ThresholdPostProcessor implements AnomalyPostProcessor {
   private final Double min;
   private final Double max;
   private String timestampColum;
-  private String valueColumn;
+  // quick development - should be genralized by providing a sql interface to write filters TODO CYRIL revert this change once the sql post processor is implemented
+  private List<String> valueColumns;
 
   private final boolean ignore;
   private final String labelName;
@@ -76,7 +77,12 @@ public class ThresholdPostProcessor implements AnomalyPostProcessor {
     this.min = optional(spec.getMin()).orElse(NOT_ACTIVATED_VALUE);
     this.max = optional(spec.getMax()).orElse(NOT_ACTIVATED_VALUE);
     this.timestampColum = optional(spec.getTimestamp()).orElse(DEFAULT_TIMESTAMP);
-    this.valueColumn = optional(spec.getMetric()).orElse(DEFAULT_METRIC);
+    if (spec.getMetrics() != null) {
+      checkArgument(!spec.getMetrics().isEmpty());
+      this.valueColumns = spec.getMetrics();
+    } else {
+      this.valueColumns = List.of(optional(spec.getMetric()).orElse(DEFAULT_METRIC));
+    }
 
     final String valueName = optional(spec.getValueName()).orElse(DEFAULT_VALUE_NAME);
     this.labelName = labelName(this.min, this.max, valueName);
@@ -117,7 +123,10 @@ public class ThresholdPostProcessor implements AnomalyPostProcessor {
     final DataFrame df;
     if (thresholdSideInput == null) {
       timestampColum = COL_TIME;
-      valueColumn = COL_CURRENT;
+      if (valueColumns.equals(List.of(DEFAULT_METRIC))) {
+        // when using the analysis df for filtering, the default column is current
+        valueColumns = List.of(COL_CURRENT);
+      }
       df = optional(operatorResult.getTimeseries()).map(TimeSeries::getDataFrame)
           .orElseThrow(() -> new IllegalArgumentException(
               "Invalid input. OperatorResult contains anomalies but no timeseries."));
@@ -145,15 +154,27 @@ public class ThresholdPostProcessor implements AnomalyPostProcessor {
     final Set<Long> outOfThreshold = new HashSet<>();
     // note - doing this on the whole dataframe is not efficient could be done between min and max of the anomalies only
     for (int i = 0; i < df.size(); i++) {
-      if (isOutOfThreshold(df.getDouble(valueColumn, i))) {
+      if (isOutOfThreshold(df, i)){
         outOfThreshold.add(df.getLong(timestampColum, i));
       }
     }
     return outOfThreshold;
   }
 
-  private boolean isOutOfThreshold(final double value) {
-    return (isActivated(min) && value <= min) || (isActivated(max) && value >= max);
+  // out of threshold only when all values are not in the same
+  private boolean isOutOfThreshold(final DataFrame df, final int index) {
+    final boolean minIsActivated = isActivated(min);
+    final boolean maxIsActivated = isActivated(max);
+    for (final String colName : valueColumns) {
+      final double value = df.getDouble(colName, index);
+      final boolean isInThreshold =
+          (!minIsActivated || value > min) && (!maxIsActivated || value < max);
+      if (!isInThreshold) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   private static boolean isActivated(final Double extremum) {
@@ -185,7 +206,8 @@ public class ThresholdPostProcessor implements AnomalyPostProcessor {
     }
 
     @Override
-    public AnomalyPostProcessor build(final Map<String, Object> params, final PostProcessingContext context) {
+    public AnomalyPostProcessor build(final Map<String, Object> params,
+        final PostProcessingContext context) {
       final ThresholdPostProcessorSpec spec = new ObjectMapper().convertValue(params,
           ThresholdPostProcessorSpec.class);
       return new ThresholdPostProcessor(spec);

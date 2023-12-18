@@ -40,6 +40,7 @@ import { Modal } from "../../modal/modal.component";
 import { TimeRangeQueryStringKey } from "../../time-range/time-range-provider/time-range-provider.interfaces";
 import { AlertOptionsButtonProps } from "./alert-options-button.interfaces";
 import { TasksTable } from "../tasks-table/tasks-table.component";
+import { SubscriptionGroupsTable } from "../subscription-groups-table/subscription-groups-table.component";
 
 export const AlertOptionsButton: FunctionComponent<AlertOptionsButtonProps> = ({
     alert,
@@ -286,7 +287,7 @@ export const AlertOptionsButton: FunctionComponent<AlertOptionsButtonProps> = ({
                     maxWidth="lg"
                     trigger={(onClick) => (
                         <MenuItem onClick={onClick}>
-                            View Task Statuses for Alert
+                            {t("label.view-tasks-for-alert")}
                         </MenuItem>
                     )}
                 >
@@ -304,6 +305,32 @@ export const AlertOptionsButton: FunctionComponent<AlertOptionsButtonProps> = ({
                             headerName={t(
                                 "label.recent-task-statuses-for-alert"
                             )}
+                        />
+                    </Box>
+                </Modal>
+
+                {/* View subscription group for alert */}
+                <Modal
+                    cancelButtonLabel={t("label.close")}
+                    maxWidth="lg"
+                    trigger={(onClick) => (
+                        <MenuItem onClick={onClick}>
+                            {t("label.view-subscription-groups-for-alert")}
+                        </MenuItem>
+                    )}
+                >
+                    <Box
+                        width={{
+                            xs: "100%",
+                            sm: "100%",
+                            md: "800px",
+                            lg: "1000px",
+                            xl: "1000px",
+                        }}
+                    >
+                        <SubscriptionGroupsTable
+                            alertId={alert.id}
+                            headerName={t("label.subscription-groups")}
                         />
                     </Box>
                 </Modal>

@@ -70,6 +70,12 @@ export interface AlertInsight {
     templateWithProperties: {
         metadata: EvaluatedTemplateMetadata;
     };
+    /**
+     * Added in https://startree.atlassian.net/browse/TE-1964
+     *
+     * The field may be null or missing if the backend was not able to infer a good cron
+     */
+    defaultCron?: string;
 }
 
 export interface AlertDataFetcherNode {

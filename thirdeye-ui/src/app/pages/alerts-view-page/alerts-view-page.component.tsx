@@ -185,10 +185,6 @@ export const AlertsViewPage: FunctionComponent = () => {
     }, [resetAlertRequestStatus]);
 
     useEffect(() => {
-        getAlert(Number(alertId));
-    }, [alertId]);
-
-    useEffect(() => {
         getAnomaliesQuery.isError &&
             notifyIfErrors(
                 ActionStatus.Error,
@@ -313,15 +309,26 @@ export const AlertsViewPage: FunctionComponent = () => {
             return;
         }
 
-        updateAlert(updatedAlert).then(() => {
-            notify(
-                NotificationTypeV1.Success,
-                t("message.update-success", { entity: t("label.alert") })
-            );
+        updateAlert(updatedAlert).then(
+            () => {
+                notify(
+                    NotificationTypeV1.Success,
+                    t("message.update-success", { entity: t("label.alert") })
+                );
 
-            // Replace updated alert as fetched alert
-            // fetchData();
-        });
+                getAlertQuery.refetch();
+            },
+            (error) => {
+                notifyIfErrors(
+                    ActionStatus.Error,
+                    getErrorMessages(error),
+                    notify,
+                    t("message.update-error", {
+                        entity: t("label.alert"),
+                    })
+                );
+            }
+        );
     };
 
     const handleSearchTermChange = (newTerm: string): void => {

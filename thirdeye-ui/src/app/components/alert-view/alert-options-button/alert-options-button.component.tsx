@@ -90,9 +90,10 @@ export const AlertOptionsButton: FunctionComponent<AlertOptionsButtonProps> = ({
         if (!alert || !alert) {
             return;
         }
+        const copied = { ...alert };
 
-        alert.active = !alert.active;
-        onChange && onChange(alert);
+        copied.active = !copied.active;
+        onChange && onChange(copied);
         handleAlertOptionsClose();
     };
 

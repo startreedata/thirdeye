@@ -1,3 +1,10 @@
+## [2.44.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.43.0...thirdeye-ui-2.44.0) (2023-12-19)
+
+
+### Features
+
+* [TE-1924](https://cortexdata.atlassian.net/browse/TE-1924) show subscription groups for alert in alert view page ([2fc906f56](https://github.com/startreedata/thirdeye/commit/2fc906f561a6e59f381cb2bc5de53486d5948c53))
+
 ## [2.43.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.42.0...thirdeye-ui-2.43.0) (2023-12-13)
 
 

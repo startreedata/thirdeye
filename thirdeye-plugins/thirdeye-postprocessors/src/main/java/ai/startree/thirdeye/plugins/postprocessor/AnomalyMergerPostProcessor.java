@@ -328,7 +328,7 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     return new ArrayList<>(anomaliesToUpdate);
   }
 
-  private void addReplayLabel(final AnomalyDTO anomaly, final AnomalyLabelDTO label) {
+  private static void addReplayLabel(final AnomalyDTO anomaly, final AnomalyLabelDTO label) {
     final List<AnomalyLabelDTO> labels = optional(anomaly.getAnomalyLabels()).orElse(
         new ArrayList<>());
     anomaly.setAnomalyLabels(labels);
@@ -359,7 +359,7 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     return percentageHasChanged && absoluteHasChanged;
   }
 
-  private boolean startEndEquals(final AnomalyDTO existingA, final AnomalyDTO newA) {
+  private static boolean startEndEquals(final AnomalyDTO existingA, final AnomalyDTO newA) {
     return existingA.getStartTime() == newA.getStartTime()
         && existingA.getEndTime() == newA.getEndTime();
   }
@@ -409,7 +409,7 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     return patternKey;
   }
 
-  private void mergeIntoParent(final AnomalyDTO parent,
+  private static void mergeIntoParent(final AnomalyDTO parent,
       final AnomalyDTO child) {
     // fully merge into existing
     final Set<AnomalyDTO> children = parent.getChildren();
@@ -467,7 +467,7 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     return to;
   }
 
-  private void updateAnomalyWithNewValues(final AnomalyDTO currentA, final AnomalyDTO newA) {
+  private static void updateAnomalyWithNewValues(final AnomalyDTO currentA, final AnomalyDTO newA) {
     currentA.setAvgBaselineVal(newA.getAvgBaselineVal());
     currentA.setAvgCurrentVal(newA.getAvgCurrentVal());
     currentA.setScore(newA.getScore());
@@ -481,7 +481,7 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
    * @param parent The parent anomaly's properties.
    * @param child The child anomaly's properties.
    */
-  private void mergeAnomalyProperties(final Map<String, String> parent,
+  private static void mergeAnomalyProperties(final Map<String, String> parent,
       final Map<String, String> child) {
     for (final Entry<String, String> e : child.entrySet()) {
       final String key = e.getKey();
@@ -497,7 +497,7 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     return clone;
   }
 
-  private @Nullable List<AnomalyLabelDTO> mergeAnomalyLabels(
+  private static @Nullable List<AnomalyLabelDTO> mergeAnomalyLabels(
       final @Nullable List<AnomalyLabelDTO> parentLabels,
       @Nullable final List<AnomalyLabelDTO> childLabels) {
     if (parentLabels == null && childLabels == null) {

@@ -296,6 +296,32 @@ public class AnomalyMergerPostProcessorTest {
     assertThat(merged.size()).isEqualTo(2);
   }
 
+  // FIXME CYRIL add a ignore=True first oto test all cases, add two ignore, etc...?
+  @Test
+  public void testMergeDoMergeWithIgnoreTrueBetweenTwoIgnoreFalse() {
+    // with: [anomaly1(ignore=False), anomaly2(ignore=True), anomaly3(ignore=False)] anomaly 1 and 3 should be merged
+    // see TE-2004
+    final AnomalyDTO existing1 = existingAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H);
+    final AnomalyDTO existing2 = existingAnomaly(JANUARY_1_2021_02H,
+        JANUARY_1_2021_03H).setAnomalyLabels(List.of(new AnomalyLabelDTO().setIgnore(true)));
+    final AnomalyDTO new1 = newAnomaly(JANUARY_1_2021_03H, JANUARY_1_2021_04H).setAnomalyLabels(List.of(new AnomalyLabelDTO().setIgnore(false)));
+    detectionSpec.setMergeMaxGap("PT2H");
+    detectionMerger = new AnomalyMergerPostProcessor(detectionSpec);
+    final List<AnomalyDTO> merged = detectionMerger.doMerge(List.of(new1), List.of(existing1, existing2));
+
+    // FIXME CYRIL - NEW FAILING TEST - SHOULD MERGE in 2 anomalies
+    // the two legit anomalies are merged together
+    assertThat(merged.size()).isEqualTo(2);
+    assertThat(merged.get(0).getId()).isEqualTo(1001);
+    assertThat(merged.get(0)).isEqualTo(existing1);
+    assertThat(merged.get(0).getChildren().size()).isEqualTo(2);
+
+    // the ignored anomalies is kept separated
+    assertThat(merged.get(1).getChildren().size()).isEqualTo(0);
+    assertThat(merged.get(1).getId()).isEqualTo(1002);
+    assertThat(merged.get(1)).isEqualTo(existing2);
+  }
+
   @Test
   public void testMergeDoMergeWithLabelsWithIgnoreDefaultSameFalse() {
     // merge anomalies with ignore default both false

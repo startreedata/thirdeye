@@ -346,9 +346,9 @@ public class HappyPathTest {
 
     assertThat(anomalies).hasSize(8);
     // the fifth anomaly is the March 21 - March 23 anomaly
-    assertThat(anomalies.get(4).getStartTime().getTime()).isEqualTo(1584748800000L);
-    assertThat(anomalies.get(4).getEndTime().getTime()).isEqualTo(1584921600000L);
-    anomalyId = anomalies.get(4).getId();
+    assertThat(anomalies.get(3).getStartTime().getTime()).isEqualTo(1584748800000L);
+    assertThat(anomalies.get(3).getEndTime().getTime()).isEqualTo(1584921600000L);
+    anomalyId = anomalies.get(3).getId();
   }
 
   @Test(dependsOnMethods = "testGetAnomaliesCreate", timeOut = 50000L)
@@ -389,10 +389,10 @@ public class HappyPathTest {
     assertThat(outdatedAnomalies).hasSize(2);
     assertThat(remainingAnomalies).hasSize(6);
     // the third anomaly is the March 21 - March 23 anomaly
-    assertThat(remainingAnomalies.get(2).getStartTime().getTime()).isEqualTo(1584748800000L);
-    assertThat(remainingAnomalies.get(2).getEndTime().getTime()).isEqualTo(1584921600000L);
+    assertThat(remainingAnomalies.get(1).getStartTime().getTime()).isEqualTo(1584748800000L);
+    assertThat(remainingAnomalies.get(1).getEndTime().getTime()).isEqualTo(1584921600000L);
     // the id should not be changed by a soft-reset
-    assertThat(remainingAnomalies.get(2).getId()).isEqualTo(anomalyId);
+    assertThat(remainingAnomalies.get(1).getId()).isEqualTo(anomalyId);
   }
 
   @Test(dependsOnMethods = "testGetAnomaliesAfterUpdate")

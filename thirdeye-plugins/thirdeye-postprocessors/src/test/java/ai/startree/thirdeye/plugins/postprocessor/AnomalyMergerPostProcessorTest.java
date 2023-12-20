@@ -56,7 +56,7 @@ public class AnomalyMergerPostProcessorTest {
   private static final long JANUARY_1_2021_04H = 1609473600_000L;
   private static final long JANUARY_1_2021_05H = 1609477200_000L;
   private static final long JANUARY_1_2021_06H = 1609480800_000L;
-  private static long ANOMALY_ID = 1000L;
+  private long anomalyId;
   private List<AnomalyDTO> existingAnomalies;
   private AnomalyManager anomalyManager;
   private AnomalyMergerPostProcessorSpec detectionSpec;
@@ -75,9 +75,9 @@ public class AnomalyMergerPostProcessorTest {
     return anomaly;
   }
 
-  private static AnomalyDTO existingAnomaly(final long startDate, final long endDate) {
+  private AnomalyDTO existingAnomaly(final long startDate, final long endDate) {
     final AnomalyDTO anomaly = newAnomaly(startDate, endDate);
-    anomaly.setId(++ANOMALY_ID);
+    anomaly.setId(++anomalyId);
     return anomaly;
   }
 
@@ -92,6 +92,7 @@ public class AnomalyMergerPostProcessorTest {
 
   @BeforeMethod
   public void setUp() {
+    anomalyId = 1000L;
     existingAnomalies = new ArrayList<>();
     anomalyManager = mock(AnomalyManager.class);
     when(anomalyManager.filter(any(AnomalyFilter.class)))
@@ -294,6 +295,31 @@ public class AnomalyMergerPostProcessorTest {
     final List<AnomalyDTO> merged = detectionMerger.doMerge(List.of(new1), List.of(existing1));
 
     assertThat(merged.size()).isEqualTo(2);
+  }
+
+  @Test
+  public void testMergeDoMergeWithIgnoreTrueBetweenTwoIgnoreFalse() {
+    // with: [anomaly0(ignore=True), anomaly1(ignore=False), anomaly2(ignore=True), anomaly3(ignore=False)] anomaly 1 and 3 should be merged together, anomaly 0 and 2 should be merged together
+    // see TE-2004
+    final AnomalyDTO existing0 = existingAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H).setAnomalyLabels(List.of(new AnomalyLabelDTO().setIgnore(true)));
+    final AnomalyDTO existing1 = existingAnomaly(JANUARY_1_2021_02H, JANUARY_1_2021_03H);
+    final AnomalyDTO existing2 = existingAnomaly(JANUARY_1_2021_03H,
+        JANUARY_1_2021_04H).setAnomalyLabels(List.of(new AnomalyLabelDTO().setIgnore(true)));
+    final AnomalyDTO new1 = newAnomaly(JANUARY_1_2021_04H, JANUARY_1_2021_05H).setAnomalyLabels(List.of(new AnomalyLabelDTO().setIgnore(false)));
+    detectionSpec.setMergeMaxGap("PT2H");
+    detectionMerger = new AnomalyMergerPostProcessor(detectionSpec);
+    final List<AnomalyDTO> merged = detectionMerger.doMerge(List.of(new1), List.of(existing0, existing1, existing2));
+
+    // the two legit anomalies are merged together
+    assertThat(merged.size()).isEqualTo(2);
+    assertThat(merged.get(0).getId()).isEqualTo(1002);
+    assertThat(merged.get(0)).isEqualTo(existing1);
+    assertThat(merged.get(0).getChildren().size()).isEqualTo(2);
+
+    // the ignored anomalies is kept separated
+    assertThat(merged.get(1).getChildren().size()).isEqualTo(2);
+    assertThat(merged.get(1).getId()).isEqualTo(1001);
+    assertThat(merged.get(1)).isEqualTo(existing0);
   }
 
   @Test
@@ -513,11 +539,11 @@ public class AnomalyMergerPostProcessorTest {
     detectionSpec.setMergeMaxGap("PT4H");
     detectionMerger = new AnomalyMergerPostProcessor(detectionSpec);
     final AnomalyDTO n1 = newAnomaly(JANUARY_1_2021_04H, JANUARY_1_2021_05H);
-    // interval and mergeMax gap such as e1 is fetched but not merged thanks to a different ignore state - only tests rule 2, does not test rule 4
+    // interval and mergeMax gap are such that e1 is fetched. But e1 is not merged because the ignore state is different - only tests rule 2, does not test rule 4
     final Interval detectionInterval = new Interval(JANUARY_1_2021_04H, JANUARY_1_2021_05H, UTC);
     final List<AnomalyDTO> output = detectionMerger.merge(listOf(n1), detectionInterval);
 
-    assertThat(output).isEqualTo(listOf(e1, e2));
+    assertThat(output).isEqualTo(listOf(e2, e1));
     assertThat(e2.getChildren().size()).isEqualTo(2);
     // the other anomaly is a copy of e2 - not tested here
     assertThat(e2.getChildren().contains(n1)).isTrue();

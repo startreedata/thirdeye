@@ -330,6 +330,9 @@ public class AnomalyDTO extends AbstractDTO implements Comparable<AnomalyDTO>, S
     if (!(o instanceof AnomalyDTO)) {
       return false;
     }
+    if (o == this) {
+      return true;
+    }
     AnomalyDTO m = (AnomalyDTO) o;
     return Objects.equals(getId(), m.getId()) && Objects.equals(startTime, m.getStartTime())
         && Objects

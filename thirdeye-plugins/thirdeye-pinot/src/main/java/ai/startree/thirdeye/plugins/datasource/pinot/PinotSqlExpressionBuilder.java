@@ -240,6 +240,7 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
         case "EPOCH|MILLISECONDS":
         case "EPOCH|MILLISECONDS|1":
         case "TIMESTAMP":
+        case "1:MILLISECONDS:TIMESTAMP":
           // breaking change - previously EPOCH was an alias for EPOCH_SECONDS. Now it is a valid pinot format that means epoch millis  - TODO CYRIL this comment can be removed after migration of users is done
         case "EPOCH":
           dateTimeConvertString = "1:MILLISECONDS:EPOCH";

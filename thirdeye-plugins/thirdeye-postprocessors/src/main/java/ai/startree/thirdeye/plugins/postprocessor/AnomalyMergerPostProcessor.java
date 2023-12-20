@@ -18,6 +18,7 @@ import static ai.startree.thirdeye.spi.util.AnomalyUtils.isIgnore;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 
@@ -96,7 +97,8 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
   protected static final Period DEFAULT_ANOMALY_MAX_DURATION = Period.days(7);
   public static final String NEW_AFTER_REPLAY_LABEL_NAME = "NEW_AFTER_REPLAY";
   public static final String OUTDATED_AFTER_REPLAY_LABEL_NAME = "OUTDATED_AFTER_REPLAY";
-  private static final Set<String> REPLAY_LABELS = Set.of(NEW_AFTER_REPLAY_LABEL_NAME, OUTDATED_AFTER_REPLAY_LABEL_NAME);
+  private static final Set<String> REPLAY_LABELS = Set.of(NEW_AFTER_REPLAY_LABEL_NAME,
+      OUTDATED_AFTER_REPLAY_LABEL_NAME);
 
   private final Period mergeMaxGap;
   private final Period mergeMaxDuration;
@@ -163,8 +165,10 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
 
   protected List<AnomalyDTO> merge(
       final List<AnomalyDTO> operatorAnomalies, final Interval detectionInterval) {
-    final List<AnomalyDTO> persistenceAnomalies = retrieveRelevantAnomaliesFromDatabase(detectionInterval);
-    final List<AnomalyDTO> anomaliesToUpdate = vanishedAnomalies(operatorAnomalies, persistenceAnomalies, detectionInterval);
+    final List<AnomalyDTO> persistenceAnomalies = retrieveRelevantAnomaliesFromDatabase(
+        detectionInterval);
+    final List<AnomalyDTO> anomaliesToUpdate = vanishedAnomalies(operatorAnomalies,
+        persistenceAnomalies, detectionInterval);
     // exclude vanished anomalies from merge operation
     persistenceAnomalies.removeAll(anomaliesToUpdate);
     final List<AnomalyDTO> mergedAnomalies = doMerge(operatorAnomalies, persistenceAnomalies);
@@ -174,11 +178,13 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
   }
 
   /**
-   * Vanished anomalies are anomalies that exist in the persistence db but are not detected anymore.
+   * Vanished anomalies are anomalies that exist in the persistence db but are not detected
+   * anymore.
    * They are tagged as outdated.
    *
    * Notes:
-   * A parent anomaly that has a child anomaly vanished, such that the gap between 2 child anomalies is now bigger than mergeMaxGap, is not split into 2 parents.
+   * A parent anomaly that has a child anomaly vanished, such that the gap between 2 child anomalies
+   * is now bigger than mergeMaxGap, is not split into 2 parents.
    * We consider this is an edge case, and in this case the parent anomaly is still valid.
    */
   private List<AnomalyDTO> vanishedAnomalies(final List<AnomalyDTO> operatorAnomalies,
@@ -208,16 +214,23 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     for (final AnomalyDTO existingAnomaly : persistenceAnomalies) {
       final Set<AnomalyDTO> children = existingAnomaly.getChildren();
       if (children != null && children.size() > 0) {
-        int numChildrenOutdated = children.stream().map(AnomalyMergerPostProcessor::hasOutdatedLabel).mapToInt( o -> o ? 1 : 0).sum();
+        int numChildrenOutdated = children.stream()
+            .map(AnomalyMergerPostProcessor::hasOutdatedLabel)
+            .mapToInt(o -> o ? 1 : 0)
+            .sum();
         if (numChildrenOutdated == children.size()) {
           // parent is fully outdated
           addReplayLabel(existingAnomaly, newOutdatedLabel());
           vanishedAnomalies.add(existingAnomaly);
-        } else if (numChildrenOutdated > 0){
+        } else if (numChildrenOutdated > 0) {
           // parent is partially outdated - updated bounds
-          final List<AnomalyDTO> sortedNotOutdatedChildren  = children.stream().filter(a -> !hasOutdatedLabel(a)).sorted(COMPARATOR).collect(Collectors.toList());
+          final List<AnomalyDTO> sortedNotOutdatedChildren = children.stream()
+              .filter(a -> !hasOutdatedLabel(a))
+              .sorted(COMPARATOR)
+              .collect(Collectors.toList());
           final AnomalyDTO firstChildren = sortedNotOutdatedChildren.get(0);
-          final AnomalyDTO lastChildren = sortedNotOutdatedChildren.get(sortedNotOutdatedChildren.size()-1);
+          final AnomalyDTO lastChildren = sortedNotOutdatedChildren.get(
+              sortedNotOutdatedChildren.size() - 1);
           existingAnomaly.setStartTime(firstChildren.getStartTime());
           updateAnomalyWithNewValues(existingAnomaly, firstChildren);
           existingAnomaly.setEndTime(lastChildren.getEndTime());
@@ -278,12 +291,16 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
   protected List<AnomalyDTO> doMerge(final List<AnomalyDTO> operatorAnomalies,
       final List<AnomalyDTO> persistenceAnomalies) {
     // use a set that maintains order
-    final List<AnomalyDTO> sortedAnomalies = combineAndSort(operatorAnomalies, persistenceAnomalies);
+    final List<AnomalyDTO> sortedAnomalies = combineAndSort(operatorAnomalies,
+        persistenceAnomalies);
     final Set<AnomalyDTO> anomaliesToUpdate = new LinkedHashSet<>();
+    // two parents are maintained: one for normal anomalies and one for anomalies to ignore
+    // the merge happens independently for these 2 kinds of anomalies
+    // this is done in the same loop to perform the replay logic first
     AnomalyDTO parentCandidate = null;
+    AnomalyDTO ignoredParentCandidate = null;
     AnomalyDTO previousAnomaly = null;
     // sorted anomalies look like [parentWithChild, child, replay, child, replay, parentWithNoChild, replay, replayNew]
-    // TODO CYRIL implement rule 4. anomaly that don't exist anymore - requires a rewrite at upper levels
     for (final AnomalyDTO anomaly : sortedAnomalies) {
       if (previousAnomaly != null && previousAnomaly.getId() != null && anomaly.getId() == null) {
         // apply replay checks
@@ -292,6 +309,12 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
             addReplayLabel(previousAnomaly, newOutdatedLabel());
             anomaliesToUpdate.add(previousAnomaly);
             addReplayLabel(anomaly, newAfterReplayLabel());
+            if (previousAnomaly == parentCandidate) {
+              // the current parentCandidate is ignored now - move it to ignoredParentCandidate
+              parentCandidate = null;
+              optional(ignoredParentCandidate).ifPresent(anomaliesToUpdate::add);
+              ignoredParentCandidate = previousAnomaly;
+            }
           } else {
             // update the existing anomaly with minor changes - drop the new anomaly
             updateAnomalyWithNewValues(previousAnomaly, anomaly);
@@ -306,24 +329,40 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
       if (anomaly.isChild()) {
         continue;
       }
-      if (parentCandidate == null) {
-        parentCandidate = anomaly;
-        continue;
-      }
-      if (shouldMerge(parentCandidate, anomaly)) {
-        // anomaly is merged into the existing parent
-        mergeIntoParent(parentCandidate, anomaly);
+      if (isIgnore(anomaly)) {
+        // maybe ignored anomalies should never be merged?
+        if (ignoredParentCandidate == null) {
+          ignoredParentCandidate = anomaly;
+          continue;
+        }
+        if (shouldMerge(ignoredParentCandidate, anomaly)) {
+          // anomaly is merged into the existing parent
+          mergeIntoParent(ignoredParentCandidate, anomaly);
+        } else {
+          // by properties of the sort the current parentCandidate will not merge anymore
+          // put it in list of anomalies and make the current anomaly the new parentCandidate
+          anomaliesToUpdate.add(ignoredParentCandidate);
+          ignoredParentCandidate = anomaly;
+        }
       } else {
-        // by properties of the sort the current parentCandidate will not merge anymore
-        // put it in list of anomalies and make the current anomaly the new parentCandidate
-        anomaliesToUpdate.add(parentCandidate);
-        parentCandidate = anomaly;
+        if (parentCandidate == null) {
+          parentCandidate = anomaly;
+          continue;
+        }
+        if (shouldMerge(parentCandidate, anomaly)) {
+          // anomaly is merged into the existing parent
+          mergeIntoParent(parentCandidate, anomaly);
+        } else {
+          // by properties of the sort the current parentCandidate will not merge anymore
+          // put it in list of anomalies and make the current anomaly the new parentCandidate
+          anomaliesToUpdate.add(parentCandidate);
+          parentCandidate = anomaly;
+        }
       }
     }
     // add last parent candidate
-    if (parentCandidate != null) {
-      anomaliesToUpdate.add(parentCandidate);
-    }
+    optional(parentCandidate).ifPresent(anomaliesToUpdate::add);
+    optional(ignoredParentCandidate).ifPresent(anomaliesToUpdate::add);
 
     return new ArrayList<>(anomaliesToUpdate);
   }
@@ -350,7 +389,8 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     final double existingCurrentVal = existingA.getAvgCurrentVal();
     final double newCurrentVal = newA.getAvgCurrentVal();
     final boolean percentageHasChanged = reNotifyPercentageThreshold >= 0
-        && ((existingCurrentVal == 0 && newCurrentVal != 0) || computeValueChangePercentage(existingCurrentVal, newCurrentVal)
+        && ((existingCurrentVal == 0 && newCurrentVal != 0)
+        || computeValueChangePercentage(existingCurrentVal, newCurrentVal)
         > reNotifyPercentageThreshold);
 
     final boolean absoluteHasChanged = reNotifyAbsoluteThreshold >= 0
@@ -381,10 +421,7 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
 
     final boolean parentIsIgnore = isIgnore(parent);
     final boolean childIsIgnore = isIgnore(child);
-    if (parentIsIgnore != childIsIgnore) {
-      // never merge anomalies with different ignore value
-      return false;
-    }
+    checkState(parentIsIgnore == childIsIgnore, "Implementation error. Parent and child should have the same value for isIgnore. Please reach out to support.");
 
     final String parentPatternKey = patternKey(parent);
     final String childPatternKey = patternKey(child);

@@ -109,7 +109,9 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     this.metricMinimumValue = optional(spec.getMetricMinimumValue()).orElse(Double.NEGATIVE_INFINITY);
     this.metricMaximumValue = optional(spec.getMetricMaximumValue()).orElse(Double.POSITIVE_INFINITY);
     this.lowerBoundMultiplier = optional(spec.getLowerBoundMultiplier()).orElse(1.);
+    checkArgument(lowerBoundMultiplier > 0 && lowerBoundMultiplier <=1, "Invalid lowerBoundMultiplier value: %s. lowerBoundMultiplier value must be in ]0, 1].", lowerBoundMultiplier);
     this.upperBoundMultiplier = optional(spec.getUpperBoundMultiplier()).orElse(1.);
+    checkArgument(upperBoundMultiplier >= 1, "Invalid upperBoundMultiplier value: %s. upperBoundMultiplier value must be greater than or equal to 1.", upperBoundMultiplier);
 
     if (spec.getLookbackPeriod() != null) {
       checkArgument(spec.getMonitoringGranularity() != null,

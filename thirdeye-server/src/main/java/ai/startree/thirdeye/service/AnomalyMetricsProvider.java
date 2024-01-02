@@ -40,7 +40,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @Singleton
-public class AnomalyStatsService {
+public class AnomalyMetricsProvider {
 
   private final AnomalyManager anomalyManager;
 
@@ -49,7 +49,7 @@ public class AnomalyStatsService {
           METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES);
 
   @Inject
-  public AnomalyStatsService(AnomalyManager anomalyManager, final MetricRegistry metricRegistry) {
+  public AnomalyMetricsProvider(AnomalyManager anomalyManager, final MetricRegistry metricRegistry) {
     this.anomalyManager = anomalyManager;
     metricRegistry.register("anomalyCountTotal",
         new CachedGauge<Long>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {

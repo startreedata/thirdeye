@@ -48,7 +48,7 @@ public class AppAnalyticsService {
 
   private final AlertManager alertManager;
   private final AlertTemplateRenderer renderer;
-  private final AnomalyStatsService anomalyStatsService;
+  private final AnomalyMetricsProvider anomalyMetricsProvider;
 
   public Supplier<Set<MonitoredMetricWrapper>> uniqueMonitoredMetricsSupplier =
       Suppliers.memoizeWithExpiration(this::getUniqueMonitoredMetrics,
@@ -58,10 +58,10 @@ public class AppAnalyticsService {
   public AppAnalyticsService(final AlertManager alertManager,
       final AlertTemplateRenderer renderer,
       final MetricRegistry metricRegistry,
-      final AnomalyStatsService anomalyStatsService) {
+      final AnomalyMetricsProvider anomalyMetricsProvider) {
     this.alertManager = alertManager;
     this.renderer = renderer;
-    this.anomalyStatsService = anomalyStatsService;
+    this.anomalyMetricsProvider = anomalyMetricsProvider;
     registerMetrics(metricRegistry);
   }
 
@@ -119,6 +119,6 @@ public class AppAnalyticsService {
     return new AppAnalyticsApi()
         .setVersion(appVersion())
         .setnMonitoredMetrics(uniqueMonitoredMetricsCount())
-        .setAnomalyStats(anomalyStatsService.computeAnomalyStats(predicate));
+        .setAnomalyStats(anomalyMetricsProvider.computeAnomalyStats(predicate));
   }
 }

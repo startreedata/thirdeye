@@ -27,7 +27,7 @@ import ai.startree.thirdeye.auth.ThirdEyeAuthorizerProvider;
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.config.TimeConfiguration;
 import ai.startree.thirdeye.service.AlertService;
-import ai.startree.thirdeye.service.AnomalyStatsService;
+import ai.startree.thirdeye.service.AnomalyMetricsProvider;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
@@ -86,7 +86,7 @@ public class AlertResourceTest {
         alertManager,
         mock(AnomalyManager.class),
         mock(AlertEvaluator.class),
-        mock(AnomalyStatsService.class),
+        mock(AnomalyMetricsProvider.class),
         mock(AlertInsightsProvider.class),
         mock(SubscriptionGroupManager.class),
         mock(EnumerationItemManager.class),
@@ -267,7 +267,7 @@ public class AlertResourceTest {
         alertManager,
         mock(AnomalyManager.class),
         alertEvaluator,
-        mock(AnomalyStatsService.class),
+        mock(AnomalyMetricsProvider.class),
         mock(AlertInsightsProvider.class),
         mock(SubscriptionGroupManager.class),
         mock(EnumerationItemManager.class),
@@ -322,7 +322,7 @@ public class AlertResourceTest {
         alertManager,
         mock(AnomalyManager.class),
         alertEvaluator,
-        mock(AnomalyStatsService.class),
+        mock(AnomalyMetricsProvider.class),
         mock(AlertInsightsProvider.class),
         mock(SubscriptionGroupManager.class),
         mock(EnumerationItemManager.class),
@@ -370,7 +370,7 @@ public class AlertResourceTest {
         mock(AlertManager.class),
         mock(AnomalyManager.class),
         alertEvaluator,
-        mock(AnomalyStatsService.class),
+        mock(AnomalyMetricsProvider.class),
         mock(AlertInsightsProvider.class),
         mock(SubscriptionGroupManager.class),
         mock(EnumerationItemManager.class),
@@ -422,7 +422,7 @@ public class AlertResourceTest {
         mock(AlertManager.class),
         mock(AnomalyManager.class),
         alertEvaluator,
-        mock(AnomalyStatsService.class),
+        mock(AnomalyMetricsProvider.class),
         mock(AlertInsightsProvider.class),
         mock(SubscriptionGroupManager.class),
         mock(EnumerationItemManager.class),

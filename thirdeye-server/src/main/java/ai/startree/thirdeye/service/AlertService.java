@@ -80,7 +80,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
 
   private final TaskManager taskManager;
   private final AnomalyManager anomalyManager;
-  private final AnomalyStatsService anomalyStatsService;
+  private final AnomalyMetricsProvider anomalyMetricsProvider;
   private final AlertEvaluator alertEvaluator;
   private final AlertInsightsProvider alertInsightsProvider;
   private final SubscriptionGroupManager subscriptionGroupManager;
@@ -93,7 +93,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
       final AlertManager alertManager,
       final AnomalyManager anomalyManager,
       final AlertEvaluator alertEvaluator,
-      final AnomalyStatsService anomalyStatsService,
+      final AnomalyMetricsProvider anomalyMetricsProvider,
       final AlertInsightsProvider alertInsightsProvider,
       final SubscriptionGroupManager subscriptionGroupManager,
       final EnumerationItemManager enumerationItemManager,
@@ -107,7 +107,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     this.subscriptionGroupManager = subscriptionGroupManager;
     this.enumerationItemManager = enumerationItemManager;
     this.taskManager = taskManager;
-    this.anomalyStatsService = anomalyStatsService;
+    this.anomalyMetricsProvider = anomalyMetricsProvider;
 
     minimumOnboardingStartTime = timeConfiguration.getMinimumOnboardingStartTime();
   }
@@ -331,7 +331,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     optional(endTime)
         .ifPresent(end -> predicates.add(Predicate.LE("endTime", endTime)));
 
-    return anomalyStatsService.computeAnomalyStats(
+    return anomalyMetricsProvider.computeAnomalyStats(
         Predicate.AND(predicates.toArray(Predicate[]::new)));
   }
 

@@ -56,18 +56,18 @@ public class AnomalyService extends CrudService<AnomalyApi, AnomalyDTO> {
 
   private final AnomalyManager anomalyManager;
   private final AlertManager alertManager;
-  private final AnomalyStatsService anomalyStatsService;
+  private final AnomalyMetricsProvider anomalyMetricsProvider;
 
   @Inject
   public AnomalyService(
       final AnomalyManager anomalyManager,
       final AlertManager alertManager,
       final AuthorizationManager authorizationManager,
-      final AnomalyStatsService anomalyStatsService) {
+      final AnomalyMetricsProvider anomalyMetricsProvider) {
     super(authorizationManager, anomalyManager, API_TO_INDEX_FILTER_MAP);
     this.anomalyManager = anomalyManager;
     this.alertManager = alertManager;
-    this.anomalyStatsService = anomalyStatsService;
+    this.anomalyMetricsProvider = anomalyMetricsProvider;
   }
 
   @Override
@@ -128,6 +128,6 @@ public class AnomalyService extends CrudService<AnomalyApi, AnomalyDTO> {
         .ifPresent(end -> predicates.add(Predicate.LE("endTime", endTime)));
     final Predicate predicate = predicates.isEmpty()
         ? null : Predicate.AND(predicates.toArray(Predicate[]::new));
-    return anomalyStatsService.computeAnomalyStats(predicate);
+    return anomalyMetricsProvider.computeAnomalyStats(predicate);
   }
 }

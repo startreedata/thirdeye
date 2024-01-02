@@ -45,7 +45,6 @@ public class NotificationPipelineTaskCreator {
     final String taskJobName = String.format("%s_%d", NOTIFICATION, subscriptionGroupId);
     if (jobSchedulerService.taskAlreadyRunning(taskJobName)) {
       // if a task is pending and not time out yet, don't schedule more
-      LOG.info("Skip scheduling subscription task {}. Already queued", taskJobName);
       return;
     }
 

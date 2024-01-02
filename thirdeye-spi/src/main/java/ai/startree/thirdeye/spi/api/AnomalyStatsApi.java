@@ -19,7 +19,7 @@ import java.util.Map;
 
 public class AnomalyStatsApi implements ThirdEyeApi {
 
-  private Long totalCount;
+  private Long totalCount; // This reports parent anomalies only
   private Long countWithFeedback;
   private Map<AnomalyFeedbackType, Long> feedbackStats = new HashMap<>();
 

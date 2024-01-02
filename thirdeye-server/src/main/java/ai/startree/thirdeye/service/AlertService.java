@@ -76,12 +76,12 @@ import org.slf4j.LoggerFactory;
 public class AlertService extends CrudService<AlertApi, AlertDTO> {
 
   private static final Logger LOG = LoggerFactory.getLogger(AlertService.class);
-  public static final int ALERT_CRON_MAX_TRIGGERS_PER_MINUTE = 6;
+  private static final int ALERT_CRON_MAX_TRIGGERS_PER_MINUTE = 6;
 
   private final TaskManager taskManager;
   private final AnomalyManager anomalyManager;
+  private final AnomalyStatsService anomalyStatsService;
   private final AlertEvaluator alertEvaluator;
-  private final AppAnalyticsService analyticsService;
   private final AlertInsightsProvider alertInsightsProvider;
   private final SubscriptionGroupManager subscriptionGroupManager;
   private final EnumerationItemManager enumerationItemManager;
@@ -93,7 +93,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
       final AlertManager alertManager,
       final AnomalyManager anomalyManager,
       final AlertEvaluator alertEvaluator,
-      final AppAnalyticsService analyticsService,
+      final AnomalyStatsService anomalyStatsService,
       final AlertInsightsProvider alertInsightsProvider,
       final SubscriptionGroupManager subscriptionGroupManager,
       final EnumerationItemManager enumerationItemManager,
@@ -102,13 +102,14 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
       final AuthorizationManager authorizationManager) {
     super(authorizationManager, alertManager, ImmutableMap.of());
     this.alertEvaluator = alertEvaluator;
-    this.analyticsService = analyticsService;
     this.alertInsightsProvider = alertInsightsProvider;
     this.anomalyManager = anomalyManager;
     this.subscriptionGroupManager = subscriptionGroupManager;
     this.enumerationItemManager = enumerationItemManager;
     this.taskManager = taskManager;
-    this.minimumOnboardingStartTime = timeConfiguration.getMinimumOnboardingStartTime();
+    this.anomalyStatsService = anomalyStatsService;
+
+    minimumOnboardingStartTime = timeConfiguration.getMinimumOnboardingStartTime();
   }
 
   @Override
@@ -141,7 +142,11 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     ensureExists(api.getCron(), "cron value must be set.");
     ensure(CronExpression.isValidExpression(api.getCron()), ERR_CRON_INVALID, api.getCron());
     final int maxTriggersPerMinute = maximumTriggersPerMinute(api.getCron());
-    ensure(maxTriggersPerMinute <= ALERT_CRON_MAX_TRIGGERS_PER_MINUTE, ERR_CRON_FREQUENCY_TOO_HIGH,  api.getCron(), maxTriggersPerMinute, ALERT_CRON_MAX_TRIGGERS_PER_MINUTE);
+    ensure(maxTriggersPerMinute <= ALERT_CRON_MAX_TRIGGERS_PER_MINUTE,
+        ERR_CRON_FREQUENCY_TOO_HIGH,
+        api.getCron(),
+        maxTriggersPerMinute,
+        ALERT_CRON_MAX_TRIGGERS_PER_MINUTE);
     /* new entity creation or name change in existing entity */
     if (existing == null || !existing.getName().equals(api.getName())) {
       ensure(dtoManager.findByName(api.getName()).isEmpty(), ERR_DUPLICATE_NAME, api.getName());
@@ -300,7 +305,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
      * with subscription groups. This is taken care automatically after the reset when the pipeline
      * is executed and the enumerator operator cleans the existing enumeration items
      */
-    this.deleteAssociatedAnomalies(dto.getId());
+    deleteAssociatedAnomalies(dto.getId());
     // reset lastTimestamp
     dto.setLastTimestamp(minimumLastTimestamp(dto));
     dtoManager.update(dto);
@@ -326,7 +331,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     optional(endTime)
         .ifPresent(end -> predicates.add(Predicate.LE("endTime", endTime)));
 
-    return analyticsService.computeAnomalyStats(
+    return anomalyStatsService.computeAnomalyStats(
         Predicate.AND(predicates.toArray(Predicate[]::new)));
   }
 
@@ -369,13 +374,14 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
       if (datasetStartTime < minimumOnboardingStartTime) {
         LOG.warn(
             "Dataset start time {} is smaller than the minimum onboarding time allowed {}. Using the minimum time allowed.",
-            datasetStartTime, minimumOnboardingStartTime);
+            datasetStartTime,
+            minimumOnboardingStartTime);
         return minimumOnboardingStartTime;
       }
       return datasetStartTime;
     } catch (final WebApplicationException e) {
       throw e;
-    } catch (Exception e) {
+    } catch (final Exception e) {
       // replay from JAN 1 2000 because replaying from 1970 is too slow with small granularity
       LOG.error("Could not fetch insights for alert {}. Using the minimum time allowed. {}",
           dto,
@@ -393,7 +399,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     try {
       final TaskDTO t = taskManager.createTaskDto(alertId, info, DETECTION);
       LOG.info("Created {} task {} with settings {}", DETECTION, t.getId(), t);
-    } catch (JsonProcessingException e) {
+    } catch (final JsonProcessingException e) {
       throw new RuntimeException(String.format("Error while serializing %s: %s",
           DetectionPipelineTaskInfo.class.getSimpleName(),
           info), e);

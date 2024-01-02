@@ -27,7 +27,7 @@ import ai.startree.thirdeye.auth.ThirdEyeAuthorizerProvider;
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.config.TimeConfiguration;
 import ai.startree.thirdeye.service.AlertService;
-import ai.startree.thirdeye.service.AppAnalyticsService;
+import ai.startree.thirdeye.service.AnomalyStatsService;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
@@ -86,7 +86,7 @@ public class AlertResourceTest {
         alertManager,
         mock(AnomalyManager.class),
         mock(AlertEvaluator.class),
-        mock(AppAnalyticsService.class),
+        mock(AnomalyStatsService.class),
         mock(AlertInsightsProvider.class),
         mock(SubscriptionGroupManager.class),
         mock(EnumerationItemManager.class),
@@ -94,6 +94,13 @@ public class AlertResourceTest {
         new TimeConfiguration(),
         authorizationManager
     );
+  }
+
+  private static AuthorizationManager newAuthorizationManager(
+      final AlertTemplateRenderer alertTemplateRenderer,
+      final ThirdEyeAuthorizer thirdEyeAuthorizer) {
+    return new AuthorizationManager(alertTemplateRenderer,
+        thirdEyeAuthorizer, new NamespaceResolver(null, null, null));
   }
 
   @Test
@@ -150,7 +157,9 @@ public class AlertResourceTest {
         thirdEyeAuthorizer).createMultiple(
         nobody(),
         Collections.singletonList(
-            new AlertApi().setName("alert1").setCron(VALID_CRON).setTemplate(new AlertTemplateApi().setId(2L))
+            new AlertApi().setName("alert1")
+                .setCron(VALID_CRON)
+                .setTemplate(new AlertTemplateApi().setId(2L))
         ));
   }
 
@@ -177,7 +186,9 @@ public class AlertResourceTest {
         ThirdEyeAuthorizerProvider.ALWAYS_DENY).validateMultiple(
         nobody(),
         Collections.singletonList(
-            new AlertApi().setTemplate(new AlertTemplateApi().setId(1L)).setName("alert1").setCron(VALID_CRON)
+            new AlertApi().setTemplate(new AlertTemplateApi().setId(1L))
+                .setName("alert1")
+                .setCron(VALID_CRON)
         )
     );
   }
@@ -186,7 +197,8 @@ public class AlertResourceTest {
   public void testValidate_withNoAccessToTemplate() {
     final AlertTemplateManager alertTemplateManager = mock(AlertTemplateManager.class);
     when(alertTemplateManager.findById(1L))
-        .thenReturn(((AlertTemplateDTO) new AlertTemplateDTO().setId(1L)).setName("template1").setCron(VALID_CRON));
+        .thenReturn(((AlertTemplateDTO) new AlertTemplateDTO().setId(1L)).setName("template1")
+            .setCron(VALID_CRON));
     final AlertTemplateRenderer alertTemplateRenderer = new AlertTemplateRenderer(
         mock(AlertManager.class), alertTemplateManager);
 
@@ -198,7 +210,9 @@ public class AlertResourceTest {
         thirdEyeAuthorizer).validateMultiple(
         nobody(),
         Collections.singletonList(
-            new AlertApi().setTemplate(new AlertTemplateApi().setId(1L)).setName("alert1").setCron(VALID_CRON)
+            new AlertApi().setTemplate(new AlertTemplateApi().setId(1L))
+                .setName("alert1")
+                .setCron(VALID_CRON)
         )
     );
   }
@@ -253,7 +267,7 @@ public class AlertResourceTest {
         alertManager,
         mock(AnomalyManager.class),
         alertEvaluator,
-        mock(AppAnalyticsService.class),
+        mock(AnomalyStatsService.class),
         mock(AlertInsightsProvider.class),
         mock(SubscriptionGroupManager.class),
         mock(EnumerationItemManager.class),
@@ -308,7 +322,7 @@ public class AlertResourceTest {
         alertManager,
         mock(AnomalyManager.class),
         alertEvaluator,
-        mock(AppAnalyticsService.class),
+        mock(AnomalyStatsService.class),
         mock(AlertInsightsProvider.class),
         mock(SubscriptionGroupManager.class),
         mock(EnumerationItemManager.class),
@@ -356,7 +370,7 @@ public class AlertResourceTest {
         mock(AlertManager.class),
         mock(AnomalyManager.class),
         alertEvaluator,
-        mock(AppAnalyticsService.class),
+        mock(AnomalyStatsService.class),
         mock(AlertInsightsProvider.class),
         mock(SubscriptionGroupManager.class),
         mock(EnumerationItemManager.class),
@@ -408,7 +422,7 @@ public class AlertResourceTest {
         mock(AlertManager.class),
         mock(AnomalyManager.class),
         alertEvaluator,
-        mock(AppAnalyticsService.class),
+        mock(AnomalyStatsService.class),
         mock(AlertInsightsProvider.class),
         mock(SubscriptionGroupManager.class),
         mock(EnumerationItemManager.class),
@@ -426,13 +440,6 @@ public class AlertResourceTest {
       assertThat(results.getDetectionEvaluations().get("allowedEval")).isNotNull();
       assertThat(results.getDetectionEvaluations().get("blockedEval")).isNull();
     }
-  }
-
-  private static AuthorizationManager newAuthorizationManager(
-      final AlertTemplateRenderer alertTemplateRenderer,
-      final ThirdEyeAuthorizer thirdEyeAuthorizer) {
-    return new AuthorizationManager(alertTemplateRenderer,
-        thirdEyeAuthorizer, new NamespaceResolver(null, null, null));
   }
 
   @Test(expectedExceptions = ForbiddenException.class)

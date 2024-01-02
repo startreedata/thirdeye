@@ -56,18 +56,18 @@ public class AnomalyService extends CrudService<AnomalyApi, AnomalyDTO> {
 
   private final AnomalyManager anomalyManager;
   private final AlertManager alertManager;
-  private final AppAnalyticsService analyticsService;
+  private final AnomalyStatsService anomalyStatsService;
 
   @Inject
   public AnomalyService(
       final AnomalyManager anomalyManager,
       final AlertManager alertManager,
-      final AppAnalyticsService analyticsService,
-      final AuthorizationManager authorizationManager) {
+      final AuthorizationManager authorizationManager,
+      final AnomalyStatsService anomalyStatsService) {
     super(authorizationManager, anomalyManager, API_TO_INDEX_FILTER_MAP);
     this.anomalyManager = anomalyManager;
     this.alertManager = alertManager;
-    this.analyticsService = analyticsService;
+    this.anomalyStatsService = anomalyStatsService;
   }
 
   @Override
@@ -91,14 +91,15 @@ public class AnomalyService extends CrudService<AnomalyApi, AnomalyDTO> {
   }
 
   @Override
-  protected AnomalyApi toApi(final AnomalyDTO dto, RequestCache cache) {
+  protected AnomalyApi toApi(final AnomalyDTO dto, final RequestCache cache) {
     final AnomalyApi anomalyApi = ApiBeanMapper.toApi(dto);
     optional(anomalyApi.getAlert())
         .filter(alertApi -> alertApi.getId() != null)
         .ifPresent(alertApi -> alertApi.setName(cache.getAlerts()
             .getUnchecked(alertApi.getId())
             .getName()));
-    anomalyApi.setAuth(new AuthorizationConfigurationApi().setNamespace(authorizationManager.resourceId(dto).getNamespace()));
+    anomalyApi.setAuth(new AuthorizationConfigurationApi().setNamespace(authorizationManager.resourceId(
+        dto).getNamespace()));
     return anomalyApi;
   }
 
@@ -127,6 +128,6 @@ public class AnomalyService extends CrudService<AnomalyApi, AnomalyDTO> {
         .ifPresent(end -> predicates.add(Predicate.LE("endTime", endTime)));
     final Predicate predicate = predicates.isEmpty()
         ? null : Predicate.AND(predicates.toArray(Predicate[]::new));
-    return analyticsService.computeAnomalyStats(predicate);
+    return anomalyStatsService.computeAnomalyStats(predicate);
   }
 }

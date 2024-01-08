@@ -13,9 +13,12 @@
  */
 package ai.startree.thirdeye.detectionpipeline.operator;
 
+import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.detection.model.TimeSeries;
+import ai.startree.thirdeye.spi.detection.v2.AbstractDataTableImpl;
+import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import java.util.Collections;
 import java.util.List;
@@ -26,8 +29,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * Anomaly detection result. Contains a list of anomalies detected and the associated timeseries
  * which includes timestamps, predicted baseline, current value, upper/lower bounds.
  */
-// todo cyril most of the interface should be moved down to OperatorResult
-public class AnomalyDetectorOperatorResult implements OperatorResult {
+// todo cyril refactor OperatorResult, AnomalyDetectorOperatorResult, and DataTable interfaces - below keeping the implemented interface for clarity - the abstract class is tech debt
+public class AnomalyDetectorOperatorResult extends AbstractDataTableImpl implements OperatorResult, DataTable {
 
   private final List<AnomalyDTO> anomalies;
   private final TimeSeries timeseries;
@@ -70,6 +73,11 @@ public class AnomalyDetectorOperatorResult implements OperatorResult {
   public String toString() {
     return "OperatorResult{" + "anomalies=" + anomalies + ", timeseries=" + timeseries
         + ", rawdata=" + rawData + '}';
+  }
+
+  @Override
+  public DataFrame getDataFrame() {
+    return timeseries.getDataFrame();
   }
 
   public static class Builder {

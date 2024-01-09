@@ -30,8 +30,21 @@ public interface AnomalyManager extends AbstractManager<AnomalyDTO> {
 
   List<AnomalyDTO> decorate(List<AnomalyDTO> anomalyDTOList);
 
+  /**
+   * Refactor to use {@link AnomalyFilter}
+   * Predicate should not be exposed at the interface level. This ensures column level internals
+   * are not exposed to the service layer.
+   */
+  @Deprecated
   long countParentAnomalies(Predicate predicate);
 
   List<AnomalyDTO> filter(AnomalyFilter anomalyFilter);
+
+  /**
+   * Refactor to use {@link AnomalyFilter}
+   * Predicate should not be exposed at the interface level. This ensures column level internals
+   * are not exposed to the service layer.
+   */
+  @Deprecated
   List<AnomalyDTO> findParentAnomaliesWithFeedback(Predicate filter);
 }

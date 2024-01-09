@@ -91,15 +91,14 @@ public class SubscriptionGroupWatermarkManager {
         );
   }
 
-  public static long findStartTime(final Map<Long, Long> vectorClocks, final long endTime,
+  public static long getStartTime(final Map<Long, Long> vectorClocks,
+      final long endTime,
       final Long alertId) {
     long startTime = vectorClocks.get(alertId);
 
-    // No point in fetching anomalies older than MAX_ANOMALY_NOTIFICATION_LOOKBACK
-    if (startTime < endTime - Constants.ANOMALY_NOTIFICATION_LOOKBACK_TIME) {
-      startTime = endTime - Constants.ANOMALY_NOTIFICATION_LOOKBACK_TIME;
-    }
-    return startTime;
+    // Do not notify anomalies older than MAX_ANOMALY_NOTIFICATION_LOOKBACK
+    final long minStartTime = endTime - Constants.NOTIFICATION_ANOMALY_MAX_LOOKBACK_MS;
+    return Math.max(startTime, minStartTime);
   }
 
   public void updateWatermarks(final SubscriptionGroupDTO sg,

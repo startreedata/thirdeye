@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.notification;
 
-import static ai.startree.thirdeye.notification.SubscriptionGroupWatermarkManager.findStartTime;
+import static ai.startree.thirdeye.notification.SubscriptionGroupWatermarkManager.getStartTime;
 import static ai.startree.thirdeye.notification.SubscriptionGroupWatermarkManager.newVectorClocks;
 import static ai.startree.thirdeye.spi.util.AnomalyUtils.isIgnore;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
@@ -143,11 +143,11 @@ public class SubscriptionGroupFilter {
 
   private Set<AnomalyDTO> findAnomaliesForAlertAssociation(
       final AlertAssociationDto aa,
-      final Long id,
+      final Long subscriptionGroupId,
       final Map<Long, Long> vectorClocks,
       final long endTime) {
     final long alertId = aa.getAlert().getId();
-    final long startTime = findStartTime(vectorClocks, endTime, alertId);
+    final long startTime = getStartTime(vectorClocks, endTime, alertId);
 
     final AnomalyFilter anomalyFilter = new AnomalyFilter()
         .setCreateTimeWindow(new Interval(startTime + 1, endTime))
@@ -165,7 +165,7 @@ public class SubscriptionGroupFilter {
 
     LOG.info("Subscription Group: {} Alert: {}. "
             + "Found {} out of {} anomalies to be notified from {} to {} ({} to {} System Time)",
-        id,
+        subscriptionGroupId,
         alertId,
         anomaliesToBeNotified.size(),
         candidates.size(),

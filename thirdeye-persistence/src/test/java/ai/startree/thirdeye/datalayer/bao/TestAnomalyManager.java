@@ -538,6 +538,34 @@ public class TestAnomalyManager {
   }
 
   @Test
+  public void testFilterWithChild() throws InterruptedException {
+    final long alertId = 13579L;
+    final AnomalyDTO child = persist(anomalyWithCreateTime(1000)
+        .setDetectionConfigId(alertId)
+        .setChild(true));
+    Thread.sleep(100);
+
+    final AnomalyDTO parent = persist(anomalyWithCreateTime(1000)
+        .setDetectionConfigId(alertId)
+        .setChildIds(Set.of(child.getId())));
+    Thread.sleep(100);
+
+    assertThat(collectIds(mergedAnomalyResultDAO.filter(new AnomalyFilter()
+        .setAlertId(alertId))))
+        .isEqualTo(collectIds(Set.of(child, parent)));
+
+    assertThat(collectIds(mergedAnomalyResultDAO.filter(new AnomalyFilter()
+        .setAlertId(alertId)
+        .setIsChild(true))))
+        .isEqualTo(collectIds(Set.of(child)));
+
+    assertThat(collectIds(mergedAnomalyResultDAO.filter(new AnomalyFilter()
+        .setAlertId(alertId)
+        .setIsChild(false))))
+        .isEqualTo(collectIds(Set.of(parent)));
+  }
+
+  @Test
   public void testUpdateTime() {
     final long alertId = 1234L;
 

@@ -17,6 +17,7 @@ import static ai.startree.thirdeye.notification.SubscriptionGroupWatermarkManage
 import static ai.startree.thirdeye.notification.SubscriptionGroupWatermarkManager.newVectorClocks;
 import static ai.startree.thirdeye.spi.util.AnomalyUtils.isIgnore;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.stream.Collectors.toSet;
 
 import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
@@ -34,8 +35,10 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.joda.time.Interval;
@@ -99,6 +102,25 @@ public class SubscriptionGroupFilter {
   }
 
   /**
+   * Returns {@code value} casted as List via {@code getList(Object value)} and parsed via {@code
+   * getLongs(Collection&lt;Number&gt;)}.
+   *
+   * @param value value casted as list and parsed
+   * @return equivalent collection of Long without nulls
+   */
+  private static List<Long> getLongs(Object value) {
+    if (value == null) {
+      return Collections.emptyList();
+    }
+
+    checkArgument(value instanceof Collection, "Expected Collection, got %s", value.getClass());
+    return ((Collection<Number>) value).stream()
+        .filter(Objects::nonNull)
+        .map(Number::longValue)
+        .collect(Collectors.toList());
+  }
+
+  /**
    * Find anomalies for the given subscription group given an end time.
    *
    * @param sg subscription group
@@ -127,7 +149,7 @@ public class SubscriptionGroupFilter {
    * @return List of Alert Association objects
    */
   private List<AlertAssociationDto> generate(final SubscriptionGroupDTO subscriptionGroup) {
-    final List<Long> alertIds = SubscriptionGroupFilterUtils.getLongs(subscriptionGroup.getProperties()
+    final List<Long> alertIds = getLongs(subscriptionGroup.getProperties()
         .get(PROP_DETECTION_CONFIG_IDS));
 
     return alertIds.stream()

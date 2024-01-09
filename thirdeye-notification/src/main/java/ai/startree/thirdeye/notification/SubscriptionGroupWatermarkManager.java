@@ -91,7 +91,7 @@ public class SubscriptionGroupWatermarkManager {
         );
   }
 
-  public static long getStartTime(final Map<Long, Long> vectorClocks,
+  public static long getCreateTimeWindowStart(final Map<Long, Long> vectorClocks,
       final long endTime,
       final Long alertId) {
     long startTime = vectorClocks.get(alertId);

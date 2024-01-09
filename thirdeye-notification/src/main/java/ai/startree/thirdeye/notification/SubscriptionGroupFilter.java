@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.notification;
 
-import static ai.startree.thirdeye.notification.SubscriptionGroupWatermarkManager.getStartTime;
+import static ai.startree.thirdeye.notification.SubscriptionGroupWatermarkManager.getCreateTimeWindowStart;
 import static ai.startree.thirdeye.notification.SubscriptionGroupWatermarkManager.newVectorClocks;
 import static ai.startree.thirdeye.spi.util.AnomalyUtils.isIgnore;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
@@ -28,6 +28,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyResultSource;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.time.Instant;
@@ -92,10 +93,28 @@ public class SubscriptionGroupFilter {
     return alert;
   }
 
-  private static String toFormattedDate(long ts) {
+  private static String toFormattedDate(final long ts) {
     return DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
         .withZone(ZoneId.systemDefault())
         .format(Instant.ofEpochMilli(ts));
+  }
+
+  private static AnomalyFilter buildAnomalyFilter(final AlertAssociationDto aa,
+      final Map<Long, Long> vectorClocks,
+      final long createTimeEnd) {
+    final long alertId = aa.getAlert().getId();
+    final long createTimeStart = getCreateTimeWindowStart(vectorClocks, createTimeEnd, alertId);
+
+    final AnomalyFilter f = new AnomalyFilter()
+        .setCreateTimeWindow(new Interval(createTimeStart + 1, createTimeEnd))
+        .setIsChild(false) // Notify only parent anomalies
+        .setAlertId(alertId);
+
+    optional(aa.getEnumerationItem())
+        .map(AbstractDTO::getId)
+        .ifPresent(f::setEnumerationItemId);
+
+    return f;
   }
 
   /**
@@ -113,10 +132,8 @@ public class SubscriptionGroupFilter {
     final Map<Long, Long> vectorClocks = newVectorClocks(alertAssociations, sg.getVectorClocks());
     return alertAssociations.stream()
         .filter(aa -> isAlertActive(aa.getAlert().getId()))
-        .map(alertAssociation -> findAnomaliesForAlertAssociation(alertAssociation,
-            sg.getId(),
-            vectorClocks,
-            endTime))
+        .map(aa -> buildAnomalyFilter(aa, vectorClocks, endTime))
+        .map(f -> filterAnomalies(f, sg.getId()))
         .flatMap(Collection::stream)
         .collect(toSet());
   }
@@ -144,39 +161,24 @@ public class SubscriptionGroupFilter {
     return alert != null && alert.isActive();
   }
 
-  private Set<AnomalyDTO> findAnomaliesForAlertAssociation(
-      final AlertAssociationDto aa,
-      final Long subscriptionGroupId,
-      final Map<Long, Long> vectorClocks,
-      final long endTime) {
-    final long alertId = aa.getAlert().getId();
-    final long startTime = getStartTime(vectorClocks, endTime, alertId);
-
-    final AnomalyFilter anomalyFilter = new AnomalyFilter()
-        .setCreateTimeWindow(new Interval(startTime + 1, endTime))
-        .setIsChild(false) // Notify only parent anomalies
-        .setAlertId(alertId);
-
-    optional(aa.getEnumerationItem())
-        .map(AbstractDTO::getId)
-        .ifPresent(anomalyFilter::setEnumerationItemId);
-
-    final Collection<AnomalyDTO> candidates = anomalyManager.filter(anomalyFilter);
+  @VisibleForTesting
+  Set<AnomalyDTO> filterAnomalies(final AnomalyFilter f, final Long subscriptionGroupId) {
+    final List<AnomalyDTO> candidates = anomalyManager.filter(f);
 
     final Set<AnomalyDTO> anomaliesToBeNotified = candidates.stream()
         .filter(SubscriptionGroupFilter::shouldFilter)
         .collect(toSet());
 
     LOG.info("Subscription Group: {} Alert: {}. "
-            + "Found {} out of {} anomalies to be notified from {} to {} ({} to {} System Time)",
+            + "{} out of {} candidates to be notified. Created between {} and {} ({} and {} System Time)",
         subscriptionGroupId,
-        alertId,
+        f.getAlertId(),
         anomaliesToBeNotified.size(),
         candidates.size(),
-        startTime,
-        endTime,
-        toFormattedDate(startTime),
-        toFormattedDate(endTime));
+        f.getCreateTimeWindow().getStartMillis(),
+        f.getCreateTimeWindow().getEndMillis(),
+        toFormattedDate(f.getCreateTimeWindow().getStartMillis()),
+        toFormattedDate(f.getCreateTimeWindow().getEndMillis()));
 
     return anomaliesToBeNotified;
   }

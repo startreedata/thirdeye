@@ -17,7 +17,6 @@ import static ai.startree.thirdeye.notification.SubscriptionGroupWatermarkManage
 import static ai.startree.thirdeye.notification.SubscriptionGroupWatermarkManager.newVectorClocks;
 import static ai.startree.thirdeye.spi.util.AnomalyUtils.isIgnore;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.stream.Collectors.toSet;
 
 import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
@@ -89,7 +88,7 @@ public class SubscriptionGroupFilter {
         && ANOMALY_RESULT_SOURCES.contains(anomaly.getAnomalyResultSource());
   }
 
-  private static AlertDTO fromId(final Long id) {
+  private static AlertDTO newAlertRef(final Long id) {
     final AlertDTO alert = new AlertDTO();
     alert.setId(id);
     return alert;
@@ -102,25 +101,6 @@ public class SubscriptionGroupFilter {
   }
 
   /**
-   * Returns {@code value} casted as List via {@code getList(Object value)} and parsed via {@code
-   * getLongs(Collection&lt;Number&gt;)}.
-   *
-   * @param value value casted as list and parsed
-   * @return equivalent collection of Long without nulls
-   */
-  private static List<Long> getLongs(Object value) {
-    if (value == null) {
-      return Collections.emptyList();
-    }
-
-    checkArgument(value instanceof Collection, "Expected Collection, got %s", value.getClass());
-    return ((Collection<Number>) value).stream()
-        .filter(Objects::nonNull)
-        .map(Number::longValue)
-        .collect(Collectors.toList());
-  }
-
-  /**
    * Find anomalies for the given subscription group given an end time.
    *
    * @param sg subscription group
@@ -129,7 +109,7 @@ public class SubscriptionGroupFilter {
    */
   public Set<AnomalyDTO> filter(final SubscriptionGroupDTO sg, final long endTime) {
     final List<AlertAssociationDto> alertAssociations = optional(sg.getAlertAssociations())
-        .orElseGet(() -> generate(sg));
+        .orElseGet(() -> migrateOlderSchema(sg));
 
     // Fetch all the anomalies to be notified to the recipients
     final Map<Long, Long> vectorClocks = newVectorClocks(alertAssociations, sg.getVectorClocks());
@@ -148,12 +128,15 @@ public class SubscriptionGroupFilter {
    *
    * @return List of Alert Association objects
    */
-  private List<AlertAssociationDto> generate(final SubscriptionGroupDTO subscriptionGroup) {
-    final List<Long> alertIds = getLongs(subscriptionGroup.getProperties()
-        .get(PROP_DETECTION_CONFIG_IDS));
-
-    return alertIds.stream()
-        .map(SubscriptionGroupFilter::fromId)
+  private List<AlertAssociationDto> migrateOlderSchema(final SubscriptionGroupDTO sg) {
+    return optional((List<?>) sg.getProperties().get(PROP_DETECTION_CONFIG_IDS))
+        .orElse(Collections.emptyList())
+        .stream()
+        .filter(Objects::nonNull)
+        .filter(Number.class::isInstance)
+        .map(Number.class::cast)
+        .map(Number::longValue)
+        .map(SubscriptionGroupFilter::newAlertRef)
         .map(alert -> new AlertAssociationDto().setAlert(alert))
         .collect(Collectors.toList());
   }

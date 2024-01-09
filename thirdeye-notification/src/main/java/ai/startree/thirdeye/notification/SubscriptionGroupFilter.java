@@ -79,11 +79,9 @@ public class SubscriptionGroupFilter {
         && !anomaly.getFeedback().getFeedbackType().isUnresolved();
   }
 
-  private static boolean shouldFilter(final AnomalyDTO anomaly, final long startTime) {
+  private static boolean shouldFilter(final AnomalyDTO anomaly) {
     return anomaly != null
-        && !anomaly.isChild()
         && !hasFeedback(anomaly)
-        && anomaly.getCreateTime().getTime() > startTime
         && !isIgnore(anomaly)
         && ANOMALY_RESULT_SOURCES.contains(anomaly.getAnomalyResultSource());
   }
@@ -156,6 +154,7 @@ public class SubscriptionGroupFilter {
 
     final AnomalyFilter anomalyFilter = new AnomalyFilter()
         .setCreateTimeWindow(new Interval(startTime + 1, endTime))
+        .setIsChild(false) // Notify only parent anomalies
         .setAlertId(alertId);
 
     optional(aa.getEnumerationItem())
@@ -165,7 +164,7 @@ public class SubscriptionGroupFilter {
     final Collection<AnomalyDTO> candidates = anomalyManager.filter(anomalyFilter);
 
     final Set<AnomalyDTO> anomaliesToBeNotified = candidates.stream()
-        .filter(anomaly -> shouldFilter(anomaly, startTime))
+        .filter(SubscriptionGroupFilter::shouldFilter)
         .collect(toSet());
 
     LOG.info("Subscription Group: {} Alert: {}. "

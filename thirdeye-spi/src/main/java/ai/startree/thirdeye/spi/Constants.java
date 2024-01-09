@@ -50,7 +50,7 @@ public interface Constants {
   String SCALING_FACTOR = "scalingFactor";
 
   // Time beyond which we do not want to notify anomalies
-  long ANOMALY_NOTIFICATION_LOOKBACK_TIME = TimeUnit.DAYS.toMillis(1400);
+  long NOTIFICATION_ANOMALY_MAX_LOOKBACK_MS = TimeUnit.DAYS.toMillis(1400);
 
   String NOTIFICATIONS_DEFAULT_DATE_PATTERN = "MMM dd, yyyy HH:mm";
   String NOTIFICATIONS_DEFAULT_EVENT_CRAWL_OFFSET = "P2D";

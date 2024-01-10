@@ -26,6 +26,9 @@ public class AnomalyFilter {
   /**Will match any anomaly that overlaps with the window*/
   private Interval startEndWindow;
 
+  // find anomalies whose end time is greater than this value
+  private Long endTimeIsGte;
+
   public Interval getCreateTimeWindow() {
     return createTimeWindow;
   }
@@ -86,6 +89,15 @@ public class AnomalyFilter {
 
   public AnomalyFilter setStartEndWindow(final Interval startEndWindow) {
     this.startEndWindow = startEndWindow;
+    return this;
+  }
+
+  public Long getEndTimeIsGte() {
+    return endTimeIsGte;
+  }
+
+  public AnomalyFilter setEndTimeIsGte(final Long endTimeIsGte) {
+    this.endTimeIsGte = endTimeIsGte;
     return this;
   }
 }

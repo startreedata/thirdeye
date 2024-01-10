@@ -59,7 +59,7 @@ public class TestAnomalyManager {
 
   private AnomalyDTO mergedResult = null;
   private AlertManager detectionConfigDAO;
-  private AnomalyManager mergedAnomalyResultDAO;
+  private AnomalyManager anomalyManager;
 
   public static AlertDTO mockDetectionConfig() {
     final AlertDTO detectionConfig = new AlertDTO();
@@ -129,36 +129,36 @@ public class TestAnomalyManager {
 
   private AnomalyDTO provideFeedbackToAnomaly(final Long anomalyId, final AnomalyFeedbackType type,
       final String comment) {
-    final AnomalyDTO anomalyForFeedback = mergedAnomalyResultDAO.findById(anomalyId);
+    final AnomalyDTO anomalyForFeedback = anomalyManager.findById(anomalyId);
     final AnomalyFeedbackDTO feedback = new AnomalyFeedbackDTO().setComment(comment)
         .setFeedbackType(type);
     anomalyForFeedback.setFeedback(feedback);
-    mergedAnomalyResultDAO.updateAnomalyFeedback(anomalyForFeedback);
-    return mergedAnomalyResultDAO.findById(anomalyId);
+    anomalyManager.updateAnomalyFeedback(anomalyForFeedback);
+    return anomalyManager.findById(anomalyId);
   }
 
   @BeforeClass
   void beforeClass() {
     final Injector injector = MySqlTestDatabase.sharedInjector();
     detectionConfigDAO = injector.getInstance(AlertManager.class);
-    mergedAnomalyResultDAO = injector.getInstance(AnomalyManager.class);
+    anomalyManager = injector.getInstance(AnomalyManager.class);
   }
 
   @AfterClass(alwaysRun = true)
   void afterClass() {
     detectionConfigDAO.findAll().forEach(detectionConfigDAO::delete);
-    mergedAnomalyResultDAO.findAll().forEach(mergedAnomalyResultDAO::delete);
+    anomalyManager.findAll().forEach(anomalyManager::delete);
   }
 
   @Test
   public void testAnomalyCrud() throws ParseException {
     final AnomalyDTO a = new AnomalyDTO().setStartTime(1000).setEndTime(2000);
 
-    final Long id = mergedAnomalyResultDAO.save(a);
+    final Long id = anomalyManager.save(a);
     assertThat(id).isNotNull();
     assertThat(a.getCreateTime()).isNotNull();
 
-    final AnomalyDTO aRetrieved = mergedAnomalyResultDAO.findById(id);
+    final AnomalyDTO aRetrieved = anomalyManager.findById(id);
     assertThat(aRetrieved).isNotNull();
     assertThat(aRetrieved.getStartTime()).isEqualTo(a.getStartTime());
     assertThat(aRetrieved.getEndTime()).isEqualTo(a.getEndTime());
@@ -179,11 +179,11 @@ public class TestAnomalyManager {
     /* Checking if create time is retained */
     a.setCreateTime(new Timestamp(epoch("Jan 01 2020 01:01:01.454 UTC")));
 
-    final Long id = mergedAnomalyResultDAO.save(a);
+    final Long id = anomalyManager.save(a);
     assertThat(id).isNotNull();
     assertThat(a.getCreateTime()).isNotNull();
 
-    final AnomalyDTO aRetrieved = mergedAnomalyResultDAO.findById(id);
+    final AnomalyDTO aRetrieved = anomalyManager.findById(id);
     assertThat(aRetrieved).isNotNull();
     assertThat(aRetrieved.getStartTime()).isEqualTo(a.getStartTime());
     assertThat(aRetrieved.getEndTime()).isEqualTo(a.getEndTime());
@@ -201,7 +201,7 @@ public class TestAnomalyManager {
   public void testFeedback() {
     final String expectedComment = "this is a good find";
     final String expectedUser = "test user";
-    final AnomalyDTO anomalyMergedResult = mergedAnomalyResultDAO.findById(mergedResult.getId());
+    final AnomalyDTO anomalyMergedResult = anomalyManager.findById(mergedResult.getId());
     AnomalyFeedbackDTO feedback = new AnomalyFeedbackDTO().setComment(expectedComment)
         .setFeedbackType(AnomalyFeedbackType.ANOMALY)
         .setCause(AnomalyCause.FRAUD);
@@ -209,10 +209,10 @@ public class TestAnomalyManager {
 
     anomalyMergedResult.setFeedback(feedback);
     // now we need to make explicit call to anomaly update in order to update the feedback
-    mergedAnomalyResultDAO.updateAnomalyFeedback(anomalyMergedResult);
+    anomalyManager.updateAnomalyFeedback(anomalyMergedResult);
 
     //verify feedback
-    final AnomalyDTO mergedResult1 = mergedAnomalyResultDAO.findById(mergedResult.getId());
+    final AnomalyDTO mergedResult1 = anomalyManager.findById(mergedResult.getId());
     AnomalyFeedbackDTO actualFeedback = (AnomalyFeedbackDTO) mergedResult1.getFeedback();
     Assert.assertEquals(actualFeedback.getFeedbackType(), AnomalyFeedbackType.ANOMALY);
     Assert.assertEquals(actualFeedback.getComment(), expectedComment);
@@ -223,17 +223,17 @@ public class TestAnomalyManager {
   @Test(dependsOnMethods = {"testFeedback"})
   public void testFeedback_updateWithoutOptionalFields() {
     final String expectedUser = "test user 2";
-    final AnomalyDTO anomalyMergedResult = mergedAnomalyResultDAO.findById(mergedResult.getId());
+    final AnomalyDTO anomalyMergedResult = anomalyManager.findById(mergedResult.getId());
     AnomalyFeedbackDTO feedback = new AnomalyFeedbackDTO().setFeedbackType(
         AnomalyFeedbackType.NOT_ANOMALY);
     feedback = (AnomalyFeedbackDTO) feedback.setUpdatedBy(expectedUser);
 
     anomalyMergedResult.setFeedback(feedback);
     // now we need to make explicit call to anomaly update in order to update the feedback
-    mergedAnomalyResultDAO.updateAnomalyFeedback(anomalyMergedResult);
+    anomalyManager.updateAnomalyFeedback(anomalyMergedResult);
 
     //verify feedback
-    final AnomalyDTO mergedResult1 = mergedAnomalyResultDAO.findById(mergedResult.getId());
+    final AnomalyDTO mergedResult1 = anomalyManager.findById(mergedResult.getId());
     AnomalyFeedbackDTO actualFeedback = (AnomalyFeedbackDTO) mergedResult1.getFeedback();
     assertThat(actualFeedback.getFeedbackType()).isEqualTo(AnomalyFeedbackType.NOT_ANOMALY);
     assertThat(actualFeedback.getUpdatedBy()).isEqualTo(expectedUser);
@@ -243,13 +243,13 @@ public class TestAnomalyManager {
 
   @Test
   public void testFindAllAnomaliesForFeedback() {
-    final Long id1 = mergedAnomalyResultDAO.save(anomaly(10000, 11000));
-    final Long id2 = mergedAnomalyResultDAO.save(anomaly(12000, 13000));
+    final Long id1 = anomalyManager.save(anomaly(10000, 11000));
+    final Long id2 = anomalyManager.save(anomaly(12000, 13000));
 
     final String feedbackComment = "test feedback";
     provideFeedbackToAnomaly(id1, AnomalyFeedbackType.ANOMALY, feedbackComment);
 
-    final List<AnomalyDTO> findAllAnomalies = mergedAnomalyResultDAO.findAll();
+    final List<AnomalyDTO> findAllAnomalies = anomalyManager.findAll();
     assertThat(findAnomalyById(findAllAnomalies, id1).getFeedback().getComment()).isEqualTo(
         feedbackComment);
     assertThat(findAnomalyById(findAllAnomalies, id2).getFeedback()).isNull();
@@ -257,14 +257,14 @@ public class TestAnomalyManager {
 
   @Test(dependsOnMethods = {"testFindAllAnomaliesForFeedback"})
   public void testFilterAnomaliesForFeedback() {
-    final Long id1 = mergedAnomalyResultDAO.save(anomaly(10000, 11000));
-    final Long id2 = mergedAnomalyResultDAO.save(anomaly(12000, 13000));
+    final Long id1 = anomalyManager.save(anomaly(10000, 11000));
+    final Long id2 = anomalyManager.save(anomaly(12000, 13000));
 
     final String feedbackComment = "test feedback";
     provideFeedbackToAnomaly(id1, AnomalyFeedbackType.ANOMALY, feedbackComment);
 
     final DaoFilter filter = new DaoFilter().setPredicate(Predicate.GE("startTime", 10000));
-    final List<AnomalyDTO> filterAnomalies = mergedAnomalyResultDAO.filter(filter);
+    final List<AnomalyDTO> filterAnomalies = anomalyManager.filter(filter);
     assertThat(findAnomalyById(filterAnomalies, id1).getFeedback().getComment()).isEqualTo(
         feedbackComment);
     assertThat(findAnomalyById(filterAnomalies, id2).getFeedback()).isNull();
@@ -280,7 +280,7 @@ public class TestAnomalyManager {
 
     mergedResult.setChildren(new HashSet<>(Arrays.asList(child1, child2)));
 
-    mergedAnomalyResultDAO.save(mergedResult);
+    anomalyManager.save(mergedResult);
 
     Assert.assertNotNull(mergedResult.getId());
     Assert.assertNotNull(child1.getId());
@@ -292,11 +292,11 @@ public class TestAnomalyManager {
     final long detectionConfigId = detectionConfigDAO.save(mockDetectionConfig());
     final List<AnomalyDTO> anomalies = mockAnomalies(detectionConfigId);
     for (final AnomalyDTO anomaly : anomalies) {
-      mergedAnomalyResultDAO.save(anomaly);
+      anomalyManager.save(anomaly);
     }
     final DateTime start = new DateTime(2019, 1, 1, 0, 0, DateTimeZone.UTC);
     final DateTime end = new DateTime(2019, 1, 3, 0, 0, DateTimeZone.UTC);
-    final List<AnomalyDTO> fetchedAnomalies = mergedAnomalyResultDAO.filter(
+    final List<AnomalyDTO> fetchedAnomalies = anomalyManager.filter(
         new AnomalyFilter().setAlertId(detectionConfigId)
             .setStartEndWindow(new Interval(start, end)));
     Assert.assertEquals(fetchedAnomalies.size(), anomalies.size());
@@ -308,7 +308,7 @@ public class TestAnomalyManager {
     }
     // Clean up
     for (int i = 0; i < anomalies.size(); i++) {
-      mergedAnomalyResultDAO.delete(fetchedAnomalies.get(i));
+      anomalyManager.delete(fetchedAnomalies.get(i));
     }
     detectionConfigDAO.deleteById(detectionConfigId);
   }
@@ -318,11 +318,11 @@ public class TestAnomalyManager {
     final long detectionConfigId = detectionConfigDAO.save(mockDetectionConfig());
     final List<AnomalyDTO> anomalies = mockAnomalies(detectionConfigId);
     for (final AnomalyDTO anomaly : anomalies) {
-      mergedAnomalyResultDAO.save(anomaly);
+      anomalyManager.save(anomaly);
     }
     final DateTime start = new DateTime(2019, 1, 1, 0, 0, DateTimeZone.UTC);
     final DateTime end = new DateTime(2019, 1, 3, 0, 0, DateTimeZone.UTC);
-    final List<AnomalyDTO> fetchedAnomalies = mergedAnomalyResultDAO.filter(
+    final List<AnomalyDTO> fetchedAnomalies = anomalyManager.filter(
         new AnomalyFilter().setAlertId(detectionConfigId)
             .setStartEndWindow(new Interval(start, end)));
     Assert.assertEquals(fetchedAnomalies.size(), anomalies.size());
@@ -334,7 +334,7 @@ public class TestAnomalyManager {
     }
     // Clean up
     for (int i = 0; i < anomalies.size(); i++) {
-      mergedAnomalyResultDAO.delete(fetchedAnomalies.get(i));
+      anomalyManager.delete(fetchedAnomalies.get(i));
     }
     detectionConfigDAO.deleteById(detectionConfigId);
   }
@@ -355,8 +355,8 @@ public class TestAnomalyManager {
 
     parent.setChildren(new HashSet<>(Arrays.asList(child1, child2)));
 
-    final long id = mergedAnomalyResultDAO.save(child1);
-    mergedAnomalyResultDAO.save(parent);
+    final long id = anomalyManager.save(child1);
+    anomalyManager.save(parent);
 
     Assert.assertNotNull(parent.getId());
     Assert.assertEquals(child1.getId().longValue(), id);
@@ -384,9 +384,9 @@ public class TestAnomalyManager {
     child2.setChildren(new HashSet<>(Arrays.asList(child3)));
     parent.setChildren(new HashSet<>(Arrays.asList(child1, child2)));
 
-    final long parentId = mergedAnomalyResultDAO.save(parent);
+    final long parentId = anomalyManager.save(parent);
 
-    final AnomalyDTO read = mergedAnomalyResultDAO.findById(parentId);
+    final AnomalyDTO read = anomalyManager.findById(parentId);
 
     assertThat(read).isNotSameAs(parent);
     Assert.assertEquals(read.getStartTime(), 1000);
@@ -432,13 +432,13 @@ public class TestAnomalyManager {
     child1.setChildren(new HashSet<>(Arrays.asList(child2)));
     parent.setChildren(new HashSet<>(Arrays.asList(child1)));
 
-    mergedAnomalyResultDAO.save(parent);
+    anomalyManager.save(parent);
 
     child2.setChildren(new HashSet<>(Arrays.asList(child3)));
 
-    mergedAnomalyResultDAO.save(parent);
+    anomalyManager.save(parent);
 
-    final AnomalyDTO read = mergedAnomalyResultDAO.findById(parent.getId());
+    final AnomalyDTO read = anomalyManager.findById(parent.getId());
     Assert.assertFalse(read.getChildren().isEmpty());
     Assert.assertEquals(read.getChildren().iterator().next().getStartTime(), 1000);
     Assert.assertFalse(read.getChildren().iterator().next().getChildren().isEmpty());
@@ -489,8 +489,8 @@ public class TestAnomalyManager {
     child1.setChildren(new HashSet<>(Collections.singletonList(child2)));
     top.setChildren(new HashSet<>(Arrays.asList(child1, child3)));
 
-    final long topId = mergedAnomalyResultDAO.save(top);
-    final AnomalyDTO topNode = mergedAnomalyResultDAO.findById(topId);
+    final long topId = anomalyManager.save(top);
+    final AnomalyDTO topNode = anomalyManager.findById(topId);
     AnomalyDTO parent = null;
     AnomalyDTO leafNode = null;
     for (final AnomalyDTO intermediate : topNode.getChildren()) {
@@ -500,7 +500,7 @@ public class TestAnomalyManager {
       }
     }
     Assert.assertNotNull(parent);
-    Assert.assertEquals(parent, mergedAnomalyResultDAO.findParent(leafNode));
+    Assert.assertEquals(parent, anomalyManager.findParent(leafNode));
   }
 
   @Test
@@ -521,19 +521,19 @@ public class TestAnomalyManager {
 
     final AnomalyDTO a4 = persist(anomalyWithCreateTime(4000).setDetectionConfigId(alertId));
 
-    assertThat(collectIds(mergedAnomalyResultDAO.filter(new AnomalyFilter().setCreateTimeWindow(
+    assertThat(collectIds(anomalyManager.filter(new AnomalyFilter().setCreateTimeWindow(
         new Interval(a2.getCreateTime().getTime(), a4.getCreateTime().getTime()))))).isEqualTo(
         collectIds(Set.of(a2, a3)));
 
-    assertThat(collectIds(mergedAnomalyResultDAO.filter(new AnomalyFilter().setCreateTimeWindow(
+    assertThat(collectIds(anomalyManager.filter(new AnomalyFilter().setCreateTimeWindow(
             new Interval(a2.getCreateTime().getTime(), a4.getCreateTime().getTime()))
         .setAlertId(alertId)))).isEqualTo(collectIds(Set.of(a2)));
 
     assertThat(collectIds(
-        mergedAnomalyResultDAO.filter(new AnomalyFilter().setAlertId(alertId2)))).isEqualTo(
+        anomalyManager.filter(new AnomalyFilter().setAlertId(alertId2)))).isEqualTo(
         collectIds(Set.of(a3)));
 
-    assertThat(collectIds(mergedAnomalyResultDAO.filter(
+    assertThat(collectIds(anomalyManager.filter(
         new AnomalyFilter().setEnumerationItemId(ei.getId())))).isEqualTo(collectIds(Set.of(a1)));
   }
 
@@ -550,19 +550,58 @@ public class TestAnomalyManager {
         .setChildIds(Set.of(child.getId())));
     Thread.sleep(100);
 
-    assertThat(collectIds(mergedAnomalyResultDAO.filter(new AnomalyFilter()
+    assertThat(collectIds(anomalyManager.filter(new AnomalyFilter()
         .setAlertId(alertId))))
         .isEqualTo(collectIds(Set.of(child, parent)));
 
-    assertThat(collectIds(mergedAnomalyResultDAO.filter(new AnomalyFilter()
+    assertThat(collectIds(anomalyManager.filter(new AnomalyFilter()
         .setAlertId(alertId)
         .setIsChild(true))))
         .isEqualTo(collectIds(Set.of(child)));
 
-    assertThat(collectIds(mergedAnomalyResultDAO.filter(new AnomalyFilter()
+    assertThat(collectIds(anomalyManager.filter(new AnomalyFilter()
         .setAlertId(alertId)
         .setIsChild(false))))
         .isEqualTo(collectIds(Set.of(parent)));
+  }
+
+  @Test
+  public void testFilterWithEndTimeIsGte() throws InterruptedException {
+    final long alertId = 10101L;
+    final AnomalyDTO a1 = persist(anomaly(1000L, 2000L).setDetectionConfigId(alertId));
+    Thread.sleep(100);
+
+    final AnomalyDTO a2 = persist(anomaly(1500L, 2500L).setDetectionConfigId(alertId));
+    Thread.sleep(100);
+
+    assertThat(collectIds(anomalyManager.filter(new AnomalyFilter()
+        .setAlertId(alertId))))
+        .isEqualTo(collectIds(Set.of(a1, a2)));
+
+    assertThat(collectIds(anomalyManager.filter(new AnomalyFilter()
+        .setAlertId(alertId)
+        .setEndTimeIsGte(0L))))
+        .isEqualTo(collectIds(Set.of(a1, a2)));
+
+    assertThat(collectIds(anomalyManager.filter(new AnomalyFilter()
+        .setAlertId(alertId)
+        .setEndTimeIsGte(3000L))))
+        .isEqualTo(collectIds(Set.of()));
+
+    assertThat(collectIds(anomalyManager.filter(new AnomalyFilter()
+        .setAlertId(alertId)
+        .setEndTimeIsGte(2100L))))
+        .isEqualTo(collectIds(Set.of(a2)));
+
+    assertThat(collectIds(anomalyManager.filter(new AnomalyFilter()
+        .setAlertId(alertId)
+        .setEndTimeIsGte(2000L))))
+        .isEqualTo(collectIds(Set.of(a1, a2)));
+
+    assertThat(collectIds(anomalyManager.filter(new AnomalyFilter()
+        .setAlertId(alertId)
+        .setEndTimeIsGte(1800L))))
+        .isEqualTo(collectIds(Set.of(a1, a2)));
   }
 
   @Test
@@ -583,28 +622,28 @@ public class TestAnomalyManager {
   }
 
   private AnomalyDTO persist(final AnomalyDTO anomaly) {
-    final long id = mergedAnomalyResultDAO.save(anomaly);
+    final long id = anomalyManager.save(anomaly);
     assertThat(id).isNotNull();
     return anomaly;
   }
 
   @Test
   public void ignoreLabelIndexNoLabelsTest() {
-    final Long id = mergedAnomalyResultDAO.save(anomaly());
+    final Long id = anomalyManager.save(anomaly());
     assertByIdAndIgnored(id, false);
   }
 
   @Test
   public void ignoreLabelIndexLabelsWithNoIgnoreTest() {
     final List<AnomalyLabelDTO> labels = List.of(anomalyLabel(false), anomalyLabel(false));
-    final Long id = mergedAnomalyResultDAO.save(anomaly().setAnomalyLabels(labels));
+    final Long id = anomalyManager.save(anomaly().setAnomalyLabels(labels));
     assertByIdAndIgnored(id, false);
   }
 
   @Test
   public void ignoreLabelIndexLabelsWithIgnoreTest() {
     final List<AnomalyLabelDTO> labels = List.of(anomalyLabel(false), anomalyLabel(true));
-    final Long id = mergedAnomalyResultDAO.save(anomaly().setAnomalyLabels(labels));
+    final Long id = anomalyManager.save(anomaly().setAnomalyLabels(labels));
     assertByIdAndIgnored(id, true);
   }
 
@@ -612,12 +651,12 @@ public class TestAnomalyManager {
   public void updateLabelsToIgnoreTest() {
     // create anomaly with labels with no ignore
     final List<AnomalyLabelDTO> labels = List.of(anomalyLabel(false), anomalyLabel(false));
-    final Long id = mergedAnomalyResultDAO.save(anomaly().setAnomalyLabels(labels));
+    final Long id = anomalyManager.save(anomaly().setAnomalyLabels(labels));
 
     // update the anomaly label to ignore
-    final AnomalyDTO result = mergedAnomalyResultDAO.findById(id);
+    final AnomalyDTO result = anomalyManager.findById(id);
     result.getAnomalyLabels().get(0).setIgnore(true);
-    mergedAnomalyResultDAO.update(result);
+    anomalyManager.update(result);
     assertByIdAndIgnored(id, true);
   }
 
@@ -625,19 +664,19 @@ public class TestAnomalyManager {
   public void updateResetIgnoreLabelsTest() {
     // create anomaly with ignore label
     final List<AnomalyLabelDTO> labels = List.of(anomalyLabel(true), anomalyLabel(false));
-    final Long id = mergedAnomalyResultDAO.save(anomaly().setAnomalyLabels(labels));
+    final Long id = anomalyManager.save(anomaly().setAnomalyLabels(labels));
 
     // update the anomaly label not to ignore
-    final AnomalyDTO result = mergedAnomalyResultDAO.findById(id);
+    final AnomalyDTO result = anomalyManager.findById(id);
     result.getAnomalyLabels().forEach(label -> label.setIgnore(false));
-    mergedAnomalyResultDAO.update(result);
+    anomalyManager.update(result);
     assertByIdAndIgnored(id, false);
   }
 
   private List<AnomalyDTO> filterByIdAndIgnored(final Long id, final boolean ignored) {
     final DaoFilter filter = new DaoFilter().setPredicate(
         Predicate.AND(Predicate.EQ("baseId", id), Predicate.EQ("ignored", ignored)));
-    return mergedAnomalyResultDAO.filter(filter);
+    return anomalyManager.filter(filter);
   }
 
   private void assertByIdAndIgnored(final long id, final boolean ignored) {

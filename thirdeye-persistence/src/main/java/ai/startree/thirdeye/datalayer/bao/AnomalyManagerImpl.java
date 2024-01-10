@@ -380,6 +380,10 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
             Predicate.GT("endTime", window.getStartMillis())))
         .ifPresent(predicates::add);
 
+    optional(af.getEndTimeIsGte())
+        .map(endTime -> Predicate.GE("endTime", endTime))
+        .ifPresent(predicates::add);
+
     return Predicate.AND(predicates.toArray(new Predicate[]{}));
   }
 }

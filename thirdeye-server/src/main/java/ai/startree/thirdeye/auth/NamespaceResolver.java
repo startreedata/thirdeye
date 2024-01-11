@@ -29,6 +29,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 @Singleton
 public class NamespaceResolver {
@@ -37,7 +38,7 @@ public class NamespaceResolver {
   private final EnumerationItemManager enumerationItemManager;
   private final AnomalyManager anomalyManager;
 
-  private final Cache<Long, String> namespaceCache = CacheBuilder.newBuilder()
+  private final Cache<Long, @NonNull String> namespaceCache = CacheBuilder.newBuilder()
       .maximumSize(2048)
       .expireAfterWrite(60, TimeUnit.SECONDS)
       .build();
@@ -54,24 +55,20 @@ public class NamespaceResolver {
     namespaceCache.invalidateAll();
   }
 
-  public String resolveNamespace(final AbstractDTO dto) {
+  public @NonNull String resolveNamespace(final AbstractDTO dto) {
     if (dto == null) {
       return DEFAULT_NAMESPACE;
     }
-
-    final String namespace;
     if (dto instanceof AnomalyDTO) {
-      namespace = resolveAnomalyNamespace((AnomalyDTO) (dto));
+      return resolveAnomalyNamespace((AnomalyDTO) (dto));
     } else if (dto instanceof RcaInvestigationDTO) {
-      namespace = resolveRcaNamespace((RcaInvestigationDTO) (dto));
+      return resolveRcaNamespace((RcaInvestigationDTO) (dto));
     } else {
-      namespace = getNamespaceFromAuth(dto);
+      return getNamespaceFromAuth(dto);
     }
-
-    return namespace;
   }
 
-  private String resolveAnomalyNamespace(final AnomalyDTO dto) {
+  private @NonNull String resolveAnomalyNamespace(final AnomalyDTO dto) {
     if (dto.getEnumerationItem() != null) {
       return optional(dto.getEnumerationItem())
           .map(AbstractDTO::getId)
@@ -84,14 +81,14 @@ public class NamespaceResolver {
         .orElse(DEFAULT_NAMESPACE);
   }
 
-  private String resolveRcaNamespace(final RcaInvestigationDTO dto) {
+  private @NonNull String resolveRcaNamespace(final RcaInvestigationDTO dto) {
     return optional(dto.getAnomaly())
         .map(AbstractDTO::getId)
         .map(this::getAnomalyNamespaceById)
         .orElse(DEFAULT_NAMESPACE);
   }
 
-  private String getEnumerationItemNamespaceById(final long id) {
+  private @NonNull String getEnumerationItemNamespaceById(final long id) {
     try {
       return namespaceCache.get(id, () ->
           optional(enumerationItemManager.findById(id))
@@ -102,7 +99,7 @@ public class NamespaceResolver {
     }
   }
 
-  private String getAlertNamespaceById(final long id) {
+  private @NonNull String getAlertNamespaceById(final long id) {
     try {
       return namespaceCache.get(id, () ->
           optional(alertManager.findById(id))
@@ -113,7 +110,7 @@ public class NamespaceResolver {
     }
   }
 
-  private String getAnomalyNamespaceById(final long id) {
+  private @NonNull String getAnomalyNamespaceById(final long id) {
     try {
       return namespaceCache.get(id, () -> optional(id)
           .map(anomalyManager::findById)
@@ -124,7 +121,7 @@ public class NamespaceResolver {
     }
   }
   
-  private String getNamespaceFromAuth(final AbstractDTO dto) {
+  private @NonNull String getNamespaceFromAuth(final AbstractDTO dto) {
     return optional(dto)
         .map(AbstractDTO::getAuth)
         .map(AuthorizationConfigurationDTO::getNamespace)

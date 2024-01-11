@@ -25,19 +25,19 @@ import java.util.Objects;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AlertDTO extends AbstractDTO {
 
-  String name;
-  String description;
-  boolean active;
-  String cron;
-  long lastTimestamp;
-  boolean isDataAvailabilitySchedule;
-  long taskTriggerFallBackTimeInSec;
-  List<String> owners;
-  Map<String, Object> properties;
-  DetectionHealth health;
+  private String name;
+  private String description;
+  private boolean active;
+  private String cron;
+  private long lastTimestamp;
+  private boolean isDataAvailabilitySchedule;
+  private long taskTriggerFallBackTimeInSec;
+  private List<String> owners;
+  private Map<String, Object> properties;
+  private DetectionHealth health;
 
   // The alert template
-  AlertTemplateDTO template;
+  private AlertTemplateDTO template;
 
   // Values to be plugged into the above template
   private Map<String, Object> templateProperties;
@@ -57,34 +57,37 @@ public class AlertDTO extends AbstractDTO {
     return name;
   }
 
-  public void setName(String name) {
+  public AlertDTO setName(final String name) {
     this.name = name;
+    return this;
   }
 
   public String getDescription() {
     return description;
   }
 
-  public void setDescription(String description) {
+  public AlertDTO setDescription(final String description) {
     this.description = description;
+    return this;
   }
 
   public String getCron() {
     return cron;
   }
 
-  public void setCron(String cron) {
+  public AlertDTO setCron(final String cron) {
     this.cron = cron;
+    return this;
   }
 
   public Map<String, Object> getProperties() {
     return properties;
   }
 
-  public void setProperties(Map<String, Object> properties) {
+  public AlertDTO setProperties(final Map<String, Object> properties) {
     this.properties = properties;
+    return this;
   }
-
   public long getLastTimestamp() {
     return lastTimestamp;
   }
@@ -98,8 +101,9 @@ public class AlertDTO extends AbstractDTO {
     return active;
   }
 
-  public void setActive(boolean active) {
+  public AlertDTO setActive(final boolean active) {
     this.active = active;
+    return this;
   }
 
   public boolean isDataAvailabilitySchedule() {
@@ -122,8 +126,9 @@ public class AlertDTO extends AbstractDTO {
     return health;
   }
 
-  public void setHealth(DetectionHealth health) {
+  public AlertDTO setHealth(final DetectionHealth health) {
     this.health = health;
+    return this;
   }
 
   public AlertTemplateDTO getTemplate() {
@@ -150,10 +155,10 @@ public class AlertDTO extends AbstractDTO {
     return components;
   }
 
-  public void setComponents(Map<String, BaseComponent> components) {
+  public AlertDTO setComponents(final Map<String, BaseComponent> components) {
     this.components = components;
+    return this;
   }
-
   //fixme make sure equals and hashCode implems are correct
   @Override
   public boolean equals(Object o) {

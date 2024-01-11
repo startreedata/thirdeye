@@ -27,9 +27,11 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Singleton
 public class NamespaceResolver {
@@ -38,7 +40,7 @@ public class NamespaceResolver {
   private final EnumerationItemManager enumerationItemManager;
   private final AnomalyManager anomalyManager;
 
-  private final Cache<Long, @NonNull String> namespaceCache = CacheBuilder.newBuilder()
+  private final Cache<Long, @NonNull Optional<String>> namespaceCache = CacheBuilder.newBuilder()
       .maximumSize(2048)
       .expireAfterWrite(60, TimeUnit.SECONDS)
       .build();
@@ -55,76 +57,75 @@ public class NamespaceResolver {
     namespaceCache.invalidateAll();
   }
 
-  public @NonNull String resolveNamespace(final AbstractDTO dto) {
-    if (dto == null) {
-      return DEFAULT_NAMESPACE;
-    }
+  public @NonNull String resolveNamespace(final @Nullable AbstractDTO dto) {
+    Optional<String> namespace;
     if (dto instanceof AnomalyDTO) {
-      return resolveAnomalyNamespace((AnomalyDTO) (dto));
+      namespace = resolveAnomalyNamespace((AnomalyDTO) (dto));
     } else if (dto instanceof RcaInvestigationDTO) {
-      return resolveRcaNamespace((RcaInvestigationDTO) (dto));
+      namespace = resolveRcaNamespace((RcaInvestigationDTO) (dto));
     } else {
-      return getNamespaceFromAuth(dto);
-    }
-  }
-
-  private @NonNull String resolveAnomalyNamespace(final AnomalyDTO dto) {
-    if (dto.getEnumerationItem() != null) {
-      return optional(dto.getEnumerationItem())
-          .map(AbstractDTO::getId)
-          .map(this::getEnumerationItemNamespaceById)
-          .orElse(DEFAULT_NAMESPACE);
+      namespace = getNamespaceFromAuth(dto);
     }
 
-    return optional(dto.getDetectionConfigId())
-        .map(this::getAlertNamespaceById)
-        .orElse(DEFAULT_NAMESPACE);
+    return namespace.orElse(DEFAULT_NAMESPACE);
   }
 
-  private @NonNull String resolveRcaNamespace(final RcaInvestigationDTO dto) {
-    return optional(dto.getAnomaly())
-        .map(AbstractDTO::getId)
-        .map(this::getAnomalyNamespaceById)
-        .orElse(DEFAULT_NAMESPACE);
+  private @NonNull Optional<String> resolveAnomalyNamespace(final @Nullable AnomalyDTO dto) {
+    if (dto == null) {
+      return Optional.empty();
+    }
+    // anomaly inherits namespace from enum 
+    final Long enumerationItemId = optional(dto.getEnumerationItem()).map(AbstractDTO::getId)
+        .orElse(null);
+    if (enumerationItemId != null) {
+      final Optional<String> enumNamespace = getEnumerationItemNamespaceById(
+          enumerationItemId);
+      if (enumNamespace.isPresent()) {
+        return enumNamespace;
+      }
+    }
+    // if no enum or enum has no namespace, fallback to detection config namespace
+    final Long detectionConfigId = dto.getDetectionConfigId();
+    if (detectionConfigId != null) {
+      return getAlertNamespaceById(detectionConfigId);
+    }
+    return Optional.empty();
   }
 
-  private @NonNull String getEnumerationItemNamespaceById(final long id) {
+  private @NonNull Optional<String> resolveRcaNamespace(final @NonNull RcaInvestigationDTO dto) {
+    final Long anomalyId = optional(dto.getAnomaly()).map(AbstractDTO::getId).orElse(null);
+    if (anomalyId != null) {
+      return getAnomalyNamespaceById(anomalyId);
+    }
+    return Optional.empty();
+  }
+
+  private @NonNull Optional<String> getEnumerationItemNamespaceById(final long id) {
     try {
-      return namespaceCache.get(id, () ->
-          optional(enumerationItemManager.findById(id))
-              .map(this::getNamespaceFromAuth)
-              .orElse(DEFAULT_NAMESPACE));
+      return namespaceCache.get(id,
+          () -> getNamespaceFromAuth(enumerationItemManager.findById(id)));
     } catch (ExecutionException e) {
       throw new RuntimeException(e);
     }
   }
 
-  private @NonNull String getAlertNamespaceById(final long id) {
+  private @NonNull Optional<String> getAlertNamespaceById(final long id) {
     try {
-      return namespaceCache.get(id, () ->
-          optional(alertManager.findById(id))
-              .map(this::getNamespaceFromAuth)
-              .orElse(DEFAULT_NAMESPACE));
+      return namespaceCache.get(id, () -> getNamespaceFromAuth(alertManager.findById(id)));
     } catch (ExecutionException e) {
       throw new RuntimeException(e);
     }
   }
 
-  private @NonNull String getAnomalyNamespaceById(final long id) {
+  private @NonNull Optional<String> getAnomalyNamespaceById(final long id) {
     try {
-      return namespaceCache.get(id, () -> optional(id)
-          .map(anomalyManager::findById)
-          .map(this::resolveAnomalyNamespace)
-          .orElse(DEFAULT_NAMESPACE));
+      return namespaceCache.get(id, () -> resolveAnomalyNamespace(anomalyManager.findById(id)));
     } catch (ExecutionException e) {
       throw new RuntimeException(e);
     }
   }
-  
-  private @NonNull String getNamespaceFromAuth(final AbstractDTO dto) {
-    return optional(dto)
-        .map(AbstractDTO::getAuth)
-        .map(AuthorizationConfigurationDTO::getNamespace)
-        .orElse(DEFAULT_NAMESPACE);
+
+  private @NonNull Optional<String> getNamespaceFromAuth(final @Nullable AbstractDTO dto) {
+    return optional(dto).map(AbstractDTO::getAuth).map(AuthorizationConfigurationDTO::getNamespace);
   }
 }

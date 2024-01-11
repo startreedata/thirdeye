@@ -86,4 +86,32 @@ public class AuthorizationManagerTest {
     assertThat(got.getNamespace()).isEqualTo("enum_namespace");
     assertThat(got.getEntityType()).isEqualTo("ANOMALY");
   }
+
+  @Test
+  public void testResourceIdOfAnomalyDtoWithAnEnumThatHasNoResourceIdInheritsTheAlertResourceId() {
+    final AlertManager alertManager = mock(AlertManager.class);
+    final AlertDTO alertDto = new AlertDTO();
+    alertDto.setId(1L);
+    alertDto.setAuth(new AuthorizationConfigurationDTO().setNamespace("alert_namespace"));
+    when(alertManager.findById(1L)).thenReturn(alertDto);
+
+    final EnumerationItemManager enumManager = mock(EnumerationItemManager.class);
+    final EnumerationItemDTO enumItemDto = new EnumerationItemDTO();
+    // enum with no auth info
+    enumItemDto.setId(2L);
+    when(enumManager.findById(2L)).thenReturn(enumItemDto);
+
+    final AnomalyDTO anomalyDto = new AnomalyDTO();
+    anomalyDto.setDetectionConfigId(1L);
+    anomalyDto.setEnumerationItem((EnumerationItemDTO) new EnumerationItemDTO().setId(2L));
+    anomalyDto.setId(3L);
+
+    final AuthorizationManager authorizationManager = new AuthorizationManager(
+        null, null, new NamespaceResolver(alertManager, enumManager, null));
+
+    final ResourceIdentifier got = authorizationManager.resourceId(anomalyDto);
+    assertThat(got.getName()).isEqualTo("3");
+    assertThat(got.getNamespace()).isEqualTo("alert_namespace");
+    assertThat(got.getEntityType()).isEqualTo("ANOMALY");
+  }
 }

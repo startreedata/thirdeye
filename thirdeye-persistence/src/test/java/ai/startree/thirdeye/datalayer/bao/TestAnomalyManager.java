@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.datalayer.bao;
 
-import static java.util.stream.Collectors.toSet;
+import static ai.startree.thirdeye.datalayer.DatalayerTestUtils.collectIds;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
@@ -22,7 +22,6 @@ import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
-import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
@@ -36,7 +35,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -90,10 +88,6 @@ public class TestAnomalyManager {
     final SimpleDateFormat df = new SimpleDateFormat("MMM dd yyyy HH:mm:ss.SSS zzz");
     final Date date = df.parse(dateStr);
     return date.getTime();
-  }
-
-  private static Set<Long> collectIds(final Collection<AnomalyDTO> anomalies) {
-    return anomalies.stream().map(AbstractDTO::getId).collect(toSet());
   }
 
   private static AnomalyDTO anomalyWithCreateTime(final long createTimeOffset) {

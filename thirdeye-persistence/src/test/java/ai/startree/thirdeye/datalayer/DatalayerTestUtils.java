@@ -14,13 +14,14 @@
 package ai.startree.thirdeye.datalayer;
 
 import static ai.startree.thirdeye.spi.Constants.SCALING_FACTOR;
+import static java.util.stream.Collectors.toSet;
 
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.bao.OverrideConfigManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DetectionStatusDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.EntityToEntityMappingDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.JobDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.OnboardDatasetMetricDTO;
@@ -30,14 +31,21 @@ import ai.startree.thirdeye.spi.task.TaskType;
 import ai.startree.thirdeye.spi.util.SpiUtils;
 import com.google.common.collect.Lists;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
 public class DatalayerTestUtils {
+
+  public static Set<Long> collectIds(final Collection<? extends AbstractDTO> anomalies) {
+    return anomalies.stream().map(AbstractDTO::getId).collect(toSet());
+  }
+
 
   public static MetricConfigDTO getTestMetricConfig(String collection, String metric, Long id) {
     MetricConfigDTO metricConfigDTO = new MetricConfigDTO();
@@ -85,16 +93,6 @@ public class DatalayerTestUtils {
     detectionStatusDTO.setDateToCheckInSDF(dateToCheckInSDF);
     detectionStatusDTO.setDetectionRun(detectionRun);
     return detectionStatusDTO;
-  }
-
-  public static EntityToEntityMappingDTO getTestEntityToEntityMapping(String fromURN, String toURN,
-      String mappingType) {
-    EntityToEntityMappingDTO dto = new EntityToEntityMappingDTO();
-    dto.setFromURN(fromURN);
-    dto.setToURN(toURN);
-    dto.setMappingType(mappingType);
-    dto.setScore(1);
-    return dto;
   }
 
   public static OnboardDatasetMetricDTO getTestOnboardConfig(String datasetName, String metricName,

@@ -16,7 +16,6 @@ package ai.startree.thirdeye.notification;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.stream.Collectors.toMap;
 
-import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertAssociationDto;
@@ -89,16 +88,6 @@ public class SubscriptionGroupWatermarkManager {
             id -> vc.getOrDefault(id, 0L),
             (a, b) -> b)
         );
-  }
-
-  public static long getCreateTimeWindowStart(final Map<Long, Long> vectorClocks,
-      final long endTime,
-      final Long alertId) {
-    long startTime = vectorClocks.get(alertId);
-
-    // Do not notify anomalies older than MAX_ANOMALY_NOTIFICATION_LOOKBACK
-    final long minStartTime = endTime - Constants.NOTIFICATION_ANOMALY_MAX_LOOKBACK_MS;
-    return Math.max(startTime, minStartTime);
   }
 
   public void updateWatermarks(final SubscriptionGroupDTO sg,

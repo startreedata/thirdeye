@@ -13,12 +13,12 @@
  */
 package ai.startree.thirdeye.notification;
 
-import static ai.startree.thirdeye.notification.SubscriptionGroupWatermarkManager.getCreateTimeWindowStart;
 import static ai.startree.thirdeye.notification.SubscriptionGroupWatermarkManager.newVectorClocks;
 import static ai.startree.thirdeye.spi.util.AnomalyUtils.isIgnore;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.stream.Collectors.toSet;
 
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
@@ -103,7 +103,11 @@ public class SubscriptionGroupFilter {
       final Map<Long, Long> vectorClocks,
       final long createTimeEnd) {
     final long alertId = aa.getAlert().getId();
-    final long createTimeStart = getCreateTimeWindowStart(vectorClocks, createTimeEnd, alertId);
+    long startTime = vectorClocks.get(alertId);
+
+    // Do not notify anomalies older than MAX_ANOMALY_NOTIFICATION_LOOKBACK
+    final long minStartTime = createTimeEnd - Constants.NOTIFICATION_ANOMALY_MAX_LOOKBACK_MS;
+    final long createTimeStart = Math.max(startTime, minStartTime);
 
     final AnomalyFilter f = new AnomalyFilter()
         .setCreateTimeWindow(new Interval(createTimeStart + 1, createTimeEnd))
@@ -144,7 +148,8 @@ public class SubscriptionGroupFilter {
    * @return List of Alert Association objects
    */
   private List<AlertAssociationDto> migrateOlderSchema(final SubscriptionGroupDTO sg) {
-    return optional((List<?>) sg.getProperties().get(PROP_DETECTION_CONFIG_IDS))
+    return optional(sg.getProperties())
+        .map(p -> (List<?>) p.get(PROP_DETECTION_CONFIG_IDS))
         .orElse(Collections.emptyList())
         .stream()
         .filter(Objects::nonNull)

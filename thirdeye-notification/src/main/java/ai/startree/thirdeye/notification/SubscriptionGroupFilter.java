@@ -13,7 +13,6 @@
  */
 package ai.startree.thirdeye.notification;
 
-import static ai.startree.thirdeye.notification.SubscriptionGroupWatermarkManager.newVectorClocks;
 import static ai.startree.thirdeye.spi.util.AnomalyUtils.isIgnore;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.stream.Collectors.toSet;
@@ -103,7 +102,9 @@ public class SubscriptionGroupFilter {
       final Map<Long, Long> vectorClocks,
       final long createTimeEnd) {
     final long alertId = aa.getAlert().getId();
-    long startTime = vectorClocks.get(alertId);
+    long startTime = optional(vectorClocks)
+        .map(v -> v.get(alertId))
+        .orElse(0L);
 
     // Do not notify anomalies older than MAX_ANOMALY_NOTIFICATION_LOOKBACK
     final long minStartTime = createTimeEnd - Constants.NOTIFICATION_ANOMALY_MAX_LOOKBACK_MS;
@@ -133,10 +134,9 @@ public class SubscriptionGroupFilter {
         .orElseGet(() -> migrateOlderSchema(sg));
 
     // Fetch all the anomalies to be notified to the recipients
-    final Map<Long, Long> vectorClocks = newVectorClocks(alertAssociations, sg.getVectorClocks());
     return alertAssociations.stream()
         .filter(aa -> isAlertActive(aa.getAlert().getId()))
-        .map(aa -> buildAnomalyFilter(aa, vectorClocks, endTime))
+        .map(aa -> buildAnomalyFilter(aa, sg.getVectorClocks(), endTime))
         .map(f -> filterAnomalies(f, sg.getId()))
         .flatMap(Collection::stream)
         .collect(toSet());

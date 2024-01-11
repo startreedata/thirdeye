@@ -14,11 +14,8 @@
 package ai.startree.thirdeye.notification;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
-import static java.util.stream.Collectors.toMap;
 
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
-import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.AlertAssociationDto;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import com.google.inject.Inject;
@@ -26,7 +23,6 @@ import com.google.inject.Singleton;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,19 +71,6 @@ public class SubscriptionGroupWatermarkManager {
     b.forEach((key, value) -> result.merge(key, value, Math::max));
 
     return result;
-  }
-
-  public static Map<Long, Long> newVectorClocks(final List<AlertAssociationDto> alertAssociations,
-      final Map<Long, Long> vectorClocks) {
-    final Map<Long, Long> vc = optional(vectorClocks).orElse(Map.of());
-    return alertAssociations.stream()
-        .map(AlertAssociationDto::getAlert)
-        .map(AbstractDTO::getId)
-        .collect(toMap(
-            id -> id,
-            id -> vc.getOrDefault(id, 0L),
-            (a, b) -> b)
-        );
   }
 
   public void updateWatermarks(final SubscriptionGroupDTO sg,

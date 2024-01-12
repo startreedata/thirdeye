@@ -39,6 +39,7 @@ export enum SpecType {
     Slack = "slack",
     Webhook = "webhook",
     EmailSendgrid = "email-sendgrid",
+    PagerDuty = "pager-duty",
 }
 
 export interface SpecConfiguration {
@@ -71,7 +72,18 @@ export interface SendgridEmailSpec extends SpecConfiguration {
     };
 }
 
-export type NotificationSpec = SlackSpec | WebhookSpec | SendgridEmailSpec;
+export interface PagerDutySpec extends SpecConfiguration {
+    type: SpecType.PagerDuty;
+    params: {
+        eventsIntegrationKey: string;
+    };
+}
+
+export type NotificationSpec =
+    | SlackSpec
+    | WebhookSpec
+    | SendgridEmailSpec
+    | PagerDutySpec;
 
 export interface NotificationSchemes {
     email: EmailScheme;

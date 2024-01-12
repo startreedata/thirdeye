@@ -14,6 +14,7 @@
  */
 import {
     NotificationSpec,
+    PagerDutySpec,
     SendgridEmailSpec,
     SlackSpec,
     SpecType,
@@ -25,6 +26,7 @@ import {
 } from "../../../../subscription-group-view/notification-channels-card/notification-channels-card.utils";
 import { SendgridEmailReview } from "../groups-renderer/sendgrid-email-review/sendgrid-email-review.component";
 import { SpecUIConfig } from "./groups-editor.interfaces";
+import { PagerDuty } from "./pager-duty/pager-duty.component";
 import { SendgridEmail } from "./sendgrid-email/sendgrid-email.component";
 import { Slack } from "./slack/slack.component";
 import { Webhook } from "./webhook/webhook.component";
@@ -73,6 +75,20 @@ export const availableSpecTypes: SpecUIConfig[] = [
             const specTyped = spec as WebhookSpec;
 
             return specTyped.params.url !== "";
+        },
+    },
+    {
+        id: SpecType.PagerDuty,
+        internationalizationString:
+            subscriptionGroupChannelHeaderMap[SpecType.PagerDuty],
+        icon: subscriptionGroupChannelIconsMap[SpecType.PagerDuty],
+        formComponent: PagerDuty,
+        reviewComponent: (props) => props.configuration.params.url,
+        viewComponent: PagerDuty,
+        validate: (spec: NotificationSpec): boolean => {
+            const specTyped = spec as PagerDutySpec;
+
+            return specTyped.params.eventsIntegrationKey !== "";
         },
     },
 ];

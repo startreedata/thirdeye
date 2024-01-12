@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.notification;
 
 import static ai.startree.thirdeye.spi.util.AnomalyUtils.isIgnore;
+import static ai.startree.thirdeye.spi.util.SpiUtils.bool;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.stream.Collectors.toSet;
 
@@ -36,7 +37,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -98,30 +98,6 @@ public class SubscriptionGroupFilter {
         .format(Instant.ofEpochMilli(ts));
   }
 
-  private static AnomalyFilter buildAnomalyFilter(final AlertAssociationDto aa,
-      final Map<Long, Long> vectorClocks,
-      final long createTimeEnd) {
-    final long alertId = aa.getAlert().getId();
-    long startTime = optional(vectorClocks)
-        .map(v -> v.get(alertId))
-        .orElse(0L);
-
-    // Do not notify anomalies older than MAX_ANOMALY_NOTIFICATION_LOOKBACK
-    final long minStartTime = createTimeEnd - Constants.NOTIFICATION_ANOMALY_MAX_LOOKBACK_MS;
-    final long createTimeStart = Math.max(startTime, minStartTime);
-
-    final AnomalyFilter f = new AnomalyFilter()
-        .setCreateTimeWindow(new Interval(createTimeStart + 1, createTimeEnd))
-        .setIsChild(false) // Notify only parent anomalies
-        .setAlertId(alertId);
-
-    optional(aa.getEnumerationItem())
-        .map(AbstractDTO::getId)
-        .ifPresent(f::setEnumerationItemId);
-
-    return f;
-  }
-
   /**
    * Find anomalies for the given subscription group given an end time.
    *
@@ -136,7 +112,7 @@ public class SubscriptionGroupFilter {
     // Fetch all the anomalies to be notified to the recipients
     return alertAssociations.stream()
         .filter(aa -> isAlertActive(aa.getAlert().getId()))
-        .map(aa -> buildAnomalyFilter(aa, sg.getVectorClocks(), endTime))
+        .map(aa -> buildAnomalyFilter(aa, sg, endTime))
         .map(f -> filterAnomalies(f, sg.getId()))
         .flatMap(Collection::stream)
         .collect(toSet());
@@ -164,6 +140,41 @@ public class SubscriptionGroupFilter {
   private boolean isAlertActive(final long alertId) {
     final AlertDTO alert = alertManager.findById(alertId);
     return alert != null && alert.isActive();
+  }
+
+  private AnomalyFilter buildAnomalyFilter(final AlertAssociationDto aa,
+      final SubscriptionGroupDTO sg,
+      final long createTimeEnd) {
+    final long alertId = aa.getAlert().getId();
+    final AlertDTO alert = alertManager.findById(alertId);
+    long startTime = optional(sg.getVectorClocks())
+        .map(v -> v.get(alertId))
+        .orElse(0L);
+
+    // Do not notify anomalies older than MAX_ANOMALY_NOTIFICATION_LOOKBACK
+    final long minStartTime = createTimeEnd - Constants.NOTIFICATION_ANOMALY_MAX_LOOKBACK_MS;
+    final long createTimeStart = Math.max(startTime, minStartTime);
+
+    final AnomalyFilter f = new AnomalyFilter()
+        .setCreateTimeWindow(new Interval(createTimeStart + 1, createTimeEnd))
+        .setIsChild(false) // Notify only parent anomalies
+        .setAlertId(alertId);
+
+    /*
+     * Do not notify historical anomalies if the end time of the anomaly is before the
+     * max of the alert create time and subscription group create time.
+     *
+     * TODO spyne This should also take the alert association tine when available.
+     */
+    if (!bool(sg.getNotifyHistoricalAnomalies())) {
+      f.setEndTimeIsGte(Math.max(alert.getCreateTime().getTime(), sg.getCreateTime().getTime()));
+    }
+
+    optional(aa.getEnumerationItem())
+        .map(AbstractDTO::getId)
+        .ifPresent(f::setEnumerationItemId);
+
+    return f;
   }
 
   @VisibleForTesting

@@ -638,6 +638,30 @@ public class HappyPathTest {
     assertThat(investigationApi.getAuth().getNamespace()).isEqualTo("new-alert-namespace");
   }
 
+  @Test
+  public void testCreateSubscriptionGroup() {
+    final var sg = new SubscriptionGroupApi()
+        .setName("test-subscription-group")
+        .setCron("0 0/5 0 ? * * *");
+
+    final var sgWithHistoricalAnomalies = new SubscriptionGroupApi()
+        .setName("test-subscription-group-with-historical-anomalies")
+        .setCron("0 0/5 0 ? * * *")
+        .setNotifyHistoricalAnomalies(true);
+
+    final var response = request("api/subscription-groups").post(
+        Entity.json(List.of(sg, sgWithHistoricalAnomalies)));
+    assertThat(response.getStatus()).isEqualTo(200);
+
+    final var response2 = request("api/subscription-groups").get();
+    assertThat(response2.getStatus()).isEqualTo(200);
+    final var gotSgs = response2.readEntity(new GenericType<List<SubscriptionGroupApi>>() {});
+    assertThat(gotSgs).hasSize(2);
+
+    gotSgs.stream().map(SubscriptionGroupApi::getName)
+        .forEach(name -> assertThat(name).isIn(sg.getName(), sgWithHistoricalAnomalies.getName()));
+  }
+
   private Builder request(final String urlFragment) {
     return client.target(endPoint(urlFragment)).request();
   }

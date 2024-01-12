@@ -30,7 +30,7 @@ import com.google.inject.Injector;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Set;
-import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -45,9 +45,9 @@ public class SubscriptionGroupFilterIntegrationTest {
   private AlertManager alertManager;
 
   private static AnomalyDTO anomalyWithCreateTime(final long createTime) {
-    final AnomalyDTO anomaly = new AnomalyDTO().setChild(false);
-    anomaly.setCreateTime(new Timestamp(createTime));
-    return anomaly;
+    return new AnomalyDTO()
+        .setChild(false)
+        .setCreateTime(new Timestamp(createTime));
   }
 
   private static long minutesAgo(final long nMinutes) {
@@ -95,14 +95,78 @@ public class SubscriptionGroupFilterIntegrationTest {
     instance = injector.getInstance(SubscriptionGroupFilter.class);
   }
 
-  @AfterClass(alwaysRun = true)
-  void afterClass() {
+  @AfterMethod(alwaysRun = true)
+  void afterMethod() {
     alertManager.findAll().forEach(alertManager::delete);
     subscriptionGroupManager.findAll().forEach(subscriptionGroupManager::delete);
     anomalyManager.findAll().forEach(anomalyManager::delete);
   }
+
   @Test
   public void testFilter() {
+    final AlertDTO alert = persist(new AlertDTO()
+        .setName("alert1")
+        .setActive(true)
+        .setCreateTime(new Timestamp(minutesAgo(100)))
+    );
+
+    final int sgCreationOffset = 80;
+    final SubscriptionGroupDTO sg = persist(new SubscriptionGroupDTO()
+        .setName("name1")
+        .setCronExpression(CRON)
+        .setCreateTime(new Timestamp(minutesAgo(sgCreationOffset)))
+    );
+
+    // base case
+    assertThat(instance.filter(sg, POINT_IN_TIME).isEmpty()).isTrue();
+
+    final long superOldCreateTime = POINT_IN_TIME - NOTIFICATION_ANOMALY_MAX_LOOKBACK_MS - 100_000L;
+    persist(anomalyWithCreateTime(superOldCreateTime)
+        .setDetectionConfigId(alert.getId())
+        .setStartTime(minutesAgo(1000))
+        .setEndTime(minutesAgo(800))
+    );
+
+    persist(anomalyWithCreateTime(minutesAgo(9)) // before alert was created
+        .setDetectionConfigId(alert.getId())
+        .setStartTime(minutesAgo(100))
+        .setEndTime(minutesAgo(sgCreationOffset + 1)) // before sg was created
+    );
+    final AnomalyDTO anomaly1 = persist(anomalyWithCreateTime(minutesAgo(2))
+        .setDetectionConfigId(alert.getId())
+        .setStartTime(minutesAgo(100))
+        .setEndTime(minutesAgo(sgCreationOffset - 5)) // after sg was created
+    );
+
+    persist(sg.setAlertAssociations(List.of(aaRef(alert.getId()))));
+
+    assertThat(collectIds(instance.filter(sg, POINT_IN_TIME)))
+        .isEqualTo(collectIds(Set.of(anomaly1)));
+
+    watermarkManager.updateWatermarks(sg, List.of(anomaly1));
+
+    persist(anomalyWithCreateTime(minutesAgo(3))
+        .setDetectionConfigId(alert.getId())
+        .setStartTime(minutesAgo(100))
+        .setEndTime(minutesAgo(sgCreationOffset - 10))
+    );
+    // time in the future. Found an old anomaly. Should not be notified
+    persist(anomalyWithCreateTime(minutesAgo(-1))
+        .setDetectionConfigId(alert.getId())
+        .setStartTime(minutesAgo(100))
+        .setEndTime(minutesAgo(sgCreationOffset - 10))
+    );
+    final AnomalyDTO anomaly2 = persist(anomalyWithCreateTime(minutesAgo(1))
+        .setDetectionConfigId(alert.getId())
+        .setStartTime(minutesAgo(100))
+        .setEndTime(minutesAgo(sgCreationOffset - 20))
+    );
+    assertThat(collectIds(instance.filter(sg, POINT_IN_TIME)))
+        .isEqualTo(collectIds(Set.of(anomaly2)));
+  }
+
+  @Test
+  public void testFilterWithHistoricalAnomalies() {
     final AlertDTO alert = persist(new AlertDTO()
         .setName("alert1")
         .setActive(true));
@@ -110,7 +174,7 @@ public class SubscriptionGroupFilterIntegrationTest {
     final SubscriptionGroupDTO sg = persist(new SubscriptionGroupDTO()
         .setName("name1")
         .setCronExpression(CRON)
-    );
+        .setNotifyHistoricalAnomalies(true));
 
     // base case
     assertThat(instance.filter(sg, POINT_IN_TIME).isEmpty()).isTrue();

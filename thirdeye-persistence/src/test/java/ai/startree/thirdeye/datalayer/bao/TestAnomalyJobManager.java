@@ -32,7 +32,7 @@ import org.testng.annotations.Test;
  * This class uses weaving to control the java system time.
  *
  * Note: if run within IntelliJ, run with the following JVM option:
- * -javaagent:[USER_PATH]/.m2/repository/org/aspectj/aspectjweaver/1.9.6/aspectjweaver-1.9.6.jar
+ * -javaagent:[USER_PATH]/.m2/repository/org/aspectj/aspectjweaver/1.9.21/aspectjweaver-1.9.21.jar --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.time=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED
  * IntelliJ does not use the pom surefire config: https://youtrack.jetbrains.com/issue/IDEA-52286
  *
  * In command line: ./mvnw -pl 'thirdeye-persistence' -Dtest=TestAnomalyJobManager test

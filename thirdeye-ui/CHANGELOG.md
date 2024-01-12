@@ -1,3 +1,10 @@
+## [2.45.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.44.0...thirdeye-ui-2.45.0) (2023-12-20)
+
+
+### Features
+
+* provide error notification when alert fails to update ([f5a4c607f](https://github.com/startreedata/thirdeye/commit/f5a4c607f2b88ae39a394032f26cbe35b896a9a1))
+
 ## [2.44.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.43.0...thirdeye-ui-2.44.0) (2023-12-19)
 
 

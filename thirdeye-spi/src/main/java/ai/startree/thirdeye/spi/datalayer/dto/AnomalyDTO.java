@@ -23,6 +23,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -425,5 +426,11 @@ public class AnomalyDTO extends AbstractDTO implements Comparable<AnomalyDTO>, S
         .add("startTime", startTime)
         .add("endTime", endTime)
         .toString();
+  }
+
+  @Override
+  public AnomalyDTO setCreateTime(final Timestamp createTime) {
+    super.setCreateTime(createTime);
+    return this;
   }
 }

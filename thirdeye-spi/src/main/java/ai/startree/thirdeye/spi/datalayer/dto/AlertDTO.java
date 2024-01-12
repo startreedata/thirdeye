@@ -17,6 +17,7 @@ import ai.startree.thirdeye.spi.detection.BaseComponent;
 import ai.startree.thirdeye.spi.detection.health.DetectionHealth;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -182,5 +183,11 @@ public class AlertDTO extends AbstractDTO {
   @Override
   public int hashCode() {
     return Objects.hash(cron, name, lastTimestamp, properties, active);
+  }
+
+  @Override
+  public AlertDTO setCreateTime(final Timestamp createTime) {
+    super.setCreateTime(createTime);
+    return this;
   }
 }

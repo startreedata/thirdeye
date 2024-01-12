@@ -15,6 +15,7 @@ package ai.startree.thirdeye.spi.datalayer.dto;
 
 import ai.startree.thirdeye.spi.Constants.SubjectType;
 import com.google.common.base.Objects;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 
@@ -231,5 +232,11 @@ public class SubscriptionGroupDTO extends AbstractDTO {
         properties,
         refLinks,
         owners);
+  }
+
+  @Override
+  public SubscriptionGroupDTO setCreateTime(final Timestamp createTime) {
+    super.setCreateTime(createTime);
+    return this;
   }
 }

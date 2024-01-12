@@ -90,6 +90,21 @@ export const GroupsEditor: FunctionComponent<GroupsEditorProps> = ({
                 });
 
                 break;
+
+            case SpecType.PagerDuty:
+                setCurrentSpecs((specs) => {
+                    return [
+                        ...specs,
+                        {
+                            type: SpecType.PagerDuty,
+                            params: {
+                                eventsIntegrationKey: "",
+                            },
+                        },
+                    ];
+                });
+
+                break;
             default:
                 break;
         }

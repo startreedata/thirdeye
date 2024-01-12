@@ -28,12 +28,14 @@ export const subscriptionGroupChannelHeaderMap = {
     [SpecType.Webhook]: "label.webhook",
     [SpecType.Slack]: "label.slack",
     [SpecType.EmailSendgrid]: "label.email",
+    [SpecType.PagerDuty]: "label.pager-duty",
 } as const;
 
 export const subscriptionGroupChannelIconsMap = {
     [SpecType.Webhook]: "material-symbols:webhook-rounded",
     [SpecType.Slack]: "mdi:slack",
     [SpecType.EmailSendgrid]: "ic:outline-email",
+    [SpecType.PagerDuty]: "simple-icons:pagerduty",
 } as const;
 
 export const getCardProps = (
@@ -65,6 +67,14 @@ export const getCardProps = (
             });
 
             break;
+        case SpecType.PagerDuty:
+            cardProps.rows.push({
+                label: t("label.integration-key"),
+                value: channel.params.eventsIntegrationKey,
+            });
+
+            break;
+
         case SpecType.Slack:
             cardProps.rows.push({
                 label: t("label.url"),

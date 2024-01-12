@@ -86,8 +86,7 @@ export const PagerDuty: FunctionComponent<PagerDutyProps> = ({
                                             SpecType.PagerDuty
                                         ]
                                     }
-                                />
-                                &nbsp;
+                                />{" "}
                                 {t(
                                     subscriptionGroupChannelHeaderMap[
                                         SpecType.PagerDuty
@@ -139,7 +138,8 @@ export const PagerDuty: FunctionComponent<PagerDutyProps> = ({
                                     }
                                 />
                                 <FormHelperText>
-                                    e.g. ad2a75369ae44008c051dfb8323d4285
+                                    {t("label.eg")}{" "}
+                                    ad2a75369ae44008c051dfb8323d4285
                                 </FormHelperText>
                             </>
                         }

@@ -162,7 +162,7 @@ module.exports = {
         }),
         // Allows fast refresh
         // https://github.com/pmmmwh/react-refresh-webpack-plugin
-        new ReactRefreshWebpackPlugin(),
+        new ReactRefreshWebpackPlugin({ overlay: false }),
     ],
 
     // webpack-dev-server

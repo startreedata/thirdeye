@@ -19,6 +19,8 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const { RetryChunkLoadPlugin } = require("webpack-retry-chunk-load-plugin");
 const WebpackBar = require("webpackbar");
+const ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin");
+const ReactRefreshTypeScript = require("react-refresh-typescript");
 
 const outputPath = path.join(__dirname, "dist");
 
@@ -50,6 +52,9 @@ module.exports = {
                         options: {
                             configFile: "tsconfig.json",
                             transpileOnly: true,
+                            getCustomTransformers: () => ({
+                                before: [ReactRefreshTypeScript()],
+                            }),
                         },
                     },
                 ],
@@ -155,6 +160,9 @@ module.exports = {
             name: "@startree-ui/thirdeye-ui [dev]",
             color: "#68B6F4",
         }),
+        // Allows fast refresh
+        // https://github.com/pmmmwh/react-refresh-webpack-plugin
+        new ReactRefreshWebpackPlugin(),
     ],
 
     // webpack-dev-server

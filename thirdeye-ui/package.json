@@ -100,6 +100,7 @@
     "devDependencies": {
         "@iconify/react": "^3.2.2",
         "@musement/iso-duration": "^1.0.0",
+        "@pmmmwh/react-refresh-webpack-plugin": "0.5.11",
         "@prettier/plugin-xml": "1.0.2",
         "@semantic-release/changelog": "6.0.1",
         "@sentry/webpack-plugin": "^2.7.0",
@@ -147,6 +148,8 @@
         "postcss": "8.3.6",
         "prettier": "2.4.0",
         "prettier-plugin-organize-imports": "2.3.3",
+        "react-refresh": "0.14.0",
+        "react-refresh-typescript": "2.0.9",
         "react-test-renderer": "^16.14.0",
         "sass": "1.39.0",
         "sass-loader": "12.1.0",

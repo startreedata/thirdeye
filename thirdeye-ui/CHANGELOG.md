@@ -1,3 +1,10 @@
+### [2.45.1](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.0...thirdeye-ui-2.45.1) (2024-01-12)
+
+
+### Bug Fixes
+
+* [TE-1886](https://cortexdata.atlassian.net/browse/TE-1886) pager duty support for subscription group ([195be23b3](https://github.com/startreedata/thirdeye/commit/195be23b30dfd240758ac567be7799c377fecb00))
+
 ## [2.45.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.44.0...thirdeye-ui-2.45.0) (2023-12-20)
 
 

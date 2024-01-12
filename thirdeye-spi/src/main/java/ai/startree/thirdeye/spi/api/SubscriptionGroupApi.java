@@ -40,6 +40,8 @@ public class SubscriptionGroupApi implements ThirdEyeCrudApi<SubscriptionGroupAp
   private NotificationSchemesApi notificationSchemes;
   private TimeWindowSuppressorApi alertSuppressors;
 
+  private Boolean notifyHistoricalAnomalies;
+
   public Long getId() {
     return id;
   }
@@ -158,6 +160,16 @@ public class SubscriptionGroupApi implements ThirdEyeCrudApi<SubscriptionGroupAp
 
   public SubscriptionGroupApi setAlertSuppressors(TimeWindowSuppressorApi alertSuppressors) {
     this.alertSuppressors = alertSuppressors;
+    return this;
+  }
+
+  public Boolean getNotifyHistoricalAnomalies() {
+    return notifyHistoricalAnomalies;
+  }
+
+  public SubscriptionGroupApi setNotifyHistoricalAnomalies(
+      final Boolean notifyHistoricalAnomalies) {
+    this.notifyHistoricalAnomalies = notifyHistoricalAnomalies;
     return this;
   }
 }

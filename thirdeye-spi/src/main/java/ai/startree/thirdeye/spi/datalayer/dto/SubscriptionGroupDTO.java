@@ -46,6 +46,12 @@ public class SubscriptionGroupDTO extends AbstractDTO {
   private Map<String, String> refLinks;
   private List<String> owners;
 
+  /**
+   * By default, this will be set to false. Meaning that anomalies that happened and ended
+   * before the association with the alert was created will not be notified.
+   */
+  private Boolean notifyHistoricalAnomalies;
+
   public boolean isActive() {
     return active;
   }
@@ -176,6 +182,16 @@ public class SubscriptionGroupDTO extends AbstractDTO {
   public SubscriptionGroupDTO setNotificationSchemes(
       final NotificationSchemesDto notificationSchemes) {
     this.notificationSchemes = notificationSchemes;
+    return this;
+  }
+
+  public Boolean getNotifyHistoricalAnomalies() {
+    return notifyHistoricalAnomalies;
+  }
+
+  public SubscriptionGroupDTO setNotifyHistoricalAnomalies(
+      final Boolean notifyHistoricalAnomalies) {
+    this.notifyHistoricalAnomalies = notifyHistoricalAnomalies;
     return this;
   }
 

@@ -163,11 +163,15 @@ public class SubscriptionGroupFilter {
     /*
      * Do not notify historical anomalies if the end time of the anomaly is before the
      * max of the alert create time and subscription group create time.
-     *
-     * TODO spyne This should also take the alert association tine when available.
      */
     if (!bool(sg.getNotifyHistoricalAnomalies())) {
-      f.setEndTimeIsGte(Math.max(alert.getCreateTime().getTime(), sg.getCreateTime().getTime()));
+      long earliestAnomalyEndTime = Math.max(
+          alert.getCreateTime().getTime(),
+          sg.getCreateTime().getTime());
+      if (aa.getCreateTime() != null) {
+        earliestAnomalyEndTime = Math.max(earliestAnomalyEndTime, aa.getCreateTime().getTime());
+      }
+      f.setEndTimeIsGte(earliestAnomalyEndTime);
     }
 
     optional(aa.getEnumerationItem())

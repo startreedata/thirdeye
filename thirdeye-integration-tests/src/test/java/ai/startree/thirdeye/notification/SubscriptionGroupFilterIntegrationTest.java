@@ -132,6 +132,75 @@ public class SubscriptionGroupFilterIntegrationTest {
         .setStartTime(minutesAgo(100))
         .setEndTime(minutesAgo(sgCreationOffset + 1)) // before sg was created
     );
+    persist(anomalyWithCreateTime(minutesAgo(2))
+        .setDetectionConfigId(alert.getId())
+        .setStartTime(minutesAgo(100))
+        .setEndTime(minutesAgo(sgCreationOffset - 5)) // after sg was created
+    );
+    final AnomalyDTO anomaly1 = persist(anomalyWithCreateTime(minutesAgo(2))
+        .setDetectionConfigId(alert.getId())
+        .setStartTime(minutesAgo(100))
+        .setEndTime(minutesAgo(sgCreationOffset - 15)) // after sg was created
+    );
+
+    persist(sg.setAlertAssociations(List.of(aaRef(alert.getId()).setCreateTime(new Timestamp(
+        minutesAgo(70))))));
+
+    assertThat(collectIds(instance.filter(sg, POINT_IN_TIME)))
+        .isEqualTo(collectIds(Set.of(anomaly1)));
+
+    watermarkManager.updateWatermarks(sg, List.of(anomaly1));
+
+    persist(anomalyWithCreateTime(minutesAgo(3))
+        .setDetectionConfigId(alert.getId())
+        .setStartTime(minutesAgo(100))
+        .setEndTime(minutesAgo(sgCreationOffset - 10))
+    );
+    // time in the future. Found an old anomaly. Should not be notified
+    persist(anomalyWithCreateTime(minutesAgo(-1))
+        .setDetectionConfigId(alert.getId())
+        .setStartTime(minutesAgo(100))
+        .setEndTime(minutesAgo(sgCreationOffset - 10))
+    );
+    final AnomalyDTO anomaly2 = persist(anomalyWithCreateTime(minutesAgo(1))
+        .setDetectionConfigId(alert.getId())
+        .setStartTime(minutesAgo(100))
+        .setEndTime(minutesAgo(sgCreationOffset - 20))
+    );
+    assertThat(collectIds(instance.filter(sg, POINT_IN_TIME)))
+        .isEqualTo(collectIds(Set.of(anomaly2)));
+  }
+
+  @Test
+  public void testFilterNoAlertAssociationCreateTime() {
+    final AlertDTO alert = persist(new AlertDTO()
+        .setName("alert1")
+        .setActive(true)
+        .setCreateTime(new Timestamp(minutesAgo(100)))
+    );
+
+    final int sgCreationOffset = 80;
+    final SubscriptionGroupDTO sg = persist(new SubscriptionGroupDTO()
+        .setName("name1")
+        .setCronExpression(CRON)
+        .setCreateTime(new Timestamp(minutesAgo(sgCreationOffset)))
+    );
+
+    // base case
+    assertThat(instance.filter(sg, POINT_IN_TIME).isEmpty()).isTrue();
+
+    final long superOldCreateTime = POINT_IN_TIME - NOTIFICATION_ANOMALY_MAX_LOOKBACK_MS - 100_000L;
+    persist(anomalyWithCreateTime(superOldCreateTime)
+        .setDetectionConfigId(alert.getId())
+        .setStartTime(minutesAgo(1000))
+        .setEndTime(minutesAgo(800))
+    );
+
+    persist(anomalyWithCreateTime(minutesAgo(9)) // before alert was created
+        .setDetectionConfigId(alert.getId())
+        .setStartTime(minutesAgo(100))
+        .setEndTime(minutesAgo(sgCreationOffset + 1)) // before sg was created
+    );
     final AnomalyDTO anomaly1 = persist(anomalyWithCreateTime(minutesAgo(2))
         .setDetectionConfigId(alert.getId())
         .setStartTime(minutesAgo(100))

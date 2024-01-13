@@ -72,4 +72,10 @@ public class EnumerationItemDTO extends AbstractDTO {
         .add("params=" + params)
         .toString();
   }
+
+  @Override
+  public EnumerationItemDTO setId(final Long id) {
+    super.setId(id);
+    return this;
+  }
 }

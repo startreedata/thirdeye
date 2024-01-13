@@ -20,6 +20,7 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.maximumTriggersPerMinute;
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
+import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
@@ -28,9 +29,18 @@ import ai.startree.thirdeye.notification.NotificationDispatcher;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AlertAssociationDto;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Singleton;
+import java.sql.Timestamp;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import javax.inject.Inject;
 import org.quartz.CronExpression;
 
@@ -57,7 +67,11 @@ public class SubscriptionGroupService extends
     ensureExists(api.getCron(), "cron value must be set.");
     ensure(CronExpression.isValidExpression(api.getCron()), ERR_CRON_INVALID, api.getCron());
     final int maxTriggersPerMinute = maximumTriggersPerMinute(api.getCron());
-    ensure(maxTriggersPerMinute <= SUBSCRIPTION_CRON_MAX_TRIGGERS_PER_MINUTE, ERR_CRON_FREQUENCY_TOO_HIGH,  api.getCron(), maxTriggersPerMinute, SUBSCRIPTION_CRON_MAX_TRIGGERS_PER_MINUTE);
+    ensure(maxTriggersPerMinute <= SUBSCRIPTION_CRON_MAX_TRIGGERS_PER_MINUTE,
+        ERR_CRON_FREQUENCY_TOO_HIGH,
+        api.getCron(),
+        maxTriggersPerMinute,
+        SUBSCRIPTION_CRON_MAX_TRIGGERS_PER_MINUTE);
 
     // For new Subscription Group or existing Subscription Group with different name
     if (existing == null || !existing.getName().equals(api.getName())) {
@@ -72,12 +86,42 @@ public class SubscriptionGroupService extends
   }
 
   @Override
+  protected void prepareCreatedDto(final ThirdEyeServerPrincipal principal,
+      final SubscriptionGroupDTO dto) {
+    final Timestamp created = requireNonNull(dto.getCreateTime(), "created");
+    optional(dto.getAlertAssociations())
+        .ifPresent(l -> l.forEach(aa -> aa.setCreateTime(created)));
+  }
+
+  @Override
   protected void prepareUpdatedDto(final ThirdEyeServerPrincipal principal,
       final SubscriptionGroupDTO existing,
       final SubscriptionGroupDTO updated) {
 
     /* This is a system field which is managed by the notification pipeline */
     updated.setVectorClocks(existing.getVectorClocks());
+
+    updateAlertAssociationsIfReqd(existing.getAlertAssociations(), updated.getAlertAssociations());
+  }
+
+  @VisibleForTesting
+  void updateAlertAssociationsIfReqd(final List<AlertAssociationDto> existing,
+      final List<AlertAssociationDto> updated) {
+    if (updated == null) {
+      return;
+    }
+    final Timestamp createTime = new Timestamp(System.currentTimeMillis());
+    if (existing == null) {
+      updated.forEach(aa -> aa.setCreateTime(createTime));
+      return;
+    }
+    final Map<AlertAssociationId, Date> m = existing.stream()
+        .collect(HashMap::new,
+            (map, aa) -> map.put(new AlertAssociationId(aa), aa.getCreateTime()),
+            HashMap::putAll
+        );
+    updated
+        .forEach(aa -> aa.setCreateTime(m.getOrDefault(new AlertAssociationId(aa), createTime)));
   }
 
   @Override
@@ -101,6 +145,38 @@ public class SubscriptionGroupService extends
   public void sendTestMessage(final Long id) {
     final SubscriptionGroupDTO sg = getDto(id);
     notificationDispatcher.sendTestMessage(sg);
+  }
+
+  private static class AlertAssociationId {
+
+    private final Long alertId;
+    private final Long enumerationItemId;
+
+    private AlertAssociationId(AlertAssociationDto aa) {
+      alertId = requireNonNull(aa.getAlert().getId());
+      enumerationItemId = optional(aa.getEnumerationItem())
+          .map(AbstractDTO::getId)
+          .orElse(null);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (o == null || getClass() != o.getClass()) {
+        return false;
+      }
+      final AlertAssociationId that = (AlertAssociationId) o;
+      return Objects.equals(alertId, that.alertId) && Objects.equals(
+          enumerationItemId,
+          that.enumerationItemId);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(alertId, enumerationItemId);
+    }
   }
 }
 

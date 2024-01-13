@@ -129,8 +129,8 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
         .peek(api -> validate(api, null))
         .map(this::toDto)
         .peek(dto -> authorizationManager.ensureCanCreate(principal, dto))
+        .map(dto -> setSystemFields(principal, dto))
         .peek(dto -> prepareCreatedDto(principal, dto))
-        .map(dto -> createGateKeeper(principal, dto))
         .peek(dtoManager::save)
         .peek(dto -> Objects.requireNonNull(dto.getId(), "DB update failed!"))
         .peek(this::postCreate)
@@ -169,7 +169,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
 
     // Override system fields.
     updated.setId(id);
-    updateGateKeeper(principal, existing, updated);
+    setSystemFields(principal, existing, updated);
 
     // ready to be persisted to db.
     return updated;
@@ -202,7 +202,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
     // By default, do nothing.
   }
 
-  private DtoT updateGateKeeper(final ThirdEyeServerPrincipal principal,
+  private DtoT setSystemFields(final ThirdEyeServerPrincipal principal,
       final DtoT existing,
       final DtoT updated) {
     updated.setCreatedBy(existing.getCreatedBy())
@@ -288,9 +288,10 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
     }
   }
 
-  private DtoT createGateKeeper(final ThirdEyeServerPrincipal principal, final DtoT dto) {
+  private DtoT setSystemFields(final ThirdEyeServerPrincipal principal, final DtoT dto) {
     final Timestamp currentTime = new Timestamp(new Date().getTime());
-    dto.setCreatedBy(principal.getName())
+    dto
+        .setCreatedBy(principal.getName())
         .setCreateTime(currentTime)
         .setUpdatedBy(principal.getName())
         .setUpdateTime(currentTime);

@@ -404,6 +404,7 @@
             <excludes>
               <!-- Text and log files -->
               <exclude>**/*.txt</exclude>
+              <exclude>**/*.http</exclude>
               <exclude>**/*.log</exclude>
               <exclude>**/*.list</exclude>
               <exclude>**/*.out</exclude>

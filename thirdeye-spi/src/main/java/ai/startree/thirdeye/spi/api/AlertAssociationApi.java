@@ -15,12 +15,14 @@ package ai.startree.thirdeye.spi.api;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import java.util.Date;
 
 @JsonInclude(Include.NON_NULL)
 public class AlertAssociationApi {
 
   private AlertApi alert;
   private EnumerationItemApi enumerationItem;
+  private Date created;
 
   public AlertApi getAlert() {
     return alert;
@@ -38,6 +40,15 @@ public class AlertAssociationApi {
   public AlertAssociationApi setEnumerationItem(
       final EnumerationItemApi enumerationItem) {
     this.enumerationItem = enumerationItem;
+    return this;
+  }
+
+  public Date getCreated() {
+    return created;
+  }
+
+  public AlertAssociationApi setCreated(final Date created) {
+    this.created = created;
     return this;
   }
 }

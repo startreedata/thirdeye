@@ -13,10 +13,13 @@
  */
 package ai.startree.thirdeye.spi.datalayer.dto;
 
+import java.util.Date;
+
 public class AlertAssociationDto {
 
   private AlertDTO alert;
   private EnumerationItemDTO enumerationItem;
+  private Date createTime;
 
   public AlertDTO getAlert() {
     return alert;
@@ -34,6 +37,15 @@ public class AlertAssociationDto {
   public AlertAssociationDto setEnumerationItem(
       final EnumerationItemDTO enumerationItem) {
     this.enumerationItem = enumerationItem;
+    return this;
+  }
+
+  public Date getCreateTime() {
+    return createTime;
+  }
+
+  public AlertAssociationDto setCreateTime(final Date createTime) {
+    this.createTime = createTime;
     return this;
   }
 }

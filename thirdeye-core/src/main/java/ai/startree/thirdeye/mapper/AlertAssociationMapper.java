@@ -27,9 +27,11 @@ public interface AlertAssociationMapper {
 
   @Mapping(target = "alert", qualifiedByName = "IdMapper")
   @Mapping(target = "enumerationItem", qualifiedByName = "IdMapper", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
+  @Mapping(target = "createTime", source = "created")
   AlertAssociationDto toDto(AlertAssociationApi api);
 
   @Mapping(target = "alert", qualifiedByName = "IdMapper")
   @Mapping(target = "enumerationItem", qualifiedByName = "IdMapper", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
+  @Mapping(target = "created", source = "createTime")
   AlertAssociationApi toApi(AlertAssociationDto dto);
 }

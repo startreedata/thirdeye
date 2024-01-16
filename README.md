@@ -71,7 +71,7 @@ For a complete description of ThirdEye's features, see [**ThirdEye documentation
 
 ### Requirements
 - tested on Linux and Mac OS
-- Java 11
+- Java 17
 - MySQL 8.0
 - the UI requires internal npm packages. Make sure you can access them. See [thirdeye-ui prerequisites](./thirdeye-ui/README.md#configure-node-package-manager-npm-for-use-with-artifactory)
 

@@ -73,7 +73,10 @@ public class NamespaceResolver {
     return namespace.orElse(DEFAULT_NAMESPACE);
   }
 
-  private @NonNull Optional<String> resolveEnumerationItemNamespace(final @NonNull EnumerationItemDTO enumerationItemDTO) {
+  private @NonNull Optional<String> resolveEnumerationItemNamespace(final @Nullable EnumerationItemDTO enumerationItemDTO) {
+    if (enumerationItemDTO == null) {
+      return Optional.empty();
+    }
     final Long enumerationItemId = optional(enumerationItemDTO.getId()).orElse(null);
     if (enumerationItemId != null) {
       final Optional<String> enumNamespace = getEnumerationItemNamespaceById(enumerationItemId);
@@ -93,15 +96,10 @@ public class NamespaceResolver {
     if (dto == null) {
       return Optional.empty();
     }
-    // anomaly inherits namespace from enum 
-    final Long enumerationItemId = optional(dto.getEnumerationItem()).map(AbstractDTO::getId)
-        .orElse(null);
-    if (enumerationItemId != null) {
-      final Optional<String> enumNamespace = getEnumerationItemNamespaceById(
-          enumerationItemId);
-      if (enumNamespace.isPresent()) {
-        return enumNamespace;
-      }
+    // anomaly inherits namespace from enum
+    final Optional<String> enumNamespace = resolveEnumerationItemNamespace(dto.getEnumerationItem());
+    if (enumNamespace.isPresent()) {
+      return enumNamespace;
     }
     // if no enum or enum has no namespace, fallback to detection config namespace
     final Long detectionConfigId = dto.getDetectionConfigId();

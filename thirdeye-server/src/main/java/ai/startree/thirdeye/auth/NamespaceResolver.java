@@ -89,7 +89,7 @@ public class NamespaceResolver {
       return getAlertNamespaceById(detectionConfigId);
     }
     
-    return Optional.empty();
+    return getNamespaceFromAuth(enumerationItemDTO);
   }
 
   private @NonNull Optional<String> resolveAnomalyNamespace(final @Nullable AnomalyDTO dto) {

@@ -39,6 +39,52 @@ public class AuthorizationManagerTest {
   }
 
   @Test
+  public void testResourceIdOfEnumerationItemDtoWithResourceOverridesAlertNamespace() {
+    final AlertManager alertManager = mock(AlertManager.class);
+    final AlertDTO alertDto = new AlertDTO();
+    alertDto.setId(1L);
+    alertDto.setAuth(new AuthorizationConfigurationDTO().setNamespace("alert_namespace"));
+    when(alertManager.findById(1L)).thenReturn(alertDto);
+
+    final EnumerationItemManager enumerationItemManager = mock(EnumerationItemManager.class);
+    final EnumerationItemDTO enumerationItemDTO = new EnumerationItemDTO();
+    enumerationItemDTO.setId(2L);
+    enumerationItemDTO.setAuth(new AuthorizationConfigurationDTO().setNamespace("enum_namespace"));
+    final AlertDTO alertRef = new AlertDTO();
+    alertRef.setId(1L);
+    enumerationItemDTO.setAlert(alertRef);
+    when(enumerationItemManager.findById(2L)).thenReturn(enumerationItemDTO);
+    final AuthorizationManager authorizationManager = new AuthorizationManager(
+        null, null, new NamespaceResolver(alertManager, enumerationItemManager, null));
+    final ResourceIdentifier got = authorizationManager.resourceId(enumerationItemDTO);
+    assertThat(got.getName()).isEqualTo("2");
+    assertThat(got.getNamespace()).isEqualTo("enum_namespace");
+    assertThat(got.getEntityType()).isEqualTo("ENUMERATION_ITEM");
+  }
+  
+  @Test
+  public void testResourceIdOfEnumerationItemDtoWithoutResourceInheritsAlert() {
+    final AlertManager alertManager = mock(AlertManager.class);
+    final AlertDTO alertDto = new AlertDTO();
+    alertDto.setId(1L);
+    alertDto.setAuth(new AuthorizationConfigurationDTO().setNamespace("alert_namespace"));
+    when(alertManager.findById(1L)).thenReturn(alertDto);
+
+    final EnumerationItemManager enumerationItemManager = mock(EnumerationItemManager.class);
+    final EnumerationItemDTO enumerationItemDTO = new EnumerationItemDTO();
+    enumerationItemDTO.setId(2L);
+    final AlertDTO alertRef = new AlertDTO();
+    alertRef.setId(1L);
+    enumerationItemDTO.setAlert(alertRef);
+    final AuthorizationManager authorizationManager = new AuthorizationManager(
+        null, null, new NamespaceResolver(alertManager, enumerationItemManager, null));
+    final ResourceIdentifier got = authorizationManager.resourceId(enumerationItemDTO);
+    assertThat(got.getName()).isEqualTo("2");
+    assertThat(got.getNamespace()).isEqualTo("alert_namespace");
+    assertThat(got.getEntityType()).isEqualTo("ENUMERATION_ITEM");
+  }
+
+  @Test
   public void testResourceIdOfAnomalyDtoWithoutEnumInheritsAlertResourceId() {
     final AlertManager alertManager = mock(AlertManager.class);
     final AlertDTO alertDto = new AlertDTO();

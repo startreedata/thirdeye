@@ -22,6 +22,7 @@ import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -63,11 +64,29 @@ public class NamespaceResolver {
       namespace = resolveAnomalyNamespace((AnomalyDTO) (dto));
     } else if (dto instanceof RcaInvestigationDTO) {
       namespace = resolveRcaNamespace((RcaInvestigationDTO) (dto));
+    } else if (dto instanceof EnumerationItemDTO) {
+      namespace = resolveEnumerationItemNamespace((EnumerationItemDTO) dto);
     } else {
       namespace = getNamespaceFromAuth(dto);
     }
 
     return namespace.orElse(DEFAULT_NAMESPACE);
+  }
+
+  private @NonNull Optional<String> resolveEnumerationItemNamespace(final @NonNull EnumerationItemDTO enumerationItemDTO) {
+    final Long enumerationItemId = optional(enumerationItemDTO.getId()).orElse(null);
+    if (enumerationItemId != null) {
+      final Optional<String> enumNamespace = getEnumerationItemNamespaceById(enumerationItemId);
+      if (enumNamespace.isPresent()) {
+        return enumNamespace;
+      }
+    }
+    final Long detectionConfigId = optional(enumerationItemDTO.getAlert()).map(AbstractDTO::getId).orElse(null);
+    if (detectionConfigId != null) {
+      return getAlertNamespaceById(detectionConfigId);
+    }
+    
+    return Optional.empty();
   }
 
   private @NonNull Optional<String> resolveAnomalyNamespace(final @Nullable AnomalyDTO dto) {

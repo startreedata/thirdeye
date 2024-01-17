@@ -53,6 +53,7 @@ public class AuthorizationManagerTest {
     final AlertDTO alertRef = new AlertDTO();
     alertRef.setId(1L);
     enumerationItemDTO.setAlert(alertRef);
+    when(enumerationItemManager.findById(2L)).thenReturn(enumerationItemDTO);
     final AuthorizationManager authorizationManager = new AuthorizationManager(
         null, null, new NamespaceResolver(alertManager, enumerationItemManager, null));
     final ResourceIdentifier got = authorizationManager.resourceId(enumerationItemDTO);

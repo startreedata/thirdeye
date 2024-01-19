@@ -55,6 +55,7 @@ import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.dropwizard.DropwizardExports;
+import io.sentry.Hint;
 import io.sentry.Sentry;
 import io.sentry.SentryLevel;
 import java.util.EnumSet;
@@ -69,6 +70,7 @@ import org.slf4j.LoggerFactory;
 public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
 
   private static final Logger log = LoggerFactory.getLogger(ThirdEyeServer.class);
+  private static final String SENTRY_MAIN_THREAD_HINT_KEY = "IS_MAIN_THREAD_ERROR";
 
   private Injector injector;
   private TaskDriver taskDriver = null;
@@ -98,6 +100,15 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
       }
     });
     bootstrap.getObjectMapper().registerModule(ThirdEyeSerialization.TEMPLATABLE);
+  }
+
+  @Override
+  protected void onFatalError(final Throwable t) {
+    // dropwizard catches an exception that makes the main thread stop - so it is not caught by sentry - catch it in sentry manually here
+    final Hint hint = new Hint();
+    hint.set(SENTRY_MAIN_THREAD_HINT_KEY, new Object());
+    Sentry.captureException(t, hint);
+    super.onFatalError(t);
   }
 
   @Override
@@ -249,7 +260,6 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
     return injector;
   }
 
-
   private void initSentry(final BackendSentryConfiguration config) {
     if (config.getDsn() != null && !config.getDsn().isBlank()) {
       // start sentry - see https://docs.sentry.io/platforms/java/usage/
@@ -257,7 +267,9 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
         options.setDsn(config.getDsn());
         // by default sentry catches uncaught exception, so they are not shown in stdout. Force print them in stdout 
         options.setBeforeSend((sentryEvent, hint) -> {
-          optional(sentryEvent.getThrowable()).ifPresent(Throwable::printStackTrace);
+          if (hint.get(SENTRY_MAIN_THREAD_HINT_KEY) == null) {
+            optional(sentryEvent.getThrowable()).ifPresent(Throwable::printStackTrace);
+          } // else it is an exception on the main thread. dropwizard catches it and prints it already so no need to print here
           return sentryEvent;
         });
         options.setRelease(this.getClass().getPackage().getImplementationVersion());

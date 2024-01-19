@@ -174,9 +174,10 @@ prometheus:
 sentry:
   # set the sentry dsn here - if not set or blank, sentry is disabled
   dsn: ""
-  environment: development
+  # Some characters are forbidden - see https://docs.sentry.io/platforms/java/configuration/environments/?original_referrer=https%3A%2F%2Fwww.google.com%2F
+  environment: "localhost:7004"
   tags:
-    service: coordinator
+    component: coordinator
 
 scheduler:
   # Run the Quartz Scheduler.

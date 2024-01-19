@@ -21,6 +21,7 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import ai.startree.thirdeye.auth.AuthConfiguration;
 import ai.startree.thirdeye.auth.AuthDisabledRequestFilter;
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
+import ai.startree.thirdeye.config.BackendSentryConfiguration;
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.datalayer.DataSourceBuilder;
 import ai.startree.thirdeye.datalayer.core.EnumerationItemMaintainer;
@@ -54,6 +55,9 @@ import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.dropwizard.DropwizardExports;
+import io.sentry.Hint;
+import io.sentry.Sentry;
+import io.sentry.SentryLevel;
 import java.util.EnumSet;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
@@ -66,6 +70,7 @@ import org.slf4j.LoggerFactory;
 public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
 
   private static final Logger log = LoggerFactory.getLogger(ThirdEyeServer.class);
+  private static final String SENTRY_MAIN_THREAD_HINT_KEY = "IS_MAIN_THREAD_ERROR";
 
   private Injector injector;
   private TaskDriver taskDriver = null;
@@ -98,7 +103,17 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
   }
 
   @Override
+  protected void onFatalError(final Throwable t) {
+    // dropwizard catches an exception that makes the main thread stop - so it is not caught by sentry - catch it in sentry manually here
+    final Hint hint = new Hint();
+    hint.set(SENTRY_MAIN_THREAD_HINT_KEY, new Object());
+    Sentry.captureException(t, hint);
+    super.onFatalError(t);
+  }
+
+  @Override
   public void run(final ThirdEyeServerConfiguration configuration, final Environment env) {
+    initSentry(configuration.getSentryConfiguration());
 
     final DataSource dataSource = new DataSourceBuilder()
         .build(configuration.getDatabaseConfiguration());
@@ -243,5 +258,30 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
    */
   public Injector getInjector() {
     return injector;
+  }
+
+  private void initSentry(final BackendSentryConfiguration config) {
+    if (config.getDsn() != null && !config.getDsn().isBlank()) {
+      // start sentry - see https://docs.sentry.io/platforms/java/usage/
+      Sentry.init(options -> {
+        options.setDsn(config.getDsn());
+        // by default sentry catches uncaught exception, so they are not shown in stdout. Force print them in stdout 
+        options.setBeforeSend((sentryEvent, hint) -> {
+          if (hint.get(SENTRY_MAIN_THREAD_HINT_KEY) == null) {
+            optional(sentryEvent.getThrowable()).ifPresent(Throwable::printStackTrace);
+          } // else it is an exception on the main thread. dropwizard catches it and prints it already so no need to print here
+          return sentryEvent;
+        });
+        options.setRelease(this.getClass().getPackage().getImplementationVersion());
+        options.setEnvironment(config.getEnvironment());
+        config.getTags().forEach(options::setTag);
+        // Enable Sentry SDK logs for error level - to know if sentry has errors
+        options.setDebug(true);
+        options.setDiagnosticLevel(SentryLevel.ERROR);
+      });
+      log.info("Sentry.io collect is enabled.");
+    } else {
+      log.info("Sentry.io collect is not enabled.");
+    }
   }
 }

@@ -91,6 +91,7 @@
     <swagger.version>2.1.6-1</swagger.version>
     <testcontainers.version>1.18.3</testcontainers.version>
     <micrometer.version>1.11.4</micrometer.version>
+    <sentry.version>7.2.0</sentry.version>
   </properties>
 
   <licenses>
@@ -823,6 +824,11 @@
         <groupId>io.prometheus</groupId>
         <artifactId>simpleclient_servlet</artifactId>
         <version>${prometheus.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.sentry</groupId>
+        <artifactId>sentry</artifactId>
+        <version>${sentry.version}</version>
       </dependency>
 
       <dependency>

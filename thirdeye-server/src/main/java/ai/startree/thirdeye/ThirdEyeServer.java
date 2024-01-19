@@ -308,8 +308,7 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
     @Override
     public void onEvent(final RequestEvent event) {
       if (event.getType() == Type.ON_EXCEPTION) {
-        final Throwable exception = event.getException();
-        Sentry.captureException(exception);
+        Sentry.captureException(event.getException());
       }
     }
   }

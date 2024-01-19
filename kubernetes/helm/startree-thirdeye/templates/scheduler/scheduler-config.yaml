@@ -128,6 +128,15 @@ data:
     # Prometheus compatible metrics will be exposed at /admin/prometheus
     prometheus:
       enabled: {{ .Values.prometheus.enabled }}
+    
+    # sentry.io collect
+    sentry:
+      # if sentry.dsn is not set or blank, sentry is disabled
+      dsn: "{{ .Values.sentry.dsn }}"
+      # Some characters are forbidden - see https://docs.sentry.io/platforms/java/configuration/environments
+      environment: "{{regexReplaceAll `(https?:|\n| |/)` .Values.ui.publicUrl ""}}"
+      tags:
+        component: "{{ .Values.scheduler.name }}"
 
     failureFromAddress: "thirdeye@localhost"
     failureToAddress: "thirdeye@localhost"

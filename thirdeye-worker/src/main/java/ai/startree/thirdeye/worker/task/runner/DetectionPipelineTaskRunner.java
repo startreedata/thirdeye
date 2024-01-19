@@ -21,14 +21,10 @@ import ai.startree.thirdeye.alert.AlertDetectionIntervalCalculator;
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.detectionpipeline.DetectionPipelineContext;
 import ai.startree.thirdeye.detectionpipeline.PlanExecutor;
-import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
-import ai.startree.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotificationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DetectionPipelineTaskInfo;
 import ai.startree.thirdeye.spi.detection.DetectionPipelineUsage;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
@@ -37,6 +33,7 @@ import ai.startree.thirdeye.worker.task.TaskContext;
 import ai.startree.thirdeye.worker.task.TaskResult;
 import ai.startree.thirdeye.worker.task.TaskRunner;
 import com.codahale.metrics.Counter;
+import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -53,116 +50,102 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
 
   private final Logger LOG = LoggerFactory.getLogger(DetectionPipelineTaskRunner.class);
 
-  private final Counter detectionTaskExceptionCounter;
-  private final Counter detectionTaskSuccessCounter;
-  private final Counter detectionTaskCounter;
-
   private final AlertManager alertManager;
-  private final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager;
   private final AlertDetectionIntervalCalculator alertDetectionIntervalCalculator;
-  private final AnomalyManager anomalyDao;
+  private final AnomalyManager anomalyManager;
   private final PlanExecutor planExecutor;
   private final AlertTemplateRenderer alertTemplateRenderer;
 
+  private final Counter detectionTaskExceptionCounter;
+  private final Counter detectionTaskSuccessCounter;
+  private final Counter detectionTaskCounter;
+  private final Histogram detectionTaskDuration;
+
   @Inject
   public DetectionPipelineTaskRunner(final AlertManager alertManager,
-      final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager,
       final MetricRegistry metricRegistry,
       final AlertDetectionIntervalCalculator alertDetectionIntervalCalculator,
-      final AnomalyManager anomalyDao,
+      final AnomalyManager anomalyManager,
       final PlanExecutor planExecutor,
       final AlertTemplateRenderer alertTemplateRenderer) {
     this.alertManager = alertManager;
-    this.anomalySubscriptionGroupNotificationManager = anomalySubscriptionGroupNotificationManager;
     this.alertDetectionIntervalCalculator = alertDetectionIntervalCalculator;
-    this.anomalyDao = anomalyDao;
+    this.anomalyManager = anomalyManager;
     this.planExecutor = planExecutor;
     this.alertTemplateRenderer = alertTemplateRenderer;
 
     detectionTaskExceptionCounter = metricRegistry.counter("detectionTaskExceptionCounter");
     detectionTaskSuccessCounter = metricRegistry.counter("detectionTaskSuccessCounter");
     detectionTaskCounter = metricRegistry.counter("detectionTaskCounter");
-  }
-
-  /**
-   * Renotify the anomaly by creating or updating the record in the subscription group notification
-   * table
-   *
-   * @param anomaly the anomaly to be notified.
-   */
-  public static void renotifyAnomaly(final AnomalyDTO anomaly,
-      final AnomalySubscriptionGroupNotificationManager anomalySubscriptionGroupNotificationManager) {
-    final List<AnomalySubscriptionGroupNotificationDTO> subscriptionGroupNotificationDTOs =
-        anomalySubscriptionGroupNotificationManager
-            .findByPredicate(Predicate.EQ("anomalyId", anomaly.getId()));
-    final AnomalySubscriptionGroupNotificationDTO anomalyNotificationDTO;
-    if (subscriptionGroupNotificationDTOs.isEmpty()) {
-      // create a new record if it is not existed yet.
-      anomalyNotificationDTO = new AnomalySubscriptionGroupNotificationDTO();
-      new AnomalySubscriptionGroupNotificationDTO();
-      anomalyNotificationDTO.setAnomalyId(anomaly.getId());
-      anomalyNotificationDTO.setDetectionConfigId(anomaly.getDetectionConfigId());
-    } else {
-      // update the existing record if the anomaly needs to be re-notified
-      anomalyNotificationDTO = subscriptionGroupNotificationDTOs.get(0);
-      anomalyNotificationDTO.setNotifiedSubscriptionGroupIds(Collections.emptyList());
-    }
-    anomalySubscriptionGroupNotificationManager.save(anomalyNotificationDTO);
+    detectionTaskDuration = metricRegistry.histogram("detectionTaskDuration");
   }
 
   @Override
   public List<TaskResult> execute(final TaskInfo taskInfo, final TaskContext taskContext)
       throws Exception {
+    final long tStart = System.currentTimeMillis();
     detectionTaskCounter.inc();
     try {
-      final DetectionPipelineTaskInfo info = (DetectionPipelineTaskInfo) taskInfo;
-      LOG.info("Start detection task for id {} between {} and {}",
-          info.getConfigId(),
-          new DateTime(info.getStart(), DateTimeZone.UTC),
-          new DateTime(info.getEnd(), DateTimeZone.UTC));
-      final AlertDTO alert = requireNonNull(alertManager.findById(info.getConfigId()),
-          String.format("Could not resolve config id %d", info.getConfigId()));
-
-      final Interval detectionInterval = alertDetectionIntervalCalculator.getCorrectedInterval(
-          alert,
-          info.getStart(), info.getEnd());
-
-      final OperatorResult result = run(alert, detectionInterval);
-
-      if (result.getLastTimestamp() < 0) {
-        // notice lastTimestamp is not updated
-        LOG.info("No data returned for detection run for id {} between {} and {}",
-            alert.getId(),
-            detectionInterval.getStart(),
-            detectionInterval.getEnd());
-        return Collections.emptyList();
-      }
-
-      // a detection can be replayed on specific period (eg if the data has mutated) - ensure the lastTimestamp never goes back in time because of a detection run
-      // if the user really wants to set the lastTimestamp back in time, he can do it with reset, of by editing the lastTimestamp manually
-      final long newLastTimestamp = Math.max(detectionInterval.getEndMillis(),
-          alert.getLastTimestamp());
-      alert.setLastTimestamp(newLastTimestamp);
-      // TODO CYRIL: lastTimestamp and updateTime are used by consumers to known when an alert has run
-      //  to improve consistency the anomaly save and the update of the alert should be in a single transaction
-      //  this would also improve failure cases
-      optional(result.getAnomalies())
-          .orElse(Collections.emptyList())
-          .forEach(anomalyDao::save);
-      alertManager.update(alert);
-
+      final var result = execute0((DetectionPipelineTaskInfo) taskInfo);
       detectionTaskSuccessCounter.inc();
-      LOG.info("Completed detection task for id {} between {} and {}. Detected {} anomalies.",
-          alert.getId(),
-          detectionInterval.getStart(),
-          detectionInterval.getEnd(),
-          result.getAnomalies().size());
-
-      return Collections.emptyList();
+      detectionTaskDuration.update(System.currentTimeMillis() - tStart);
+      return result;
     } catch (final Exception e) {
       detectionTaskExceptionCounter.inc();
       throw e;
     }
+  }
+
+  private List<TaskResult> execute0(final DetectionPipelineTaskInfo info)
+      throws Exception {
+    LOG.info("Start detection task for id {} between {} and {}",
+        info.getConfigId(),
+        new DateTime(info.getStart(), DateTimeZone.UTC),
+        new DateTime(info.getEnd(), DateTimeZone.UTC));
+    final AlertDTO alert = requireNonNull(alertManager.findById(info.getConfigId()),
+        String.format("Could not resolve config id %d", info.getConfigId()));
+
+    final Interval detectionInterval = alertDetectionIntervalCalculator.getCorrectedInterval(
+        alert,
+        info.getStart(), info.getEnd());
+
+    final OperatorResult result = run(alert, detectionInterval);
+
+    if (result.getLastTimestamp() < 0) {
+      // notice lastTimestamp is not updated
+      LOG.info("No data returned for detection run for id {} between {} and {}",
+          alert.getId(),
+          detectionInterval.getStart(),
+          detectionInterval.getEnd());
+      return Collections.emptyList();
+    }
+
+    /*
+     * a detection can be replayed on specific period (eg if the data has mutated) - ensure the
+     * lastTimestamp never goes back in time because of a detection run if the user really wants
+     * to set the lastTimestamp back in time, he can do it with reset, of by editing the
+     * lastTimestamp manually
+     */
+    final long newLastTimestamp = Math.max(
+        detectionInterval.getEndMillis(),
+        alert.getLastTimestamp());
+
+    alert.setLastTimestamp(newLastTimestamp);
+    // TODO CYRIL: lastTimestamp and updateTime are used by consumers to known when an alert has run
+    //  to improve consistency the anomaly save and the update of the alert should be in a single
+    //  transaction this would also improve failure cases
+    optional(result.getAnomalies())
+        .orElse(Collections.emptyList())
+        .forEach(anomalyManager::save);
+    alertManager.update(alert);
+
+    LOG.info("Completed detection task for id {} between {} and {}. Detected {} anomalies.",
+        alert.getId(),
+        detectionInterval.getStart(),
+        detectionInterval.getEnd(),
+        optional(result.getAnomalies()).map(List::size).orElse(0));
+
+    return Collections.emptyList();
   }
 
   public OperatorResult run(final AlertDTO alert, final Interval detectionInterval)

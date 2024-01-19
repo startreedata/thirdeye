@@ -61,9 +61,15 @@ import io.sentry.SentryLevel;
 import java.util.EnumSet;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
+import javax.ws.rs.ext.Provider;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
+import org.glassfish.jersey.server.monitoring.ApplicationEvent;
+import org.glassfish.jersey.server.monitoring.ApplicationEventListener;
+import org.glassfish.jersey.server.monitoring.RequestEvent;
+import org.glassfish.jersey.server.monitoring.RequestEvent.Type;
+import org.glassfish.jersey.server.monitoring.RequestEventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -113,7 +119,7 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
 
   @Override
   public void run(final ThirdEyeServerConfiguration configuration, final Environment env) {
-    initSentry(configuration.getSentryConfiguration());
+    initSentry(configuration.getSentryConfiguration(), env.jersey());
 
     final DataSource dataSource = new DataSourceBuilder()
         .build(configuration.getDatabaseConfiguration());
@@ -260,7 +266,7 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
     return injector;
   }
 
-  private void initSentry(final BackendSentryConfiguration config) {
+  private void initSentry(final BackendSentryConfiguration config, final JerseyEnvironment jersey) {
     if (config.getDsn() != null && !config.getDsn().isBlank()) {
       // start sentry - see https://docs.sentry.io/platforms/java/usage/
       Sentry.init(options -> {
@@ -279,9 +285,32 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
         options.setDebug(true);
         options.setDiagnosticLevel(SentryLevel.ERROR);
       });
+      // intercept exceptions caught by dropwizard/jersey
+      jersey.register(new ExceptionSentryLogger());
       log.info("Sentry.io collect is enabled.");
     } else {
       log.info("Sentry.io collect is not enabled.");
+    }
+  }
+  
+  @Provider
+  public static class ExceptionSentryLogger implements ApplicationEventListener, RequestEventListener {
+
+    @Override
+    public void onEvent(final ApplicationEvent event) {
+    }
+
+    @Override
+    public RequestEventListener onRequest(final RequestEvent requestEvent) {
+      return this;
+    }
+
+    @Override
+    public void onEvent(final RequestEvent event) {
+      if (event.getType() == Type.ON_EXCEPTION) {
+        final Throwable exception = event.getException();
+        Sentry.captureException(exception);
+      }
     }
   }
 }

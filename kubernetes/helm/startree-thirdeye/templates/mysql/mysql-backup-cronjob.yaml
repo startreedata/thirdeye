@@ -18,6 +18,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: mysql-backup
+  namespace: {{ .Release.Namespace }}
 spec:
   schedule: {{ .Values.mysql.backup.schedule | quote }}
   successfulJobsHistoryLimit: 0

@@ -18,6 +18,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: dataloader-pinot
+  namespace: {{ .Release.Namespace }}
 spec:
   template:
     metadata:

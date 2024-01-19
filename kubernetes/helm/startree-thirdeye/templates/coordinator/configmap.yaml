@@ -17,6 +17,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: thirdeye-config
+  namespace: {{ .Release.Namespace }}
 data:
   server.yaml: |
     ######################################################

@@ -31,6 +31,7 @@ apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRouteTCP
 metadata:
   name: {{ include "thirdeye.coordinator.fullname" . }}
+  namespace: {{ .Release.Namespace }}
 spec:
   entryPoints:
   - websecure

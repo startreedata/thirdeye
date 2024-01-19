@@ -18,6 +18,7 @@ apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
   name: {{ include "thirdeye.ui.fullname" . }}
+  namespace: {{ .Release.Namespace }}
 spec:
   entryPoints:
   - websecure

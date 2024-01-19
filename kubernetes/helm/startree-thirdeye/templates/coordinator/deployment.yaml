@@ -17,6 +17,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "thirdeye.coordinator.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ include "thirdeye.name" . }}
     chart: {{ include "thirdeye.chart" . }}

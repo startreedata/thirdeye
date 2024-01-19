@@ -16,6 +16,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: ui-test
+  namespace: {{ .Release.Namespace }}
   annotations:
     "helm.sh/hook": test
 spec:

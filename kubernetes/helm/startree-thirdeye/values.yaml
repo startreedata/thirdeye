@@ -124,6 +124,10 @@ tls:
 # Expose prometheus metrics.
 prometheus:
   enabled: false
+  
+# sentry collect is dsn is not set or blank, sentry is disabled
+sentry:
+  dsn: ""
 
 time:
   timezone: UTC

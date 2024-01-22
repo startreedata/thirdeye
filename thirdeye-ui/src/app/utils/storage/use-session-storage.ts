@@ -59,7 +59,7 @@ export const useSessionStorage = <T = string>(
         try {
             window.sessionStorage.removeItem(keyName);
         } catch (err) {
-            console.error(`Unable to delete value for ${keyName} from`);
+            console.error(`Unable to delete value for ${keyName} from storage`);
         }
     };
 

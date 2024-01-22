@@ -14,7 +14,7 @@
  */
 import { useState } from "react";
 
-export type UseSessionStorageReturn<T> = [T, (newVal: T) => void];
+export type UseSessionStorageReturn<T> = [T, (newVal: T) => void, () => void];
 
 const getDefaultStoredValue = <T>(
     keyName: SessionStorageKeys,
@@ -55,7 +55,15 @@ export const useSessionStorage = <T = string>(
         setStoredValue(newValue);
     };
 
-    return [storedValue, setValue];
+    const deleteValue = (): void => {
+        try {
+            window.sessionStorage.removeItem(keyName);
+        } catch (err) {
+            console.error(`Unable to delete value for ${keyName} from`);
+        }
+    };
+
+    return [storedValue, setValue, deleteValue];
 };
 
 // Add keys here to use this hook. This centralized store ensures

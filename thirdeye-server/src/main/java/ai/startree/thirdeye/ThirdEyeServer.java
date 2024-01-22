@@ -291,13 +291,13 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
       jersey.register(new ExceptionSentryLogger());
 
       // enable sentry log collect - see https://docs.sentry.io/platforms/java/guides/logback/
-      final ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
       final SentryAppender appender = new SentryAppender();
       appender.setMinimumEventLevel(Level.ERROR);
       appender.setMinimumBreadcrumbLevel(Level.DEBUG);
       appender.start();
+      final ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
       rootLogger.addAppender(appender);
-      // re-init the logger of this class now that the Sentry logback appender has been injected
+      // re-instantiate the logger of this class now that the Sentry appender has been injected
       log = LoggerFactory.getLogger(ThirdEyeServer.class);
       log.info("Sentry.io collect is enabled.");
     } else {

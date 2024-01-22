@@ -162,6 +162,7 @@ export interface CohortDetectionResponse {
     maxDepth: number;
     resultSize: number;
     results: CohortResult[];
+    where: string; // For queryFilter value
 }
 
 export interface CohortResult {

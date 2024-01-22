@@ -15,7 +15,7 @@
 import { Box, Card, Grid, Typography } from "@material-ui/core";
 import SearchIcon from "@material-ui/icons/Search";
 import { sortBy } from "lodash";
-import React, { FunctionComponent, useMemo } from "react";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
     DataGridScrollV1,
@@ -26,20 +26,16 @@ import {
 } from "../../../platform/components";
 import { formatLargeNumberV1 } from "../../../platform/utils";
 import { ActionStatus } from "../../../rest/actions.interfaces";
-import { CohortResult } from "../../../rest/dto/rca.interfaces";
-import { concatKeyValueWithEqual } from "../../../utils/params/params.util";
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
-import { generateFilterOptions } from "../../rca/anomaly-dimension-analysis/algorithm-table/algorithm-table.utils";
 import {
     CohortsTableProps,
     CohortTableRowData,
 } from "./cohorts-table.interfaces";
-
-const NAME_JOIN_KEY = " AND ";
-const PERCENTAGE = "percentage";
+import { getCohortTableRowFromData, PERCENTAGE } from "./cohorts-table.utils";
 
 export const CohortsTable: FunctionComponent<CohortsTableProps> = ({
     getCohortsRequestStatus,
+    initiallySelectedCohorts,
     cohortsData,
     onSelectionChange,
     children,
@@ -47,6 +43,7 @@ export const CohortsTable: FunctionComponent<CohortsTableProps> = ({
     subtitle,
 }) => {
     const { t } = useTranslation();
+
     const tableRows: CohortTableRowData[] = useMemo(() => {
         if (!cohortsData) {
             return [];
@@ -56,24 +53,37 @@ export const CohortsTable: FunctionComponent<CohortsTableProps> = ({
 
         // Showing more than 100 breaks the table and this feature is not used
         // enough to illicit enabling pagination
-        return sorted.slice(0, 100).map((result: CohortResult) => {
-            const copied: CohortTableRowData = { ...result, name: "" };
-
-            const values: string[] = [];
-            const columnKeys: string[] = [];
-            Object.keys(result.dimensionFilters).forEach((dimensionColumn) => {
-                values.push(result.dimensionFilters[dimensionColumn]);
-                columnKeys.push(dimensionColumn);
-            });
-
-            copied.name = generateFilterOptions(values, columnKeys, [])
-                .map((item) => concatKeyValueWithEqual(item, true))
-                .sort()
-                .join(NAME_JOIN_KEY);
-
-            return copied;
-        });
+        return sorted.slice(0, 100).map(getCohortTableRowFromData);
     }, [cohortsData]);
+
+    // Manage the table selection
+    const [selectedCohorts, setSelectedCohorts] = useState<
+        DataGridSelectionModelV1<CohortTableRowData>
+    >(() => ({
+        rowKeyValues: [],
+        rowKeyValueMap: new Map(),
+    }));
+
+    useEffect(() => {
+        if (
+            selectedCohorts.rowKeyValues.length === 0 &&
+            initiallySelectedCohorts.length > 0
+        ) {
+            // If there are initially selected cohorts but none selected already,
+            // update the row selection
+            setSelectedCohorts({
+                rowKeyValues: initiallySelectedCohorts.map(
+                    (cohort) => cohort.name
+                ),
+                rowKeyValueMap: new Map(
+                    initiallySelectedCohorts.map((cohort) => [
+                        cohort.name,
+                        cohort,
+                    ])
+                ),
+            });
+        }
+    }, [initiallySelectedCohorts]);
 
     const renderPercentageCell = (
         cellValue: Record<string, unknown>
@@ -187,6 +197,7 @@ export const CohortsTable: FunctionComponent<CohortsTableProps> = ({
                                     }}
                                     rowKey="name"
                                     scroll={DataGridScrollV1.Body}
+                                    selectionModel={selectedCohorts}
                                     onSelectionChange={handleSelectionChange}
                                 />
                             </>

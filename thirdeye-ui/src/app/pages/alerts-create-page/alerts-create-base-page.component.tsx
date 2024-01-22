@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { AxiosError } from "axios/index";
 import React, { FunctionComponent, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -25,11 +26,14 @@ import { handleCreateAlertClickGenerator } from "../../utils/anomalies/anomalies
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getAlertsAlertPath } from "../../utils/routes/routes.util";
+import {
+    SessionStorageKeys,
+    useSessionStorage,
+} from "../../utils/storage/use-session-storage";
 import { createEmptySubscriptionGroup } from "../../utils/subscription-groups/subscription-groups.util";
 import { AlertsEditCreateBasePageComponent } from "../alerts-edit-create-common/alerts-edit-create-base-page.component";
 import { QUERY_PARAM_KEY_ANOMALIES_RETRY } from "../alerts-view-page/alerts-view-page.utils";
 import { AlertsCreatePageProps } from "./alerts-create-page.interfaces";
-import { AxiosError } from "axios/index";
 
 export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
     startingAlertConfiguration,
@@ -41,6 +45,14 @@ export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
         SubscriptionGroup[]
     >([]);
     const [isEditRequestInFlight, setIsEditRequestInFlight] = useState(false);
+    const [, , clearSelectedDimensions] = useSessionStorage<string[]>(
+        SessionStorageKeys.SelectedDimensionsOnAlertFlow,
+        []
+    );
+    const [, , clearQueryFilter] = useSessionStorage<string>(
+        SessionStorageKeys.QueryFilterOnAlertFlow,
+        ""
+    );
 
     const [singleNewSubscriptionGroup, setSingleNewSubscriptionGroup] =
         useState<SubscriptionGroup>(createEmptySubscriptionGroup());
@@ -50,6 +62,10 @@ export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
             const searchParams = new URLSearchParams([
                 [QUERY_PARAM_KEY_ANOMALIES_RETRY, "true"],
             ]);
+            // Guided alert flow sets the selected dimensions and applied query filter as cache.
+            // Clear them since the alert has been created and the user will not go back from here.
+            clearSelectedDimensions();
+            clearQueryFilter();
             navigate(getAlertsAlertPath(savedAlert.id, searchParams));
         });
     }, [navigate, notify, t]);

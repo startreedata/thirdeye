@@ -40,6 +40,10 @@ import {
     STAR_COLUMN,
 } from "../../../utils/datasources/datasources.util";
 import { generateDateRangeMonthsFromNow } from "../../../utils/routes/routes.util";
+import {
+    SessionStorageKeys,
+    useSessionStorage,
+} from "../../../utils/storage/use-session-storage";
 import { useAlertWizardV2Styles } from "../../alert-wizard-v2/alert-wizard-v2.styles";
 import { InputSection } from "../../form-basics/input-section/input-section.component";
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
@@ -98,13 +102,32 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
             initialSelectedAggregationFunc ?? MetricAggFunction.SUM
         );
     const [selectedDimensions, setSelectedDimensions] = useState<string[]>([]);
-    const [queryValue, setQueryValue] = useState<string>("");
+    const [queryValue, setQueryValue] = useSessionStorage<string>(
+        SessionStorageKeys.QueryFilterOnAlertFlow,
+        ""
+    );
 
     useEffect(() => {
         getDatasets();
         getMetrics();
         getDatasources();
     }, []);
+
+    // Store the selected dimensions till the flow is completed ...or the session is ended.
+    const [storedDimensions, setStoredDimensions] = useSessionStorage<string[]>(
+        SessionStorageKeys.SelectedDimensionsOnAlertFlow,
+        []
+    );
+
+    useEffect(() => {
+        if (selectedTable && storedDimensions.length > 0) {
+            const dimensionsInTable = storedDimensions.filter((dim) =>
+                selectedTable.dimensions.includes(dim)
+            );
+            setSelectedDimensions(dimensionsInTable);
+            setStoredDimensions(dimensionsInTable);
+        }
+    }, [selectedTable]);
 
     // Build the table configuration tree
     useEffect(() => {
@@ -454,6 +477,10 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
                                 value={selectedDimensions}
                                 onChange={(_, dimensions) => {
                                     setSelectedDimensions(dimensions || []);
+
+                                    // Update selection in storage as well in case the
+                                    // user returns to this page in the same flow
+                                    setStoredDimensions(dimensions || []);
                                 }}
                             />
                         }

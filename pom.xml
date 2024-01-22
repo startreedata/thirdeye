@@ -830,6 +830,11 @@
         <artifactId>sentry</artifactId>
         <version>${sentry.version}</version>
       </dependency>
+      <dependency>
+        <groupId>io.sentry</groupId>
+        <artifactId>sentry-logback</artifactId>
+        <version>${sentry.version}</version>
+      </dependency>
 
       <dependency>
         <groupId>org.apache.commons</groupId>

@@ -36,6 +36,7 @@ import ai.startree.thirdeye.scheduler.events.MockEventsLoader;
 import ai.startree.thirdeye.service.ResourcesBootstrapService;
 import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
 import ai.startree.thirdeye.worker.task.TaskDriver;
+import ch.qos.logback.classic.Level;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import io.dropwizard.Application;
@@ -58,6 +59,7 @@ import io.prometheus.client.dropwizard.DropwizardExports;
 import io.sentry.Hint;
 import io.sentry.Sentry;
 import io.sentry.SentryLevel;
+import io.sentry.logback.SentryAppender;
 import java.util.EnumSet;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
@@ -75,7 +77,7 @@ import org.slf4j.LoggerFactory;
 
 public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
 
-  private static final Logger log = LoggerFactory.getLogger(ThirdEyeServer.class);
+  private static Logger log = LoggerFactory.getLogger(ThirdEyeServer.class);
   private static final String SENTRY_MAIN_THREAD_HINT_KEY = "IS_MAIN_THREAD_ERROR";
 
   private Injector injector;
@@ -287,6 +289,16 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
       });
       // intercept exceptions caught by dropwizard/jersey
       jersey.register(new ExceptionSentryLogger());
+
+      // enable sentry log collect - see https://docs.sentry.io/platforms/java/guides/logback/
+      final ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+      final SentryAppender appender = new SentryAppender();
+      appender.setMinimumEventLevel(Level.ERROR);
+      appender.setMinimumBreadcrumbLevel(Level.DEBUG);
+      appender.start();
+      rootLogger.addAppender(appender);
+      // re-init the logger of this class now that the Sentry logback appender has been injected
+      log = LoggerFactory.getLogger(ThirdEyeServer.class);
       log.info("Sentry.io collect is enabled.");
     } else {
       log.info("Sentry.io collect is not enabled.");

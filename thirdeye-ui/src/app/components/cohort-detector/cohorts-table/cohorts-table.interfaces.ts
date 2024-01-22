@@ -24,6 +24,7 @@ export interface CohortsTableProps {
     onSelectionChange?: (cohorts: CohortResult[]) => void;
     title: string;
     subtitle?: string;
+    initiallySelectedCohorts: CohortTableRowData[];
 }
 
 export interface CohortTableRowData extends CohortResult {

@@ -13,22 +13,31 @@
  * the License.
  */
 import { Box, Button, Grid, Typography } from "@material-ui/core";
+import isEqual from "lodash/isEqual";
 import {
     default as React,
     FunctionComponent,
     useEffect,
+    useMemo,
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { generateTemplateProperties } from "../../../components/alert-wizard-v3/threshold-setup/threshold-setup.utils";
 import { CohortsTable } from "../../../components/cohort-detector/cohorts-table/cohorts-table.component";
+import { CohortTableRowData } from "../../../components/cohort-detector/cohorts-table/cohorts-table.interfaces";
+import {
+    getCohortTableRowFromData,
+    NAME_JOIN_KEY,
+} from "../../../components/cohort-detector/cohorts-table/cohorts-table.utils";
 import { DatasetDetails } from "../../../components/cohort-detector/dataset-details/dataset-details.component";
 import { WizardBottomBar } from "../../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import {
     PageContentsGridV1,
     useNotificationProviderV1,
 } from "../../../platform/components";
+import { ActionStatus } from "../../../rest/actions.interfaces";
+import { EnumerationItemConfig } from "../../../rest/dto/alert.interfaces";
 import { MetricAggFunction } from "../../../rest/dto/metric.interfaces";
 import { CohortResult } from "../../../rest/dto/rca.interfaces";
 import { useGetCohort } from "../../../rest/rca/rca.actions";
@@ -80,6 +89,45 @@ export const SetupDimensionGroupsPage: FunctionComponent = () => {
     const handleCohortsSelectionChange = (cohorts: CohortResult[]): void => {
         setSelectedCohorts(cohorts);
     };
+
+    const initiallySelectedCohorts = useMemo<CohortTableRowData[]>(() => {
+        if (!(status === ActionStatus.Done && cohortsResponse)) {
+            return [];
+        }
+
+        // Extract all the queryFilters in alert
+        const selectedEnumerationItemsInAlert = (
+            (alert.templateProperties.enumerationItems ||
+                []) as EnumerationItemConfig[]
+        ).map((item) => item.params.queryFilters);
+
+        // Parse the stringified `queryFilter=` to an object
+        // `dimensionFilters` format for precise comparison
+        const selectedDimensionFilters = selectedEnumerationItemsInAlert
+            .map((query) =>
+                query
+                    .split(NAME_JOIN_KEY)
+                    .map((dim) => dim.split("="))
+                    .filter((v) => v.filter((g) => g.length > 0))
+                    .filter((v) => v.length > 0 && v[0].length > 0)
+                    .map(([k, v]) => ({ [k]: v.slice(1, -1) }))
+            )
+            .map((entries) => Object.assign({}, ...entries));
+
+        // Get the table rows from the cohorts list
+        const cohortDimensionsTableRow = cohortsResponse?.results
+            ? cohortsResponse?.results.map(getCohortTableRowFromData)
+            : [];
+
+        // Filter for the cohorts that match any enumeration item in alert
+        const cohortsInAlert = cohortDimensionsTableRow.filter((dimension) =>
+            selectedDimensionFilters.some((selected) =>
+                isEqual(selected, dimension.dimensionFilters)
+            )
+        );
+
+        return cohortsInAlert;
+    }, [alert, status, cohortsResponse]);
 
     const handleCreateBtnClick = (): void => {
         const enumerationItemConfiguration = selectedCohorts.map((cohort) => {
@@ -164,6 +212,7 @@ export const SetupDimensionGroupsPage: FunctionComponent = () => {
                     <CohortsTable
                         cohortsData={cohortsResponse}
                         getCohortsRequestStatus={status}
+                        initiallySelectedCohorts={initiallySelectedCohorts}
                         subtitle={t(
                             "message.select-the-dimensions-and-create-a-multi-dimension-alert"
                         )}

@@ -49,6 +49,10 @@ export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
         SessionStorageKeys.SelectedDimensionsOnAlertFlow,
         []
     );
+    const [, , clearQueryFilter] = useSessionStorage<string>(
+        SessionStorageKeys.QueryFilterOnAlertFlow,
+        ""
+    );
 
     const [singleNewSubscriptionGroup, setSingleNewSubscriptionGroup] =
         useState<SubscriptionGroup>(createEmptySubscriptionGroup());
@@ -58,9 +62,10 @@ export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
             const searchParams = new URLSearchParams([
                 [QUERY_PARAM_KEY_ANOMALIES_RETRY, "true"],
             ]);
-            // Guided alert flow sets the selected dimensions as cache. Clear them since
-            // the alert has been created and the user will not go back from here.
+            // Guided alert flow sets the selected dimensions and applied query filter as cache.
+            // Clear them since the alert has been created and the user will not go back from here.
             clearSelectedDimensions();
+            clearQueryFilter();
             navigate(getAlertsAlertPath(savedAlert.id, searchParams));
         });
     }, [navigate, notify, t]);

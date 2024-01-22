@@ -70,4 +70,5 @@ export const useSessionStorage = <T = string>(
 // that values aren't unintentionally read / overwritten
 export enum SessionStorageKeys {
     SelectedDimensionsOnAlertFlow = "SelectedDimensionsOnAlertFlow",
+    QueryFilterOnAlertFlow = "QueryFilterOnAlertFlow",
 }

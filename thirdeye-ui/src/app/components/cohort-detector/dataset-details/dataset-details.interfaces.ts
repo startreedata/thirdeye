@@ -34,4 +34,5 @@ export interface DatasetDetailsProps {
     initialSelectedDataset?: string;
     initialSelectedDatasource?: string;
     initialSelectedAggregationFunc?: MetricAggFunction;
+    initialQuery?: string;
 }

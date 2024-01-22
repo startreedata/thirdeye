@@ -146,7 +146,7 @@ export const SetupDimensionGroupsPage: FunctionComponent = () => {
         onAlertPropertyChange({
             templateProperties: {
                 ...alert.templateProperties,
-                queryFilters: "${queryFilters}",
+                queryFilters: cohortsResponse?.where || "${queryFilters}",
                 enumerationItems: enumerationItemConfiguration,
             },
         });
@@ -169,6 +169,9 @@ export const SetupDimensionGroupsPage: FunctionComponent = () => {
                 </Grid>
                 <Grid item xs={12}>
                     <DatasetDetails
+                        initialQuery={
+                            alert.templateProperties.queryFilters as string
+                        }
                         initialSelectedAggregationFunc={
                             alert.templateProperties
                                 .aggregationFunction as MetricAggFunction

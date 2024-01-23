@@ -18,8 +18,17 @@ import FiberManualRecordIcon from "@material-ui/icons/FiberManualRecord";
 import FiberManualRecordOutlinedIcon from "@material-ui/icons/FiberManualRecordOutlined";
 import React, { FunctionComponent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { Link, useLocation, useSearchParams } from "react-router-dom";
-import { AppRouteRelative } from "../../../utils/routes/routes.util";
+import {
+    Link,
+    useLocation,
+    useParams,
+    useSearchParams,
+} from "react-router-dom";
+import {
+    AppRouteRelative,
+    getRootCauseAnalysisForAnomalyInvestigateV2StepsPath,
+    RCAV2Steps,
+} from "../../../utils/routes/routes.util";
 
 const CircleIcon = ({
     active,
@@ -43,24 +52,27 @@ export const InvestigationStepsNavigation: FunctionComponent = () => {
     const { t } = useTranslation();
     const location = useLocation();
     const [searchParams] = useSearchParams();
+    const params = useParams<Record<"id", string>>();
+
+    const anomalyId = Number(params.id);
 
     const stepItems = [
         {
             matcher: (path: string) =>
                 path.includes(AppRouteRelative.RCA_WHAT_WHERE),
-            navLink: `${AppRouteRelative.RCA_WHAT_WHERE}`,
+            navLink: AppRouteRelative.RCA_WHAT_WHERE as RCAV2Steps,
             text: t("label.what-went-wrong-and-where"),
         },
         {
             matcher: (path: string) =>
                 path.endsWith(AppRouteRelative.RCA_EVENTS),
-            navLink: AppRouteRelative.RCA_EVENTS,
+            navLink: AppRouteRelative.RCA_EVENTS as RCAV2Steps,
             text: t("label.an-event-could-have-caused-it"),
         },
         {
             matcher: (path: string) =>
                 path.endsWith(AppRouteRelative.RCA_REVIEW_SHARE),
-            navLink: AppRouteRelative.RCA_REVIEW_SHARE,
+            navLink: AppRouteRelative.RCA_REVIEW_SHARE as RCAV2Steps,
             text: t("label.review-investigation-share"),
         },
     ];
@@ -82,9 +94,10 @@ export const InvestigationStepsNavigation: FunctionComponent = () => {
                             <Button
                                 color="default"
                                 component={Link}
-                                to={`${
+                                to={`${getRootCauseAnalysisForAnomalyInvestigateV2StepsPath(
+                                    anomalyId,
                                     stepConfig.navLink
-                                }?${searchParams.toString()}`}
+                                )}?${searchParams.toString()}`}
                                 variant="text"
                             >
                                 {stepConfig.text}

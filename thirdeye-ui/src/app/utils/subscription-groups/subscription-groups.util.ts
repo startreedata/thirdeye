@@ -31,7 +31,6 @@ export const createEmptySubscriptionGroup = (): SubscriptionGroup => {
     return {
         name: "",
         cron: "0 */5 * * * ?",
-        alerts: [] as Alert[],
         alertAssociations: [] as AlertAssociation[],
     } as SubscriptionGroup;
 };

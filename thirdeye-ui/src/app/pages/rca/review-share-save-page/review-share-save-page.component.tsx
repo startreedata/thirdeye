@@ -13,13 +13,19 @@
  * the License.
  */
 import { Box, Card, CardContent, CardHeader, Grid } from "@material-ui/core";
+import { isNull } from "lodash";
 import React, { FunctionComponent, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useOutletContext, useSearchParams } from "react-router-dom";
+import {
+    useNavigate,
+    useOutletContext,
+    useSearchParams,
+} from "react-router-dom";
 import { InvestigationDetailsForm } from "../../../components/rca/investigation-details-form/investigation-details-form.component";
 import { InvestigationPreview } from "../../../components/rca/investigation-preview/investigation-preview.component";
 import { WizardBottomBar } from "../../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import {
+    NotificationScopeV1,
     NotificationTypeV1,
     useNotificationProviderV1,
 } from "../../../platform/components";
@@ -29,7 +35,10 @@ import {
     updateInvestigation,
 } from "../../../rest/rca/rca.rest";
 import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
-import { AppRouteRelative } from "../../../utils/routes/routes.util";
+import {
+    AppRouteRelative,
+    getRootCauseAnalysisForAnomalyInvestigatePath,
+} from "../../../utils/routes/routes.util";
 import { InvestigationContext } from "../investigation-state-tracker-container-page/investigation-state-tracker.interfaces";
 
 export const ReviewShareSavePage: FunctionComponent = () => {
@@ -43,6 +52,7 @@ export const ReviewShareSavePage: FunctionComponent = () => {
         handleServerUpdatedInvestigation,
         onInvestigationChange,
     } = useOutletContext<InvestigationContext>();
+    const navigate = useNavigate();
 
     const [isSaving, setIsSaving] = useState(false);
     const [investigationName, setInvestigationName] = useState(
@@ -97,15 +107,28 @@ export const ReviewShareSavePage: FunctionComponent = () => {
             .then((investigationFromServer) => {
                 handleServerUpdatedInvestigation(investigationFromServer);
 
-                if (investigation.id) {
-                    notify(
-                        NotificationTypeV1.Success,
-                        "Successfully updated investigation"
-                    );
-                } else {
-                    notify(
-                        NotificationTypeV1.Success,
-                        "Successfully created investigation, copy and paste URL to share the investigation"
+                // `investigation.id` is only defined for existing data
+                const isExisting = !isNull(investigation.id);
+
+                notify(
+                    NotificationTypeV1.Success,
+                    t(
+                        isExisting
+                            ? "message.update-success"
+                            : "message.create-success",
+                        {
+                            entity: t("label.investigation"),
+                        }
+                    ),
+                    false,
+                    NotificationScopeV1.Global
+                );
+
+                if (investigationFromServer.id) {
+                    navigate(
+                        getRootCauseAnalysisForAnomalyInvestigatePath(
+                            investigation.anomaly?.id as number
+                        ) + `?investigationId=${investigationFromServer.id}`
                     );
                 }
             })

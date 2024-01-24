@@ -21,6 +21,7 @@ import { getRecognizedQuery } from "../params/params.util";
 
 const PLACEHOLDER_ROUTE_ID = ":id";
 const PLACEHOLDER_ROUTE_NAME = ":name";
+const PLACEHOLDER_ROUTE_STEP = ":step";
 const SEARCH_TERM_QUERY_PARAM_KEY = "search";
 
 export const AppRouteRelative = {
@@ -93,6 +94,7 @@ export const AppRouteRelative = {
     ROOT_CAUSE_ANALYSIS_FOR_ANOMALY: `anomaly/${PLACEHOLDER_ROUTE_ID}`,
     ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_V2: `v2/anomaly/${PLACEHOLDER_ROUTE_ID}`,
     ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_INVESTIGATE: `investigate`,
+    ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_INVESTIGATE_STEPS: `investigate/${PLACEHOLDER_ROUTE_STEP}`,
     RCA_WHAT_WHERE: "what-where-page",
     RCA_HEATMAP: "heatmap",
     RCA_TOP_CONTRIBUTORS: "top-contributors-page",
@@ -195,6 +197,9 @@ export const AppRoute = {
     ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_INVESTIGATE_V2:
         `/${AppRouteRelative.ROOT_CAUSE_ANALYSIS}/` +
         `${AppRouteRelative.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_V2}/${AppRouteRelative.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_INVESTIGATE}`,
+    ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_INVESTIGATE_V2_STEPS:
+        `/${AppRouteRelative.ROOT_CAUSE_ANALYSIS}/` +
+        `${AppRouteRelative.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_V2}/${AppRouteRelative.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_INVESTIGATE_STEPS}`,
     EVENTS_ALL: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.EVENTS}/${AppRouteRelative.EVENTS_ALL}`,
     EVENTS_CREATE: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.EVENTS}/${AppRouteRelative.EVENTS_CREATE}`,
     EVENTS_VIEW: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.EVENTS}/${AppRouteRelative.EVENTS_VIEW}`,
@@ -569,6 +574,24 @@ export const getRootCauseAnalysisForAnomalyInvestigateV2Path = (
 ): string => {
     let path: string = AppRoute.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_INVESTIGATE_V2;
     path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
+
+    return path;
+};
+
+export type RCAV2Steps =
+    | typeof AppRouteRelative.RCA_WHAT_WHERE
+    | typeof AppRouteRelative.RCA_EVENTS
+    | typeof AppRouteRelative.RCA_REVIEW_SHARE;
+
+export const getRootCauseAnalysisForAnomalyInvestigateV2StepsPath = (
+    id: number,
+    step: RCAV2Steps
+): string => {
+    let path: string =
+        AppRoute.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_INVESTIGATE_V2_STEPS;
+    path = path
+        .replace(PLACEHOLDER_ROUTE_ID, `${id}`)
+        .replace(PLACEHOLDER_ROUTE_STEP, `${step}`);
 
     return path;
 };

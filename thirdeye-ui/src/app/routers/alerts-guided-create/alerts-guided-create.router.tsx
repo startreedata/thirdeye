@@ -12,11 +12,15 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import React, { FunctionComponent, lazy, Suspense } from "react";
+import React, { FunctionComponent, lazy, Suspense, useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
 import { CancelAPICallsOnPageUnload } from "../../components/cancel-api-calls-on-page-unload/cancel-api-calls-on-page-unload.component";
 import { AppLoadingIndicatorV1 } from "../../platform/components";
 import { AppRouteRelative } from "../../utils/routes/routes.util";
+import {
+    SessionStorageKeys,
+    useSessionStorage,
+} from "../../utils/storage/use-session-storage";
 import { AlertsGuidedCreateRouterProps } from "./alerts-guided-create.router.interface";
 
 const CreateAlertGuidedPage = lazy(() =>
@@ -79,6 +83,30 @@ export const AlertsCreateGuidedRouter: FunctionComponent<AlertsGuidedCreateRoute
         inProgressLabel,
         hideBottomBarForAlertCategorySelection,
     }) => {
+        const [, , clearSelectedDimensions] = useSessionStorage<string[]>(
+            SessionStorageKeys.SelectedDimensionsOnAlertFlow,
+            []
+        );
+        const [, , clearQueryFilter] = useSessionStorage<string>(
+            SessionStorageKeys.QueryFilterOnAlertFlow,
+            ""
+        );
+
+        // Guided alert flow sets the selected dimensions and applied query filter as cache.
+        // Clear those cached values once the user leaves / enters the flow from outside
+        useEffect(() => {
+            // Clear on flow entry as well since the session is persisted even if the user
+            // manually enters a new url, in which case the value would still persist.
+            clearSelectedDimensions();
+            clearQueryFilter();
+
+            return () => {
+                // Clear the data on leaving the flow.
+                clearSelectedDimensions();
+                clearQueryFilter();
+            };
+        }, []);
+
         return (
             <Suspense fallback={<AppLoadingIndicatorV1 />}>
                 <Routes>

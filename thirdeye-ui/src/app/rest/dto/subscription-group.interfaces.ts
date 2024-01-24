@@ -39,7 +39,7 @@ export enum SpecType {
     Slack = "slack",
     Webhook = "webhook",
     EmailSendgrid = "email-sendgrid",
-    PagerDuty = "pager-duty",
+    PagerDuty = "pagerduty",
 }
 
 export interface SpecConfiguration {

@@ -1,3 +1,10 @@
+### [2.45.3](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.2...thirdeye-ui-2.45.3) (2024-01-24)
+
+
+### Bug Fixes
+
+* [TE-2049](https://cortexdata.atlassian.net/browse/TE-2049) ensure the alert creation data does not persist beyond the flow ([0137af5a0](https://github.com/startreedata/thirdeye/commit/0137af5a01d91a463437d0c2ccd6b6474332715f))
+
 ### [2.45.1](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.0...thirdeye-ui-2.45.1) (2024-01-12)
 
 

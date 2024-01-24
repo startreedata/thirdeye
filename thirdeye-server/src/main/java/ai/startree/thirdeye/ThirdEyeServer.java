@@ -63,6 +63,7 @@ import io.sentry.logback.SentryAppender;
 import java.util.EnumSet;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.ext.Provider;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
@@ -278,6 +279,11 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
           if (hint.get(SENTRY_MAIN_THREAD_HINT_KEY) == null) {
             optional(sentryEvent.getThrowable()).ifPresent(Throwable::printStackTrace);
           } // else it is an exception on the main thread. dropwizard catches it and prints it already so no need to print here
+          optional(sentryEvent.getThrowable())
+              .filter(t -> t instanceof WebApplicationException)
+              .map(t -> ((WebApplicationException) t).getResponse())
+              .map(r -> String.valueOf(r.getStatus()))
+              .ifPresent(status_code -> sentryEvent.setTag("status_code", status_code));
           return sentryEvent;
         });
         options.setRelease(this.getClass().getPackage().getImplementationVersion());

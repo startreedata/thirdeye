@@ -1,9 +1,16 @@
-### [2.45.2](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.1...thirdeye-ui-2.45.2) (2024-01-22)
+### [2.45.3](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.2...thirdeye-ui-2.45.3) (2024-01-24)
 
 
 ### Bug Fixes
 
 * [TE-2049](https://cortexdata.atlassian.net/browse/TE-2049) retain dimension, query, and selected cohorts when navigating back in alert flow ([62a326c8e](https://github.com/startreedata/thirdeye/commit/62a326c8ec520f82ab7289ceac81c02e0e5c111b))
+
+### [2.45.2](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.1...thirdeye-ui-2.45.2) (2024-01-22)
+
+
+### Bug Fixes
+
+* [TE-2049](https://cortexdata.atlassian.net/browse/TE-2049) ensure the alert creation data does not persist beyond the flow ([0137af5a0](https://github.com/startreedata/thirdeye/commit/0137af5a01d91a463437d0c2ccd6b6474332715f))
 
 ### [2.45.1](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.0...thirdeye-ui-2.45.1) (2024-01-12)
 

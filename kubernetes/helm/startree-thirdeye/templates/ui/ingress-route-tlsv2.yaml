@@ -32,5 +32,5 @@ spec:
         scheme: https
         serversTransport: {{ .Values.tls.traefik.serversTransportName }}
   tls:
-    secretName: {{ .Values.tls.externalCertSecretName }}
+    secretName: {{ .Values.tls.cert.external.secretName }}
 {{- end }}

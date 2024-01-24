@@ -12,14 +12,14 @@
 # the License.
 #
 
-{{ if and .Values.traefik.enabled .Values.tls.enabled .Values.tls.v2 -}}
+{{ if and .Values.traefik.enabled .Values.tls.enabled .Values.tls.v2 .Values.tls.v2.traefik.serversTransport.create -}}
 apiVersion: traefik.containo.us/v1alpha1
 kind: ServersTransport
 metadata:
-  name: {{ .Values.tls.traefik.serversTransportName }}
+  name: {{ .Values.tls.traefik.serversTransport.name }}
   namespace: {{ .Release.Namespace }}
 spec:
-  insecureSkipVerify: {{ default false .Values.tls.traefik.skipVerify }}
+  insecureSkipVerify: {{ default false .Values.tls.traefik.serversTransport.skipVerify }}
   rootCAsSecrets:
     - {{ .Values.tls.rootCaSecretName }}
   serverName: '{{ .Release.Namespace }}.svc'

@@ -30,7 +30,7 @@ spec:
         namespace: {{ .Release.Namespace }}
         port: {{ .Values.ui.port }}
         scheme: https
-        serversTransport: {{ .Values.tls.traefik.serversTransportName }}
+        serversTransport: {{ .Values.tls.traefik.serversTransport.name }}
   tls:
     secretName: {{ .Values.tls.cert.external.secretName }}
 {{- end }}

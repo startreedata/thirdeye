@@ -279,7 +279,7 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
         options.setDsn(config.getDsn());
         // by default sentry catches uncaught exception, so they are not shown in stdout. Force print them in stdout 
         options.setBeforeSend((sentryEvent, hint) -> {
-          // if the exception is not on the main thread, print it. IF it's on the main thread dropwizard prints it already
+          // if the exception is not on the main thread, print it. If it's on the main thread dropwizard prints it already
           if (hint.get(SENTRY_MAIN_THREAD_HINT_KEY) == null) {
             optional(sentryEvent.getThrowable()).ifPresent(Throwable::printStackTrace);
           }

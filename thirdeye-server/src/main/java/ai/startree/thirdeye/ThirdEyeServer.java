@@ -331,7 +331,7 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
     @Override
     public void onEvent(final RequestEvent event) {
       if (event.getType() == Type.ON_EXCEPTION) {
-        Breadcrumb breadcrumb = new Breadcrumb();
+        final Breadcrumb breadcrumb = new Breadcrumb();
         breadcrumb.setCategory("request.exception");
         breadcrumb.setLevel(SentryLevel.WARNING);
         breadcrumb.setMessage(
@@ -340,7 +340,8 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
         if (event.getException() instanceof WebApplicationException webException
             && webException.getResponse() instanceof OutboundJaxrsResponse rep
             && rep.getContext() != null) {
-          // warning - this returns a big StatusListApi object - it may exceed the max payload size of 1Mb. It's very unlikely though so ignoring for the moment. 
+          // warning - this returns a big StatusListApi object - it may exceed the max payload size of 1Mb. 
+          // It's very unlikely though so ignoring for the moment. Worst case the breadcrumb is dropped by sentry, but the exception will still be collected.  
           breadcrumb.setData("exception_entity", rep.getContext().getEntity());
         }
         if (event.getContainerRequest() != null) {

@@ -120,6 +120,11 @@ tls:
     enabled: false
   scheduler:
     enabled: false
+  cert:
+    internal: {}
+    external: {}
+  traefik:
+    serversTransport: {}
 
 # Expose prometheus metrics.
 prometheus:

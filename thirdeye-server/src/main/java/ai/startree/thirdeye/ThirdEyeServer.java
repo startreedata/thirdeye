@@ -56,6 +56,7 @@ import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.dropwizard.DropwizardExports;
+import io.sentry.Breadcrumb;
 import io.sentry.Hint;
 import io.sentry.Sentry;
 import io.sentry.SentryLevel;
@@ -67,6 +68,8 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.ext.Provider;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
+import org.glassfish.jersey.message.internal.OutboundJaxrsResponse;
+import org.glassfish.jersey.server.ContainerRequest;
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 import org.glassfish.jersey.server.monitoring.ApplicationEvent;
 import org.glassfish.jersey.server.monitoring.ApplicationEventListener;
@@ -276,14 +279,15 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
         options.setDsn(config.getDsn());
         // by default sentry catches uncaught exception, so they are not shown in stdout. Force print them in stdout 
         options.setBeforeSend((sentryEvent, hint) -> {
+          // if the exception is not on the main thread, print it. If it's on the main thread dropwizard prints it already
           if (hint.get(SENTRY_MAIN_THREAD_HINT_KEY) == null) {
             optional(sentryEvent.getThrowable()).ifPresent(Throwable::printStackTrace);
-          } // else it is an exception on the main thread. dropwizard catches it and prints it already so no need to print here
+          }
           optional(sentryEvent.getThrowable())
               .filter(t -> t instanceof WebApplicationException)
               .map(t -> ((WebApplicationException) t).getResponse())
               .map(r -> String.valueOf(r.getStatus()))
-              .ifPresent(status_code -> sentryEvent.setTag("status_code", status_code));
+              .ifPresent(status_code -> sentryEvent.setTag("http_status_code", status_code));
           return sentryEvent;
         });
         options.setRelease(this.getClass().getPackage().getImplementationVersion());
@@ -320,12 +324,34 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
 
     @Override
     public RequestEventListener onRequest(final RequestEvent requestEvent) {
+      requestEvent.getContainerRequest().bufferEntity();
       return this;
     }
 
     @Override
     public void onEvent(final RequestEvent event) {
       if (event.getType() == Type.ON_EXCEPTION) {
+        final Breadcrumb breadcrumb = new Breadcrumb();
+        breadcrumb.setCategory("request.exception");
+        breadcrumb.setLevel(SentryLevel.WARNING);
+        breadcrumb.setMessage(
+            "A request generated an exception. The exception was caught by dropwizard.");
+        breadcrumb.setData("exception_message", event.getException().getMessage());
+        if (event.getException() instanceof WebApplicationException webException
+            && webException.getResponse() instanceof OutboundJaxrsResponse rep
+            && rep.getContext() != null) {
+          // warning - this returns a big StatusListApi object - it may exceed the max payload size of 1Mb. 
+          // It's very unlikely though so ignoring for the moment. Worst case the breadcrumb is dropped by sentry, but the exception will still be collected.  
+          breadcrumb.setData("exception_entity", rep.getContext().getEntity());
+        }
+        if (event.getContainerRequest() != null) {
+          final ContainerRequest req = event.getContainerRequest();
+          breadcrumb.setData("request_path", req.getPath(true));
+          breadcrumb.setData("request_method", req.getMethod());
+          breadcrumb.setData("request_payload", req.readEntity(String.class));
+        }
+        Sentry.addBreadcrumb(breadcrumb);
+
         Sentry.captureException(event.getException());
       }
     }

@@ -23,6 +23,7 @@ import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import io.micrometer.core.instrument.Metrics;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -36,6 +37,10 @@ public class DatabaseService {
   private final SqlQueryBuilder sqlQueryBuilder;
   private final GenericResultSetMapper genericResultSetMapper;
   private final Counter dbReadCallCounter;
+  // debugging metrics TODO CYRIL remove once te-2075 is closed
+  private static final io.micrometer.core.instrument.Counter debugFindAllCounter = Metrics.counter("dbReadCallCounter.findAll");
+  private static final io.micrometer.core.instrument.Counter debugCountCounter = Metrics.counter("dbReadCallCounter.count");
+  private static final io.micrometer.core.instrument.Counter debugRunSQLCounter = Metrics.counter("dbReadCallCounter.runSql");
   private final Counter dbWriteCallCounter;
   private final Histogram dbReadDuration;
   private final Histogram dbWriteDuration;
@@ -78,6 +83,7 @@ public class DatabaseService {
     } finally {
       dbReadCallCounter.inc();
       dbReadDuration.update(System.nanoTime() - tStart);
+      debugFindAllCounter.increment();
     }
   }
 
@@ -170,6 +176,7 @@ public class DatabaseService {
     } finally {
       dbReadCallCounter.inc();
       dbReadDuration.update(System.nanoTime() - tStart);
+      debugCountCounter.count();
     }
   }
 
@@ -192,6 +199,7 @@ public class DatabaseService {
     } finally {
       dbReadCallCounter.inc();
       dbReadDuration.update(System.nanoTime() - tStart);
+      debugRunSQLCounter.increment();
     }
   }
 }

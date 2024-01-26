@@ -15,6 +15,8 @@ package ai.startree.thirdeye.config;
 
 import static ai.startree.thirdeye.spi.Constants.DEFAULT_CHRONOLOGY;
 
+import ai.startree.thirdeye.spi.Constants;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.joda.time.DateTimeZone;
 
 public class TimeConfiguration {
@@ -22,9 +24,20 @@ public class TimeConfiguration {
   private static final long JAN_1_2000_UTC = 946684800000L;
 
   /**
-   * Timezone used for notifications
+   * Timezone to use in notifications.
    */
   private DateTimeZone timezone = DEFAULT_CHRONOLOGY.getZone();
+
+  /**
+   * Time format to use in notifications.
+   * For instance with "MMM dd, yyyy HH:mm" the datetime will render as "Feb 03, 2020 00:00".
+   * See pattern specification here
+   * https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html
+   * It is recommended to not put the timezone it this pattern.
+   * The timezone is appended in the notification text by ThirdEye, but not in all datetime strings 
+   * to avoid repetition.
+   */
+  private @NonNull String dateTimePattern = Constants.NOTIFICATIONS_DEFAULT_DATE_PATTERN;
 
   /**
    * Onboarding start time >= onboardingStartTimeLimit.
@@ -48,6 +61,16 @@ public class TimeConfiguration {
 
   public TimeConfiguration setMinimumOnboardingStartTime(final long minimumOnboardingStartTime) {
     this.minimumOnboardingStartTime = minimumOnboardingStartTime;
+    return this;
+  }
+
+  public @NonNull String getDateTimePattern() {
+    return dateTimePattern;
+  }
+
+  public TimeConfiguration setDateTimePattern(
+      final String dateTimePattern) {
+    this.dateTimePattern = dateTimePattern;
     return this;
   }
 }

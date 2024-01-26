@@ -136,6 +136,7 @@ sentry:
 
 time:
   timezone: UTC
+  dateTimePattern: "MMM dd, yyyy HH:mm"
   # JAN_1_2000_UTC
   minimumOnboardingStartTime: 946684800000
 

@@ -95,6 +95,7 @@ data:
 
     time:
       timezone: {{ .Values.time.timezone }}
+      dateTimePattern: "{{ .Values.time.dateTimePattern }}"
       minimumOnboardingStartTime: {{ .Values.time.minimumOnboardingStartTime }}
 
     rca:

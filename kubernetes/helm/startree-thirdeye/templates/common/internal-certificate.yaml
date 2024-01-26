@@ -17,7 +17,7 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: '{{ .Release.Namespace }}-namespace'
+  name: thirdeye-internal
   namespace: {{ .Release.Namespace }}
 spec:
   commonName: '*.{{ .Release.Namespace }}.svc.cluster.local'

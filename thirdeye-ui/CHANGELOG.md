@@ -1,3 +1,11 @@
+### [2.45.4](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.3...thirdeye-ui-2.45.4) (2024-01-25)
+
+
+### Bug Fixes
+
+* [TE-2051](https://cortexdata.atlassian.net/browse/TE-2051) razorpay rca issues ([25dd0e24d](https://github.com/startreedata/thirdeye/commit/25dd0e24d30471a55b742bfd2469cff65f36f21a))
+* [TE-2068](https://cortexdata.atlassian.net/browse/TE-2068) pager duty enum fix ([1706e51e7](https://github.com/startreedata/thirdeye/commit/1706e51e7114db3894b31e8094ca6b6ca3ecfd22))
+
 ### [2.45.3](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.2...thirdeye-ui-2.45.3) (2024-01-24)
 
 

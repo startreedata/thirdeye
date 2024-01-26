@@ -27,11 +27,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.TimeZone;
 import org.apache.commons.collections4.MapUtils;
-import org.joda.time.DateTime;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.joda.time.DateTimeZone;
+import org.joda.time.format.DateTimeFormatter;
 
 public class AnomalyReportHelper {
 
@@ -39,7 +41,7 @@ public class AnomalyReportHelper {
       final String feedbackVal,
       final String alertName,
       final String alertDescription,
-      final DateTimeZone dateTimeZone,
+      final DateTimeFormatter dateTimeFormatter,
       final String uiPublicUrl) {
     final Properties props = new Properties();
     props.putAll(anomaly.getProperties());
@@ -60,20 +62,12 @@ public class AnomalyReportHelper {
         .setFunction(alertName)
         .setFuncDescription(alertDescription)
         .setMetric(anomaly.getMetric())
-        .setStartDateTime(getDateString(anomaly.getStartTime(), dateTimeZone))
-        .setEndTime(getDateString(anomaly.getEndTime(), dateTimeZone))
-        .setTimezone(getTimezoneString(dateTimeZone))
+        .setStartDateTime(dateTimeFormatter.print(anomaly.getStartTime()))
+        .setEndTime(dateTimeFormatter.print(anomaly.getEndTime()))
+        .setTimezone(getTimezoneString(dateTimeFormatter))
         .setIssueType(getIssueType(anomaly))
         .setProperties(SpiUtils.encodeCompactedProperties(props))
         .setMetricUrn(anomaly.getMetricUrn());
-  }
-
-  public static String getDateString(final DateTime dateTime) {
-    return dateTime.toString(Constants.NOTIFICATIONS_DEFAULT_DATE_PATTERN);
-  }
-
-  public static String getDateString(final long millis, final DateTimeZone dateTimeZone) {
-    return getDateString(new DateTime(millis, dateTimeZone));
   }
 
   public static double getLift(double current, double expected) {
@@ -190,7 +184,9 @@ public class AnomalyReportHelper {
   /**
    * Get the timezone in String
    */
-  public static String getTimezoneString(DateTimeZone dateTimeZone) {
+  public static String getTimezoneString(final @NonNull DateTimeFormatter dateTimeFormatter) {
+    final DateTimeZone dateTimeZone = Objects.requireNonNull(dateTimeFormatter.getZone(),
+        "The dateTimeFormatter passed to this method must have a defined timezone");
     TimeZone tz = TimeZone.getTimeZone(dateTimeZone.getID());
     return tz.getDisplayName(true, 0);
   }

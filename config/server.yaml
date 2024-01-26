@@ -99,7 +99,10 @@ rca:
     params: {}
 
 time:
+  # notification text timezone
   timezone: UTC
+  # notification text time format pattern - see https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html 
+  dateTimePattern: "MMM dd, yyyy HH:mm"
   # Limit onboarding alert replay back to JAN_1_2000_UTC
   minimumOnboardingStartTime: 946684800000
 
@@ -168,11 +171,12 @@ phantomJsPath: "/usr/local/bin/jstf"
 
 # Prometheus compatible metrics will be exposed at /admin/prometheus
 prometheus:
-  enabled: false
+  enabled: true
   
 # sentry.io collect
 sentry:
   # set the sentry dsn here - if not set or blank, sentry is disabled
+  #dsn: "https://6e5e7adb930fd0005935e33eb2f1e662@o4505484207325184.ingest.sentry.io/4506574735015936"
   dsn: ""
   # Some characters are forbidden - see https://docs.sentry.io/platforms/java/configuration/environments
   environment: "localhost:7004"

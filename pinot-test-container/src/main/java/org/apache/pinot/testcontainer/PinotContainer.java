@@ -39,8 +39,8 @@ public class PinotContainer extends GenericContainer<PinotContainer> {
 
   private static final DockerImageName DEFAULT_IMAGE_NAME = DockerImageName.parse(
       "apachepinot/pinot");
-  private static final String DEFAULT_TAG = "0.12.1";
-  private static final String DEFAULT_TAG_ARM64 = DEFAULT_TAG + "-arm64";
+  private static final String DEFAULT_TAG = "1.0.0";
+  private static final String DEFAULT_TAG_ARM64 = DEFAULT_TAG;
   public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private List<AddTable> addTables;
   private List<ImportData> importDataList;

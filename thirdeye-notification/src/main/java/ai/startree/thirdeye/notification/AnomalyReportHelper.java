@@ -68,13 +68,12 @@ public class AnomalyReportHelper {
         .setMetricUrn(anomaly.getMetricUrn());
   }
 
-  public static String getDateString(DateTime dateTime) {
+  public static String getDateString(final DateTime dateTime) {
     return dateTime.toString(Constants.NOTIFICATIONS_DEFAULT_DATE_PATTERN);
   }
 
-  public static String getDateString(long millis, DateTimeZone dateTimeZone) {
-    return (new DateTime(millis,
-        dateTimeZone)).toString(Constants.NOTIFICATIONS_DEFAULT_DATE_PATTERN);
+  public static String getDateString(final long millis, final DateTimeZone dateTimeZone) {
+    return getDateString(new DateTime(millis, dateTimeZone));
   }
 
   public static double getLift(double current, double expected) {

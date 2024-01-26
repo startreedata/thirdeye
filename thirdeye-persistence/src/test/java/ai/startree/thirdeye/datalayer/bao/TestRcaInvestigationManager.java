@@ -18,8 +18,6 @@ import ai.startree.thirdeye.spi.datalayer.bao.RcaInvestigationManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import java.sql.Timestamp;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import org.testng.Assert;
@@ -135,27 +133,6 @@ public class TestRcaInvestigationManager {
     Assert.assertEquals(sessionsA.size(), 2);
     Assert.assertEquals(sessionsB.size(), 1);
     Assert.assertEquals(sessionsC.size(), 0);
-  }
-
-  @Test
-  public void testFindSessionByNameLike() {
-    this.sessionDAO.save(makeName("ABC"));
-    this.sessionDAO.save(makeName("BDC"));
-    this.sessionDAO.save(makeName("CB"));
-
-    List<RcaInvestigationDTO> sessionsAB = this.sessionDAO
-        .findByNameLike(new HashSet<>(Arrays.asList("A", "B")));
-    List<RcaInvestigationDTO> sessionsBC = this.sessionDAO
-        .findByNameLike(new HashSet<>(Arrays.asList("B", "C")));
-    List<RcaInvestigationDTO> sessionsCD = this.sessionDAO
-        .findByNameLike(new HashSet<>(Arrays.asList("C", "D")));
-    List<RcaInvestigationDTO> sessionsABCD = this.sessionDAO
-        .findByNameLike(new HashSet<>(Arrays.asList("A", "B", "C", "D")));
-
-    Assert.assertEquals(sessionsAB.size(), 1);
-    Assert.assertEquals(sessionsBC.size(), 3);
-    Assert.assertEquals(sessionsCD.size(), 1);
-    Assert.assertEquals(sessionsABCD.size(), 0);
   }
 
   @Test

@@ -17,8 +17,6 @@ import ai.startree.thirdeye.datalayer.DatalayerTestUtils;
 import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -82,19 +80,7 @@ public class TestMetricConfigManager {
     Assert.assertEquals(metricConfig.getId(), metricConfigId1);
   }
 
-  @Test(dependsOnMethods = {"testFind"})
-  public void testFindLike() {
-    List<MetricConfigDTO> metricConfigs = metricConfigDAO.findWhereNameOrAliasLikeAndActive("%m%");
-    Assert.assertEquals(metricConfigs.size(), 2);
-    metricConfigs = metricConfigDAO.findWhereNameOrAliasLikeAndActive("%2%");
-    Assert.assertEquals(metricConfigs.size(), 1);
-    metricConfigs = metricConfigDAO.findWhereNameOrAliasLikeAndActive("%1%");
-    Assert.assertEquals(metricConfigs.size(), 1);
-    metricConfigs = metricConfigDAO.findWhereNameOrAliasLikeAndActive("%p%");
-    Assert.assertEquals(metricConfigs.size(), 0);
-  }
-
-  @Test(dependsOnMethods = {"testFindLike", "testFindByAlias"})
+  @Test()
   public void testUpdate() {
     MetricConfigDTO metricConfig = metricConfigDAO.findById(metricConfigId1);
     Assert.assertNotNull(metricConfig);
@@ -111,16 +97,5 @@ public class TestMetricConfigManager {
     metricConfigDAO.deleteById(metricConfigId2);
     MetricConfigDTO metricConfig = metricConfigDAO.findById(metricConfigId2);
     Assert.assertNull(metricConfig);
-  }
-
-  @Test(dependsOnMethods = {"testFind"})
-  public void testFindByAlias() {
-    List<MetricConfigDTO> metricConfigs = metricConfigDAO.findWhereAliasLikeAndActive(
-        new HashSet<>(Arrays.asList("1", "3")));
-    Assert.assertEquals(metricConfigs.size(), 1);
-
-    metricConfigs = metricConfigDAO.findWhereAliasLikeAndActive(
-        new HashSet<>(Arrays.asList("etric", "m")));
-    Assert.assertEquals(metricConfigs.size(), 2);
   }
 }

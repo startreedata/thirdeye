@@ -30,11 +30,11 @@ public class ThirdEyeResultSetDataTable extends AbstractDataTableImpl {
 
   private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeResultSetDataTable.class);
   // this counter tracks the object type bug - see comment where it is used. Can be removed once the bug is fixed.
-  private final Counter incorrectObjectDataTypeCounter = Metrics.counter("pinot_object_type_bug_total");
+  private static final Counter incorrectObjectDataTypeCounter = Metrics.counter("pinot_object_type_bug_total");
   // this counter should always be zero - if it's not, then the type fetching is incorrect, the parsing in this class is not implemented correctly or some behaviour changed in Pinot
-  private final Counter unknownDataTypeCounter = Metrics.counter("pinot_unknown_data_type_error_total");
+  private static final Counter unknownDataTypeCounter = Metrics.counter("pinot_unknown_data_type_error_total");
   // this counter should always be zero - if it's not, then the parsing in this class is not implemented correctly or some behaviour changed in Pinot
-  private final Counter parsingErrorCounter = Metrics.counter("pinot_value_parsing_error_total");
+  private static final Counter parsingErrorCounter = Metrics.counter("pinot_value_parsing_error_total");
 
   private final DataFrame dataFrame;
 

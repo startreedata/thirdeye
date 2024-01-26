@@ -18,19 +18,13 @@ import static ai.startree.thirdeye.spi.Constants.METRICS_CACHE_TIMEOUT;
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.RcaInvestigationManager;
-import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import com.codahale.metrics.CachedGauge;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.lang3.StringUtils;
 
 @Singleton
 public class RcaInvestigationManagerImpl extends AbstractManagerImpl<RcaInvestigationDTO> implements
@@ -62,11 +56,6 @@ public class RcaInvestigationManagerImpl extends AbstractManagerImpl<RcaInvestig
   }
 
   @Override
-  public List<RcaInvestigationDTO> findByNameLike(Set<String> nameFragments) {
-    return findByLike(nameFragments, FIND_BY_NAME_LIKE_TEMPLATE, FIND_BY_NAME_LIKE_KEY);
-  }
-
-  @Override
   public List<RcaInvestigationDTO> findByOwner(String owner) {
     return findByPredicate(Predicate.EQ("owner", owner));
   }
@@ -92,28 +81,5 @@ public class RcaInvestigationManagerImpl extends AbstractManagerImpl<RcaInvestig
   @Override
   public List<RcaInvestigationDTO> findByAnomalyId(long id) {
     return findByPredicate(Predicate.EQ("anomalyId", id));
-  }
-
-  private List<RcaInvestigationDTO> findByLike(Set<String> fragments, String template, String key) {
-    return findByLike(fragments, template, key, RcaInvestigationDTO.class);
-  }
-
-  private <B extends AbstractDTO, D> List<D> findByLike(Set<String> fragments, String template,
-      String key,
-      Class<B> beanClass) {
-    List<String> conditions = new ArrayList<>();
-    Map<String, Object> params = new HashMap<>();
-
-    int i = 0;
-    for (String fragment : fragments) {
-      conditions.add(String.format(template, i));
-      params.put(String.format(key, i), String.format(FIND_BY_LIKE_VALUE, fragment));
-      i++;
-    }
-
-    String query = String
-        .format(FIND_BY_LIKE_TEMPLATE, StringUtils.join(conditions, FIND_BY_LIKE_JOINER));
-
-    return (List<D>) genericPojoDao.executeParameterizedSQL(query, params, beanClass);
   }
 }

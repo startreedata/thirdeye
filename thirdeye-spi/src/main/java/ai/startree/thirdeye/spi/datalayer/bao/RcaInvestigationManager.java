@@ -15,14 +15,10 @@ package ai.startree.thirdeye.spi.datalayer.bao;
 
 import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import java.util.List;
-import java.util.Set;
 
 public interface RcaInvestigationManager extends AbstractManager<RcaInvestigationDTO> {
 
   List<RcaInvestigationDTO> findByName(String name);
-
-  List<RcaInvestigationDTO> findByNameLike(Set<String> nameFragments);
-
   List<RcaInvestigationDTO> findByOwner(String owner);
 
   List<RcaInvestigationDTO> findByAnomalyRange(long start, long end);

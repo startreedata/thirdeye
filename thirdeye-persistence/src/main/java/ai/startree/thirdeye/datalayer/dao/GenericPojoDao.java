@@ -47,7 +47,6 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -352,35 +351,6 @@ public class GenericPojoDao {
       LOG.error(e.getMessage(), e);
       return emptyList();
     }
-  }
-
-  /**
-   * @param parameterizedSQL second part of the sql (omit select from table section)
-   */
-  public <E extends AbstractDTO> List<E> executeParameterizedSQL(final String parameterizedSQL,
-      final Map<String, Object> parameterMap, final Class<E> pojoClass) {
-    final Class<? extends AbstractIndexEntity> indexClass = BEAN_INDEX_MAP.get(pojoClass);
-    try {
-      final List<? extends AbstractIndexEntity> indexEntities = transactionService.executeTransaction(
-          (connection) -> databaseService.runSQL(
-              parameterizedSQL,
-              parameterMap,
-              indexClass,
-              connection), emptyList());
-      final List<Long> idsToFind = new ArrayList<>();
-      if (CollectionUtils.isNotEmpty(indexEntities)) {
-        for (final AbstractIndexEntity entity : indexEntities) {
-          idsToFind.add(entity.getBaseId());
-        }
-      }
-      //fetch the entities
-      if (!idsToFind.isEmpty()) {
-        return get(idsToFind, pojoClass);
-      }
-    } catch (final SQLException e) {
-      LOG.error(e.getMessage(), e);
-    }
-    return emptyList();
   }
 
   /**

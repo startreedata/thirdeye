@@ -13,7 +13,6 @@
  */
 package ai.startree.thirdeye.notification;
 
-import static ai.startree.thirdeye.notification.AnomalyReportHelper.getDateString;
 import static ai.startree.thirdeye.notification.AnomalyReportHelper.getFeedbackValue;
 import static ai.startree.thirdeye.notification.AnomalyReportHelper.getTimezoneString;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
@@ -44,8 +43,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,7 +62,7 @@ public class NotificationReportBuilder {
   private final UiConfiguration uiConfiguration;
   private final EnumerationItemManager enumerationItemManager;
 
-  private final DateTimeZone dateTimeZone;
+  private final DateTimeFormatter dateTimeFormatter;
 
   @Inject
   public NotificationReportBuilder(final AlertManager alertManager,
@@ -74,7 +73,8 @@ public class NotificationReportBuilder {
     this.uiConfiguration = uiConfiguration;
     this.enumerationItemManager = enumerationItemManager;
 
-    dateTimeZone = timeConfiguration.getTimezone();
+    dateTimeFormatter = DateTimeFormat.forPattern(timeConfiguration.getDateTimePattern())
+        .withZone(timeConfiguration.getTimezone());
   }
 
   public NotificationReportApi buildNotificationReportApi(
@@ -84,15 +84,15 @@ public class NotificationReportBuilder {
     final List<AnomalyDTO> mergedAnomalyResults = new ArrayList<>();
 
     // Calculate start and end time of the anomalies
-    DateTime startTime = DateTime.now(dateTimeZone);
-    DateTime endTime = new DateTime(0L, dateTimeZone);
+    long startTime = System.currentTimeMillis();
+    long endTime = 0L;
     for (final AnomalyDTO anomaly : anomalies) {
       mergedAnomalyResults.add(anomaly);
-      if (anomaly.getStartTime() < startTime.getMillis()) {
-        startTime = new DateTime(anomaly.getStartTime(), dateTimeZone);
+      if (anomaly.getStartTime() < startTime) {
+        startTime = anomaly.getStartTime();
       }
-      if (anomaly.getEndTime() > endTime.getMillis()) {
-        endTime = new DateTime(anomaly.getEndTime(), dateTimeZone);
+      if (anomaly.getEndTime() > endTime) {
+        endTime = anomaly.getEndTime();
       }
     }
 
@@ -101,9 +101,9 @@ public class NotificationReportBuilder {
         new DummyAnomalyFilter());
 
     final NotificationReportApi report = new NotificationReportApi()
-        .setStartTime(getDateString(startTime))
-        .setEndTime(getDateString(endTime))
-        .setTimeZone(getTimezoneString(dateTimeZone))
+        .setStartTime(dateTimeFormatter.print(startTime))
+        .setEndTime(dateTimeFormatter.print(endTime))
+        .setTimeZone(getTimezoneString(dateTimeFormatter))
         .setNotifiedCount(precisionRecallEvaluator.getTotalAlerts())
         .setFeedbackCount(precisionRecallEvaluator.getTotalResponses())
         .setTrueAlertCount(precisionRecallEvaluator.getTrueAnomalies())
@@ -166,7 +166,7 @@ public class NotificationReportBuilder {
         feedbackVal,
         alertName,
         alertDescription,
-        dateTimeZone,
+        dateTimeFormatter,
         uiConfiguration.getExternalUrl());
   }
 

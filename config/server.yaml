@@ -99,9 +99,9 @@ rca:
     params: {}
 
 time:
-  # notification text timezone
+  # notification timezone
   timezone: UTC
-  # notification text time format pattern - see https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html 
+  # notification time format pattern - see https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html 
   dateTimePattern: "MMM dd, yyyy HH:mm"
   # Limit onboarding alert replay back to JAN_1_2000_UTC
   minimumOnboardingStartTime: 946684800000

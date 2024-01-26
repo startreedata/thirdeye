@@ -80,7 +80,7 @@ public class TestMetricConfigManager {
     Assert.assertEquals(metricConfig.getId(), metricConfigId1);
   }
 
-  @Test(dependsOnMethods = {"testFindLike", "testFindByAlias"})
+  @Test()
   public void testUpdate() {
     MetricConfigDTO metricConfig = metricConfigDAO.findById(metricConfigId1);
     Assert.assertNotNull(metricConfig);

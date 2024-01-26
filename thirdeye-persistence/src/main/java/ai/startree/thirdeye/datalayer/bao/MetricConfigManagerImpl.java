@@ -56,4 +56,10 @@ public class MetricConfigManagerImpl extends AbstractManagerImpl<MetricConfigDTO
     }
     return null;
   }
+
+  @Override
+  public List<MetricConfigDTO> findByMetricName(String metricName) {
+    Predicate metricNamePredicate = Predicate.EQ("name", metricName);
+    return findByPredicate(metricNamePredicate);
+  }
 }

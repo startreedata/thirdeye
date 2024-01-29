@@ -26,7 +26,10 @@ import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.notification.NotificationDispatcher;
+import ai.startree.thirdeye.notification.NotificationServiceRegistry;
 import ai.startree.thirdeye.spi.api.AlertApi;
+import ai.startree.thirdeye.spi.api.AlertAssociationApi;
+import ai.startree.thirdeye.spi.api.NotificationSpecApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
@@ -50,39 +53,59 @@ public class SubscriptionGroupService extends
 
   private static final int SUBSCRIPTION_CRON_MAX_TRIGGERS_PER_MINUTE = 6;
   private final NotificationDispatcher notificationDispatcher;
+  private final NotificationServiceRegistry notificationServiceRegistry;
 
   @Inject
   public SubscriptionGroupService(
       final SubscriptionGroupManager subscriptionGroupManager,
       final AuthorizationManager authorizationManager,
-      final NotificationDispatcher notificationDispatcher) {
+      final NotificationDispatcher notificationDispatcher,
+      NotificationServiceRegistry notificationServiceRegistry) {
     super(authorizationManager, subscriptionGroupManager, ImmutableMap.of());
     this.notificationDispatcher = notificationDispatcher;
+    this.notificationServiceRegistry = notificationServiceRegistry;
   }
 
-  @Override
-  protected void validate(final SubscriptionGroupApi api, final SubscriptionGroupDTO existing) {
-    super.validate(api, existing);
-    ensureExists(api.getName(), "name value must be set.");
+  private static void validateCron(final SubscriptionGroupApi api) {
     ensureExists(api.getCron(), "cron value must be set.");
     ensure(CronExpression.isValidExpression(api.getCron()), ERR_CRON_INVALID, api.getCron());
+
     final int maxTriggersPerMinute = maximumTriggersPerMinute(api.getCron());
     ensure(maxTriggersPerMinute <= SUBSCRIPTION_CRON_MAX_TRIGGERS_PER_MINUTE,
         ERR_CRON_FREQUENCY_TOO_HIGH,
         api.getCron(),
         maxTriggersPerMinute,
         SUBSCRIPTION_CRON_MAX_TRIGGERS_PER_MINUTE);
+  }
+
+  private static void validateAlertAssociation(final AlertAssociationApi alertAssociation) {
+    final AlertApi alert = alertAssociation.getAlert();
+    ensureExists(alert, "alert missing in alert association");
+    ensureExists(alert.getId(), "alert.id is missing in alert association");
+  }
+
+  private void validateSpec(NotificationSpecApi spec) {
+    ensureExists(spec.getType(), "type value must be set.");
+    ensure(notificationServiceRegistry.isRegistered(spec.getType()),
+        "Notification service not registered: %s. Available: %s".formatted(spec.getType(),
+            notificationServiceRegistry.getRegisteredNotificationServices()));
+  }
+
+  @Override
+  protected void validate(final SubscriptionGroupApi api, final SubscriptionGroupDTO existing) {
+    super.validate(api, existing);
+    ensureExists(api.getName(), "name value must be set.");
+    validateCron(api);
+
+    optional(api.getSpecs())
+        .ifPresent(l -> l.forEach(this::validateSpec));
 
     // For new Subscription Group or existing Subscription Group with different name
     if (existing == null || !existing.getName().equals(api.getName())) {
       ensure(dtoManager.findByName(api.getName()).isEmpty(), ERR_DUPLICATE_NAME, api.getName());
     }
     optional(api.getAlertAssociations())
-        .ifPresent(l -> l.forEach(alertAssociation -> {
-          final AlertApi alert = alertAssociation.getAlert();
-          ensureExists(alert, "alert missing in alert association");
-          ensureExists(alert.getId(), "alert.id is missing in alert association");
-        }));
+        .ifPresent(l -> l.forEach(SubscriptionGroupService::validateAlertAssociation));
   }
 
   @Override

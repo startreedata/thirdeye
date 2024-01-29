@@ -19,6 +19,7 @@ import static org.mockito.Mockito.mock;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.notification.NotificationDispatcher;
+import ai.startree.thirdeye.notification.NotificationServiceRegistry;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertAssociationDto;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
@@ -46,7 +47,8 @@ public class SubscriptionGroupServiceTest {
     subscriptionGroupService = new SubscriptionGroupService(
         mock(SubscriptionGroupManager.class),
         mock(AuthorizationManager.class),
-        mock(NotificationDispatcher.class)
+        mock(NotificationDispatcher.class),
+        mock(NotificationServiceRegistry.class)
     );
   }
 

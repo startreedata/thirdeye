@@ -21,6 +21,7 @@ import ai.startree.thirdeye.spi.notification.NotificationServiceFactory;
 import com.google.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 @Singleton
 public class NotificationServiceRegistry {
@@ -41,5 +42,14 @@ public class NotificationServiceRegistry {
     final NotificationServiceFactory notificationServiceFactory = requireNonNull(factoryMap.get(name),
         "Unable to load NotificationServiceFactory: " + name);
     return notificationServiceFactory.build(params);
+  }
+
+  public boolean isRegistered(final String name) {
+    requireNonNull(name, "name is null");
+    return factoryMap.containsKey(name);
+  }
+
+  public Set<String> getRegisteredNotificationServices() {
+    return factoryMap.keySet();
   }
 }

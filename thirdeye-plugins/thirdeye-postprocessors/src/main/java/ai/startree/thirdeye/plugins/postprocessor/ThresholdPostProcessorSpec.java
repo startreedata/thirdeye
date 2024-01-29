@@ -28,6 +28,8 @@ public class ThresholdPostProcessorSpec extends AbstractSpec {
   private String valueName;
 
   /**A list of metrics to filter on. Filter when all metrics are out of the [min,max] range (AND operation)*/
+  // deprecated in favor of using a sql interface with a combination of a SQL oprator and a simple threshold post processor
+  @Deprecated 
   private List<String> metrics;
 
   public Double getMin() {
@@ -66,10 +68,12 @@ public class ThresholdPostProcessorSpec extends AbstractSpec {
     return this;
   }
 
+  @Deprecated
   public List<String> getMetrics() {
     return metrics;
   }
 
+  @Deprecated
   public ThresholdPostProcessorSpec setMetrics(final List<String> metrics) {
     this.metrics = metrics;
     return this;

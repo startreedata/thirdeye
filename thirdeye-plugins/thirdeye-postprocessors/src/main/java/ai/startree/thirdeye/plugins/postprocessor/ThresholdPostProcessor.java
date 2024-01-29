@@ -40,6 +40,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.Interval;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Apply a label on anomalies that have their value out of a threshold.
@@ -53,6 +55,7 @@ import org.joda.time.Interval;
  */
 public class ThresholdPostProcessor implements AnomalyPostProcessor {
 
+  private static final Logger LOG = LoggerFactory.getLogger(ThresholdPostProcessor.class);
   private static final String NAME = "THRESHOLD";
 
   private static final boolean DEFAULT_IGNORE = false;
@@ -66,7 +69,9 @@ public class ThresholdPostProcessor implements AnomalyPostProcessor {
   private final Double min;
   private final Double max;
   private String timestampColum;
-  // quick development - should be genralized by providing a sql interface to write filters TODO CYRIL revert this change once the sql post processor is implemented
+  // quick development - should be genralized by providing a sql interface to write filters
+  // TODO cyril remove around March 2024
+  @Deprecated // in favor of using a SQL interface by combining a SQL operator and the threshold post processor
   private List<String> valueColumns;
 
   private final boolean ignore;
@@ -78,6 +83,7 @@ public class ThresholdPostProcessor implements AnomalyPostProcessor {
     this.max = optional(spec.getMax()).orElse(NOT_ACTIVATED_VALUE);
     this.timestampColum = optional(spec.getTimestamp()).orElse(DEFAULT_TIMESTAMP);
     if (spec.getMetrics() != null && !spec.getMetrics().isEmpty()) {
+      LOG.warn("Use of deprecated parameter 'metrics'. This will be removed around March 2024.");
       this.valueColumns = spec.getMetrics();
     } else {
       this.valueColumns = List.of(optional(spec.getMetric()).orElse(DEFAULT_METRIC));

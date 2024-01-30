@@ -1,3 +1,10 @@
+### [2.45.5](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.4...thirdeye-ui-2.45.5) (2024-01-30)
+
+
+### Bug Fixes
+
+* [TE-2049](https://cortexdata.atlassian.net/browse/TE-2049) add custom query filter to the alert config ([c037f3eba](https://github.com/startreedata/thirdeye/commit/c037f3eba573e6d6fbacdf3d59053d454d603472))
+
 ### [2.45.4](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.3...thirdeye-ui-2.45.4) (2024-01-25)
 
 

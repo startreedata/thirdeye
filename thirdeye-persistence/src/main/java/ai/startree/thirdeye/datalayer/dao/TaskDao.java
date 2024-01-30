@@ -272,28 +272,6 @@ public class TaskDao {
     }
   }
 
-  /**
-   * Dump all entities of type entityClass to logger
-   * This utility is useful to dump the entire table. However, it gets executed in code regularly in
-   * debug mode.
-   */
-  @SuppressWarnings("unused")
-  private void dumpTable() {
-    if (IS_DEBUG) {
-      try {
-        final List<TaskEntity> entities = transactionService.executeTransaction(
-            (connection) -> databaseService.findAll(
-                null, null, null, TaskEntity.class, connection),
-            Collections.emptyList());
-        for (final TaskEntity entity : entities) {
-          LOG.debug("{}", entity);
-        }
-      } catch (SQLException e) {
-        LOG.error(e.getMessage(), e);
-      }
-    }
-  }
-
   public int delete(final Long id) {
     return delete(List.of(id));
   }

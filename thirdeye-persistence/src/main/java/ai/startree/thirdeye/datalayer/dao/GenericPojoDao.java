@@ -29,7 +29,6 @@ import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.datalayer.DatabaseService;
 import ai.startree.thirdeye.datalayer.DatabaseTransactionService;
-import ai.startree.thirdeye.datalayer.entity.AbstractEntity;
 import ai.startree.thirdeye.datalayer.entity.AbstractIndexEntity;
 import ai.startree.thirdeye.datalayer.entity.GenericJsonEntity;
 import ai.startree.thirdeye.datalayer.entity.SubEntityType;
@@ -350,32 +349,6 @@ public class GenericPojoDao {
     } catch (final SQLException e) {
       LOG.error(e.getMessage(), e);
       return emptyList();
-    }
-  }
-
-  /**
-   * Dump all entities of type entityClass to logger
-   * This utility is useful to dump the entire table. However, it gets executed in code regularly in
-   * debug mode.
-   *
-   * @param entityClass The entity class.
-   */
-  @SuppressWarnings("unused")
-  private void dumpTable(final Class<? extends AbstractEntity> entityClass) {
-    if (IS_DEBUG) {
-      try {
-        final List<? extends AbstractEntity> entities = transactionService.executeTransaction(
-            (connection) -> databaseService.findAll(null,
-                null,
-                null,
-                entityClass,
-                connection), emptyList());
-        for (final AbstractEntity entity : entities) {
-          LOG.debug("{}", entity);
-        }
-      } catch (final SQLException e) {
-        LOG.error(e.getMessage(), e);
-      }
     }
   }
 

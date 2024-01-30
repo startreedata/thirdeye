@@ -34,4 +34,8 @@ export interface DatasetDetailsProps {
     initialSelectedDataset?: string;
     initialSelectedDatasource?: string;
     initialSelectedAggregationFunc?: MetricAggFunction;
+
+    // For the manually entered query filter
+    queryValue: string;
+    setQueryValue: (val: string) => void;
 }

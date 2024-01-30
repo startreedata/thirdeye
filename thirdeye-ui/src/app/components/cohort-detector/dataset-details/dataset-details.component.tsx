@@ -61,6 +61,8 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
     initialSelectedDataset,
     initialSelectedDatasource,
     initialSelectedAggregationFunc,
+    queryValue,
+    setQueryValue,
 }) => {
     const {
         datasources,
@@ -102,10 +104,6 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
             initialSelectedAggregationFunc ?? MetricAggFunction.SUM
         );
     const [selectedDimensions, setSelectedDimensions] = useState<string[]>([]);
-    const [queryValue, setQueryValue] = useSessionStorage<string>(
-        SessionStorageKeys.QueryFilterOnAlertFlow,
-        ""
-    );
 
     useEffect(() => {
         getDatasets();

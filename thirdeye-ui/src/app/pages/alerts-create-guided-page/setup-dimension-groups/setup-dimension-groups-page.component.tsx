@@ -44,6 +44,10 @@ import { useGetCohort } from "../../../rest/rca/rca.actions";
 import { GetCohortParams } from "../../../rest/rca/rca.interfaces";
 import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
 import { AppRouteRelative } from "../../../utils/routes/routes.util";
+import {
+    SessionStorageKeys,
+    useSessionStorage,
+} from "../../../utils/storage/use-session-storage";
 import { AlertCreatedGuidedPageOutletContext } from "../alerts-create-guided-page.interfaces";
 
 export const SetupDimensionGroupsPage: FunctionComponent = () => {
@@ -58,6 +62,11 @@ export const SetupDimensionGroupsPage: FunctionComponent = () => {
         useOutletContext<AlertCreatedGuidedPageOutletContext>();
 
     const [selectedCohorts, setSelectedCohorts] = useState<CohortResult[]>([]);
+
+    const [queryValue, setQueryValue] = useSessionStorage<string>(
+        SessionStorageKeys.QueryFilterOnAlertFlow,
+        ""
+    );
 
     useEffect(() => {
         setIsMultiDimensionAlert(true);
@@ -143,10 +152,17 @@ export const SetupDimensionGroupsPage: FunctionComponent = () => {
             };
         });
 
+        let queryFilters = "${queryFilters}";
+
+        // Append the custom query filter if exists
+        if (queryValue) {
+            queryFilters = `${queryFilters} AND ${queryValue}`;
+        }
+
         onAlertPropertyChange({
             templateProperties: {
                 ...alert.templateProperties,
-                queryFilters: "${queryFilters}",
+                queryFilters,
                 enumerationItems: enumerationItemConfiguration,
             },
         });
@@ -182,6 +198,8 @@ export const SetupDimensionGroupsPage: FunctionComponent = () => {
                         initialSelectedMetric={
                             alert.templateProperties.aggregationColumn as string
                         }
+                        queryValue={queryValue}
+                        setQueryValue={setQueryValue}
                         submitButtonLabel={t(
                             "message.generate-dimensions-to-monitor"
                         )}

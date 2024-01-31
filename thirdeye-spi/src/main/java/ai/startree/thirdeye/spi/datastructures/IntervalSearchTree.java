@@ -18,7 +18,7 @@ package ai.startree.thirdeye.spi.datastructures;
  * https://algs4.cs.princeton.edu/93intersection/IntervalST.java.html
  * https://algs4.cs.princeton.edu/93intersection/
  *
- * Modified to respect ThirdEye start/end semantic.
+ * Modified to respect ThirdEye start/end semantic: [start, end[. Original implementation was for a [start, end] interval.
  * */
 
 /******************************************************************************
@@ -198,7 +198,7 @@ public class IntervalSearchTree<V> {
         return Map.entry(x.interval, x.values);
       } else if (x.left == null) {
         x = x.right;
-      } else if (x.left.max < interval.getMin()) {
+      } else if (x.left.max <= interval.getMin()) {
         x = x.right;
       } else {
         x = x.left;
@@ -227,10 +227,10 @@ public class IntervalSearchTree<V> {
       matchingIntervals.put(x.interval, x.values);
       found1 = true;
     }
-    if (x.left != null && x.left.max >= interval.getMin()) {
+    if (x.left != null && x.left.max > interval.getMin()) {
       found2 = searchAll(x.left, interval, matchingIntervals);
     }
-    if (found2 || x.left == null || x.left.max < interval.getMin()) {
+    if (found2 || x.left == null || x.left.max <= interval.getMin()) {
       found3 = searchAll(x.right, interval, matchingIntervals);
     }
     return found1 || found2 || found3;

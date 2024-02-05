@@ -107,4 +107,5 @@ public interface Constants {
   }
 
   Duration METRICS_CACHE_TIMEOUT = Duration.ofMinutes(10);
+  double[] METRICS_TIMER_PERCENTILES = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999};
 }

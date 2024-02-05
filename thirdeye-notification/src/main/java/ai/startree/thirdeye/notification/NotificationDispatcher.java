@@ -37,10 +37,15 @@ public class NotificationDispatcher {
 
   private final NotificationServiceRegistry notificationServiceRegistry;
   private final NotificationSchemesMigrator notificationSchemesMigrator;
+  @Deprecated // use thirdeye_notification_dispatch 
   private final Counter notificationDispatchCounter;
+  @Deprecated // use thirdeye_notification_dispatch
   private final Counter notificationDispatchSuccessCounter;
+  @Deprecated // use thirdeye_notification_dispatch
   private final Counter notificationDispatchExceptionCounter;
+  @Deprecated // use thirdeye_notification_dispatch
   private final Histogram notificationDispatchDuration;
+  
   private final Timer notificationDispatchTimerOfSuccess;
   private final Timer notificationDispatchTimerOfException;
 
@@ -52,18 +57,24 @@ public class NotificationDispatcher {
     this.notificationServiceRegistry = notificationServiceRegistry;
     this.notificationSchemesMigrator = notificationSchemesMigrator;
 
+    // TODO CYRIL WARNING - REMOVE AT THE END OF THE MIGRATION TO MICROMETER ONLY - USED IN IMPORTANT PRODUCTION ALERTS
+    // deprecated metrics - use the count of thirdeye_notification_dispatch with exception=true
+    this.notificationDispatchExceptionCounter = metricRegistry.counter(
+        "notificationDispatchExceptionCounter");
+
+    // TODO CYRIL micrometer - safe to remove if not used by distribution users
+    // deprecated metrics - use thirdeye_notification_dispatch
     this.notificationDispatchCounter = metricRegistry.counter("notificationDispatchCounter");
     this.notificationDispatchSuccessCounter = metricRegistry.counter(
         "notificationDispatchSuccessCounter");
-    this.notificationDispatchExceptionCounter = metricRegistry.counter(
-        "notificationDispatchExceptionCounter");
     this.notificationDispatchDuration = metricRegistry.histogram(
         "notificationDispatchDuration");
+    
     // same metric but different tag - the time measure is assigned manually to the correct tag based on whether there was an exception 
     this.notificationDispatchTimerOfSuccess = Timer.builder("thirdeye_notification_dispatch")
         .publishPercentiles(METRICS_TIMER_PERCENTILES)
         .tag("exception", "false")
-        .description("Start: A notification payload is passed to the NotificationService#notify implementation. End: The method returns. Tag exception=true an exception was thrown by the method call.")
+        .description("Start: A notification payload is passed to the NotificationService#notify implementation. End: The method returns. Tag exception=true means an exception was thrown by the method call.")
         .register(Metrics.globalRegistry);
     this.notificationDispatchTimerOfException = Timer.builder("thirdeye_notification_dispatch")
         .publishPercentiles(METRICS_TIMER_PERCENTILES)

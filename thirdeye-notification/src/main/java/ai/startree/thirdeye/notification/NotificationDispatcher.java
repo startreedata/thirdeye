@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.notification;
 
+import static ai.startree.thirdeye.spi.Constants.METRICS_TIMER_PERCENTILES;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
@@ -59,12 +60,13 @@ public class NotificationDispatcher {
     this.notificationDispatchDuration = metricRegistry.histogram(
         "notificationDispatchDuration");
     // same metric but different tag - the time measure is assigned manually to the correct tag based on whether there was an exception 
-    this.notificationDispatchTimerOfSuccess = Timer
-        .builder("thirdeye_notification_dispatch")
+    this.notificationDispatchTimerOfSuccess = Timer.builder("thirdeye_notification_dispatch")
+        .publishPercentiles(METRICS_TIMER_PERCENTILES)
         .tag("exception", "false")
         .description("Start: A notification payload is passed to the NotificationService#notify implementation. End: The method returns. Tag exception=true an exception was thrown by the method call.")
         .register(Metrics.globalRegistry);
     this.notificationDispatchTimerOfException = Timer.builder("thirdeye_notification_dispatch")
+        .publishPercentiles(METRICS_TIMER_PERCENTILES)
         .tag("exception", "true")
         .register(Metrics.globalRegistry);
   }

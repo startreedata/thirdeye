@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.datalayer.bao;
 
 import static ai.startree.thirdeye.spi.Constants.METRICS_CACHE_TIMEOUT;
+import static com.google.common.base.Suppliers.memoizeWithExpiration;
 
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
@@ -24,6 +25,8 @@ import com.codahale.metrics.CachedGauge;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import io.micrometer.core.instrument.Gauge;
+import io.micrometer.core.instrument.Metrics;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -35,6 +38,10 @@ public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
   public AlertManagerImpl(final GenericPojoDao genericPojoDao,
       final MetricRegistry metricRegistry) {
     super(AlertDTO.class, genericPojoDao);
+    // TODO CYRIL remove this comment - migration test for CachedGauge   
+    Gauge.builder("thirdeye_active_alerts",
+            memoizeWithExpiration(this::countActive, METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES))
+        .register(Metrics.globalRegistry);
     metricRegistry.register("activeAlertsCount",
         new CachedGauge<Long>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
       @Override

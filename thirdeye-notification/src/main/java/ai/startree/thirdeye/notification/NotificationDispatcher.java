@@ -25,6 +25,8 @@ import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.Timer;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,6 +40,8 @@ public class NotificationDispatcher {
   private final Counter notificationDispatchSuccessCounter;
   private final Counter notificationDispatchExceptionCounter;
   private final Histogram notificationDispatchDuration;
+  private final Timer notificationDispatchTimerOfSuccess;
+  private final Timer notificationDispatchTimerOfException;
 
   @Inject
   public NotificationDispatcher(
@@ -54,6 +58,15 @@ public class NotificationDispatcher {
         "notificationDispatchExceptionCounter");
     this.notificationDispatchDuration = metricRegistry.histogram(
         "notificationDispatchDuration");
+    // same metric but different tag - the time measure is assigned manually to the correct tag based on whether there was an exception 
+    this.notificationDispatchTimerOfSuccess = Timer
+        .builder("thirdeye_notification_dispatch")
+        .tag("exception", "false")
+        .description("Start: A notification payload is passed to the NotificationService#notify implementation. End: The method returns. Tag exception=true an exception was thrown by the method call.")
+        .register(Metrics.globalRegistry);
+    this.notificationDispatchTimerOfException = Timer.builder("thirdeye_notification_dispatch")
+        .tag("exception", "true")
+        .register(Metrics.globalRegistry);
   }
 
   public void dispatch(final SubscriptionGroupDTO subscriptionGroup,
@@ -69,13 +82,16 @@ public class NotificationDispatcher {
 
   private void notifyService(final NotificationService service,
       final NotificationPayloadApi payload) {
+    final Timer.Sample sample = Timer.start(Metrics.globalRegistry);
     try {
       final long tStart = System.currentTimeMillis();
       service.notify(payload);
+      sample.stop(notificationDispatchTimerOfSuccess);
       notificationDispatchDuration.update(System.currentTimeMillis() - tStart);
       notificationDispatchSuccessCounter.inc();
     } catch (Exception exception) {
       notificationDispatchExceptionCounter.inc();
+      sample.stop(notificationDispatchTimerOfException);
       throw exception;
     } finally {
       notificationDispatchCounter.inc();

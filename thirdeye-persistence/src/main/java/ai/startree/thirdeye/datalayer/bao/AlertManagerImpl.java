@@ -38,7 +38,7 @@ public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
   public AlertManagerImpl(final GenericPojoDao genericPojoDao,
       final MetricRegistry metricRegistry) {
     super(AlertDTO.class, genericPojoDao);
-    // TODO CYRIL remove this comment - migration test for CachedGauge   
+    // TODO CYRIL micrometer migration - test for CachedGauge   
     Gauge.builder("thirdeye_active_alerts",
             memoizeWithExpiration(this::countActive, METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES))
         .register(Metrics.globalRegistry);

@@ -23,6 +23,7 @@ import static ai.startree.thirdeye.spi.util.ExecutorUtils.shutdownExecutionServi
 import static ai.startree.thirdeye.spi.util.ExecutorUtils.threadsNamed;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkState;
+import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.datasource.DataSourcesLoader;
@@ -38,6 +39,7 @@ import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import io.micrometer.core.instrument.Metrics;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
@@ -86,6 +88,7 @@ public class DataSourceCache {
           }
         });
     metricRegistry.register("cachedDatasourceCount", (Gauge<Integer>) cache::size);
+    Metrics.gaugeMapSize("thirdeye_cached_datasources", emptyList(), cache);
   }
 
   private Integer getHealthyDatasourceCount() {

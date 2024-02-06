@@ -127,13 +127,9 @@ public class TaskDriverRunnable implements Runnable {
     Future<List<TaskResult>> future = null;
     try {
       future = runTaskAsync(taskDTO);
-      // wait for the future to complete
       future.get(config.getMaxTaskRunTime().toMillis(), TimeUnit.MILLISECONDS);
-
-      LOG.info("DONE Executing task {}", taskDTO.getId());
-      // update status to COMPLETED
       updateTaskStatus(taskDTO.getId(), TaskStatus.COMPLETED, "");
-
+      LOG.info("DONE Executing task {}", taskDTO.getId());
       taskSuccessCounter.inc();
     } catch (TimeoutException e) {
       handleTimeout(taskDTO, future, e);

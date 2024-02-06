@@ -51,6 +51,7 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.federecio.dropwizard.swagger.SwaggerBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
+import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
@@ -149,7 +150,8 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
     // Expose dropwizard metrics in prometheus compatible format
     if (configuration.getPrometheusConfiguration().isEnabled()) {
       // new registry based on micrometers
-      final PrometheusMeterRegistry registry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
+      final PrometheusMeterRegistry registry = new PrometheusMeterRegistry(
+          PrometheusConfig.DEFAULT);
       // TODO CYRIL can be removed once migration from dw-metrics to micrometer is completed
       registry.config().commonTags("metric_framework", "micrometer");
       Metrics.globalRegistry.add(registry);
@@ -160,6 +162,10 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
           .addServlet("prometheus", new MergingMetricsServlet(registry, legacyRegistry))
           .addMapping("/prometheus");
     }
+    Gauge.builder("thirdeye_version_info", () -> 1)
+        .tag("semver", packageSemver())
+        .tag("git_hash", packageGitHash())
+        .register(Metrics.globalRegistry);
 
     // Persistence layer connectivity health check registry
     env.healthChecks().register("database", injector.getInstance(DatabaseHealthCheck.class));
@@ -292,7 +298,7 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
               .ifPresent(status_code -> sentryEvent.setTag("http_status_code", status_code));
           return sentryEvent;
         });
-        options.setRelease(this.getClass().getPackage().getImplementationVersion());
+        options.setRelease(packageSemver());
         options.setEnvironment(config.getEnvironment());
         config.getTags().forEach(options::setTag);
         // Enable Sentry SDK logs for error level - to know if sentry has errors
@@ -307,7 +313,8 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
       appender.setMinimumEventLevel(Level.ERROR);
       appender.setMinimumBreadcrumbLevel(Level.DEBUG);
       appender.start();
-      final ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+      final ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(
+          Logger.ROOT_LOGGER_NAME);
       rootLogger.addAppender(appender);
       // re-instantiate the logger of this class now that the Sentry appender has been injected
       log = LoggerFactory.getLogger(ThirdEyeServer.class);
@@ -316,9 +323,30 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
       log.info("Sentry.io collect is not enabled.");
     }
   }
-  
+
+  private String packageSemver() {
+    // assuming format is "x.y.z-2c2commitHash"
+    final String fullPackageVersion = this.getClass().getPackage().getImplementationVersion();
+    final int indexOfCommitHashStart = fullPackageVersion.indexOf("-");
+    if (indexOfCommitHashStart > 0) {
+      return fullPackageVersion.substring(0, indexOfCommitHashStart);
+    }
+    return fullPackageVersion;
+  }
+
+  private String packageGitHash() {
+    // assuming format is "x.y.z-2c2commitHash"
+    final String fullPackageVersion = this.getClass().getPackage().getImplementationVersion();
+    final int indexOfCommitHashStart = fullPackageVersion.indexOf("-");
+    if (indexOfCommitHashStart > 0) {
+      return fullPackageVersion.substring(indexOfCommitHashStart + 1);
+    }
+    return fullPackageVersion;
+  }
+
   @Provider
-  public static class ExceptionSentryLogger implements ApplicationEventListener, RequestEventListener {
+  public static class ExceptionSentryLogger implements ApplicationEventListener,
+      RequestEventListener {
 
     @Override
     public void onEvent(final ApplicationEvent event) {

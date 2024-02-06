@@ -127,6 +127,7 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
   @Override
   public void run(final ThirdEyeServerConfiguration configuration, final Environment env) {
     initSentry(configuration.getSentryConfiguration(), env.jersey());
+    initMetrics(configuration, env);
 
     final DataSource dataSource = new DataSourceBuilder()
         .build(configuration.getDatabaseConfiguration());
@@ -147,13 +148,31 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
     registerResources(env.jersey());
     env.jersey().register(new ThirdEyeJsonProcessingExceptionMapper());
 
+    // Persistence layer connectivity health check registry
+    env.healthChecks().register("database", injector.getInstance(DatabaseHealthCheck.class));
+
+    registerAuthFilter(injector, env.jersey());
+
+    // Enable CORS. Opens up the API server to respond to requests from all external domains.
+    addCorsFilter(env);
+
+    // Load mock events if enabled.
+    injector.getInstance(MockEventsLoader.class).run();
+    env.lifecycle().manage(lifecycleManager(configuration));
+  }
+
+  private void initMetrics(final ThirdEyeServerConfiguration configuration, final Environment env) {
+    final String environmentUrl = optional(configuration.getUiConfiguration().getExternalUrl())
+        .map(s -> s.replaceAll("https?://", ""))
+        .orElse("unknown");
     // Expose dropwizard metrics in prometheus compatible format
     if (configuration.getPrometheusConfiguration().isEnabled()) {
       // new registry based on micrometers
       final PrometheusMeterRegistry registry = new PrometheusMeterRegistry(
           PrometheusConfig.DEFAULT);
-      // TODO CYRIL can be removed once migration from dw-metrics to micrometer is completed
-      registry.config().commonTags("metric_framework", "micrometer");
+      registry.config()
+          // TODO CYRIL metric_framework can be removed once migration from dw-metrics to micrometer is completed
+          .commonTags("metric_framework", "micrometer", "environment_url", environmentUrl);
       Metrics.globalRegistry.add(registry);
       // old registry based on dropwizard-metrics
       final CollectorRegistry legacyRegistry = new CollectorRegistry();
@@ -166,18 +185,6 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
         .tag("semver", packageSemver())
         .tag("git_hash", packageGitHash())
         .register(Metrics.globalRegistry);
-
-    // Persistence layer connectivity health check registry
-    env.healthChecks().register("database", injector.getInstance(DatabaseHealthCheck.class));
-
-    registerAuthFilter(injector, env.jersey());
-
-    // Enable CORS. Opens up the API server to respond to requests from all external domains.
-    addCorsFilter(env);
-
-    // Load mock events if enabled.
-    injector.getInstance(MockEventsLoader.class).run();
-    env.lifecycle().manage(lifecycleManager(configuration));
   }
 
   protected void registerResources(final JerseyEnvironment jersey) {

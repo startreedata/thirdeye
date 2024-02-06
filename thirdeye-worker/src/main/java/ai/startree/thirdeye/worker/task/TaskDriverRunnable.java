@@ -37,7 +37,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 
 @Singleton
 public class TaskDriverRunnable implements Runnable {
@@ -131,9 +130,7 @@ public class TaskDriverRunnable implements Runnable {
 
       LOG.info("DONE Executing task {}", taskDTO.getId());
       // update status to COMPLETED
-      updateTaskStatus(taskDTO.getId(),
-          TaskStatus.COMPLETED,
-          "");
+      updateTaskStatus(taskDTO.getId(), TaskStatus.COMPLETED, "");
 
       taskSuccessCounter.inc();
     } catch (TimeoutException e) {

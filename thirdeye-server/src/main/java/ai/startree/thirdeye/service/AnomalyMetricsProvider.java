@@ -19,6 +19,7 @@ import static ai.startree.thirdeye.spi.detection.AnomalyFeedbackType.ANOMALY_EXP
 import static ai.startree.thirdeye.spi.detection.AnomalyFeedbackType.ANOMALY_NEW_TREND;
 import static ai.startree.thirdeye.spi.detection.AnomalyFeedbackType.NOT_ANOMALY;
 import static ai.startree.thirdeye.spi.detection.AnomalyFeedbackType.NO_FEEDBACK;
+import static com.google.common.base.Suppliers.memoizeWithExpiration;
 
 import ai.startree.thirdeye.core.ConfusionMatrix;
 import ai.startree.thirdeye.spi.api.AnomalyStatsApi;
@@ -29,9 +30,10 @@ import ai.startree.thirdeye.spi.detection.AnomalyFeedback;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedbackType;
 import com.codahale.metrics.CachedGauge;
 import com.codahale.metrics.MetricRegistry;
-import com.google.common.base.Suppliers;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import io.micrometer.core.instrument.Gauge;
+import io.micrometer.core.instrument.Metrics;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,12 +47,18 @@ public class AnomalyMetricsProvider {
   private final AnomalyManager anomalyManager;
 
   public Supplier<List<AnomalyFeedback>> anomalyFeedbacksSupplier =
-      Suppliers.memoizeWithExpiration(this::getAllAnomalyFeedbacks,
+      memoizeWithExpiration(this::getAllAnomalyFeedbacks,
           METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES);
 
   @Inject
-  public AnomalyMetricsProvider(AnomalyManager anomalyManager, final MetricRegistry metricRegistry) {
+  public AnomalyMetricsProvider(AnomalyManager anomalyManager,
+      final MetricRegistry metricRegistry) {
     this.anomalyManager = anomalyManager;
+    Gauge.builder("thirdeye_anomalies",
+            memoizeWithExpiration(() -> countTotal(null), METRICS_CACHE_TIMEOUT.toMinutes(),
+                TimeUnit.MINUTES))
+        .register(Metrics.globalRegistry);
+    // deprecated - use thirdeye_anomalies
     metricRegistry.register("anomalyCountTotal",
         new CachedGauge<Long>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
           @Override
@@ -58,6 +66,11 @@ public class AnomalyMetricsProvider {
             return countTotal(null);
           }
         });
+    Gauge.builder("thirdeye_anomaly_feedbacks",
+            memoizeWithExpiration(() -> countFeedbacks(null), METRICS_CACHE_TIMEOUT.toMinutes(),
+                TimeUnit.MINUTES))
+        .register(Metrics.globalRegistry);
+    // deprecated - use thirdeye_anomaly_feedbacks
     metricRegistry.register("anomalyFeedbackCount",
         new CachedGauge<Long>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
           @Override
@@ -65,6 +78,13 @@ public class AnomalyMetricsProvider {
             return countFeedbacks(null);
           }
         });
+    final Supplier<ConfusionMatrix> cachedConfusionMatrix = memoizeWithExpiration(
+        this::computeConfusionMatrixForAnomalies, METRICS_CACHE_TIMEOUT.toMinutes(),
+        TimeUnit.MINUTES);
+    Gauge.builder("thirdeye_anomaly_precision",
+            () -> cachedConfusionMatrix.get().getPrecision())
+        .register(Metrics.globalRegistry);
+    // deprecated - use thirdeye_anomaly_precision
     metricRegistry.register("anomalyPrecision",
         new CachedGauge<Double>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
           @Override
@@ -72,6 +92,10 @@ public class AnomalyMetricsProvider {
             return computeConfusionMatrixForAnomalies().getPrecision();
           }
         });
+    Gauge.builder("thirdeye_anomaly_response_rate",
+            () -> cachedConfusionMatrix.get().getResponseRate())
+        .register(Metrics.globalRegistry);
+    // deprecated - use thirdeye_anomaly_response_rate
     metricRegistry.register("anomalyResponseRate",
         new CachedGauge<Double>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
           @Override

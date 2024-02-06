@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.worker.task;
 
+import static ai.startree.thirdeye.spi.Constants.METRICS_TIMER_PERCENTILES;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
@@ -25,6 +26,8 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Singleton;
+import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.Timer.Sample;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -54,8 +57,9 @@ public class TaskDriverRunnable implements Runnable {
   private final long workerId;
   private final TaskRunnerFactory taskRunnerFactory;
 
-  // migration to micrometer. we start by verifying that old and new counters behave the same
+  @Deprecated
   private final Counter taskExceptionCounter;
+  @Deprecated
   private final Counter taskSuccessCounter;
 
   private final Counter taskCounter;
@@ -65,6 +69,8 @@ public class TaskDriverRunnable implements Runnable {
   private final Timer taskRunningTimer;
   private final Timer taskWaitingTimer;
   private final TaskDriverThreadPoolManager taskDriverThreadPoolManager;
+  private final io.micrometer.core.instrument.Timer taskRunTimerOfSuccess;
+  private final io.micrometer.core.instrument.Timer taskRunTimerOfException;
 
   public TaskDriverRunnable(final TaskContext taskContext) {
     this.taskContext = taskContext;
@@ -76,12 +82,23 @@ public class TaskDriverRunnable implements Runnable {
     this.taskRunnerFactory = taskContext.getTaskRunnerFactory();
 
     final MetricRegistry metricRegistry = taskContext.getMetricRegistry();
+    // deprecated - use thirdeye_task_run
     taskExceptionCounter = metricRegistry.counter("taskExceptionCounter");
     taskSuccessCounter = metricRegistry.counter("taskSuccessCounter");
-
-    // TODO CYRIL replace by thirdeye_task_run timer
     taskCounter = metricRegistry.counter("taskCounter");
     taskRunningTimer = metricRegistry.timer("taskRunningTimer");
+
+    final String description = "Start: a taskDTO is passed for execution. End: the task has run or failed. Tag exception=true means an exception was thrown by the method call.";
+    this.taskRunTimerOfSuccess = io.micrometer.core.instrument.Timer.builder("thirdeye_task_run")
+        .description(description)
+        .publishPercentiles(METRICS_TIMER_PERCENTILES)
+        .tag("exception", "false")
+        .register(Metrics.globalRegistry);
+    this.taskRunTimerOfException = io.micrometer.core.instrument.Timer.builder("thirdeye_task_run")
+        .description(description)
+        .publishPercentiles(METRICS_TIMER_PERCENTILES)
+        .tag("exception", "true")
+        .register(Metrics.globalRegistry);
 
     taskFetchHitCounter = metricRegistry.counter("taskFetchHitCounter");
     taskFetchMissCounter = metricRegistry.counter("taskFetchMissCounter");
@@ -112,6 +129,7 @@ public class TaskDriverRunnable implements Runnable {
   private void runTask(final TaskDTO taskDTO) {
     LOG.info("Task {} {}: executing {}", taskDTO.getId(), taskDTO.getJobName(), taskDTO.getTaskInfo());
 
+    final Sample sample = io.micrometer.core.instrument.Timer.start(Metrics.globalRegistry);
     final long tStart = System.nanoTime();
     taskCounter.inc();
 
@@ -131,14 +149,17 @@ public class TaskDriverRunnable implements Runnable {
       updateTaskStatus(taskDTO.getId(), TaskStatus.COMPLETED, "");
       LOG.info("Task {} {}: COMPLETED", taskDTO.getId(), taskDTO.getJobName());
       taskSuccessCounter.inc();
+      sample.stop(taskRunTimerOfSuccess);
     } catch (TimeoutException e) {
       future.cancel(true);
       taskExceptionCounter.inc();
+      sample.stop(taskRunTimerOfException);
       LOG.error("Task {} {}: TIMEOUT after a period of {}", taskDTO.getId(), taskDTO.getJobName(),
           config.getMaxTaskRunTime(), e);
       updateTaskStatus(taskDTO.getId(), TaskStatus.TIMEOUT, e.getMessage());
     } catch (Exception e) {
       taskExceptionCounter.inc();
+      sample.stop(taskRunTimerOfException);
       LOG.error("Task {} {}: FAILED with exception.", taskDTO.getId(), taskDTO.getJobName(), e);
       updateTaskStatus(taskDTO.getId(), TaskStatus.FAILED,
           String.format("%s\n%s", ExceptionUtils.getMessage(e), ExceptionUtils.getStackTrace(e)));

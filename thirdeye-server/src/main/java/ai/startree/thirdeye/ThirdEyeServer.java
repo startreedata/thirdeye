@@ -334,6 +334,9 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
   private String packageSemver() {
     // assuming format is "x.y.z-2c2commitHash"
     final String fullPackageVersion = this.getClass().getPackage().getImplementationVersion();
+    if (fullPackageVersion == null) {
+      return "unknown";
+    }
     final int indexOfCommitHashStart = fullPackageVersion.indexOf("-");
     if (indexOfCommitHashStart > 0) {
       return fullPackageVersion.substring(0, indexOfCommitHashStart);
@@ -344,6 +347,9 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
   private String packageGitHash() {
     // assuming format is "x.y.z-2c2commitHash"
     final String fullPackageVersion = this.getClass().getPackage().getImplementationVersion();
+    if (fullPackageVersion == null) {
+      return "unknown";
+    }
     final int indexOfCommitHashStart = fullPackageVersion.indexOf("-");
     if (indexOfCommitHashStart > 0) {
       return fullPackageVersion.substring(indexOfCommitHashStart + 1);

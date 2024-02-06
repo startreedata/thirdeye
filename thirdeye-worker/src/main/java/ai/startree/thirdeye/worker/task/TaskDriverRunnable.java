@@ -110,7 +110,7 @@ public class TaskDriverRunnable implements Runnable {
   private void runAcquiredTask(final TaskDTO taskDTO) {
     LOG.info("Executing task {} {}", taskDTO.getId(), taskDTO.getTaskInfo());
 
-    final long tStart = System.currentTimeMillis();
+    final long tStart = System.nanoTime();
     taskCounter.inc();
 
     Future heartbeat = null;
@@ -138,7 +138,7 @@ public class TaskDriverRunnable implements Runnable {
     } catch (Exception e) {
       handleException(taskDTO, e);
     } finally {
-      long elapsedTime = System.currentTimeMillis() - tStart;
+      long elapsedTime = (System.nanoTime() - tStart) / 1_000_000;
       LOG.info("Task {} took {}ms", taskDTO.getId(), elapsedTime);
       optional(heartbeat).ifPresent(pulse -> pulse.cancel(false));
     }

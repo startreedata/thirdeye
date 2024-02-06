@@ -29,14 +29,7 @@ import java.util.concurrent.TimeUnit;
 @Singleton
 public class RcaInvestigationManagerImpl extends AbstractManagerImpl<RcaInvestigationDTO> implements
     RcaInvestigationManager {
-
-  private static final String FIND_BY_LIKE_TEMPLATE = "WHERE %s";
-  private static final String FIND_BY_LIKE_JOINER = " AND ";
-  private static final String FIND_BY_LIKE_VALUE = "%%%s%%";
-
-  private static final String FIND_BY_NAME_LIKE_TEMPLATE = "name LIKE :name__%d";
-  private static final String FIND_BY_NAME_LIKE_KEY = "name__%d";
-
+  
   @Inject
   public RcaInvestigationManagerImpl(final GenericPojoDao genericPojoDao,
       final MetricRegistry metricRegistry) {

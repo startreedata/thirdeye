@@ -14,15 +14,20 @@
 package ai.startree.thirdeye.datalayer.bao;
 
 import static ai.startree.thirdeye.spi.Constants.METRICS_CACHE_TIMEOUT;
+import static com.google.common.base.Suppliers.memoizeWithExpiration;
 
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import com.codahale.metrics.CachedGauge;
 import com.codahale.metrics.MetricRegistry;
+import com.google.common.base.Supplier;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import io.micrometer.core.instrument.Gauge;
+import io.micrometer.core.instrument.Metrics;
 import java.util.concurrent.TimeUnit;
+import org.apache.commons.collections4.CollectionUtils;
 
 @Singleton
 public class SubscriptionGroupManagerImpl extends
@@ -36,17 +41,21 @@ public class SubscriptionGroupManagerImpl extends
   }
 
   private void registerMetrics(final MetricRegistry metricRegistry) {
+    final Supplier<Number> notificationFlowsFun = () -> findAll().stream()
+        .filter(sg -> CollectionUtils.isNotEmpty(sg.getAlertAssociations()))
+        .filter(sg -> CollectionUtils.isNotEmpty(sg.getSpecs()))
+        .map(sg -> sg.getAlertAssociations().size() * sg.getSpecs().size())
+        .reduce(0, Integer::sum);
+    
+    Gauge.builder("thirdeye_notification_flows",
+            memoizeWithExpiration( notificationFlowsFun,METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES))
+        .register(Metrics.globalRegistry);
+
     metricRegistry.register("notificationFlowCountTotal",
-        new CachedGauge<Integer>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
+        new CachedGauge<Number>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
           @Override
-          public Integer loadValue() {
-            return findAll().stream()
-                .filter(sg -> sg.getAlertAssociations() != null)
-                .filter(sg -> !sg.getAlertAssociations().isEmpty())
-                .filter(sg -> sg.getSpecs() != null)
-                .filter(sg -> !sg.getSpecs().isEmpty())
-                .map(sg -> sg.getAlertAssociations().size() * sg.getSpecs().size())
-                .reduce(0, Integer::sum);
+          public Number loadValue() {
+            return notificationFlowsFun.get();
           }
         });
   }

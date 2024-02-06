@@ -25,6 +25,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.micrometer.core.instrument.Gauge;
+import io.micrometer.core.instrument.Metrics;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -37,7 +38,8 @@ public class RcaInvestigationManagerImpl extends AbstractManagerImpl<RcaInvestig
       final MetricRegistry metricRegistry) {
     super(RcaInvestigationDTO.class, genericPojoDao);
     Gauge.builder("thirdeye_rca_investigations", 
-        memoizeWithExpiration(this::count, METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES));
+        memoizeWithExpiration(this::count, METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES))
+        .register(Metrics.globalRegistry);
     // deprecated - use thirdeye_rca_investigations 
     metricRegistry.register("rcaInvestigationCount",
         new CachedGauge<Long>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {

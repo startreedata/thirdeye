@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.worker.task;
 
+import static ai.startree.thirdeye.spi.Constants.METRICS_TIMER_PERCENTILES;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
@@ -25,6 +26,8 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Singleton;
+import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.Timer.Sample;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -37,7 +40,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 
 @Singleton
 public class TaskDriverRunnable implements Runnable {
@@ -55,17 +57,27 @@ public class TaskDriverRunnable implements Runnable {
   private final long workerId;
   private final TaskRunnerFactory taskRunnerFactory;
 
-  // migration to micrometer. we start by verifying that old and new counters behave the same
+  @Deprecated //  use thirdeye_task_run
   private final Counter taskExceptionCounter;
+  @Deprecated //  use thirdeye_task_run
   private final Counter taskSuccessCounter;
-
+  @Deprecated //  use thirdeye_task_run
   private final Counter taskCounter;
+  @Deprecated //  use thirdeye_task_wait
   private final Counter taskFetchHitCounter;
+  @Deprecated //  use thirdeye_task_runner_idle
   private final Counter taskFetchMissCounter;
+  @Deprecated // use thirdeye_task_runner_idle
   private final Counter workerIdleTimeInSeconds;
+  @Deprecated //  use thirdeye_task_run
   private final Timer taskRunningTimer;
+  @Deprecated // use thirdeye_task_wait
   private final Timer taskWaitingTimer;
   private final TaskDriverThreadPoolManager taskDriverThreadPoolManager;
+  private final io.micrometer.core.instrument.Timer taskRunTimerOfSuccess;
+  private final io.micrometer.core.instrument.Timer taskRunTimerOfException;
+  private final io.micrometer.core.instrument.Timer taskWaitTimer;
+  private final io.micrometer.core.instrument.Timer taskRunnerWaitIdleTimer;
 
   public TaskDriverRunnable(final TaskContext taskContext) {
     this.taskContext = taskContext;
@@ -77,16 +89,38 @@ public class TaskDriverRunnable implements Runnable {
     this.taskRunnerFactory = taskContext.getTaskRunnerFactory();
 
     final MetricRegistry metricRegistry = taskContext.getMetricRegistry();
+    // deprecated - use thirdeye_task_run
     taskExceptionCounter = metricRegistry.counter("taskExceptionCounter");
     taskSuccessCounter = metricRegistry.counter("taskSuccessCounter");
     taskCounter = metricRegistry.counter("taskCounter");
-    
     taskRunningTimer = metricRegistry.timer("taskRunningTimer");
-    taskFetchHitCounter = metricRegistry.counter("taskFetchHitCounter");
-    taskFetchMissCounter = metricRegistry.counter("taskFetchMissCounter");
     
-    workerIdleTimeInSeconds = metricRegistry.counter("workerIdleTimeInSeconds");
+    final String description = "Start: a taskDTO is passed for execution. End: the task has run or failed. Tag exception=true means an exception was thrown by the method call.";
+    this.taskRunTimerOfSuccess = io.micrometer.core.instrument.Timer.builder("thirdeye_task_run")
+        .description(description)
+        .publishPercentiles(METRICS_TIMER_PERCENTILES)
+        .tag("exception", "false")
+        .register(Metrics.globalRegistry);
+    this.taskRunTimerOfException = io.micrometer.core.instrument.Timer.builder("thirdeye_task_run")
+        .description(description)
+        .publishPercentiles(METRICS_TIMER_PERCENTILES)
+        .tag("exception", "true")
+        .register(Metrics.globalRegistry);
+
+    // deprecated - use thirdeye_task_wait
+    taskFetchHitCounter = metricRegistry.counter("taskFetchHitCounter");
     taskWaitingTimer = metricRegistry.timer("taskWaitingTimer");
+    this.taskWaitTimer = io.micrometer.core.instrument.Timer.builder("thirdeye_task_wait")
+        .description("Start: a task is created in the persistence layer. End: the task is picked by a task runner for execution.")
+        .register(Metrics.globalRegistry);
+    
+    // deprecated - use thirdeye_task_runner_idle
+    taskFetchMissCounter = metricRegistry.counter("taskFetchMissCounter");
+    workerIdleTimeInSeconds = metricRegistry.counter("workerIdleTimeInSeconds");
+    this.taskRunnerWaitIdleTimer = io.micrometer.core.instrument.Timer.builder("thirdeye_task_runner_idle")
+        .description("Start: start thread sleep because no tasks were found. End: end of sleep. Mostly used for the sum and the count.")
+        .publishPercentiles(METRICS_TIMER_PERCENTILES)
+        .register(Metrics.globalRegistry);
   }
 
   public void run() {
@@ -98,7 +132,7 @@ public class TaskDriverRunnable implements Runnable {
       }
 
       // a task has acquired and we must finish executing it before termination
-      taskRunningTimer.time(() -> runAcquiredTask(taskDTO));
+      taskRunningTimer.time(() -> runTask(taskDTO));
     }
     LOG.info(String.format("TaskDriverRunnable safely quitting. name: %s",
         Thread.currentThread().getName()));
@@ -108,10 +142,11 @@ public class TaskDriverRunnable implements Runnable {
     return taskDriverThreadPoolManager.isShutdown();
   }
 
-  private void runAcquiredTask(final TaskDTO taskDTO) {
-    LOG.info("Executing task {} {}", taskDTO.getId(), taskDTO.getTaskInfo());
+  private void runTask(final TaskDTO taskDTO) {
+    LOG.info("Task {} {}: executing {}", taskDTO.getId(), taskDTO.getJobName(), taskDTO.getTaskInfo());
 
-    final long tStart = System.currentTimeMillis();
+    final Sample sample = io.micrometer.core.instrument.Timer.start(Metrics.globalRegistry);
+    final long tStart = System.nanoTime();
     taskCounter.inc();
 
     Future heartbeat = null;
@@ -126,24 +161,28 @@ public class TaskDriverRunnable implements Runnable {
     Future<List<TaskResult>> future = null;
     try {
       future = runTaskAsync(taskDTO);
-      // wait for the future to complete
       future.get(config.getMaxTaskRunTime().toMillis(), TimeUnit.MILLISECONDS);
-
-      LOG.info("DONE Executing task {}", taskDTO.getId());
-      // update status to COMPLETED
-      updateTaskStatus(taskDTO.getId(),
-          TaskStatus.COMPLETED,
-          "");
-
+      updateTaskStatus(taskDTO.getId(), TaskStatus.COMPLETED, "");
+      LOG.info("Task {} {}: COMPLETED", taskDTO.getId(), taskDTO.getJobName());
       taskSuccessCounter.inc();
+      sample.stop(taskRunTimerOfSuccess);
     } catch (TimeoutException e) {
-      handleTimeout(taskDTO, future, e);
+      future.cancel(true);
+      taskExceptionCounter.inc();
+      sample.stop(taskRunTimerOfException);
+      LOG.error("Task {} {}: TIMEOUT after a period of {}", taskDTO.getId(), taskDTO.getJobName(),
+          config.getMaxTaskRunTime(), e);
+      updateTaskStatus(taskDTO.getId(), TaskStatus.TIMEOUT, e.getMessage());
     } catch (Exception e) {
-      handleException(taskDTO, e);
+      taskExceptionCounter.inc();
+      sample.stop(taskRunTimerOfException);
+      LOG.error("Task {} {}: FAILED with exception.", taskDTO.getId(), taskDTO.getJobName(), e);
+      updateTaskStatus(taskDTO.getId(), TaskStatus.FAILED,
+          String.format("%s\n%s", ExceptionUtils.getMessage(e), ExceptionUtils.getStackTrace(e)));
     } finally {
-      long elapsedTime = System.currentTimeMillis() - tStart;
-      LOG.info("Task {} took {}ms", taskDTO.getId(), elapsedTime);
-      optional(heartbeat).ifPresent(pulse -> pulse.cancel(false));
+      long elapsedTime = (System.nanoTime() - tStart) / 1_000_000;
+      LOG.info("Task {} {}: run took {}ms", taskDTO.getId(), taskDTO.getJobName(), elapsedTime);
+      optional(heartbeat).ifPresent(f -> f.cancel(false));
     }
   }
 
@@ -159,32 +198,6 @@ public class TaskDriverRunnable implements Runnable {
     // execute the selected task asynchronously
     return taskDriverThreadPoolManager.getTaskExecutorService()
         .submit(() -> taskRunner.execute(taskInfo, taskContext));
-  }
-
-  private void handleTimeout(final TaskDTO taskDTO, final Future<List<TaskResult>> future,
-      final TimeoutException e) {
-    taskExceptionCounter.inc();
-    LOG.error("Timeout on executing task", e);
-    if (future != null) {
-      future.cancel(true);
-      LOG.info("Executor thread gets cancelled successfully: {}", future.isCancelled());
-    }
-
-    updateTaskStatus(taskDTO.getId(),
-        TaskStatus.TIMEOUT,
-        e.getMessage());
-  }
-
-  private void handleException(final TaskDTO task, final Exception e) {
-    taskExceptionCounter.inc();
-    LOG.error(String.format("Exception in electing and executing task(id: %d, name: %s)",
-        task.getId(),
-        task.getJobName()), e);
-
-    // update task status failed
-    updateTaskStatus(task.getId(),
-        TaskStatus.FAILED,
-        String.format("%s\n%s", ExceptionUtils.getMessage(e), ExceptionUtils.getStackTrace(e)));
   }
 
   /**
@@ -206,7 +219,7 @@ public class TaskDriverRunnable implements Runnable {
       }
       taskFetchMissCounter.inc();
       final long idleStart = System.nanoTime();
-      sleep(!tasksFound);
+      taskRunnerWaitIdleTimer.record(() -> sleep(!tasksFound));
       workerIdleTimeInSeconds.inc(TimeUnit.SECONDS.convert(System.nanoTime() - idleStart, TimeUnit.NANOSECONDS));
     }
     return null;
@@ -225,9 +238,9 @@ public class TaskDriverRunnable implements Runnable {
               ALLOWED_OLD_TASK_STATUS,
               taskDTO.getVersion());
           if (success) {
-            taskWaitingTimer.update(
-                System.currentTimeMillis() - taskDTO.getCreateTime().getTime(),
-                TimeUnit.MILLISECONDS);
+            final long waitTime = System.currentTimeMillis() - taskDTO.getCreateTime().getTime();
+            taskWaitTimer.record(waitTime, TimeUnit.MILLISECONDS);
+            taskWaitingTimer.update(waitTime, TimeUnit.MILLISECONDS);
             return taskDTO;
           }
         }

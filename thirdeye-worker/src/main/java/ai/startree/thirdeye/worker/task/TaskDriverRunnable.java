@@ -78,14 +78,14 @@ public class TaskDriverRunnable implements Runnable {
     final MetricRegistry metricRegistry = taskContext.getMetricRegistry();
     taskExceptionCounter = metricRegistry.counter("taskExceptionCounter");
     taskSuccessCounter = metricRegistry.counter("taskSuccessCounter");
-    
+
     // TODO CYRIL replace by thirdeye_task_run timer
     taskCounter = metricRegistry.counter("taskCounter");
     taskRunningTimer = metricRegistry.timer("taskRunningTimer");
-    
+
     taskFetchHitCounter = metricRegistry.counter("taskFetchHitCounter");
     taskFetchMissCounter = metricRegistry.counter("taskFetchMissCounter");
-    
+
     workerIdleTimeInSeconds = metricRegistry.counter("workerIdleTimeInSeconds");
     taskWaitingTimer = metricRegistry.timer("taskWaitingTimer");
   }
@@ -99,7 +99,7 @@ public class TaskDriverRunnable implements Runnable {
       }
 
       // a task has acquired and we must finish executing it before termination
-      taskRunningTimer.time(() -> runAcquiredTask(taskDTO));
+      taskRunningTimer.time(() -> runTask(taskDTO));
     }
     LOG.info(String.format("TaskDriverRunnable safely quitting. name: %s",
         Thread.currentThread().getName()));
@@ -109,8 +109,8 @@ public class TaskDriverRunnable implements Runnable {
     return taskDriverThreadPoolManager.isShutdown();
   }
 
-  private void runAcquiredTask(final TaskDTO taskDTO) {
-    LOG.info("Executing task {} {}", taskDTO.getId(), taskDTO.getTaskInfo());
+  private void runTask(final TaskDTO taskDTO) {
+    LOG.info("Task {} {}: executing {}", taskDTO.getId(), taskDTO.getJobName(), taskDTO.getTaskInfo());
 
     final long tStart = System.nanoTime();
     taskCounter.inc();
@@ -129,15 +129,22 @@ public class TaskDriverRunnable implements Runnable {
       future = runTaskAsync(taskDTO);
       future.get(config.getMaxTaskRunTime().toMillis(), TimeUnit.MILLISECONDS);
       updateTaskStatus(taskDTO.getId(), TaskStatus.COMPLETED, "");
-      LOG.info("DONE Executing task {}", taskDTO.getId());
+      LOG.info("Task {} {}: COMPLETED", taskDTO.getId(), taskDTO.getJobName());
       taskSuccessCounter.inc();
     } catch (TimeoutException e) {
-      handleTimeout(taskDTO, future, e);
+      future.cancel(true);
+      taskExceptionCounter.inc();
+      LOG.error("Task {} {}: TIMEOUT after a period of {}", taskDTO.getId(), taskDTO.getJobName(),
+          config.getMaxTaskRunTime(), e);
+      updateTaskStatus(taskDTO.getId(), TaskStatus.TIMEOUT, e.getMessage());
     } catch (Exception e) {
-      handleException(taskDTO, e);
+      taskExceptionCounter.inc();
+      LOG.error("Task {} {}: FAILED with exception.", taskDTO.getId(), taskDTO.getJobName(), e);
+      updateTaskStatus(taskDTO.getId(), TaskStatus.FAILED,
+          String.format("%s\n%s", ExceptionUtils.getMessage(e), ExceptionUtils.getStackTrace(e)));
     } finally {
       long elapsedTime = (System.nanoTime() - tStart) / 1_000_000;
-      LOG.info("Task {} took {}ms", taskDTO.getId(), elapsedTime);
+      LOG.info("Task {} {}: run took {}ms", taskDTO.getId(), taskDTO.getJobName(), elapsedTime);
       optional(heartbeat).ifPresent(f -> f.cancel(false));
     }
   }
@@ -154,32 +161,6 @@ public class TaskDriverRunnable implements Runnable {
     // execute the selected task asynchronously
     return taskDriverThreadPoolManager.getTaskExecutorService()
         .submit(() -> taskRunner.execute(taskInfo, taskContext));
-  }
-
-  private void handleTimeout(final TaskDTO taskDTO, final Future<List<TaskResult>> future,
-      final TimeoutException e) {
-    taskExceptionCounter.inc();
-    LOG.error("Timeout on executing task", e);
-    if (future != null) {
-      future.cancel(true);
-      LOG.info("Executor thread gets cancelled successfully: {}", future.isCancelled());
-    }
-
-    updateTaskStatus(taskDTO.getId(),
-        TaskStatus.TIMEOUT,
-        e.getMessage());
-  }
-
-  private void handleException(final TaskDTO task, final Exception e) {
-    taskExceptionCounter.inc();
-    LOG.error(String.format("Exception in electing and executing task(id: %d, name: %s)",
-        task.getId(),
-        task.getJobName()), e);
-
-    // update task status failed
-    updateTaskStatus(task.getId(),
-        TaskStatus.FAILED,
-        String.format("%s\n%s", ExceptionUtils.getMessage(e), ExceptionUtils.getStackTrace(e)));
   }
 
   /**

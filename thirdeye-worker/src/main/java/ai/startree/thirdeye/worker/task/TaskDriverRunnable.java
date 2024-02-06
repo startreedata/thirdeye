@@ -78,9 +78,11 @@ public class TaskDriverRunnable implements Runnable {
     final MetricRegistry metricRegistry = taskContext.getMetricRegistry();
     taskExceptionCounter = metricRegistry.counter("taskExceptionCounter");
     taskSuccessCounter = metricRegistry.counter("taskSuccessCounter");
-    taskCounter = metricRegistry.counter("taskCounter");
     
+    // TODO CYRIL replace by thirdeye_task_run timer
+    taskCounter = metricRegistry.counter("taskCounter");
     taskRunningTimer = metricRegistry.timer("taskRunningTimer");
+    
     taskFetchHitCounter = metricRegistry.counter("taskFetchHitCounter");
     taskFetchMissCounter = metricRegistry.counter("taskFetchMissCounter");
     
@@ -140,7 +142,7 @@ public class TaskDriverRunnable implements Runnable {
     } finally {
       long elapsedTime = (System.nanoTime() - tStart) / 1_000_000;
       LOG.info("Task {} took {}ms", taskDTO.getId(), elapsedTime);
-      optional(heartbeat).ifPresent(pulse -> pulse.cancel(false));
+      optional(heartbeat).ifPresent(f -> f.cancel(false));
     }
   }
 

@@ -23,6 +23,8 @@ import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.Timer;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -35,10 +37,18 @@ public class DatabaseService {
 
   private final SqlQueryBuilder sqlQueryBuilder;
   private final GenericResultSetMapper genericResultSetMapper;
+  @Deprecated // use thirdeye_db_crud_operation
   private final Counter dbReadCallCounter;
+  @Deprecated // use thirdeye_db_crud_operation
   private final Counter dbWriteCallCounter;
+  @Deprecated // use thirdeye_db_crud_operation
   private final Histogram dbReadDuration;
+  @Deprecated // use thirdeye_db_crud_operation
   private final Histogram dbWriteDuration;
+  private final Timer dbCrudTimerOfCreate;
+  private final Timer dbCrudTimerOfUpdate;
+  private final Timer dbCrudTimerOfRead;
+  private final Timer dbCrudTimerOfDelete;
 
   @Inject
   public DatabaseService(final SqlQueryBuilder sqlQueryBuilder,
@@ -51,6 +61,28 @@ public class DatabaseService {
     dbWriteDuration = metricRegistry.histogram("dbWriteDuration");
     dbWriteCallCounter = metricRegistry.counter("dbWriteCallCounter");
     dbReadDuration = metricRegistry.histogram("dbReadDuration");
+
+    final String description = "Persistence layer performance. Start: just before the statement creation. End: result of the query is returned or the query failed. The operation label contains the crud type.";
+    this.dbCrudTimerOfCreate = Timer.builder("thirdeye_persistence_crud_operation")
+        .description(description)
+        .publishPercentileHistogram()
+        .tag("operation", "create")
+        .register(Metrics.globalRegistry);
+    this.dbCrudTimerOfRead = Timer.builder("thirdeye_persistence_crud_operation")
+        .description(description)
+        .publishPercentileHistogram()
+        .tag("operation", "read")
+        .register(Metrics.globalRegistry);
+    this.dbCrudTimerOfUpdate = Timer.builder("thirdeye_persistence_crud_operation")
+        .description(description)
+        .publishPercentileHistogram()
+        .tag("operation", "update")
+        .register(Metrics.globalRegistry);
+    this.dbCrudTimerOfDelete = Timer.builder("thirdeye_persistence_crud_operation")
+        .description(description)
+        .publishPercentileHistogram()
+        .tag("operation", "delete")
+        .register(Metrics.globalRegistry);
   }
 
   public <E extends AbstractEntity> E find(final Long id, final Class<E> clazz,
@@ -63,6 +95,7 @@ public class DatabaseService {
   public <E extends AbstractEntity> List<E> findAll(final Predicate predicate, final Long limit,
       final Long offset, final Class<E> clazz, final Connection connection)
       throws Exception {
+    final Timer.Sample sample = Timer.start(Metrics.globalRegistry);
     final long tStart = System.nanoTime();
     try {
       try (final PreparedStatement selectStatement = sqlQueryBuilder
@@ -78,11 +111,13 @@ public class DatabaseService {
     } finally {
       dbReadCallCounter.inc();
       dbReadDuration.update(System.nanoTime() - tStart);
+      sample.stop(dbCrudTimerOfRead);
     }
   }
 
   public <E extends AbstractEntity> Long save(final E entity, final Connection connection)
       throws Exception {
+    final Timer.Sample sample = Timer.start(Metrics.globalRegistry);
     final long tStart = System.nanoTime();
     try {
       try (final PreparedStatement baseTableInsertStmt = sqlQueryBuilder
@@ -102,6 +137,7 @@ public class DatabaseService {
     } finally {
       dbWriteCallCounter.inc();
       dbWriteDuration.update(System.nanoTime() - tStart);
+      sample.stop(dbCrudTimerOfCreate);
     }
   }
 
@@ -117,6 +153,7 @@ public class DatabaseService {
       finalPredicate = Predicate.AND(predicate, Predicate.EQ(idCol, entity.getId()));
     }
     if (dbEntity != null) {
+      final Timer.Sample sample = Timer.start(Metrics.globalRegistry);
       final long tStart = System.nanoTime();
       entity.setCreateTime(dbEntity.getCreateTime());
       try {
@@ -127,6 +164,7 @@ public class DatabaseService {
       } finally {
         dbWriteCallCounter.inc();
         dbWriteDuration.update(System.nanoTime() - tStart);
+        sample.stop(dbCrudTimerOfUpdate);
       }
     }
     return 0;
@@ -139,6 +177,7 @@ public class DatabaseService {
   public Integer delete(final Predicate predicate,
       final Class<? extends AbstractEntity> entityClass, final Connection connection)
       throws Exception {
+    final Timer.Sample sample = Timer.start(Metrics.globalRegistry);
     final long tStart = System.nanoTime();
     try {
       try (final PreparedStatement baseTableDeleteStatement = sqlQueryBuilder
@@ -148,12 +187,14 @@ public class DatabaseService {
     } finally {
       dbWriteCallCounter.inc();
       dbWriteDuration.update(System.nanoTime() - tStart);
+      sample.stop(dbCrudTimerOfDelete);
     }
   }
 
   public <E extends AbstractEntity> Long count(final @Nullable Predicate predicate, final Class<E> clazz,
       final Connection connection)
       throws Exception {
+    final Timer.Sample sample = Timer.start(Metrics.globalRegistry);
     final long tStart = System.nanoTime();
     try {
       try (final PreparedStatement selectStatement = sqlQueryBuilder
@@ -170,6 +211,7 @@ public class DatabaseService {
     } finally {
       dbReadCallCounter.inc();
       dbReadDuration.update(System.nanoTime() - tStart);
+      sample.stop(dbCrudTimerOfRead);
     }
   }
 
@@ -178,6 +220,7 @@ public class DatabaseService {
       final Map<String, Object> parameterMap,
       final Class<E> clazz,
       final Connection connection) throws Exception {
+    final Timer.Sample sample = Timer.start(Metrics.globalRegistry);
     final long tStart = System.nanoTime();
     try {
       try (final PreparedStatement findMatchingIdsStatement = sqlQueryBuilder
@@ -192,6 +235,7 @@ public class DatabaseService {
     } finally {
       dbReadCallCounter.inc();
       dbReadDuration.update(System.nanoTime() - tStart);
+      sample.stop(dbCrudTimerOfRead);
     }
   }
 }

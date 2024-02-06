@@ -17,6 +17,7 @@ import static ai.startree.thirdeye.spi.Constants.METRICS_CACHE_TIMEOUT;
 import static ai.startree.thirdeye.spi.Constants.TASK_EXPIRY_DURATION;
 import static ai.startree.thirdeye.spi.Constants.TASK_MAX_DELETES_PER_CLEANUP;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static com.google.common.base.Suppliers.memoizeWithExpiration;
 
 import ai.startree.thirdeye.datalayer.dao.TaskDao;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
@@ -34,6 +35,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.persist.Transactional;
+import io.micrometer.core.instrument.Gauge;
+import io.micrometer.core.instrument.Metrics;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -213,7 +216,8 @@ public class TaskManagerImpl implements TaskManager {
     return findByPredicate(Predicate.AND(statusPredicate, workerIdPredicate));
   }
 
-  public void purge(@Nullable final Duration expiryDurationOptional, @Nullable final Integer limitOptional) {
+  public void purge(@Nullable final Duration expiryDurationOptional,
+      @Nullable final Integer limitOptional) {
     final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
     final Duration expiryDuration = optional(expiryDurationOptional).orElse(TASK_EXPIRY_DURATION);
     final long twoMonthsBack = System.currentTimeMillis() - expiryDuration.toMillis();
@@ -262,7 +266,14 @@ public class TaskManagerImpl implements TaskManager {
     return count(Predicate.EQ("status", status.toString()));
   }
 
+  public long countBy(final TaskStatus status, final TaskType type) {
+    return count(Predicate.AND(
+        Predicate.EQ("status", status.toString()),
+        Predicate.EQ("type", type)));
+  }
+
   private void registerMetrics() {
+    // deprecated - use thirdeye_tasks
     metricRegistry.register("taskCountTotal",
         new CachedGauge<Long>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
       @Override
@@ -271,6 +282,7 @@ public class TaskManagerImpl implements TaskManager {
       }
     });
 
+    // deprecated - use thirdeye_task_latency
     metricRegistry.register("detectionTaskLatencyInMillis",
         new CachedGauge<Long>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
       @Override
@@ -279,6 +291,7 @@ public class TaskManagerImpl implements TaskManager {
       }
     });
 
+    // deprecated - use thirdeye_task_latency
     metricRegistry.register("notificationTaskLatencyInMillis",
         new CachedGauge<Long>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
       @Override
@@ -290,8 +303,22 @@ public class TaskManagerImpl implements TaskManager {
     for (final TaskStatus status : TaskStatus.values()) {
       registerStatusMetric(status);
     }
+
+    for (final TaskType type : TaskType.values()) {
+      Gauge.builder("thirdeye_task_latency",
+              memoizeWithExpiration(() -> getTaskLatency(type), 1, TimeUnit.MINUTES))
+          .register(Metrics.globalRegistry);
+      for (final TaskStatus status : TaskStatus.values()) {
+        Gauge.builder("thirdeye_tasks",
+                memoizeWithExpiration(() -> countBy(status, type), 1, TimeUnit.MINUTES))
+            .tag("status", status.toString())
+            .tags("type", type.toString())
+            .register(Metrics.globalRegistry);
+      }
+    }
   }
 
+  // FIXME CYRIL - this should have as less cache as possible and as precise as possible - so it should be a direct query to the index table
   private long getTaskLatency(final TaskType type) {
     // fetch pending tasks from DB of the given type
     final List<TaskStatus> pendingStatus = List.of(TaskStatus.WAITING, TaskStatus.RUNNING);
@@ -308,7 +335,8 @@ public class TaskManagerImpl implements TaskManager {
   }
 
   private void registerStatusMetric(final TaskStatus status) {
-    metricRegistry.register(String.format("taskCount_%s", status.toString()),
+    // deprecated - use thirdeye_tasks
+    metricRegistry.register(String.format("taskCount_%s", status),
         new CachedGauge<Long>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
           @Override
           protected Long loadValue() {

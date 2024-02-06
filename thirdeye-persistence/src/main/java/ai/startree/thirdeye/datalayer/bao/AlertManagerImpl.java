@@ -23,6 +23,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import com.codahale.metrics.CachedGauge;
 import com.codahale.metrics.MetricRegistry;
+import com.google.common.base.Supplier;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.micrometer.core.instrument.Gauge;
@@ -40,26 +41,37 @@ public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
     super(AlertDTO.class, genericPojoDao);
     // TODO CYRIL micrometer migration - test for CachedGauge   
     Gauge.builder("thirdeye_active_alerts",
-            memoizeWithExpiration(this::countActive, METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES))
+            memoizeWithExpiration(this::countActive, METRICS_CACHE_TIMEOUT.toMinutes(),
+                TimeUnit.MINUTES))
         .register(Metrics.globalRegistry);
+    // deprecated - use thirdeye_active_alerts above
     metricRegistry.register("activeAlertsCount",
         new CachedGauge<Long>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
-      @Override
-      public Long loadValue() {
-        return countActive();
-      }
-    });
-    metricRegistry.register("activeTimeseriesMonitoredCount", new CachedGauge<Integer>(15, TimeUnit.MINUTES) {
-      @Override
-      protected Integer loadValue() {
-        final List<AlertDTO> activeAlerts = findAllActive();
-        return activeAlerts.stream()
-            // Assumes dangling enumeration items are handled and only linked items are present in DB
-            .map(alert -> (int) genericPojoDao.count(Predicate.EQ("alertId", alert.getId()), EnumerationItemDTO.class))
-            // add enumerationItems count if present, else just add 1 for simple alert
-            .reduce(0, (tsCount, enumCount) -> tsCount + (enumCount == 0 ? 1 : enumCount));
-      }
-    });
+          @Override
+          public Long loadValue() {
+            return countActive();
+          }
+        });
+
+    Supplier<Number> activeTimeseriesCountFun = () -> {
+      final List<AlertDTO> activeAlerts = findAllActive();
+      return activeAlerts.stream()
+          // Assumes dangling enumeration items are handled and only linked items are present in DB
+          .map(alert -> (int) genericPojoDao.count(Predicate.EQ("alertId", alert.getId()),
+              EnumerationItemDTO.class))
+          // add enumerationItems count if present, else just add 1 for simple alert
+          .reduce(0, (tsCount, enumCount) -> tsCount + (enumCount == 0 ? 1 : enumCount));
+    };
+    Gauge.builder("thirdeye_active_timeseries",
+            memoizeWithExpiration(activeTimeseriesCountFun, 15, TimeUnit.MINUTES))
+        .register(Metrics.globalRegistry);
+    // deprecated - use thirdeye_active_timeseries above
+    metricRegistry.register("activeTimeseriesMonitoredCount",
+        new CachedGauge<Number>(15, TimeUnit.MINUTES) {
+          @Override
+          protected Number loadValue() {
+            return activeTimeseriesCountFun.get();}
+        });
   }
 
   @Override

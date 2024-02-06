@@ -13,12 +13,14 @@
  */
 package ai.startree.thirdeye.worker.task.runner;
 
+import static ai.startree.thirdeye.spi.util.MetricsUtils.record;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.notification.NotificationDispatcher;
 import ai.startree.thirdeye.notification.NotificationPayloadBuilder;
 import ai.startree.thirdeye.notification.SubscriptionGroupFilter;
 import ai.startree.thirdeye.notification.SubscriptionGroupWatermarkManager;
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
@@ -34,6 +36,8 @@ import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.Timer;
 import java.util.Collections;
 import java.util.List;
 import org.slf4j.Logger;
@@ -58,6 +62,8 @@ public class NotificationTaskRunner implements TaskRunner {
   private final Counter notificationTaskSuccessCounter;
   private final Counter notificationTaskCounter;
   private final Histogram notificationTaskDuration;
+  private final Timer notificationTaskTimerOfSuccess;
+  private final Timer notificationTaskTimerOfException;
 
   @Inject
   public NotificationTaskRunner(
@@ -78,6 +84,18 @@ public class NotificationTaskRunner implements TaskRunner {
     notificationTaskCounter = metricRegistry.counter("notificationTaskCounter");
     notificationTaskSuccessCounter = metricRegistry.counter("notificationTaskSuccessCounter");
     notificationTaskDuration = metricRegistry.histogram("notificationTaskDuration");
+
+    final String description = "Start: a task is started from an input subscription group id. End: the task execution is finished. Tag exception=true means an exception was thrown by the method call.";
+    this.notificationTaskTimerOfSuccess = Timer.builder("thirdeye_notification_task")
+        .description(description)
+        .publishPercentiles(Constants.METRICS_TIMER_PERCENTILES)
+        .tag("exception", "false")
+        .register(Metrics.globalRegistry);
+    this.notificationTaskTimerOfException = Timer.builder("thirdeye_notification_task")
+        .description(description)
+        .publishPercentiles(Constants.METRICS_TIMER_PERCENTILES)
+        .tag("exception", "true")
+        .register(Metrics.globalRegistry);
   }
 
   private SubscriptionGroupDTO getSubscriptionGroupDTO(final long id) {
@@ -97,15 +115,20 @@ public class NotificationTaskRunner implements TaskRunner {
   }
 
   public List<TaskResult> execute(final long subscriptionGroupId) throws Exception {
-    final long tStart = System.currentTimeMillis();
-    notificationTaskCounter.inc();
+    return record(
+        () -> {
+          final long tStart = System.currentTimeMillis();
+          notificationTaskCounter.inc();
 
-    final SubscriptionGroupDTO sg = getSubscriptionGroupDTO(subscriptionGroupId);
+          final SubscriptionGroupDTO sg = getSubscriptionGroupDTO(subscriptionGroupId);
 
-    executeInternal(sg);
-    notificationTaskSuccessCounter.inc();
-    notificationTaskDuration.update(System.currentTimeMillis() - tStart);
-    return Collections.emptyList();
+          executeInternal(sg);
+          notificationTaskSuccessCounter.inc();
+          notificationTaskDuration.update(System.currentTimeMillis() - tStart);
+          return Collections.emptyList();
+        },
+        notificationTaskTimerOfSuccess, 
+        notificationTaskTimerOfException);
   }
 
   private void executeInternal(final SubscriptionGroupDTO subscriptionGroup) {

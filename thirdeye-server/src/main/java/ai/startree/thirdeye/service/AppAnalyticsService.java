@@ -17,7 +17,6 @@ import static ai.startree.thirdeye.spi.Constants.METRICS_CACHE_TIMEOUT;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
-import ai.startree.thirdeye.core.MonitoredMetricWrapper;
 import ai.startree.thirdeye.spi.api.AppAnalyticsApi;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
@@ -28,6 +27,8 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Suppliers;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import io.micrometer.core.instrument.Gauge;
+import io.micrometer.core.instrument.Metrics;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -70,6 +71,9 @@ public class AppAnalyticsService {
   }
 
   private void registerMetrics(final MetricRegistry metricRegistry) {
+    Gauge.builder("thirdeye_active_distinct_metrics", this::uniqueMonitoredMetricsCount)
+        .register(Metrics.globalRegistry);
+    // deprecated - use thirdeye_active_distinct_metrics
     metricRegistry.register("nMonitoredMetrics",
         new CachedGauge<Integer>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
           @Override
@@ -104,10 +108,8 @@ public class AppAnalyticsService {
   }
 
   private MonitoredMetricWrapper wrapMonitoredMetric(final AlertMetadataDTO metadata) {
-    return new MonitoredMetricWrapper()
-        .setMetric(metadata.getMetric().getName())
-        .setDataset(metadata.getDataset().getDataset())
-        .setDatasource(metadata.getDatasource().getName());
+    return new MonitoredMetricWrapper(metadata.getDatasource().getName(),
+        metadata.getDataset().getDataset(), metadata.getMetric().getName());
   }
 
   public AppAnalyticsApi getAppAnalytics(final Long startTime, final Long endTime) {
@@ -121,4 +123,6 @@ public class AppAnalyticsService {
         .setnMonitoredMetrics(uniqueMonitoredMetricsCount())
         .setAnomalyStats(anomalyMetricsProvider.computeAnomalyStats(predicate));
   }
+
+  public record MonitoredMetricWrapper(String datasource, String dataset, String metric) {}
 }

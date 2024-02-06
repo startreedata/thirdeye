@@ -23,6 +23,7 @@ import static ai.startree.thirdeye.spi.util.ExecutorUtils.shutdownExecutionServi
 import static ai.startree.thirdeye.spi.util.ExecutorUtils.threadsNamed;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Suppliers.memoizeWithExpiration;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 
@@ -80,6 +81,10 @@ public class DataSourceCache {
     this.dataSourcesLoader = dataSourcesLoader;
     this.metricRegistry = metricRegistry;
 
+    io.micrometer.core.instrument.Gauge.builder("thirdeye_healthy_datasources", 
+        memoizeWithExpiration(this::getHealthyDatasourceCount, METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES))
+            .register(Metrics.globalRegistry);
+    // deprecated - use thirdeye_healthy_datasources
     metricRegistry.register("healthyDatasourceCount",
         new CachedGauge<Integer>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
           @Override
@@ -87,8 +92,9 @@ public class DataSourceCache {
             return getHealthyDatasourceCount();
           }
         });
-    metricRegistry.register("cachedDatasourceCount", (Gauge<Integer>) cache::size);
     Metrics.gaugeMapSize("thirdeye_cached_datasources", emptyList(), cache);
+    // deprecated - use thirdeye_cached_datasources
+    metricRegistry.register("cachedDatasourceCount", (Gauge<Integer>) cache::size);
   }
 
   private Integer getHealthyDatasourceCount() {

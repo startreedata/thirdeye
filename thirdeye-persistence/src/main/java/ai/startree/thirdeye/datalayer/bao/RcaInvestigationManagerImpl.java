@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.datalayer.bao;
 
 import static ai.startree.thirdeye.spi.Constants.METRICS_CACHE_TIMEOUT;
+import static com.google.common.base.Suppliers.memoizeWithExpiration;
 
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
@@ -23,24 +24,21 @@ import com.codahale.metrics.CachedGauge;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import io.micrometer.core.instrument.Gauge;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Singleton
 public class RcaInvestigationManagerImpl extends AbstractManagerImpl<RcaInvestigationDTO> implements
     RcaInvestigationManager {
-
-  private static final String FIND_BY_LIKE_TEMPLATE = "WHERE %s";
-  private static final String FIND_BY_LIKE_JOINER = " AND ";
-  private static final String FIND_BY_LIKE_VALUE = "%%%s%%";
-
-  private static final String FIND_BY_NAME_LIKE_TEMPLATE = "name LIKE :name__%d";
-  private static final String FIND_BY_NAME_LIKE_KEY = "name__%d";
-
+  
   @Inject
   public RcaInvestigationManagerImpl(final GenericPojoDao genericPojoDao,
       final MetricRegistry metricRegistry) {
     super(RcaInvestigationDTO.class, genericPojoDao);
+    Gauge.builder("thirdeye_rca_investigations", 
+        memoizeWithExpiration(this::count, METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES));
+    // deprecated - use thirdeye_rca_investigations 
     metricRegistry.register("rcaInvestigationCount",
         new CachedGauge<Long>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
       @Override

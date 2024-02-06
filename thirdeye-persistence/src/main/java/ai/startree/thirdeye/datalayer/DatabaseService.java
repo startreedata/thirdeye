@@ -61,21 +61,25 @@ public class DatabaseService {
     dbWriteDuration = metricRegistry.histogram("dbWriteDuration");
     dbWriteCallCounter = metricRegistry.counter("dbWriteCallCounter");
     dbReadDuration = metricRegistry.histogram("dbReadDuration");
-    
+
+    final String description = "Persistence layer performance. Start: just before the statement creation. End: result of the query is returned or the query failed. The operation label contains the crud type.";
     this.dbCrudTimerOfCreate = Timer.builder("thirdeye_persistence_crud_operation")
-        .description("Persistence layer performance. Start: just before the statement creation. End: result of the query is returned or the query failed. The operation label contains the crud type.")
+        .description(description)
         .publishPercentileHistogram()
         .tag("operation", "create")
         .register(Metrics.globalRegistry);
     this.dbCrudTimerOfRead = Timer.builder("thirdeye_persistence_crud_operation")
+        .description(description)
         .publishPercentileHistogram()
         .tag("operation", "read")
         .register(Metrics.globalRegistry);
     this.dbCrudTimerOfUpdate = Timer.builder("thirdeye_persistence_crud_operation")
+        .description(description)
         .publishPercentileHistogram()
         .tag("operation", "update")
         .register(Metrics.globalRegistry);
     this.dbCrudTimerOfDelete = Timer.builder("thirdeye_persistence_crud_operation")
+        .description(description)
         .publishPercentileHistogram()
         .tag("operation", "delete")
         .register(Metrics.globalRegistry);

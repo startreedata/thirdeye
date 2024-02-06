@@ -71,12 +71,14 @@ public class NotificationDispatcher {
         "notificationDispatchDuration");
     
     // same metric but different tag - the time measure is assigned manually to the correct tag based on whether there was an exception 
+    final String description = "Start: A notification payload is passed to the NotificationService#notify implementation. End: The method returns. Tag exception=true means an exception was thrown by the method call.";
     this.notificationDispatchTimerOfSuccess = Timer.builder("thirdeye_notification_dispatch")
+        .description(description)
         .publishPercentiles(METRICS_TIMER_PERCENTILES)
         .tag("exception", "false")
-        .description("Start: A notification payload is passed to the NotificationService#notify implementation. End: The method returns. Tag exception=true means an exception was thrown by the method call.")
         .register(Metrics.globalRegistry);
     this.notificationDispatchTimerOfException = Timer.builder("thirdeye_notification_dispatch")
+        .description(description)
         .publishPercentiles(METRICS_TIMER_PERCENTILES)
         .tag("exception", "true")
         .register(Metrics.globalRegistry);

@@ -25,7 +25,6 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Singleton;
-import io.micrometer.core.instrument.Metrics;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -58,9 +57,7 @@ public class TaskDriverRunnable implements Runnable {
 
   // migration to micrometer. we start by verifying that old and new counters behave the same
   private final Counter taskExceptionCounter;
-  private final io.micrometer.core.instrument.Counter taskExceptionCounterNew;
   private final Counter taskSuccessCounter;
-  private final io.micrometer.core.instrument.Counter taskSuccessCounterNew;
 
   private final Counter taskCounter;
   private final Counter taskFetchHitCounter;
@@ -80,10 +77,8 @@ public class TaskDriverRunnable implements Runnable {
     this.taskRunnerFactory = taskContext.getTaskRunnerFactory();
 
     final MetricRegistry metricRegistry = taskContext.getMetricRegistry();
-    taskExceptionCounterNew = Metrics.counter("taskExceptionCounter2");
     taskExceptionCounter = metricRegistry.counter("taskExceptionCounter");
     taskSuccessCounter = metricRegistry.counter("taskSuccessCounter");
-    taskSuccessCounterNew = Metrics.counter("taskSuccessCounter2");
     taskCounter = metricRegistry.counter("taskCounter");
     taskRunningTimer = metricRegistry.timer("taskRunningTimer");
     taskFetchHitCounter = metricRegistry.counter("taskFetchHitCounter");
@@ -140,7 +135,6 @@ public class TaskDriverRunnable implements Runnable {
           "");
 
       taskSuccessCounter.inc();
-      taskSuccessCounterNew.increment();
     } catch (TimeoutException e) {
       handleTimeout(taskDTO, future, e);
     } catch (Exception e) {
@@ -170,7 +164,6 @@ public class TaskDriverRunnable implements Runnable {
   private void handleTimeout(final TaskDTO taskDTO, final Future<List<TaskResult>> future,
       final TimeoutException e) {
     taskExceptionCounter.inc();
-    taskExceptionCounterNew.increment();
     LOG.error("Timeout on executing task", e);
     if (future != null) {
       future.cancel(true);
@@ -184,7 +177,6 @@ public class TaskDriverRunnable implements Runnable {
 
   private void handleException(final TaskDTO task, final Exception e) {
     taskExceptionCounter.inc();
-    taskExceptionCounterNew.increment();
     LOG.error(String.format("Exception in electing and executing task(id: %d, name: %s)",
         task.getId(),
         task.getJobName()), e);

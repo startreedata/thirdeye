@@ -80,10 +80,12 @@ public class TaskDriverRunnable implements Runnable {
     taskExceptionCounter = metricRegistry.counter("taskExceptionCounter");
     taskSuccessCounter = metricRegistry.counter("taskSuccessCounter");
     taskCounter = metricRegistry.counter("taskCounter");
+    
     taskRunningTimer = metricRegistry.timer("taskRunningTimer");
     taskFetchHitCounter = metricRegistry.counter("taskFetchHitCounter");
-    workerIdleTimeInSeconds = metricRegistry.counter("workerIdleTimeInSeconds");
     taskFetchMissCounter = metricRegistry.counter("taskFetchMissCounter");
+    
+    workerIdleTimeInSeconds = metricRegistry.counter("workerIdleTimeInSeconds");
     taskWaitingTimer = metricRegistry.timer("taskWaitingTimer");
   }
 
@@ -107,7 +109,6 @@ public class TaskDriverRunnable implements Runnable {
   }
 
   private void runAcquiredTask(final TaskDTO taskDTO) {
-    MDC.put("job.name", taskDTO.getJobName());
     LOG.info("Executing task {} {}", taskDTO.getId(), taskDTO.getTaskInfo());
 
     final long tStart = System.currentTimeMillis();
@@ -140,7 +141,6 @@ public class TaskDriverRunnable implements Runnable {
     } catch (Exception e) {
       handleException(taskDTO, e);
     } finally {
-      MDC.clear();
       long elapsedTime = System.currentTimeMillis() - tStart;
       LOG.info("Task {} took {}ms", taskDTO.getId(), elapsedTime);
       optional(heartbeat).ifPresent(pulse -> pulse.cancel(false));

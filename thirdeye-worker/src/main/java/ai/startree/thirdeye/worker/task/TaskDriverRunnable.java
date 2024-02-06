@@ -259,7 +259,7 @@ public class TaskDriverRunnable implements Runnable {
         : config.getNoTaskDelay().toMillis() + RANDOM
             .nextInt((int) config.getRandomDelayCap().toMillis());
     // sleep for few seconds if not tasks found - avoid cpu thrashing
-    // also add some extra random number of milli seconds to allow threads to start at different times
+    // also add some extra random number of milliseconds to allow threads to start at different times
     try {
       Thread.sleep(sleepTime);
     } catch (InterruptedException e) {

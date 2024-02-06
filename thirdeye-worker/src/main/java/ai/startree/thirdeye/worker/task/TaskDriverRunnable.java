@@ -57,20 +57,27 @@ public class TaskDriverRunnable implements Runnable {
   private final long workerId;
   private final TaskRunnerFactory taskRunnerFactory;
 
-  @Deprecated
+  @Deprecated //  use thirdeye_task_run
   private final Counter taskExceptionCounter;
-  @Deprecated
+  @Deprecated //  use thirdeye_task_run
   private final Counter taskSuccessCounter;
-
+  @Deprecated //  use thirdeye_task_run
   private final Counter taskCounter;
+  @Deprecated //  use thirdeye_task_wait
   private final Counter taskFetchHitCounter;
+  @Deprecated //  use thirdeye_task_runner_idle
   private final Counter taskFetchMissCounter;
+  @Deprecated // use thirdeye_task_runner_idle
   private final Counter workerIdleTimeInSeconds;
+  @Deprecated //  use thirdeye_task_run
   private final Timer taskRunningTimer;
+  @Deprecated // use thirdeye_task_wait
   private final Timer taskWaitingTimer;
   private final TaskDriverThreadPoolManager taskDriverThreadPoolManager;
   private final io.micrometer.core.instrument.Timer taskRunTimerOfSuccess;
   private final io.micrometer.core.instrument.Timer taskRunTimerOfException;
+  private final io.micrometer.core.instrument.Timer taskWaitTimer;
+  private final io.micrometer.core.instrument.Timer taskRunnerWaitIdleTimer;
 
   public TaskDriverRunnable(final TaskContext taskContext) {
     this.taskContext = taskContext;
@@ -87,7 +94,7 @@ public class TaskDriverRunnable implements Runnable {
     taskSuccessCounter = metricRegistry.counter("taskSuccessCounter");
     taskCounter = metricRegistry.counter("taskCounter");
     taskRunningTimer = metricRegistry.timer("taskRunningTimer");
-
+    
     final String description = "Start: a taskDTO is passed for execution. End: the task has run or failed. Tag exception=true means an exception was thrown by the method call.";
     this.taskRunTimerOfSuccess = io.micrometer.core.instrument.Timer.builder("thirdeye_task_run")
         .description(description)
@@ -100,11 +107,20 @@ public class TaskDriverRunnable implements Runnable {
         .tag("exception", "true")
         .register(Metrics.globalRegistry);
 
+    // deprecated - use thirdeye_task_wait
     taskFetchHitCounter = metricRegistry.counter("taskFetchHitCounter");
-    taskFetchMissCounter = metricRegistry.counter("taskFetchMissCounter");
-
-    workerIdleTimeInSeconds = metricRegistry.counter("workerIdleTimeInSeconds");
     taskWaitingTimer = metricRegistry.timer("taskWaitingTimer");
+    this.taskWaitTimer = io.micrometer.core.instrument.Timer.builder("thirdeye_task_wait")
+        .description("Start: a task is created in the persistence layer. End: the task is picked by a task runner for execution.")
+        .register(Metrics.globalRegistry);
+    
+    // deprecated - use thirdeye_task_runner_idle
+    taskFetchMissCounter = metricRegistry.counter("taskFetchMissCounter");
+    workerIdleTimeInSeconds = metricRegistry.counter("workerIdleTimeInSeconds");
+    this.taskRunnerWaitIdleTimer = io.micrometer.core.instrument.Timer.builder("thirdeye_task_runner_idle")
+        .description("Start: start thread sleep because no tasks were found. End: end of sleep. Mostly used for the sum and the count.")
+        .publishPercentiles(METRICS_TIMER_PERCENTILES)
+        .register(Metrics.globalRegistry);
   }
 
   public void run() {
@@ -203,7 +219,7 @@ public class TaskDriverRunnable implements Runnable {
       }
       taskFetchMissCounter.inc();
       final long idleStart = System.nanoTime();
-      sleep(!tasksFound);
+      taskRunnerWaitIdleTimer.record(() -> sleep(!tasksFound));
       workerIdleTimeInSeconds.inc(TimeUnit.SECONDS.convert(System.nanoTime() - idleStart, TimeUnit.NANOSECONDS));
     }
     return null;
@@ -222,9 +238,9 @@ public class TaskDriverRunnable implements Runnable {
               ALLOWED_OLD_TASK_STATUS,
               taskDTO.getVersion());
           if (success) {
-            taskWaitingTimer.update(
-                System.currentTimeMillis() - taskDTO.getCreateTime().getTime(),
-                TimeUnit.MILLISECONDS);
+            final long waitTime = System.currentTimeMillis() - taskDTO.getCreateTime().getTime();
+            taskWaitTimer.record(waitTime, TimeUnit.MILLISECONDS);
+            taskWaitingTimer.update(waitTime, TimeUnit.MILLISECONDS);
             return taskDTO;
           }
         }

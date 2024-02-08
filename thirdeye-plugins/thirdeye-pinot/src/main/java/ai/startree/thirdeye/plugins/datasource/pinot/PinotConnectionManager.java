@@ -27,6 +27,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.apache.http.HttpHeaders;
 import org.apache.pinot.client.Connection;
+import org.apache.pinot.client.PinotClientException;
 import org.apache.pinot.client.PinotConnectionBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -122,6 +123,7 @@ public class PinotConnectionManager {
       executorService.submit(() -> closeConnection(connection));
     }
   }
+
   private void closeConnection(@Nullable final Connection connection) {
     try {
       final long start = System.nanoTime();
@@ -130,8 +132,10 @@ public class PinotConnectionManager {
         LOG.info(String.format("Successfully closed pinot connection. took %.2fms",
             ((System.nanoTime() - start) / 1e6)));
       }
+    } catch (final PinotClientException e) {
+      LOG.warn("Exception closing connection: {}", e.getMessage(), e);
     } catch (final Exception e) {
-      LOG.error("Exception closing connection", e);
+      LOG.error("Exception closing connection: {}", e.getMessage(), e);
     }
   }
 }

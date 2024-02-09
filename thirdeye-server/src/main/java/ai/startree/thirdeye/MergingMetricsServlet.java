@@ -50,7 +50,7 @@ public class MergingMetricsServlet extends HttpServlet {
     String contentType = TextFormat.chooseContentType(req.getHeader("Accept"));
     resp.setContentType(contentType);
     try (Writer writer = new BufferedWriter(resp.getWriter())) {
-      writer.write(promRegistry.scrape());
+      writer.write(promRegistry.scrape(contentType));
       writer.flush();
       TextFormat.writeFormat(contentType, writer,
           this.legacyRegistry.filteredMetricFamilySamples(this.parse(req)));

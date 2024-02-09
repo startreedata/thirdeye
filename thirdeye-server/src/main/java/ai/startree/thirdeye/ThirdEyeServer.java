@@ -172,7 +172,7 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
       final PrometheusMeterRegistry registry = new PrometheusMeterRegistry(
           PrometheusConfig.DEFAULT);
       Metrics.globalRegistry.add(registry);
-      //Metrics.globalRegistry.config().commonTags("environment_url", environmentUrl);
+      Metrics.globalRegistry.config().commonTags("environment_url", environmentUrl);
       // old registry based on dropwizard-metrics
       final CollectorRegistry legacyRegistry = new CollectorRegistry();
       legacyRegistry.register(new DropwizardExports(env.metrics()));

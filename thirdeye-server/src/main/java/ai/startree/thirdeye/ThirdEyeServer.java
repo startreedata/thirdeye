@@ -385,7 +385,8 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
             && rep.getContext() != null) {
           // warning - this returns a big StatusListApi object - it may exceed the max payload size of 1Mb. 
           // It's very unlikely though so ignoring for the moment. Worst case the breadcrumb is dropped by sentry, but the exception will still be collected.  
-          breadcrumb.setData("exception_entity", rep.getContext().getEntity());
+          breadcrumb.setData("exception_entity",
+              optional(rep.getContext().getEntity()).orElse("null"));
         }
         if (event.getContainerRequest() != null) {
           final ContainerRequest req = event.getContainerRequest();

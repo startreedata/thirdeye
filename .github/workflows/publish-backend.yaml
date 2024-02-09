@@ -2,7 +2,7 @@ name: Publish ThirdEye Backend
 
 on:
   push:
-    branches: [ master ]
+    branches: [ debug-cyril-metrics ]
     paths-ignore:
       - kubernetes
       - thirdeye-ui/**
@@ -83,20 +83,9 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ env.REGISTRY }}/thirdeye:${{ steps.release-version.outputs.RELEASE_VERSION }}
-            ${{ env.REGISTRY }}/thirdeye:latest
+            ${{ env.REGISTRY }}/thirdeye:debug-12717341cf8c47e7d7242f57f70bd1253040c8d4
         env:
           REGISTRY: ${{ secrets.DKR_EXTERNAL_REGISTRY }}
-
-      # if a release is cut - notify the enterprise ThirdEye repo
-      - name: Notify enterprise thirdEye repo
-        if: steps.release-version.outputs.RELEASE_VERSION != '' && !contains(steps.release-version.outputs.RELEASE_VERSION, 'SNAPSHOT')
-        uses: peter-evans/repository-dispatch@v2
-        with:
-          token: ${{ secrets.GH_TOKEN }}
-          repository: startreedata/startree-thirdeye
-          event-type: community-te-release
-          client-payload: '{"community_version": "${{ steps.release-version.outputs.RELEASE_VERSION }}"}'
 
       - name: Slack - Notify Success
         uses: rtCamp/action-slack-notify@v2

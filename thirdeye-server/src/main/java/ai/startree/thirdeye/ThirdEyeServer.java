@@ -127,7 +127,6 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
   @Override
   public void run(final ThirdEyeServerConfiguration configuration, final Environment env) {
     initSentry(configuration.getSentryConfiguration(), env.jersey());
-    initMetrics(configuration, env);
 
     final DataSource dataSource = new DataSourceBuilder()
         .build(configuration.getDatabaseConfiguration());
@@ -147,6 +146,8 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
 
     registerResources(env.jersey());
     env.jersey().register(new ThirdEyeJsonProcessingExceptionMapper());
+
+    initMetrics(configuration, env);
 
     // Persistence layer connectivity health check registry
     env.healthChecks().register("database", injector.getInstance(DatabaseHealthCheck.class));

@@ -151,8 +151,11 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
       // new registry based on micrometers
       final PrometheusMeterRegistry registry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
       // TODO CYRIL can be removed once migration from dw-metrics to micrometer is completed
-      // registry.config().commonTags("test", "micrometer");
       Metrics.globalRegistry.add(registry);
+      final String environmentUrl = optional(configuration.getUiConfiguration().getExternalUrl())
+          .map(s -> s.replaceAll("https?://", ""))
+          .orElse("unknown");
+      Metrics.globalRegistry.config().commonTags("environment_url", environmentUrl);
       // old registry based on dropwizard-metrics
       final CollectorRegistry legacyRegistry = new CollectorRegistry();
       legacyRegistry.register(new DropwizardExports(env.metrics()));

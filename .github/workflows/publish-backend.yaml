@@ -83,7 +83,7 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ env.REGISTRY }}/thirdeye:debug-67cc34044218f46b803c5222b883c7e59344ab71
+            ${{ env.REGISTRY }}/thirdeye:debug-67cc34044218f46b803c5222b883c7e59344ab71-custom-label-name
         env:
           REGISTRY: ${{ secrets.DKR_EXTERNAL_REGISTRY }}
 

@@ -50,7 +50,12 @@ public class MergingMetricsServlet extends HttpServlet {
     String contentType = TextFormat.chooseContentType(req.getHeader("Accept"));
     resp.setContentType(contentType);
     try (Writer writer = new BufferedWriter(resp.getWriter())) {
-      writer.write(promRegistry.scrape(contentType));
+      String scrape = promRegistry.scrape(contentType);
+      // in the openmetrics-text format, there is an end of file token - remove it before writing the second part of metrics
+      if (scrape.endsWith("# EOF\n")) {
+        scrape = scrape.substring(0, scrape.length() - 6);
+      }
+      writer.write(scrape);
       writer.flush();
       TextFormat.writeFormat(contentType, writer,
           this.legacyRegistry.filteredMetricFamilySamples(this.parse(req)));

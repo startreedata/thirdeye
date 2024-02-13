@@ -49,6 +49,22 @@ public class RootResource {
         .build();
   }
 
+  // for some instances the coordinator can be exposed on the public web
+  @GET
+  @Produces(MediaType.TEXT_PLAIN)
+  @Path("robots.txt")
+  public Response robots() {
+    return Response.ok("User-agent: *\nDisallow: /\n").header("Content-Type", "text/plain").build();
+  }
+
+  @GET
+  @Produces("image/x-icon")
+  @Path("favicon.ico")
+  public byte[] favicon() {
+    // no favicon for the moment
+    return new byte[0];
+  }
+
   @Path("api")
   public ApiResource getApiResource() {
     return apiResource;

@@ -108,6 +108,10 @@ spec:
               location ~ /index.html {
                 add_header Cache-Control "no-cache, no-store, must-revalidate";
               }
+              location = /robots.txt {
+                add_header Content-Type text/plain;
+                return 200 "User-agent: *\nDisallow: /\n";
+              }
             }
         command:
         - /bin/sh

@@ -27,6 +27,8 @@ import com.nimbusds.jose.KeySourceException;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.proc.JWSKeySelector;
+import io.micrometer.core.instrument.Gauge;
+import io.micrometer.core.instrument.Metrics;
 import java.net.URL;
 import java.security.Key;
 import java.util.Collections;
@@ -56,8 +58,8 @@ public class CachedJWSKeySelector implements JWSKeySelector<OidcContext> {
         .expireAfterWrite(ttl, TimeUnit.MILLISECONDS)
         .build(new KeyCacheLoader(authServerRunning));
 
-//    metricRegistry.register("authServerRunning",
-//        (Gauge<Integer>) () -> authServerRunning.get() ? 1 : 0);
+    Gauge.builder("thirdeye_auth_running", () -> authServerRunning.get() ? 1 : 0)
+        .tag("type", "oauth").register(Metrics.globalRegistry);
   }
 
   // NOTE: is there a better way with little complexity?

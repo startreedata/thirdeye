@@ -51,6 +51,7 @@ public class SubscriptionGroupManagerImpl extends
             memoizeWithExpiration( notificationFlowsFun,METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES))
         .register(Metrics.globalRegistry);
 
+    // deprecated - use thirdeye_notification_flows
     metricRegistry.register("notificationFlowCountTotal",
         new CachedGauge<Number>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
           @Override

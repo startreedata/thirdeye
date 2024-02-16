@@ -15,6 +15,7 @@ package ai.startree.thirdeye.datalayer;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
+import io.micrometer.core.instrument.Metrics;
 import java.sql.Connection;
 import java.sql.SQLException;
 import javax.inject.Inject;
@@ -29,16 +30,28 @@ public class DatabaseTransactionService {
   private static final Logger LOG = LoggerFactory.getLogger(DatabaseTransactionService.class);
 
   private final DataSource dataSource;
+  @Deprecated
   private final Counter dbExceptionCounter;
+  @Deprecated
   private final Counter dbCallCounter;
+  private final io.micrometer.core.instrument.Counter dbTransactionCounterOfSuccess;
+  private final io.micrometer.core.instrument.Counter dbTransactionCounterOfException;
 
   @Inject
   public DatabaseTransactionService(final DataSource dataSource,
       final MetricRegistry metricRegistry) {
     this.dataSource = dataSource;
 
+    // deprecated - use thirdeye_persistence_transaction_total
     dbExceptionCounter = metricRegistry.counter("dbExceptionCounter");
+    // deprecated - use thirdeye_persistence_transaction_total
     dbCallCounter = metricRegistry.counter("dbCallCounter");
+    this.dbTransactionCounterOfSuccess = io.micrometer.core.instrument.Counter.builder("thirdeye_persistence_transaction_total")
+        .tag("exception", "false")
+        .register(Metrics.globalRegistry);
+    this.dbTransactionCounterOfException = io.micrometer.core.instrument.Counter.builder("thirdeye_persistence_transaction_total")
+        .tag("exception", "true")
+        .register(Metrics.globalRegistry);
   }
 
   public <T> T executeTransaction(final DBOperation<T> operation, final T defaultReturn)
@@ -49,9 +62,11 @@ public class DatabaseTransactionService {
       connection.setAutoCommit(false);
       final T t = operation.handle(connection);
       connection.commit();
+      dbTransactionCounterOfSuccess.increment();
       return t;
     } catch (final Exception e) {
       LOG.error("Exception while executing query task", e);
+      dbTransactionCounterOfException.increment();
       dbExceptionCounter.inc();
 
       // Rollback transaction in case json table is updated but index table isn't due to any errors (duplicate key, etc.)

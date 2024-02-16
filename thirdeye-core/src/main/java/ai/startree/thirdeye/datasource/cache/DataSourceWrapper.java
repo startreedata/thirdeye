@@ -36,14 +36,18 @@ public class DataSourceWrapper implements ThirdEyeDataSource {
 
   private final ThirdEyeDataSource delegate;
 
+  @Deprecated
   private final Meter fetchTableExceptionMeter;
+  @Deprecated
   private final Timer fetchTableTimer;
   private final io.micrometer.core.instrument.Timer fetchTableTimer2;
 
   public DataSourceWrapper(final ThirdEyeDataSource delegate, final MetricRegistry metricRegistry) {
     this.delegate = delegate;
-
+    
+    // deprecated with no replacement - should not be used anymore - metric should be inside the delegate
     fetchTableExceptionMeter = metricRegistry.meter("fetchTableExceptionMeter");
+    // deprecated - use thirdeye_fetch_data_table
     fetchTableTimer = metricRegistry.timer("fetchTableTimer");
     fetchTableTimer2 = io.micrometer.core.instrument.Timer.builder(
             "thirdeye_fetch_data_table")

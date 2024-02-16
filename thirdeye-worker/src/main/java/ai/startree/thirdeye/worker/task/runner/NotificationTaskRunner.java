@@ -59,8 +59,11 @@ public class NotificationTaskRunner implements TaskRunner {
   private final SubscriptionGroupFilter subscriptionGroupFilter;
   private final SubscriptionGroupWatermarkManager subscriptionGroupWatermarkManager;
 
+  @Deprecated
   private final Counter notificationTaskSuccessCounter;
+  @Deprecated
   private final Counter notificationTaskCounter;
+  @Deprecated
   private final Histogram notificationTaskDuration;
   private final Timer notificationTaskTimerOfSuccess;
   private final Timer notificationTaskTimerOfException;
@@ -81,8 +84,11 @@ public class NotificationTaskRunner implements TaskRunner {
     this.subscriptionGroupFilter = subscriptionGroupFilter;
     this.subscriptionGroupWatermarkManager = subscriptionGroupWatermarkManager;
 
+    // deprecated - use thirdeye_notification_task
     notificationTaskCounter = metricRegistry.counter("notificationTaskCounter");
+    // deprecated - use thirdeye_notification_task
     notificationTaskSuccessCounter = metricRegistry.counter("notificationTaskSuccessCounter");
+    // deprecated - use thirdeye_notification_task
     notificationTaskDuration = metricRegistry.histogram("notificationTaskDuration");
 
     final String description = "Start: a task is started from an input subscription group id. End: the task execution is finished. Tag exception=true means an exception was thrown by the method call.";

@@ -61,7 +61,7 @@ public class AnomalyResource extends CrudResource<AnomalyApi, AnomalyDTO> {
 
   @Path("{id}/feedback")
   @POST
-  @Timed
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   public Response setFeedback(
       @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
       @PathParam("id") final Long id,
@@ -75,7 +75,7 @@ public class AnomalyResource extends CrudResource<AnomalyApi, AnomalyDTO> {
 
   @GET
   @Path("stats")
-  @Timed
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
   public Response getAnomalyStats(
       @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,

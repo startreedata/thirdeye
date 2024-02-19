@@ -69,7 +69,7 @@ public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
   @Override
   @POST
   @Operation(summary = "", hidden = true)
-  @Timed
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
   public Response createMultiple(
       @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
@@ -81,7 +81,7 @@ public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
   @Override
   @PUT
   @Operation(summary = "", hidden = true)
-  @Timed
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
   public Response editMultiple(
       @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
@@ -91,7 +91,7 @@ public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
 
   @DELETE
   @Path("/purge")
-  @Timed
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
   public Response purge(@Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
       @Parameter(description = "Older than (number of days)", example = N_DAYS_TO_DELETE) @QueryParam("olderThanInDays") Integer nDays,

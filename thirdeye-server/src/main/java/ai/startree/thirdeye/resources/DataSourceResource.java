@@ -70,7 +70,7 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
     this.dataSourceService = dataSourceService;
   }
 
-  @Timed
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @GET
   @Path("/name/{name}/datasets")
   public Response getDatasets(
@@ -82,7 +82,7 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
   @POST
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Path("onboard-dataset")
-  @Timed
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
   public Response onboardDataset(
       @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
@@ -98,7 +98,7 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
   @POST
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Path("onboard-all")
-  @Timed
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
   public Response onboardAll(
       @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
@@ -112,7 +112,7 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
   @DELETE
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Path("offboard-all")
-  @Timed
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
   public Response offboardAll(
       @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
@@ -123,7 +123,7 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
 
   @DELETE
   @Path("cache")
-  @Timed
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
   public Response clearDataSourceCache(
       @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal) {
@@ -133,7 +133,7 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
 
   @GET
   @Path("validate")
-  @Timed
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
   public Response validate(@Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
       @QueryParam("name") String name) {

@@ -96,7 +96,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
 
   @Path("{id}/insights")
   @GET
-  @Timed
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
   @Deprecated(forRemoval = true)
   public Response getInsights(
@@ -107,7 +107,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
 
   @Path("insights")
   @POST
-  @Timed
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
   public Response getInsights(
       @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
@@ -120,7 +120,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @Path("{id}/run")
   @POST
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-  @Timed
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   public Response runTask(
       @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
       @PathParam("id") final Long id,
@@ -132,7 +132,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   }
 
   @POST
-  @Timed
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Path("/validate")
   @Produces(MediaType.APPLICATION_JSON)
   // can be moved to CrudResource if /validate is needed for other entities.
@@ -147,7 +147,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
 
   @Path("evaluate")
   @POST
-  @Timed
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   public Response evaluate(
       @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
       @Schema(example = EVALUATE_SWAGGER_EXAMPLE) final AlertEvaluationApi request
@@ -162,7 +162,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @Operation(summary = "Delete associated anomalies and rerun detection till present")
   @POST
   @Path("{id}/reset")
-  @Timed
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
   public Response reset(
       @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
@@ -171,7 +171,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   }
 
   @GET
-  @Timed
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Path("{id}/stats")
   @Produces(MediaType.APPLICATION_JSON)
   public Response stats(

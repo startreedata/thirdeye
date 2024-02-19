@@ -54,14 +54,14 @@ public class AuthResource {
         .setAccessToken(NO_AUTH_USER);
   }
 
-  @Timed
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Path("/login")
   @POST
   public Response login(@Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal) {
     return respondOk(authApi(principal));
   }
 
-  @Timed
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Path("/logout")
   @POST
   public Response logout(@Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal) {

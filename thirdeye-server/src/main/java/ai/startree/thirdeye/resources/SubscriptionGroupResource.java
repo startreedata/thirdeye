@@ -59,7 +59,7 @@ public class SubscriptionGroupResource extends
   }
 
   @POST
-  @Timed
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
   @Path("{id}/reset")
   public Response reset(
@@ -69,7 +69,7 @@ public class SubscriptionGroupResource extends
   }
 
   @POST
-  @Timed
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
   @Path("{id}/test")
   public Response test(

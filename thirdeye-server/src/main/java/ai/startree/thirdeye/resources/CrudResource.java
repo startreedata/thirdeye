@@ -52,7 +52,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   }
 
   @GET
-  @Timed
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
   public Response list(
       @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
@@ -64,7 +64,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
 
   @GET
   @Path("{id}")
-  @Timed
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
   public Response get(
       @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
@@ -74,7 +74,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
 
   @GET
   @Path("name/{name}")
-  @Timed
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
   public Response get(
       @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
@@ -83,7 +83,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   }
 
   @POST
-  @Timed
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
   public Response createMultiple(
       @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
@@ -94,7 +94,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   }
 
   @PUT
-  @Timed
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
   public Response editMultiple(
       @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
@@ -105,7 +105,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
 
   @DELETE
   @Path("{id}")
-  @Timed
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
   public Response delete(
       @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
@@ -119,7 +119,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
 
   @DELETE
   @Path("/all")
-  @Timed
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
   public Response deleteAll(@Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal) {
     crudService.deleteAll(principal);
@@ -128,7 +128,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
 
   @GET
   @Path("/count")
-  @Timed
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   public Response countWithPredicate(
       @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
       @Context UriInfo uriInfo

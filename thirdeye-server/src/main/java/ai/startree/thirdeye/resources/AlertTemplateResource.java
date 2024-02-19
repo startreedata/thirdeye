@@ -61,7 +61,7 @@ public class AlertTemplateResource extends CrudResource<AlertTemplateApi, AlertT
   @POST
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Path("load-defaults")
-  @Timed
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   public Response loadRecommendedTemplates(
       @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
       @FormParam("updateExisting") final boolean updateExisting) {

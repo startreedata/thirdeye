@@ -232,7 +232,7 @@ public class InternalResource {
   @Path("run-detection-task-locally")
   @POST
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-  @Timed
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   public Response runTask(
       @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
       @FormParam("alertId") final Long alertId,

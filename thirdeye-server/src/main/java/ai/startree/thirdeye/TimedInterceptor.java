@@ -62,6 +62,7 @@ public class TimedInterceptor implements MethodInterceptor {
 
   @NonNull
   private static String defaultName(final Method method) {
-    return "thirdeye_method_" + method.getName();
+    
+    return "thirdeye_method_" + method.getDeclaringClass().getSimpleName() + "_" + method.getName();
   }
 }

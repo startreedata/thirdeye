@@ -13,9 +13,9 @@
  */
 package ai.startree.thirdeye.resources;
 
-import io.micrometer.core.annotation.Timed;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.core.annotation.Timed;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.POST;
@@ -32,7 +32,7 @@ public class HttpDetectorResource {
   }
 
   @POST
-  @Timed
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
   public Response post(Object o) throws JsonProcessingException {
     System.out.println("payload:" + new ObjectMapper().writeValueAsString(o));

@@ -20,6 +20,7 @@ public class AlertAssociationDto {
   private AlertDTO alert;
   private EnumerationItemDTO enumerationItem;
   private Date createTime;
+  private Date anomalyCompletionWatermark;
 
   public AlertDTO getAlert() {
     return alert;
@@ -46,6 +47,16 @@ public class AlertAssociationDto {
 
   public AlertAssociationDto setCreateTime(final Date createTime) {
     this.createTime = createTime;
+    return this;
+  }
+
+  public Date getAnomalyCompletionWatermark() {
+    return anomalyCompletionWatermark;
+  }
+
+  public AlertAssociationDto setAnomalyCompletionWatermark(
+      final Date anomalyCompletionWatermark) {
+    this.anomalyCompletionWatermark = anomalyCompletionWatermark;
     return this;
   }
 }

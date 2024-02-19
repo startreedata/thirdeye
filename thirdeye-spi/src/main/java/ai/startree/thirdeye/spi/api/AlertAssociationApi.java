@@ -23,6 +23,7 @@ public class AlertAssociationApi {
   private AlertApi alert;
   private EnumerationItemApi enumerationItem;
   private Date created;
+  private Date anomalyCompletionWatermark;
 
   public AlertApi getAlert() {
     return alert;
@@ -49,6 +50,16 @@ public class AlertAssociationApi {
 
   public AlertAssociationApi setCreated(final Date created) {
     this.created = created;
+    return this;
+  }
+
+  public Date getAnomalyCompletionWatermark() {
+    return anomalyCompletionWatermark;
+  }
+
+  public AlertAssociationApi setAnomalyCompletionWatermark(
+      final Date anomalyCompletionWatermark) {
+    this.anomalyCompletionWatermark = anomalyCompletionWatermark;
     return this;
   }
 }

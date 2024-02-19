@@ -239,4 +239,10 @@ public class SubscriptionGroupDTO extends AbstractDTO {
     super.setCreateTime(createTime);
     return this;
   }
+
+  @Override
+  public SubscriptionGroupDTO setId(final Long id) {
+    super.setId(id);
+    return this;
+  }
 }

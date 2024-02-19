@@ -20,6 +20,7 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.maximumTriggersPerMinute;
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
+import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
@@ -39,7 +40,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Singleton;
 import java.sql.Timestamp;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,6 +84,13 @@ public class SubscriptionGroupService extends
     ensureExists(alert.getId(), "alert.id is missing in alert association");
   }
 
+  private static void initSystemFields(final AlertAssociationDto aa, final Timestamp created) {
+    // override system field values
+    aa
+        .setCreateTime(created)
+        .setAnomalyCompletionWatermark(null);
+  }
+
   private void validateSpec(NotificationSpecApi spec) {
     ensureExists(spec.getType(), "type value must be set.");
     ensure(notificationServiceRegistry.isRegistered(spec.getType()),
@@ -111,40 +118,48 @@ public class SubscriptionGroupService extends
   @Override
   protected void prepareCreatedDto(final ThirdEyeServerPrincipal principal,
       final SubscriptionGroupDTO dto) {
-    final Timestamp created = requireNonNull(dto.getCreateTime(), "created");
+    final Timestamp createTime = requireNonNull(dto.getCreateTime(), "created");
     optional(dto.getAlertAssociations())
-        .ifPresent(l -> l.forEach(aa -> aa.setCreateTime(created)));
+        .ifPresent(l -> l.forEach(aa -> initSystemFields(aa, createTime)));
   }
 
   @Override
   protected void prepareUpdatedDto(final ThirdEyeServerPrincipal principal,
       final SubscriptionGroupDTO existing,
       final SubscriptionGroupDTO updated) {
-
     /* This is a system field which is managed by the notification pipeline */
     updated.setVectorClocks(existing.getVectorClocks());
-
     updateAlertAssociationsIfReqd(existing.getAlertAssociations(), updated.getAlertAssociations());
   }
 
   @VisibleForTesting
   void updateAlertAssociationsIfReqd(final List<AlertAssociationDto> existing,
       final List<AlertAssociationDto> updated) {
-    if (updated == null) {
+    if (updated == null || updated.isEmpty()) {
+      // if updated is null/empty. nothing to update. all associations are being removed
       return;
     }
-    final Timestamp createTime = new Timestamp(System.currentTimeMillis());
-    if (existing == null) {
-      updated.forEach(aa -> aa.setCreateTime(createTime));
-      return;
-    }
-    final Map<AlertAssociationId, Date> m = existing.stream()
+
+    // Collect existing alert associations into a map for easy lookup
+    final Map<AlertAssociationId, AlertAssociationDto> m = optional(existing)
+        .orElse(emptyList())
+        .stream()
         .collect(HashMap::new,
-            (map, aa) -> map.put(new AlertAssociationId(aa), aa.getCreateTime()),
-            HashMap::putAll
-        );
-    updated
-        .forEach(aa -> aa.setCreateTime(m.getOrDefault(new AlertAssociationId(aa), createTime)));
+            (map, aa) -> map.put(new AlertAssociationId(aa), aa),
+            HashMap::putAll);
+
+    // Restore system fields from existing alert associations or initialize them
+    updated.forEach(aa -> restoreSystemFields(aa, m.get(new AlertAssociationId(aa))));
+  }
+
+  private void restoreSystemFields(final AlertAssociationDto dest, final AlertAssociationDto src) {
+    if (src != null) {
+      dest.setCreateTime(src.getCreateTime())
+          .setAnomalyCompletionWatermark(src.getAnomalyCompletionWatermark());
+    } else {
+      final Timestamp created = new Timestamp(System.currentTimeMillis());
+      initSystemFields(dest, created);
+    }
   }
 
   @Override

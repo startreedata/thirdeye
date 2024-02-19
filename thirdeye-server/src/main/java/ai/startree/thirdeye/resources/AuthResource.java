@@ -19,7 +19,7 @@ import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.spi.api.AuthApi;
 import ai.startree.thirdeye.spi.api.UserApi;
-import com.codahale.metrics.annotation.Timed;
+import io.micrometer.core.annotation.Timed;
 import com.google.inject.Singleton;
 import io.dropwizard.auth.Auth;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;

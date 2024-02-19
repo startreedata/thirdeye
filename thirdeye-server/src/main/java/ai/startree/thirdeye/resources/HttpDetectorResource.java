@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.resources;
 
-import com.codahale.metrics.annotation.Timed;
+import io.micrometer.core.annotation.Timed;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javax.inject.Inject;

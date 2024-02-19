@@ -20,7 +20,7 @@ import ai.startree.thirdeye.auth.AuthConfiguration;
 import ai.startree.thirdeye.service.AuthService;
 import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.api.AuthInfoApi;
-import com.codahale.metrics.annotation.Timed;
+import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import javax.inject.Inject;
 import javax.inject.Singleton;

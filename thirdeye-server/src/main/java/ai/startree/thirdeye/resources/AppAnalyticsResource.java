@@ -17,7 +17,7 @@ import static ai.startree.thirdeye.service.AppAnalyticsService.appVersion;
 import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 
 import ai.startree.thirdeye.service.AppAnalyticsService;
-import com.codahale.metrics.annotation.Timed;
+import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import javax.inject.Inject;
 import javax.inject.Singleton;

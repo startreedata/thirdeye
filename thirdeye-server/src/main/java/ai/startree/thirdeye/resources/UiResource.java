@@ -18,7 +18,7 @@ import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 import ai.startree.thirdeye.auth.AuthConfiguration;
 import ai.startree.thirdeye.config.UiConfiguration;
 import ai.startree.thirdeye.mapper.UiConfigurationMapper;
-import com.codahale.metrics.annotation.Timed;
+import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import javax.inject.Inject;
 import javax.inject.Singleton;

@@ -34,7 +34,7 @@ import ai.startree.thirdeye.worker.task.TaskDriver;
 import ai.startree.thirdeye.worker.task.TaskDriverConfiguration;
 import ai.startree.thirdeye.worker.task.runner.DetectionPipelineTaskRunner;
 import ai.startree.thirdeye.worker.task.runner.NotificationTaskRunner;
-import com.codahale.metrics.annotation.Timed;
+import io.micrometer.core.annotation.Timed;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.jaxrs.annotation.JacksonFeatures;

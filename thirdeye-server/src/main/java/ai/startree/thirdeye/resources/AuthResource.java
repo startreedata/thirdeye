@@ -19,9 +19,9 @@ import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.spi.api.AuthApi;
 import ai.startree.thirdeye.spi.api.UserApi;
-import com.codahale.metrics.annotation.Timed;
 import com.google.inject.Singleton;
 import io.dropwizard.auth.Auth;
+import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
@@ -54,14 +54,14 @@ public class AuthResource {
         .setAccessToken(NO_AUTH_USER);
   }
 
-  @Timed
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Path("/login")
   @POST
   public Response login(@Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal) {
     return respondOk(authApi(principal));
   }
 
-  @Timed
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Path("/logout")
   @POST
   public Response logout(@Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal) {

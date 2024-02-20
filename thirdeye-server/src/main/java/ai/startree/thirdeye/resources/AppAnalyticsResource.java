@@ -17,7 +17,7 @@ import static ai.startree.thirdeye.service.AppAnalyticsService.appVersion;
 import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 
 import ai.startree.thirdeye.service.AppAnalyticsService;
-import com.codahale.metrics.annotation.Timed;
+import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -41,7 +41,7 @@ public class AppAnalyticsResource {
   }
 
   @GET
-  @Timed
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
   public Response get(
       @QueryParam("startTime") final Long startTime,

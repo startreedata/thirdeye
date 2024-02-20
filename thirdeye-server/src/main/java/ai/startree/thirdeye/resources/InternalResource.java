@@ -34,13 +34,13 @@ import ai.startree.thirdeye.worker.task.TaskDriver;
 import ai.startree.thirdeye.worker.task.TaskDriverConfiguration;
 import ai.startree.thirdeye.worker.task.runner.DetectionPipelineTaskRunner;
 import ai.startree.thirdeye.worker.task.runner.NotificationTaskRunner;
-import com.codahale.metrics.annotation.Timed;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.jaxrs.annotation.JacksonFeatures;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import io.dropwizard.auth.Auth;
+import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
@@ -232,7 +232,7 @@ public class InternalResource {
   @Path("run-detection-task-locally")
   @POST
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-  @Timed
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   public Response runTask(
       @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
       @FormParam("alertId") final Long alertId,

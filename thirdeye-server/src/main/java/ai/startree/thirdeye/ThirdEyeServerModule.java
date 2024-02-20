@@ -27,6 +27,8 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import com.google.inject.matcher.Matchers;
+import io.micrometer.core.annotation.Timed;
 import org.apache.tomcat.jdbc.pool.DataSource;
 
 public class ThirdEyeServerModule extends AbstractModule {
@@ -66,6 +68,8 @@ public class ThirdEyeServerModule extends AbstractModule {
     bind(AuthConfiguration.class).toInstance(configuration.getAuthConfiguration());
     bind(MetricRegistry.class).toInstance(metricRegistry);
     bind(ThirdEyeServerConfiguration.class).toInstance(configuration);
+
+    bindInterceptor(Matchers.any(), Matchers.annotatedWith(Timed.class), new TimedInterceptor());
   }
 
   @Singleton

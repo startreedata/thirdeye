@@ -25,9 +25,9 @@ import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
-import com.codahale.metrics.annotation.Timed;
 import com.google.inject.Inject;
 import io.dropwizard.auth.Auth;
+import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -80,7 +80,7 @@ public class MaintenanceResource {
   @POST
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Path("/enumeration-items/migrate")
-  @Timed
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
   @Operation(summary = "Update the ignored index based on anomaly labels for historical anomalies")
   public Response migrateEnumerationItems(
@@ -121,7 +121,7 @@ public class MaintenanceResource {
 
   @POST
   @Path("/anomaly/index-ignored")
-  @Timed
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
   @Operation(summary = "Update the ignored index based on anomaly labels for historical anomalies")
   public Response updateIgnoreLabelIndex(

@@ -18,8 +18,8 @@ import ai.startree.thirdeye.service.AnomalyService;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.AnomalyFeedbackApi;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
-import com.codahale.metrics.annotation.Timed;
 import io.dropwizard.auth.Auth;
+import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
@@ -61,7 +61,7 @@ public class AnomalyResource extends CrudResource<AnomalyApi, AnomalyDTO> {
 
   @Path("{id}/feedback")
   @POST
-  @Timed
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   public Response setFeedback(
       @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
       @PathParam("id") final Long id,
@@ -75,7 +75,7 @@ public class AnomalyResource extends CrudResource<AnomalyApi, AnomalyDTO> {
 
   @GET
   @Path("stats")
-  @Timed
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
   public Response getAnomalyStats(
       @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,

@@ -19,8 +19,8 @@ import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.service.AlertTemplateService;
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
-import com.codahale.metrics.annotation.Timed;
 import io.dropwizard.auth.Auth;
+import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
@@ -61,7 +61,7 @@ public class AlertTemplateResource extends CrudResource<AlertTemplateApi, AlertT
   @POST
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Path("load-defaults")
-  @Timed
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   public Response loadRecommendedTemplates(
       @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
       @FormParam("updateExisting") final boolean updateExisting) {

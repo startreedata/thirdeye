@@ -30,6 +30,8 @@ import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.binder.jvm.ExecutorServiceMetrics;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,6 +76,8 @@ public class PlanExecutor implements AutoCloseable {
 
     final int nThreads = detectionPipelineConfiguration.getForkjoin().getParallelism();
     subTaskExecutor = Executors.newFixedThreadPool(nThreads, threadsNamed("fork-join-%d"));
+    new ExecutorServiceMetrics(subTaskExecutor, "fork-join", emptyList()).bindTo(
+        Metrics.globalRegistry);
   }
 
   @VisibleForTesting

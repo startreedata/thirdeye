@@ -53,6 +53,9 @@ import io.federecio.dropwizard.swagger.SwaggerBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.binder.jersey.server.DefaultJerseyTagsProvider;
+import io.micrometer.core.instrument.binder.jersey.server.MetricsApplicationEventListener;
+import io.micrometer.core.instrument.binder.jetty.JettyConnectionMetrics;
 import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
 import io.prometheus.client.CollectorRegistry;
@@ -68,6 +71,7 @@ import javax.servlet.FilterRegistration;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.ext.Provider;
 import org.apache.tomcat.jdbc.pool.DataSource;
+import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.glassfish.jersey.message.internal.OutboundJaxrsResponse;
 import org.glassfish.jersey.server.ContainerRequest;
@@ -172,6 +176,16 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
           PrometheusConfig.DEFAULT);
       Metrics.globalRegistry.add(registry);
       Metrics.globalRegistry.config().commonTags("environment_url", environmentUrl);
+      // add jersey instrumentation
+      env.jersey().getResourceConfig().register(new MetricsApplicationEventListener(Metrics.globalRegistry,
+          new DefaultJerseyTagsProvider(), "http.server.requests", true));
+      // add jetty instrumentation
+      env.lifecycle().addServerLifecycleListener(server -> {
+        for (final Connector c: server.getConnectors()) {
+          c.addBean(new JettyConnectionMetrics(Metrics.globalRegistry, c));
+        }
+      });
+      
       // old registry based on dropwizard-metrics
       final CollectorRegistry legacyRegistry = new CollectorRegistry();
       legacyRegistry.register(new DropwizardExports(env.metrics()));

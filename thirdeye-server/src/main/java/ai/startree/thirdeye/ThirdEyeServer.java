@@ -56,6 +56,11 @@ import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.binder.jersey.server.DefaultJerseyTagsProvider;
 import io.micrometer.core.instrument.binder.jersey.server.MetricsApplicationEventListener;
 import io.micrometer.core.instrument.binder.jetty.JettyConnectionMetrics;
+import io.micrometer.core.instrument.binder.jvm.ClassLoaderMetrics;
+import io.micrometer.core.instrument.binder.jvm.JvmGcMetrics;
+import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics;
+import io.micrometer.core.instrument.binder.jvm.JvmThreadMetrics;
+import io.micrometer.core.instrument.binder.system.ProcessorMetrics;
 import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
 import io.prometheus.client.CollectorRegistry;
@@ -185,6 +190,13 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
           c.addBean(new JettyConnectionMetrics(Metrics.globalRegistry, c));
         }
       });
+      // add jvm metrics
+      new ClassLoaderMetrics().bindTo(registry);
+      new JvmMemoryMetrics().bindTo(registry);
+      // should not be closed here - but should be closed when the app stops. In TE case it's fine not to close it, app stop corresponds to JVM stop.
+      new JvmGcMetrics().bindTo(registry);
+      new ProcessorMetrics().bindTo(registry);
+      new JvmThreadMetrics().bindTo(registry);
       
       // old registry based on dropwizard-metrics
       final CollectorRegistry legacyRegistry = new CollectorRegistry();

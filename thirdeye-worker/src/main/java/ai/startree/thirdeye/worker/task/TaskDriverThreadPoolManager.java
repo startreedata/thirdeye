@@ -14,10 +14,13 @@
 package ai.startree.thirdeye.worker.task;
 
 import static ai.startree.thirdeye.spi.util.ExecutorUtils.shutdownExecutionService;
+import static java.util.Collections.emptyList;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.binder.jvm.ExecutorServiceMetrics;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -38,6 +41,8 @@ public class TaskDriverThreadPoolManager {
         new ThreadFactoryBuilder()
             .setNameFormat("task-executor-%d")
             .build());
+    new ExecutorServiceMetrics(taskExecutorService, "task-executor", emptyList()).bindTo(
+        Metrics.globalRegistry);
 
     taskWatcherExecutorService = Executors.newFixedThreadPool(
         config.getMaxParallelTasks(),
@@ -45,11 +50,15 @@ public class TaskDriverThreadPoolManager {
             .setNameFormat("task-watcher-%d")
             .setDaemon(true)
             .build());
+    new ExecutorServiceMetrics(taskWatcherExecutorService, "task-watcher", emptyList()).bindTo(
+        Metrics.globalRegistry);
 
     heartbeatExecutorService = Executors.newScheduledThreadPool(config.getMaxParallelTasks(),
         new ThreadFactoryBuilder()
             .setNameFormat("task-heartbeat-%d")
             .build());
+    new ExecutorServiceMetrics(heartbeatExecutorService, "task-heartbeat", emptyList()).bindTo(
+        Metrics.globalRegistry);
   }
 
   public ExecutorService getTaskExecutorService() {

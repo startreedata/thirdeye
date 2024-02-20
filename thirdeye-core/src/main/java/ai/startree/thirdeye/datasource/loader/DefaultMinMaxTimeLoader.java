@@ -16,6 +16,7 @@ package ai.startree.thirdeye.datasource.loader;
 import static ai.startree.thirdeye.util.CalciteUtils.addAlias;
 import static ai.startree.thirdeye.util.CalciteUtils.identifierDescOf;
 import static ai.startree.thirdeye.util.CalciteUtils.identifierOf;
+import static java.util.Collections.emptyList;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.datasource.query.SelectQuery;
@@ -31,6 +32,8 @@ import ai.startree.thirdeye.util.CalciteUtils;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.binder.jvm.ExecutorServiceMetrics;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
@@ -63,6 +66,8 @@ public class DefaultMinMaxTimeLoader implements MinMaxTimeLoader {
     this.dataSourceCache = dataSourceCache;
     executorService = Executors.newCachedThreadPool(
         new ThreadFactoryBuilder().setNameFormat("minmax-loader-%d").build());
+    new ExecutorServiceMetrics(executorService, "minmax-loader", emptyList()).bindTo(
+        Metrics.globalRegistry);
   }
 
   @Override
@@ -153,7 +158,8 @@ public class DefaultMinMaxTimeLoader implements MinMaxTimeLoader {
       final SqlParser.Config sqlParserConfig) {
     final String quoteSafeTimeColumn = dialect.quoteIdentifier(datasetConfigDTO.getTimeColumn());
     final String timeGroupExpression = sqlExpressionBuilder.getTimeGroupExpression(
-        quoteSafeTimeColumn, datasetConfigDTO.getTimeFormat(), Period.millis(1), DateTimeZone.UTC.toString());
+        quoteSafeTimeColumn, datasetConfigDTO.getTimeFormat(), Period.millis(1),
+        DateTimeZone.UTC.toString());
 
     final SqlNode timeGroupNode = CalciteUtils.expressionToNode(timeGroupExpression,
         sqlParserConfig);

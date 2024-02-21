@@ -28,6 +28,11 @@ public class AnomalyFilter {
 
   // find anomalies whose end time is greater than this value
   private Long endTimeIsGte;
+  /**
+   * find anomalies whose end time is less than this value
+   * TODO spyne refactor pattern
+   */
+  private Long endTimeIsLt;
 
   public Interval getCreateTimeWindow() {
     return createTimeWindow;
@@ -98,6 +103,15 @@ public class AnomalyFilter {
 
   public AnomalyFilter setEndTimeIsGte(final Long endTimeIsGte) {
     this.endTimeIsGte = endTimeIsGte;
+    return this;
+  }
+
+  public Long getEndTimeIsLt() {
+    return endTimeIsLt;
+  }
+
+  public AnomalyFilter setEndTimeIsLt(final Long endTimeIsLt) {
+    this.endTimeIsLt = endTimeIsLt;
     return this;
   }
 }

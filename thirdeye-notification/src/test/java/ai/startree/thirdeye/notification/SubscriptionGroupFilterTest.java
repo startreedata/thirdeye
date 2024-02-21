@@ -32,6 +32,6 @@ public class SubscriptionGroupFilterTest {
     instance.filterAnomalies(new AnomalyFilter()
         .setAlertId(123L)
         .setIsChild(false)
-        .setCreateTimeWindow(new Interval(1230L, 1234L)), 5678L);
+        .setCreateTimeWindow(new Interval(1230L, 1234L)), 5678L, "");
   }
 }

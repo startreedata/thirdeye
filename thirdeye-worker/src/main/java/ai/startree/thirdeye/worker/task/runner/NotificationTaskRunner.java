@@ -137,31 +137,32 @@ public class NotificationTaskRunner implements TaskRunner {
         notificationTaskTimerOfException);
   }
 
-  private void executeInternal(final SubscriptionGroupDTO subscriptionGroup) {
-    requireNonNull(subscriptionGroup, "subscription Group is null");
-    final var anomalies = subscriptionGroupFilter.filter(
-        subscriptionGroup,
-        System.currentTimeMillis());
+  private void executeInternal(final SubscriptionGroupDTO sg) {
+    requireNonNull(sg, "subscription Group is null");
+    final long now = System.currentTimeMillis();
+    final var anomalies = subscriptionGroupFilter.filter(sg, now);
+    final var completedAnomalies = subscriptionGroupFilter.filterCompletedAnomalies(sg);
 
-    if (anomalies.isEmpty()) {
-      LOG.debug("Zero anomalies found, skipping notification for subscription group: {}",
-          subscriptionGroup.getId());
+    if (anomalies.isEmpty() && completedAnomalies.isEmpty()) {
+      LOG.debug("Subscription group: {} "
+              + "has no anomalies to notify and no completed anomalies to notify",
+          sg.getId());
       return;
     }
 
     /* Dispatch notifications */
     final NotificationPayloadApi payload = notificationPayloadBuilder.buildNotificationPayload(
-        subscriptionGroup,
+        sg,
         anomalies);
 
     /* fire notifications */
-    notificationDispatcher.dispatch(subscriptionGroup, payload);
+    notificationDispatcher.dispatch(sg, payload);
 
     /* Update anomalies */
     for (final AnomalyDTO anomaly : anomalies) {
       anomalyManager.update(anomaly.setNotified(true));
     }
     /* Record watermarks */
-    subscriptionGroupWatermarkManager.updateWatermarks(subscriptionGroup, anomalies);
+    subscriptionGroupWatermarkManager.updateWatermarks(sg, anomalies);
   }
 }

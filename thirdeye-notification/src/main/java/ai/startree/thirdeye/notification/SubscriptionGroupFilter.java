@@ -36,11 +36,13 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.joda.time.Interval;
+import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -98,6 +100,35 @@ public class SubscriptionGroupFilter {
         .format(Instant.ofEpochMilli(ts));
   }
 
+  private static long getMaxMergeGap(final AlertDTO alert) {
+    // TODO spyne determine max merge gap
+    return Period.seconds(1).toStandardDuration().getMillis();
+  }
+
+  /**
+   * Generate List of Alert Association objects from existing subscription group
+   *
+   * @return List of Alert Association objects
+   */
+  private static List<AlertAssociationDto> migrateOlderSchema(final SubscriptionGroupDTO sg) {
+    return optional(sg.getProperties())
+        .map(p -> (List<?>) p.get(PROP_DETECTION_CONFIG_IDS))
+        .orElse(Collections.emptyList())
+        .stream()
+        .filter(Objects::nonNull)
+        .filter(Number.class::isInstance)
+        .map(Number.class::cast)
+        .map(Number::longValue)
+        .map(SubscriptionGroupFilter::newAlertRef)
+        .map(alert -> new AlertAssociationDto().setAlert(alert))
+        .collect(Collectors.toList());
+  }
+
+  private static boolean isNotifyCompletedAnomaliesEnabled(final SubscriptionGroupDTO sg) {
+    // TODO spyne subscription group flag is set to true
+    return false;
+  }
+
   /**
    * Find anomalies for the given subscription group given an end time.
    *
@@ -113,28 +144,40 @@ public class SubscriptionGroupFilter {
     return alertAssociations.stream()
         .filter(aa -> isAlertActive(aa.getAlert().getId()))
         .map(aa -> buildAnomalyFilter(aa, sg, endTime))
-        .map(f -> filterAnomalies(f, sg.getId()))
+        .map(f -> filterAnomalies(f, sg.getId(), "anomalies"))
         .flatMap(Collection::stream)
         .collect(toSet());
   }
 
-  /**
-   * Generate List of Alert Association objects from existing subscription group
-   *
-   * @return List of Alert Association objects
-   */
-  private List<AlertAssociationDto> migrateOlderSchema(final SubscriptionGroupDTO sg) {
-    return optional(sg.getProperties())
-        .map(p -> (List<?>) p.get(PROP_DETECTION_CONFIG_IDS))
-        .orElse(Collections.emptyList())
-        .stream()
-        .filter(Objects::nonNull)
-        .filter(Number.class::isInstance)
-        .map(Number.class::cast)
-        .map(Number::longValue)
-        .map(SubscriptionGroupFilter::newAlertRef)
-        .map(alert -> new AlertAssociationDto().setAlert(alert))
-        .collect(Collectors.toList());
+  public Set<AnomalyDTO> filterCompletedAnomalies(final SubscriptionGroupDTO sg) {
+    if (!isNotifyCompletedAnomaliesEnabled(sg)) {
+      // Do not notify completed anomalies
+      return Set.of();
+    }
+    final List<AlertAssociationDto> alertAssociations = optional(sg.getAlertAssociations())
+        .orElseGet(() -> migrateOlderSchema(sg));
+
+    return alertAssociations.stream()
+        .filter(aa -> isAlertActive(aa.getAlert().getId()))
+        .map(this::buildAnomalyFilterCompletedAnomalies)
+        .map(f -> filterAnomalies(f, sg.getId(), "completed anomalies"))
+        .flatMap(Collection::stream)
+        .collect(toSet());
+  }
+
+  private AnomalyFilter buildAnomalyFilterCompletedAnomalies(final AlertAssociationDto aa) {
+    final Date watermark = optional(aa.getAnomalyCompletionWatermark())
+        .orElseThrow(() -> new IllegalStateException("Invalid code path. Watermark is null"));
+
+    final long alertId = aa.getAlert().getId();
+    final AlertDTO alert = alertManager.findById(alertId);
+    final long endTimeIsLt = alert.getLastTimestamp() - getMaxMergeGap(alert);
+
+    return new AnomalyFilter()
+        .setIsChild(false)
+        .setAlertId(alertId)
+        .setEndTimeIsGte(watermark.getTime())
+        .setEndTimeIsLt(endTimeIsLt);
   }
 
   private boolean isAlertActive(final long alertId) {
@@ -147,7 +190,7 @@ public class SubscriptionGroupFilter {
       final long createTimeEnd) {
     final long alertId = aa.getAlert().getId();
     final AlertDTO alert = alertManager.findById(alertId);
-    long startTime = optional(sg.getVectorClocks())
+    final long startTime = optional(sg.getVectorClocks())
         .map(v -> v.get(alertId))
         .orElse(0L);
 
@@ -182,17 +225,20 @@ public class SubscriptionGroupFilter {
   }
 
   @VisibleForTesting
-  Set<AnomalyDTO> filterAnomalies(final AnomalyFilter f, final Long subscriptionGroupId) {
+  Set<AnomalyDTO> filterAnomalies(final AnomalyFilter f,
+      final Long subscriptionGroupId,
+      final String logContext) {
     final List<AnomalyDTO> candidates = anomalyManager.filter(f);
 
     final Set<AnomalyDTO> anomaliesToBeNotified = candidates.stream()
         .filter(SubscriptionGroupFilter::shouldFilter)
         .collect(toSet());
 
-    LOG.info("Subscription Group: {} Alert: {}. "
-            + "{} out of {} candidates to be notified. Created between {} and {} ({} and {} System Time)",
+    LOG.info("Subscription Group: {} Alert: {} context: {}. "
+            + "{}/{} filtered. Created between {} and {} ({} and {} System Time)",
         subscriptionGroupId,
         f.getAlertId(),
+        logContext,
         anomaliesToBeNotified.size(),
         candidates.size(),
         f.getCreateTimeWindow().getStartMillis(),

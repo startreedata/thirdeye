@@ -148,7 +148,7 @@ public class TaskDao {
       final TaskEntity entity = toEntity(pojo);
       return transactionService.executeTransaction(
           (connection) -> databaseService.update(entity, predicate, connection),
-          null);
+          0);
     } catch (JsonProcessingException | SQLException e) {
       LOG.error(e.getMessage(), e);
       return 0;

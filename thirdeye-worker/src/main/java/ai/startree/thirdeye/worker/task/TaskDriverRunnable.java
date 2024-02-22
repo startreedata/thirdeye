@@ -207,8 +207,11 @@ public class TaskDriverRunnable implements Runnable {
    */
   private TaskDTO waitForTask() {
     while (!isShutdown()) {
+      // acquire a task in a single operation
+      // acquire the oldest task for a given ref_id that has to be run 
+      // don't acquire on ref_id that have task in WAITING OR RUNNING STATE
+      // defined behavior for FAILED
       final List<TaskDTO> anomalyTasks = findTasks();
-
       final boolean tasksFound = CollectionUtils.isNotEmpty(anomalyTasks);
       if (tasksFound) {
         final TaskDTO taskDTO = acquireTask(anomalyTasks);
@@ -253,13 +256,10 @@ public class TaskDriverRunnable implements Runnable {
 
   private List<TaskDTO> findTasks() {
     try {
-      // randomize fetching head and tail to reduce synchronized patterns across threads (and hosts)
-      boolean orderAscending = System.currentTimeMillis() % 2 == 0;
-
       // find by task type to separate online task from a normal task
       return taskManager.findByStatusOrderByCreateTime(TaskStatus.WAITING,
           config.getTaskFetchSizeCap(),
-          orderAscending);
+          true);
     } catch (Exception e) {
       LOG.error("Exception found in fetching new tasks", e);
     }

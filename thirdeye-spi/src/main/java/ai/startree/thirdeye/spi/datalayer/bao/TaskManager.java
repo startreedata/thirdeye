@@ -34,7 +34,7 @@ public interface TaskManager extends AbstractManager<TaskDTO> {
 
   List<TaskDTO> findTimeoutTasksWithinDays(int days, long maxTaskTime);
 
-  List<TaskDTO> findByStatusOrderByCreateTime(TaskStatus status, int fetchSize, boolean asc);
+  TaskDTO findNextTaskToRun();
 
   List<TaskDTO> findByStatusAndWorkerId(Long workerId, TaskStatus status);
 

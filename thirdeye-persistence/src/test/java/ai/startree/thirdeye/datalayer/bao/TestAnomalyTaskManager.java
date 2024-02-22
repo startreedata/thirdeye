@@ -116,9 +116,8 @@ public class TestAnomalyTaskManager {
 
   @Test(dependsOnMethods = {"testUpdateStatusAndWorkerId"})
   public void testFindByStatusOrderByCreationTimeAsc() {
-    List<TaskDTO> anomalyTasks =
-        taskDAO.findByStatusOrderByCreateTime(TaskStatus.WAITING, Integer.MAX_VALUE, true);
-    Assert.assertEquals(anomalyTasks.size(), 1);
+    TaskDTO anomalyTask = taskDAO.findNextTaskToRun();
+    assertThat(anomalyTask).isNotNull();
   }
 
   @Test(dependsOnMethods = {"testFindByStatusOrderByCreationTimeAsc"})

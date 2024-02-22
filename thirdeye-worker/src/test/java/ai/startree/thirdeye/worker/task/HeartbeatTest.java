@@ -16,7 +16,6 @@ package ai.startree.thirdeye.worker.task;
 import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
@@ -36,7 +35,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
 import java.time.Duration;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
@@ -99,8 +97,7 @@ public class HeartbeatTest {
   public void heartbeatPulseCheck() {
     final Timestamp startTime = new Timestamp(System.currentTimeMillis());
     final TaskDTO taskDTO = newTask();
-    when(taskManager.findByStatusOrderByCreateTime(eq(TaskStatus.WAITING), anyInt(), anyBoolean()))
-        .thenAnswer(i -> pollingCount++ == 0? List.of(taskDTO) : List.of());
+    when(taskManager.findNextTaskToRun()).thenAnswer(i -> pollingCount++ == 0? taskDTO : null);
 
     doAnswer(invocation -> {
       taskDTO.setStatus(TaskStatus.COMPLETED);

@@ -49,9 +49,8 @@ public class SqlQueryBuilder {
   private static final Logger LOG = LoggerFactory.getLogger(SqlQueryBuilder.class);
 
   private static final String NAME_REGEX = "[a-z][_a-z0-9]*";
-  private static final String PARAM_REGEX = ":(" + NAME_REGEX + ")";
   private static final Pattern PARAM_PATTERN =
-      Pattern.compile(PARAM_REGEX, Pattern.CASE_INSENSITIVE);
+      Pattern.compile(":(" + NAME_REGEX + ")", Pattern.CASE_INSENSITIVE);
   private static final Set<String> AUTO_UPDATE_COLUMN_SET =
       Sets.newHashSet("id", "last_modified");
   //insert sql per table

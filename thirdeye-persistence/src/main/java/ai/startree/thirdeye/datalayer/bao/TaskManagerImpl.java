@@ -41,6 +41,7 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -120,14 +121,17 @@ public class TaskManagerImpl implements TaskManager {
   }
 
   @Override
-  public List<TaskDTO> findByStatusOrderByCreateTime(final TaskStatus status, final int fetchSize,
-      final boolean asc) {
-    final Map<String, Object> parameterMap = new HashMap<>();
-    parameterMap.put("status", status.toString());
-    final String queryClause = (asc)
-        ? FIND_BY_STATUS_ORDER_BY_CREATE_TIME_ASC + fetchSize
-        : FIND_BY_STATUS_ORDER_BY_CREATE_TIME_DESC + fetchSize;
-    return dao.executeParameterizedSQL(queryClause, parameterMap);
+  public TaskDTO findNextTaskToRun() {
+    final String queryClause = """
+        WHERE status = 'WAITING'
+        AND ref_id not in (select ref_id from task_entity where status = 'RUNNING')
+        ORDER BY create_time ASC LIMIT 1
+        """;
+    final List<TaskDTO> dtos = dao.executeParameterizedSQL(queryClause, Collections.emptyMap());
+    if (dtos.isEmpty()) {
+      return null;
+    }
+    return dtos.get(0);
   }
 
   @Override
@@ -276,29 +280,29 @@ public class TaskManagerImpl implements TaskManager {
     // deprecated - use thirdeye_tasks
     metricRegistry.register("taskCountTotal",
         new CachedGauge<Long>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
-      @Override
-      protected Long loadValue() {
-        return count();
-      }
-    });
+          @Override
+          protected Long loadValue() {
+            return count();
+          }
+        });
 
     // deprecated - use thirdeye_task_latency
     metricRegistry.register("detectionTaskLatencyInMillis",
         new CachedGauge<Long>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
-      @Override
-      protected Long loadValue() {
-        return getTaskLatency(TaskType.DETECTION);
-      }
-    });
+          @Override
+          protected Long loadValue() {
+            return getTaskLatency(TaskType.DETECTION);
+          }
+        });
 
     // deprecated - use thirdeye_task_latency
     metricRegistry.register("notificationTaskLatencyInMillis",
         new CachedGauge<Long>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
-      @Override
-      protected Long loadValue() {
-        return getTaskLatency(TaskType.NOTIFICATION);
-      }
-    });
+          @Override
+          protected Long loadValue() {
+            return getTaskLatency(TaskType.NOTIFICATION);
+          }
+        });
 
     for (final TaskStatus status : TaskStatus.values()) {
       registerStatusMetric(status);

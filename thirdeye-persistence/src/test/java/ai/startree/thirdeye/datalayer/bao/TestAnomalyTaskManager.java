@@ -87,9 +87,9 @@ public class TestAnomalyTaskManager {
   public void testCreate() throws JsonProcessingException {
     JobDTO testAnomalyJobSpec = DatalayerTestUtils.getTestJobSpec();
     anomalyJobId = jobDAO.save(testAnomalyJobSpec);
-    anomalyTaskId1 = taskDAO.save(getTestTaskSpec(testAnomalyJobSpec));
+    anomalyTaskId1 = taskDAO.save(getTestTaskSpec(testAnomalyJobSpec, 1));
     Assert.assertNotNull(anomalyTaskId1);
-    anomalyTaskId2 = taskDAO.save(getTestTaskSpec(testAnomalyJobSpec));
+    anomalyTaskId2 = taskDAO.save(getTestTaskSpec(testAnomalyJobSpec, 2));
     Assert.assertNotNull(anomalyTaskId2);
   }
 
@@ -115,12 +115,12 @@ public class TestAnomalyTaskManager {
   }
 
   @Test(dependsOnMethods = {"testUpdateStatusAndWorkerId"})
-  public void testFindByStatusOrderByCreationTimeAsc() {
+  public void testFindNextTaskToRun() {
     TaskDTO anomalyTask = taskDAO.findNextTaskToRun();
     assertThat(anomalyTask).isNotNull();
   }
 
-  @Test(dependsOnMethods = {"testFindByStatusOrderByCreationTimeAsc"})
+  @Test(dependsOnMethods = {"testFindNextTaskToRun"})
   public void testUpdateStatusAndTaskEndTime() {
     TaskStatus oldStatus = TaskStatus.RUNNING;
     TaskStatus newStatus = TaskStatus.COMPLETED;
@@ -161,9 +161,9 @@ public class TestAnomalyTaskManager {
   public void testFindByStatusWithinDays() throws JsonProcessingException {
     JobDTO testAnomalyJobSpec = DatalayerTestUtils.getTestJobSpec();
     anomalyJobId = jobDAO.save(testAnomalyJobSpec);
-    anomalyTaskId1 = taskDAO.save(getTestTaskSpec(testAnomalyJobSpec));
+    anomalyTaskId1 = taskDAO.save(getTestTaskSpec(testAnomalyJobSpec, 1));
     Assert.assertNotNull(anomalyTaskId1);
-    anomalyTaskId2 = taskDAO.save(getTestTaskSpec(testAnomalyJobSpec));
+    anomalyTaskId2 = taskDAO.save(getTestTaskSpec(testAnomalyJobSpec, 1));
     Assert.assertNotNull(anomalyTaskId2);
 
     CLOCK.tick(2); // To ensure every task has been created more than 1 ms ago
@@ -187,7 +187,7 @@ public class TestAnomalyTaskManager {
     Assert.assertTrue(timeoutTasksWithinOneDays.size() > 0);
   }
 
-  TaskDTO getTestTaskSpec(JobDTO anomalyJobSpec) throws JsonProcessingException {
+  TaskDTO getTestTaskSpec(JobDTO anomalyJobSpec, final long refId) throws JsonProcessingException {
     TaskDTO jobSpec = new TaskDTO();
     jobSpec.setJobName("Test_Anomaly_Task");
     jobSpec.setStatus(TaskStatus.WAITING);
@@ -196,6 +196,7 @@ public class TestAnomalyTaskManager {
     jobSpec.setEndTime(new DateTime(DateTimeZone.UTC).minusDays(10).getMillis());
     jobSpec.setTaskInfo(new ObjectMapper().writeValueAsString(new MockTaskInfo()));
     jobSpec.setJobId(anomalyJobSpec.getId());
+    jobSpec.setRefId(refId);
     return jobSpec;
   }
 

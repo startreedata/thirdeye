@@ -98,6 +98,7 @@ public class TaskDriverRunnable implements Runnable {
         .register(Metrics.globalRegistry);
 
     this.taskWaitTimer = io.micrometer.core.instrument.Timer.builder("thirdeye_task_wait")
+        .publishPercentiles(METRICS_TIMER_PERCENTILES)
         .description(
             "Start: a task is created in the persistence layer. End: the task is picked by a task runner for execution.")
         .register(Metrics.globalRegistry);
@@ -204,14 +205,16 @@ public class TaskDriverRunnable implements Runnable {
         taskRunnerWaitIdleTimer.record(() -> sleep(true));
         continue;
       }
-      if (isShutdown()) {
-        break;
-      }
       if (nextTask == null) {
+        // no task found
         taskRunnerWaitIdleTimer.record(() -> sleep(false));
         continue;
       }
+      if (isShutdown()) {
+        break;
+      }
       try {
+        // FIXME CYRIL REWRITE THIS BLOCK
         boolean success = taskManager.updateStatusAndWorkerId(workerId,
             nextTask.getId(),
             ALLOWED_OLD_TASK_STATUS,
@@ -222,7 +225,7 @@ public class TaskDriverRunnable implements Runnable {
           return nextTask;
         }
       } catch (Exception e) {
-        LOG.warn("Got exception when acquiring task. (Worker Id: {})", workerId, e);
+        LOG.warn("Failed to acquire task {} from worker id {})", nextTask, workerId, e);
         taskRunnerWaitIdleTimer.record(() -> sleep(true));
         continue;
       }

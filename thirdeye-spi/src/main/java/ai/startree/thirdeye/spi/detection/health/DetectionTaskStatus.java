@@ -16,7 +16,6 @@ package ai.startree.thirdeye.spi.detection.health;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskStatus;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -46,11 +45,12 @@ public class DetectionTaskStatus {
 
   // the counting for detection task status
   @JsonProperty
-  private final Map<TaskStatus, Long> taskCounts = new HashMap<TaskStatus, Long>() {{
+  private final Map<TaskStatus, Long> taskCounts = new HashMap<>() {{
     put(TaskStatus.COMPLETED, 0L);
     put(TaskStatus.FAILED, 0L);
     put(TaskStatus.WAITING, 0L);
     put(TaskStatus.TIMEOUT, 0L);
+    put(TaskStatus.RUNNING, 0L);
   }};
 
   // the list of tasks for the detection config
@@ -67,14 +67,6 @@ public class DetectionTaskStatus {
     this.tasks = tasks;
     this.taskCounts.putAll(counts);
     this.lastTaskExecutionTime = lastTaskExecutionTime;
-  }
-
-  // default constructor for deserialization
-  public DetectionTaskStatus() {
-    this.taskSuccessRate = Double.NaN;
-    this.healthStatus = HealthStatus.UNKNOWN;
-    this.tasks = Collections.emptyList();
-    this.lastTaskExecutionTime = -1L;
   }
 
   public double getTaskSuccessRate() {

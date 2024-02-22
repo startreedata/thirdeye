@@ -43,9 +43,7 @@ import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
@@ -132,6 +130,11 @@ public class TaskManagerImpl implements TaskManager {
       return null;
     }
     return dtos.get(0);
+  }
+
+  @Override
+  public TaskDTO acquireTask(final TaskDTO taskDTO) {
+    return null;
   }
 
   @Override

@@ -61,16 +61,8 @@ public class TaskDriverRunnable implements Runnable {
   private final Counter taskSuccessCounter;
   @Deprecated //  use thirdeye_task_run
   private final Counter taskCounter;
-  @Deprecated //  use thirdeye_task_wait
-  private final Counter taskFetchHitCounter;
-  @Deprecated //  use thirdeye_task_runner_idle
-  private final Counter taskFetchMissCounter;
-  @Deprecated // use thirdeye_task_runner_idle
-  private final Counter workerIdleTimeInSeconds;
   @Deprecated //  use thirdeye_task_run
   private final Timer taskRunningTimer;
-  @Deprecated // use thirdeye_task_wait
-  private final Timer taskWaitingTimer;
   private final TaskDriverThreadPoolManager taskDriverThreadPoolManager;
   private final io.micrometer.core.instrument.Timer taskRunTimerOfSuccess;
   private final io.micrometer.core.instrument.Timer taskRunTimerOfException;
@@ -105,17 +97,12 @@ public class TaskDriverRunnable implements Runnable {
         .tag("exception", "true")
         .register(Metrics.globalRegistry);
 
-    // deprecated - use thirdeye_task_wait
-    taskFetchHitCounter = metricRegistry.counter("taskFetchHitCounter");
-    taskWaitingTimer = metricRegistry.timer("taskWaitingTimer");
     this.taskWaitTimer = io.micrometer.core.instrument.Timer.builder("thirdeye_task_wait")
         .description(
             "Start: a task is created in the persistence layer. End: the task is picked by a task runner for execution.")
         .register(Metrics.globalRegistry);
 
     // deprecated - use thirdeye_task_runner_idle
-    taskFetchMissCounter = metricRegistry.counter("taskFetchMissCounter");
-    workerIdleTimeInSeconds = metricRegistry.counter("workerIdleTimeInSeconds");
     this.taskRunnerWaitIdleTimer = io.micrometer.core.instrument.Timer.builder(
             "thirdeye_task_runner_idle")
         .description(
@@ -128,7 +115,7 @@ public class TaskDriverRunnable implements Runnable {
     while (!isShutdown()) {
       // select a task to execute, and update it to RUNNING
       final TaskDTO taskDTO = waitForTask();
-      if (taskDTO == null) {
+      if (taskDTO == null || isShutdown()) {
         continue;
       }
 
@@ -209,49 +196,35 @@ public class TaskDriverRunnable implements Runnable {
    */
   private TaskDTO waitForTask() {
     while (!isShutdown()) {
-      TaskDTO nextTask = null;
+      final TaskDTO nextTask;
       try {
         nextTask = taskManager.findNextTaskToRun();
       } catch (Exception e) {
         LOG.error("Failed to fetch a new task to run", e);
+        taskRunnerWaitIdleTimer.record(() -> sleep(true));
+        continue;
       }
-      boolean taskFound = nextTask != null;
-      if (taskFound) {
-        // FIXME CYRIL REWRITE THIS
-        final TaskDTO taskDTO = acquireTask(List.of(nextTask));
-        if (taskDTO != null) {
-          taskFetchHitCounter.inc();
-          return taskDTO;
-        }
+      if (isShutdown()) {
+        break;
       }
-      taskFetchMissCounter.inc();
-      final long idleStart = System.nanoTime();
-      // FIXME CYRIL REWRITE THIS
-      taskRunnerWaitIdleTimer.record(() -> sleep(!taskFound));
-      workerIdleTimeInSeconds.inc(
-          TimeUnit.SECONDS.convert(System.nanoTime() - idleStart, TimeUnit.NANOSECONDS));
-    }
-    return null;
-  }
-
-  private TaskDTO acquireTask(final List<TaskDTO> anomalyTasks) {
-    for (final TaskDTO taskDTO : anomalyTasks) {
+      if (nextTask == null) {
+        taskRunnerWaitIdleTimer.record(() -> sleep(false));
+        continue;
+      }
       try {
-        // Don't acquire a new task if shutting down.
-        if (!isShutdown()) {
-          boolean success = taskManager.updateStatusAndWorkerId(workerId,
-              taskDTO.getId(),
-              ALLOWED_OLD_TASK_STATUS,
-              taskDTO.getVersion());
-          if (success) {
-            final long waitTime = System.currentTimeMillis() - taskDTO.getCreateTime().getTime();
-            taskWaitTimer.record(waitTime, TimeUnit.MILLISECONDS);
-            taskWaitingTimer.update(waitTime, TimeUnit.MILLISECONDS);
-            return taskDTO;
-          }
+        boolean success = taskManager.updateStatusAndWorkerId(workerId,
+            nextTask.getId(),
+            ALLOWED_OLD_TASK_STATUS,
+            nextTask.getVersion());
+        if (success) {
+          final long waitTime = System.currentTimeMillis() - nextTask.getCreateTime().getTime();
+          taskWaitTimer.record(waitTime, TimeUnit.MILLISECONDS);
+          return nextTask;
         }
       } catch (Exception e) {
         LOG.warn("Got exception when acquiring task. (Worker Id: {})", workerId, e);
+        taskRunnerWaitIdleTimer.record(() -> sleep(true));
+        continue;
       }
     }
     return null;

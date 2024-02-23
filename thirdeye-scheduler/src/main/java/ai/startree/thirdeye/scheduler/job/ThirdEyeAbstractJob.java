@@ -16,7 +16,13 @@ package ai.startree.thirdeye.scheduler.job;
 import static ai.startree.thirdeye.spi.Constants.CTX_INJECTOR;
 import static java.util.Objects.requireNonNull;
 
+import ai.startree.thirdeye.spi.task.TaskType;
 import com.google.inject.Injector;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.Metrics;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.SchedulerException;
@@ -26,6 +32,12 @@ import org.slf4j.LoggerFactory;
 public abstract class ThirdEyeAbstractJob implements Job {
 
   private static final Logger log = LoggerFactory.getLogger(ThirdEyeAbstractJob.class);
+
+  protected static final Map<TaskType, Counter> BACKPRESSURE_COUNTERS =
+      Arrays.stream(TaskType.values()).collect(Collectors.toMap(
+          t -> t,
+          t -> Metrics.counter("thirdeye_scheduler_backpressure_total", "task_type",
+              t.toString())));
 
   protected final <T> T getInstance(final JobExecutionContext context, Class<T> clazz) {
     final Injector injector = (Injector) getObjectFromContext(context, CTX_INJECTOR);

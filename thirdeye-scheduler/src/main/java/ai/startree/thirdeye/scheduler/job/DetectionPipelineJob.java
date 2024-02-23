@@ -13,6 +13,8 @@
  */
 package ai.startree.thirdeye.scheduler.job;
 
+import static ai.startree.thirdeye.spi.task.TaskType.DETECTION;
+
 import ai.startree.thirdeye.scheduler.JobSchedulerService;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DetectionPipelineTaskInfo;
@@ -41,11 +43,12 @@ public class DetectionPipelineJob extends ThirdEyeAbstractJob {
     // if a task is pending and not time out yet, don't schedule more
     String jobName = ctx.getJobDetail().getKey().getName();
     if (service.taskAlreadyRunning(jobName)) {
-      LOG.info(
-          "Skip scheduling detection task for {} with start time {} and end time {}. Task is already in the queue.",
+      LOG.warn(
+          "Skipped scheduling detection task for {} with start time {} and end time {}. A task for the same entity is already in the queue.",
           jobName,
           taskInfo.getStart(),
           taskInfo.getEnd());
+      BACKPRESSURE_COUNTERS.get(DETECTION).increment();
       return;
     }
 

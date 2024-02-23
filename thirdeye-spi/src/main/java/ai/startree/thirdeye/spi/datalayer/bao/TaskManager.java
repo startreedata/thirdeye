@@ -21,7 +21,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.util.List;
-import java.util.Set;
 
 public interface TaskManager extends AbstractManager<TaskDTO> {
 
@@ -34,12 +33,11 @@ public interface TaskManager extends AbstractManager<TaskDTO> {
 
   List<TaskDTO> findTimeoutTasksWithinDays(int days, long maxTaskTime);
 
-  List<TaskDTO> findByStatusOrderByCreateTime(TaskStatus status, int fetchSize, boolean asc);
+  TaskDTO findNextTaskToRun();
+  
+  boolean acquireTaskToRun(TaskDTO taskDTO, final long workerId);
 
   List<TaskDTO> findByStatusAndWorkerId(Long workerId, TaskStatus status);
-
-  boolean updateStatusAndWorkerId(Long workerId, Long id, Set<TaskStatus> allowedOldStatus,
-      int expectedVersion);
 
   void updateStatusAndTaskEndTime(Long id, TaskStatus oldStatus, TaskStatus newStatus,
       Long taskEndTime, String message);

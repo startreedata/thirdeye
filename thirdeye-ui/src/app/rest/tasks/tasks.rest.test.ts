@@ -80,6 +80,20 @@ describe("Tasks REST", () => {
             "/api/tasks?startTime=%5Bgte%5D1&startTime=%5Blte%5D2"
         );
     });
+
+    it("getTasks with createdStart and createdEnd should invoke axios.get with appropriate input and return appropriate anomalies", async () => {
+        jest.spyOn(axios, "get").mockResolvedValue({
+            data: [mockTask],
+        });
+
+        await expect(
+            getTasks({ createdStartTime: 1, createdEndTime: 2 })
+        ).resolves.toEqual([mockTask]);
+
+        expect(axios.get).toHaveBeenCalledWith(
+            "/api/tasks?created=%5Bgte%5D1&created=%5Blte%5D2"
+        );
+    });
 });
 
 const mockError = new Error("testError");

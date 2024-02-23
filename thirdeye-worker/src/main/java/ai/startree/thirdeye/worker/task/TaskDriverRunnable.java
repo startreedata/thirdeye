@@ -116,11 +116,10 @@ public class TaskDriverRunnable implements Runnable {
     while (!isShutdown()) {
       // select a task to execute, and update it to RUNNING
       final TaskDTO taskDTO = waitForTask();
-      if (taskDTO == null || isShutdown()) {
+      if (taskDTO == null) {
         continue;
       }
-
-      // a task has acquired and we must finish executing it before termination
+      // a task was acquired - try to finish executing it before termination
       taskRunningTimer.time(() -> runTask(taskDTO));
     }
     LOG.info(String.format("TaskDriverRunnable safely quitting. name: %s",
@@ -214,7 +213,6 @@ public class TaskDriverRunnable implements Runnable {
         break;
       }
       try {
-        // FIXME CYRIL I AM HERE - replace updateStatusAndWorkerId in tests
         boolean success = taskManager.acquireTaskToRun(nextTask, workerId);
         if (success) {
           final long waitTime = System.currentTimeMillis() - nextTask.getCreateTime().getTime();

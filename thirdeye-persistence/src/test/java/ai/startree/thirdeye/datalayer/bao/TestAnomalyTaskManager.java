@@ -100,21 +100,21 @@ public class TestAnomalyTaskManager {
   }
 
   @Test(dependsOnMethods = {"testFindAll"})
-  public void testUpdateStatusAndWorkerId() {
+  public void testAcquireTaskToRun() {
     CLOCK.tick(1);
     Long workerId = 1L;
     TaskDTO taskDTO = taskDAO.findById(anomalyTaskId1);
-    boolean status =
-        taskDAO.updateStatusAndWorkerId(workerId, anomalyTaskId1, allowedOldTaskStatus,
-            taskDTO.getVersion());
+    final long currentVersion = taskDTO.getVersion();
+    boolean status = taskDAO.acquireTaskToRun(taskDTO, workerId);
+    // refetch task from the persistence layer and check its values
     TaskDTO anomalyTask = taskDAO.findById(anomalyTaskId1);
     Assert.assertTrue(status);
     Assert.assertEquals(anomalyTask.getStatus(), TaskStatus.RUNNING);
     Assert.assertEquals(anomalyTask.getWorkerId(), workerId);
-    Assert.assertEquals(anomalyTask.getVersion(), taskDTO.getVersion() + 1);
+    Assert.assertEquals(anomalyTask.getVersion(), currentVersion + 1);
   }
 
-  @Test(dependsOnMethods = {"testUpdateStatusAndWorkerId"})
+  @Test(dependsOnMethods = {"testAcquireTaskToRun"})
   public void testFindNextTaskToRun() {
     TaskDTO anomalyTask = taskDAO.findNextTaskToRun();
     assertThat(anomalyTask).isNotNull();

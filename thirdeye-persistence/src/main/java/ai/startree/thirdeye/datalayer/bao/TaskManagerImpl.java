@@ -44,7 +44,6 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 import org.joda.time.DateTime;
@@ -118,7 +117,7 @@ public class TaskManagerImpl implements TaskManager {
     return findByPredicate(predicate);
   }
 
-  // TODO CYRIL NOTE - RETRY IS NOT IMPLEMENTED BUT IT SHOULD BE EASY BY ACCEPTING STATUS = FAILED IN THE 2 METHODS ABOVE AND PUTTING A LIMIT ON THE VALUE OF VERSION
+  // TODO CYRIL NOTE - RETRY IS NOT IMPLEMENTED BUT IT SHOULD BE EASY BY ACCEPTING STATUS = FAILED IN THE 2 METHODS BELOW AND PUTTING A LIMIT ON THE VALUE OF VERSION
   @Override
   public TaskDTO findNextTaskToRun() {
     final String queryClause = """
@@ -133,6 +132,10 @@ public class TaskManagerImpl implements TaskManager {
     return dtos.get(0);
   }
 
+  /**
+   * This method has side effects on the task DTO, even if the acquisition attempt fails.
+   * Re-fetch the taskDto if you need to ensure consistency with the persistence layer.
+   * */
   @Override
   public boolean acquireTaskToRun(final TaskDTO task, final long workerId) {
     task.setStatus(TaskStatus.RUNNING);
@@ -145,25 +148,6 @@ public class TaskManagerImpl implements TaskManager {
         Predicate.EQ("status", TaskStatus.WAITING.toString())
     );
     return dao.update(task, predicate) == 1;
-  }
-
-  @Override
-  public boolean updateStatusAndWorkerId(final Long workerId, final Long id,
-      final Set<TaskStatus> permittedOldStatus,
-      final int expectedVersion) {
-    final TaskDTO task = findById(id);
-    if (permittedOldStatus.contains(task.getStatus())) {
-      task.setStatus(TaskStatus.RUNNING);
-      task.setWorkerId(workerId);
-      task.setStartTime(System.currentTimeMillis());
-      //increment the version
-      task.setVersion(expectedVersion + 1);
-      final Predicate predicate = Predicate.EQ("version", expectedVersion);
-      final int update = update(task, predicate);
-      return update == 1;
-    } else {
-      return false;
-    }
   }
 
   @Override

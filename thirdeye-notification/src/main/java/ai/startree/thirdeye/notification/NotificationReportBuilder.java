@@ -16,7 +16,6 @@ package ai.startree.thirdeye.notification;
 import static ai.startree.thirdeye.notification.AnomalyReportHelper.getFeedbackValue;
 import static ai.startree.thirdeye.notification.AnomalyReportHelper.getTimezoneString;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.config.TimeConfiguration;
@@ -126,10 +125,12 @@ public class NotificationReportBuilder {
     return report;
   }
 
-  public List<AnomalyReportApi> buildAnomalyReports(
+  public List<AnomalyReportApi> toSortedAnomalyReports(
       final Set<AnomalyDTO> anomalies) {
     requireNonNull(anomalies, "anomalies is null");
-    checkArgument(anomalies.size() > 0, "anomalies is empty");
+    if (anomalies.isEmpty()) {
+      return List.of();
+    }
 
     final List<AnomalyDTO> sortedAnomalyResults = new ArrayList<>(anomalies);
     sortedAnomalyResults.sort((o1, o2) -> -1 * Long.compare(o1.getStartTime(), o2.getStartTime()));

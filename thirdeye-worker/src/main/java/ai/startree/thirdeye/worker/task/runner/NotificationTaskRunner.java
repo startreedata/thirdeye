@@ -143,17 +143,15 @@ public class NotificationTaskRunner implements TaskRunner {
     final long now = System.currentTimeMillis();
     final var result = notificationTaskFilter.filter(sg, now);
     final var anomalies = result.getAnomalies();
-    final var completedAnomalies = result.getCompletedAnomalies();
 
-    if (anomalies.isEmpty() && completedAnomalies.isEmpty()) {
+    /* Dispatch notifications */
+    final NotificationPayloadApi payload = notificationPayloadBuilder.build(result);
+    if (payload == null) {
       LOG.debug("Subscription group: {} "
               + "has no anomalies to notify and no completed anomalies to notify",
           sg.getId());
       return;
     }
-
-    /* Dispatch notifications */
-    final NotificationPayloadApi payload = notificationPayloadBuilder.build(result);
 
     /* fire notifications */
     notificationDispatcher.dispatch(sg, payload);

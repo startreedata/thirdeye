@@ -13,6 +13,8 @@
  */
 package ai.startree.thirdeye.notification;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.api.NotificationReportApi;
@@ -39,19 +41,27 @@ public class NotificationPayloadBuilder {
     this.notificationEventsBuilder = notificationEventsBuilder;
   }
 
-  public NotificationPayloadApi build(
-      final NotificationTaskFilterResult result) {
+  public NotificationPayloadApi build(final NotificationTaskFilterResult result) {
     final SubscriptionGroupDTO subscriptionGroup = result.getSubscriptionGroup();
-    final Set<AnomalyDTO> anomalies = result.getAnomalies();
-    final NotificationReportApi report = notificationReportBuilder.buildNotificationReportApi(
-        subscriptionGroup,
-        anomalies);
+    final Set<AnomalyDTO> anomalies = optional(result.getAnomalies())
+        .orElse(Set.of());
+    final Set<AnomalyDTO> completedAnomalies = optional(result.getCompletedAnomalies())
+        .orElse(Set.of());
 
-    report.setRelatedEvents(notificationEventsBuilder.getRelatedEvents(anomalies));
+    if (anomalies.isEmpty() && completedAnomalies.isEmpty()) {
+      /* No notification required. Do not generate a report */
+      return null;
+    }
+
+    final NotificationReportApi report = notificationReportBuilder
+        .buildNotificationReportApi(subscriptionGroup, anomalies)
+        .setRelatedEvents(notificationEventsBuilder.getRelatedEvents(anomalies));
 
     return new NotificationPayloadApi()
         .setSubscriptionGroup(ApiBeanMapper.toApi(subscriptionGroup))
         .setReport(report)
-        .setAnomalyReports(notificationReportBuilder.buildAnomalyReports(anomalies));
+        .setAnomalyReports(notificationReportBuilder.toSortedAnomalyReports(anomalies))
+        .setCompletedAnomalyReports(notificationReportBuilder
+            .toSortedAnomalyReports(result.getCompletedAnomalies()));
   }
 }

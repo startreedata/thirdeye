@@ -63,15 +63,8 @@ function start_server {
   java ${ALL_JAVA_OPTS:+$ALL_JAVA_OPTS}  -cp "${CLASSPATH}" ${class_ref} server "${CONFIG_DIR}"/server.yaml
 }
 
-function start_ui {
-  class_ref="ai.startree.thirdeye.ThirdEyeUiServer"
-
-  java ${ALL_JAVA_OPTS:+$ALL_JAVA_OPTS} -cp "${CLASSPATH}" ${class_ref} --port 8081 --proxyHostPort localhost:8080 --resourceBase "${UI_DIR}"
-}
-
 MODE=$1
 case ${MODE} in
     "server" )  start_server ;;
-    "ui"  )          start_ui ;;
     * )              echo "Invalid argument: ${MODE}! Exiting."; exit 1;;
 esac

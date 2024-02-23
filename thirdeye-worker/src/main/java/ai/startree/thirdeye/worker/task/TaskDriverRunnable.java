@@ -24,14 +24,12 @@ import ai.startree.thirdeye.spi.task.TaskType;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.Singleton;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.Timer.Sample;
 import java.io.IOException;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -44,10 +42,6 @@ public class TaskDriverRunnable implements Runnable {
 
   private static final Logger LOG = LoggerFactory.getLogger(TaskDriverRunnable.class);
   private static final Random RANDOM = new Random();
-  private static final Set<TaskStatus> ALLOWED_OLD_TASK_STATUS = ImmutableSet.of(
-      TaskStatus.FAILED,
-      TaskStatus.WAITING
-  );
 
   private final TaskManager taskManager;
   private final TaskContext taskContext;

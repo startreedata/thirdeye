@@ -118,6 +118,7 @@ public class TaskManagerImpl implements TaskManager {
     return findByPredicate(predicate);
   }
 
+  // TODO CYRIL NOTE - RETRY IS NOT IMPLEMENTED BUT IT SHOULD BE EASY BY ACCEPTING STATUS = FAILED IN THE 2 METHODS ABOVE AND PUTTING A LIMIT ON THE VALUE OF VERSION
   @Override
   public TaskDTO findNextTaskToRun() {
     final String queryClause = """
@@ -133,8 +134,17 @@ public class TaskManagerImpl implements TaskManager {
   }
 
   @Override
-  public TaskDTO acquireTask(final TaskDTO taskDTO) {
-    return null;
+  public boolean acquireTaskToRun(final TaskDTO task, final long workerId) {
+    task.setStatus(TaskStatus.RUNNING);
+    task.setWorkerId(workerId);
+    task.setStartTime(System.currentTimeMillis());
+    final int currentVersion = task.getVersion();
+    task.setVersion(currentVersion + 1);
+    final Predicate predicate = Predicate.AND(
+        Predicate.EQ("version", currentVersion),
+        Predicate.EQ("status", TaskStatus.WAITING.toString())
+    );
+    return dao.update(task, predicate) == 1;
   }
 
   @Override

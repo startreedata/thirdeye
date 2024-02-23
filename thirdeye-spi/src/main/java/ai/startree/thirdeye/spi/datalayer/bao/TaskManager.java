@@ -36,7 +36,7 @@ public interface TaskManager extends AbstractManager<TaskDTO> {
 
   TaskDTO findNextTaskToRun();
   
-  TaskDTO acquireTask(TaskDTO taskDTO);
+  boolean acquireTaskToRun(TaskDTO taskDTO, final long workerId);
 
   List<TaskDTO> findByStatusAndWorkerId(Long workerId, TaskStatus status);
 

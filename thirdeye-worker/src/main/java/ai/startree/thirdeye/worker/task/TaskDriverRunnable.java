@@ -214,15 +214,17 @@ public class TaskDriverRunnable implements Runnable {
         break;
       }
       try {
-        // FIXME CYRIL REWRITE THIS BLOCK
-        boolean success = taskManager.updateStatusAndWorkerId(workerId,
-            nextTask.getId(),
-            ALLOWED_OLD_TASK_STATUS,
-            nextTask.getVersion());
+        // FIXME CYRIL I AM HERE - replace updateStatusAndWorkerId in tests
+        boolean success = taskManager.acquireTaskToRun(nextTask, workerId);
         if (success) {
           final long waitTime = System.currentTimeMillis() - nextTask.getCreateTime().getTime();
           taskWaitTimer.record(waitTime, TimeUnit.MILLISECONDS);
           return nextTask;
+        } else {
+          LOG.debug("Failed to acquire task {} referencing {} from worker id {}. Task was locked, or edited by another transaction.)", nextTask.getId(),
+              nextTask.getRefId(), workerId);
+          // don't sleep - look for a next task
+          continue;  
         }
       } catch (Exception e) {
         LOG.warn("Failed to acquire task {} from worker id {})", nextTask, workerId, e);

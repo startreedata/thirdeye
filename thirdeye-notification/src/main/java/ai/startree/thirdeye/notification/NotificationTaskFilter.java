@@ -50,9 +50,9 @@ import org.slf4j.LoggerFactory;
  * The Subscription Group filter collects all anomalies and returns back a Result
  */
 @Singleton
-public class SubscriptionGroupFilter {
+public class NotificationTaskFilter {
 
-  private static final Logger LOG = LoggerFactory.getLogger(SubscriptionGroupFilter.class);
+  private static final Logger LOG = LoggerFactory.getLogger(NotificationTaskFilter.class);
 
   private static final String PROP_DETECTION_CONFIG_IDS = "detectionConfigIds";
   private static final Set<AnomalyResultSource> ANOMALY_RESULT_SOURCES = Set.of(
@@ -64,7 +64,7 @@ public class SubscriptionGroupFilter {
   private final AlertManager alertManager;
 
   @Inject
-  public SubscriptionGroupFilter(final AnomalyManager anomalyManager,
+  public NotificationTaskFilter(final AnomalyManager anomalyManager,
       final AlertManager alertManager) {
     this.anomalyManager = anomalyManager;
     this.alertManager = alertManager;
@@ -119,7 +119,7 @@ public class SubscriptionGroupFilter {
         .filter(Number.class::isInstance)
         .map(Number.class::cast)
         .map(Number::longValue)
-        .map(SubscriptionGroupFilter::newAlertRef)
+        .map(NotificationTaskFilter::newAlertRef)
         .map(alert -> new AlertAssociationDto().setAlert(alert))
         .collect(Collectors.toList());
   }
@@ -134,9 +134,25 @@ public class SubscriptionGroupFilter {
    *
    * @param sg subscription group
    * @param endTime end time
+   * @return result This returns a new NotificationTaskFilterResult object containing the
+   *     subscription group, anomalies, completed anomalies and other metadata
+   */
+  public NotificationTaskFilterResult filter(final SubscriptionGroupDTO sg, final long endTime) {
+    return new NotificationTaskFilterResult()
+        .setSubscriptionGroup(sg)
+        .setAnomalies(filterAnomalies(sg, endTime))
+        .setCompletedAnomalies(filterCompletedAnomalies(sg));
+  }
+
+  /**
+   * Find anomalies for the given subscription group given an end time.
+   *
+   * @param sg subscription group
+   * @param endTime end time
    * @return set of anomalies
    */
-  public Set<AnomalyDTO> filter(final SubscriptionGroupDTO sg, final long endTime) {
+  @VisibleForTesting
+  Set<AnomalyDTO> filterAnomalies(final SubscriptionGroupDTO sg, final long endTime) {
     final List<AlertAssociationDto> alertAssociations = optional(sg.getAlertAssociations())
         .orElseGet(() -> migrateOlderSchema(sg));
 
@@ -149,7 +165,8 @@ public class SubscriptionGroupFilter {
         .collect(toSet());
   }
 
-  public Set<AnomalyDTO> filterCompletedAnomalies(final SubscriptionGroupDTO sg) {
+  @VisibleForTesting
+  Set<AnomalyDTO> filterCompletedAnomalies(final SubscriptionGroupDTO sg) {
     if (!isNotifyCompletedAnomaliesEnabled(sg)) {
       // Do not notify completed anomalies
       return Set.of();
@@ -231,7 +248,7 @@ public class SubscriptionGroupFilter {
     final List<AnomalyDTO> candidates = anomalyManager.filter(f);
 
     final Set<AnomalyDTO> anomaliesToBeNotified = candidates.stream()
-        .filter(SubscriptionGroupFilter::shouldFilter)
+        .filter(NotificationTaskFilter::shouldFilter)
         .collect(toSet());
 
     LOG.info("Subscription Group: {} Alert: {} context: {}. "

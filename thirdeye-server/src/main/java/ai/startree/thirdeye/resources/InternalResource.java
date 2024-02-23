@@ -22,7 +22,8 @@ import static java.util.Objects.requireNonNull;
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.notification.NotificationPayloadBuilder;
 import ai.startree.thirdeye.notification.NotificationServiceRegistry;
-import ai.startree.thirdeye.notification.SubscriptionGroupFilter;
+import ai.startree.thirdeye.notification.NotificationTaskFilter;
+import ai.startree.thirdeye.notification.NotificationTaskFilterResult;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
@@ -66,7 +67,7 @@ import org.slf4j.LoggerFactory;
 
 @Produces(MediaType.APPLICATION_JSON)
 @Tag(name = "zzz Internal zzz")
-@SecurityRequirement(name="oauth")
+@SecurityRequirement(name = "oauth")
 @OpenAPIDefinition(security = {
     @SecurityRequirement(name = "oauth")
 })
@@ -84,7 +85,7 @@ public class InternalResource {
   private final SubscriptionGroupManager subscriptionGroupManager;
   private final TaskDriverConfiguration taskDriverConfiguration;
   private final TaskDriver taskDriver;
-  private final SubscriptionGroupFilter subscriptionGroupFilter;
+  private final NotificationTaskFilter notificationTaskFilter;
   private final DetectionPipelineTaskRunner detectionPipelineTaskRunner;
 
   @Inject
@@ -97,7 +98,7 @@ public class InternalResource {
       final SubscriptionGroupManager subscriptionGroupManager,
       final TaskDriverConfiguration taskDriverConfiguration,
       final TaskDriver taskDriver,
-      final SubscriptionGroupFilter subscriptionGroupFilter,
+      final NotificationTaskFilter notificationTaskFilter,
       final DetectionPipelineTaskRunner detectionPipelineTaskRunner) {
     this.httpDetectorResource = httpDetectorResource;
     this.databaseAdminResource = databaseAdminResource;
@@ -107,7 +108,7 @@ public class InternalResource {
     this.subscriptionGroupManager = subscriptionGroupManager;
     this.taskDriverConfiguration = taskDriverConfiguration;
     this.taskDriver = taskDriver;
-    this.subscriptionGroupFilter = subscriptionGroupFilter;
+    this.notificationTaskFilter = notificationTaskFilter;
     this.detectionPipelineTaskRunner = detectionPipelineTaskRunner;
   }
 
@@ -142,14 +143,16 @@ public class InternalResource {
     }
 
     requireNonNull(sg, "subscription Group is null");
-    final var anomalies = requireNonNull(subscriptionGroupFilter.filter(
-        sg,
-        System.currentTimeMillis()), "DetectionAlertFilterResult is null");
+    final long endTime = System.currentTimeMillis();
+    final NotificationTaskFilterResult result = requireNonNull(
+        notificationTaskFilter.filter(sg, endTime),
+        "NotificationTaskFilterResult is null");
+    final var anomalies = result.getAnomalies();
 
-    if (anomalies.size() == 0) {
+    if (anomalies.isEmpty()) {
       return Response.ok("No anomalies!").build();
     }
-    final var payload = notificationPayloadBuilder.buildNotificationPayload(sg, anomalies);
+    final var payload = notificationPayloadBuilder.build(result);
 
     final NotificationService emailNotificationService = notificationServiceRegistry.get(
         "email-smtp",

@@ -34,14 +34,14 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-public class SubscriptionGroupFilterIntegrationTest {
+public class NotificationTaskFilterIntegrationTest {
 
   private static final String CRON = "0 0 * * * ? *";
   private static final long POINT_IN_TIME = System.currentTimeMillis();
   private AnomalyManager anomalyManager;
   private SubscriptionGroupManager subscriptionGroupManager;
   private SubscriptionGroupWatermarkManager watermarkManager;
-  private SubscriptionGroupFilter instance;
+  private NotificationTaskFilter instance;
   private AlertManager alertManager;
 
   private static AnomalyDTO anomalyWithCreateTime(final long createTime) {
@@ -92,7 +92,7 @@ public class SubscriptionGroupFilterIntegrationTest {
     watermarkManager = injector.getInstance(SubscriptionGroupWatermarkManager.class);
     alertManager = injector.getInstance(AlertManager.class);
 
-    instance = injector.getInstance(SubscriptionGroupFilter.class);
+    instance = injector.getInstance(NotificationTaskFilter.class);
   }
 
   @AfterMethod(alwaysRun = true)
@@ -118,7 +118,7 @@ public class SubscriptionGroupFilterIntegrationTest {
     );
 
     // base case
-    assertThat(instance.filter(sg, POINT_IN_TIME).isEmpty()).isTrue();
+    assertThat(instance.filterAnomalies(sg, POINT_IN_TIME).isEmpty()).isTrue();
 
     final long superOldCreateTime = POINT_IN_TIME - NOTIFICATION_ANOMALY_MAX_LOOKBACK_MS - 100_000L;
     persist(anomalyWithCreateTime(superOldCreateTime)
@@ -146,7 +146,7 @@ public class SubscriptionGroupFilterIntegrationTest {
     persist(sg.setAlertAssociations(List.of(aaRef(alert.getId()).setCreateTime(new Timestamp(
         minutesAgo(70))))));
 
-    assertThat(collectIds(instance.filter(sg, POINT_IN_TIME)))
+    assertThat(collectIds(instance.filterAnomalies(sg, POINT_IN_TIME)))
         .isEqualTo(collectIds(Set.of(anomaly1)));
 
     watermarkManager.updateWatermarks(sg, List.of(anomaly1));
@@ -167,7 +167,7 @@ public class SubscriptionGroupFilterIntegrationTest {
         .setStartTime(minutesAgo(100))
         .setEndTime(minutesAgo(sgCreationOffset - 20))
     );
-    assertThat(collectIds(instance.filter(sg, POINT_IN_TIME)))
+    assertThat(collectIds(instance.filterAnomalies(sg, POINT_IN_TIME)))
         .isEqualTo(collectIds(Set.of(anomaly2)));
   }
 
@@ -187,7 +187,7 @@ public class SubscriptionGroupFilterIntegrationTest {
     );
 
     // base case
-    assertThat(instance.filter(sg, POINT_IN_TIME).isEmpty()).isTrue();
+    assertThat(instance.filterAnomalies(sg, POINT_IN_TIME).isEmpty()).isTrue();
 
     final long superOldCreateTime = POINT_IN_TIME - NOTIFICATION_ANOMALY_MAX_LOOKBACK_MS - 100_000L;
     persist(anomalyWithCreateTime(superOldCreateTime)
@@ -209,7 +209,7 @@ public class SubscriptionGroupFilterIntegrationTest {
 
     persist(sg.setAlertAssociations(List.of(aaRef(alert.getId()))));
 
-    assertThat(collectIds(instance.filter(sg, POINT_IN_TIME)))
+    assertThat(collectIds(instance.filterAnomalies(sg, POINT_IN_TIME)))
         .isEqualTo(collectIds(Set.of(anomaly1)));
 
     watermarkManager.updateWatermarks(sg, List.of(anomaly1));
@@ -230,7 +230,7 @@ public class SubscriptionGroupFilterIntegrationTest {
         .setStartTime(minutesAgo(100))
         .setEndTime(minutesAgo(sgCreationOffset - 20))
     );
-    assertThat(collectIds(instance.filter(sg, POINT_IN_TIME)))
+    assertThat(collectIds(instance.filterAnomalies(sg, POINT_IN_TIME)))
         .isEqualTo(collectIds(Set.of(anomaly2)));
   }
 
@@ -246,7 +246,7 @@ public class SubscriptionGroupFilterIntegrationTest {
         .setNotifyHistoricalAnomalies(true));
 
     // base case
-    assertThat(instance.filter(sg, POINT_IN_TIME).isEmpty()).isTrue();
+    assertThat(instance.filterAnomalies(sg, POINT_IN_TIME).isEmpty()).isTrue();
 
     final long superOldCreateTime = POINT_IN_TIME - NOTIFICATION_ANOMALY_MAX_LOOKBACK_MS - 100_000L;
     persist(anomalyWithCreateTime(superOldCreateTime)
@@ -263,7 +263,7 @@ public class SubscriptionGroupFilterIntegrationTest {
 
     persist(sg.setAlertAssociations(List.of(aaRef(alert.getId()))));
 
-    assertThat(collectIds(instance.filter(sg, POINT_IN_TIME)))
+    assertThat(collectIds(instance.filterAnomalies(sg, POINT_IN_TIME)))
         .isEqualTo(collectIds(Set.of(anomaly1)));
 
     watermarkManager.updateWatermarks(sg, List.of(anomaly1));
@@ -278,7 +278,7 @@ public class SubscriptionGroupFilterIntegrationTest {
         .setStartTime(minutesAgo(100))
         .setEndTime(minutesAgo(80))
     );
-    assertThat(collectIds(instance.filter(sg, POINT_IN_TIME)))
+    assertThat(collectIds(instance.filterAnomalies(sg, POINT_IN_TIME)))
         .isEqualTo(collectIds(Set.of(anomaly3)));
   }
 }

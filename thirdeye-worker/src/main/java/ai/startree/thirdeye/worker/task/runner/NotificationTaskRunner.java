@@ -18,7 +18,7 @@ import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.notification.NotificationDispatcher;
 import ai.startree.thirdeye.notification.NotificationPayloadBuilder;
-import ai.startree.thirdeye.notification.SubscriptionGroupFilter;
+import ai.startree.thirdeye.notification.NotificationTaskFilter;
 import ai.startree.thirdeye.notification.SubscriptionGroupWatermarkManager;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
@@ -56,7 +56,7 @@ public class NotificationTaskRunner implements TaskRunner {
   private final AnomalyManager anomalyManager;
   private final NotificationDispatcher notificationDispatcher;
   private final NotificationPayloadBuilder notificationPayloadBuilder;
-  private final SubscriptionGroupFilter subscriptionGroupFilter;
+  private final NotificationTaskFilter notificationTaskFilter;
   private final SubscriptionGroupWatermarkManager subscriptionGroupWatermarkManager;
 
   @Deprecated
@@ -75,13 +75,13 @@ public class NotificationTaskRunner implements TaskRunner {
       final MetricRegistry metricRegistry,
       final NotificationDispatcher notificationDispatcher,
       final NotificationPayloadBuilder notificationPayloadBuilder,
-      final SubscriptionGroupFilter subscriptionGroupFilter,
+      final NotificationTaskFilter notificationTaskFilter,
       final SubscriptionGroupWatermarkManager subscriptionGroupWatermarkManager) {
     this.subscriptionGroupManager = subscriptionGroupManager;
     this.anomalyManager = anomalyManager;
     this.notificationDispatcher = notificationDispatcher;
     this.notificationPayloadBuilder = notificationPayloadBuilder;
-    this.subscriptionGroupFilter = subscriptionGroupFilter;
+    this.notificationTaskFilter = notificationTaskFilter;
     this.subscriptionGroupWatermarkManager = subscriptionGroupWatermarkManager;
 
     // deprecated - use thirdeye_notification_task
@@ -139,9 +139,11 @@ public class NotificationTaskRunner implements TaskRunner {
 
   private void executeInternal(final SubscriptionGroupDTO sg) {
     requireNonNull(sg, "subscription Group is null");
+
     final long now = System.currentTimeMillis();
-    final var anomalies = subscriptionGroupFilter.filter(sg, now);
-    final var completedAnomalies = subscriptionGroupFilter.filterCompletedAnomalies(sg);
+    final var result = notificationTaskFilter.filter(sg, now);
+    final var anomalies = result.getAnomalies();
+    final var completedAnomalies = result.getCompletedAnomalies();
 
     if (anomalies.isEmpty() && completedAnomalies.isEmpty()) {
       LOG.debug("Subscription group: {} "
@@ -151,9 +153,7 @@ public class NotificationTaskRunner implements TaskRunner {
     }
 
     /* Dispatch notifications */
-    final NotificationPayloadApi payload = notificationPayloadBuilder.buildNotificationPayload(
-        sg,
-        anomalies);
+    final NotificationPayloadApi payload = notificationPayloadBuilder.build(result);
 
     /* fire notifications */
     notificationDispatcher.dispatch(sg, payload);

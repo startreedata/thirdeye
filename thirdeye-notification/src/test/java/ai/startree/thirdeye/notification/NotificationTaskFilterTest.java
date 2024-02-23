@@ -21,11 +21,11 @@ import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import org.joda.time.Interval;
 import org.testng.annotations.Test;
 
-public class SubscriptionGroupFilterTest {
+public class NotificationTaskFilterTest {
 
   @Test
   public void testFilterAnomalies() {
-    final SubscriptionGroupFilter instance = new SubscriptionGroupFilter(
+    final NotificationTaskFilter instance = new NotificationTaskFilter(
         mock(AnomalyManager.class),
         mock(AlertManager.class)
     );

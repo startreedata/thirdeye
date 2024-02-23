@@ -39,9 +39,10 @@ public class NotificationPayloadBuilder {
     this.notificationEventsBuilder = notificationEventsBuilder;
   }
 
-  public NotificationPayloadApi buildNotificationPayload(
-      final SubscriptionGroupDTO subscriptionGroup,
-      final Set<AnomalyDTO> anomalies) {
+  public NotificationPayloadApi build(
+      final NotificationTaskFilterResult result) {
+    final SubscriptionGroupDTO subscriptionGroup = result.getSubscriptionGroup();
+    final Set<AnomalyDTO> anomalies = result.getAnomalies();
     final NotificationReportApi report = notificationReportBuilder.buildNotificationReportApi(
         subscriptionGroup,
         anomalies);

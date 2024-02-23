@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.scheduler.job;
 
+import static ai.startree.thirdeye.scheduler.job.ThirdEyeAbstractJob.BACKPRESSURE_COUNTERS;
 import static ai.startree.thirdeye.spi.task.TaskType.NOTIFICATION;
 
 import ai.startree.thirdeye.scheduler.JobSchedulerService;
@@ -32,6 +33,7 @@ public class NotificationPipelineTaskCreator {
 
   private final JobSchedulerService jobSchedulerService;
   private final TaskManager taskManager;
+  
 
   @Inject
   public NotificationPipelineTaskCreator(final JobSchedulerService jobSchedulerService,
@@ -44,7 +46,9 @@ public class NotificationPipelineTaskCreator {
     // TODO spyne this name creation logic should be managed by the task manager
     final String taskJobName = String.format("%s_%d", NOTIFICATION, subscriptionGroupId);
     if (jobSchedulerService.taskAlreadyRunning(taskJobName)) {
-      // if a task is pending and not time out yet, don't schedule more
+      LOG.warn("Skipped scheduling notification task for {}. A task for the same entity is already in the queue.",
+          taskJobName);
+      BACKPRESSURE_COUNTERS.get(NOTIFICATION).increment();
       return;
     }
 

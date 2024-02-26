@@ -41,7 +41,7 @@ export const TasksTable: FunctionComponent<TaskTableProps> = ({
     const [start, end] = generateDateRangeDaysFromNow(7);
     const [sortModel, setSortModel] = useState<GridSortModel>([
         {
-            field: "startTime",
+            field: "created",
             sort: "desc",
         },
     ]);
@@ -54,8 +54,8 @@ export const TasksTable: FunctionComponent<TaskTableProps> = ({
         queryKey: ["tasks", "alert", alertId, start, end],
         queryFn: () => {
             return getTasks({
-                startTime: start,
-                endTime: end,
+                createdStartTime: start,
+                createdEndTime: end,
                 alertOrSubGroupId: alertId,
             });
         },
@@ -107,11 +107,11 @@ export const TasksTable: FunctionComponent<TaskTableProps> = ({
             },
         },
         {
-            field: "startTime",
+            field: "created",
             headerName: t("label.timestamp"),
             flex: 2,
             sortable: true,
-            renderCell: (params) => formatDateAndTimeV1(params.row.startTime),
+            renderCell: (params) => formatDateAndTimeV1(params.row.created),
         },
         {
             field: "message",

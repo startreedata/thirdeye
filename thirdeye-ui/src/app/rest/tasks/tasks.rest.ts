@@ -25,6 +25,8 @@ export const getTasks = async ({
     startTime,
     endTime,
     alertOrSubGroupId,
+    createdStartTime,
+    createdEndTime,
 }: GetTasksProps = {}): Promise<Task[]> => {
     const queryParams = new URLSearchParams();
 
@@ -46,6 +48,14 @@ export const getTasks = async ({
 
     if (endTime) {
         queryParams.append("startTime", `[lte]${endTime}`);
+    }
+
+    if (createdStartTime) {
+        queryParams.append("created", `[gte]${createdStartTime}`);
+    }
+
+    if (createdEndTime) {
+        queryParams.append("created", `[lte]${createdEndTime}`);
     }
 
     const response = await axios.get(

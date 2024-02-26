@@ -20,4 +20,6 @@ export interface GetTasksProps {
     startTime?: number;
     endTime?: number;
     alertOrSubGroupId?: number;
+    createdStartTime?: number;
+    createdEndTime?: number;
 }

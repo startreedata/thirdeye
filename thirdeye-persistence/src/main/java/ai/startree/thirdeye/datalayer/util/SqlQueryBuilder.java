@@ -29,6 +29,7 @@ import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -37,6 +38,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -229,7 +231,13 @@ public class SqlQueryBuilder {
         final ColumnInfo info = columnInfoMap.get(dbFieldName);
         checkNotNull(info,
             "Found field '%s' but expected %s", dbFieldName, columnInfoMap.keySet());
-        prepareStatement.setObject(parameterIndex++, pair.getValue(), info.getSqlType());
+        Object parameterValue =  pair.getValue();
+        if (info.getSqlType() == Types.TIMESTAMP && (pair.getValue() instanceof String
+            && StringUtils.isNumeric(pair.getValue().toString()) || pair.getValue() instanceof Long)) {
+          // need to translate string of longs to date manually
+          parameterValue = new Date(Long.parseLong(pair.getValue().toString()));
+        } 
+        prepareStatement.setObject(parameterIndex++, parameterValue, info.getSqlType());
       }
     }
     return prepareStatement;

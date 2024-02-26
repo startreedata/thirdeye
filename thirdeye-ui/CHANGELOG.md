@@ -1,3 +1,10 @@
+### [2.45.6](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.5...thirdeye-ui-2.45.6) (2024-02-26)
+
+
+### Bug Fixes
+
+* [TE-2158](https://cortexdata.atlassian.net/browse/TE-2158) fix task table in alert page ([5ad966406](https://github.com/startreedata/thirdeye/commit/5ad966406e48d22c9b10d09f0203b638709c970f))
+
 ### [2.45.5](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.4...thirdeye-ui-2.45.5) (2024-01-30)
 
 

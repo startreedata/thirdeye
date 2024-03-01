@@ -17,11 +17,11 @@ import ai.startree.thirdeye.spi.detection.BaseComponent;
 import ai.startree.thirdeye.spi.detection.health.DetectionHealth;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.google.common.base.Objects;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AlertDTO extends AbstractDTO {
@@ -31,8 +31,12 @@ public class AlertDTO extends AbstractDTO {
   private boolean active;
   private String cron;
   private long lastTimestamp;
-  private boolean isDataAvailabilitySchedule;
-  private long taskTriggerFallBackTimeInSec;
+  @Deprecated // TODO CYRIL REMOVE JULY 2024
+  @JsonIgnore
+  private boolean isDataAvailabilitySchedule = false;
+  @Deprecated // TODO CYRIL REMOVE JULY 2024
+  @JsonIgnore
+  private long taskTriggerFallBackTimeInSec = 0;
   private List<String> owners;
   private Map<String, Object> properties;
   private DetectionHealth health;
@@ -107,22 +111,6 @@ public class AlertDTO extends AbstractDTO {
     return this;
   }
 
-  public boolean isDataAvailabilitySchedule() {
-    return isDataAvailabilitySchedule;
-  }
-
-  public void setDataAvailabilitySchedule(boolean dataAvailabilitySchedule) {
-    isDataAvailabilitySchedule = dataAvailabilitySchedule;
-  }
-
-  public long getTaskTriggerFallBackTimeInSec() {
-    return taskTriggerFallBackTimeInSec;
-  }
-
-  public void setTaskTriggerFallBackTimeInSec(long taskTriggerFallBackTimeInSec) {
-    this.taskTriggerFallBackTimeInSec = taskTriggerFallBackTimeInSec;
-  }
-
   public DetectionHealth getHealth() {
     return health;
   }
@@ -152,37 +140,37 @@ public class AlertDTO extends AbstractDTO {
     return this;
   }
 
-  public Map<String, BaseComponent> getComponents() {
-    return components;
-  }
-
-  public AlertDTO setComponents(final Map<String, BaseComponent> components) {
-    this.components = components;
-    return this;
-  }
-  //fixme make sure equals and hashCode implems are correct
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(final Object o) {
     if (this == o) {
       return true;
     }
-    if (!(o instanceof AlertDTO)) {
+    if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    AlertDTO that = (AlertDTO) o;
-    return lastTimestamp == that.lastTimestamp
-        && active == that.active
-        && Objects.equals(cron, that.cron)
-        && Objects.equals(name, that.name)
-        && Objects.equals(properties, that.properties)
-        && Objects.equals(isDataAvailabilitySchedule, that.isDataAvailabilitySchedule)
-        && Objects.equals(taskTriggerFallBackTimeInSec, that.taskTriggerFallBackTimeInSec)
-        ;
+    if (!super.equals(o)) {
+      return false;
+    }
+    final AlertDTO alertDTO = (AlertDTO) o;
+    return active == alertDTO.active && lastTimestamp == alertDTO.lastTimestamp
+        && isDataAvailabilitySchedule == alertDTO.isDataAvailabilitySchedule
+        && taskTriggerFallBackTimeInSec == alertDTO.taskTriggerFallBackTimeInSec
+        && Objects.equal(name, alertDTO.name)
+        && Objects.equal(description, alertDTO.description)
+        && Objects.equal(cron, alertDTO.cron)
+        && Objects.equal(owners, alertDTO.owners)
+        && Objects.equal(properties, alertDTO.properties)
+        && Objects.equal(health, alertDTO.health)
+        && Objects.equal(template, alertDTO.template)
+        && Objects.equal(templateProperties, alertDTO.templateProperties)
+        && Objects.equal(components, alertDTO.components);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(cron, name, lastTimestamp, properties, active);
+    return Objects.hashCode(super.hashCode(), name, description, active, cron, lastTimestamp,
+        isDataAvailabilitySchedule, taskTriggerFallBackTimeInSec, owners, properties, health,
+        template, templateProperties, components);
   }
 
   @Override

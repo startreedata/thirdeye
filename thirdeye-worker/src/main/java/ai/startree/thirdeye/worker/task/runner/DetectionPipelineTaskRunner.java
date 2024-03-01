@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.worker.task.runner;
 
 import static ai.startree.thirdeye.spi.Constants.METRICS_TIMER_PERCENTILES;
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_ALERT_PIPELINE_EXECUTION;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
@@ -22,6 +23,7 @@ import ai.startree.thirdeye.alert.AlertDetectionIntervalCalculator;
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.detectionpipeline.DetectionPipelineContext;
 import ai.startree.thirdeye.detectionpipeline.PlanExecutor;
+import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
@@ -87,17 +89,18 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
     // deprecated metrics - use thirdeye_detection_task
     detectionTaskExceptionCounter = metricRegistry.counter("detectionTaskExceptionCounter");
     detectionTaskCounter = metricRegistry.counter("detectionTaskCounter");
-    
+
     // TODO CYRIL micrometer - safe to remove if not used by distribution users
     // deprecated metrics - use thirdeye_detection_task
     detectionTaskSuccessCounter = metricRegistry.counter("detectionTaskSuccessCounter");
     detectionTaskDuration = metricRegistry.histogram("detectionTaskDuration");
-    
+
     this.detectionTaskTimerOfSuccess = Timer
         .builder("thirdeye_detection_task")
         .publishPercentiles(METRICS_TIMER_PERCENTILES)
         .tag("exception", "false")
-        .description("Start: A detectionPipeline task info is passed for execution. End: the task is finished: detection pipeline is run, alert watermark is saved and results are persisted. Tag exception=true means an exception was thrown by the method call.")
+        .description(
+            "Start: A detectionPipeline task info is passed for execution. End: the task is finished: detection pipeline is run, alert watermark is saved and results are persisted. Tag exception=true means an exception was thrown by the method call.")
         .register(Metrics.globalRegistry);
     this.detectionTaskTimerOfException = Timer
         .builder("thirdeye_detection_task")
@@ -159,6 +162,19 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
         detectionInterval.getEndMillis(),
         alert.getLastTimestamp());
 
+    // before saving, ensure the alert was not modified by someone else. 
+    // If the alert was modified, drop the work to avoid concurrent modification of the alert dto and conflicting side effects
+    // FIXME CYRIL - the block below should be transactional / take a lock on the alert in the database - especially given anomalyManager.save can take time 
+    final AlertDTO alertNow = alertManager.findById(info.getConfigId());
+    if (alertNow == null) {
+      throw new ThirdEyeException(ERR_ALERT_PIPELINE_EXECUTION,
+          String.format("The alert %s was deleted during the detection task run. Dropping results.",
+              info.getConfigId()));
+    } else if (!alert.equals(alertNow)) {
+      throw new ThirdEyeException(ERR_ALERT_PIPELINE_EXECUTION, String.format(
+          "The alert %s was edited during the detection task run. Dropping results to avoid conflicts.",
+          info.getConfigId()));
+    }
     alert.setLastTimestamp(newLastTimestamp);
     // TODO CYRIL: lastTimestamp and updateTime are used by consumers to known when an alert has run
     //  to improve consistency the anomaly save and the update of the alert should be in a single
@@ -167,6 +183,7 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
         .orElse(Collections.emptyList())
         .forEach(anomalyManager::save);
     alertManager.update(alert);
+    // end of block that should be transactional
 
     LOG.info("Completed detection task for id {} between {} and {}. Detected {} anomalies.",
         alert.getId(),

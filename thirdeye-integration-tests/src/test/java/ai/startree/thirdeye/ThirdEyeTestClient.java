@@ -64,14 +64,24 @@ public class ThirdEyeTestClient {
   }
 
   public AlertApi getAlert(Long alertId) {
-    final Response r = client.target(baseUrl())
-        .path("api/alerts")
-        .path(alertId.toString())
-        .request()
-        .get();
+    return getById(alertId, "alerts", AlertApi.class);
+  }
 
-    assertThat(r.getStatus()).isEqualTo(200);
-    return r.readEntity(AlertApi.class);
+  public SubscriptionGroupApi getSubscriptionGroup(Long id) {
+    return getById(id, "subscription-groups", SubscriptionGroupApi.class);
+  }
+
+  private <T> T getById(final Long id, final String path, final Class<T> entityType) {
+    final Builder request = client.target(baseUrl())
+        .path("api")
+        .path(path)
+        .path(id.toString())
+        .request();
+
+    try (Response r = request.get()) {
+      assertThat(r.getStatus()).isEqualTo(200);
+      return r.readEntity(entityType);
+    }
   }
 
   public List<TaskApi> getSuccessfulTasks(Long refId) {

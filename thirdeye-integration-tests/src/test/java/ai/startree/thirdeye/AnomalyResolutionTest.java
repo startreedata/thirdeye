@@ -17,11 +17,11 @@ import static ai.startree.thirdeye.DropwizardTestUtils.buildClient;
 import static ai.startree.thirdeye.DropwizardTestUtils.buildSupport;
 import static ai.startree.thirdeye.DropwizardTestUtils.loadAlertApi;
 import static ai.startree.thirdeye.DropwizardTestUtils.loadApi;
-import static ai.startree.thirdeye.HappyPathTest.ALERT_LIST_TYPE;
-import static ai.startree.thirdeye.HappyPathTest.SUBSCRIPTION_GROUP_LIST_TYPE;
 import static ai.startree.thirdeye.HappyPathTest.assert200;
 import static ai.startree.thirdeye.PinotDataSourceManager.PINOT_DATASET_NAME;
 import static ai.startree.thirdeye.PinotDataSourceManager.PINOT_DATA_SOURCE_NAME;
+import static ai.startree.thirdeye.ThirdEyeTestClient.ALERT_LIST_TYPE;
+import static ai.startree.thirdeye.ThirdEyeTestClient.SUBSCRIPTION_GROUP_LIST_TYPE;
 import static ai.startree.thirdeye.datalayer.MySqlTestDatabase.useLocalMysqlInstance;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -37,7 +37,6 @@ import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
-import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import com.google.inject.Injector;
 import io.dropwizard.testing.DropwizardTestSupport;
 import java.io.IOException;
@@ -133,7 +132,7 @@ public class AnomalyResolutionTest {
     // Setup plugins dir so ThirdEye can load it
     IntegrationTestUtils.setupPluginsDirAbsolutePath();
 
-    SUPPORT = buildSupport(dbConfiguration, "scheduling/config/server.yaml");
+    SUPPORT = buildSupport(dbConfiguration, "anomalyresolution/config/server.yaml");
     SUPPORT.before();
     final Client c = buildClient("scheduling-test-client", SUPPORT);
     client = new ThirdEyeTestClient(c, SUPPORT.getLocalPort());
@@ -209,7 +208,7 @@ public class AnomalyResolutionTest {
   }
 
   @Test(dependsOnMethods = "testCreateSubscriptionGroup", timeOut = 60000L)
-  public void testOnboardingLastTimestamp() throws Exception {
+  public void testOnboardingTaskRunAndNotificationRun() throws Exception {
     // wait for anomalies - proxy to know when the onboarding task has run
     while (client.getAnomalies().isEmpty()) {
       // see taskDriver server config for optimization
@@ -221,17 +220,13 @@ public class AnomalyResolutionTest {
     assertThat(alertLastTimestamp).isEqualTo(epoch("2020-02-16 00:00"));
   }
 
-  @Test(dependsOnMethods = "testOnboardingLastTimestamp", timeOut = 60000L)
+  @Test(dependsOnMethods = "testOnboardingTaskRunAndNotificationRun", timeOut = 60000L)
   public void testAfterDetectionCronLastTimestamp() throws InterruptedException {
     // get current number of anomalies
     final int numAnomaliesBeforeDetectionRun = client.getAnomalies().size();
 
     final List<AnomalyApi> parentAnomalies = client.getAnomalies("?isChild=False");
     assertThat(parentAnomalies).hasSize(1);
-
-    final SubscriptionGroupDTO sg = subscriptionGroupManager.findById(subscriptionGroupId);
-    final long now = System.currentTimeMillis();
-    final var result = notificationTaskFilter.filter(sg, now);
 
     // No notifications sent yet.
     assertThat(nsf.getCount()).isZero();
@@ -254,8 +249,14 @@ public class AnomalyResolutionTest {
     // check that lastTimestamp after detection is the runTime of the cron
     final long alertLastTimestamp = getAlertLastTimestamp();
     assertThat(alertLastTimestamp).isEqualTo(jumpTime);
-  }
 
+    while (client.getSuccessfulTasks(subscriptionGroupId).isEmpty()) {
+      Thread.sleep(1000);
+    }
+
+    // There is at least 1 successful subscription group task
+    assertThat(nsf.getCount()).isEqualTo(0);
+  }
 
   private long getAlertLastTimestamp() {
     final Response getResponse = client.request("api/alerts/" + alertId).get();

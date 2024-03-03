@@ -27,7 +27,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.time.Duration;
 import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
@@ -59,24 +58,27 @@ public class SubscriptionCronScheduler implements Runnable {
 
   private static final Logger LOG = LoggerFactory.getLogger(SubscriptionCronScheduler.class);
   private static final String Q_JOB_GROUP = TaskType.NOTIFICATION.toString();
-  private static final Duration INTERVAL = Duration.ofMinutes(1);
-  // todo cyril make this a config file parameter, and throw when it is not respected
   private static final int SUBSCRIPTION_SCHEDULER_CRON_MAX_TRIGGERS_PER_MINUTE = 10;
 
   private final Scheduler scheduler;
   private final ScheduledExecutorService executorService;
   private final SubscriptionGroupManager subscriptionGroupManager;
 
+  private final ThirdEyeSchedulerConfiguration configuration;
+
   @Inject
-  public SubscriptionCronScheduler(final SubscriptionGroupManager subscriptionGroupManager) {
-    this(subscriptionGroupManager, createScheduler());
+  public SubscriptionCronScheduler(final SubscriptionGroupManager subscriptionGroupManager,
+      ThirdEyeSchedulerConfiguration configuration) {
+    this(subscriptionGroupManager, createScheduler(), configuration);
   }
 
   @VisibleForTesting
   SubscriptionCronScheduler(final SubscriptionGroupManager subscriptionGroupManager,
-      final Scheduler scheduler) {
+      final Scheduler scheduler,
+      final ThirdEyeSchedulerConfiguration configuration) {
     this.subscriptionGroupManager = subscriptionGroupManager;
     this.scheduler = scheduler;
+    this.configuration = configuration;
     executorService = createExecutorService();
   }
 
@@ -129,7 +131,10 @@ public class SubscriptionCronScheduler implements Runnable {
 
   public void start() throws SchedulerException {
     scheduler.start();
-    executorService.scheduleWithFixedDelay(this, 0, INTERVAL.toMinutes(), TimeUnit.MINUTES);
+    executorService.scheduleWithFixedDelay(this,
+        0,
+        configuration.getSubscriptionGroupUpdateDelay(),
+        TimeUnit.SECONDS);
   }
 
   public void shutdown() throws SchedulerException {

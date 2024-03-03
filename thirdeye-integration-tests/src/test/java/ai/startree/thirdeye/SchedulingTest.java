@@ -16,11 +16,11 @@ package ai.startree.thirdeye;
 import static ai.startree.thirdeye.DropwizardTestUtils.buildClient;
 import static ai.startree.thirdeye.DropwizardTestUtils.buildSupport;
 import static ai.startree.thirdeye.DropwizardTestUtils.loadAlertApi;
-import static ai.startree.thirdeye.HappyPathTest.ALERT_LIST_TYPE;
-import static ai.startree.thirdeye.HappyPathTest.ANOMALIES_LIST_TYPE;
 import static ai.startree.thirdeye.HappyPathTest.assert200;
 import static ai.startree.thirdeye.PinotDataSourceManager.PINOT_DATASET_NAME;
 import static ai.startree.thirdeye.PinotDataSourceManager.PINOT_DATA_SOURCE_NAME;
+import static ai.startree.thirdeye.ThirdEyeTestClient.ALERT_LIST_TYPE;
+import static ai.startree.thirdeye.ThirdEyeTestClient.ANOMALIES_LIST_TYPE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.aspect.TimeProvider;

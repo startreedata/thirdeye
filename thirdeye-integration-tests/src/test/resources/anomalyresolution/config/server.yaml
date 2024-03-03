@@ -69,6 +69,7 @@ scheduler:
   # Only 1 instance of scheduler should run. This responsibility is currently on the user!!
   enabled: true
   alertUpdateDelay: 1
+  subscriptionGroupUpdateDelay: 1
 
   detectionPipeline: true
   detectionAlert: true
@@ -78,3 +79,5 @@ scheduler:
     enabled: false
     frequency: PT3m # 3 min
 
+ui:
+  externalUrl: http://localhost:7004

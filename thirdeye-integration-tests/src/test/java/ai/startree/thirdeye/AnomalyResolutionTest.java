@@ -34,6 +34,7 @@ import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertAssociationApi;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
+import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import com.google.inject.Injector;
 import io.dropwizard.testing.DropwizardTestSupport;
@@ -42,6 +43,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Future;
 import javax.ws.rs.client.Client;
@@ -63,6 +65,10 @@ public class AnomalyResolutionTest {
   private static final SubscriptionGroupApi SUBSCRIPTION_GROUP_API;
   private static final TimeProvider CLOCK = TimeProvider.instance();
   private static final long T_PAGEVIEWS_DATASET_START = epoch("2020-02-02 00:00");
+  public static final long TEST_IMEOUT = 6000000L;
+
+  private int nDetectionTaskRuns = 0;
+  private int nNotificationTaskRuns = 0;
 
   static {
     try {
@@ -185,59 +191,103 @@ public class AnomalyResolutionTest {
     }
   }
 
-  @Test(dependsOnMethods = "testCreateSubscriptionGroup", timeOut = 60000L)
-  public void testOnboardingTaskRunAndNotificationRun() throws Exception {
-    while (client.getSuccessfulTasks(alertId).isEmpty()) {
-      Thread.sleep(1000);
-    }
+  @Test(dependsOnMethods = "testCreateSubscriptionGroup", timeOut = TEST_IMEOUT)
+  public void testOnboardingTaskRun() throws Exception {
+    waitForDetectionRun();
 
     // check that lastTimestamp is the endTime of the Onboarding task: March 21 1H
     final long alertLastTimestamp = getAlertLastTimestamp();
     assertThat(alertLastTimestamp).isEqualTo(epoch("2020-02-16 00:00"));
   }
 
-  @Test(dependsOnMethods = "testOnboardingTaskRunAndNotificationRun", timeOut = 60000L)
-  public void testAfterDetectionCronLastTimestamp() throws InterruptedException {
+  @Test(dependsOnMethods = "testOnboardingTaskRun", timeOut = TEST_IMEOUT)
+  public void testDailyFeb21() throws InterruptedException {
     // get current number of anomalies
     final int numAnomaliesBeforeDetectionRun = client.getAnomalies().size();
 
-    final List<AnomalyApi> parentAnomalies = client.getAnomalies("?isChild=False");
+    final List<AnomalyApi> parentAnomalies = client.getParentAnomalies();
     assertThat(parentAnomalies).hasSize(1);
 
     // No notifications sent yet.
     assertThat(nsf.getCount()).isZero();
+    long jumpTime = jumpToTime("2020-02-21 00:00");
 
-    final int nSuccessfulTasks = client.getSuccessfulTasks(subscriptionGroupId).size();
-
-    // advance detection time to March 22, 2020, 00:00:00 UTC
-    // this should trigger the cron - and a new anomaly is expected on [March 21 - March 22]
-    final long jumpTime = epoch("2020-02-21 00:00");
-    CLOCK.useMockTime(jumpTime);
-    // not exact time should not impact lastTimestamp
-    CLOCK.tick(5);
-    // give thread to detectionCronScheduler and to quartz scheduler - (quartz idle time is weaved to 100 ms for test speed)
-    Thread.sleep(1000);
-
-    while (client.getSuccessfulTasks(alertId).size() <= nSuccessfulTasks) {
-      // should trigger another task after time jump
-      Thread.sleep(1000);
-    }
-
-    // wait for the new anomaly to be created - proxy to know when the detection has run
+    waitForDetectionRun();
+    // wait for new anomalies to be created
     while (client.getAnomalies().size() == numAnomaliesBeforeDetectionRun) {
       Thread.sleep(1000);
     }
 
     // check that lastTimestamp after detection is the runTime of the cron
-    final long alertLastTimestamp = getAlertLastTimestamp();
-    assertThat(alertLastTimestamp).isEqualTo(jumpTime);
+    assertThat(getAlertLastTimestamp()).isEqualTo(jumpTime);
 
-    while (client.getSuccessfulTasks(subscriptionGroupId).isEmpty()) {
-      Thread.sleep(1000);
-    }
+    assertThat(client.getParentAnomalies()).hasSize(2);
+
 
     // There is at least 1 successful subscription group task
+    waitForNotificationTaskRun();
     assertThat(nsf.getCount()).isEqualTo(0);
+
+    // Move time forward by 5 minutes to make subscription group task run again
+    jumpToTime("2020-02-21 00:05");
+
+    waitForNotificationTaskRun();
+    assertThat(nsf.getCount()).isEqualTo(1);
+
+    final NotificationPayloadApi notificationPayload = nsf.getNotificationPayload();
+    assertThat(notificationPayload.getAnomalyReports()).hasSize(1);
+
+    final AnomalyApi anomalyApi = notificationPayload.getAnomalyReports().get(0).getAnomaly();
+    assertThat(anomalyApi.getStartTime()).isEqualTo(new Date(epoch("2020-02-17 00:00")));
+    assertThat(anomalyApi.getEndTime()).isEqualTo(new Date(epoch("2020-02-21 00:00")));
+  }
+
+  @Test(dependsOnMethods = "testDailyFeb21", timeOut = TEST_IMEOUT)
+  public void testDailyFeb22() throws InterruptedException {
+    jumpToTime("2020-02-22 00:06"); // allow both detection and notification to run
+    waitForDetectionRun();
+    waitForNotificationTaskRun();
+
+    assertThat(client.getParentAnomalies()).hasSize(2);
+
+    // No new anomalies to be sent
+    assertThat(nsf.getCount()).isEqualTo(1);
+  }
+
+  private void waitForDetectionRun() throws InterruptedException {
+    nDetectionTaskRuns = waitFor(alertId, nDetectionTaskRuns);
+
+    // Even after the task is complete, anomalies are persisted async. Giving another sec
+    Thread.sleep(1000);
+  }
+
+  private void waitForNotificationTaskRun() throws InterruptedException {
+    nNotificationTaskRuns = waitFor(subscriptionGroupId, nNotificationTaskRuns);
+  }
+
+  private int waitFor(final Long refId, int currentCount) throws InterruptedException {
+    int nTasks;
+    do {
+      nTasks = client.getSuccessfulTasks(refId).size();
+      if (!(nTasks <= currentCount)) {
+        break;
+      }
+      // should trigger another task after time jump
+      Thread.sleep(1000);
+    } while (true);
+
+    return nTasks;
+  }
+
+  private static long jumpToTime(final String dateTime) throws InterruptedException {
+    final long jumpTime = epoch(dateTime);
+    CLOCK.useMockTime(jumpTime);
+    CLOCK.tick(5); // simulate move time forward
+
+    // give thread to detectionCronScheduler and to quartz scheduler -
+    // (quartz idle time is weaved to 100 ms for test speed)
+    Thread.sleep(1000);
+    return jumpTime;
   }
 
   private long getAlertLastTimestamp() {

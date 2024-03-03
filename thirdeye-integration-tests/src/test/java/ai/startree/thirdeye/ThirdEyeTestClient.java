@@ -57,7 +57,11 @@ public class ThirdEyeTestClient {
     return getAnomalies("");
   }
 
-  public List<AnomalyApi> getAnomalies(String urlSuffix) {
+  public List<AnomalyApi> getParentAnomalies() {
+    return getAnomalies("?isChild=False");
+  }
+
+  private List<AnomalyApi> getAnomalies(String urlSuffix) {
     final Response response = request("api/anomalies" + urlSuffix).get();
     assert200(response);
     return response.readEntity(ANOMALIES_LIST_TYPE);

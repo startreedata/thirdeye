@@ -59,16 +59,14 @@ import org.testng.annotations.Test;
 
 public class AnomalyResolutionTest {
 
-  public static final ZoneOffset UTC = ZoneOffset.UTC;
   private static final Logger log = LoggerFactory.getLogger(AnomalyResolutionTest.class);
+
+  private static final ZoneOffset UTC = ZoneOffset.UTC;
+  private static final long TEST_IMEOUT = 6000000L;
   private static final AlertApi ALERT_API;
   private static final SubscriptionGroupApi SUBSCRIPTION_GROUP_API;
   private static final TimeProvider CLOCK = TimeProvider.instance();
   private static final long T_PAGEVIEWS_DATASET_START = epoch("2020-02-02 00:00");
-  public static final long TEST_IMEOUT = 6000000L;
-
-  private int nDetectionTaskRuns = 0;
-  private int nNotificationTaskRuns = 0;
 
   static {
     try {
@@ -81,6 +79,8 @@ public class AnomalyResolutionTest {
     }
   }
 
+  private int nDetectionTaskRuns = 0;
+  private int nNotificationTaskRuns = 0;
   private DropwizardTestSupport<ThirdEyeServerConfiguration> SUPPORT;
   private ThirdEyeTestClient client;
 
@@ -101,6 +101,17 @@ public class AnomalyResolutionTest {
     final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
         .withZone(UTC);
     return formatter.format(instant);
+  }
+
+  private static long jumpToTime(final String dateTime) throws InterruptedException {
+    final long jumpTime = epoch(dateTime);
+    CLOCK.useMockTime(jumpTime);
+    CLOCK.tick(5); // simulate move time forward
+
+    // give thread to detectionCronScheduler and to quartz scheduler -
+    // (quartz idle time is weaved to 100 ms for test speed)
+    Thread.sleep(1000);
+    return jumpTime;
   }
 
   @BeforeClass
@@ -223,7 +234,6 @@ public class AnomalyResolutionTest {
 
     assertThat(client.getParentAnomalies()).hasSize(2);
 
-
     // There is at least 1 successful subscription group task
     waitForNotificationTaskRun();
     assertThat(nsf.getCount()).isEqualTo(0);
@@ -244,14 +254,73 @@ public class AnomalyResolutionTest {
 
   @Test(dependsOnMethods = "testDailyFeb21", timeOut = TEST_IMEOUT)
   public void testDailyFeb22() throws InterruptedException {
-    jumpToTime("2020-02-22 00:06"); // allow both detection and notification to run
+    jumpToTimeAndWait("2020-02-22 00:06");
+    assertThat(client.getParentAnomalies()).hasSize(2);
+    assertThat(nsf.getCount()).isEqualTo(1); // no new notifications
+  }
+
+  @Test(dependsOnMethods = "testDailyFeb22", timeOut = TEST_IMEOUT)
+  public void testDailyFeb23() throws InterruptedException {
+    jumpToTimeAndWait("2020-02-23 00:06");
+    assertThat(client.getParentAnomalies()).hasSize(2);
+    assertThat(nsf.getCount()).isEqualTo(1); // no new notifications
+  }
+
+  @Test(dependsOnMethods = "testDailyFeb23", timeOut = TEST_IMEOUT)
+  public void testDailyFeb24() throws InterruptedException {
+    jumpToTimeAndWait("2020-02-24 00:06");
+    assertThat(client.getParentAnomalies()).hasSize(2);
+    assertThat(nsf.getCount()).isEqualTo(1); // no new notifications
+  }
+
+  @Test(dependsOnMethods = "testDailyFeb24", timeOut = TEST_IMEOUT)
+  public void testDailyFeb25() throws InterruptedException {
+    jumpToTimeAndWait("2020-02-25 00:06");
+
+    final List<AnomalyApi> parentAnomalies = client.getParentAnomalies();
+    assertThat(parentAnomalies).hasSize(2);
+
+    final AnomalyApi ongoingAnomaly = parentAnomalies.stream()
+        .filter(a -> a.getStartTime().equals(new Date(epoch("2020-02-17 00:00"))))
+        .findFirst()
+        .orElseThrow(() -> new AssertionError("Anomaly not found"));
+
+    // anomalies are merged here
+    assertThat(ongoingAnomaly.getEndTime()).isEqualTo(new Date(epoch("2020-02-25 00:00")));
+
+    // No new notifications yet
+    assertThat(nsf.getCount()).isEqualTo(1);
+  }
+
+  @Test(dependsOnMethods = "testDailyFeb25", timeOut = TEST_IMEOUT)
+  public void testDailyMar3() throws InterruptedException {
+    jumpToTimeAndWait("2020-03-03 00:06");
+    assertThat(client.getParentAnomalies()).hasSize(3);
+    assertThat(nsf.getCount()).isEqualTo(1);
+  }
+
+  @Test(dependsOnMethods = "testDailyMar3", timeOut = TEST_IMEOUT)
+  public void testDailyMar4() throws InterruptedException {
+    jumpToTimeAndWait("2020-03-04 00:06");
+
+    final List<AnomalyApi> parentAnomalies = client.getParentAnomalies();
+    assertThat(parentAnomalies).hasSize(3);
+
+    // No new notifications yet
+    assertThat(nsf.getCount()).isEqualTo(2);
+
+    final NotificationPayloadApi notificationPayload = nsf.getNotificationPayload();
+    assertThat(notificationPayload.getAnomalyReports()).hasSize(1);
+
+    final AnomalyApi anomalyApi = notificationPayload.getAnomalyReports().get(0).getAnomaly();
+    assertThat(anomalyApi.getStartTime()).isEqualTo(new Date(epoch("2020-03-02 00:00")));
+    assertThat(anomalyApi.getEndTime()).isEqualTo(new Date(epoch("2020-03-03 00:00")));
+  }
+
+  private void jumpToTimeAndWait(final String dateTime) throws InterruptedException {
+    jumpToTime(dateTime); // allow both detection and notification to run
     waitForDetectionRun();
     waitForNotificationTaskRun();
-
-    assertThat(client.getParentAnomalies()).hasSize(2);
-
-    // No new anomalies to be sent
-    assertThat(nsf.getCount()).isEqualTo(1);
   }
 
   private void waitForDetectionRun() throws InterruptedException {
@@ -277,17 +346,6 @@ public class AnomalyResolutionTest {
     } while (true);
 
     return nTasks;
-  }
-
-  private static long jumpToTime(final String dateTime) throws InterruptedException {
-    final long jumpTime = epoch(dateTime);
-    CLOCK.useMockTime(jumpTime);
-    CLOCK.tick(5); // simulate move time forward
-
-    // give thread to detectionCronScheduler and to quartz scheduler -
-    // (quartz idle time is weaved to 100 ms for test speed)
-    Thread.sleep(1000);
-    return jumpTime;
   }
 
   private long getAlertLastTimestamp() {

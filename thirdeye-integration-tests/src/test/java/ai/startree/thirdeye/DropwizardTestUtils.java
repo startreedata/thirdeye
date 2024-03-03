@@ -64,8 +64,12 @@ public class DropwizardTestUtils {
   }
 
   public static AlertApi loadAlertApi(final String alertJsonPath) throws IOException {
-    String alertApiJson = IOUtils.resourceToString(alertJsonPath, StandardCharsets.UTF_8);
-    return OBJECT_MAPPER.readValue(alertApiJson, AlertApi.class);
+    return loadApi(alertJsonPath, AlertApi.class);
+  }
+
+  public static <T> T loadApi(final String jsonPath, Class<T> clazz) throws IOException {
+    String alertApiJson = IOUtils.resourceToString(jsonPath, StandardCharsets.UTF_8);
+    return OBJECT_MAPPER.readValue(alertApiJson, clazz);
   }
 
   public static AlertEvaluationApi alertEvaluationApi(final AlertApi alertApi, final long startTime,

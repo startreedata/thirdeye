@@ -1,0 +1,14 @@
+{
+  "name": "sg-anomalyresolution",
+  "cron": "0 0/5 0 ? * * *",
+  "active": true,
+  "notifyHistoricalAnomalies": false,
+  "specs": [
+    {
+      "type": "integration-test",
+      "params": {
+
+      }
+    }
+  ]
+}

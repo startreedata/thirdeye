@@ -98,6 +98,7 @@ public class HappyPathTest {
 
   public static final GenericType<List<AnomalyApi>> ANOMALIES_LIST_TYPE = new GenericType<>() {};
   public static final GenericType<List<AlertApi>> ALERT_LIST_TYPE = new GenericType<>() {};
+  public static final GenericType<List<SubscriptionGroupApi>> SUBSCRIPTION_GROUP_LIST_TYPE = new GenericType<>() {};
   public static final String THRESHOLD_TEMPLATE_NAME = "startree-threshold";
   private static final Logger log = LoggerFactory.getLogger(HappyPathTest.class);
 

@@ -22,6 +22,7 @@ import static ai.startree.thirdeye.HappyPathTest.SUBSCRIPTION_GROUP_LIST_TYPE;
 import static ai.startree.thirdeye.HappyPathTest.assert200;
 import static ai.startree.thirdeye.PinotDataSourceManager.PINOT_DATASET_NAME;
 import static ai.startree.thirdeye.PinotDataSourceManager.PINOT_DATA_SOURCE_NAME;
+import static ai.startree.thirdeye.datalayer.MySqlTestDatabase.useLocalMysqlInstance;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.aspect.TimeProvider;
@@ -80,13 +81,6 @@ public class AnomalyResolutionTest {
   private static final SubscriptionGroupApi SUBSCRIPTION_GROUP_API;
   private static final TimeProvider CLOCK = TimeProvider.instance();
   private static final long T_PAGEVIEWS_DATASET_START = epoch("2020-02-02 00:00");
-  private static final long MARCH_21_2020_00H00 = epoch("2020-03-21 00:00");
-  private static final long MARCH_25_2020_05H00 = epoch("2020-03-25 05:00");
-  // = MARCH_25_2020_05H00 - delay P3D and floor granularity P1D (see config in alert json)
-  private static final long MARCH_22_2020_00H00 = epoch("2020-03-22 00:00");
-  private static final long MARCH_26_2020_05H00 = epoch("2020-03-26 05:00");
-  // = MARCH_26_2020_05H00 - delay P3D and floor granularity P1D (see config in alert json)
-  private static final long MARCH_23_2020_00H00 = epoch("2020-03-23 00:00");
 
   static {
     try {
@@ -131,6 +125,11 @@ public class AnomalyResolutionTest {
 
     final Future<DataSourceApi> pinotDataSourceFuture = PinotDataSourceManager.getPinotDataSourceApi();
     final DatabaseConfiguration dbConfiguration = MySqlTestDatabase.sharedDatabaseConfiguration();
+
+    if(useLocalMysqlInstance()) {
+      MySqlTestDatabase.cleanSharedDatabase();
+    }
+
     // Setup plugins dir so ThirdEye can load it
     IntegrationTestUtils.setupPluginsDirAbsolutePath();
 

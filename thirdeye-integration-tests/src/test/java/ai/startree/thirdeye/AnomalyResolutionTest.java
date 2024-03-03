@@ -30,13 +30,11 @@ import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.datalayer.util.DatabaseConfiguration;
 import ai.startree.thirdeye.notification.NotificationServiceRegistry;
-import ai.startree.thirdeye.notification.NotificationTaskFilter;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertAssociationApi;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
-import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import com.google.inject.Injector;
 import io.dropwizard.testing.DropwizardTestSupport;
 import java.io.IOException;
@@ -57,21 +55,6 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-/**
- * Scheduler tests. Time is mocked with the TimeProvider.
- * - create datasource, dataset
- * - fix time
- * - create alert. check lastTimestamp
- * - wait for onboarding task to run. Check lastTimestamp
- * - advance time to next cron run.
- * - wait for detection task to run. Check lastTimestamp
- *
- * Note: if run within IntelliJ, run with the following JVM option:
- * -javaagent:[USER_PATH]/.m2/repository/org/aspectj/aspectjweaver/1.9.21/aspectjweaver-1.9.21.jar
- * --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.time=ALL-UNNAMED
- * --add-opens java.base/java.util=ALL-UNNAMED
- * IntelliJ does not use the pom surefire config: https://youtrack.jetbrains.com/issue/IDEA-52286
- */
 public class AnomalyResolutionTest {
 
   public static final ZoneOffset UTC = ZoneOffset.UTC;
@@ -98,9 +81,6 @@ public class AnomalyResolutionTest {
   private long alertId;
   private Long subscriptionGroupId;
   private DataSourceApi pinotDataSourceApi;
-  private Injector injector;
-  private SubscriptionGroupManager subscriptionGroupManager;
-  private NotificationTaskFilter notificationTaskFilter;
   private TestNotificationServiceFactory nsf;
 
   private static long epoch(final String dateTime) {
@@ -125,7 +105,7 @@ public class AnomalyResolutionTest {
     final Future<DataSourceApi> pinotDataSourceFuture = PinotDataSourceManager.getPinotDataSourceApi();
     final DatabaseConfiguration dbConfiguration = MySqlTestDatabase.sharedDatabaseConfiguration();
 
-    if(useLocalMysqlInstance()) {
+    if (useLocalMysqlInstance()) {
       MySqlTestDatabase.cleanSharedDatabase();
     }
 
@@ -138,9 +118,7 @@ public class AnomalyResolutionTest {
     client = new ThirdEyeTestClient(c, SUPPORT.getLocalPort());
     pinotDataSourceApi = pinotDataSourceFuture.get();
 
-    injector = ((ThirdEyeServer) SUPPORT.getApplication()).getInjector();
-    subscriptionGroupManager = injector.getInstance(SubscriptionGroupManager.class);
-    notificationTaskFilter = injector.getInstance(NotificationTaskFilter.class);
+    Injector injector = ((ThirdEyeServer) SUPPORT.getApplication()).getInjector();
 
     nsf = new TestNotificationServiceFactory();
     injector
@@ -209,9 +187,7 @@ public class AnomalyResolutionTest {
 
   @Test(dependsOnMethods = "testCreateSubscriptionGroup", timeOut = 60000L)
   public void testOnboardingTaskRunAndNotificationRun() throws Exception {
-    // wait for anomalies - proxy to know when the onboarding task has run
-    while (client.getAnomalies().isEmpty()) {
-      // see taskDriver server config for optimization
+    while (client.getSuccessfulTasks(alertId).isEmpty()) {
       Thread.sleep(1000);
     }
 
@@ -231,6 +207,7 @@ public class AnomalyResolutionTest {
     // No notifications sent yet.
     assertThat(nsf.getCount()).isZero();
 
+    final int nSuccessfulTasks = client.getSuccessfulTasks(subscriptionGroupId).size();
 
     // advance detection time to March 22, 2020, 00:00:00 UTC
     // this should trigger the cron - and a new anomaly is expected on [March 21 - March 22]
@@ -240,6 +217,11 @@ public class AnomalyResolutionTest {
     CLOCK.tick(5);
     // give thread to detectionCronScheduler and to quartz scheduler - (quartz idle time is weaved to 100 ms for test speed)
     Thread.sleep(1000);
+
+    while (client.getSuccessfulTasks(alertId).size() <= nSuccessfulTasks) {
+      // should trigger another task after time jump
+      Thread.sleep(1000);
+    }
 
     // wait for the new anomaly to be created - proxy to know when the detection has run
     while (client.getAnomalies().size() == numAnomaliesBeforeDetectionRun) {
@@ -259,10 +241,7 @@ public class AnomalyResolutionTest {
   }
 
   private long getAlertLastTimestamp() {
-    final Response getResponse = client.request("api/alerts/" + alertId).get();
-    assertThat(getResponse.getStatus()).isEqualTo(200);
-    final AlertApi alert = getResponse.readEntity(AlertApi.class);
-    return alert.getLastTimestamp().getTime();
+    return client.getAlert(alertId).getLastTimestamp().getTime();
   }
 }
 

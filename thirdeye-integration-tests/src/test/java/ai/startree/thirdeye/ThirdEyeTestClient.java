@@ -14,6 +14,7 @@
 package ai.startree.thirdeye;
 
 import static ai.startree.thirdeye.HappyPathTest.assert200;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
@@ -60,6 +61,17 @@ public class ThirdEyeTestClient {
     final Response response = request("api/anomalies" + urlSuffix).get();
     assert200(response);
     return response.readEntity(ANOMALIES_LIST_TYPE);
+  }
+
+  public AlertApi getAlert(Long alertId) {
+    final Response r = client.target(baseUrl())
+        .path("api/alerts")
+        .path(alertId.toString())
+        .request()
+        .get();
+
+    assertThat(r.getStatus()).isEqualTo(200);
+    return r.readEntity(AlertApi.class);
   }
 
   public List<TaskApi> getSuccessfulTasks(Long refId) {

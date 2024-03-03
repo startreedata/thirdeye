@@ -33,15 +33,21 @@ public class MySqlTestDatabase {
   private static final AtomicInteger counter = new AtomicInteger(0);
   private static final String MYSQL_DOCKER_IMAGE = "mysql:8.0";
 
-  public static final String USERNAME = "root";
-  public static final String PASSWORD = "test";
-  public static String jdbcUrl = null;
+  private static final String USERNAME = "root";
+  private static final String PASSWORD = "test";
+  private static String jdbcUrl = null;
   private static String defaultDatabaseName = null;
 
   private static MySQLContainer<?> persistenceDbContainer = null;
   private static DatabaseConfiguration sharedConfiguration = null;
 
   public static DatabaseConfiguration sharedDatabaseConfiguration() {
+    final String property = System.getProperty("thirdeye.test.useLocalMysqlInstance");
+    if (property != null) {
+      log.warn("Using local mysql instance for testing!");
+      return localMysqlDatabaseConfiguration();
+    }
+
     if (sharedConfiguration == null) {
       sharedConfiguration = newDatabaseConfiguration();
     }
@@ -99,6 +105,19 @@ public class MySqlTestDatabase {
         .setUser(USERNAME)
         .setPassword(PASSWORD)
         .setDriver(persistenceDbContainer.getDriverClassName());
+  }
+
+  private static DatabaseConfiguration localMysqlDatabaseConfiguration() {
+    final String host = "localhost";
+    final int port = 3306;
+    final String dbName = "thirdeye_integration_test";
+
+    return new DatabaseConfiguration()
+        .setUrl("jdbc:mysql://" + host + ":" + port + "/" + dbName
+            + "?autoReconnect=true&allowPublicKeyRetrieval=true&sslMode=DISABLED")
+        .setUser("test_user")
+        .setPassword("pass")
+        .setDriver("com.mysql.cj.jdbc.Driver");
   }
 
   public static DataSource newDataSource(final DatabaseConfiguration dbConfig) throws Exception {

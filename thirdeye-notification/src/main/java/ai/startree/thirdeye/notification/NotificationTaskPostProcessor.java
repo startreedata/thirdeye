@@ -15,9 +15,11 @@ package ai.startree.thirdeye.notification;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
+import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.sql.Timestamp;
@@ -32,16 +34,18 @@ import org.slf4j.LoggerFactory;
  * The watermark is stored in the subscriptionGroup.vectorClocks field.
  */
 @Singleton
-public class SubscriptionGroupWatermarkManager {
+public class NotificationTaskPostProcessor {
 
-  private static final Logger LOG = LoggerFactory.getLogger(SubscriptionGroupWatermarkManager.class);
+  private static final Logger LOG = LoggerFactory.getLogger(NotificationTaskPostProcessor.class);
 
   private final SubscriptionGroupManager subscriptionGroupManager;
+  private final AnomalyManager anomalyManager;
 
   @Inject
-  public SubscriptionGroupWatermarkManager(
-      final SubscriptionGroupManager subscriptionGroupManager) {
+  public NotificationTaskPostProcessor(
+      final SubscriptionGroupManager subscriptionGroupManager, AnomalyManager anomalyManager) {
     this.subscriptionGroupManager = subscriptionGroupManager;
+    this.anomalyManager = anomalyManager;
   }
 
   public static Map<Long, Long> buildVectorClock(Collection<AnomalyDTO> anomalies) {
@@ -73,7 +77,18 @@ public class SubscriptionGroupWatermarkManager {
     return result;
   }
 
-  public void updateWatermarks(final SubscriptionGroupDTO sg,
+  public void postProcess(NotificationTaskFilterResult result) {
+    /* Update anomalies */
+    for (final AnomalyDTO anomaly : result.getAnomalies()) {
+      anomalyManager.update(anomaly.setNotified(true));
+    }
+
+    /* Record watermarks */
+    updateWatermarks(result.getSubscriptionGroup(), result.getAnomalies());
+  }
+
+  @VisibleForTesting
+  void updateWatermarks(final SubscriptionGroupDTO sg,
       final Collection<AnomalyDTO> anomalies) {
     if (anomalies.isEmpty()) {
       return;

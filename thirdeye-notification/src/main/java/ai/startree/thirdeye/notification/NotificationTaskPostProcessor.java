@@ -15,6 +15,7 @@ package ai.startree.thirdeye.notification;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
+import ai.startree.thirdeye.alert.AlertDataRetriever;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
@@ -45,15 +46,18 @@ public class NotificationTaskPostProcessor {
   private final SubscriptionGroupManager subscriptionGroupManager;
   private final AlertManager alertManager;
   private final AnomalyManager anomalyManager;
+  private final AlertDataRetriever alertDataRetriever;
 
   @Inject
   public NotificationTaskPostProcessor(
       final SubscriptionGroupManager subscriptionGroupManager,
       final AlertManager alertManager,
-      final AnomalyManager anomalyManager) {
+      final AnomalyManager anomalyManager,
+      final AlertDataRetriever alertDataRetriever) {
     this.subscriptionGroupManager = subscriptionGroupManager;
     this.alertManager = alertManager;
     this.anomalyManager = anomalyManager;
+    this.alertDataRetriever = alertDataRetriever;
   }
 
   public static Map<Long, Long> buildVectorClock(final Collection<AnomalyDTO> anomalies) {
@@ -124,9 +128,8 @@ public class NotificationTaskPostProcessor {
     subscriptionGroupManager.save(sg);
   }
 
-  private static long getMergeMaxGap(final AlertDTO alert) {
-    // TODO spyne implement
-    return 1000; // 1 second in milliseconds
+  private long getMergeMaxGap(final AlertDTO alert) {
+    return alertDataRetriever.getMergeMaxGap(alert).toStandardDuration().getMillis();
   }
 
   @VisibleForTesting

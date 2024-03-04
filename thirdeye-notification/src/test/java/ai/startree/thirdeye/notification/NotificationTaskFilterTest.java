@@ -15,6 +15,7 @@ package ai.startree.thirdeye.notification;
 
 import static org.mockito.Mockito.mock;
 
+import ai.startree.thirdeye.alert.AlertDataRetriever;
 import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
@@ -27,7 +28,8 @@ public class NotificationTaskFilterTest {
   public void testFilterAnomalies() {
     final NotificationTaskFilter instance = new NotificationTaskFilter(
         mock(AnomalyManager.class),
-        mock(AlertManager.class)
+        mock(AlertManager.class),
+        mock(AlertDataRetriever.class)
     );
     instance.filterAnomalies(new AnomalyFilter()
         .setAlertId(123L)

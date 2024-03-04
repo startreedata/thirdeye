@@ -25,6 +25,7 @@ import static ai.startree.thirdeye.ThirdEyeTestClient.SUBSCRIPTION_GROUP_LIST_TY
 import static ai.startree.thirdeye.datalayer.MySqlTestDatabase.useLocalMysqlInstance;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import ai.startree.thirdeye.alert.AlertDataRetriever;
 import ai.startree.thirdeye.aspect.TimeProvider;
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
@@ -36,6 +37,8 @@ import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
+import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import com.google.inject.Injector;
 import io.dropwizard.testing.DropwizardTestSupport;
 import java.io.IOException;
@@ -51,6 +54,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
@@ -88,6 +92,8 @@ public class AnomalyResolutionTest {
   private Long subscriptionGroupId;
   private DataSourceApi pinotDataSourceApi;
   private TestNotificationServiceFactory nsf;
+  private AlertDataRetriever alertDataRetriever;
+  private AlertManager alertManager;
 
   private static long epoch(final String dateTime) {
     final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
@@ -136,6 +142,8 @@ public class AnomalyResolutionTest {
     pinotDataSourceApi = pinotDataSourceFuture.get();
 
     Injector injector = ((ThirdEyeServer) SUPPORT.getApplication()).getInjector();
+    alertDataRetriever = injector.getInstance(AlertDataRetriever.class);
+    alertManager = injector.getInstance(AlertManager.class);
 
     nsf = new TestNotificationServiceFactory();
     injector
@@ -180,6 +188,10 @@ public class AnomalyResolutionTest {
     assertThat(createResponse.getStatus()).isEqualTo(200);
     final List<AlertApi> alerts = createResponse.readEntity(ALERT_LIST_TYPE);
     alertId = alerts.get(0).getId();
+
+    final AlertDTO alert = alertManager.findById(alertId);
+    final Period mergeMaxGap = alertDataRetriever.getMergeMaxGap(alert);
+    assertThat(mergeMaxGap).isEqualTo(Period.days(3));
 
     // time advancing should not impact lastTimestamp
     CLOCK.tick(5);

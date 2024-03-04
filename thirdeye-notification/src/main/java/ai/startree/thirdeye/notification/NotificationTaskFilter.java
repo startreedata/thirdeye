@@ -18,6 +18,7 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.bool;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.stream.Collectors.toSet;
 
+import ai.startree.thirdeye.alert.AlertDataRetriever;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
@@ -42,7 +43,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.joda.time.Interval;
-import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,12 +62,15 @@ public class NotificationTaskFilter {
 
   private final AnomalyManager anomalyManager;
   private final AlertManager alertManager;
+  private final AlertDataRetriever alertDataRetriever;
 
   @Inject
   public NotificationTaskFilter(final AnomalyManager anomalyManager,
-      final AlertManager alertManager) {
+      final AlertManager alertManager,
+      final AlertDataRetriever alertDataRetriever) {
     this.anomalyManager = anomalyManager;
     this.alertManager = alertManager;
+    this.alertDataRetriever = alertDataRetriever;
   }
 
   /**
@@ -100,9 +103,8 @@ public class NotificationTaskFilter {
         .format(Instant.ofEpochMilli(ts));
   }
 
-  private static long getMaxMergeGap(final AlertDTO alert) {
-    // TODO spyne determine max merge gap
-    return Period.seconds(1).toStandardDuration().getMillis();
+  private long getMaxMergeGap(final AlertDTO alert) {
+    return alertDataRetriever.getMergeMaxGap(alert).toStandardDuration().getMillis();
   }
 
   /**

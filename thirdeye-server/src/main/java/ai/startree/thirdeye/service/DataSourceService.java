@@ -17,12 +17,12 @@ import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DUPLICATE_NAME;
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
-import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.core.DataSourceOnboarder;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
 import ai.startree.thirdeye.spi.api.DatasetApi;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
@@ -78,7 +78,7 @@ public class DataSourceService extends CrudService<DataSourceApi, DataSourceDTO>
 
   @Override
   protected void prepareUpdatedDto(
-      final ThirdEyeServerPrincipal principal,
+      final ThirdEyePrincipal principal,
       final DataSourceDTO existing,
       final DataSourceDTO updated) {
     dataSourceCache.removeDataSource(existing.getName());

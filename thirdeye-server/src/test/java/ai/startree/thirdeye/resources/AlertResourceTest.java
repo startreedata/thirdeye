@@ -24,7 +24,6 @@ import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.NamespaceResolver;
 import ai.startree.thirdeye.auth.ThirdEyeAuthorizerProvider;
-import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.config.TimeConfiguration;
 import ai.startree.thirdeye.service.AlertService;
 import ai.startree.thirdeye.service.AnomalyMetricsProvider;
@@ -40,6 +39,7 @@ import ai.startree.thirdeye.spi.auth.AuthenticationType;
 import ai.startree.thirdeye.spi.auth.ResourceIdentifier;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.spi.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
@@ -68,8 +68,9 @@ public class AlertResourceTest {
 
   private static final String VALID_CRON = "0 0 * * * ? *";
 
-  static ThirdEyeServerPrincipal nobody() {
-    return new ThirdEyeServerPrincipal("nobody", "", AuthenticationType.OAUTH);
+  static ThirdEyePrincipal nobody() {
+    return new ThirdEyeServerPrincipal("nobody", "", AuthenticationType.OAUTH,
+        null, List.of(), false);
   }
 
   private static AlertResource newAlertResource(final AlertManager alertManager,

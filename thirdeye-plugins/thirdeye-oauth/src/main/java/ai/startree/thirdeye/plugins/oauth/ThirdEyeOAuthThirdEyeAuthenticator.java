@@ -16,8 +16,10 @@ package ai.startree.thirdeye.plugins.oauth;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Objects.requireNonNull;
 
+import ai.startree.thirdeye.spi.auth.AuthenticationType;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthenticator;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.spi.auth.ThirdEyeServerPrincipal;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -25,6 +27,7 @@ import com.google.inject.Inject;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import java.text.ParseException;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
@@ -33,7 +36,8 @@ import org.slf4j.LoggerFactory;
 public class ThirdEyeOAuthThirdEyeAuthenticator implements ThirdEyeAuthenticator<String> {
 
   public static final String NAME_CLAIM = "email";
-  private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeOAuthThirdEyeAuthenticator.class);
+  private static final Logger LOG = LoggerFactory.getLogger(
+      ThirdEyeOAuthThirdEyeAuthenticator.class);
 
   private final OidcJWTProcessor processor;
   private final OidcContext oidcContext;
@@ -75,11 +79,16 @@ public class ThirdEyeOAuthThirdEyeAuthenticator implements ThirdEyeAuthenticator
     return new CacheLoader<>() {
 
       @Override
-      public OauthThirdEyePrincipal load(String authToken)
+      public ThirdEyePrincipal load(String authToken)
           throws Exception {
         final SignedJWT jwt = SignedJWT.parse(authToken);
         final JWTClaimsSet claims = processor.process(jwt, oidcContext);
-        return new OauthThirdEyePrincipal(getName(claims));
+        // TODO CYRIL next iteration - the JWT claims will contain the namespace information 
+        final boolean isFullyNamespaced = false;
+        final String activeNamespace = null;
+        final List<String> namespaces = null;
+        return new ThirdEyeServerPrincipal(getName(claims), authToken, AuthenticationType.OAUTH,
+            activeNamespace, namespaces, isFullyNamespaced);
       }
     };
   }

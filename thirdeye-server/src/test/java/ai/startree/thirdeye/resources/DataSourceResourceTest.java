@@ -21,7 +21,6 @@ import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.NamespaceResolver;
 import ai.startree.thirdeye.auth.ThirdEyeAuthorizerProvider;
-import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.core.DataSourceOnboarder;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.service.DataSourceService;
@@ -29,8 +28,11 @@ import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.api.StatusApi;
 import ai.startree.thirdeye.spi.api.StatusListApi;
 import ai.startree.thirdeye.spi.auth.AuthenticationType;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.spi.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
+import java.util.List;
 import javax.ws.rs.core.Response;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -38,9 +40,10 @@ import org.testng.annotations.Test;
 public class DataSourceResourceTest {
 
   private final String dataSourceName = "test";
-  private final ThirdEyeServerPrincipal principal = new ThirdEyeServerPrincipal("test",
+  private final ThirdEyePrincipal principal = new ThirdEyeServerPrincipal("test",
       "",
-      AuthenticationType.OAUTH);
+      AuthenticationType.OAUTH,
+      null, List.of(), false);
   private ThirdEyeDataSource dataSource;
   private DataSourceCache dataSourceCache;
   private DataSourceResource dataSourceResource;

@@ -24,7 +24,6 @@ import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
-import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.notification.NotificationDispatcher;
 import ai.startree.thirdeye.notification.NotificationServiceRegistry;
@@ -32,6 +31,7 @@ import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertAssociationApi;
 import ai.startree.thirdeye.spi.api.NotificationSpecApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertAssociationDto;
@@ -116,7 +116,7 @@ public class SubscriptionGroupService extends
   }
 
   @Override
-  protected void prepareCreatedDto(final ThirdEyeServerPrincipal principal,
+  protected void prepareCreatedDto(final ThirdEyePrincipal principal,
       final SubscriptionGroupDTO dto) {
     final Timestamp createTime = requireNonNull(dto.getCreateTime(), "created");
     optional(dto.getAlertAssociations())
@@ -124,7 +124,7 @@ public class SubscriptionGroupService extends
   }
 
   @Override
-  protected void prepareUpdatedDto(final ThirdEyeServerPrincipal principal,
+  protected void prepareUpdatedDto(final ThirdEyePrincipal principal,
       final SubscriptionGroupDTO existing,
       final SubscriptionGroupDTO updated) {
     /* This is a system field which is managed by the notification pipeline */

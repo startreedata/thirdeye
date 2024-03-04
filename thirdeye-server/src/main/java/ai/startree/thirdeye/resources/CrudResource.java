@@ -18,9 +18,9 @@ import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 import static ai.startree.thirdeye.util.ResourceUtils.statusResponse;
 
-import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.service.CrudService;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import io.dropwizard.auth.Auth;
 import io.micrometer.core.annotation.Timed;
@@ -55,7 +55,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
   public Response list(
-      @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
+      @Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
       @Context UriInfo uriInfo
   ) {
     final MultivaluedMap<String, String> queryParameters = uriInfo.getQueryParameters();
@@ -67,7 +67,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
   public Response get(
-      @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
+      @Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
       @PathParam("id") Long id) {
     return respondOk(crudService.get(principal, id));
   }
@@ -77,7 +77,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
   public Response get(
-      @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
+      @Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
       @PathParam("name") String name) {
     return respondOk(crudService.findByName(principal, name));
   }
@@ -86,7 +86,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
   public Response createMultiple(
-      @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
+      @Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
       List<ApiT> list) {
     ensureExists(list, "Invalid request");
 
@@ -97,7 +97,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
   public Response editMultiple(
-      @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
+      @Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
       List<ApiT> list) {
 
     return respondOk(crudService.editMultiple(principal, list));
@@ -108,7 +108,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
   public Response delete(
-      @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
+      @Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
       @PathParam("id") Long id) {
     final ApiT apiT = crudService.delete(principal, id);
     if (apiT != null) {
@@ -121,7 +121,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   @Path("/all")
   @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
-  public Response deleteAll(@Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal) {
+  public Response deleteAll(@Parameter(hidden = true) @Auth ThirdEyePrincipal principal) {
     crudService.deleteAll(principal);
     return Response.ok().build();
   }
@@ -130,7 +130,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   @Path("/count")
   @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   public Response countWithPredicate(
-      @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
+      @Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
       @Context UriInfo uriInfo
   ) {
     return Response.ok(crudService.count(uriInfo.getQueryParameters())).build();

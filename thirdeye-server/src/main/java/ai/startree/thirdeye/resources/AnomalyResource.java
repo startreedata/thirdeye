@@ -13,10 +13,10 @@
  */
 package ai.startree.thirdeye.resources;
 
-import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.service.AnomalyService;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.AnomalyFeedbackApi;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import io.dropwizard.auth.Auth;
 import io.micrometer.core.annotation.Timed;
@@ -63,7 +63,7 @@ public class AnomalyResource extends CrudResource<AnomalyApi, AnomalyDTO> {
   @POST
   @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   public Response setFeedback(
-      @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
+      @Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,
       @PathParam("id") final Long id,
       final AnomalyFeedbackApi api) {
     anomalyService.setFeedback(principal, id, api);
@@ -78,7 +78,7 @@ public class AnomalyResource extends CrudResource<AnomalyApi, AnomalyDTO> {
   @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
   public Response getAnomalyStats(
-      @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
+      @Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,
       @QueryParam("startTime") final Long startTime,
       @QueryParam("endTime") final Long endTime
   ) {

@@ -32,6 +32,14 @@ public interface ThirdEyeAuthorizer {
       AccessType accessType
   );
 
+  // TODO CYRIL - implement in next iteration
+  default String setActiveNamespace(final ThirdEyePrincipal principal, final String newNamespace) {
+    throw new UnsupportedOperationException();
+  }
+  
+  // TODO CYRIL - implement in next iteration
+  // default List<String>
+
   interface ThirdEyeAuthorizerFactory extends
       PluginServiceFactory<ThirdEyeAuthorizer, Map<String, Object>> {}
 }

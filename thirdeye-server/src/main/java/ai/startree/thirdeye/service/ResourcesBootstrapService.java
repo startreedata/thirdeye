@@ -41,6 +41,7 @@ public class ResourcesBootstrapService {
     datasetDAO.update(datasets);
     // MIGRATION CODE: END
 
+    // FIXME CYRIL - next iteration once templates are namespaced - bootstrap should happen for each namespace
     alertTemplateService.loadRecommendedTemplates(AuthorizationManager.getInternalValidPrincipal(),
         true);
   }

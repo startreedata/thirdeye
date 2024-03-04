@@ -20,7 +20,6 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.auth.AuthConfiguration;
 import ai.startree.thirdeye.auth.AuthDisabledRequestFilter;
-import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.config.BackendSentryConfiguration;
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.datalayer.DataSourceBuilder;
@@ -34,6 +33,7 @@ import ai.startree.thirdeye.scheduler.SchedulerService;
 import ai.startree.thirdeye.scheduler.SubscriptionCronScheduler;
 import ai.startree.thirdeye.scheduler.events.MockEventsLoader;
 import ai.startree.thirdeye.service.ResourcesBootstrapService;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
 import ai.startree.thirdeye.worker.task.TaskDriver;
 import ch.qos.logback.classic.Level;
@@ -287,7 +287,7 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
       }
       jersey.register(new AuthDynamicFeature(injector.getInstance(AuthFilter.class)));
       jersey.register(RolesAllowedDynamicFeature.class);
-      jersey.register(new AuthValueFactoryProvider.Binder<>(ThirdEyeServerPrincipal.class));
+      jersey.register(new AuthValueFactoryProvider.Binder<>(ThirdEyePrincipal.class));
     } catch (final Exception e) {
       throw new IllegalStateException("Failed to configure Authentication filter", e);
     }

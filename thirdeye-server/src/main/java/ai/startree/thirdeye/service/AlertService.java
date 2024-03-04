@@ -29,7 +29,6 @@ import static java.util.Collections.singleton;
 import ai.startree.thirdeye.alert.AlertEvaluator;
 import ai.startree.thirdeye.alert.AlertInsightsProvider;
 import ai.startree.thirdeye.auth.AuthorizationManager;
-import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.config.TimeConfiguration;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AlertApi;
@@ -40,6 +39,7 @@ import ai.startree.thirdeye.spi.api.AnomalyStatsApi;
 import ai.startree.thirdeye.spi.api.DetectionEvaluationApi;
 import ai.startree.thirdeye.spi.api.UserApi;
 import ai.startree.thirdeye.spi.auth.AccessType;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
@@ -123,7 +123,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
   }
 
   @Override
-  protected void prepareCreatedDto(final ThirdEyeServerPrincipal principal, final AlertDTO dto) {
+  protected void prepareCreatedDto(final ThirdEyePrincipal principal, final AlertDTO dto) {
     if (dto.getLastTimestamp() < minimumOnboardingStartTime) {
       dto.setLastTimestamp(minimumLastTimestamp(dto));
     }
@@ -153,7 +153,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
   }
 
   @Override
-  protected void prepareUpdatedDto(final ThirdEyeServerPrincipal principal,
+  protected void prepareUpdatedDto(final ThirdEyePrincipal principal,
       final AlertDTO existing,
       final AlertDTO updated) {
     // prevent manual update of lastTimestamp
@@ -188,7 +188,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     return ApiBeanMapper.toApi(dto);
   }
 
-  public AlertInsightsApi getInsightsById(final ThirdEyeServerPrincipal principal, final Long id) {
+  public AlertInsightsApi getInsightsById(final ThirdEyePrincipal principal, final Long id) {
     final AlertDTO dto = getDto(id);
     authorizationManager.ensureHasAccess(principal, dto, AccessType.READ);
     return alertInsightsProvider.getInsights(dto);
@@ -200,7 +200,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
   }
 
   public void runTask(
-      final ThirdEyeServerPrincipal principal,
+      final ThirdEyePrincipal principal,
       final Long id,
       final Long startTime,
       final Long endTime
@@ -229,7 +229,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     return endTime;
   }
 
-  public void validateMultiple(final ThirdEyeServerPrincipal principal, final List<AlertApi> list) {
+  public void validateMultiple(final ThirdEyePrincipal principal, final List<AlertApi> list) {
     for (final AlertApi api : list) {
       final AlertDTO existing =
           api.getId() == null ? null : ensureExists(dtoManager.findById(api.getId()));
@@ -239,7 +239,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
   }
 
   public AlertEvaluationApi evaluate(
-      final ThirdEyeServerPrincipal principal,
+      final ThirdEyePrincipal principal,
       final AlertEvaluationApi request
   ) throws ExecutionException {
     final long safeEndTime = safeEndTime(request.getEnd().getTime());
@@ -262,7 +262,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
   }
 
   private Map<String, DetectionEvaluationApi> allowedEvaluations(
-      final ThirdEyeServerPrincipal principal, final Map<String, DetectionEvaluationApi> gotEvals) {
+      final ThirdEyePrincipal principal, final Map<String, DetectionEvaluationApi> gotEvals) {
     final Map<String, DetectionEvaluationApi> allowedEvals = new HashMap<>();
 
     // Assume entries without an enumeration item are allowed because the evaluation was executed.
@@ -292,7 +292,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
   // Solution 2. was the first design but puts too much work on the client side and already resulted
   // in an important regression so is strongly discouraged
   public AlertApi reset(
-      final ThirdEyeServerPrincipal principal,
+      final ThirdEyePrincipal principal,
       final Long id) {
     final AlertDTO dto = getDto(id);
     authorizationManager.ensureHasAccess(principal, dto, AccessType.WRITE);

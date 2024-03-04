@@ -15,9 +15,9 @@ package ai.startree.thirdeye.resources;
 
 import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 
-import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.service.AlertTemplateService;
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import io.dropwizard.auth.Auth;
 import io.micrometer.core.annotation.Timed;
@@ -63,7 +63,7 @@ public class AlertTemplateResource extends CrudResource<AlertTemplateApi, AlertT
   @Path("load-defaults")
   @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   public Response loadRecommendedTemplates(
-      @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
+      @Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,
       @FormParam("updateExisting") final boolean updateExisting) {
 
     return respondOk(alertTemplateService.loadRecommendedTemplates(principal, updateExisting));

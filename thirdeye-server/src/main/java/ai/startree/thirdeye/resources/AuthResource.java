@@ -16,9 +16,9 @@ package ai.startree.thirdeye.resources;
 import static ai.startree.thirdeye.spi.Constants.NO_AUTH_USER;
 import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 
-import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.spi.api.AuthApi;
 import ai.startree.thirdeye.spi.api.UserApi;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import com.google.inject.Singleton;
 import io.dropwizard.auth.Auth;
 import io.micrometer.core.annotation.Timed;
@@ -46,7 +46,7 @@ import javax.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 public class AuthResource {
 
-  private static AuthApi authApi(final ThirdEyeServerPrincipal thirdEyePrincipal) {
+  private static AuthApi authApi(final ThirdEyePrincipal thirdEyePrincipal) {
     final String principal = thirdEyePrincipal.getName();
     return new AuthApi()
         .setUser(new UserApi()
@@ -57,14 +57,14 @@ public class AuthResource {
   @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Path("/login")
   @POST
-  public Response login(@Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal) {
+  public Response login(@Parameter(hidden = true) @Auth ThirdEyePrincipal principal) {
     return respondOk(authApi(principal));
   }
 
   @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Path("/logout")
   @POST
-  public Response logout(@Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal) {
+  public Response logout(@Parameter(hidden = true) @Auth ThirdEyePrincipal principal) {
     // TODO spyne to be implemented.
     return Response.ok().build();
   }

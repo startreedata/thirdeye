@@ -23,7 +23,6 @@ import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.NamespaceResolver;
 import ai.startree.thirdeye.auth.ThirdEyeAuthorizerProvider;
-import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.datalayer.bao.AbstractManagerImpl;
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.service.CrudService;
@@ -33,6 +32,7 @@ import ai.startree.thirdeye.spi.auth.AuthenticationType;
 import ai.startree.thirdeye.spi.auth.ResourceIdentifier;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.spi.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.spi.datalayer.bao.AbstractManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import com.google.common.collect.ImmutableMap;
@@ -50,8 +50,9 @@ import org.testng.annotations.Test;
 
 public class CrudResourceTest {
 
-  static ThirdEyeServerPrincipal nobody() {
-    return new ThirdEyeServerPrincipal("nobody", "", AuthenticationType.OAUTH);
+  static ThirdEyePrincipal nobody() {
+    return new ThirdEyeServerPrincipal("nobody", "", AuthenticationType.OAUTH,
+        null, List.of(), false);
   }
 
   @Test
@@ -95,8 +96,8 @@ public class CrudResourceTest {
 
     final List<String> emails = List.of("tester1@testing.com", "tester2@testing.com");
     final Timestamp before = new Timestamp(1671476530000L);
-    final ThirdEyeServerPrincipal owner = getPrincipal(emails.get(0));
-    final ThirdEyeServerPrincipal updater = getPrincipal(emails.get(1));
+    final ThirdEyePrincipal owner = getPrincipal(emails.get(0));
+    final ThirdEyePrincipal updater = getPrincipal(emails.get(1));
 
     final DummyDto dbDto = new DummyDto().setData("testData");
     dbDto.setId(1L)
@@ -122,7 +123,7 @@ public class CrudResourceTest {
   }
 
   private ThirdEyeServerPrincipal getPrincipal(String name) {
-    return new ThirdEyeServerPrincipal(name, "", AuthenticationType.OAUTH);
+    return new ThirdEyeServerPrincipal(name, "", AuthenticationType.OAUTH, null, List.of(), false);
   }
 
   @Test
@@ -141,7 +142,8 @@ public class CrudResourceTest {
     try (Response resp = resource.list(nobody(), uriInfo)) {
       assertThat(resp.getStatus()).isEqualTo(200);
 
-      final List<DummyApi> entities = ((Stream<DummyApi>) resp.getEntity()).collect(Collectors.toList());
+      final List<DummyApi> entities = ((Stream<DummyApi>) resp.getEntity()).collect(
+          Collectors.toList());
       assertThat(entities).isEmpty();
     }
   }
@@ -164,7 +166,8 @@ public class CrudResourceTest {
     try (Response resp = resource.list(nobody(), uriInfo)) {
       assertThat(resp.getStatus()).isEqualTo(200);
 
-      final List<DummyApi> entities = ((Stream<DummyApi>) resp.getEntity()).collect(Collectors.toList());
+      final List<DummyApi> entities = ((Stream<DummyApi>) resp.getEntity()).collect(
+          Collectors.toList());
       assertThat(1).isEqualTo(entities.size());
       assertThat(2L).isEqualTo(entities.get(0).getId());
     }

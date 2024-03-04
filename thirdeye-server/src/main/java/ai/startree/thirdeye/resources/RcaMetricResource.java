@@ -16,9 +16,9 @@ package ai.startree.thirdeye.resources;
 import static ai.startree.thirdeye.core.ExceptionHandler.handleRcaAlgorithmException;
 import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 
-import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.service.RcaMetricService;
 import ai.startree.thirdeye.spi.api.HeatMapResponseApi;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.dropwizard.auth.Auth;
@@ -71,7 +71,7 @@ public class RcaMetricResource {
   @Path("/heatmap")
   @Operation(summary = "Returns heatmap for the specified anomaly.\n Aligns time stamps if necessary and omits null values.")
   public Response getAnomalyHeatmap(
-      @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
+      @Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
       @Parameter(description = "id of the anomaly")
       @QueryParam("id") long anomalyId,
 

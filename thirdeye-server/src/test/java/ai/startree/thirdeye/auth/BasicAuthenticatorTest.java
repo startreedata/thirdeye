@@ -18,6 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import ai.startree.thirdeye.auth.basic.BasicAuthConfiguration;
 import ai.startree.thirdeye.auth.basic.ThirdEyeBasicAuthenticator;
 import ai.startree.thirdeye.auth.basic.UserCredentialConfiguration;
+import ai.startree.thirdeye.spi.auth.ThirdEyeServerPrincipal;
 import io.dropwizard.auth.basic.BasicCredentials;
 import java.util.List;
 import org.testng.annotations.Test;

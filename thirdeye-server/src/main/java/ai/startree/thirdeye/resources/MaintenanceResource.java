@@ -14,9 +14,9 @@
 package ai.startree.thirdeye.resources;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
-import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.datalayer.core.EnumerationItemMaintainer;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
@@ -84,7 +84,7 @@ public class MaintenanceResource {
   @Produces(MediaType.APPLICATION_JSON)
   @Operation(summary = "Update the ignored index based on anomaly labels for historical anomalies")
   public Response migrateEnumerationItems(
-      @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
+      @Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,
       @FormParam("from") final long fromId,
       @FormParam("to") final long toId
 
@@ -102,7 +102,7 @@ public class MaintenanceResource {
   }
 
   private void logDeleteOperation(final EnumerationItemDTO ei,
-      final ThirdEyeServerPrincipal principal,
+      final ThirdEyePrincipal principal,
       final boolean dryRun) {
     String eiString;
     try {
@@ -125,7 +125,7 @@ public class MaintenanceResource {
   @Produces(MediaType.APPLICATION_JSON)
   @Operation(summary = "Update the ignored index based on anomaly labels for historical anomalies")
   public Response updateIgnoreLabelIndex(
-      @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal
+      @Parameter(hidden = true) @Auth final ThirdEyePrincipal principal
   ) {
     // skip already updated ignored index
     final DaoFilter filter = new DaoFilter().setPredicate(Predicate.NEQ("ignored", true));

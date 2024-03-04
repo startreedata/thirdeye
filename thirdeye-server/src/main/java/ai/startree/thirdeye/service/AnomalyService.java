@@ -19,12 +19,12 @@ import static ai.startree.thirdeye.util.ResourceUtils.ensureNull;
 
 import ai.startree.thirdeye.RequestCache;
 import ai.startree.thirdeye.auth.AuthorizationManager;
-import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.AnomalyFeedbackApi;
 import ai.startree.thirdeye.spi.api.AnomalyStatsApi;
 import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
@@ -102,7 +102,7 @@ public class AnomalyService extends CrudService<AnomalyApi, AnomalyDTO> {
     return anomalyApi;
   }
 
-  public void setFeedback(final ThirdEyeServerPrincipal principal, final Long id,
+  public void setFeedback(final ThirdEyePrincipal principal, final Long id,
       final AnomalyFeedbackApi api) {
     final AnomalyDTO dto = getDto(id);
     final AnomalyFeedbackDTO feedbackDTO = ApiBeanMapper.toAnomalyFeedbackDTO(api);

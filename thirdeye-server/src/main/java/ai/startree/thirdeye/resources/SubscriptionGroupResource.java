@@ -13,9 +13,9 @@
  */
 package ai.startree.thirdeye.resources;
 
-import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.service.SubscriptionGroupService;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import io.dropwizard.auth.Auth;
 import io.micrometer.core.annotation.Timed;
@@ -63,7 +63,7 @@ public class SubscriptionGroupResource extends
   @Produces(MediaType.APPLICATION_JSON)
   @Path("{id}/reset")
   public Response reset(
-      @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
+      @Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
       @PathParam("id") Long id) {
     return Response.ok(subscriptionGroupService.reset(id)).build();
   }
@@ -73,7 +73,7 @@ public class SubscriptionGroupResource extends
   @Produces(MediaType.APPLICATION_JSON)
   @Path("{id}/test")
   public Response test(
-      @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
+      @Parameter(hidden = true) @Auth ThirdEyePrincipal principal,
       @PathParam("id") Long id) {
     subscriptionGroupService.sendTestMessage(id);
     return Response.ok().build();

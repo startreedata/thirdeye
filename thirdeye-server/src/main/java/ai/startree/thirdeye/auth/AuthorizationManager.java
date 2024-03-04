@@ -23,6 +23,8 @@ import ai.startree.thirdeye.spi.auth.AccessType;
 import ai.startree.thirdeye.spi.auth.AuthenticationType;
 import ai.startree.thirdeye.spi.auth.ResourceIdentifier;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.spi.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
@@ -43,8 +45,10 @@ public class AuthorizationManager {
       "thirdeye-root",
       "thirdeye-root");
 
-  private static final ThirdEyeServerPrincipal INTERNAL_VALID_PRINCIPAL = new ThirdEyeServerPrincipal(
-      "thirdeye-internal", RandomStringUtils.random(1024, true, true), AuthenticationType.INTERNAL);
+  // FIXME CYRIL - this will require proper namespacing
+  private static final ThirdEyePrincipal INTERNAL_VALID_PRINCIPAL = new ThirdEyeServerPrincipal(
+      "thirdeye-internal", RandomStringUtils.random(1024, true, true), 
+      AuthenticationType.INTERNAL, null, List.of(), false);
 
   private final AlertTemplateRenderer alertTemplateRenderer;
   private final ThirdEyeAuthorizer thirdEyeAuthorizer;
@@ -60,19 +64,19 @@ public class AuthorizationManager {
     this.namespaceResolver = namespaceResolver;
   }
 
-  public <T extends AbstractDTO> void ensureCanCreate(final ThirdEyeServerPrincipal principal,
+  public <T extends AbstractDTO> void ensureCanCreate(final ThirdEyePrincipal principal,
       final T entity) {
     ensureHasAccess(principal, resourceId(entity), AccessType.WRITE);
     relatedEntities(entity).forEach(relatedId ->
         ensureHasAccess(principal, relatedId, AccessType.READ));
   }
 
-  public <T extends AbstractDTO> void ensureCanDelete(final ThirdEyeServerPrincipal principal,
+  public <T extends AbstractDTO> void ensureCanDelete(final ThirdEyePrincipal principal,
       final T entity) {
     ensureHasAccess(principal, resourceId(entity), AccessType.WRITE);
   }
 
-  public <T extends AbstractDTO> void ensureCanEdit(final ThirdEyeServerPrincipal principal,
+  public <T extends AbstractDTO> void ensureCanEdit(final ThirdEyePrincipal principal,
       final T before, final T after) {
     ensureHasAccess(principal, resourceId(before), AccessType.WRITE);
     ensureHasAccess(principal, resourceId(after), AccessType.WRITE);
@@ -80,38 +84,38 @@ public class AuthorizationManager {
         ensureHasAccess(principal, related, AccessType.READ));
   }
 
-  public <T extends AbstractDTO> void ensureCanRead(final ThirdEyeServerPrincipal principal,
+  public <T extends AbstractDTO> void ensureCanRead(final ThirdEyePrincipal principal,
       final T entity) {
     ensureHasAccess(principal, resourceId(entity), AccessType.READ);
   }
 
-  public void ensureCanValidate(final ThirdEyeServerPrincipal principal, final AlertDTO entity) {
+  public void ensureCanValidate(final ThirdEyePrincipal principal, final AlertDTO entity) {
     ensureCanCreate(principal, entity);
   }
 
-  public <T extends AbstractDTO> void ensureHasAccess(final ThirdEyeServerPrincipal principal,
+  public <T extends AbstractDTO> void ensureHasAccess(final ThirdEyePrincipal principal,
       final T entity, final AccessType accessType) {
     ensureHasAccess(principal, resourceId(entity), accessType);
   }
 
-  public void ensureHasAccess(final ThirdEyeServerPrincipal principal,
+  public void ensureHasAccess(final ThirdEyePrincipal principal,
       final ResourceIdentifier identifier, final AccessType accessType) {
     if (!hasAccess(principal, identifier, accessType)) {
       throw forbiddenExceptionFor(principal, identifier, accessType);
     }
   }
 
-  public <T extends AbstractDTO> boolean canRead(final ThirdEyeServerPrincipal principal,
+  public <T extends AbstractDTO> boolean canRead(final ThirdEyePrincipal principal,
       final T entity) {
     return hasAccess(principal, resourceId(entity), AccessType.READ);
   }
 
-  public <T extends AbstractDTO> boolean hasAccess(final ThirdEyeServerPrincipal principal,
+  public <T extends AbstractDTO> boolean hasAccess(final ThirdEyePrincipal principal,
       final T entity, final AccessType accessType) {
     return hasAccess(principal, resourceId(entity), accessType);
   }
 
-  public boolean hasAccess(final ThirdEyeServerPrincipal principal,
+  public boolean hasAccess(final ThirdEyePrincipal principal,
       final ResourceIdentifier identifier, final AccessType accessType) {
     if (INTERNAL_VALID_PRINCIPAL.equals(principal)) {
       return true;
@@ -122,7 +126,7 @@ public class AuthorizationManager {
     }
   }
 
-  public void ensureHasRootAccess(final ThirdEyeServerPrincipal principal) {
+  public void ensureHasRootAccess(final ThirdEyePrincipal principal) {
     if (!hasRootAccess(principal)) {
       throw new ForbiddenException(Response.status(
           Status.FORBIDDEN.getStatusCode(),
@@ -131,7 +135,7 @@ public class AuthorizationManager {
     }
   }
 
-  public boolean hasRootAccess(final ThirdEyeServerPrincipal principal) {
+  public boolean hasRootAccess(final ThirdEyePrincipal principal) {
     return INTERNAL_VALID_PRINCIPAL.equals(principal) ||
         thirdEyeAuthorizer.authorize(principal, ROOT_RESOURCE_ID, AccessType.WRITE);
   }
@@ -158,25 +162,27 @@ public class AuthorizationManager {
   private <T extends AbstractDTO> List<ResourceIdentifier> relatedEntities(T entity) {
     if (entity instanceof AlertDTO) {
       final AlertDTO alertDto = (AlertDTO) entity;
-      final AlertTemplateDTO alertTemplateDTO = alertTemplateRenderer.getTemplate(alertDto.getTemplate());
+      final AlertTemplateDTO alertTemplateDTO = alertTemplateRenderer.getTemplate(
+          alertDto.getTemplate());
       return Collections.singletonList(resourceId(alertTemplateDTO));
     }
     return new ArrayList<>();
   }
 
   public ForbiddenException forbiddenExceptionFor(
-      final ThirdEyeServerPrincipal principal,
+      final ThirdEyePrincipal principal,
       final ResourceIdentifier resourceIdentifier,
       final AccessType accessType
   ) {
     return new ForbiddenException(Response.status(
         Status.FORBIDDEN.getStatusCode(),
         String.format("%s access denied to %s for entity %s %s",
-            accessType, principal.getName(), resourceIdentifier.getEntityType(), resourceIdentifier.getName())
+            accessType, principal.getName(), resourceIdentifier.getEntityType(),
+            resourceIdentifier.getName())
     ).build());
   }
 
-  public static ThirdEyeServerPrincipal getInternalValidPrincipal() {
+  public static ThirdEyePrincipal getInternalValidPrincipal() {
     return INTERNAL_VALID_PRINCIPAL;
   }
 

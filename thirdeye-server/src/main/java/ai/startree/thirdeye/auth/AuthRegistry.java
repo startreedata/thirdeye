@@ -17,10 +17,10 @@ import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.auth.oauth.OAuthConfiguration;
-import ai.startree.thirdeye.spi.auth.AuthenticationType;
 import ai.startree.thirdeye.spi.auth.OpenIdConfigurationProvider;
 import ai.startree.thirdeye.spi.auth.OpenIdConfigurationProvider.Factory;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthenticator.OauthThirdEyeAuthenticatorFactory;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Singleton;
 import io.dropwizard.auth.Authenticator;
@@ -62,14 +62,12 @@ public class AuthRegistry {
   }
 
   @SuppressWarnings("unchecked")
-  public Authenticator<String, ThirdEyeServerPrincipal> createOAuthAuthenticator(
+  public Authenticator<String, ThirdEyePrincipal> createOAuthAuthenticator(
       final OAuthConfiguration oauthConfig) {
     final Map<String, Object> oauthConfigMap = toMap(oauthConfig);
-
     final var authenticator = requireNonNull(getDefaultOAuthFactory().build(oauthConfigMap),
         "failed to build authenticator");
-    return credentials -> authenticator.authenticate(credentials)
-        .map(p -> new ThirdEyeServerPrincipal(p.getName(), credentials, AuthenticationType.OAUTH));
+    return authenticator::authenticate;
   }
 
   public OpenIdConfigurationProvider createDefaultOpenIdConfigurationProvider(

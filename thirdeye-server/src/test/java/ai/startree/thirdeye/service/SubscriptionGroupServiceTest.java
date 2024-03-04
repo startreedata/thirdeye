@@ -21,13 +21,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
-import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.notification.NotificationDispatcher;
 import ai.startree.thirdeye.notification.NotificationServiceRegistry;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertAssociationApi;
 import ai.startree.thirdeye.spi.api.EnumerationItemApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
+import ai.startree.thirdeye.spi.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertAssociationDto;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;

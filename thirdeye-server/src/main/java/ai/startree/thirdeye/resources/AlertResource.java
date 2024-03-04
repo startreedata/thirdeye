@@ -16,11 +16,11 @@ package ai.startree.thirdeye.resources;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 
-import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.service.AlertService;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.api.AlertInsightsRequestApi;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import io.dropwizard.auth.Auth;
 import io.micrometer.core.annotation.Timed;
@@ -100,7 +100,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @Produces(MediaType.APPLICATION_JSON)
   @Deprecated(forRemoval = true)
   public Response getInsights(
-      @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
+      @Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,
       @PathParam("id") final Long id) {
     return Response.ok(alertService.getInsightsById(principal, id)).build();
   }
@@ -110,7 +110,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
   public Response getInsights(
-      @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
+      @Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,
       final AlertInsightsRequestApi request) {
     final AlertApi alert = request.getAlert();
     ensureExists(alert);
@@ -122,7 +122,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   public Response runTask(
-      @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
+      @Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,
       @PathParam("id") final Long id,
       @FormParam("start") final Long startTime,
       @FormParam("end") final Long endTime
@@ -137,7 +137,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @Produces(MediaType.APPLICATION_JSON)
   // can be moved to CrudResource if /validate is needed for other entities.
   public Response validateMultiple(
-      @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
+      @Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,
       final List<AlertApi> list) {
     ensureExists(list, "Invalid request");
 
@@ -149,7 +149,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @POST
   @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   public Response evaluate(
-      @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
+      @Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,
       @Schema(example = EVALUATE_SWAGGER_EXAMPLE) final AlertEvaluationApi request
   ) throws ExecutionException {
     ensureExists(request.getStart(), "start");
@@ -165,7 +165,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
   public Response reset(
-      @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
+      @Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,
       @PathParam("id") final Long id) {
     return respondOk(alertService.reset(principal, id));
   }
@@ -175,7 +175,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @Path("{id}/stats")
   @Produces(MediaType.APPLICATION_JSON)
   public Response stats(
-      @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
+      @Parameter(hidden = true) @Auth final ThirdEyePrincipal principal,
       @PathParam("id") final Long id,
       @QueryParam("enumerationItem.id") final Long enumerationId,
       @QueryParam("startTime") final Long startTime,

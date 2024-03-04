@@ -14,10 +14,10 @@
 package ai.startree.thirdeye.service;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
-import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.core.BootstrapResourcesRegistry;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import com.google.common.collect.ImmutableMap;
@@ -54,7 +54,7 @@ public class AlertTemplateService extends CrudService<AlertTemplateApi, AlertTem
     return ApiBeanMapper.toAlertTemplateApi(dto);
   }
 
-  public List<AlertTemplateApi> loadRecommendedTemplates(final ThirdEyeServerPrincipal principal,
+  public List<AlertTemplateApi> loadRecommendedTemplates(final ThirdEyePrincipal principal,
       final boolean updateExisting) {
     LOG.info("Loading recommended templates: START.");
     final List<AlertTemplateApi> alertTemplates = bootstrapResourcesRegistry.getAlertTemplates();
@@ -67,7 +67,7 @@ public class AlertTemplateService extends CrudService<AlertTemplateApi, AlertTem
     return loadedTemplates;
   }
 
-  private List<AlertTemplateApi> loadTemplates(final ThirdEyeServerPrincipal principal,
+  private List<AlertTemplateApi> loadTemplates(final ThirdEyePrincipal principal,
       final List<AlertTemplateApi> alertTemplates, final boolean updateExisting) {
     final List<AlertTemplateApi> toCreateTemplates = new ArrayList<>();
     final List<AlertTemplateApi> toUpdateTemplates = new ArrayList<>();

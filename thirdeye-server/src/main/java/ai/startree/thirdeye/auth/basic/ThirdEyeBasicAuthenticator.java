@@ -13,16 +13,18 @@
  */
 package ai.startree.thirdeye.auth.basic;
 
-import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.spi.auth.AuthenticationType;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.spi.auth.ThirdEyeServerPrincipal;
 import com.google.inject.Inject;
 import io.dropwizard.auth.Authenticator;
 import io.dropwizard.auth.basic.BasicCredentials;
+import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nullable;
 
 public class ThirdEyeBasicAuthenticator implements
-    Authenticator<BasicCredentials, ThirdEyeServerPrincipal> {
+    Authenticator<BasicCredentials, ThirdEyePrincipal> {
 
   private final BasicAuthConfiguration configuration;
 
@@ -32,14 +34,16 @@ public class ThirdEyeBasicAuthenticator implements
   }
 
   @Override
-  public Optional<ThirdEyeServerPrincipal> authenticate(final BasicCredentials basicCredentials) {
+  public Optional<ThirdEyePrincipal> authenticate(final BasicCredentials basicCredentials) {
     final UserCredentialConfiguration user = new UserCredentialConfiguration()
         .setUsername(basicCredentials.getUsername())
         .setPassword(basicCredentials.getPassword());
     if (configuration.getUsers().contains(user)) {
       return Optional.of(new ThirdEyeServerPrincipal(basicCredentials.getUsername(),
           "",
-          AuthenticationType.BASIC_AUTH));
+          AuthenticationType.BASIC_AUTH,
+          // FIXME CYRIL - next iteration  - add support for namespace in basic auth
+          null, List.of(), false));
     }
     return Optional.empty();
   }

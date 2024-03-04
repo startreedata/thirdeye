@@ -75,11 +75,11 @@ public class ThirdEyeOAuthThirdEyeAuthenticator implements ThirdEyeAuthenticator
     return new CacheLoader<>() {
 
       @Override
-      public ai.startree.thirdeye.plugins.oauth.ThirdEyePrincipal load(String authToken)
+      public OauthThirdEyePrincipal load(String authToken)
           throws Exception {
         final SignedJWT jwt = SignedJWT.parse(authToken);
         final JWTClaimsSet claims = processor.process(jwt, oidcContext);
-        return new ai.startree.thirdeye.plugins.oauth.ThirdEyePrincipal(getName(claims));
+        return new OauthThirdEyePrincipal(getName(claims));
       }
     };
   }

@@ -14,12 +14,13 @@
 package ai.startree.thirdeye.plugins.oauth;
 
 import ai.startree.thirdeye.spi.auth.AuthenticationType;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 
-public class ThirdEyePrincipal implements ai.startree.thirdeye.spi.auth.ThirdEyePrincipal {
+public class OauthThirdEyePrincipal implements ThirdEyePrincipal {
 
   private final String name;
 
-  public ThirdEyePrincipal(final String name) {
+  public OauthThirdEyePrincipal(final String name) {
     this.name = name;
   }
 

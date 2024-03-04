@@ -15,8 +15,11 @@ package ai.startree.thirdeye.notification;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
+import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AlertAssociationDto;
+import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import com.google.common.annotations.VisibleForTesting;
@@ -24,6 +27,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.sql.Timestamp;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -39,16 +43,20 @@ public class NotificationTaskPostProcessor {
   private static final Logger LOG = LoggerFactory.getLogger(NotificationTaskPostProcessor.class);
 
   private final SubscriptionGroupManager subscriptionGroupManager;
+  private final AlertManager alertManager;
   private final AnomalyManager anomalyManager;
 
   @Inject
   public NotificationTaskPostProcessor(
-      final SubscriptionGroupManager subscriptionGroupManager, AnomalyManager anomalyManager) {
+      final SubscriptionGroupManager subscriptionGroupManager,
+      final AlertManager alertManager,
+      final AnomalyManager anomalyManager) {
     this.subscriptionGroupManager = subscriptionGroupManager;
+    this.alertManager = alertManager;
     this.anomalyManager = anomalyManager;
   }
 
-  public static Map<Long, Long> buildVectorClock(Collection<AnomalyDTO> anomalies) {
+  public static Map<Long, Long> buildVectorClock(final Collection<AnomalyDTO> anomalies) {
     final Map<Long, Long> alertIdToAnomalyCreateTimeMax = new HashMap<>();
     for (final AnomalyDTO a : anomalies) {
       final Long alertId = a.getDetectionConfigId();
@@ -77,14 +85,48 @@ public class NotificationTaskPostProcessor {
     return result;
   }
 
-  public void postProcess(NotificationTaskFilterResult result) {
+  private static long initialWatermark(final AlertAssociationDto aa,
+      final AlertDTO alert,
+      final SubscriptionGroupDTO sg) {
+    long initialWatermark = Math.max(alert.getCreateTime().getTime(), sg.getCreateTime().getTime());
+    if (aa.getCreateTime() != null) {
+      initialWatermark = Math.max(initialWatermark, aa.getCreateTime().getTime());
+    }
+    // initialize to lastTimestamp of the alert
+    return Math.max(initialWatermark, alert.getLastTimestamp());
+  }
+
+  public void postProcess(final NotificationTaskFilterResult result) {
+    final SubscriptionGroupDTO sg = result.getSubscriptionGroup();
+
     /* Update anomalies */
     for (final AnomalyDTO anomaly : result.getAnomalies()) {
       anomalyManager.update(anomaly.setNotified(true));
     }
 
     /* Record watermarks */
-    updateWatermarks(result.getSubscriptionGroup(), result.getAnomalies());
+    updateWatermarks(sg, result.getAnomalies());
+
+    /* Update completion watermarks */
+    for (final AlertAssociationDto aa : sg.getAlertAssociations()) {
+      final AlertDTO alert = alertManager.findById(aa.getAlert().getId());
+      final long mergeMaxGap = getMergeMaxGap(alert);
+      if (mergeMaxGap <= 0) {
+        LOG.warn("Alert {} has invalid mergeMaxGap: {}", alert.getId(), mergeMaxGap);
+        continue;
+      }
+      final Date w = aa.getAnomalyCompletionWatermark();
+      final long w_next = w != null
+          ? Math.max(w.getTime(), alert.getLastTimestamp() - mergeMaxGap)
+          : initialWatermark(aa, alert, sg);
+      aa.setAnomalyCompletionWatermark(new Timestamp(w_next));
+    }
+    subscriptionGroupManager.save(sg);
+  }
+
+  private static long getMergeMaxGap(final AlertDTO alert) {
+    // TODO spyne implement
+    return 1000; // 1 second in milliseconds
   }
 
   @VisibleForTesting

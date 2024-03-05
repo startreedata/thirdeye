@@ -13,6 +13,8 @@
  */
 package ai.startree.thirdeye.spi.datalayer.dto;
 
+import static ai.startree.thirdeye.spi.util.TimeUtils.fromEpoch;
+
 import ai.startree.thirdeye.spi.detection.AnomalyFeedback;
 import ai.startree.thirdeye.spi.detection.AnomalyResultSource;
 import ai.startree.thirdeye.spi.detection.AnomalySeverity;
@@ -423,8 +425,8 @@ public class AnomalyDTO extends AbstractDTO implements Comparable<AnomalyDTO>, S
   public String toString() {
     return MoreObjects.toStringHelper(this)
         .add("id", getId())
-        .add("startTime", startTime)
-        .add("endTime", endTime)
+        .add("startTime", fromEpoch(startTime))
+        .add("endTime", fromEpoch(endTime))
         .toString();
   }
 

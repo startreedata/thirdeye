@@ -42,7 +42,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import com.google.inject.Injector;
 import io.dropwizard.testing.DropwizardTestSupport;
 import java.io.IOException;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -99,14 +98,6 @@ public class AnomalyResolutionTest {
     final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     final LocalDateTime localDateTime = LocalDateTime.parse(dateTime, formatter);
     return localDateTime.toInstant(UTC).toEpochMilli();
-  }
-
-  @SuppressWarnings("unused")
-  private static String fromEpoch(final long epochMilli) {
-    final Instant instant = Instant.ofEpochMilli(epochMilli);
-    final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
-        .withZone(UTC);
-    return formatter.format(instant);
   }
 
   private static long jumpToTime(final String dateTime) throws InterruptedException {
@@ -327,6 +318,17 @@ public class AnomalyResolutionTest {
     final AnomalyApi anomalyApi = notificationPayload.getAnomalyReports().get(0).getAnomaly();
     assertThat(anomalyApi.getStartTime()).isEqualTo(new Date(epoch("2020-03-02 00:00")));
     assertThat(anomalyApi.getEndTime()).isEqualTo(new Date(epoch("2020-03-03 00:00")));
+  }
+
+  @Test(dependsOnMethods = "testDailyMar4", timeOut = TEST_IMEOUT, enabled = false)
+  public void testDailyMar5() throws InterruptedException {
+    jumpToTimeAndWait("2020-03-05 00:06");
+    assertThat(client.getParentAnomalies()).hasSize(3);
+    assertThat(nsf.getCount()).isEqualTo(3);
+
+    final NotificationPayloadApi payload = nsf.getNotificationPayload();
+    assertThat(payload.getAnomalyReports()).hasSize(0);
+    assertThat(payload.getCompletedAnomalyReports()).hasSize(1);
   }
 
   private void jumpToTimeAndWait(final String dateTime) throws InterruptedException {

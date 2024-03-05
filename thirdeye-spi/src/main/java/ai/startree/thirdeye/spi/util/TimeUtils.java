@@ -21,6 +21,9 @@ import com.google.common.base.Strings;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Set;
@@ -233,5 +236,13 @@ public class TimeUtils {
       // should be a specific second
       return 1;
     }
+  }
+
+  @SuppressWarnings("unused")
+  public static String fromEpoch(final long epochMilli) {
+    final Instant instant = Instant.ofEpochMilli(epochMilli);
+    final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+        .withZone(ZoneOffset.UTC);
+    return formatter.format(instant);
   }
 }

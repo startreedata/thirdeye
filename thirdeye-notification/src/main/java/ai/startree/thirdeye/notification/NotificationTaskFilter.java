@@ -178,6 +178,7 @@ public class NotificationTaskFilter {
 
     return alertAssociations.stream()
         .filter(aa -> isAlertActive(aa.getAlert().getId()))
+        .filter(aa -> aa.getAnomalyCompletionWatermark() != null)
         .map(this::buildAnomalyFilterCompletedAnomalies)
         .map(f -> filterAnomalies(f, sg.getId(), "completed anomalies"))
         .flatMap(Collection::stream)
@@ -253,17 +254,23 @@ public class NotificationTaskFilter {
         .filter(NotificationTaskFilter::shouldFilter)
         .collect(toSet());
 
-    LOG.info("Subscription Group: {} Alert: {} context: {}. "
-            + "{}/{} filtered. Created between {} and {} ({} and {} System Time)",
+    String createdMsg = "";
+    if (f.getCreateTimeWindow() != null) {
+      createdMsg = String.format("Created between %s and %s (%s and %s System Time)",
+          f.getCreateTimeWindow().getStartMillis(),
+          f.getCreateTimeWindow().getEndMillis(),
+          toFormattedDate(f.getCreateTimeWindow().getStartMillis()),
+          toFormattedDate(f.getCreateTimeWindow().getEndMillis()));
+    }
+
+    LOG.info("Subscription Group: {} Alert: {} context: {}. {}/{} filtered. {}",
         subscriptionGroupId,
         f.getAlertId(),
         logContext,
         anomaliesToBeNotified.size(),
         candidates.size(),
-        f.getCreateTimeWindow().getStartMillis(),
-        f.getCreateTimeWindow().getEndMillis(),
-        toFormattedDate(f.getCreateTimeWindow().getStartMillis()),
-        toFormattedDate(f.getCreateTimeWindow().getEndMillis()));
+        createdMsg);
+
 
     return anomaliesToBeNotified;
   }

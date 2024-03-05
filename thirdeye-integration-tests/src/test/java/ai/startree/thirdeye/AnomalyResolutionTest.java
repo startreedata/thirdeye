@@ -320,7 +320,7 @@ public class AnomalyResolutionTest {
     assertThat(anomalyApi.getEndTime()).isEqualTo(new Date(epoch("2020-03-03 00:00")));
   }
 
-  @Test(dependsOnMethods = "testDailyMar4", timeOut = TEST_IMEOUT, enabled = false)
+  @Test(dependsOnMethods = "testDailyMar4", timeOut = TEST_IMEOUT)
   public void testDailyMar5() throws InterruptedException {
     jumpToTimeAndWait("2020-03-05 00:06");
     assertThat(client.getParentAnomalies()).hasSize(3);

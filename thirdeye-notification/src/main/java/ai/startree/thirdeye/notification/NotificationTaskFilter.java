@@ -125,12 +125,7 @@ public class NotificationTaskFilter {
         .map(alert -> new AlertAssociationDto().setAlert(alert))
         .collect(Collectors.toList());
   }
-
-  private static boolean isNotifyCompletedAnomaliesEnabled(final SubscriptionGroupDTO sg) {
-    // TODO spyne subscription group flag is set to true
-    return false;
-  }
-
+  
   /**
    * Find anomalies for the given subscription group given an end time.
    *
@@ -140,10 +135,20 @@ public class NotificationTaskFilter {
    *     subscription group, anomalies, completed anomalies and other metadata
    */
   public NotificationTaskFilterResult filter(final SubscriptionGroupDTO sg, final long endTime) {
+    final Set<AnomalyDTO> anomalies = filterAnomalies(sg, endTime);
+
+    final var ids = anomalies.stream()
+        .map(AnomalyDTO::getId)
+        .collect(toSet());
+
+    // remove anomalies that are already being notified
+    final Set<AnomalyDTO> completedAnomalies = filterCompletedAnomalies(sg);
+    completedAnomalies.removeIf(a -> ids.contains(a.getId()));
+
     return new NotificationTaskFilterResult()
         .setSubscriptionGroup(sg)
-        .setAnomalies(filterAnomalies(sg, endTime))
-        .setCompletedAnomalies(filterCompletedAnomalies(sg));
+        .setAnomalies(anomalies)
+        .setCompletedAnomalies(completedAnomalies);
   }
 
   /**
@@ -169,10 +174,6 @@ public class NotificationTaskFilter {
 
   @VisibleForTesting
   Set<AnomalyDTO> filterCompletedAnomalies(final SubscriptionGroupDTO sg) {
-    if (!isNotifyCompletedAnomaliesEnabled(sg)) {
-      // Do not notify completed anomalies
-      return Set.of();
-    }
     final List<AlertAssociationDto> alertAssociations = optional(sg.getAlertAssociations())
         .orElseGet(() -> migrateOlderSchema(sg));
 

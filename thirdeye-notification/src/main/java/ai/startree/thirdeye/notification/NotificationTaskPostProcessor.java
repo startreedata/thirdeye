@@ -30,6 +30,7 @@ import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -112,7 +113,7 @@ public class NotificationTaskPostProcessor {
     updateWatermarks(sg, result.getAnomalies());
 
     /* Update completion watermarks */
-    for (final AlertAssociationDto aa : sg.getAlertAssociations()) {
+    for (final AlertAssociationDto aa : optional(sg.getAlertAssociations()).orElse(List.of())) {
       final AlertDTO alert = alertManager.findById(aa.getAlert().getId());
       final long mergeMaxGap = getMergeMaxGap(alert);
       if (mergeMaxGap <= 0) {

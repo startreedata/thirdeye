@@ -102,7 +102,6 @@ describe("Datasources Util", () => {
 const mockDefaultDatasource = {
     name: "mypinot",
     type: "pinot",
-    defaultQueryOptions: { timeoutMs: "30000" },
     properties: {
         brokerUrl: "localhost:8000",
         clusterName: "QuickStartCluster",

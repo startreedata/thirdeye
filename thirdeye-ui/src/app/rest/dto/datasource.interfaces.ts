@@ -13,12 +13,11 @@
  * the License.
  */
 export interface Datasource {
-    id?: number;
+    id: number;
     name: string;
     type: string;
     properties: DatasourceProperties;
     metaList?: DatasourceMetaList[];
-    defaultQueryOptions?: { [key: string]: string };
 }
 
 export interface DatasourceProperties {

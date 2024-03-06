@@ -33,6 +33,7 @@ public class TemplateEngineStringSerializer extends JsonSerializer<String> {
 
   public TemplateEngineStringSerializer(final Map<String, Object> valuesMap) {
     this.sub = new StringSubstitutor(valuesMap).setDisableSubstitutionInValues(true)
+        .setEnableSubstitutionInVariables(true)
         .setEnableUndefinedVariableException(true);
   }
 

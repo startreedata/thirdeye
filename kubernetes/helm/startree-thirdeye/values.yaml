@@ -37,6 +37,7 @@ ui:
   affinity: {}
   podAnnotations: {}
   serviceAnnotations: {}
+  serviceLabels: {}
 
 coordinator:
   enabled: true

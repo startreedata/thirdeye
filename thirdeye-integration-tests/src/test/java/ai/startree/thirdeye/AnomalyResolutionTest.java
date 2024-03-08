@@ -73,12 +73,12 @@ public class AnomalyResolutionTest {
     }
   }
 
+  private final ThirdEyeIntegrationTestSupport support = new ThirdEyeIntegrationTestSupport(
+      "anomalyresolution/config/server.yaml"
+  );
   private int nDetectionTaskRuns = 0;
   private int nNotificationTaskRuns = 0;
-
-  private ThirdEyeIntegrationTestSupport support = new ThirdEyeIntegrationTestSupport();
   private ThirdEyeTestClient client;
-
   private long alertId;
   private Long subscriptionGroupId;
   private DataSourceApi pinotDataSourceApi;

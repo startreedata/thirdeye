@@ -36,6 +36,11 @@ public class ThirdEyeIntegrationTestSupport {
   private ThirdEyeTestClient client;
   private Future<DataSourceApi> pinotDataSourceFuture;
   private DatabaseConfiguration dbConfiguration;
+  private final String serverConfigPath;
+
+  public ThirdEyeIntegrationTestSupport(String serverConfigPath) {
+    this.serverConfigPath = serverConfigPath;
+  }
 
   public void setup() throws Exception {
     pinotDataSourceFuture = PinotDataSourceManager.getPinotDataSourceApi();
@@ -48,10 +53,10 @@ public class ThirdEyeIntegrationTestSupport {
     // Setup plugins dir so ThirdEye can load it
     IntegrationTestUtils.setupPluginsDirAbsolutePath();
 
-    support = buildSupport(dbConfiguration, "anomalyresolution/config/server.yaml");
+    support = buildSupport(dbConfiguration, serverConfigPath);
     support.before();
 
-    final Client c = buildClient("scheduling-test-client", support);
+    final Client c = buildClient("test-client", support);
     client = new ThirdEyeTestClient(c, support.getLocalPort());
   }
 

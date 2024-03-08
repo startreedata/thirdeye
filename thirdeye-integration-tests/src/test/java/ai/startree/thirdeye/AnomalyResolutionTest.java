@@ -13,8 +13,6 @@
  */
 package ai.startree.thirdeye;
 
-import static ai.startree.thirdeye.DropwizardTestUtils.buildClient;
-import static ai.startree.thirdeye.DropwizardTestUtils.buildSupport;
 import static ai.startree.thirdeye.DropwizardTestUtils.loadAlertApi;
 import static ai.startree.thirdeye.DropwizardTestUtils.loadApi;
 import static ai.startree.thirdeye.HappyPathTest.assert200;
@@ -22,14 +20,10 @@ import static ai.startree.thirdeye.PinotDataSourceManager.PINOT_DATASET_NAME;
 import static ai.startree.thirdeye.PinotDataSourceManager.PINOT_DATA_SOURCE_NAME;
 import static ai.startree.thirdeye.ThirdEyeTestClient.ALERT_LIST_TYPE;
 import static ai.startree.thirdeye.ThirdEyeTestClient.SUBSCRIPTION_GROUP_LIST_TYPE;
-import static ai.startree.thirdeye.datalayer.MySqlTestDatabase.useLocalMysqlInstance;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.alert.AlertDataRetriever;
 import ai.startree.thirdeye.aspect.TimeProvider;
-import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
-import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
-import ai.startree.thirdeye.datalayer.util.DatabaseConfiguration;
 import ai.startree.thirdeye.notification.NotificationServiceRegistry;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertAssociationApi;
@@ -40,15 +34,12 @@ import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import com.google.inject.Injector;
-import io.dropwizard.testing.DropwizardTestSupport;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.Future;
-import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
@@ -84,7 +75,8 @@ public class AnomalyResolutionTest {
 
   private int nDetectionTaskRuns = 0;
   private int nNotificationTaskRuns = 0;
-  private DropwizardTestSupport<ThirdEyeServerConfiguration> SUPPORT;
+
+  private ThirdEyeIntegrationTestSupport support = new ThirdEyeIntegrationTestSupport();
   private ThirdEyeTestClient client;
 
   private long alertId;
@@ -116,23 +108,13 @@ public class AnomalyResolutionTest {
     // ensure time is controlled via the TimeProvider CLOCK - ie weaving is working correctly
     assertThat(CLOCK.isTimeMockWorking()).isTrue();
 
-    final Future<DataSourceApi> pinotDataSourceFuture = PinotDataSourceManager.getPinotDataSourceApi();
-    final DatabaseConfiguration dbConfiguration = MySqlTestDatabase.sharedDatabaseConfiguration();
+    // Initialize the test support
+    support.setup();
 
-    if (useLocalMysqlInstance()) {
-      MySqlTestDatabase.cleanSharedDatabase();
-    }
+    client = support.getClient();
+    Injector injector = support.getInjector();
+    pinotDataSourceApi = support.getPinotDataSourceApi();
 
-    // Setup plugins dir so ThirdEye can load it
-    IntegrationTestUtils.setupPluginsDirAbsolutePath();
-
-    SUPPORT = buildSupport(dbConfiguration, "anomalyresolution/config/server.yaml");
-    SUPPORT.before();
-    final Client c = buildClient("scheduling-test-client", SUPPORT);
-    client = new ThirdEyeTestClient(c, SUPPORT.getLocalPort());
-    pinotDataSourceApi = pinotDataSourceFuture.get();
-
-    Injector injector = ((ThirdEyeServer) SUPPORT.getApplication()).getInjector();
     alertDataRetriever = injector.getInstance(AlertDataRetriever.class);
     alertManager = injector.getInstance(AlertManager.class);
 
@@ -145,9 +127,7 @@ public class AnomalyResolutionTest {
   @AfterClass(alwaysRun = true)
   public void afterClass() {
     CLOCK.useSystemTime();
-    log.info("Stopping Thirdeye at port: {}", SUPPORT.getLocalPort());
-    SUPPORT.after();
-    MySqlTestDatabase.cleanSharedDatabase();
+    support.tearDown();
   }
 
   @Test

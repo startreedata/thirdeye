@@ -40,7 +40,8 @@ public class ResourcesBootstrapService {
     final List<DatasetConfigDTO> datasets = datasetDAO.findAll();
     datasetDAO.update(datasets);
     // MIGRATION CODE: END
-
+    
+    // FIXME CYRIL - the templating loading should be performed for all namespaces
     alertTemplateService.loadRecommendedTemplates(AuthorizationManager.getInternalValidPrincipal(),
         true);
   }

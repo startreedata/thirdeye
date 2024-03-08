@@ -14,7 +14,9 @@
 package ai.startree.thirdeye.spi.auth;
 
 import ai.startree.thirdeye.spi.PluginServiceFactory;
+import java.util.List;
 import java.util.Map;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public interface ThirdEyeAuthorizer {
 
@@ -31,6 +33,9 @@ public interface ThirdEyeAuthorizer {
       ResourceIdentifier identifier,
       AccessType accessType
   );
+  
+  // REVIEW @suvodeep should we introduce a container? To at least have {id, name} for a namespace? 
+  @NonNull List<String> listNamespaces(final ThirdEyePrincipal principal);
 
   interface ThirdEyeAuthorizerFactory extends
       PluginServiceFactory<ThirdEyeAuthorizer, Map<String, Object>> {}

@@ -39,8 +39,8 @@ import com.google.common.annotations.VisibleForTesting;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
+import org.joda.time.Chronology;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.joda.time.ReadableInterval;
@@ -210,7 +210,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
       }
       final long forecastTime = inputTimes.getLong(k);
       final DataFrame lookbackDf = getLookbackDf(inputDF, forecastTime);
-      final DoubleSeries periodMask = buildPeriodMask(lookbackDf, forecastTime);
+      final DoubleSeries periodMask = buildPeriodMask(lookbackDf, forecastTime, detectionInterval.getChronology());
       DoubleSeries maskedValues = lookbackDf.getDoubles(COL_VALUE).multiply(periodMask);
       if (applyMask) {
         // todo cyril perf - COL_MASK.fillNull().not() can be computed once outside of the loop
@@ -243,17 +243,17 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     return resultDF;
   }
 
-  private DoubleSeries buildPeriodMask(final DataFrame lookbackDf, final long forecastTime) {
+  private DoubleSeries buildPeriodMask(final DataFrame lookbackDf, final long forecastTime,
+      final Chronology chronology) {
     if (seasonality.equals(Period.ZERO)) {
       // no seasonality --> no mask
       return DoubleSeries.fillValues(lookbackDf.size(), 1);
     }
-    // fixme cyril this implem does not not fail at DST - but datetimeZone is hardcoded to UTC so not DST
-    final DateTime forecastDateTime = new DateTime(forecastTime, DateTimeZone.UTC);
+    final DateTime forecastDateTime = new DateTime(forecastTime, chronology);
     final DoubleSeries.Builder mask = DoubleSeries.builder();
     final LongSeries lookbackEpochs = lookbackDf.get(COL_TIME).getLongs();
     for (int idx = 0; idx < lookbackEpochs.size(); idx++) {
-      final DateTime lookbackDateTime = new DateTime(lookbackEpochs.get(idx), DateTimeZone.UTC);
+      final DateTime lookbackDateTime = new DateTime(lookbackEpochs.get(idx), chronology);
       mask.addValues(isSeasonalityMatch(forecastDateTime, lookbackDateTime) ? 1. : null);
     }
     return mask.build();

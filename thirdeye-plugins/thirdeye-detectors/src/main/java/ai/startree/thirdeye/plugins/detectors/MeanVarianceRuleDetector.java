@@ -249,11 +249,11 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
       return DoubleSeries.fillValues(lookbackDf.size(), 1);
     }
     // fixme cyril this implem does not not fail at DST - but datetimeZone is hardcoded to UTC so not DST
-    DateTime forecastDateTime = new DateTime(forecastTime, DateTimeZone.UTC);
+    final DateTime forecastDateTime = new DateTime(forecastTime, DateTimeZone.UTC);
     DoubleSeries.Builder mask = DoubleSeries.builder();
     LongSeries lookbackEpochs = lookbackDf.get(COL_TIME).getLongs();
     for (int idx = 0; idx < lookbackEpochs.size(); idx++) {
-      DateTime lookbackDateTime = new DateTime(lookbackEpochs.get(idx), DateTimeZone.UTC);
+      final DateTime lookbackDateTime = new DateTime(lookbackEpochs.get(idx), DateTimeZone.UTC);
       mask.addValues(isSeasonalityMatch(forecastDateTime, lookbackDateTime) ? 1. : null);
     }
     return mask.build();

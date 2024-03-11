@@ -21,6 +21,7 @@ import static ai.startree.thirdeye.spi.Constants.COL_MASK;
 import static ai.startree.thirdeye.spi.Constants.COL_TIME;
 import static ai.startree.thirdeye.spi.Constants.COL_UPPER_BOUND;
 import static ai.startree.thirdeye.spi.Constants.COL_VALUE;
+import static ai.startree.thirdeye.spi.Constants.UTC_TIMEZONE;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -35,6 +36,7 @@ import ai.startree.thirdeye.spi.detection.AnomalyDetector;
 import ai.startree.thirdeye.spi.detection.AnomalyDetectorResult;
 import ai.startree.thirdeye.spi.detection.Pattern;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
+import ai.startree.thirdeye.spi.util.TimeUtils;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.Arrays;
 import java.util.Map;
@@ -209,7 +211,7 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
         continue;
       }
       final long forecastTime = inputTimes.getLong(k);
-      final DataFrame lookbackDf = getLookbackDf(inputDF, forecastTime);
+      final DataFrame lookbackDf = getLookbackDf(inputDF, forecastTime, detectionInterval.getChronology());
       final DoubleSeries periodMask = buildPeriodMask(lookbackDf, forecastTime, detectionInterval.getChronology());
       DoubleSeries maskedValues = lookbackDf.getDoubles(COL_VALUE).multiply(periodMask);
       if (applyMask) {
@@ -273,14 +275,26 @@ public class MeanVarianceRuleDetector implements AnomalyDetector<MeanVarianceRul
     }
   }
 
-  private DataFrame getLookbackDf(final DataFrame inputDF, final long endTimeMillis) {
+  private DataFrame getLookbackDf(final DataFrame inputDF, final long endTimeMillis,
+      final Chronology chronology) {
     final int indexEnd = inputDF.getLongs(COL_TIME).find(endTimeMillis);
     checkArgument(indexEnd != -1,
         "Could not find index of endTime %s. endTime should exist in inputDf. This should not happen.", endTimeMillis);
-    final int indexStart = indexEnd - lookback;
-    checkArgument(indexStart >= 0,
-        "Invalid index. Insufficient data to compute mean/variance on lookback. index: "
-            + indexStart);
+    int indexStart = indexEnd - lookback;
+    if (indexStart < 0) {
+      if (TimeUtils.timezonesAreEquivalent(chronology.getZone().toString(), UTC_TIMEZONE)) {
+        throw new IllegalArgumentException(String.format("Invalid index. Insufficient data to compute mean/variance on lookback. index: "
+            + indexStart));
+      } else {
+        LOG.warn("Unexpected low number of points in the training data when computing mean-variance. This can happen around a DST change. Timezone: {}. Time: {}. Number of missing points: {}.",
+            chronology.getZone(),
+            endTimeMillis,
+            indexStart 
+            );
+        indexStart = 0;
+      }
+    }
+    
     return inputDF.slice(indexStart, indexEnd);
   }
 

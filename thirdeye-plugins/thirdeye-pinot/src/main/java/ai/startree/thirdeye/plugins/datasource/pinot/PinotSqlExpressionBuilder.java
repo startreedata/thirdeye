@@ -239,11 +239,19 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
         case "1:MILLISECONDS:EPOCH":
         case "EPOCH|MILLISECONDS":
         case "EPOCH|MILLISECONDS|1":
-        case "TIMESTAMP":
-        case "1:MILLISECONDS:TIMESTAMP":
           // breaking change - previously EPOCH was an alias for EPOCH_SECONDS. Now it is a valid pinot format that means epoch millis  - TODO CYRIL this comment can be removed after migration of users is done
         case "EPOCH":
           dateTimeConvertString = "1:MILLISECONDS:EPOCH";
+          dateTruncString = "MILLISECONDS";
+          isEpochFormat = true;
+          timeFormatter = d -> String.valueOf(d.getMillis());
+          exactGranularity = null;
+          break;
+        // TIMESTAMP behavior should be the same as for EPOCH MILLISECONDS but an issue prevents this - see https://startreedata.slack.com/archives/C019DPR16JW/p1710241341251029
+        // note: this does not solve the issue with TIMESTAMP completely, so this could result in failing queries in some edge cases 
+        case "TIMESTAMP":
+        case "1:MILLISECONDS:TIMESTAMP":
+          dateTimeConvertString = "1:MILLISECONDS:TIMESTAMP";
           dateTruncString = "MILLISECONDS";
           isEpochFormat = true;
           timeFormatter = d -> String.valueOf(d.getMillis());

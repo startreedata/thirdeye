@@ -98,5 +98,6 @@ const MOCK_CONFIGURATION: SlackSpec = {
     type: SpecType.Slack,
     params: {
         webhookUrl: INITIAL_URL,
+        notifyResolvedAnomalies: false,
     },
 };

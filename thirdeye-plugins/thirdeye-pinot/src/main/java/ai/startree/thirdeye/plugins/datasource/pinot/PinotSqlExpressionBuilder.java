@@ -248,7 +248,10 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
           exactGranularity = null;
           break;
         // TIMESTAMP behavior should be the same as for EPOCH MILLISECONDS but an issue prevents this - see https://startreedata.slack.com/archives/C019DPR16JW/p1710241341251029
-        // note: this does not solve the issue with TIMESTAMP completely, so this could result in failing queries in some edge cases 
+        // issue: a group by returns a TIMESTAMP column in string instead of long 
+        // note: the fix does not solve the issue with TIMESTAMP completely, it actually exploits 
+        // a bad implementation in Pinot https://github.com/apache/pinot/blob/410a2cf13260c5bc4a0deb5b3999abd015f2d206/pinot-spi/src/main/java/org/apache/pinot/spi/utils/TimestampUtils.java#L56 
+        // that is slow but compatible with both long and string format (at the time of implementing this - this may change in the future)
         case "TIMESTAMP":
         case "1:MILLISECONDS:TIMESTAMP":
           dateTimeConvertString = "1:MILLISECONDS:TIMESTAMP";

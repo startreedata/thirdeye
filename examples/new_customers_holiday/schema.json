@@ -9,8 +9,8 @@
   ],
   "dateTimeFieldSpecs": [{
     "name": "epochdate",
-    "dataType": "LONG",
-    "format" : "1:MILLISECONDS:EPOCH",
-    "granularity": "1:SECONDS"
+    "dataType": "TIMESTAMP",
+    "format" : "1:MILLISECONDS:TIMESTAMP",
+    "granularity": "1:MILLISECONDS"
   }]
 }

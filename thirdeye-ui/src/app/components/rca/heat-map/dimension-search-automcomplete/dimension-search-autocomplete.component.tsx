@@ -12,14 +12,12 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import {
-    Box,
-    Chip,
-    IconButton,
-    InputAdornment,
-    TextField,
-    Tooltip,
-} from "@material-ui/core";
+import Box from "@material-ui/core/Box";
+import Chip from "@material-ui/core/Chip";
+import IconButton from "@material-ui/core/IconButton";
+import InputAdornment from "@material-ui/core/InputAdornment";
+import TextField from "@material-ui/core/TextField";
+import Tooltip from "@material-ui/core/Tooltip";
 import CheckIcon from "@material-ui/icons/CheckCircleOutlineOutlined";
 import CopyIcon from "@material-ui/icons/FileCopyOutlined";
 import SearchIcon from "@material-ui/icons/Search";

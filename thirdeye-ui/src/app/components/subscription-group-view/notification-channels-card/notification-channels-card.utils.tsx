@@ -14,7 +14,8 @@
  */
 
 import { Icon } from "@iconify/react";
-import { Box, Switch } from "@material-ui/core";
+import Box from "@material-ui/core/Box";
+import Checkbox from "@material-ui/core/Checkbox";
 import React from "react";
 import { TFunction } from "react-i18next";
 import { lightV1 } from "../../../platform/utils";
@@ -85,7 +86,7 @@ export const getCardProps = (
                 label: t("message.notify-when-the-anomaly-period-ends"),
                 value: (
                     <Box clone ml={-1.25}>
-                        <Switch
+                        <Checkbox
                             disabled
                             checked={channel.params.notifyResolvedAnomalies}
                             color="primary"

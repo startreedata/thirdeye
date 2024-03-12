@@ -14,7 +14,8 @@
  */
 
 import { Icon } from "@iconify/react";
-import { Box } from "@material-ui/core";
+import Box from "@material-ui/core/Box";
+import Checkbox from "@material-ui/core/Checkbox";
 import React from "react";
 import { TFunction } from "react-i18next";
 import { lightV1 } from "../../../platform/utils";
@@ -79,6 +80,20 @@ export const getCardProps = (
             cardProps.rows.push({
                 label: t("label.url"),
                 value: channel.params.webhookUrl,
+            });
+
+            cardProps.rows.push({
+                label: t("message.notify-when-the-anomaly-period-ends"),
+                value: (
+                    <Box clone ml={-1.25}>
+                        <Checkbox
+                            disabled
+                            checked={channel.params.notifyResolvedAnomalies}
+                            color="primary"
+                            size="small"
+                        />
+                    </Box>
+                ),
             });
 
             break;

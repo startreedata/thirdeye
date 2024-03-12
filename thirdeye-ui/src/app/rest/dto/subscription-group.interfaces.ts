@@ -51,6 +51,7 @@ export interface SlackSpec extends SpecConfiguration {
     type: SpecType.Slack;
     params: {
         webhookUrl: string;
+        notifyResolvedAnomalies: boolean;
     };
 }
 

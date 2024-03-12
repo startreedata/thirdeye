@@ -69,6 +69,7 @@ export const GroupsEditor: FunctionComponent<GroupsEditorProps> = ({
                             type: SpecType.Slack,
                             params: {
                                 webhookUrl: "",
+                                notifyResolvedAnomalies: false,
                             },
                         },
                     ];

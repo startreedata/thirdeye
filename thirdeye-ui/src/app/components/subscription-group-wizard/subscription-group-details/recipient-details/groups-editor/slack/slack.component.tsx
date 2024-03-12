@@ -19,6 +19,8 @@ import {
     Button,
     Card,
     CardContent,
+    Checkbox,
+    FormControlLabel,
     FormHelperText,
     Grid,
     TextField,
@@ -26,7 +28,7 @@ import {
     useTheme,
 } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import * as yup from "yup";
 import { LocalThemeProviderV1 } from "../../../../../../platform/components";
@@ -48,6 +50,7 @@ export const Slack: FunctionComponent<SlackProps> = ({
     const {
         register,
         formState: { errors },
+        control,
     } = useForm<SlackFormEntries>({
         mode: "onChange",
         reValidateMode: "onChange",
@@ -58,6 +61,7 @@ export const Slack: FunctionComponent<SlackProps> = ({
                     .string()
                     .trim()
                     .required(t("message.url-required")),
+                notifyResolvedAnomalies: yup.boolean().optional(),
             })
         ),
     });
@@ -67,6 +71,15 @@ export const Slack: FunctionComponent<SlackProps> = ({
             ...configuration,
         };
         copied.params.webhookUrl = newValue;
+
+        onSpecChange(copied);
+    };
+
+    const handleNotifyResolvedAnomaliesChange = (newValue: boolean): void => {
+        const copied = {
+            ...configuration,
+        };
+        copied.params.notifyResolvedAnomalies = newValue;
 
         onSpecChange(copied);
     };
@@ -144,6 +157,36 @@ export const Slack: FunctionComponent<SlackProps> = ({
                             </>
                         }
                         label={t("label.slack-url")}
+                    />
+                </Grid>
+                <Grid container>
+                    <Controller
+                        control={control}
+                        name="notifyResolvedAnomalies"
+                        render={({ field: { name, value, onChange } }) => (
+                            <InputSection
+                                inputComponent={
+                                    <FormControlLabel
+                                        checked={value}
+                                        control={<Checkbox color="primary" />}
+                                        label={
+                                            <Typography variant="body2">
+                                                {t(
+                                                    "message.notify-when-the-anomaly-period-ends"
+                                                )}
+                                            </Typography>
+                                        }
+                                        name={name}
+                                        onChange={(_e, checked) => {
+                                            onChange(checked);
+                                            handleNotifyResolvedAnomaliesChange(
+                                                checked
+                                            );
+                                        }}
+                                    />
+                                }
+                            />
+                        )}
                     />
                 </Grid>
             </CardContent>

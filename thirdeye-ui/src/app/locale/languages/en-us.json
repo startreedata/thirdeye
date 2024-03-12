@@ -682,6 +682,7 @@
         "no-this-is-an-anomaly": "No, this is not an anomaly",
         "no-this-is-not-an-anomaly": "No, this is not an anomaly",
         "non-dimension-exploration-alert": "Not a dimension exploration alert",
+        "notify-when-the-anomaly-period-ends": "Notify when the anomaly period ends",
         "num-delete-error": "{{num}} {{entity}} experienced issues while attempting to delete",
         "num-delete-success": "{{num}} {{entity}} deleted successfully",
         "num-metrics": "{{num}} metrics",

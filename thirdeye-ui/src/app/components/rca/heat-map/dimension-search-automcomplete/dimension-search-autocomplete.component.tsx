@@ -14,34 +14,22 @@
  */
 import Box from "@material-ui/core/Box";
 import Chip from "@material-ui/core/Chip";
-import IconButton from "@material-ui/core/IconButton";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import TextField from "@material-ui/core/TextField";
-import Tooltip from "@material-ui/core/Tooltip";
-import CheckIcon from "@material-ui/icons/CheckCircleOutlineOutlined";
-import CopyIcon from "@material-ui/icons/FileCopyOutlined";
 import SearchIcon from "@material-ui/icons/Search";
 import { Autocomplete } from "@material-ui/lab";
 import { isString, pull } from "lodash";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { EMPTY_STRING_DISPLAY } from "../../../../utils/anomalies/anomalies.util";
-import { copyToClipboard } from "../../../../utils/browser/browser.utils";
 import { AnomalyFilterOption } from "../heat-map.interfaces";
 import { formatDimensionOptions } from "../heat-map.utils";
 import { DimensionSearchAutocompleteProps } from "./dimension-search-autocomplete.interfaces";
-import { LocalThemeProviderV1 } from "../../../../platform/components";
-import { lightV1 } from "../../../../platform/utils";
+import { CopyButton } from "../../../copy-button/copy-button.component";
 
 export const DimensionSearchAutocomplete: FunctionComponent<DimensionSearchAutocompleteProps> =
     ({ heatMapData, anomalyFilters, onFilterChange }) => {
         const { t } = useTranslation();
-
-        // Keep track of the filter that was copied to the clipboard,
-        // to show and hide a checkmark in response
-        const [showCopyForFilter, setShowCopyForFilter] = useState<
-            string | null
-        >(null);
 
         const [anomalyFilterOptions, setAnomalyFilterOptions] = useState<
             AnomalyFilterOption[]
@@ -64,15 +52,6 @@ export const DimensionSearchAutocomplete: FunctionComponent<DimensionSearchAutoc
 
         const handleOnChangeFilter = (options: AnomalyFilterOption[]): void => {
             onFilterChange([...options]);
-        };
-
-        const handleCopyFilterName = (filterName: string): void => {
-            copyToClipboard(filterName);
-            setShowCopyForFilter(filterName);
-
-            setTimeout(() => {
-                setShowCopyForFilter(null);
-            }, 2000);
         };
 
         const aggregateFilter = useMemo(
@@ -122,45 +101,12 @@ export const DimensionSearchAutocomplete: FunctionComponent<DimensionSearchAutoc
                             endAdornment: (
                                 <>
                                     <InputAdornment position="start">
-                                        <Tooltip
-                                            title={
-                                                aggregateFilter ===
-                                                showCopyForFilter
-                                                    ? t(
-                                                          "label.copied-to-clipboard"
-                                                      )
-                                                    : t(
-                                                          "label.copy-dimension-filter"
-                                                      )
-                                            }
-                                        >
-                                            <IconButton
-                                                color="secondary"
-                                                size="small"
-                                                onClick={() => {
-                                                    handleCopyFilterName(
-                                                        aggregateFilter
-                                                    );
-                                                }}
-                                            >
-                                                {aggregateFilter ===
-                                                showCopyForFilter ? (
-                                                    <LocalThemeProviderV1
-                                                        primary={
-                                                            lightV1.palette
-                                                                .success
-                                                        }
-                                                    >
-                                                        <CheckIcon
-                                                            color="primary"
-                                                            fontSize="small"
-                                                        />
-                                                    </LocalThemeProviderV1>
-                                                ) : (
-                                                    <CopyIcon fontSize="small" />
-                                                )}
-                                            </IconButton>
-                                        </Tooltip>
+                                        <CopyButton
+                                            beforeCopyTooltip={t(
+                                                "label.copy-dimension-filter"
+                                            )}
+                                            content={aggregateFilter}
+                                        />
                                     </InputAdornment>
                                     {params.InputProps.endAdornment}
                                 </>
@@ -192,44 +138,15 @@ export const DimensionSearchAutocomplete: FunctionComponent<DimensionSearchAutoc
                                         gridGap={8}
                                     >
                                         {filterName}
-                                        <Tooltip
-                                            title={
-                                                filterName === showCopyForFilter
-                                                    ? t(
-                                                          "label.copied-to-clipboard"
-                                                      )
-                                                    : t(
-                                                          "label.copy-dimension-filter"
-                                                      )
-                                            }
-                                        >
-                                            <IconButton
-                                                color="secondary"
-                                                size="small"
-                                                onClick={() => {
-                                                    handleCopyFilterName(
-                                                        filterName
-                                                    );
-                                                }}
-                                            >
-                                                {filterName ===
-                                                showCopyForFilter ? (
-                                                    <LocalThemeProviderV1
-                                                        primary={
-                                                            lightV1.palette
-                                                                .success
-                                                        }
-                                                    >
-                                                        <CheckIcon
-                                                            color="primary"
-                                                            fontSize="inherit"
-                                                        />
-                                                    </LocalThemeProviderV1>
-                                                ) : (
-                                                    <CopyIcon fontSize="inherit" />
-                                                )}
-                                            </IconButton>
-                                        </Tooltip>
+                                        <CopyButton
+                                            beforeCopyTooltip={t(
+                                                "label.copy-dimension-filter"
+                                            )}
+                                            content={filterName}
+                                            iconProps={{
+                                                fontSize: "inherit",
+                                            }}
+                                        />
                                     </Box>
                                 }
                                 size="small"

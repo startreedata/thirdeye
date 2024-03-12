@@ -1,3 +1,10 @@
+### [2.45.8](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.7...thirdeye-ui-2.45.8) (2024-03-12)
+
+
+### Bug Fixes
+
+* [TE-2112](https://cortexdata.atlassian.net/browse/TE-2112) enable copying the dimension filter ([87bf051bd](https://github.com/startreedata/thirdeye/commit/87bf051bd9a1bdf053129c20705ac6b9e1d6ad32))
+
 ### [2.45.5](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.4...thirdeye-ui-2.45.5) (2024-01-30)
 
 

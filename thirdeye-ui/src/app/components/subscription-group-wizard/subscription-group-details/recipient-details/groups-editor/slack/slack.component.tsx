@@ -167,10 +167,6 @@ export const Slack: FunctionComponent<SlackProps> = ({
                             <InputSection
                                 inputComponent={
                                     <FormControlLabel
-                                        // eslint-disable-next-line max-len
-                                        // `control` needs to be passed on differently for checkbox
-                                        // eslint-disable-next-line max-len
-                                        // https://stackoverflow.com/questions/62291962/react-hook-forms-material-ui-checkboxes
                                         checked={value}
                                         control={<Checkbox color="primary" />}
                                         label={

@@ -143,7 +143,7 @@ const getUiDatasourceInternal = (datasource: Datasource): UiDatasource => {
     uiDatasource.datasource = datasource;
 
     // Basic properties
-    uiDatasource.id = datasource.id || -1;
+    uiDatasource.id = datasource.id;
     uiDatasource.name = datasource.name || noDataMarker;
     uiDatasource.type = datasource.type || noDataMarker;
 

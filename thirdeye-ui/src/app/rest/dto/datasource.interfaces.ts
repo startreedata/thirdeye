@@ -18,6 +18,7 @@ export interface Datasource {
     type: string;
     properties: DatasourceProperties;
     metaList?: DatasourceMetaList[];
+    defaultQueryOptions?: { [key: string]: string };
 }
 
 export interface DatasourceProperties {

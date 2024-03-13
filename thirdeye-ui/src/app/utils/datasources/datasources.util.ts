@@ -30,6 +30,7 @@ export const createDefaultDatasource = (): Datasource => {
         return {
             name: "mypinot",
             type: "pinot",
+            defaultQueryOptions: { timeoutMs: "30000" },
             properties: {
                 zookeeperUrl: "localhost:2123",
                 clusterName: "QuickStartCluster",
@@ -38,12 +39,13 @@ export const createDefaultDatasource = (): Datasource => {
                 controllerPort: 9000,
                 brokerUrl: "localhost:8000",
             } as DatasourceProperties,
-        } as Datasource;
+        } as unknown as Datasource;
     }
 
     return {
         name: "mypinot",
         type: "pinot",
+        defaultQueryOptions: { timeoutMs: "30000" },
         properties: {
             zookeeperUrl:
                 "pinot-zookeeper-headless.managed.svc.cluster.local:2181",
@@ -53,7 +55,7 @@ export const createDefaultDatasource = (): Datasource => {
                 "pinot-pinot-controller-headless.managed.svc.cluster.local",
             controllerPort: 9000,
         } as DatasourceProperties,
-    } as Datasource;
+    } as unknown as Datasource;
 };
 
 export const createEmptyUiDatasource = (): UiDatasource => {

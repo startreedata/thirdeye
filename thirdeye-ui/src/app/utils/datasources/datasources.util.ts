@@ -39,7 +39,7 @@ export const createDefaultDatasource = (): Datasource => {
                 controllerPort: 9000,
                 brokerUrl: "localhost:8000",
             } as DatasourceProperties,
-        } as Datasource;
+        } as unknown as Datasource;
     }
 
     return {
@@ -55,7 +55,7 @@ export const createDefaultDatasource = (): Datasource => {
                 "pinot-pinot-controller-headless.managed.svc.cluster.local",
             controllerPort: 9000,
         } as DatasourceProperties,
-    } as Datasource;
+    } as unknown as Datasource;
 };
 
 export const createEmptyUiDatasource = (): UiDatasource => {

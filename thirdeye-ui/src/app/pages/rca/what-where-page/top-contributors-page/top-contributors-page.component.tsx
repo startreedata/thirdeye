@@ -17,30 +17,30 @@ import { every, isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useOutletContext, useParams, useSearchParams } from "react-router-dom";
-import { NoDataIndicator } from "../../../components/no-data-indicator/no-data-indicator.component";
-import { EmptyStateSwitch } from "../../../components/page-states/empty-state-switch/empty-state-switch.component";
-import { LoadingErrorStateSwitch } from "../../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
-import { BaselineOffsetSelection } from "../../../components/rca/analysis-tabs/baseline-offset-selection/baseline-offset-selection.component";
-import { AnomalyFilterOption } from "../../../components/rca/anomaly-dimension-analysis/anomaly-dimension-analysis.interfaces";
-import { PreviewChart } from "../../../components/rca/top-contributors-table/preview-chart/preview-chart.component";
-import { TopContributorsTable } from "../../../components/rca/top-contributors-table/top-contributors-table.component";
+import { NoDataIndicator } from "../../../../components/no-data-indicator/no-data-indicator.component";
+import { EmptyStateSwitch } from "../../../../components/page-states/empty-state-switch/empty-state-switch.component";
+import { LoadingErrorStateSwitch } from "../../../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
+import { BaselineOffsetSelection } from "../../../../components/rca/analysis-tabs/baseline-offset-selection/baseline-offset-selection.component";
+import { AnomalyFilterOption } from "../../../../components/rca/anomaly-dimension-analysis/anomaly-dimension-analysis.interfaces";
+import { PreviewChart } from "../../../../components/rca/top-contributors-table/preview-chart/preview-chart.component";
+import { TopContributorsTable } from "../../../../components/rca/top-contributors-table/top-contributors-table.component";
 import {
     PageContentsCardV1,
     SkeletonV1,
     useNotificationProviderV1,
-} from "../../../platform/components";
-import { ActionStatus } from "../../../rest/actions.interfaces";
+} from "../../../../platform/components";
+import { ActionStatus } from "../../../../rest/actions.interfaces";
 import {
     AnomalyDimensionAnalysisData,
     SavedStateKeys,
-} from "../../../rest/dto/rca.interfaces";
-import { useGetAnomalyDimensionAnalysis } from "../../../rest/rca/rca.actions";
-import { areFiltersEqual } from "../../../utils/anomaly-dimension-analysis/anomaly-dimension-analysis";
-import { getFromSavedInvestigationOrDefault } from "../../../utils/investigation/investigation.util";
-import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
-import { serializeKeyValuePair } from "../../../utils/params/params.util";
-import { RootCauseAnalysisForAnomalyPageParams } from "../../root-cause-analysis-for-anomaly-page/root-cause-analysis-for-anomaly-page.interfaces";
-import { InvestigationContext } from "../investigation-state-tracker-container-page/investigation-state-tracker.interfaces";
+} from "../../../../rest/dto/rca.interfaces";
+import { useGetAnomalyDimensionAnalysis } from "../../../../rest/rca/rca.actions";
+import { areFiltersEqual } from "../../../../utils/anomaly-dimension-analysis/anomaly-dimension-analysis";
+import { getFromSavedInvestigationOrDefault } from "../../../../utils/investigation/investigation.util";
+import { notifyIfErrors } from "../../../../utils/notifications/notifications.util";
+import { serializeKeyValuePair } from "../../../../utils/params/params.util";
+import { RootCauseAnalysisForAnomalyPageParams } from "../../../root-cause-analysis-for-anomaly-page/root-cause-analysis-for-anomaly-page.interfaces";
+import { InvestigationContext } from "../../investigation-state-tracker-container-page/investigation-state-tracker.interfaces";
 
 export const TopContributorsPage: FunctionComponent = () => {
     const { notify } = useNotificationProviderV1();

@@ -61,19 +61,19 @@ const WhatWherePage = lazy(() =>
 
 const TopContributorsPage = lazy(() =>
     import(
-        /* webpackChunkName: "top-contributors-page" */ "../../pages/rca/top-contributors-page/top-contributors-page.component"
+        /* webpackChunkName: "top-contributors-page" */ "../../pages/rca/what-where-page/top-contributors-page/top-contributors-page.component"
     ).then((module) => ({ default: module.TopContributorsPage }))
 );
 
 const HeatMapPage = lazy(() =>
     import(
-        /* webpackChunkName: "heat-map-page" */ "../../pages/rca/heat-map-page/heat-map-page.component"
+        /* webpackChunkName: "heat-map-page" */ "../../pages/rca/what-where-page/heat-map-page/heat-map-page.component"
     ).then((module) => ({ default: module.HeatMapPage }))
 );
 
 const DimensionAnalysisDrillsPage = lazy(() =>
     import(
-        /* webpackChunkName: "dimension-analysis-drills" */ "../../pages/rca/dimension-analysis-drills-page/dimension-analysis-drills-page.component"
+        /* webpackChunkName: "dimension-analysis-drills" */ "../../pages/rca/what-where-page/dimension-analysis-drills-page/dimension-analysis-drills-page.component"
     ).then((module) => ({ default: module.DimensionAnalysisDrillsPage }))
 );
 

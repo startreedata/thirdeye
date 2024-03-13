@@ -1,3 +1,17 @@
+### [2.45.8](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.7...thirdeye-ui-2.45.8) (2024-03-12)
+
+
+### Bug Fixes
+
+* [TE-2112](https://cortexdata.atlassian.net/browse/TE-2112) enable copying the dimension filter ([87bf051bd](https://github.com/startreedata/thirdeye/commit/87bf051bd9a1bdf053129c20705ac6b9e1d6ad32))
+
+### [2.45.7](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.6...thirdeye-ui-2.45.7) (2024-03-12)
+
+
+### Bug Fixes
+
+* [TE-2130](https://cortexdata.atlassian.net/browse/TE-2130) add checkbox to slack edit and view for subscription group spec ([b7835806c](https://github.com/startreedata/thirdeye/commit/b7835806ce025ef065234b9b29d67b2d1968f0b0))
+
 ### [2.45.6](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.5...thirdeye-ui-2.45.6) (2024-02-26)
 
 

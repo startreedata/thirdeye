@@ -19,12 +19,11 @@ import static java.util.Objects.requireNonNull;
 import ai.startree.thirdeye.notification.NotificationDispatcher;
 import ai.startree.thirdeye.notification.NotificationPayloadBuilder;
 import ai.startree.thirdeye.notification.NotificationTaskFilter;
-import ai.startree.thirdeye.notification.SubscriptionGroupWatermarkManager;
+import ai.startree.thirdeye.notification.NotificationTaskPostProcessor;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
-import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.task.TaskInfo;
 import ai.startree.thirdeye.worker.task.DetectionAlertTaskInfo;
@@ -57,7 +56,7 @@ public class NotificationTaskRunner implements TaskRunner {
   private final NotificationDispatcher notificationDispatcher;
   private final NotificationPayloadBuilder notificationPayloadBuilder;
   private final NotificationTaskFilter notificationTaskFilter;
-  private final SubscriptionGroupWatermarkManager subscriptionGroupWatermarkManager;
+  private final NotificationTaskPostProcessor notificationTaskPostProcessor;
 
   @Deprecated
   private final Counter notificationTaskSuccessCounter;
@@ -76,13 +75,13 @@ public class NotificationTaskRunner implements TaskRunner {
       final NotificationDispatcher notificationDispatcher,
       final NotificationPayloadBuilder notificationPayloadBuilder,
       final NotificationTaskFilter notificationTaskFilter,
-      final SubscriptionGroupWatermarkManager subscriptionGroupWatermarkManager) {
+      final NotificationTaskPostProcessor notificationTaskPostProcessor) {
     this.subscriptionGroupManager = subscriptionGroupManager;
     this.anomalyManager = anomalyManager;
     this.notificationDispatcher = notificationDispatcher;
     this.notificationPayloadBuilder = notificationPayloadBuilder;
     this.notificationTaskFilter = notificationTaskFilter;
-    this.subscriptionGroupWatermarkManager = subscriptionGroupWatermarkManager;
+    this.notificationTaskPostProcessor = notificationTaskPostProcessor;
 
     // deprecated - use thirdeye_notification_task
     notificationTaskCounter = metricRegistry.counter("notificationTaskCounter");
@@ -142,7 +141,6 @@ public class NotificationTaskRunner implements TaskRunner {
 
     final long now = System.currentTimeMillis();
     final var result = notificationTaskFilter.filter(sg, now);
-    final var anomalies = result.getAnomalies();
 
     /* Dispatch notifications */
     final NotificationPayloadApi payload = notificationPayloadBuilder.build(result);
@@ -156,11 +154,7 @@ public class NotificationTaskRunner implements TaskRunner {
     /* fire notifications */
     notificationDispatcher.dispatch(sg, payload);
 
-    /* Update anomalies */
-    for (final AnomalyDTO anomaly : anomalies) {
-      anomalyManager.update(anomaly.setNotified(true));
-    }
-    /* Record watermarks */
-    subscriptionGroupWatermarkManager.updateWatermarks(sg, anomalies);
+    /* post process, Update watermarks, etc once notification is successfully sent */
+    notificationTaskPostProcessor.postProcess(result);
   }
 }

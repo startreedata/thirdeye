@@ -25,6 +25,8 @@ import static ai.startree.thirdeye.IntegrationTestUtils.enumeratorNode;
 import static ai.startree.thirdeye.IntegrationTestUtils.forkJoinNode;
 import static ai.startree.thirdeye.PinotDataSourceManager.PINOT_DATASET_NAME;
 import static ai.startree.thirdeye.PinotDataSourceManager.PINOT_DATA_SOURCE_NAME;
+import static ai.startree.thirdeye.ThirdEyeTestClient.ALERT_LIST_TYPE;
+import static ai.startree.thirdeye.ThirdEyeTestClient.ANOMALIES_LIST_TYPE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
@@ -96,8 +98,6 @@ import org.testng.annotations.Test;
  */
 public class HappyPathTest {
 
-  public static final GenericType<List<AnomalyApi>> ANOMALIES_LIST_TYPE = new GenericType<>() {};
-  public static final GenericType<List<AlertApi>> ALERT_LIST_TYPE = new GenericType<>() {};
   public static final String THRESHOLD_TEMPLATE_NAME = "startree-threshold";
   private static final Logger log = LoggerFactory.getLogger(HappyPathTest.class);
 

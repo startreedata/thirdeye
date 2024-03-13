@@ -22,6 +22,8 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,34 +32,64 @@ import org.testcontainers.containers.MySQLContainer;
 public class MySqlTestDatabase {
 
   private static final Logger log = LoggerFactory.getLogger(MySqlTestDatabase.class);
+  private static final String SYS_PROP_LOCAL_MYSQL_INSTANCE = "thirdeye.test.useLocalMysqlInstance";
   private static final AtomicInteger counter = new AtomicInteger(0);
   private static final String MYSQL_DOCKER_IMAGE = "mysql:8.0";
 
-  public static final String USERNAME = "root";
-  public static final String PASSWORD = "test";
-  public static String jdbcUrl = null;
+  private static final String USERNAME = "root";
+  private static final String PASSWORD = "test";
+  private static String jdbcUrl = null;
   private static String defaultDatabaseName = null;
 
   private static MySQLContainer<?> persistenceDbContainer = null;
   private static DatabaseConfiguration sharedConfiguration = null;
 
   public static DatabaseConfiguration sharedDatabaseConfiguration() {
+    if (useLocalMysqlInstance()) {
+      log.warn("Using local mysql instance for testing!");
+      return localMysqlDatabaseConfiguration();
+    }
+
     if (sharedConfiguration == null) {
       sharedConfiguration = newDatabaseConfiguration();
     }
     return sharedConfiguration;
   }
 
+  public static boolean useLocalMysqlInstance() {
+    final String property = System.getProperty(SYS_PROP_LOCAL_MYSQL_INSTANCE);
+    return property != null;
+  }
+
+  public static String databaseName(final String jdbcUrl) {
+    final String regex = ".*/([^/?]+)(\\?.*)?";
+    final Matcher matcher = Pattern.compile(regex).matcher(jdbcUrl);
+    if (matcher.find()) {
+      // Return the captured group, which is the database name
+      return matcher.group(1);
+    }
+    return null;
+  }
+
   public static void cleanSharedDatabase() {
-    if (sharedConfiguration == null) {
+    DatabaseConfiguration dbConfig = null;
+    if (useLocalMysqlInstance()) {
+      dbConfig = localMysqlDatabaseConfiguration();
+    } else if (sharedConfiguration != null) {
+      dbConfig = sharedConfiguration;
+    }
+
+    if (dbConfig == null) {
       return;
     }
     try {
-      final Connection connection = DriverManager.getConnection(sharedConfiguration.getUrl(),
-          sharedConfiguration.getUser(),
-          sharedConfiguration.getPassword());
+      final Connection connection = DriverManager.getConnection(dbConfig.getUrl(),
+          dbConfig.getUser(),
+          dbConfig.getPassword());
       final DatabaseMetaData metaData = connection.getMetaData();
-      ResultSet rs = metaData.getTables("test0", null, "%", null);
+
+      final String dbName = databaseName(dbConfig.getUrl());
+      final ResultSet rs = metaData.getTables(dbName, null, "%", null);
       while (rs.next()) {
         final String tableName = rs.getString(3);
         if (tableName.equals("flyway_schema_history")) {
@@ -66,8 +98,8 @@ public class MySqlTestDatabase {
         connection.createStatement().execute("DELETE FROM " + tableName + ";");
       }
       connection.close();
-    } catch (SQLException e) {
-      e.printStackTrace();
+    } catch (final SQLException e) {
+      log.error("Failed to clean shared database", e);
     }
   }
 
@@ -77,7 +109,7 @@ public class MySqlTestDatabase {
       persistenceDbContainer = new MySQLContainer<>(MYSQL_DOCKER_IMAGE).withPassword(PASSWORD);
       persistenceDbContainer.start();
       jdbcUrl = persistenceDbContainer.getJdbcUrl();
-      String[] elements = jdbcUrl.split("/");
+      final String[] elements = jdbcUrl.split("/");
       defaultDatabaseName = elements[elements.length - 1];
     }
 
@@ -89,7 +121,7 @@ public class MySqlTestDatabase {
       connection.createStatement().execute("CREATE DATABASE " + databaseName + ";");
       connection.createStatement().execute("SET GLOBAL max_connections = 300;");
       connection.close();
-    } catch (SQLException e) {
+    } catch (final SQLException e) {
       throw new RuntimeException(e);
     }
 
@@ -99,6 +131,19 @@ public class MySqlTestDatabase {
         .setUser(USERNAME)
         .setPassword(PASSWORD)
         .setDriver(persistenceDbContainer.getDriverClassName());
+  }
+
+  private static DatabaseConfiguration localMysqlDatabaseConfiguration() {
+    final String host = "localhost";
+    final int port = 3306;
+    final String dbName = "thirdeye_integration_test";
+
+    return new DatabaseConfiguration()
+        .setUrl("jdbc:mysql://" + host + ":" + port + "/" + dbName
+            + "?autoReconnect=true&allowPublicKeyRetrieval=true&sslMode=DISABLED")
+        .setUser("test_user")
+        .setPassword("pass")
+        .setDriver("com.mysql.cj.jdbc.Driver");
   }
 
   public static DataSource newDataSource(final DatabaseConfiguration dbConfig) throws Exception {
@@ -153,7 +198,7 @@ public class MySqlTestDatabase {
     try {
       final DataSource dataSource = newDataSource(configuration);
       return Guice.createInjector(new ThirdEyePersistenceModule(dataSource));
-    } catch (Exception e) {
+    } catch (final Exception e) {
       throw new RuntimeException(e);
     }
   }

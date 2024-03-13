@@ -1,0 +1,82 @@
+{
+  "name": "threshold-pageviews-daily-merge-3-15",
+  "description": "Daily Threshold Alert with mergeMaxGap = 3 days and mergeMaxDuration = 15 days",
+  "cron": "0 0 5 1/1 * ? *",
+  "template": {
+    "nodes": [
+      {
+        "name": "root",
+        "type": "PostProcessor",
+        "params": {
+          "type": "ANOMALY_MERGER",
+          "component.mergeMaxGap": "${mergeMaxGap}",
+          "component.mergeMaxDuration": "${mergeMaxDuration}"
+        },
+        "inputs": [
+          {
+            "sourcePlanNode": "detector"
+          }
+        ]
+      },
+      {
+        "name": "detector",
+        "type": "AnomalyDetector",
+        "params": {
+          "type": "THRESHOLD",
+          "component.monitoringGranularity": "${monitoringGranularity}",
+          "component.timestamp": "ts",
+          "component.metric": "met",
+          "component.max": "${max}",
+          "component.min": "${min}"
+        },
+        "inputs": [
+          {
+            "targetProperty": "current",
+            "sourcePlanNode": "currentDataFetcher",
+            "sourceProperty": "currentData"
+          }
+        ]
+      },
+      {
+        "name": "currentDataFetcher",
+        "type": "DataFetcher",
+        "params": {
+          "component.dataSource": "${dataSource}",
+          "component.tableName": "${dataset}",
+          "component.query": "SELECT __timeGroup(\"${timeColumn}\", '${timeColumnFormat}', '${monitoringGranularity}') as ts, ${aggregateFunction}(${metric}) as met FROM ${dataset} WHERE __timeFilter(\"${timeColumn}\", '${timeColumnFormat}') GROUP BY ts ORDER BY ts LIMIT 1000"
+        },
+        "outputs": [
+          {
+            "outputKey": "pinot",
+            "outputName": "currentData"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "datasource": {
+        "name": "${dataSource}"
+      },
+      "dataset": {
+        "name": "${dataset}"
+      },
+      "metric": {
+        "name": "${metric}"
+      },
+      "granularity": "${monitoringGranularity}"
+    }
+  },
+  "templateProperties": {
+    "dataSource": "PinotContainer",
+    "dataset": "pageviews",
+    "aggregateFunction": "sum",
+    "metric": "views",
+    "monitoringGranularity": "P1D",
+    "timeColumn": "AUTO",
+    "timeColumnFormat": "",
+    "max": "600000",
+    "min": "250000",
+    "mergeMaxGap": "P3D",
+    "mergeMaxDuration": "P15D"
+  }
+}

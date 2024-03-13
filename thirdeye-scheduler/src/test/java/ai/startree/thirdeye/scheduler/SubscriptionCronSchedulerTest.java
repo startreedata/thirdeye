@@ -61,7 +61,9 @@ public class SubscriptionCronSchedulerTest {
   @BeforeClass
   void setUp() throws SchedulerException {
     MockitoAnnotations.openMocks(this);
-    subscriptionCronScheduler = new SubscriptionCronScheduler(subscriptionGroupManager, scheduler);
+    subscriptionCronScheduler = new SubscriptionCronScheduler(subscriptionGroupManager,
+        scheduler,
+        new ThirdEyeSchedulerConfiguration());
     when(scheduler.getJobKeys(GroupMatcher.anyGroup())).thenReturn(new HashSet<>());
   }
 

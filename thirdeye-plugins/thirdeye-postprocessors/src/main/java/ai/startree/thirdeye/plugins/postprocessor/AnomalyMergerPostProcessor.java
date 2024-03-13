@@ -315,7 +315,7 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
       return;
     }
 
-    final List<AnomalyDTO> mergedAnomalies = merge(operatorAnomalies, detectionInterval);
+    final Set<AnomalyDTO> mergedAnomalies = merge(operatorAnomalies, detectionInterval);
     // TODO spyne Refactor. remove hack - operatorResult is not mutable - exploit list mutability
     //  to update the anomalies could silently bug if a protective copy is returned by an
     //  OperatorResult implementation
@@ -325,17 +325,21 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     operatorAnomalies.addAll(mergedAnomalies);
   }
 
-  protected List<AnomalyDTO> merge(final List<AnomalyDTO> operatorAnomalies,
+  protected Set<AnomalyDTO> merge(final List<AnomalyDTO> operatorAnomalies,
       final Interval detectionInterval) {
     final List<AnomalyDTO> persistenceAnomalies = retrieveRelevantAnomaliesFromDatabase(
         detectionInterval);
-    final List<AnomalyDTO> anomaliesToUpdate = vanishedAnomalies(operatorAnomalies,
+    
+    final Set<AnomalyDTO> anomaliesToUpdate = vanishedAnomalies(operatorAnomalies,
         persistenceAnomalies,
         detectionInterval);
-
-    // exclude vanished anomalies from merge operation
-    persistenceAnomalies.removeAll(anomaliesToUpdate);
-
+    if (!anomaliesToUpdate.isEmpty()) {
+      // exclude vanished anomalies from merge operation
+      // need to wrap in the emptiness test, because ArrayList.removeAll does not check if the collection is empty and loops through all elements if the input collection is empty
+      // TODO CYRIL -- all these array/set manipulations could be removed by merging some of the functions - for the moment focus is on readibility
+      persistenceAnomalies.removeAll(anomaliesToUpdate); 
+    }
+    
     final List<AnomalyDTO> mergedAnomalies = doMerge(operatorAnomalies, persistenceAnomalies);
     anomaliesToUpdate.addAll(mergedAnomalies);
 
@@ -350,10 +354,11 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
    * is now bigger than mergeMaxGap, is not split into 2 parents.
    * We consider this is an edge case, and in this case the parent anomaly is still valid.
    */
-  private List<AnomalyDTO> vanishedAnomalies(final List<AnomalyDTO> operatorAnomalies,
+  private Set<AnomalyDTO> vanishedAnomalies(final List<AnomalyDTO> operatorAnomalies,
       final List<AnomalyDTO> persistenceAnomalies,
       final Interval detectionInterval) {
-    final List<AnomalyDTO> vanishedAnomalies = new ArrayList<>();
+    // using LinkedHashSet is a convenience to make test and debugging simpler
+    final Set<AnomalyDTO> vanishedAnomalies = new LinkedHashSet<>(); 
     // first loop looks at the unitary anomalies (child or parent with no children)
     // check if unitary anomalies are found in the latest detection run, based on anomaly startTime
     final Set<Long> operatorAnomaliesStartTimes = operatorAnomalies.stream()

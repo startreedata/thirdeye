@@ -13,31 +13,22 @@
  */
 package ai.startree.thirdeye;
 
-import static ai.startree.thirdeye.DropwizardTestUtils.buildClient;
-import static ai.startree.thirdeye.DropwizardTestUtils.buildSupport;
 import static ai.startree.thirdeye.DropwizardTestUtils.loadAlertApi;
-import static ai.startree.thirdeye.HappyPathTest.ALERT_LIST_TYPE;
-import static ai.startree.thirdeye.HappyPathTest.ANOMALIES_LIST_TYPE;
 import static ai.startree.thirdeye.HappyPathTest.assert200;
 import static ai.startree.thirdeye.PinotDataSourceManager.PINOT_DATASET_NAME;
 import static ai.startree.thirdeye.PinotDataSourceManager.PINOT_DATA_SOURCE_NAME;
+import static ai.startree.thirdeye.ThirdEyeTestClient.ALERT_LIST_TYPE;
+import static ai.startree.thirdeye.ThirdEyeTestClient.ANOMALIES_LIST_TYPE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.aspect.TimeProvider;
-import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
-import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
-import ai.startree.thirdeye.datalayer.util.DatabaseConfiguration;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
-import io.dropwizard.testing.DropwizardTestSupport;
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.Future;
 import java.util.stream.Collectors;
-import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -61,6 +52,7 @@ import org.testng.annotations.Test;
  * IntelliJ does not use the pom surefire config: https://youtrack.jetbrains.com/issue/IDEA-52286
  */
 public class SchedulingTest {
+
   private static final Logger log = LoggerFactory.getLogger(SchedulingTest.class);
 
   private static final AlertApi ALERT_API;
@@ -83,14 +75,15 @@ public class SchedulingTest {
   static {
     try {
       ALERT_API = loadAlertApi("/scheduling/payloads/alert.json");
-    } catch (IOException e) {
+    } catch (final IOException e) {
       throw new RuntimeException(String.format("Could not load alert json: %s", e));
     }
   }
 
-  private DropwizardTestSupport<ThirdEyeServerConfiguration> SUPPORT;
-  private Client client;
-
+  private final ThirdEyeIntegrationTestSupport support = new ThirdEyeIntegrationTestSupport(
+      "scheduling/config/server.yaml"
+  );
+  private ThirdEyeTestClient client;
   private long alertId;
   private DataSourceApi pinotDataSourceApi;
 
@@ -99,40 +92,32 @@ public class SchedulingTest {
     // ensure time is controlled via the TimeProvider CLOCK - ie weaving is working correctly
     assertThat(CLOCK.isTimeMockWorking()).isTrue();
 
-    final Future<DataSourceApi> pinotDataSourceFuture = PinotDataSourceManager.getPinotDataSourceApi();
-    final DatabaseConfiguration dbConfiguration = MySqlTestDatabase.sharedDatabaseConfiguration();
-    // Setup plugins dir so ThirdEye can load it
-    IntegrationTestUtils.setupPluginsDirAbsolutePath();
-
-    SUPPORT = buildSupport(dbConfiguration, "scheduling/config/server.yaml");
-    SUPPORT.before();
-    client = buildClient("scheduling-test-client", SUPPORT);
-    pinotDataSourceApi = pinotDataSourceFuture.get();
+    support.setup();
+    pinotDataSourceApi = support.getPinotDataSourceApi();
+    client = support.getClient();
   }
 
   @AfterClass(alwaysRun = true)
   public void afterClass() {
     CLOCK.useSystemTime();
-    log.info("Stopping Thirdeye at port: {}", SUPPORT.getLocalPort());
-    SUPPORT.after();
-    MySqlTestDatabase.cleanSharedDatabase();
+    support.tearDown();
   }
 
   @Test
   public void setUpData() {
-    Response response = request("internal/ping").get();
+    Response response = client.request("internal/ping").get();
     assert200(response);
 
     // create datasource
-    response = request("api/data-sources")
+    response = client.request("api/data-sources")
         .post(Entity.json(List.of(pinotDataSourceApi)));
     assert200(response);
 
     // create dataset
-    MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
+    final MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
     formData.add("dataSourceName", PINOT_DATA_SOURCE_NAME);
     formData.add("datasetName", PINOT_DATASET_NAME);
-    response = request("api/data-sources/onboard-dataset/")
+    response = client.request("api/data-sources/onboard-dataset/")
         .post(Entity.form(formData));
     assert200(response);
   }
@@ -142,37 +127,37 @@ public class SchedulingTest {
     // fix clock : time is now controlled manually
     CLOCK.useMockTime(MARCH_24_2020_15H33);
 
-    Response createResponse = request("api/alerts")
+    final Response createResponse = client.request("api/alerts")
         .post(Entity.json(List.of(ALERT_API)));
     assertThat(createResponse.getStatus()).isEqualTo(200);
-    List<AlertApi> alerts = createResponse.readEntity(ALERT_LIST_TYPE);
+    final List<AlertApi> alerts = createResponse.readEntity(ALERT_LIST_TYPE);
     alertId = alerts.get(0).getId();
 
     // time advancing should not impact lastTimestamp
     CLOCK.tick(5);
 
-    // check that lastTimestamp just after creation is 0
-    long alertLastTimestamp = getAlertLastTimestamp();
+    // check that lastTimestamp just after creation is set to the start of the dataset
+    final long alertLastTimestamp = getAlertLastTimestamp();
     assertThat(alertLastTimestamp).isEqualTo(PAGEVIEWS_DATASET_START_TIME);
   }
 
   @Test(dependsOnMethods = "testCreateAlertLastTimestamp", timeOut = 60000L)
   public void testOnboardingLastTimestamp() throws Exception {
     // wait for anomalies - proxy to know when the onboarding task has run
-    while (getAnomalies().size() == 0) {
+    while (getAnomalies().isEmpty()) {
       // see taskDriver server config for optimization
       Thread.sleep(1000);
     }
 
     // check that lastTimestamp is the endTime of the Onboarding task: March 21 1H
-    long alertLastTimestamp = getAlertLastTimestamp();
+    final long alertLastTimestamp = getAlertLastTimestamp();
     assertThat(alertLastTimestamp).isEqualTo(MARCH_21_2020_00H00);
   }
 
   @Test(dependsOnMethods = "testOnboardingLastTimestamp", timeOut = 60000L)
   public void testAfterDetectionCronLastTimestamp() throws InterruptedException {
     // get current number of anomalies
-    int numAnomaliesBeforeDetectionRun = getAnomalies().size();
+    final int numAnomaliesBeforeDetectionRun = getAnomalies().size();
 
     // advance detection time to March 22, 2020, 00:00:00 UTC
     // this should trigger the cron - and a new anomaly is expected on [March 21 - March 22]
@@ -188,14 +173,14 @@ public class SchedulingTest {
     }
 
     // check that lastTimestamp after detection is the runTime of the cron
-    long alertLastTimestamp = getAlertLastTimestamp();
+    final long alertLastTimestamp = getAlertLastTimestamp();
     assertThat(alertLastTimestamp).isEqualTo(MARCH_22_2020_00H00);
   }
 
   @Test(dependsOnMethods = "testAfterDetectionCronLastTimestamp", timeOut = 60000L)
   public void testSecondAnomalyIsMerged() throws InterruptedException {
     List<AnomalyApi> anomalies = getAnomalies();
-    int numAnomaliesBeforeDetectionRun = anomalies.size();
+    final int numAnomaliesBeforeDetectionRun = anomalies.size();
 
     // advance detection time to March 23, 2020, 00:00:00 UTC
     // this should trigger the cron - and a new anomaly is expected on [March 22 - March 23]
@@ -212,7 +197,7 @@ public class SchedulingTest {
     }
 
     // check that lastTimestamp after detection is the runTime of the cron
-    long alertLastTimestamp = getAlertLastTimestamp();
+    final long alertLastTimestamp = getAlertLastTimestamp();
     assertThat(alertLastTimestamp).isEqualTo(MARCH_23_2020_00H00);
 
     // find anomalies starting on MARCH 21 - there should be 2
@@ -229,24 +214,16 @@ public class SchedulingTest {
   }
 
   private List<AnomalyApi> getAnomalies() {
-    Response response = request("api/anomalies").get();
+    final Response response = client.request("api/anomalies").get();
     assert200(response);
     return response.readEntity(ANOMALIES_LIST_TYPE);
   }
 
   private long getAlertLastTimestamp() {
-    final Response getResponse = request("api/alerts/" + alertId).get();
+    final Response getResponse = client.request("api/alerts/" + alertId).get();
     assertThat(getResponse.getStatus()).isEqualTo(200);
     final AlertApi alert = getResponse.readEntity(AlertApi.class);
     return alert.getLastTimestamp().getTime();
-  }
-
-  private Builder request(final String urlFragment) {
-    return client.target(endPoint(urlFragment)).request();
-  }
-
-  private String endPoint(final String pathFragment) {
-    return String.format("http://localhost:%d/%s", SUPPORT.getLocalPort(), pathFragment);
   }
 }
 

@@ -24,6 +24,10 @@ metadata:
     component: {{ .Values.ui.name }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
+    {{- with .Values.ui.serviceLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- include "ui.validate.serviceLabels" . | nindent 0 }}
   annotations:
     {{- toYaml .Values.ui.serviceAnnotations | nindent 4 }}
 spec:

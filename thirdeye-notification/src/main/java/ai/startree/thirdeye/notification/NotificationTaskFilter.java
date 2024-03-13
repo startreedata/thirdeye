@@ -18,6 +18,7 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.bool;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.stream.Collectors.toSet;
 
+import ai.startree.thirdeye.alert.AlertDataRetriever;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
@@ -42,7 +43,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.joda.time.Interval;
-import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,12 +62,15 @@ public class NotificationTaskFilter {
 
   private final AnomalyManager anomalyManager;
   private final AlertManager alertManager;
+  private final AlertDataRetriever alertDataRetriever;
 
   @Inject
   public NotificationTaskFilter(final AnomalyManager anomalyManager,
-      final AlertManager alertManager) {
+      final AlertManager alertManager,
+      final AlertDataRetriever alertDataRetriever) {
     this.anomalyManager = anomalyManager;
     this.alertManager = alertManager;
+    this.alertDataRetriever = alertDataRetriever;
   }
 
   /**
@@ -100,9 +103,8 @@ public class NotificationTaskFilter {
         .format(Instant.ofEpochMilli(ts));
   }
 
-  private static long getMaxMergeGap(final AlertDTO alert) {
-    // TODO spyne determine max merge gap
-    return Period.seconds(1).toStandardDuration().getMillis();
+  private long getMaxMergeGap(final AlertDTO alert) {
+    return alertDataRetriever.getMergeMaxGap(alert).toStandardDuration().getMillis();
   }
 
   /**
@@ -123,12 +125,7 @@ public class NotificationTaskFilter {
         .map(alert -> new AlertAssociationDto().setAlert(alert))
         .collect(Collectors.toList());
   }
-
-  private static boolean isNotifyCompletedAnomaliesEnabled(final SubscriptionGroupDTO sg) {
-    // TODO spyne subscription group flag is set to true
-    return false;
-  }
-
+  
   /**
    * Find anomalies for the given subscription group given an end time.
    *
@@ -138,10 +135,20 @@ public class NotificationTaskFilter {
    *     subscription group, anomalies, completed anomalies and other metadata
    */
   public NotificationTaskFilterResult filter(final SubscriptionGroupDTO sg, final long endTime) {
+    final Set<AnomalyDTO> anomalies = filterAnomalies(sg, endTime);
+
+    final var ids = anomalies.stream()
+        .map(AnomalyDTO::getId)
+        .collect(toSet());
+
+    // remove anomalies that are already being notified
+    final Set<AnomalyDTO> completedAnomalies = filterCompletedAnomalies(sg);
+    completedAnomalies.removeIf(a -> ids.contains(a.getId()));
+
     return new NotificationTaskFilterResult()
         .setSubscriptionGroup(sg)
-        .setAnomalies(filterAnomalies(sg, endTime))
-        .setCompletedAnomalies(filterCompletedAnomalies(sg));
+        .setAnomalies(anomalies)
+        .setCompletedAnomalies(completedAnomalies);
   }
 
   /**
@@ -167,15 +174,12 @@ public class NotificationTaskFilter {
 
   @VisibleForTesting
   Set<AnomalyDTO> filterCompletedAnomalies(final SubscriptionGroupDTO sg) {
-    if (!isNotifyCompletedAnomaliesEnabled(sg)) {
-      // Do not notify completed anomalies
-      return Set.of();
-    }
     final List<AlertAssociationDto> alertAssociations = optional(sg.getAlertAssociations())
         .orElseGet(() -> migrateOlderSchema(sg));
 
     return alertAssociations.stream()
         .filter(aa -> isAlertActive(aa.getAlert().getId()))
+        .filter(aa -> aa.getAnomalyCompletionWatermark() != null)
         .map(this::buildAnomalyFilterCompletedAnomalies)
         .map(f -> filterAnomalies(f, sg.getId(), "completed anomalies"))
         .flatMap(Collection::stream)
@@ -251,17 +255,23 @@ public class NotificationTaskFilter {
         .filter(NotificationTaskFilter::shouldFilter)
         .collect(toSet());
 
-    LOG.info("Subscription Group: {} Alert: {} context: {}. "
-            + "{}/{} filtered. Created between {} and {} ({} and {} System Time)",
+    String createdMsg = "";
+    if (f.getCreateTimeWindow() != null) {
+      createdMsg = String.format("Created between %s and %s (%s and %s System Time)",
+          f.getCreateTimeWindow().getStartMillis(),
+          f.getCreateTimeWindow().getEndMillis(),
+          toFormattedDate(f.getCreateTimeWindow().getStartMillis()),
+          toFormattedDate(f.getCreateTimeWindow().getEndMillis()));
+    }
+
+    LOG.info("Subscription Group: {} Alert: {} context: {}. {}/{} filtered. {}",
         subscriptionGroupId,
         f.getAlertId(),
         logContext,
         anomaliesToBeNotified.size(),
         candidates.size(),
-        f.getCreateTimeWindow().getStartMillis(),
-        f.getCreateTimeWindow().getEndMillis(),
-        toFormattedDate(f.getCreateTimeWindow().getStartMillis()),
-        toFormattedDate(f.getCreateTimeWindow().getEndMillis()));
+        createdMsg);
+
 
     return anomaliesToBeNotified;
   }

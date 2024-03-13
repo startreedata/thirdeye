@@ -40,7 +40,7 @@ public class NotificationTaskFilterIntegrationTest {
   private static final long POINT_IN_TIME = System.currentTimeMillis();
   private AnomalyManager anomalyManager;
   private SubscriptionGroupManager subscriptionGroupManager;
-  private SubscriptionGroupWatermarkManager watermarkManager;
+  private NotificationTaskPostProcessor watermarkManager;
   private NotificationTaskFilter instance;
   private AlertManager alertManager;
 
@@ -89,7 +89,7 @@ public class NotificationTaskFilterIntegrationTest {
     final Injector injector = MySqlTestDatabase.sharedInjector();
     anomalyManager = injector.getInstance(AnomalyManager.class);
     subscriptionGroupManager = injector.getInstance(SubscriptionGroupManager.class);
-    watermarkManager = injector.getInstance(SubscriptionGroupWatermarkManager.class);
+    watermarkManager = injector.getInstance(NotificationTaskPostProcessor.class);
     alertManager = injector.getInstance(AlertManager.class);
 
     instance = injector.getInstance(NotificationTaskFilter.class);

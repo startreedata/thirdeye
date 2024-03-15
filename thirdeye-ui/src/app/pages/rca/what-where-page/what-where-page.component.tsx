@@ -20,8 +20,8 @@ import { InvestigationPreview } from "../../../components/rca/investigation-prev
 import { WizardBottomBar } from "../../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import { AppRouteRelative } from "../../../utils/routes/routes.util";
 import { InvestigationContext } from "../investigation-state-tracker-container-page/investigation-state-tracker.interfaces";
-import { TopContributorsPage } from "./top-contributors-page/top-contributors-page.component";
-import { HeatMapPage } from "./heat-map-page/heat-map-page.component";
+import { TopContributorsPage } from "../../../components/rca/top-contributors-section/top-contributors-section.component";
+import { HeatMapPage } from "../../../components/rca/heat-map-section/heat-map-section.component";
 import { BaselineOffsetSelection } from "../../../components/rca/analysis-tabs/baseline-offset-selection/baseline-offset-selection.component";
 import { PageContentsCardV1 } from "../../../platform/components";
 import { useGetAnomalyDimensionAnalysis } from "../../../rest/rca/rca.actions";

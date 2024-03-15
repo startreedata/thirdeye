@@ -12,14 +12,10 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+
 import { GetAnomalyDimensionAnalysis } from "../../../rest/rca/rca.interfaces";
 
-export interface HeatMapProps {
-    comparisonOffset: string;
-    dimensionsInOrder: string[];
-}
-
-export interface TopContributorsProps {
+export interface TopContributorsSectionProps {
     comparisonOffset: string;
     anomalyDimensionAnalysisFetch: GetAnomalyDimensionAnalysis;
 }

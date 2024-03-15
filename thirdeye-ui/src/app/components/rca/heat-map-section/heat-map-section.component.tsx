@@ -17,39 +17,39 @@ import { every, isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useOutletContext, useParams, useSearchParams } from "react-router-dom";
-import { EmptyStateSwitch } from "../../../../components/page-states/empty-state-switch/empty-state-switch.component";
-import { LoadingErrorStateSwitch } from "../../../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
-import { AnomalyFilterOption } from "../../../../components/rca/anomaly-dimension-analysis/anomaly-dimension-analysis.interfaces";
-import { DimensionSearchAutocomplete } from "../../../../components/rca/heat-map/dimension-search-automcomplete/dimension-search-autocomplete.component";
-import { HeatMap } from "../../../../components/rca/heat-map/heat-map.component";
-import { formatDimensionOptions } from "../../../../components/rca/heat-map/heat-map.utils";
-import { PreviewChart } from "../../../../components/rca/top-contributors-table/preview-chart/preview-chart.component";
+import { EmptyStateSwitch } from "../../page-states/empty-state-switch/empty-state-switch.component";
+import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
+import { AnomalyFilterOption } from "../anomaly-dimension-analysis/anomaly-dimension-analysis.interfaces";
+import { DimensionSearchAutocomplete } from "../heat-map/dimension-search-automcomplete/dimension-search-autocomplete.component";
+import { HeatMap } from "../heat-map/heat-map.component";
+import { formatDimensionOptions } from "../heat-map/heat-map.utils";
+import { PreviewChart } from "../top-contributors-table/preview-chart/preview-chart.component";
 import {
     PageContentsCardV1,
     SkeletonV1,
     useNotificationProviderV1,
-} from "../../../../platform/components";
-import { ActionStatus } from "../../../../rest/actions.interfaces";
+} from "../../../platform/components";
+import { ActionStatus } from "../../../rest/actions.interfaces";
 import {
     AnomalyBreakdown,
     SavedStateKeys,
-} from "../../../../rest/dto/rca.interfaces";
-import { useGetAnomalyMetricBreakdown } from "../../../../rest/rca/rca.actions";
-import { areFiltersEqual } from "../../../../utils/anomaly-dimension-analysis/anomaly-dimension-analysis";
-import { getFromSavedInvestigationOrDefault } from "../../../../utils/investigation/investigation.util";
-import { notifyIfErrors } from "../../../../utils/notifications/notifications.util";
+} from "../../../rest/dto/rca.interfaces";
+import { useGetAnomalyMetricBreakdown } from "../../../rest/rca/rca.actions";
+import { areFiltersEqual } from "../../../utils/anomaly-dimension-analysis/anomaly-dimension-analysis";
+import { getFromSavedInvestigationOrDefault } from "../../../utils/investigation/investigation.util";
+import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
 import {
     concatKeyValueWithEqual,
     deserializeKeyValuePair,
     serializeKeyValuePair,
-} from "../../../../utils/params/params.util";
-import { RootCauseAnalysisForAnomalyPageParams } from "../../../root-cause-analysis-for-anomaly-page/root-cause-analysis-for-anomaly-page.interfaces";
-import { InvestigationContext } from "../../investigation-state-tracker-container-page/investigation-state-tracker.interfaces";
-import { HeatMapProps } from "../what-where-page.interfaces";
+} from "../../../utils/params/params.util";
+import { RootCauseAnalysisForAnomalyPageParams } from "../../../pages/root-cause-analysis-for-anomaly-page/root-cause-analysis-for-anomaly-page.interfaces";
+import { InvestigationContext } from "../../../pages/rca/investigation-state-tracker-container-page/investigation-state-tracker.interfaces";
+import { HeatMapSectionProps } from "./heat-map-section.interfaces";
 
 const HEATMAP_FILTERS_URL_KEY = "heatmapFilters";
 
-export const HeatMapPage: FunctionComponent<HeatMapProps> = ({
+export const HeatMapPage: FunctionComponent<HeatMapSectionProps> = ({
     comparisonOffset,
     dimensionsInOrder,
 }) => {

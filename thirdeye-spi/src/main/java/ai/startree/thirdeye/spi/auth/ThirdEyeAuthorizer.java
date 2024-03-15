@@ -34,7 +34,6 @@ public interface ThirdEyeAuthorizer {
       AccessType accessType
   );
   
-  // REVIEW @suvodeep should we introduce a container? To at least have {id, name} for a namespace? 
   @NonNull List<String> listNamespaces(final ThirdEyePrincipal principal);
 
   interface ThirdEyeAuthorizerFactory extends

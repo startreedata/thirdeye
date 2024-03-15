@@ -12,10 +12,11 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Divider, Typography } from "@material-ui/core";
+import Box from "@material-ui/core/Box";
+import Divider from "@material-ui/core/Divider";
+import Typography from "@material-ui/core/Typography";
 import SortByAlphaIcon from "@material-ui/icons/SortByAlpha";
 import BarChartIcon from "@material-ui/icons/BarChart";
-
 import { HierarchyNode } from "d3-hierarchy";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { Treemap } from "../../visualizations/treemap/treemap.component";

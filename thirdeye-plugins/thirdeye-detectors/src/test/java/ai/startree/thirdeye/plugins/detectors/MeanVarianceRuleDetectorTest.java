@@ -13,6 +13,10 @@
  */
 package ai.startree.thirdeye.plugins.detectors;
 
+import static ai.startree.thirdeye.plugins.detectors.DstTestUtils.BACKWARD_CLOCK_DATA_INPUT;
+import static ai.startree.thirdeye.plugins.detectors.DstTestUtils.BACKWARD_CLOK_DETECTION_INTERVAL;
+import static ai.startree.thirdeye.plugins.detectors.DstTestUtils.FORWARD_CLOCK_DATA_INPUT;
+import static ai.startree.thirdeye.plugins.detectors.DstTestUtils.FORWARD_CLOK_DETECTION_INTERVAL;
 import static ai.startree.thirdeye.plugins.detectors.MeanVarianceRuleDetector.computeSteps;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -26,6 +30,9 @@ import ai.startree.thirdeye.spi.detection.AnomalyDetectorResult;
 import ai.startree.thirdeye.spi.detection.Pattern;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.SimpleDataTable;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import org.assertj.core.data.Offset;
@@ -331,6 +338,82 @@ public class MeanVarianceRuleDetectorTest {
             BooleanSeries.TRUE, // change is up
             BooleanSeries.TRUE)); // change is down
     assertThat(outputAnomalySeries).isEqualTo(expectedAnomalySeries);
+  }
+
+  public static long epoch(final String dateStr) throws ParseException {
+    final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+    final Date date = df.parse(dateStr);
+    return date.getTime();
+  }
+
+  @Test
+  public void testWithDstAdvanceClock() {
+    // DST forward with a 15 minutes granularity 
+    Map<String, DataTable> timeSeriesMap = new HashMap<>();
+    final DataFrame currentDf = FORWARD_CLOCK_DATA_INPUT.copy(); 
+    timeSeriesMap.put(AnomalyDetector.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
+
+    MeanVarianceRuleDetectorSpec spec = new MeanVarianceRuleDetectorSpec();
+    spec.setMonitoringGranularity("PT15M");
+    spec.setLookbackPeriod("PT3H");
+    spec.setSeasonalityPeriod("PT0S");
+    spec.setSensitivity(0);
+    MeanVarianceRuleDetector detector = new MeanVarianceRuleDetector();
+    detector.init(spec);
+
+    AnomalyDetectorResult output = detector.runDetection(FORWARD_CLOK_DETECTION_INTERVAL, timeSeriesMap);
+    // check everything in the dataframe
+    DataFrame outputDf = output.getDataFrame();
+
+    LongSeries outputTimeSeries = outputDf.getLongs(Constants.COL_TIME);
+    LongSeries expectedTimeSeries = currentDf.getLongs(Constants.COL_TIME);
+    assertThat(outputTimeSeries).isEqualTo(expectedTimeSeries);
+
+    for (int i =0; i<12; i++) {
+      assertThat(outputDf.getDouble(Constants.COL_VALUE, i)).isNaN();
+    }
+    assertThat(outputDf.getDouble(Constants.COL_VALUE, 12)).isCloseTo( 2.69,Offset.offset(0.01));
+    assertThat(outputDf.getDouble(Constants.COL_VALUE, 13)).isCloseTo( 2.69,Offset.offset(0.01));
+    assertThat(outputDf.getDouble(Constants.COL_VALUE, 14)).isCloseTo( 2.69,Offset.offset(0.01));
+    assertThat(outputDf.getDouble(Constants.COL_VALUE, 15)).isCloseTo( 2.68,Offset.offset(0.01));
+    assertThat(outputDf.getDouble(Constants.COL_VALUE, 16)).isCloseTo( 2.67,Offset.offset(0.01));
+  }
+
+  @Test
+  public void testWithDstBackwardClock() {
+    // DST backward with a 15 minutes granularity
+    Map<String, DataTable> timeSeriesMap = new HashMap<>();
+    final DataFrame currentDf = BACKWARD_CLOCK_DATA_INPUT.copy();
+    timeSeriesMap.put(AnomalyDetector.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
+
+    MeanVarianceRuleDetectorSpec spec = new MeanVarianceRuleDetectorSpec();
+    spec.setMonitoringGranularity("PT15M");
+    spec.setLookbackPeriod("PT3H");
+    spec.setSeasonalityPeriod("PT0S");
+    spec.setSensitivity(0);
+    MeanVarianceRuleDetector detector = new MeanVarianceRuleDetector();
+    detector.init(spec);
+
+    AnomalyDetectorResult output = detector.runDetection(BACKWARD_CLOK_DETECTION_INTERVAL, timeSeriesMap);
+    // check everything in the dataframe
+    DataFrame outputDf = output.getDataFrame();
+
+    LongSeries outputTimeSeries = outputDf.getLongs(Constants.COL_TIME);
+    LongSeries expectedTimeSeries = currentDf.getLongs(Constants.COL_TIME);
+    assertThat(outputTimeSeries).isEqualTo(expectedTimeSeries);
+    
+    for (int i =0; i<12; i++) {
+      assertThat(outputDf.getDouble(Constants.COL_VALUE, i)).isNaN();
+    }
+    assertThat(outputDf.getDouble(Constants.COL_VALUE, 12)).isCloseTo( 2.69,Offset.offset(0.01));
+    assertThat(outputDf.getDouble(Constants.COL_VALUE, 13)).isCloseTo( 2.69,Offset.offset(0.01));
+    assertThat(outputDf.getDouble(Constants.COL_VALUE, 14)).isCloseTo( 2.69,Offset.offset(0.01));
+    assertThat(outputDf.getDouble(Constants.COL_VALUE, 15)).isCloseTo( 2.68,Offset.offset(0.01));
+    assertThat(outputDf.getDouble(Constants.COL_VALUE, 16)).isCloseTo( 2.67,Offset.offset(0.01));
+    assertThat(outputDf.getDouble(Constants.COL_VALUE, 17)).isCloseTo( 2.68,Offset.offset(0.01));
+    assertThat(outputDf.getDouble(Constants.COL_VALUE, 18)).isCloseTo( 2.70,Offset.offset(0.01));
+    assertThat(outputDf.getDouble(Constants.COL_VALUE, 19)).isCloseTo( 2.71,Offset.offset(0.01));
+    assertThat(outputDf.getDouble(Constants.COL_VALUE, 20)).isCloseTo( 2.73,Offset.offset(0.01));
   }
 
   private static void assertThatContainsExactlyOrNan(final double[] values,

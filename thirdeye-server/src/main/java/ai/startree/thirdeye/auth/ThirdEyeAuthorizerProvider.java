@@ -20,6 +20,7 @@ import ai.startree.thirdeye.spi.auth.ResourceIdentifier;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import java.util.List;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * AccessControlProvider serves as a mutable layer between Guice bindings and the access control
@@ -76,7 +77,7 @@ public class ThirdEyeAuthorizerProvider implements ThirdEyeAuthorizer {
   }
 
   @Override
-  public List<String> listNamespaces(final ThirdEyePrincipal principal) {
+  public @NonNull List<String> listNamespaces(final ThirdEyePrincipal principal) {
     return getAccessControl().listNamespaces(principal);
   }
 
@@ -89,7 +90,7 @@ public class ThirdEyeAuthorizerProvider implements ThirdEyeAuthorizer {
     }
 
     @Override
-    public List<String> listNamespaces(final ThirdEyePrincipal principal) {
+    public @NonNull List<String> listNamespaces(final ThirdEyePrincipal principal) {
       return List.of();
     }
   }
@@ -103,7 +104,7 @@ public class ThirdEyeAuthorizerProvider implements ThirdEyeAuthorizer {
     }
 
     @Override
-    public List<String> listNamespaces(final ThirdEyePrincipal principal) {
+    public @NonNull List<String> listNamespaces(final ThirdEyePrincipal principal) {
       return List.of();
     }
   }

@@ -34,7 +34,9 @@ public interface ThirdEyeAuthorizer {
       AccessType accessType
   );
   
-  @NonNull List<String> listNamespaces(final ThirdEyePrincipal principal);
+  default @NonNull List<String> listNamespaces(final ThirdEyePrincipal principal) {
+    throw new UnsupportedOperationException("listNamespaces is not implemented. Cannot enforce namespace in all entities.");
+  }
 
   interface ThirdEyeAuthorizerFactory extends
       PluginServiceFactory<ThirdEyeAuthorizer, Map<String, Object>> {}

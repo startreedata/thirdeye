@@ -64,8 +64,13 @@ public class ResourceUtils {
 
   @SuppressWarnings("unused")
   public static void authorize(final boolean condition) {
+    authorize(condition, "Access Denied.");
+  }
+
+  @SuppressWarnings("unused")
+  public static void authorize(final boolean condition, final String errorMessage) {
     if (!condition) {
-      throw new ForbiddenException("Access Denied.");  // throw 403
+      throw new ForbiddenException(errorMessage);  // throw 403
     }
   }
 

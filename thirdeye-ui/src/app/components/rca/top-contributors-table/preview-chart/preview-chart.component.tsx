@@ -134,7 +134,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
             .then((dataFromRequests) => {
                 setFilteredAlertEvaluation(
                     dataFromRequests.map((alertEval, idx) => {
-                        return [alertEval, dimensionCombinations[idx]];
+                        return [alertEval, dimensionCombinations?.[idx]];
                     })
                 );
             })
@@ -167,7 +167,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
 
         seriesForFiltered.forEach((series, idx) => {
             series.color = getColorForDimensionCombo(
-                dimensionCombinations[idx]
+                dimensionCombinations?.[idx] || []
             );
         });
 

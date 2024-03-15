@@ -29,7 +29,6 @@ import { HeatMap } from "../heat-map/heat-map.component";
 import { formatDimensionOptions } from "../heat-map/heat-map.utils";
 import { PreviewChart } from "../top-contributors-table/preview-chart/preview-chart.component";
 import {
-    PageContentsCardV1,
     SkeletonV1,
     useNotificationProviderV1,
 } from "../../../platform/components";
@@ -50,6 +49,12 @@ import {
 import { RootCauseAnalysisForAnomalyPageParams } from "../../../pages/root-cause-analysis-for-anomaly-page/root-cause-analysis-for-anomaly-page.interfaces";
 import { InvestigationContext } from "../../../pages/rca/investigation-state-tracker-container-page/investigation-state-tracker.interfaces";
 import { HeatMapSectionProps } from "./heat-map-section.interfaces";
+import {
+    Accordion,
+    AccordionDetails,
+    AccordionSummary,
+} from "@material-ui/core";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 
 const HEATMAP_FILTERS_URL_KEY = "heatmapFilters";
 
@@ -170,95 +175,108 @@ export const HeatMapSection: FunctionComponent<HeatMapSectionProps> = ({
     };
 
     return (
-        <PageContentsCardV1>
-            <Grid container>
-                <Grid item xs={12}>
-                    <Typography variant="h5">
-                        {t("label.heatmap-and-dimension-drills")}
-                    </Typography>
-                    <Typography variant="body2">
-                        {t(
-                            "message.represents-the-frequency-and-severity-of-a-change"
-                        )}
-                    </Typography>
-                </Grid>
+        <Accordion defaultExpanded square variant="outlined">
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Typography variant="h5">
+                    {t("label.heatmap-and-dimension-drills")}
+                </Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+                <Grid container>
+                    <Grid item xs={12}>
+                        <Typography variant="body2">
+                            {t(
+                                "message.represents-the-frequency-and-severity-of-a-change"
+                            )}
+                        </Typography>
+                    </Grid>
 
-                <Grid item xs={12}>
-                    <DimensionSearchAutocomplete
-                        anomalyFilters={anomalyFilters}
-                        heatMapData={heatMapData as AnomalyBreakdown}
-                        onFilterChange={handleFilterChange}
-                    />
-                    <LoadingErrorStateSwitch
-                        isError={
-                            heatMapDataRequestStatus === ActionStatus.Error
-                        }
-                        isLoading={
-                            heatMapDataRequestStatus === ActionStatus.Initial ||
-                            heatMapDataRequestStatus === ActionStatus.Working
-                        }
-                        loadingState={
-                            <Box pb={2} pt={2}>
-                                <SkeletonV1
-                                    animation="pulse"
-                                    height={lastTreemapHeight}
-                                    variant="rect"
-                                />
-                            </Box>
-                        }
-                    >
-                        <EmptyStateSwitch
-                            emptyState={
-                                <Box pb={20} pt={20}>
-                                    <Typography align="center" variant="body1">
-                                        {t(
-                                            "message.no-data-available-try-a-different-set-of-filters"
-                                        )}
-                                    </Typography>
+                    <Grid item xs={12}>
+                        <DimensionSearchAutocomplete
+                            anomalyFilters={anomalyFilters}
+                            heatMapData={heatMapData as AnomalyBreakdown}
+                            onFilterChange={handleFilterChange}
+                        />
+                        <LoadingErrorStateSwitch
+                            isError={
+                                heatMapDataRequestStatus === ActionStatus.Error
+                            }
+                            isLoading={
+                                heatMapDataRequestStatus ===
+                                    ActionStatus.Initial ||
+                                heatMapDataRequestStatus ===
+                                    ActionStatus.Working
+                            }
+                            loadingState={
+                                <Box pb={2} pt={2}>
+                                    <SkeletonV1
+                                        animation="pulse"
+                                        height={lastTreemapHeight}
+                                        variant="rect"
+                                    />
                                 </Box>
                             }
-                            isEmpty={
-                                !heatMapData ||
-                                isEmpty(
-                                    formatDimensionOptions(
-                                        heatMapData as AnomalyBreakdown
-                                    )
-                                )
-                            }
                         >
-                            <HeatMap
-                                anomalyFilters={anomalyFilters}
-                                dimensionsInOrder={dimensionsInOrder}
-                                heatMapData={heatMapData as AnomalyBreakdown}
-                                onFilterChange={handleFilterChange}
-                                onHeightChange={setLastTreemapHeight}
-                            />
-                        </EmptyStateSwitch>
-
-                        <Box pt={2}>
-                            <PreviewChart
-                                alertInsight={alertInsight}
-                                anomaly={anomaly}
-                                dimensionCombinations={
-                                    isEmpty(anomalyFilters)
-                                        ? []
-                                        : [anomalyFilters]
+                            <EmptyStateSwitch
+                                emptyState={
+                                    <Box pb={20} pt={20}>
+                                        <Typography
+                                            align="center"
+                                            variant="body1"
+                                        >
+                                            {t(
+                                                "message.no-data-available-try-a-different-set-of-filters"
+                                            )}
+                                        </Typography>
+                                    </Box>
+                                }
+                                isEmpty={
+                                    !heatMapData ||
+                                    isEmpty(
+                                        formatDimensionOptions(
+                                            heatMapData as AnomalyBreakdown
+                                        )
+                                    )
                                 }
                             >
-                                <Button
-                                    color="primary"
-                                    disabled={isEmpty([anomalyFilters])}
-                                    onClick={
-                                        handleAddDimensionsToInvestigationClick
+                                <HeatMap
+                                    anomalyFilters={anomalyFilters}
+                                    dimensionsInOrder={dimensionsInOrder}
+                                    heatMapData={
+                                        heatMapData as AnomalyBreakdown
+                                    }
+                                    onFilterChange={handleFilterChange}
+                                    onHeightChange={setLastTreemapHeight}
+                                />
+                            </EmptyStateSwitch>
+
+                            <Box pt={2}>
+                                <PreviewChart
+                                    alertInsight={alertInsight}
+                                    anomaly={anomaly}
+                                    dimensionCombinations={
+                                        isEmpty(anomalyFilters)
+                                            ? []
+                                            : [anomalyFilters]
                                     }
                                 >
-                                    {t("label.add-dimensions-to-investigation")}
-                                </Button>
-                            </PreviewChart>
-                        </Box>
-                    </LoadingErrorStateSwitch>
+                                    <Button
+                                        color="primary"
+                                        disabled={isEmpty([anomalyFilters])}
+                                        onClick={
+                                            handleAddDimensionsToInvestigationClick
+                                        }
+                                    >
+                                        {t(
+                                            "label.add-dimensions-to-investigation"
+                                        )}
+                                    </Button>
+                                </PreviewChart>
+                            </Box>
+                        </LoadingErrorStateSwitch>
+                    </Grid>
                 </Grid>
-            </Grid>
-        </PageContentsCardV1>
+            </AccordionDetails>
+        </Accordion>
     );
 };

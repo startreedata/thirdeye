@@ -56,46 +56,50 @@ export const WhatWherePage: FunctionComponent = () => {
             </Grid>
             <Grid item xs={12}>
                 <PageContentsCardV1>
-                    <Grid item xs={12}>
-                        <Grid
-                            container
-                            alignItems="center"
-                            justifyContent="space-between"
-                        >
-                            <Grid item>
-                                {t(
-                                    "message.select-the-top-contributors-to-see-the-dimensions"
-                                )}
-                            </Grid>
-                            <Grid item>
-                                <BaselineOffsetSelection
-                                    baselineOffset={comparisonOffset}
-                                    label={t(
-                                        "label.dimensions-changed-from-the-last"
+                    <Grid container>
+                        <Grid item xs={12}>
+                            <Grid
+                                container
+                                alignItems="center"
+                                justifyContent="space-between"
+                            >
+                                <Grid item>
+                                    {t(
+                                        "message.select-the-top-contributors-to-see-the-dimensions"
                                     )}
-                                    onBaselineOffsetChange={
-                                        handleBaselineChange
-                                    }
-                                />
+                                </Grid>
+
+                                <Grid item>
+                                    <BaselineOffsetSelection
+                                        baselineOffset={comparisonOffset}
+                                        label={t(
+                                            "label.dimensions-changed-from-the-last"
+                                        )}
+                                        onBaselineOffsetChange={
+                                            handleBaselineChange
+                                        }
+                                    />
+                                </Grid>
                             </Grid>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <TopContributorsSection
+                                anomalyDimensionAnalysisFetch={
+                                    anomalyDimensionAnalysisFetch
+                                }
+                                comparisonOffset={comparisonOffset}
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <HeatMapSection
+                                comparisonOffset={comparisonOffset}
+                                dimensionsInOrder={dimensionsInOrder}
+                            />
                         </Grid>
                     </Grid>
                 </PageContentsCardV1>
             </Grid>
-            <Grid item xs={12}>
-                <TopContributorsSection
-                    anomalyDimensionAnalysisFetch={
-                        anomalyDimensionAnalysisFetch
-                    }
-                    comparisonOffset={comparisonOffset}
-                />
-            </Grid>
-            <Grid item xs={12}>
-                <HeatMapSection
-                    comparisonOffset={comparisonOffset}
-                    dimensionsInOrder={dimensionsInOrder}
-                />
-            </Grid>
+
             <Grid item xs={12}>
                 <InvestigationPreview
                     alertInsight={context.alertInsight}

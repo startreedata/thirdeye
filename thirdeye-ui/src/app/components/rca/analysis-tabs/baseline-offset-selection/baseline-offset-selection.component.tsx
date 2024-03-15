@@ -91,7 +91,7 @@ export const BaselineOffsetSelection: FunctionComponent<BaselineOffsetSelectionP
                     <ButtonGroup color="primary">
                         <TextField
                             required
-                            inputProps={{ style: { maxWidth: "50px" } }}
+                            inputProps={{ style: { maxWidth: "30px" } }}
                             size="small"
                             type="number"
                             value={offsetValue}
@@ -112,7 +112,7 @@ export const BaselineOffsetSelection: FunctionComponent<BaselineOffsetSelectionP
                                     inputProps={{
                                         ...params.inputProps,
                                         style: {
-                                            minWidth: "50px",
+                                            minWidth: "30px",
                                         },
                                     }}
                                     variant="outlined"
@@ -129,6 +129,7 @@ export const BaselineOffsetSelection: FunctionComponent<BaselineOffsetSelectionP
                         <Button
                             color="primary"
                             disabled={isSetButtonDisabled}
+                            size="small"
                             variant="outlined"
                             onClick={handleSetClick}
                         >

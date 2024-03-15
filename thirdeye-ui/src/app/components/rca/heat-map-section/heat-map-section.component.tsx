@@ -53,7 +53,7 @@ import { HeatMapSectionProps } from "./heat-map-section.interfaces";
 
 const HEATMAP_FILTERS_URL_KEY = "heatmapFilters";
 
-export const HeatMapPage: FunctionComponent<HeatMapSectionProps> = ({
+export const HeatMapSection: FunctionComponent<HeatMapSectionProps> = ({
     comparisonOffset,
     dimensionsInOrder,
 }) => {

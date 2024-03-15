@@ -45,7 +45,7 @@ import { RootCauseAnalysisForAnomalyPageParams } from "../../../pages/root-cause
 import { InvestigationContext } from "../../../pages/rca/investigation-state-tracker-container-page/investigation-state-tracker.interfaces";
 import { TopContributorsSectionProps } from "./top-contributors-section.interfaces";
 
-export const TopContributorsPage: FunctionComponent<TopContributorsSectionProps> =
+export const TopContributorsSection: FunctionComponent<TopContributorsSectionProps> =
     ({ comparisonOffset, anomalyDimensionAnalysisFetch }) => {
         const { notify } = useNotificationProviderV1();
         const { t } = useTranslation();

@@ -135,103 +135,99 @@ export const TopContributorsSection: FunctionComponent<TopContributorsSectionPro
         };
 
         return (
-            <>
-                <Grid item xs={12}>
-                    <PageContentsCardV1>
-                        <Grid container>
-                            <Grid item xs={12}>
-                                <Typography variant="h5">
-                                    {t("label.top-contributors")}
-                                </Typography>
-                                <Typography variant="body2">
-                                    {t(
-                                        "message.review-the-recommended-dimension-combinations"
-                                    )}
-                                </Typography>
-                            </Grid>
+            <PageContentsCardV1>
+                <Grid container>
+                    <Grid item xs={12}>
+                        <Typography variant="h5">
+                            {t("label.top-contributors")}
+                        </Typography>
+                        <Typography variant="body2">
+                            {t(
+                                "message.review-the-recommended-dimension-combinations"
+                            )}
+                        </Typography>
+                    </Grid>
 
-                            <Grid item xs={12}>
-                                <LoadingErrorStateSwitch
-                                    isError={
-                                        anomalyDimensionAnalysisReqStatus ===
-                                        ActionStatus.Error
-                                    }
-                                    isLoading={
-                                        anomalyDimensionAnalysisReqStatus ===
-                                            ActionStatus.Initial ||
-                                        anomalyDimensionAnalysisReqStatus ===
-                                            ActionStatus.Working
-                                    }
-                                    loadingState={
-                                        <Box pb={2} pt={2}>
-                                            <SkeletonV1
-                                                animation="pulse"
-                                                height={300}
-                                                variant="rect"
-                                            />
-                                        </Box>
-                                    }
-                                >
-                                    <EmptyStateSwitch
-                                        emptyState={
-                                            <Box pb={20} pt={20}>
-                                                <NoDataIndicator
-                                                    text={
-                                                        anomalyDimensionAnalysisData
-                                                            ?.analysisRunInfo
-                                                            ?.message || ""
-                                                    }
-                                                />
-                                            </Box>
-                                        }
-                                        isEmpty={
-                                            !anomalyDimensionAnalysisData
-                                                ?.analysisRunInfo?.success
-                                        }
-                                    >
-                                        <TopContributorsTable
-                                            alertInsight={alertInsight}
-                                            anomaly={anomaly}
-                                            anomalyDimensionAnalysisData={
-                                                anomalyDimensionAnalysisData as AnomalyDimensionAnalysisData
-                                            }
-                                            chartTimeSeriesFilterSet={
-                                                chartTimeSeriesFilterSet
-                                            }
-                                            comparisonOffset={comparisonOffset}
-                                            onCheckClick={
-                                                handleDimensionCombinationClick
+                    <Grid item xs={12}>
+                        <LoadingErrorStateSwitch
+                            isError={
+                                anomalyDimensionAnalysisReqStatus ===
+                                ActionStatus.Error
+                            }
+                            isLoading={
+                                anomalyDimensionAnalysisReqStatus ===
+                                    ActionStatus.Initial ||
+                                anomalyDimensionAnalysisReqStatus ===
+                                    ActionStatus.Working
+                            }
+                            loadingState={
+                                <Box pb={2} pt={2}>
+                                    <SkeletonV1
+                                        animation="pulse"
+                                        height={300}
+                                        variant="rect"
+                                    />
+                                </Box>
+                            }
+                        >
+                            <EmptyStateSwitch
+                                emptyState={
+                                    <Box pb={20} pt={20}>
+                                        <NoDataIndicator
+                                            text={
+                                                anomalyDimensionAnalysisData
+                                                    ?.analysisRunInfo
+                                                    ?.message || ""
                                             }
                                         />
-                                        <Box pt={2}>
-                                            <PreviewChart
-                                                alertInsight={alertInsight}
-                                                anomaly={anomaly}
-                                                dimensionCombinations={
-                                                    chartTimeSeriesFilterSet
-                                                }
-                                            >
-                                                <Button
-                                                    color="primary"
-                                                    disabled={isEmpty(
-                                                        chartTimeSeriesFilterSet
-                                                    )}
-                                                    onClick={
-                                                        handleAddDimensionsToInvestigationClick
-                                                    }
-                                                >
-                                                    {t(
-                                                        "label.add-dimensions-to-investigation"
-                                                    )}
-                                                </Button>
-                                            </PreviewChart>
-                                        </Box>
-                                    </EmptyStateSwitch>
-                                </LoadingErrorStateSwitch>
-                            </Grid>
-                        </Grid>
-                    </PageContentsCardV1>
+                                    </Box>
+                                }
+                                isEmpty={
+                                    !anomalyDimensionAnalysisData
+                                        ?.analysisRunInfo?.success
+                                }
+                            >
+                                <TopContributorsTable
+                                    alertInsight={alertInsight}
+                                    anomaly={anomaly}
+                                    anomalyDimensionAnalysisData={
+                                        anomalyDimensionAnalysisData as AnomalyDimensionAnalysisData
+                                    }
+                                    chartTimeSeriesFilterSet={
+                                        chartTimeSeriesFilterSet
+                                    }
+                                    comparisonOffset={comparisonOffset}
+                                    onCheckClick={
+                                        handleDimensionCombinationClick
+                                    }
+                                />
+                                <Box pt={2}>
+                                    <PreviewChart
+                                        alertInsight={alertInsight}
+                                        anomaly={anomaly}
+                                        dimensionCombinations={
+                                            chartTimeSeriesFilterSet
+                                        }
+                                    >
+                                        <Button
+                                            color="primary"
+                                            disabled={isEmpty(
+                                                chartTimeSeriesFilterSet
+                                            )}
+                                            onClick={
+                                                handleAddDimensionsToInvestigationClick
+                                            }
+                                        >
+                                            {t(
+                                                "label.add-dimensions-to-investigation"
+                                            )}
+                                        </Button>
+                                    </PreviewChart>
+                                </Box>
+                            </EmptyStateSwitch>
+                        </LoadingErrorStateSwitch>
+                    </Grid>
                 </Grid>
-            </>
+            </PageContentsCardV1>
         );
     };

@@ -19,7 +19,6 @@ import { useTranslation } from "react-i18next";
 import { useOutletContext, useParams, useSearchParams } from "react-router-dom";
 import { EmptyStateSwitch } from "../../../../components/page-states/empty-state-switch/empty-state-switch.component";
 import { LoadingErrorStateSwitch } from "../../../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
-import { BaselineOffsetSelection } from "../../../../components/rca/analysis-tabs/baseline-offset-selection/baseline-offset-selection.component";
 import { AnomalyFilterOption } from "../../../../components/rca/anomaly-dimension-analysis/anomaly-dimension-analysis.interfaces";
 import { DimensionSearchAutocomplete } from "../../../../components/rca/heat-map/dimension-search-automcomplete/dimension-search-autocomplete.component";
 import { HeatMap } from "../../../../components/rca/heat-map/heat-map.component";
@@ -46,10 +45,14 @@ import {
 } from "../../../../utils/params/params.util";
 import { RootCauseAnalysisForAnomalyPageParams } from "../../../root-cause-analysis-for-anomaly-page/root-cause-analysis-for-anomaly-page.interfaces";
 import { InvestigationContext } from "../../investigation-state-tracker-container-page/investigation-state-tracker.interfaces";
+import { HeatMapProps } from "../what-where-page.interfaces";
 
 const HEATMAP_FILTERS_URL_KEY = "heatmapFilters";
 
-export const HeatMapPage: FunctionComponent = () => {
+export const HeatMapPage: FunctionComponent<HeatMapProps> = ({
+    comparisonOffset,
+    dimensionsInOrder,
+}) => {
     const { notify } = useNotificationProviderV1();
     const { t } = useTranslation();
     const [searchParams, setSearchParams] = useSearchParams();
@@ -70,9 +73,6 @@ export const HeatMapPage: FunctionComponent = () => {
                 : [];
         }
     );
-    const [comparisonOffset, setComparisonOffset] = useState(() => {
-        return searchParams.get("baselineWeekOffset") ?? "P1W";
-    });
 
     const { investigation, anomaly, alertInsight, onInvestigationChange } =
         useOutletContext<InvestigationContext>();
@@ -128,12 +128,6 @@ export const HeatMapPage: FunctionComponent = () => {
         );
     }, [heatMapDataRequestStatus]);
 
-    const handleBaselineChange = (newValue: string): void => {
-        setComparisonOffset(newValue);
-        searchParams.set("baselineWeekOffset", newValue);
-        setSearchParams(searchParams);
-    };
-
     const handleAddDimensionsToInvestigationClick = (): void => {
         const currentDimensions = getFromSavedInvestigationOrDefault<
             AnomalyFilterOption[][]
@@ -172,130 +166,95 @@ export const HeatMapPage: FunctionComponent = () => {
     };
 
     return (
-        <>
-            <Grid item xs={12}>
-                <Typography variant="h4">{t("label.heatmap")}</Typography>
-                <Typography variant="body1">
-                    {t(
-                        "message.represents-the-frequency-and-severity-of-a-change"
-                    )}
-                </Typography>
-            </Grid>
-            <Grid item xs={12}>
-                <PageContentsCardV1>
-                    <Grid container>
-                        <Grid item xs={12}>
-                            <Grid
-                                container
-                                alignItems="center"
-                                justifyContent="space-between"
-                            >
-                                <Grid item xs>
-                                    {t(
-                                        "message.select-the-dimensions-below-to-drill-down-into-the"
-                                    )}
-                                </Grid>
-                                <Grid item xs>
-                                    <BaselineOffsetSelection
-                                        baselineOffset={comparisonOffset}
-                                        label={t(
-                                            "label.dimensions-changed-from-the-last"
-                                        )}
-                                        onBaselineOffsetChange={
-                                            handleBaselineChange
-                                        }
-                                    />
-                                </Grid>
-                            </Grid>
-                        </Grid>
+        <PageContentsCardV1>
+            <Grid container>
+                <Grid item xs={12}>
+                    <Typography variant="h5">
+                        {t("label.heatmap-and-dimension-drills")}
+                    </Typography>
+                    <Typography variant="body2">
+                        {t(
+                            "message.represents-the-frequency-and-severity-of-a-change"
+                        )}
+                    </Typography>
+                </Grid>
 
-                        <Grid item xs={12}>
-                            <DimensionSearchAutocomplete
+                <Grid item xs={12}>
+                    <DimensionSearchAutocomplete
+                        anomalyFilters={anomalyFilters}
+                        heatMapData={heatMapData as AnomalyBreakdown}
+                        onFilterChange={handleFilterChange}
+                    />
+                    <LoadingErrorStateSwitch
+                        isError={
+                            heatMapDataRequestStatus === ActionStatus.Error
+                        }
+                        isLoading={
+                            heatMapDataRequestStatus === ActionStatus.Initial ||
+                            heatMapDataRequestStatus === ActionStatus.Working
+                        }
+                        loadingState={
+                            <Box pb={2} pt={2}>
+                                <SkeletonV1
+                                    animation="pulse"
+                                    height={lastTreemapHeight}
+                                    variant="rect"
+                                />
+                            </Box>
+                        }
+                    >
+                        <EmptyStateSwitch
+                            emptyState={
+                                <Box pb={20} pt={20}>
+                                    <Typography align="center" variant="body1">
+                                        {t(
+                                            "message.no-data-available-try-a-different-set-of-filters"
+                                        )}
+                                    </Typography>
+                                </Box>
+                            }
+                            isEmpty={
+                                !heatMapData ||
+                                isEmpty(
+                                    formatDimensionOptions(
+                                        heatMapData as AnomalyBreakdown
+                                    )
+                                )
+                            }
+                        >
+                            <HeatMap
                                 anomalyFilters={anomalyFilters}
+                                dimensionsInOrder={dimensionsInOrder}
                                 heatMapData={heatMapData as AnomalyBreakdown}
                                 onFilterChange={handleFilterChange}
+                                onHeightChange={setLastTreemapHeight}
                             />
-                            <LoadingErrorStateSwitch
-                                isError={
-                                    heatMapDataRequestStatus ===
-                                    ActionStatus.Error
-                                }
-                                isLoading={
-                                    heatMapDataRequestStatus ===
-                                        ActionStatus.Initial ||
-                                    heatMapDataRequestStatus ===
-                                        ActionStatus.Working
-                                }
-                                loadingState={
-                                    <Box pb={2} pt={2}>
-                                        <SkeletonV1
-                                            animation="pulse"
-                                            height={lastTreemapHeight}
-                                            variant="rect"
-                                        />
-                                    </Box>
+                        </EmptyStateSwitch>
+
+                        <Box pt={2}>
+                            <PreviewChart
+                                alertInsight={alertInsight}
+                                anomaly={anomaly}
+                                dimensionCombinations={
+                                    isEmpty(anomalyFilters)
+                                        ? []
+                                        : [anomalyFilters]
                                 }
                             >
-                                <EmptyStateSwitch
-                                    emptyState={
-                                        <Box pb={20} pt={20}>
-                                            <Typography
-                                                align="center"
-                                                variant="body1"
-                                            >
-                                                {t(
-                                                    "message.no-data-available-try-a-different-set-of-filters"
-                                                )}
-                                            </Typography>
-                                        </Box>
-                                    }
-                                    isEmpty={
-                                        !heatMapData ||
-                                        isEmpty(
-                                            formatDimensionOptions(
-                                                heatMapData as AnomalyBreakdown
-                                            )
-                                        )
+                                <Button
+                                    color="primary"
+                                    disabled={isEmpty([anomalyFilters])}
+                                    onClick={
+                                        handleAddDimensionsToInvestigationClick
                                     }
                                 >
-                                    <HeatMap
-                                        anomalyFilters={anomalyFilters}
-                                        heatMapData={
-                                            heatMapData as AnomalyBreakdown
-                                        }
-                                        onFilterChange={handleFilterChange}
-                                        onHeightChange={setLastTreemapHeight}
-                                    />
-                                </EmptyStateSwitch>
-
-                                <Box pt={2}>
-                                    <PreviewChart
-                                        alertInsight={alertInsight}
-                                        anomaly={anomaly}
-                                        dimensionCombinations={
-                                            isEmpty(anomalyFilters)
-                                                ? []
-                                                : [anomalyFilters]
-                                        }
-                                    >
-                                        <Button
-                                            color="primary"
-                                            disabled={isEmpty([anomalyFilters])}
-                                            onClick={
-                                                handleAddDimensionsToInvestigationClick
-                                            }
-                                        >
-                                            {t(
-                                                "label.add-dimensions-to-investigation"
-                                            )}
-                                        </Button>
-                                    </PreviewChart>
-                                </Box>
-                            </LoadingErrorStateSwitch>
-                        </Grid>
-                    </Grid>
-                </PageContentsCardV1>
+                                    {t("label.add-dimensions-to-investigation")}
+                                </Button>
+                            </PreviewChart>
+                        </Box>
+                    </LoadingErrorStateSwitch>
+                </Grid>
             </Grid>
-        </>
+        </PageContentsCardV1>
     );
 };

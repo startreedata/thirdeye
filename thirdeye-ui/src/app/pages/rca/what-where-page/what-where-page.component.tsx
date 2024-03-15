@@ -13,19 +13,39 @@
  * the License.
  */
 import { Grid, Typography } from "@material-ui/core";
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Outlet, useOutletContext, useSearchParams } from "react-router-dom";
+import { useOutletContext, useSearchParams } from "react-router-dom";
 import { InvestigationPreview } from "../../../components/rca/investigation-preview/investigation-preview.component";
-import { WhatWhereNavigation } from "../../../components/rca/what-where-navigation/what-where-navigation.component";
 import { WizardBottomBar } from "../../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import { AppRouteRelative } from "../../../utils/routes/routes.util";
 import { InvestigationContext } from "../investigation-state-tracker-container-page/investigation-state-tracker.interfaces";
+import { TopContributorsPage } from "./top-contributors-page/top-contributors-page.component";
+import { HeatMapPage } from "./heat-map-page/heat-map-page.component";
+import { BaselineOffsetSelection } from "../../../components/rca/analysis-tabs/baseline-offset-selection/baseline-offset-selection.component";
+import { PageContentsCardV1 } from "../../../platform/components";
+import { useGetAnomalyDimensionAnalysis } from "../../../rest/rca/rca.actions";
 
 export const WhatWherePage: FunctionComponent = () => {
     const { t } = useTranslation();
-    const [searchParams] = useSearchParams();
+    const [searchParams, setSearchParams] = useSearchParams();
     const context = useOutletContext<InvestigationContext>();
+
+    const anomalyDimensionAnalysisFetch = useGetAnomalyDimensionAnalysis();
+
+    const dimensionsInOrder =
+        anomalyDimensionAnalysisFetch?.anomalyDimensionAnalysisData
+            ?.dimensions || [];
+
+    const [comparisonOffset, setComparisonOffset] = useState(() => {
+        return searchParams.get("baselineWeekOffset") ?? "P1W";
+    });
+
+    const handleBaselineChange = (newValue: string): void => {
+        setComparisonOffset(newValue);
+        searchParams.set("baselineWeekOffset", newValue);
+        setSearchParams(searchParams);
+    };
 
     return (
         <>
@@ -33,11 +53,49 @@ export const WhatWherePage: FunctionComponent = () => {
                 <Typography variant="h4">
                     {t("message.what-went-wrong-and-where")}
                 </Typography>
-                <WhatWhereNavigation />
             </Grid>
-
-            <Outlet context={context} />
-
+            <Grid item xs={12}>
+                <PageContentsCardV1>
+                    <Grid item xs={12}>
+                        <Grid
+                            container
+                            alignItems="center"
+                            justifyContent="space-between"
+                        >
+                            <Grid item>
+                                {t(
+                                    "message.select-the-top-contributors-to-see-the-dimensions"
+                                )}
+                            </Grid>
+                            <Grid item>
+                                <BaselineOffsetSelection
+                                    baselineOffset={comparisonOffset}
+                                    label={t(
+                                        "label.dimensions-changed-from-the-last"
+                                    )}
+                                    onBaselineOffsetChange={
+                                        handleBaselineChange
+                                    }
+                                />
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                </PageContentsCardV1>
+            </Grid>
+            <Grid item xs={12}>
+                <TopContributorsPage
+                    anomalyDimensionAnalysisFetch={
+                        anomalyDimensionAnalysisFetch
+                    }
+                    comparisonOffset={comparisonOffset}
+                />
+            </Grid>
+            <Grid item xs={12}>
+                <HeatMapPage
+                    comparisonOffset={comparisonOffset}
+                    dimensionsInOrder={dimensionsInOrder}
+                />
+            </Grid>
             <Grid item xs={12}>
                 <InvestigationPreview
                     alertInsight={context.alertInsight}

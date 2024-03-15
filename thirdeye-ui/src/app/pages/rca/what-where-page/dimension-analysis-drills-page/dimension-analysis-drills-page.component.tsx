@@ -14,252 +14,102 @@
  */
 import { Box, Button, Grid, Typography } from "@material-ui/core";
 import { every, isEmpty } from "lodash";
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
-import { useOutletContext, useParams, useSearchParams } from "react-router-dom";
+import { useOutletContext } from "react-router-dom";
 import { EmptyStateSwitch } from "../../../../components/page-states/empty-state-switch/empty-state-switch.component";
-import { LoadingErrorStateSwitch } from "../../../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { AnomalyFilterOption } from "../../../../components/rca/anomaly-dimension-analysis/anomaly-dimension-analysis.interfaces";
-import { DimensionSearchAutocomplete } from "../../../../components/rca/heat-map/dimension-search-automcomplete/dimension-search-autocomplete.component";
 import { formatDimensionOptions } from "../../../../components/rca/heat-map/heat-map.utils";
 import { PreviewChart } from "../../../../components/rca/top-contributors-table/preview-chart/preview-chart.component";
-import {
-    PageContentsCardV1,
-    SkeletonV1,
-    useNotificationProviderV1,
-} from "../../../../platform/components";
-import { ActionStatus } from "../../../../rest/actions.interfaces";
 import {
     AnomalyBreakdown,
     SavedStateKeys,
 } from "../../../../rest/dto/rca.interfaces";
-import { useGetAnomalyMetricBreakdown } from "../../../../rest/rca/rca.actions";
 import { areFiltersEqual } from "../../../../utils/anomaly-dimension-analysis/anomaly-dimension-analysis";
 import { getFromSavedInvestigationOrDefault } from "../../../../utils/investigation/investigation.util";
-import { notifyIfErrors } from "../../../../utils/notifications/notifications.util";
-import {
-    concatKeyValueWithEqual,
-    deserializeKeyValuePair,
-    serializeKeyValuePair,
-} from "../../../../utils/params/params.util";
-import { RootCauseAnalysisForAnomalyPageParams } from "../../../root-cause-analysis-for-anomaly-page/root-cause-analysis-for-anomaly-page.interfaces";
 import { InvestigationContext } from "../../investigation-state-tracker-container-page/investigation-state-tracker.interfaces";
+import { DimensionSearchAutocompleteProps } from "../../../../components/rca/heat-map/dimension-search-automcomplete/dimension-search-autocomplete.interfaces";
 
-const QUERY_PARAM_KEY = "dimensionAnalysisFilters";
+export interface DimensionAnalysisDrillsPageProps {
+    dimensionSearchProps: DimensionSearchAutocompleteProps;
+}
 
-export const DimensionAnalysisDrillsPage: FunctionComponent = () => {
-    const { notify } = useNotificationProviderV1();
-    const { t } = useTranslation();
-    const [searchParams, setSearchParams] = useSearchParams();
-    const { id: anomalyId } =
-        useParams<RootCauseAnalysisForAnomalyPageParams>();
+export const DimensionAnalysisDrillsPage: FunctionComponent<DimensionAnalysisDrillsPageProps> =
+    ({ dimensionSearchProps: { anomalyFilters, heatMapData } }) => {
+        const { t } = useTranslation();
 
-    const [anomalyFilters, setAnomalyFilters] = useState<AnomalyFilterOption[]>(
-        () => {
-            const heatmapFilterQueryParams = searchParams.get(QUERY_PARAM_KEY);
+        const { investigation, anomaly, alertInsight, onInvestigationChange } =
+            useOutletContext<InvestigationContext>();
 
-            return heatmapFilterQueryParams
-                ? deserializeKeyValuePair(heatmapFilterQueryParams)
-                : [];
-        }
-    );
+        const handleAddDimensionsToInvestigationClick = (): void => {
+            const currentDimensions = getFromSavedInvestigationOrDefault<
+                AnomalyFilterOption[][]
+            >(investigation, SavedStateKeys.CHART_FILTER_SET, []);
 
-    const { investigation, anomaly, alertInsight, onInvestigationChange } =
-        useOutletContext<InvestigationContext>();
+            const missingDimensionCombinationsFromInvestigation = [
+                anomalyFilters,
+            ].filter((selected) => {
+                return every(
+                    currentDimensions.map(
+                        (dimensionFilter) =>
+                            !areFiltersEqual(dimensionFilter, selected)
+                    )
+                );
+            });
 
-    const {
-        anomalyMetricBreakdown: heatMapData,
-        getMetricBreakdown,
-        status: heatMapDataRequestStatus,
-        errorMessages,
-    } = useGetAnomalyMetricBreakdown();
+            investigation.uiMetadata[SavedStateKeys.CHART_FILTER_SET] = [
+                ...currentDimensions,
+                ...missingDimensionCombinationsFromInvestigation,
+            ];
 
-    // Sync the anomaly filters if the search params changed
-    useEffect(() => {
-        const currentQueryFilterSearchQuery = searchParams.get(QUERY_PARAM_KEY);
+            onInvestigationChange(investigation);
+        };
 
-        if (
-            currentQueryFilterSearchQuery &&
-            currentQueryFilterSearchQuery !==
-                serializeKeyValuePair(anomalyFilters)
-        ) {
-            setAnomalyFilters(
-                deserializeKeyValuePair(currentQueryFilterSearchQuery)
-            );
-        } else if (
-            currentQueryFilterSearchQuery === null &&
-            anomalyFilters.length !== 0 // check for 0 so we don't trigger necessary change
-        ) {
-            setAnomalyFilters([]);
-        }
-    }, [searchParams]);
-
-    useEffect(() => {
-        getMetricBreakdown(Number(anomalyId), {
-            baselineOffset: "P1W",
-            filters: [
-                ...anomalyFilters.map((item) =>
-                    concatKeyValueWithEqual(item, false)
-                ),
-            ],
-        });
-    }, [anomalyId, anomalyFilters]);
-
-    useEffect(() => {
-        notifyIfErrors(
-            heatMapDataRequestStatus,
-            errorMessages,
-            notify,
-            t("message.error-while-fetching", {
-                entity: "Heat map data",
-            })
-        );
-    }, [heatMapDataRequestStatus]);
-
-    const handleAddDimensionsToInvestigationClick = (): void => {
-        const currentDimensions = getFromSavedInvestigationOrDefault<
-            AnomalyFilterOption[][]
-        >(investigation, SavedStateKeys.CHART_FILTER_SET, []);
-
-        const missingDimensionCombinationsFromInvestigation = [
-            anomalyFilters,
-        ].filter((selected) => {
-            return every(
-                currentDimensions.map(
-                    (dimensionFilter) =>
-                        !areFiltersEqual(dimensionFilter, selected)
-                )
-            );
-        });
-
-        investigation.uiMetadata[SavedStateKeys.CHART_FILTER_SET] = [
-            ...currentDimensions,
-            ...missingDimensionCombinationsFromInvestigation,
-        ];
-
-        onInvestigationChange(investigation);
-    };
-
-    const handleFilterChange = (newFilters: AnomalyFilterOption[]): void => {
-        if (newFilters.length === 0) {
-            searchParams.delete(QUERY_PARAM_KEY);
-        } else {
-            searchParams.set(
-                QUERY_PARAM_KEY,
-                serializeKeyValuePair(newFilters)
-            );
-        }
-        setSearchParams(searchParams);
-        setAnomalyFilters(newFilters);
-    };
-
-    return (
-        <>
-            <Grid item xs={12}>
-                <Typography variant="h4">
-                    {t("label.dimension-analysis-drills")}
-                </Typography>
-                <Typography variant="body1">
-                    {t("message.manual-filter-for-dimensions-analysis")}
-                </Typography>
-            </Grid>
-            <Grid item xs={12}>
-                <PageContentsCardV1>
-                    <Grid container>
-                        <Grid item xs={12}>
-                            <Grid
-                                container
-                                alignItems="center"
-                                justifyContent="space-between"
-                            >
-                                <Grid item xs>
+        return (
+            <Grid container>
+                <Grid item xs={12}>
+                    <EmptyStateSwitch
+                        emptyState={
+                            <Box pb={20} pt={20}>
+                                <Typography align="center" variant="body1">
                                     {t(
-                                        "message.select-the-dimensions-below-to-drill-down-into-the"
+                                        "message.no-data-available-try-a-different-set-of-filters"
                                     )}
-                                </Grid>
-                            </Grid>
-                        </Grid>
-
-                        <Grid item xs={12}>
-                            <DimensionSearchAutocomplete
-                                anomalyFilters={anomalyFilters}
-                                heatMapData={heatMapData as AnomalyBreakdown}
-                                onFilterChange={handleFilterChange}
-                            />
-                            <LoadingErrorStateSwitch
-                                isError={
-                                    heatMapDataRequestStatus ===
-                                    ActionStatus.Error
-                                }
-                                isLoading={
-                                    heatMapDataRequestStatus ===
-                                        ActionStatus.Initial ||
-                                    heatMapDataRequestStatus ===
-                                        ActionStatus.Working
-                                }
-                                loadingState={
-                                    <Box pb={2} pt={2}>
-                                        <SkeletonV1
-                                            animation="pulse"
-                                            height={300}
-                                            variant="rect"
-                                        />
-                                    </Box>
+                                </Typography>
+                            </Box>
+                        }
+                        isEmpty={
+                            !heatMapData ||
+                            isEmpty(
+                                formatDimensionOptions(
+                                    heatMapData as AnomalyBreakdown
+                                )
+                            )
+                        }
+                    >
+                        <Box pt={2}>
+                            <PreviewChart
+                                alertInsight={alertInsight}
+                                anomaly={anomaly}
+                                dimensionCombinations={
+                                    isEmpty(anomalyFilters)
+                                        ? []
+                                        : [anomalyFilters]
                                 }
                             >
-                                <EmptyStateSwitch
-                                    emptyState={
-                                        <Box pb={20} pt={20}>
-                                            <Typography
-                                                align="center"
-                                                variant="body1"
-                                            >
-                                                {t(
-                                                    "message.no-data-available-try-a-different-set-of-filters"
-                                                )}
-                                            </Typography>
-                                        </Box>
-                                    }
-                                    isEmpty={
-                                        !heatMapData ||
-                                        isEmpty(
-                                            formatDimensionOptions(
-                                                heatMapData as AnomalyBreakdown
-                                            )
-                                        )
+                                <Button
+                                    color="primary"
+                                    disabled={isEmpty([anomalyFilters])}
+                                    onClick={
+                                        handleAddDimensionsToInvestigationClick
                                     }
                                 >
-                                    <Box pt={2}>
-                                        <PreviewChart
-                                            alertInsight={alertInsight}
-                                            anomaly={anomaly}
-                                            dimensionCombinations={
-                                                isEmpty(anomalyFilters)
-                                                    ? []
-                                                    : [anomalyFilters]
-                                            }
-                                        >
-                                            <Button
-                                                color="primary"
-                                                disabled={isEmpty([
-                                                    anomalyFilters,
-                                                ])}
-                                                onClick={
-                                                    handleAddDimensionsToInvestigationClick
-                                                }
-                                            >
-                                                {t(
-                                                    "label.add-dimensions-to-investigation"
-                                                )}
-                                            </Button>
-                                        </PreviewChart>
-                                    </Box>
-                                </EmptyStateSwitch>
-                            </LoadingErrorStateSwitch>
-                        </Grid>
-                    </Grid>
-                </PageContentsCardV1>
+                                    {t("label.add-dimensions-to-investigation")}
+                                </Button>
+                            </PreviewChart>
+                        </Box>
+                    </EmptyStateSwitch>
+                </Grid>
             </Grid>
-        </>
-    );
-};
+        );
+    };

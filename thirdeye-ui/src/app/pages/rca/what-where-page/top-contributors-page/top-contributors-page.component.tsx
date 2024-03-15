@@ -16,11 +16,10 @@ import { Box, Button, Grid, Typography } from "@material-ui/core";
 import { every, isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useOutletContext, useParams, useSearchParams } from "react-router-dom";
+import { useOutletContext, useParams } from "react-router-dom";
 import { NoDataIndicator } from "../../../../components/no-data-indicator/no-data-indicator.component";
 import { EmptyStateSwitch } from "../../../../components/page-states/empty-state-switch/empty-state-switch.component";
 import { LoadingErrorStateSwitch } from "../../../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
-import { BaselineOffsetSelection } from "../../../../components/rca/analysis-tabs/baseline-offset-selection/baseline-offset-selection.component";
 import { AnomalyFilterOption } from "../../../../components/rca/anomaly-dimension-analysis/anomaly-dimension-analysis.interfaces";
 import { PreviewChart } from "../../../../components/rca/top-contributors-table/preview-chart/preview-chart.component";
 import { TopContributorsTable } from "../../../../components/rca/top-contributors-table/top-contributors-table.component";
@@ -34,21 +33,20 @@ import {
     AnomalyDimensionAnalysisData,
     SavedStateKeys,
 } from "../../../../rest/dto/rca.interfaces";
-import { useGetAnomalyDimensionAnalysis } from "../../../../rest/rca/rca.actions";
 import { areFiltersEqual } from "../../../../utils/anomaly-dimension-analysis/anomaly-dimension-analysis";
 import { getFromSavedInvestigationOrDefault } from "../../../../utils/investigation/investigation.util";
 import { notifyIfErrors } from "../../../../utils/notifications/notifications.util";
 import { serializeKeyValuePair } from "../../../../utils/params/params.util";
 import { RootCauseAnalysisForAnomalyPageParams } from "../../../root-cause-analysis-for-anomaly-page/root-cause-analysis-for-anomaly-page.interfaces";
 import { InvestigationContext } from "../../investigation-state-tracker-container-page/investigation-state-tracker.interfaces";
+import { TopContributorsProps } from "../what-where-page.interfaces";
 
-export const TopContributorsPage: FunctionComponent = () => {
+export const TopContributorsPage: FunctionComponent<TopContributorsProps> = ({
+    comparisonOffset,
+    anomalyDimensionAnalysisFetch,
+}) => {
     const { notify } = useNotificationProviderV1();
     const { t } = useTranslation();
-    const [searchParams, setSearchParams] = useSearchParams();
-    const [comparisonOffset, setComparisonOffset] = useState(() => {
-        return searchParams.get("baselineWeekOffset") ?? "P1W";
-    });
     const { id: anomalyId } =
         useParams<RootCauseAnalysisForAnomalyPageParams>();
     const { investigation, anomaly, alertInsight, onInvestigationChange } =
@@ -59,7 +57,7 @@ export const TopContributorsPage: FunctionComponent = () => {
         getDimensionAnalysisData,
         status: anomalyDimensionAnalysisReqStatus,
         errorMessages,
-    } = useGetAnomalyDimensionAnalysis();
+    } = anomalyDimensionAnalysisFetch;
 
     const [chartTimeSeriesFilterSet, setChartTimeSeriesFilterSet] = useState<
         AnomalyFilterOption[][]
@@ -87,12 +85,6 @@ export const TopContributorsPage: FunctionComponent = () => {
             })
         );
     }, [anomalyDimensionAnalysisReqStatus]);
-
-    const handleBaselineChange = (newValue: string): void => {
-        setComparisonOffset(newValue);
-        searchParams.set("baselineWeekOffset", newValue);
-        setSearchParams(searchParams);
-    };
 
     const handleRemoveBtnClick = (idx: number): void => {
         setChartTimeSeriesFilterSet((original) =>
@@ -144,39 +136,17 @@ export const TopContributorsPage: FunctionComponent = () => {
     return (
         <>
             <Grid item xs={12}>
-                <Typography variant="h4">
-                    {t("label.top-contributors")}
-                </Typography>
-                <Typography variant="body1">
-                    {t("message.review-the-recommended-dimension-combinations")}
-                </Typography>
-            </Grid>
-            <Grid item xs={12}>
                 <PageContentsCardV1>
                     <Grid container>
                         <Grid item xs={12}>
-                            <Grid
-                                container
-                                alignItems="center"
-                                justifyContent="space-between"
-                            >
-                                <Grid item>
-                                    {t(
-                                        "message.select-the-top-contributors-to-see-the-dimensions"
-                                    )}
-                                </Grid>
-                                <Grid item>
-                                    <BaselineOffsetSelection
-                                        baselineOffset={comparisonOffset}
-                                        label={t(
-                                            "label.dimensions-changed-from-the-last"
-                                        )}
-                                        onBaselineOffsetChange={
-                                            handleBaselineChange
-                                        }
-                                    />
-                                </Grid>
-                            </Grid>
+                            <Typography variant="h5">
+                                {t("label.top-contributors")}
+                            </Typography>
+                            <Typography variant="body2">
+                                {t(
+                                    "message.review-the-recommended-dimension-combinations"
+                                )}
+                            </Typography>
                         </Grid>
 
                         <Grid item xs={12}>

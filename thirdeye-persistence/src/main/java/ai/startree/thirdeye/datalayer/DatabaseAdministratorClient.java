@@ -30,13 +30,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class DatabaseAdministrator {
+public class DatabaseAdministratorClient {
 
-  private static final Logger LOG = LoggerFactory.getLogger(DatabaseAdministrator.class);
+  private static final Logger LOG = LoggerFactory.getLogger(DatabaseAdministratorClient.class);
   private final DataSource dataSource;
 
   @Inject
-  public DatabaseAdministrator(final DataSource dataSource) {
+  public DatabaseAdministratorClient(final DataSource dataSource) {
     this.dataSource = dataSource;
   }
 

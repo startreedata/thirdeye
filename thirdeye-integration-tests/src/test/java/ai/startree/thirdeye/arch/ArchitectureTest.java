@@ -24,8 +24,9 @@ import ai.startree.thirdeye.PluginLoader;
 import ai.startree.thirdeye.ThirdEyeServerModule;
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyeAuthorizerProvider;
-import ai.startree.thirdeye.datalayer.DatabaseService;
-import ai.startree.thirdeye.datalayer.DatabaseTransactionService;
+import ai.startree.thirdeye.datalayer.DatabaseAdministratorClient;
+import ai.startree.thirdeye.datalayer.DatabaseClient;
+import ai.startree.thirdeye.datalayer.DatabaseTransactionClient;
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.resources.CrudResource;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
@@ -65,9 +66,11 @@ public class ArchitectureTest {
       .or(containAnyMethodsThat(annotatedWith(HEAD.class)))
       .or(containAnyMethodsThat(annotatedWith(GET.class)));
 
-  public static final DescribedPredicate<JavaClass> NON_SECURED_DAO_CLASSES = DescribedPredicate.or(
+  // any class that can perform db writes and does not apply the authorization layer
+  public static final DescribedPredicate<JavaClass> ARE_NON_SECURED_DB_LAYER_CLASSES = DescribedPredicate.or(
       assignableTo(AbstractManager.class), assignableTo(GenericPojoDao.class),
-      assignableTo(DatabaseService.class), assignableTo(DatabaseTransactionService.class));
+      assignableTo(DatabaseClient.class), assignableTo(DatabaseTransactionClient.class),
+      assignableTo(DatabaseAdministratorClient.class));
 
   public JavaClasses thirdeyeClasses;
 
@@ -80,8 +83,7 @@ public class ArchitectureTest {
   public void testResourcesCannotUseNonSecuredDaosDirectly() {
     final ArchRule rule = noClasses().that(ARE_RESOURCE_CLASSES)
         .should()
-        .dependOnClassesThat()
-        .areAssignableTo(NON_SECURED_DAO_CLASSES);
+        .dependOnClassesThat(ARE_NON_SECURED_DB_LAYER_CLASSES);
     rule.check(thirdeyeClasses);
   }
 

@@ -15,8 +15,8 @@ package ai.startree.thirdeye.datalayer.dao;
 
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.datalayer.DatabaseService;
-import ai.startree.thirdeye.datalayer.DatabaseTransactionService;
+import ai.startree.thirdeye.datalayer.DatabaseClient;
+import ai.startree.thirdeye.datalayer.DatabaseTransactionClient;
 import ai.startree.thirdeye.datalayer.entity.TaskEntity;
 import ai.startree.thirdeye.datalayer.mapper.TaskEntityMapper;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
@@ -46,12 +46,12 @@ public class TaskDao {
   private static final boolean IS_DEBUG = LOG.isDebugEnabled();
   private static final ObjectMapper OBJECT_MAPPER = ThirdEyeSerialization.getObjectMapper();
 
-  private final DatabaseService databaseService;
-  private final DatabaseTransactionService transactionService;
+  private final DatabaseClient databaseService;
+  private final DatabaseTransactionClient transactionService;
 
   @Inject
-  public TaskDao(final DatabaseService databaseService,
-      final DatabaseTransactionService transactionService) {
+  public TaskDao(final DatabaseClient databaseService,
+      final DatabaseTransactionClient transactionService) {
     this.databaseService = databaseService;
     this.transactionService = transactionService;
   }

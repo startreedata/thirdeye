@@ -33,7 +33,7 @@ import java.util.Map;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Singleton
-public class DatabaseService {
+public class DatabaseClient {
 
   private final SqlQueryBuilder sqlQueryBuilder;
   private final GenericResultSetMapper genericResultSetMapper;
@@ -51,7 +51,7 @@ public class DatabaseService {
   private final Timer dbCrudTimerOfDelete;
 
   @Inject
-  public DatabaseService(final SqlQueryBuilder sqlQueryBuilder,
+  public DatabaseClient(final SqlQueryBuilder sqlQueryBuilder,
       final GenericResultSetMapper genericResultSetMapper,
       final MetricRegistry metricRegistry) {
     this.sqlQueryBuilder = sqlQueryBuilder;

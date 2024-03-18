@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.arch;
 
+import static com.tngtech.archunit.base.DescribedPredicate.or;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.assignableTo;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.containAnyMethodsThat;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAnyPackage;
@@ -23,7 +24,6 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import ai.startree.thirdeye.PluginLoader;
 import ai.startree.thirdeye.ThirdEyeServerModule;
 import ai.startree.thirdeye.auth.AuthorizationManager;
-import ai.startree.thirdeye.auth.ThirdEyeAuthorizerProvider;
 import ai.startree.thirdeye.datalayer.DatabaseAdministratorClient;
 import ai.startree.thirdeye.datalayer.DatabaseClient;
 import ai.startree.thirdeye.datalayer.DatabaseTransactionClient;
@@ -67,7 +67,7 @@ public class ArchitectureTest {
       .or(containAnyMethodsThat(annotatedWith(GET.class)));
 
   // any class that can perform db writes and does not apply the authorization layer
-  public static final DescribedPredicate<JavaClass> ARE_NON_SECURED_DB_LAYER_CLASSES = DescribedPredicate.or(
+  public static final DescribedPredicate<JavaClass> ARE_NON_SECURED_DB_LAYER_CLASSES = or(
       assignableTo(AbstractManager.class), assignableTo(GenericPojoDao.class),
       assignableTo(DatabaseClient.class), assignableTo(DatabaseTransactionClient.class),
       assignableTo(DatabaseAdministratorClient.class));
@@ -99,17 +99,18 @@ public class ArchitectureTest {
 
   @Test
   public void testNoUnknownUserOfThirdEyeAuthorizer() {
-    final ArchRule rule = noClasses().that()
-        // whitelist
-        .doNotBelongToAnyOf(
-            AuthorizationManager.class,
-            ThirdEyeServerModule.class,
-            PluginLoader.class,
-            ThirdEyeAuthorizerProvider.class
+    // services that want to perform authorization should use the AuthorizationManager and never user the lower level ThirdEyeAuthorizer
+    // here we ensure there are no unknown users of the lower levels
+    final ArchRule rule = noClasses().that(
         )
+        .doNotImplement(ThirdEyeAuthorizer.class)
+        .and()
+        .doNotBelongToAnyOf(AuthorizationManager.class, ThirdEyeServerModule.class,
+            PluginLoader.class)
         .should()
         .accessClassesThat()
         .implement(ThirdEyeAuthorizer.class);
+    
     rule.check(thirdeyeClasses);
   }
 

@@ -19,6 +19,8 @@ import ai.startree.thirdeye.spi.auth.AccessType;
 import ai.startree.thirdeye.spi.auth.ResourceIdentifier;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
+import java.util.List;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * AccessControlProvider serves as a mutable layer between Guice bindings and the access control
@@ -26,17 +28,9 @@ import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
  */
 public class ThirdEyeAuthorizerProvider implements ThirdEyeAuthorizer {
 
-  public final static ThirdEyeAuthorizer ALWAYS_ALLOW = (
-      final ThirdEyePrincipal principal,
-      final ResourceIdentifier identifiers,
-      final AccessType accessType
-  ) -> true;
+  public final static ThirdEyeAuthorizer ALWAYS_ALLOW = new AlwaysAllowAuthorizer();
 
-  public final static ThirdEyeAuthorizer ALWAYS_DENY = (
-      final ThirdEyePrincipal principal,
-      final ResourceIdentifier identifiers,
-      final AccessType accessType
-  ) -> false;
+  public final static ThirdEyeAuthorizer ALWAYS_DENY = new AlwaysDenyAuthorizer();
 
   private final AccessControlConfiguration config;
   private ThirdEyeAuthorizer thirdEyeAuthorizer = null;
@@ -80,5 +74,38 @@ public class ThirdEyeAuthorizerProvider implements ThirdEyeAuthorizer {
   public boolean authorize(final ThirdEyePrincipal principal, final ResourceIdentifier identifier,
       final AccessType accessType) {
     return getAccessControl().authorize(principal, identifier, accessType);
+  }
+
+  @Override
+  public @NonNull List<String> listNamespaces(final ThirdEyePrincipal principal) {
+    return getAccessControl().listNamespaces(principal);
+  }
+
+  private static class AlwaysAllowAuthorizer implements ThirdEyeAuthorizer {
+
+    @Override
+    public boolean authorize(final ThirdEyePrincipal principal, final ResourceIdentifier identifier,
+        final AccessType accessType) {
+      return true;
+    }
+
+    @Override
+    public @NonNull List<String> listNamespaces(final ThirdEyePrincipal principal) {
+      return List.of();
+    }
+  }
+
+  private static class AlwaysDenyAuthorizer implements ThirdEyeAuthorizer {
+
+    @Override
+    public boolean authorize(final ThirdEyePrincipal principal, final ResourceIdentifier identifier,
+        final AccessType accessType) {
+      return false;
+    }
+
+    @Override
+    public @NonNull List<String> listNamespaces(final ThirdEyePrincipal principal) {
+      return List.of();
+    }
   }
 }

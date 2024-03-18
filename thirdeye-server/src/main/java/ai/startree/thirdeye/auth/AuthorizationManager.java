@@ -16,6 +16,7 @@ package ai.startree.thirdeye.auth;
 import static ai.startree.thirdeye.spi.auth.ResourceIdentifier.DEFAULT_ENTITY_TYPE;
 import static ai.startree.thirdeye.spi.auth.ResourceIdentifier.DEFAULT_NAME;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static ai.startree.thirdeye.util.ResourceUtils.authorize;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.datalayer.dao.SubEntities;
@@ -26,12 +27,14 @@ import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import com.google.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import javax.ws.rs.ForbiddenException;
+import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -49,6 +52,7 @@ public class AuthorizationManager {
   private final AlertTemplateRenderer alertTemplateRenderer;
   private final ThirdEyeAuthorizer thirdEyeAuthorizer;
   private final NamespaceResolver namespaceResolver;
+  private final boolean requireNamespace;
 
   @Inject
   public AuthorizationManager(
@@ -58,8 +62,42 @@ public class AuthorizationManager {
     this.alertTemplateRenderer = alertTemplateRenderer;
     this.thirdEyeAuthorizer = thirdEyeAuthorizer;
     this.namespaceResolver = namespaceResolver;
+
+    // TODO CYRIL next PR - make this configurable in server.yaml - for the moment the codepath is disabled
+    this.requireNamespace = false;
   }
 
+  /**
+   * Set a namespace in the entity if necessary, based on the principal.
+   * Note: following the review, we decided to put this logic outside
+   * {@link AuthorizationManager#ensureCanCreate}.
+   * FIXME CYRIL REVIEW AGAIN WITH SUVODEEP 
+   * Should always be called before {@link AuthorizationManager#ensureCanCreate},  
+   * {@link AuthorizationManager#ensureCanEdit}, {@link AuthorizationManager#ensureCanValidate}
+   */
+  // TODO CYRIL next PR - use this method in the Service layer
+  public <T extends AbstractDTO> void enrichNamespace(final ThirdEyeServerPrincipal principal,
+      final T entity) {
+    // enrich with the namespace if it is not set and required
+    if (requireNamespace) {
+      if (!namespaceIsSet(entity)) {
+        final List<String> namespaces = thirdEyeAuthorizer.listNamespaces(principal);
+        authorize(!namespaces.isEmpty());
+        if (namespaces.size() == 1) {
+          entity.setAuth(new AuthorizationConfigurationDTO().setNamespace(namespaces.get(0)));
+        } else if (namespaces.size() > 1) {
+          throw new NotAuthorizedException(String.format(
+              "Namespace not provided and cannot be resolved automatically. "
+                  + "Please provide a namespace explicitly. Namespaces: %s", namespaces));
+        }
+      }
+    } else {
+      // do not enrich namespaces on the fly
+      return;
+    }
+  }
+
+  // TODO DON'T UPDATE HERE
   public <T extends AbstractDTO> void ensureCanCreate(final ThirdEyeServerPrincipal principal,
       final T entity) {
     ensureHasAccess(principal, resourceId(entity), AccessType.WRITE);
@@ -76,6 +114,18 @@ public class AuthorizationManager {
       final T before, final T after) {
     ensureHasAccess(principal, resourceId(before), AccessType.WRITE);
     ensureHasAccess(principal, resourceId(after), AccessType.WRITE);
+    // prevent namespace change 
+    if (requireNamespace) {
+      // namespaces must be set and equal
+      // THIS IS INCOMPATIBLE WITH ENUMERATION ITEM NAMESPACE EDITION - so not compatible with some users
+      authorize(Objects.equals(before.getAuth(), after.getAuth()),
+          String.format(
+              "Entity namespace cannot change. Existing namespace: %s. New namespace: %s",
+              before.getAuth(),
+              after.getAuth()));
+    } else {
+      // allow namespace editions to keep backward compatibility
+    }
     relatedEntities(after).forEach(related ->
         ensureHasAccess(principal, related, AccessType.READ));
   }
@@ -120,6 +170,7 @@ public class AuthorizationManager {
     } else {
       return thirdEyeAuthorizer.authorize(principal, identifier, accessType);
     }
+    // TODO CYRIL ADD A case for a PUBLIC identifier for immutable READ ok, WRITE not ok shared resources (eg templates)
   }
 
   public void ensureHasRootAccess(final ThirdEyeServerPrincipal principal) {
@@ -182,5 +233,9 @@ public class AuthorizationManager {
 
   public void invalidateCache() {
     namespaceResolver.invalidateCache();
+  }
+
+  private static <T extends AbstractDTO> boolean namespaceIsSet(final T entity) {
+    return entity.getAuth() != null && entity.getAuth().getNamespace() != null;
   }
 }

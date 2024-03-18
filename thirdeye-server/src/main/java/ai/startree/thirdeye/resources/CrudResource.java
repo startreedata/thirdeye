@@ -76,6 +76,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   @Path("name/{name}")
   @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
+  @Deprecated // prefer fetching by id or by vanilla get with filter
   public Response get(
       @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
       @PathParam("name") String name) {

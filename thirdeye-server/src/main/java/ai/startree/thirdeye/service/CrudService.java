@@ -67,6 +67,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
         .build();
   }
 
+  // FIXME SUVODEEP MAIN DESIGN QUESTION ON WHETHER ONLY IF namespace match AND or  if  
   public ApiT get(
       final ThirdEyeServerPrincipal principal,
       final Long id) {
@@ -79,14 +80,18 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
 
   /**
    * Get the dto by id
+   * CAUTION: does not ensure authorization.
    *
    * @param id id
    * @return dto
    */
-  public DtoT getDto(final Long id) {
+  // FIXME CYRIL - ENSURE AUTHORIZATION IN DOWNSTREAM CONSUMERS
+  protected DtoT getDto(final Long id) {
     return ensureExists(dtoManager.findById(ensureExists(id, ERR_MISSING_ID)), "id");
   }
 
+   
+  @Deprecated
   public ApiT findByName(
       final ThirdEyeServerPrincipal principal,
       final String name) {
@@ -97,6 +102,8 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
     final String nameColumn = optional(apiToIndexMap.get("name")).orElse("name");
     final List<DtoT> byName = dtoManager.filter(new DaoFilter()
         .setPredicate(Predicate.EQ(nameColumn, name)));
+
+    // FIXME CYRIL -- add namespace filter - try to deprecate this route instead 
 
     ensure(byName.size() > 0, ERR_OBJECT_DOES_NOT_EXIST, name);
     if (byName.size() > 1) {
@@ -114,6 +121,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
     final List<DtoT> results = queryParameters.size() > 0
         ? dtoManager.filter(new DaoFilterBuilder(apiToIndexMap).buildFilter(queryParameters))
         : dtoManager.findAll();
+    // FIXME CYRIL ADD namespace in-app filter - then add query level filter
 
     final RequestCache cache = createRequestCache();
     return results.stream()
@@ -227,6 +235,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
     return null;
   }
 
+  // FIXME CYRIL ADD NAMESPACE FILTER   
   public void deleteAll(final ThirdEyeServerPrincipal principal) {
     dtoManager.findAll()
         .stream()
@@ -234,6 +243,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
         .forEach(this::deleteDto);
   }
 
+  // FIXME CYRIL ADD NAMESPACE FILTER  
   public CountApi count(final MultivaluedMap<String, String> queryParameters) {
     final CountApi api = new CountApi();
     final Long count = queryParameters.size() > 0

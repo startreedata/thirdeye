@@ -26,6 +26,8 @@ import ai.startree.thirdeye.auth.NamespaceResolver;
 import ai.startree.thirdeye.auth.ThirdEyeAuthorizerProvider;
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.config.TimeConfiguration;
+import ai.startree.thirdeye.resources.testutils.SingleNamespaceAuthorizer;
+import ai.startree.thirdeye.resources.testutils.SingleResourceAuthorizer;
 import ai.startree.thirdeye.service.AlertService;
 import ai.startree.thirdeye.service.AnomalyMetricsProvider;
 import ai.startree.thirdeye.spi.api.AlertApi;
@@ -37,9 +39,7 @@ import ai.startree.thirdeye.spi.api.EnumerationItemApi;
 import ai.startree.thirdeye.spi.api.PlanNodeApi;
 import ai.startree.thirdeye.spi.auth.AccessType;
 import ai.startree.thirdeye.spi.auth.AuthenticationType;
-import ai.startree.thirdeye.spi.auth.ResourceIdentifier;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
-import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
@@ -149,8 +149,7 @@ public class AlertResourceTest {
     final AlertTemplateRenderer alertTemplateRenderer = new AlertTemplateRenderer(
         mock(AlertManager.class), alertTemplateManager);
 
-    final ThirdEyeAuthorizer thirdEyeAuthorizer = (ThirdEyePrincipal principal, ResourceIdentifier identifier, AccessType accessType)
-        -> identifier.getName().equals("0");
+    final ThirdEyeAuthorizer thirdEyeAuthorizer = new SingleResourceAuthorizer("0");
 
     newAlertResource(mock(AlertManager.class),
         alertTemplateRenderer,
@@ -202,8 +201,7 @@ public class AlertResourceTest {
     final AlertTemplateRenderer alertTemplateRenderer = new AlertTemplateRenderer(
         mock(AlertManager.class), alertTemplateManager);
 
-    final ThirdEyeAuthorizer thirdEyeAuthorizer = (ThirdEyePrincipal principal, ResourceIdentifier identifier, AccessType accessType)
-        -> identifier.getName().equals("alert1");
+    final ThirdEyeAuthorizer thirdEyeAuthorizer = new SingleResourceAuthorizer("alert1");
 
     newAlertResource(mock(AlertManager.class),
         alertTemplateRenderer,
@@ -274,9 +272,8 @@ public class AlertResourceTest {
         mock(TaskManager.class),
         new TimeConfiguration(),
         newAuthorizationManager(alertTemplateRenderer,
-            (ThirdEyePrincipal p, ResourceIdentifier id, AccessType accessType) ->
-                id.getNamespace().equals("allowedNamespace")))
-    ).evaluate(nobody(), alertEvaluationApi);
+            SingleNamespaceAuthorizer.of("allowedNamespace"))
+    )).evaluate(nobody(), alertEvaluationApi);
   }
 
   @Test
@@ -329,8 +326,7 @@ public class AlertResourceTest {
         mock(TaskManager.class),
         new TimeConfiguration(),
         newAuthorizationManager(alertTemplateRenderer,
-            (ThirdEyePrincipal p, ResourceIdentifier id, AccessType accessType) ->
-                accessType == AccessType.READ && id.getNamespace().equals("allowedNamespace")))
+            SingleNamespaceAuthorizer.of("allowedNamespace", AccessType.READ)))
     );
 
     try (final Response resp = alertResource.evaluate(nobody(), alertEvaluationApi)) {
@@ -377,8 +373,7 @@ public class AlertResourceTest {
         mock(TaskManager.class),
         new TimeConfiguration(),
         newAuthorizationManager(alertTemplateRenderer,
-            (ThirdEyePrincipal p, ResourceIdentifier id, AccessType accessType) ->
-                id.getNamespace().equals("readonlyNamespace") && accessType == AccessType.READ))
+            SingleNamespaceAuthorizer.of("readonlyNamespace", AccessType.READ)))
     ).evaluate(nobody(), alertEvaluationApi);
   }
 
@@ -429,9 +424,7 @@ public class AlertResourceTest {
         mock(TaskManager.class),
         new TimeConfiguration(),
         newAuthorizationManager(alertTemplateRenderer,
-            (ThirdEyePrincipal p, ResourceIdentifier id, AccessType accessType) ->
-                id.getNamespace().equals("allowedNamespace")))
-    );
+            SingleNamespaceAuthorizer.of("allowedNamespace"))));
 
     try (final Response resp = resource.evaluate(nobody(), alertEvaluationApi)) {
       assertThat(resp.getStatus()).isEqualTo(200);
@@ -455,4 +448,6 @@ public class AlertResourceTest {
         nobody(),
         1L);
   }
+
+  
 }

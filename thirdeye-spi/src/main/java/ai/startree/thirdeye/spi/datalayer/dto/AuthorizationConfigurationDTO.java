@@ -13,9 +13,10 @@
  */
 package ai.startree.thirdeye.spi.datalayer.dto;
 
+import java.util.Objects;
 
 public class AuthorizationConfigurationDTO {
-
+  
   private String namespace;
 
   public String getNamespace() {
@@ -25,5 +26,22 @@ public class AuthorizationConfigurationDTO {
   public AuthorizationConfigurationDTO setNamespace(final String namespace) {
     this.namespace = namespace;
     return this;
+  }
+
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    final AuthorizationConfigurationDTO that = (AuthorizationConfigurationDTO) o;
+    return Objects.equals(namespace, that.namespace);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(namespace);
   }
 }

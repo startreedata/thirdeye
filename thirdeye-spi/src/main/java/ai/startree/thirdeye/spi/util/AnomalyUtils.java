@@ -25,8 +25,8 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class AnomalyUtils {
 
-  public static boolean isIgnore(final @NonNull AnomalyDTO parent) {
-    return optional(parent.getAnomalyLabels())
+  public static boolean isIgnore(final @NonNull AnomalyDTO anomaly) {
+    return optional(anomaly.getAnomalyLabels())
         .map(labels -> labels.stream().anyMatch(AnomalyLabelDTO::isIgnore))
         .orElse(false);
   }

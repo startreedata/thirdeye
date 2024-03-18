@@ -17,24 +17,14 @@ import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.SecurityUtils.hmacSHA512;
 import static com.google.common.base.Preconditions.checkArgument;
-import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
-import ai.startree.thirdeye.notification.NotificationPayloadBuilder;
 import ai.startree.thirdeye.notification.NotificationServiceRegistry;
-import ai.startree.thirdeye.notification.NotificationTaskFilter;
-import ai.startree.thirdeye.notification.NotificationTaskFilterResult;
+import ai.startree.thirdeye.service.InternalService;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
-import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
-import ai.startree.thirdeye.spi.datalayer.dto.DetectionPipelineTaskInfo;
-import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
-import ai.startree.thirdeye.spi.notification.NotificationService;
-import ai.startree.thirdeye.worker.task.TaskContext;
 import ai.startree.thirdeye.worker.task.TaskDriver;
 import ai.startree.thirdeye.worker.task.TaskDriverConfiguration;
-import ai.startree.thirdeye.worker.task.runner.DetectionPipelineTaskRunner;
-import ai.startree.thirdeye.worker.task.runner.NotificationTaskRunner;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.jaxrs.annotation.JacksonFeatures;
@@ -49,7 +39,6 @@ import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
@@ -68,10 +57,9 @@ import org.slf4j.LoggerFactory;
 @Produces(MediaType.APPLICATION_JSON)
 @Tag(name = "zzz Internal zzz")
 @SecurityRequirement(name = "oauth")
-@OpenAPIDefinition(security = {
-    @SecurityRequirement(name = "oauth")
-})
+@OpenAPIDefinition(security = {@SecurityRequirement(name = "oauth")})
 @SecurityScheme(name = "oauth", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER, paramName = HttpHeaders.AUTHORIZATION)
+// FIXME CYRIL - does not have authorization and workspace checks everywhere because it is not exposed in production - add checks everywhere when time just in case - or remove 
 public class InternalResource {
 
   private static final Logger log = LoggerFactory.getLogger(InternalResource.class);
@@ -80,36 +68,23 @@ public class InternalResource {
   private final HttpDetectorResource httpDetectorResource;
   private final DatabaseAdminResource databaseAdminResource;
   private final NotificationServiceRegistry notificationServiceRegistry;
-  private final NotificationTaskRunner notificationTaskRunner;
-  private final NotificationPayloadBuilder notificationPayloadBuilder;
-  private final SubscriptionGroupManager subscriptionGroupManager;
   private final TaskDriverConfiguration taskDriverConfiguration;
   private final TaskDriver taskDriver;
-  private final NotificationTaskFilter notificationTaskFilter;
-  private final DetectionPipelineTaskRunner detectionPipelineTaskRunner;
+
+  private final InternalService internalService;
 
   @Inject
-  public InternalResource(
-      final HttpDetectorResource httpDetectorResource,
+  public InternalResource(final HttpDetectorResource httpDetectorResource,
       final DatabaseAdminResource databaseAdminResource,
       final NotificationServiceRegistry notificationServiceRegistry,
-      final NotificationTaskRunner notificationTaskRunner,
-      final NotificationPayloadBuilder notificationPayloadBuilder,
-      final SubscriptionGroupManager subscriptionGroupManager,
-      final TaskDriverConfiguration taskDriverConfiguration,
-      final TaskDriver taskDriver,
-      final NotificationTaskFilter notificationTaskFilter,
-      final DetectionPipelineTaskRunner detectionPipelineTaskRunner) {
+      final TaskDriverConfiguration taskDriverConfiguration, final TaskDriver taskDriver,
+      final InternalService internalService) {
     this.httpDetectorResource = httpDetectorResource;
     this.databaseAdminResource = databaseAdminResource;
     this.notificationServiceRegistry = notificationServiceRegistry;
-    this.notificationTaskRunner = notificationTaskRunner;
-    this.notificationPayloadBuilder = notificationPayloadBuilder;
-    this.subscriptionGroupManager = subscriptionGroupManager;
     this.taskDriverConfiguration = taskDriverConfiguration;
     this.taskDriver = taskDriver;
-    this.notificationTaskFilter = notificationTaskFilter;
-    this.detectionPipelineTaskRunner = detectionPipelineTaskRunner;
+    this.internalService = internalService;
   }
 
   @Path("http-detector")
@@ -136,28 +111,8 @@ public class InternalResource {
       @QueryParam("subscriptionGroupId") final Long subscriptionGroupManagerById,
       @QueryParam("reset") final Boolean reset) {
     ensureExists(subscriptionGroupManagerById, "Query parameter required: alertId !");
-    final SubscriptionGroupDTO sg = subscriptionGroupManager.findById(subscriptionGroupManagerById);
-    if (reset == Boolean.TRUE) {
-      sg.setVectorClocks(null);
-      subscriptionGroupManager.save(sg);
-    }
+    final String emailHtml = internalService.generateHtmlEmail(subscriptionGroupManagerById, reset);
 
-    requireNonNull(sg, "subscription Group is null");
-    final long endTime = System.currentTimeMillis();
-    final NotificationTaskFilterResult result = requireNonNull(
-        notificationTaskFilter.filter(sg, endTime),
-        "NotificationTaskFilterResult is null");
-    final var anomalies = result.getAnomalies();
-
-    if (anomalies.isEmpty()) {
-      return Response.ok("No anomalies!").build();
-    }
-    final var payload = notificationPayloadBuilder.build(result);
-
-    final NotificationService emailNotificationService = notificationServiceRegistry.get(
-        "email-smtp",
-        new HashMap<>());
-    final String emailHtml = emailNotificationService.toHtml(payload).toString();
     return Response.ok(emailHtml).build();
   }
 
@@ -173,15 +128,11 @@ public class InternalResource {
   @Path("trigger/webhook")
   public Response triggerWebhook(
       @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal) {
-    final ImmutableMap<String, Object> properties = ImmutableMap.of(
-        "url", "http://localhost:8080/internal/webhook"
-    );
-    notificationServiceRegistry
-        .get("webhook", properties)
-        .notify(new NotificationPayloadApi()
-            .setSubscriptionGroup(new SubscriptionGroupApi()
-                .setName("dummy"))
-        );
+    final ImmutableMap<String, Object> properties = ImmutableMap.of("url",
+        "http://localhost:8080/internal/webhook");
+    notificationServiceRegistry.get("webhook", properties)
+        .notify(new NotificationPayloadApi().setSubscriptionGroup(
+            new SubscriptionGroupApi().setName("dummy")));
     return Response.ok().build();
   }
 
@@ -192,21 +143,14 @@ public class InternalResource {
       @FormParam("subscriptionGroupId") final Long subscriptionGroupId,
       @QueryParam("reset") final Boolean reset) throws Exception {
     ensureExists(subscriptionGroupId, "Query parameter required: alertId !");
-    final SubscriptionGroupDTO sg = subscriptionGroupManager.findById(subscriptionGroupId);
-    if (reset == Boolean.TRUE) {
-      sg.setVectorClocks(null);
-      subscriptionGroupManager.save(sg);
-    }
-    notificationTaskRunner.execute(subscriptionGroupId);
+    internalService.notify(subscriptionGroupId, reset);
     return Response.ok().build();
   }
 
   @POST
   @Path("webhook")
-  public Response webhookDummy(
-      final Object payload,
-      @HeaderParam("X-Signature") final String signature
-  ) throws Exception {
+  public Response webhookDummy(final Object payload,
+      @HeaderParam("X-Signature") final String signature) throws Exception {
     log.info("========================= Webhook request ==============================");
     //replace it with relevant secret key acquired during subscription group creation
     final String secretKey = "secretKey";
@@ -236,12 +180,9 @@ public class InternalResource {
   @POST
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
-  public Response runTask(
-      @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
-      @FormParam("alertId") final Long alertId,
-      @FormParam("start") Long startTime,
-      @FormParam("end") Long endTime
-  ) throws Exception {
+  public Response runTask(@Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
+      @FormParam("alertId") final Long alertId, @FormParam("start") Long startTime,
+      @FormParam("end") Long endTime) throws Exception {
     checkArgument(alertId != null && alertId >= 0);
     if (endTime == null) {
       endTime = System.currentTimeMillis();
@@ -249,11 +190,7 @@ public class InternalResource {
     if (startTime == null) {
       startTime = endTime - TimeUnit.MINUTES.toMillis(1);
     }
-
-    final DetectionPipelineTaskInfo info = new DetectionPipelineTaskInfo(alertId, startTime,
-        endTime);
-
-    detectionPipelineTaskRunner.execute(info, new TaskContext());
+    internalService.runDetectionTaskLocally(alertId, startTime, endTime);
 
     return Response.ok().build();
   }

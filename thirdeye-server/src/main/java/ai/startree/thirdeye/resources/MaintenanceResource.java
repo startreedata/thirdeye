@@ -13,18 +13,8 @@
  */
 package ai.startree.thirdeye.resources;
 
-import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
-import ai.startree.thirdeye.datalayer.core.EnumerationItemMaintainer;
-import ai.startree.thirdeye.mapper.ApiBeanMapper;
-import ai.startree.thirdeye.spi.datalayer.DaoFilter;
-import ai.startree.thirdeye.spi.datalayer.Predicate;
-import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
-import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
-import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
-import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
+import ai.startree.thirdeye.service.MaintenanceService;
 import com.google.inject.Inject;
 import io.dropwizard.auth.Auth;
 import io.micrometer.core.annotation.Timed;
@@ -36,7 +26,6 @@ import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.List;
 import javax.inject.Singleton;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
@@ -46,11 +35,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Tag(name = "zzz Maintenance zzz")
-@SecurityRequirement(name="oauth")
+@SecurityRequirement(name = "oauth")
 @OpenAPIDefinition(security = {
     @SecurityRequirement(name = "oauth")
 })
@@ -59,22 +46,11 @@ import org.slf4j.LoggerFactory;
 @Produces(MediaType.APPLICATION_JSON)
 public class MaintenanceResource {
 
-  private static final Logger log = LoggerFactory.getLogger(EnumerationItemResource.class);
-
-  private final EnumerationItemManager enumerationItemManager;
-  private final AnomalyManager anomalyManager;
-  private final AuthorizationManager authorizationManager;
-  private final EnumerationItemMaintainer enumerationItemMaintainer;
+  private final MaintenanceService maintenanceService;
 
   @Inject
-  public MaintenanceResource(final EnumerationItemManager enumerationItemManager,
-      final AnomalyManager anomalyManager,
-      final AuthorizationManager authorizationManager,
-      final EnumerationItemMaintainer enumerationItemMaintainer) {
-    this.enumerationItemManager = enumerationItemManager;
-    this.anomalyManager = anomalyManager;
-    this.authorizationManager = authorizationManager;
-    this.enumerationItemMaintainer = enumerationItemMaintainer;
+  public MaintenanceResource(final MaintenanceService maintenanceService) {
+    this.maintenanceService = maintenanceService;
   }
 
   @POST
@@ -89,34 +65,8 @@ public class MaintenanceResource {
       @FormParam("to") final long toId
 
   ) {
-    final EnumerationItemDTO from = enumerationItemManager.findById(fromId);
-    authorizationManager.ensureCanDelete(principal, from);
-
-    final EnumerationItemDTO to = enumerationItemManager.findById(toId);
-    authorizationManager.ensureCanDelete(principal, to);
-
-    enumerationItemMaintainer.migrateAndRemove(from, to);
-    logDeleteOperation(from, principal, false);
-
+    maintenanceService.migrateEnumerationItems(principal, fromId, toId);
     return Response.ok().build();
-  }
-
-  private void logDeleteOperation(final EnumerationItemDTO ei,
-      final ThirdEyeServerPrincipal principal,
-      final boolean dryRun) {
-    String eiString;
-    try {
-      eiString = ThirdEyeSerialization
-          .getObjectMapper()
-          .writeValueAsString(ApiBeanMapper.toApi(ei));
-    } catch (final Exception e) {
-      eiString = ei.toString();
-    }
-    log.warn("Deleting{} by {}. enumeration item(id: {}}) json: {}",
-        dryRun ? "(dryRun)" : "",
-        principal.getName(),
-        ei.getId(),
-        eiString);
   }
 
   @POST
@@ -127,17 +77,7 @@ public class MaintenanceResource {
   public Response updateIgnoreLabelIndex(
       @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal
   ) {
-    // skip already updated ignored index
-    final DaoFilter filter = new DaoFilter().setPredicate(Predicate.NEQ("ignored", true));
-    anomalyManager.filter(filter).stream()
-        .peek(anomaly -> authorizationManager.ensureCanEdit(principal, anomaly, anomaly))
-        .filter(this::isIgnored)
-        .forEach(anomalyManager::update);
+    maintenanceService.updateAnomalyIgnoredIndex(principal);
     return Response.ok().build();
-  }
-
-  private boolean isIgnored(final AnomalyDTO anomaly) {
-    final List<AnomalyLabelDTO> labels = anomaly.getAnomalyLabels();
-    return labels != null && labels.stream().anyMatch(AnomalyLabelDTO::isIgnore);
   }
 }

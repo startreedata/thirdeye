@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.healthcheck;
 
-import ai.startree.thirdeye.datalayer.DatabaseAdministrator;
+import ai.startree.thirdeye.datalayer.DatabaseAdministratorClient;
 import com.codahale.metrics.health.HealthCheck;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -21,10 +21,10 @@ import javax.inject.Singleton;
 @Singleton
 public class DatabaseHealthCheck extends HealthCheck {
 
-  private final DatabaseAdministrator databaseAdministrator;
+  private final DatabaseAdministratorClient databaseAdministrator;
 
   @Inject
-  public DatabaseHealthCheck(final DatabaseAdministrator databaseAdministrator) {
+  public DatabaseHealthCheck(final DatabaseAdministratorClient databaseAdministrator) {
     this.databaseAdministrator = databaseAdministrator;
   }
 

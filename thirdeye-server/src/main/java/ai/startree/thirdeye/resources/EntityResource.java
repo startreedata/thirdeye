@@ -13,15 +13,11 @@
  */
 package ai.startree.thirdeye.resources;
 
-import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.ResourceUtils.serverError;
 
-import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
-import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
+import ai.startree.thirdeye.service.EntityService;
 import ai.startree.thirdeye.spi.ThirdEyeStatus;
-import ai.startree.thirdeye.spi.datalayer.DaoFilter;
-import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import io.dropwizard.auth.Auth;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
@@ -31,11 +27,7 @@ import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -44,108 +36,54 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 @Produces(MediaType.APPLICATION_JSON)
 @Tag(name = "Entity")
-@SecurityRequirement(name="oauth")
-@OpenAPIDefinition(security = {
-    @SecurityRequirement(name = "oauth")
-})
+@SecurityRequirement(name = "oauth")
+@OpenAPIDefinition(security = {@SecurityRequirement(name = "oauth")})
 @SecurityScheme(name = "oauth", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER, paramName = HttpHeaders.AUTHORIZATION)
 public class EntityResource {
 
-  private final GenericPojoDao genericPojoDao;
-  private final AuthorizationManager authorizationManager;
+  private final EntityService entityService;
 
   @Inject
-  public EntityResource(final GenericPojoDao genericPojoDao,
-      final AuthorizationManager authorizationManager) {
-    this.genericPojoDao = genericPojoDao;
-    this.authorizationManager = authorizationManager;
+  public EntityResource(final EntityService entityService) {
+    this.entityService = entityService;
   }
 
   @GET
   @Path("{id}")
-  public Response getRawEntity(
-      @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
+  public Response getRawEntity(@Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
       @PathParam("id") Long id) {
-    authorizationManager.ensureHasRootAccess(principal);
-    return Response.ok(ensureExists(genericPojoDao.getRaw(id))).build();
+    return Response.ok(entityService.getRawEntity(principal, id)).build();
   }
 
   @GET
   @Path("types")
   public Response listEntities(@Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal) {
-    authorizationManager.ensureHasRootAccess(principal);
-    final Map<String, Long> entityCountMap = new TreeMap<>();
-    final Set<Class<? extends AbstractDTO>> beanClasses = genericPojoDao.getAllBeanClasses();
-    for (Class<? extends AbstractDTO> beanClass : beanClasses) {
-      final long count = genericPojoDao.count(beanClass);
-      entityCountMap.put(beanClass.getName(), count);
-    }
-    return Response.ok(entityCountMap).build();
+    return Response.ok(entityService.countEntitiesByType(principal)).build();
   }
 
   @GET
   @Path("types/{bean_class}/info")
-  public Response getEntityInfo(
-      @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
+  public Response getEntityInfo(@Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
       @PathParam("bean_class") String beanClass) {
-    authorizationManager.ensureHasRootAccess(principal);
     try {
-      List<String> indexedColumns = genericPojoDao.getIndexedColumns(Class.forName(beanClass));
-      return Response.ok(indexedColumns).build();
+      return Response.ok(entityService.getBeanFields(principal, beanClass)).build();
     } catch (Exception e) {
       throw serverError(ThirdEyeStatus.ERR_UNKNOWN, e);
     }
   }
 
-  @SuppressWarnings("unchecked")
   @GET
   @Path("types/{bean_class}")
-  public Response getEntity(
-      @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
-      @PathParam("bean_class") String beanClassRef,
-      @Context UriInfo uriInfo
-  ) {
-    authorizationManager.ensureHasRootAccess(principal);
+  public Response getEntity(@Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
+      @PathParam("bean_class") String beanClassRef, @Context UriInfo uriInfo) {
     try {
-      final MultivaluedMap<String, String> queryParameters = uriInfo.getQueryParameters();
-      int limit = 10;
-      int offset = 0;
-
-      if (queryParameters.getFirst("limit") != null) {
-        limit = Integer.parseInt(queryParameters.getFirst("limit"));
-      }
-      if (queryParameters.getFirst("offset") != null) {
-        offset = Integer.parseInt(queryParameters.getFirst("offset"));
-      }
-
-      final Class<? extends AbstractDTO> beanClass =
-          (Class<? extends AbstractDTO>) Class.forName(beanClassRef);
-      final List<String> indexedColumns = genericPojoDao.getIndexedColumns(beanClass);
-
-      final List<Predicate> predicates = new ArrayList<>();
-      for (Map.Entry<String, List<String>> e : queryParameters.entrySet()) {
-        final String qParam = e.getKey();
-        if (indexedColumns.contains(qParam)) {
-          final Object[] objects = e.getValue().toArray();
-          predicates.add(Predicate.IN(qParam, objects));
-        }
-      }
-
-      final List<? extends AbstractDTO> abstractBeans;
-      if (!predicates.isEmpty()) {
-        final DaoFilter daoFilter = new DaoFilter()
-            .setBeanClass(beanClass)
-            .setPredicate(Predicate.AND(predicates.toArray(new Predicate[]{})));
-        abstractBeans = genericPojoDao.get(daoFilter);
-      } else {
-        abstractBeans = genericPojoDao.list(beanClass, limit, offset);
-      }
+      final List<? extends AbstractDTO> abstractBeans = entityService.getEntity(principal,
+          beanClassRef, uriInfo);
       return Response.ok(abstractBeans).build();
     } catch (Exception e) {
       throw serverError(ThirdEyeStatus.ERR_UNKNOWN, e);

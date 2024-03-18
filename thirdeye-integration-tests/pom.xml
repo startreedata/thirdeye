@@ -143,6 +143,11 @@
       <scope>test</scope>
     </dependency>
     <!--end reuse  -->
+    <dependency>
+      <groupId>com.tngtech.archunit</groupId>
+      <artifactId>archunit</artifactId>
+      <scope>test</scope>
+    </dependency>
 
     <!-- https://mvnrepository.com/artifact/io.vertx/vertx-web-client -->
   </dependencies>

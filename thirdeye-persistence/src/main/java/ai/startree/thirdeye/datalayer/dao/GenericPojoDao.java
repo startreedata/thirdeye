@@ -27,8 +27,8 @@ import static com.google.common.base.Preconditions.checkState;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.datalayer.DatabaseService;
-import ai.startree.thirdeye.datalayer.DatabaseTransactionService;
+import ai.startree.thirdeye.datalayer.DatabaseClient;
+import ai.startree.thirdeye.datalayer.DatabaseTransactionClient;
 import ai.startree.thirdeye.datalayer.entity.AbstractEntity;
 import ai.startree.thirdeye.datalayer.entity.AbstractIndexEntity;
 import ai.startree.thirdeye.datalayer.entity.GenericJsonEntity;
@@ -60,12 +60,12 @@ public class GenericPojoDao {
   private static final Logger LOG = LoggerFactory.getLogger(GenericPojoDao.class);
   private static final boolean IS_DEBUG = LOG.isDebugEnabled();
 
-  private final DatabaseService databaseService;
-  private final DatabaseTransactionService transactionService;
+  private final DatabaseClient databaseService;
+  private final DatabaseTransactionClient transactionService;
 
   @Inject
-  public GenericPojoDao(final DatabaseService databaseService,
-      final DatabaseTransactionService transactionService) {
+  public GenericPojoDao(final DatabaseClient databaseService,
+      final DatabaseTransactionClient transactionService) {
     this.databaseService = databaseService;
     this.transactionService = transactionService;
 

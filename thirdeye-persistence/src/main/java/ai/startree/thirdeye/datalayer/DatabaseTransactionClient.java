@@ -25,9 +25,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class DatabaseTransactionService {
+public class DatabaseTransactionClient {
 
-  private static final Logger LOG = LoggerFactory.getLogger(DatabaseTransactionService.class);
+  private static final Logger LOG = LoggerFactory.getLogger(DatabaseTransactionClient.class);
 
   private final DataSource dataSource;
   @Deprecated
@@ -38,7 +38,7 @@ public class DatabaseTransactionService {
   private final io.micrometer.core.instrument.Counter dbTransactionCounterOfException;
 
   @Inject
-  public DatabaseTransactionService(final DataSource dataSource,
+  public DatabaseTransactionClient(final DataSource dataSource,
       final MetricRegistry metricRegistry) {
     this.dataSource = dataSource;
 

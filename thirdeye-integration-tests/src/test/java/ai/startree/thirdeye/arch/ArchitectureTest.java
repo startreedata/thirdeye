@@ -111,7 +111,10 @@ public class ArchitectureTest {
     rule.check(thirdeyeClasses);
   }
 
-  // TODO ensure that only AbstratcManagers use genericPojoDao
+  // TODO CYRIL next PR - 
+  //  ensure no unknown users of generic PojoDAO and managers
+  //  ensure Services do their job of using the authorization manager 
+  //  and taking the principal as input of all public methods
 
   // todo add test - all service public methods should ask for principle 
   //  how is a public method of service supposed to check auth 

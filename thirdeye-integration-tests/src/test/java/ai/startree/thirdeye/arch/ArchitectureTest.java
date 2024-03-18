@@ -20,8 +20,10 @@ import static com.tngtech.archunit.core.domain.properties.CanBeAnnotated.Predica
 import static com.tngtech.archunit.lang.conditions.ArchPredicates.are;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 
+import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.datalayer.DatabaseService;
 import ai.startree.thirdeye.datalayer.DatabaseTransactionService;
+import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.resources.CrudResource;
 import ai.startree.thirdeye.spi.datalayer.bao.AbstractManager;
 import com.tngtech.archunit.base.DescribedPredicate;
@@ -33,10 +35,14 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.HEAD;
+import javax.ws.rs.OPTIONS;
+import javax.ws.rs.PATCH;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class ArchitectureTest {
@@ -50,23 +56,50 @@ public class ArchitectureTest {
       .or(containAnyMethodsThat(annotatedWith(DELETE.class)))
       .or(containAnyMethodsThat(annotatedWith(POST.class)))
       .or(containAnyMethodsThat(annotatedWith(PUT.class)))
+      .or(containAnyMethodsThat(annotatedWith(PATCH.class)))
+      .or(containAnyMethodsThat(annotatedWith(OPTIONS.class)))
+      .or(containAnyMethodsThat(annotatedWith(HEAD.class)))
       .or(containAnyMethodsThat(annotatedWith(GET.class)));
 
   public static final DescribedPredicate<JavaClass> NON_SECURED_DAO_CLASSES = DescribedPredicate.or(
       assignableTo(AbstractManager.class),
-      // assignableTo(GenericPojoDao.class),
+      assignableTo(GenericPojoDao.class),
       assignableTo(DatabaseService.class),
       assignableTo(DatabaseTransactionService.class));
+  
+  public JavaClasses thirdeyeClasses;
+  
+  @BeforeClass
+  public void loadClasses() {
+    thirdeyeClasses = new ClassFileImporter().importPackages("ai.startree");
+  } 
 
   @Test
-  public void testResourcesCannotUseDaosDirectly() {
-    final JavaClasses importedClasses = new ClassFileImporter().importPackages("ai.startree");
+  public void testResourcesCannotUseNonSecuredDaosDirectly() {
     final ArchRule rule = noClasses().that(ARE_RESOURCE_CLASSES)
         .should().dependOnClassesThat()
         .areAssignableTo(NON_SECURED_DAO_CLASSES);
-
-    rule.check(importedClasses);
+    rule.check(thirdeyeClasses);
   }
+
+  @Test
+  public void testResourcesDoNotPerformAuthorization() {
+    // no resources should perform authorization - they are only responsible for authentication
+    final ArchRule rule = noClasses().that(ARE_RESOURCE_CLASSES)
+        .should().dependOnClassesThat()
+        .areAssignableTo(AuthorizationManager.class);
+    rule.check(thirdeyeClasses);
+  }
+  
+//  @Test
+//  public void testAuthorizationProviderOnlyUsedByAuthorizationManager() {
+//    classes().that()
+//        .implement(ThirdEyeAuthorizer.class)
+//        .should().onlyBeAccessed()
+//        .byClassesThat().areAssignableTo(EntityResource.class);
+//  }
+  
+  // TODO ensure that only AbstratcManagers use genericPojoDao
 
   // todo add test - all service public methods should ask for principle 
   //  how is a public method of service supposed to check auth 

@@ -20,11 +20,15 @@ import static com.tngtech.archunit.core.domain.properties.CanBeAnnotated.Predica
 import static com.tngtech.archunit.lang.conditions.ArchPredicates.are;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 
+import ai.startree.thirdeye.PluginLoader;
+import ai.startree.thirdeye.ThirdEyeServerModule;
 import ai.startree.thirdeye.auth.AuthorizationManager;
+import ai.startree.thirdeye.auth.ThirdEyeAuthorizerProvider;
 import ai.startree.thirdeye.datalayer.DatabaseService;
 import ai.startree.thirdeye.datalayer.DatabaseTransactionService;
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.resources.CrudResource;
+import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
 import ai.startree.thirdeye.spi.datalayer.bao.AbstractManager;
 import com.tngtech.archunit.base.DescribedPredicate;
 import com.tngtech.archunit.core.domain.JavaClass;
@@ -62,22 +66,21 @@ public class ArchitectureTest {
       .or(containAnyMethodsThat(annotatedWith(GET.class)));
 
   public static final DescribedPredicate<JavaClass> NON_SECURED_DAO_CLASSES = DescribedPredicate.or(
-      assignableTo(AbstractManager.class),
-      assignableTo(GenericPojoDao.class),
-      assignableTo(DatabaseService.class),
-      assignableTo(DatabaseTransactionService.class));
-  
+      assignableTo(AbstractManager.class), assignableTo(GenericPojoDao.class),
+      assignableTo(DatabaseService.class), assignableTo(DatabaseTransactionService.class));
+
   public JavaClasses thirdeyeClasses;
-  
+
   @BeforeClass
   public void loadClasses() {
     thirdeyeClasses = new ClassFileImporter().importPackages("ai.startree");
-  } 
+  }
 
   @Test
   public void testResourcesCannotUseNonSecuredDaosDirectly() {
     final ArchRule rule = noClasses().that(ARE_RESOURCE_CLASSES)
-        .should().dependOnClassesThat()
+        .should()
+        .dependOnClassesThat()
         .areAssignableTo(NON_SECURED_DAO_CLASSES);
     rule.check(thirdeyeClasses);
   }
@@ -86,19 +89,28 @@ public class ArchitectureTest {
   public void testResourcesDoNotPerformAuthorization() {
     // no resources should perform authorization - they are only responsible for authentication
     final ArchRule rule = noClasses().that(ARE_RESOURCE_CLASSES)
-        .should().dependOnClassesThat()
+        .should()
+        .dependOnClassesThat()
         .areAssignableTo(AuthorizationManager.class);
     rule.check(thirdeyeClasses);
   }
-  
-//  @Test
-//  public void testAuthorizationProviderOnlyUsedByAuthorizationManager() {
-//    classes().that()
-//        .implement(ThirdEyeAuthorizer.class)
-//        .should().onlyBeAccessed()
-//        .byClassesThat().areAssignableTo(EntityResource.class);
-//  }
-  
+
+  @Test
+  public void testNoUnknownUserOfThirdEyeAuthorizer() {
+    final ArchRule rule = noClasses().that()
+        // whitelist
+        .doNotBelongToAnyOf(
+            AuthorizationManager.class,
+            ThirdEyeServerModule.class,
+            PluginLoader.class,
+            ThirdEyeAuthorizerProvider.class
+        )
+        .should()
+        .accessClassesThat()
+        .implement(ThirdEyeAuthorizer.class);
+    rule.check(thirdeyeClasses);
+  }
+
   // TODO ensure that only AbstratcManagers use genericPojoDao
 
   // todo add test - all service public methods should ask for principle 

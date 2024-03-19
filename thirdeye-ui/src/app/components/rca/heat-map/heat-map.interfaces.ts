@@ -20,6 +20,7 @@ export interface HeatMapProps {
     anomalyFilters: AnomalyFilterOption[];
     onFilterChange: (filters: AnomalyFilterOption[]) => void;
     onHeightChange: (height: number) => void;
+    dimensionsInOrder: string[];
 }
 
 export interface SummaryData {

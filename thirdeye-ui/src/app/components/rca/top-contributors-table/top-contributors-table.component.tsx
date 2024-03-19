@@ -70,14 +70,14 @@ export const TopContributorsTable: FunctionComponent<TopContributorsTableProps> 
                 <TableHead>
                     <TableRow>
                         <TableCell width="20px" />
-                        <TableCell width="20px">
-                            <strong>{t("label.details")}</strong>
-                        </TableCell>
                         <TableCell>
                             <strong>{t("label.dimension-combination")}</strong>
                         </TableCell>
                         <TableCell>
                             <strong>{t("label.impact-percentage")}</strong>
+                        </TableCell>
+                        <TableCell width="20px">
+                            <strong>{t("label.details")}</strong>
                         </TableCell>
                     </TableRow>
                 </TableHead>

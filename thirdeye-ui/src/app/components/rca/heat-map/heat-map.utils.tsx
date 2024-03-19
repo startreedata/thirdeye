@@ -26,6 +26,11 @@ import {
     SummaryData,
 } from "./heat-map.interfaces";
 
+export enum SortOrder {
+    Alphabetical = "Alphabetical",
+    Contribution = "Contribution",
+}
+
 export function summarizeDimensionValueData(
     dimensionValueData: SummarizeDataFunctionParams
 ): [number, SummaryData] {
@@ -91,6 +96,39 @@ export function formatTreemapData(
     ];
 }
 
+// Sort by the given sorting order, if the sorting order is not given, sort alphabetically
+// eg:
+// Input: ["c", "g", "a", "b", "f", "e", "z", "v" "d"]
+// Sort Order: ["v", "a", "z"];
+// Output: ["v", "a", "z", "b", "c", "d", "e", "f", "g"]
+export const sortFnByGivenSortingOrder =
+    (sortOrderToUse: string[]): Parameters<Array<string>["sort"]>[0] =>
+    (a, b) => {
+        const i1 = sortOrderToUse.includes(a);
+        const i2 = sortOrderToUse.includes(b);
+
+        // If both are in the sort order, we want to sort them based on the order
+        if (i1 && i2) {
+            return sortOrderToUse.indexOf(a) - sortOrderToUse.indexOf(b);
+        }
+
+        // If only the first is in the sort order, we want to sort it first
+        if (i1 && !i2) {
+            return -1;
+        }
+
+        if (!i1 && i2) {
+            return 1;
+        }
+
+        // If neither are in the sort order, we want to sort them alphabetically
+        if (!i1 && !i2) {
+            return a.localeCompare(b);
+        }
+
+        return 0;
+    };
+
 export function formatDimensionOptions(
     anomalyMetricBreakdown: AnomalyBreakdown
 ): AnomalyFilterOption[] {
@@ -111,13 +149,19 @@ export function formatDimensionOptions(
 }
 
 export function formatComparisonData(
-    anomalyMetricBreakdown: AnomalyBreakdown
+    anomalyMetricBreakdown: AnomalyBreakdown,
+    customSortOrderToUse?: string[]
 ): AnomalyBreakdownComparisonDataByDimensionColumn[] {
     const breakdownComparisonDataByDimensionColumn: AnomalyBreakdownComparisonDataByDimensionColumn[] =
         [];
 
-    Object.keys(anomalyMetricBreakdown.current.breakdown).forEach(
-        (dimensionColumnName) => {
+    Object.keys(anomalyMetricBreakdown.current.breakdown)
+        .sort(
+            customSortOrderToUse
+                ? sortFnByGivenSortingOrder(customSortOrderToUse)
+                : undefined
+        )
+        .forEach((dimensionColumnName) => {
             const [currentTotal, currentDimensionValuesData] =
                 summarizeDimensionValueData(
                     anomalyMetricBreakdown.current.breakdown[
@@ -176,8 +220,7 @@ export function formatComparisonData(
                 column: dimensionColumnName,
                 dimensionComparisonData,
             });
-        }
-    );
+        });
 
     return breakdownComparisonDataByDimensionColumn;
 }

@@ -12,7 +12,11 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Divider } from "@material-ui/core";
+import Box from "@material-ui/core/Box";
+import Divider from "@material-ui/core/Divider";
+import Typography from "@material-ui/core/Typography";
+import SortByAlphaIcon from "@material-ui/icons/SortByAlpha";
+import BarChartIcon from "@material-ui/icons/BarChart";
 import { HierarchyNode } from "d3-hierarchy";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { Treemap } from "../../visualizations/treemap/treemap.component";
@@ -26,23 +30,29 @@ import {
     HeatMapProps,
 } from "./heat-map.interfaces";
 import {
+    SortOrder,
     formatComparisonData,
-    formatDimensionOptions,
     formatTreemapData,
 } from "./heat-map.utils";
+import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
+import { useTranslation } from "react-i18next";
 
 export const HeatMap: FunctionComponent<HeatMapProps> = ({
     heatMapData,
     anomalyFilters,
+    dimensionsInOrder,
     onFilterChange,
     onHeightChange,
 }) => {
+    const { t } = useTranslation();
+
     const [breakdownComparisonData, setBreakdownComparisonData] = useState<
         AnomalyBreakdownComparisonDataByDimensionColumn[] | null
     >(null);
-    const [anomalyFilterOptions, setAnomalyFilterOptions] = useState<
-        AnomalyFilterOption[]
-    >([]);
+
+    const [sortOrder, setSortOrder] = useState<SortOrder>(
+        SortOrder.Contribution
+    );
 
     useEffect(() => {
         if (!heatMapData) {
@@ -51,12 +61,15 @@ export const HeatMap: FunctionComponent<HeatMapProps> = ({
             return;
         }
 
-        if (anomalyFilterOptions.length === 0) {
-            setAnomalyFilterOptions(formatDimensionOptions(heatMapData));
-        }
-
-        setBreakdownComparisonData(formatComparisonData(heatMapData));
-    }, [heatMapData]);
+        setBreakdownComparisonData(
+            formatComparisonData(
+                heatMapData,
+                sortOrder === SortOrder.Contribution
+                    ? dimensionsInOrder
+                    : undefined
+            )
+        );
+    }, [heatMapData, dimensionsInOrder, sortOrder]);
 
     const handleNodeClick = (
         tileData: HierarchyNode<TreemapData<AnomalyBreakdownComparisonData>>,
@@ -93,29 +106,108 @@ export const HeatMap: FunctionComponent<HeatMapProps> = ({
     return (
         <>
             <Box pt={2}>
+                <Divider />
+                <Box
+                    alignItems="center"
+                    bgcolor="grey.100"
+                    display="flex"
+                    justifyContent="space-between"
+                    px={1}
+                >
+                    <Typography variant="h6">
+                        {t("label.heatmap-of-dimension-distribution")}
+                    </Typography>
+                    <Box flexGrow={1} />
+                    <Typography variant="body2">
+                        {t("label.sort-by")}:
+                    </Typography>
+                    <Box mr={1} />
+                    <ToggleButtonGroup
+                        exclusive
+                        size="small"
+                        style={{
+                            backgroundColor: "white",
+                        }}
+                        value={sortOrder}
+                        onChange={(_e, newVal) =>
+                            newVal && setSortOrder(newVal)
+                        }
+                    >
+                        <ToggleButton
+                            size="small"
+                            value={SortOrder.Alphabetical}
+                        >
+                            <SortByAlphaIcon
+                                color={
+                                    sortOrder === SortOrder.Alphabetical
+                                        ? "primary"
+                                        : "inherit"
+                                }
+                                fontSize="small"
+                            />
+                            <Box mr={1} />
+                            <Typography
+                                color={
+                                    sortOrder === SortOrder.Alphabetical
+                                        ? "primary"
+                                        : "initial"
+                                }
+                                variant="body2"
+                            >
+                                {SortOrder.Alphabetical}
+                            </Typography>
+                        </ToggleButton>
+                        <ToggleButton
+                            size="small"
+                            value={SortOrder.Contribution}
+                        >
+                            <BarChartIcon
+                                color={
+                                    sortOrder === SortOrder.Contribution
+                                        ? "primary"
+                                        : "inherit"
+                                }
+                                fontSize="small"
+                            />
+                            <Box mr={1} />
+                            <Typography
+                                color={
+                                    sortOrder === SortOrder.Contribution
+                                        ? "primary"
+                                        : "initial"
+                                }
+                                variant="body2"
+                            >
+                                {SortOrder.Contribution}
+                            </Typography>
+                        </ToggleButton>
+                    </ToggleButtonGroup>
+                </Box>
                 {React.Children.toArray(
                     breakdownComparisonData &&
                         breakdownComparisonData.map((data) => (
                             <>
                                 <Divider />
-                                <Treemap<
-                                    AnomalyBreakdownComparisonData &
-                                        DimensionDisplayData
-                                >
-                                    colorChangeValueAccessor={
-                                        colorChangeValueAccessor
-                                    }
-                                    name={data.column}
-                                    tooltipElement={DimensionHeatmapTooltip}
-                                    treemapData={formatTreemapData(
-                                        data,
-                                        data.column
-                                    )}
-                                    onDimensionClickHandler={(node) =>
-                                        handleNodeClick(node, data.column)
-                                    }
-                                    onHeightChange={handleHeightChange}
-                                />
+                                <Box px={1}>
+                                    <Treemap<
+                                        AnomalyBreakdownComparisonData &
+                                            DimensionDisplayData
+                                    >
+                                        colorChangeValueAccessor={
+                                            colorChangeValueAccessor
+                                        }
+                                        name={data.column}
+                                        tooltipElement={DimensionHeatmapTooltip}
+                                        treemapData={formatTreemapData(
+                                            data,
+                                            data.column
+                                        )}
+                                        onDimensionClickHandler={(node) =>
+                                            handleNodeClick(node, data.column)
+                                        }
+                                        onHeightChange={handleHeightChange}
+                                    />
+                                </Box>
                             </>
                         ))
                 )}

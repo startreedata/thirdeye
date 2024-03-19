@@ -116,15 +116,7 @@ export const TopContributorsRow: FunctionComponent<TopContributorsRowProps> = ({
                         />
                     )}
                 </TableCell>
-                <TableCell>
-                    <IconButton
-                        color="inherit"
-                        size="small"
-                        onClick={() => setOpen(!open)}
-                    >
-                        {open ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
-                    </IconButton>
-                </TableCell>
+
                 <TableCell component="th" scope="row">
                     {row.names.includes(SERVER_VALUE_FOR_OTHERS) ? (
                         <Tooltip
@@ -173,6 +165,15 @@ export const TopContributorsRow: FunctionComponent<TopContributorsRowProps> = ({
                             </Grid>
                         </Box>
                     </Box>
+                </TableCell>
+                <TableCell>
+                    <IconButton
+                        color="inherit"
+                        size="small"
+                        onClick={() => setOpen(!open)}
+                    >
+                        {open ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+                    </IconButton>
                 </TableCell>
             </TableRow>
             {/** Expanded Content */}

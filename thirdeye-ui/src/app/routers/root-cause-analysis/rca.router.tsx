@@ -59,24 +59,6 @@ const WhatWherePage = lazy(() =>
     ).then((module) => ({ default: module.WhatWherePage }))
 );
 
-const TopContributorsPage = lazy(() =>
-    import(
-        /* webpackChunkName: "top-contributors-page" */ "../../pages/rca/top-contributors-page/top-contributors-page.component"
-    ).then((module) => ({ default: module.TopContributorsPage }))
-);
-
-const HeatMapPage = lazy(() =>
-    import(
-        /* webpackChunkName: "heat-map-page" */ "../../pages/rca/heat-map-page/heat-map-page.component"
-    ).then((module) => ({ default: module.HeatMapPage }))
-);
-
-const DimensionAnalysisDrillsPage = lazy(() =>
-    import(
-        /* webpackChunkName: "dimension-analysis-drills" */ "../../pages/rca/dimension-analysis-drills-page/dimension-analysis-drills-page.component"
-    ).then((module) => ({ default: module.DimensionAnalysisDrillsPage }))
-);
-
 const EventsPage = lazy(() =>
     import(
         /* webpackChunkName: "events-page" */ "../../pages/rca/events-page/events-page.component"
@@ -175,27 +157,15 @@ export const RootCauseAnalysisRouter: FunctionComponent = () => {
                             path={AppRouteRelative.RCA_WHAT_WHERE}
                         >
                             <Route
-                                index
                                 element={
                                     <Navigate
                                         replace
                                         to={`${
-                                            AppRouteRelative.RCA_TOP_CONTRIBUTORS
+                                            AppRouteRelative.RCA_WHAT_WHERE
                                         }?${searchParams.toString()}`}
                                     />
                                 }
-                            />
-                            <Route
-                                element={<TopContributorsPage />}
-                                path={AppRouteRelative.RCA_TOP_CONTRIBUTORS}
-                            />
-                            <Route
-                                element={<HeatMapPage />}
-                                path={AppRouteRelative.RCA_HEATMAP}
-                            />
-                            <Route
-                                element={<DimensionAnalysisDrillsPage />}
-                                path={AppRouteRelative.RCA_DIMENSION_ANALYSIS}
+                                path="*"
                             />
                         </Route>
                         <Route

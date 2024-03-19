@@ -1,3 +1,11 @@
+### [2.45.9](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.8...thirdeye-ui-2.45.9) (2024-03-19)
+
+
+### Bug Fixes
+
+* [TE-2112](https://cortexdata.atlassian.net/browse/TE-2112) rca heatmap page changes ([b84b3999c](https://github.com/startreedata/thirdeye/commit/b84b3999c32bf2b43f63d72666d73223724cafd1))
+* [TE-2175](https://cortexdata.atlassian.net/browse/TE-2175) improve onboarding datasource configuration ([559492fb3](https://github.com/startreedata/thirdeye/commit/559492fb3a66a69211dbcc16c3b93c1678236601))
+
 ### [2.45.8](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.7...thirdeye-ui-2.45.8) (2024-03-12)
 
 

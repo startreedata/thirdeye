@@ -47,7 +47,7 @@ public class AuthInfoResource {
   @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
   public Response get() {
-    final AuthInfoApi info = authService.getOpenIdConfiguration();
+    final AuthInfoApi info = authService.getOpenIdConfiguration(null);
     if (authConfig.isEnabled() && info == null) {
       throw serverError(ThirdEyeStatus.ERR_AUTH_SERVER_NOT_RESPONDING,
           authConfig.getOAuthConfig().getServerUrl());

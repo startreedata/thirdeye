@@ -17,6 +17,7 @@ import ai.startree.thirdeye.auth.AuthRegistry;
 import ai.startree.thirdeye.auth.oauth.OAuthConfiguration;
 import ai.startree.thirdeye.spi.api.AuthInfoApi;
 import ai.startree.thirdeye.spi.auth.OpenIdConfigurationProvider;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import javax.annotation.Nullable;
@@ -35,7 +36,10 @@ public class AuthService {
     this.oAuthConfiguration = oAuthConfiguration;
   }
 
-  public AuthInfoApi getOpenIdConfiguration() {
+  public AuthInfoApi getOpenIdConfiguration(@Nullable final ThirdEyePrincipal principal) {
+    // it is fine if the principal is null - as of today this service does not require an authenticated user
+    // TODO CYRIL here we keep the convention of Service class requiring an identity in all public methods (it is enforced by tests)
+    //   we should introduce a NOT_AUTHENTICATED identity for such cases 
     if (oAuthConfiguration != null) {
       if (openIdConfigurationProvider == null) {
         // TODO: fix hack. This is loaded via a plugin and is not available at startup

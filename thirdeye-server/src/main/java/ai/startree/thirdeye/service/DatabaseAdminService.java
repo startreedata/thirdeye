@@ -17,6 +17,7 @@ import static ai.startree.thirdeye.util.ResourceUtils.resultSetToMap;
 
 import ai.startree.thirdeye.datalayer.DatabaseAdministratorClient;
 import ai.startree.thirdeye.resources.DatabaseAdminResource;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
@@ -40,25 +41,30 @@ public class DatabaseAdminService {
     this.databaseAdministrator = databaseAdministrator;
   }
 
-  public List<String> getTables() throws SQLException {
+  public List<String> getTables(final ThirdEyePrincipal principal) throws SQLException {
+    // FIXME CYRIL ENSURE ROOT ACCESS
     return databaseAdministrator.getTables();
   }
 
   @NonNull
-  public List<Map<String, Object>> executeQuery(final String sql) throws SQLException {
+  public List<Map<String, Object>> executeQuery(final ThirdEyePrincipal principal, final String sql) throws SQLException {
+    // FIXME CYRIL ENSURE ROOT ACCESS
     return resultSetToMap(databaseAdministrator.executeQuery(sql));
   }
 
-  public void createAllTables() throws SQLException, IOException {
+  public void createAllTables(final ThirdEyePrincipal principal) throws SQLException, IOException {
+    // FIXME CYRIL ENSURE ROOT ACCESS
     databaseAdministrator.createAllTables();
   }
 
-  public void deleteAllData() throws SQLException {
+  public void deleteAllData(final ThirdEyePrincipal principal) throws SQLException {
+    // FIXME CYRIL ENSURE ROOT ACCESS
     LOG.warn("DELETING ALL DATABASE DATA!!! TRUNCATING TABLES!!!");
     databaseAdministrator.truncateTables();
   }
 
-  public void dropAllTables() throws SQLException {
+  public void dropAllTables(final ThirdEyePrincipal principal) throws SQLException {
+    // FIXME CYRIL ENSURE ROOT ACCESS
     LOG.warn("DELETING ALL DATABASE TABLES!!! DROPPING TABLES!!!");
     databaseAdministrator.dropTables();
   }

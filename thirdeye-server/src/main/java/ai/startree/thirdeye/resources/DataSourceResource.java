@@ -76,7 +76,7 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
   public Response getDatasets(
       @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
       @PathParam("name") String name) {
-    return respondOk(dataSourceService.getDatasets(name));
+    return respondOk(dataSourceService.getDatasets(principal, name));
   }
 
   @POST
@@ -92,7 +92,7 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
     ensureExists(dataSourceName, "dataSourceName is a required field");
     ensureExists(datasetName, "datasetName is a required field");
 
-    return respondOk(dataSourceService.onboardDataset(dataSourceName, datasetName));
+    return respondOk(dataSourceService.onboardDataset(principal, dataSourceName, datasetName));
   }
 
   @POST
@@ -105,7 +105,7 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
       @FormParam("name") String name) {
 
     ensureExists(name, "name is a required field");
-    final List<DatasetApi> onboarded = dataSourceService.onboardAll(name);
+    final List<DatasetApi> onboarded = dataSourceService.onboardAll(principal, name);
     return respondOk(onboarded);
   }
 
@@ -118,7 +118,7 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
       @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
       @FormParam("name") String name) {
     ensureExists(name, "name is a required field");
-    return respondOk(dataSourceService.offboardAll(name));
+    return respondOk(dataSourceService.offboardAll(principal, name));
   }
 
   @DELETE
@@ -127,7 +127,7 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
   @Produces(MediaType.APPLICATION_JSON)
   public Response clearDataSourceCache(
       @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal) {
-    dataSourceService.clearDataSourceCache();
+    dataSourceService.clearDataSourceCache(principal);
     return Response.ok().build();
   }
 
@@ -141,7 +141,7 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
     try {
       // throws ThirdEyeException on datasource not found in DB
       // returns null when not able to load datasource
-      if (dataSourceService.validate(name)) {
+      if (dataSourceService.validate(principal, name)) {
         return respondOk(new StatusApi().setCode(ThirdEyeStatus.OK));
       }
     } catch (ThirdEyeException e) {

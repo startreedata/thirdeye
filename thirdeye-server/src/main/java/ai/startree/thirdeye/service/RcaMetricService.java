@@ -15,6 +15,7 @@ package ai.startree.thirdeye.service;
 
 import ai.startree.thirdeye.rca.HeatmapCalculator;
 import ai.startree.thirdeye.spi.api.HeatMapResponseApi;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
@@ -29,12 +30,13 @@ public class RcaMetricService {
     this.heatmapCalculator = heatmapCalculator;
   }
 
-  public HeatMapResponseApi computeHeatmap(final long anomalyId,
+  public HeatMapResponseApi computeHeatmap(final ThirdEyePrincipal principal, final long anomalyId,
       final String baselineOffset,
       final List<String> filters,
       final List<String> dimensions,
       final List<String> excludedDimensions,
       final Integer limit) throws Exception {
+    // FIXME CYRIL ensure authz with principal
     return heatmapCalculator.compute(anomalyId,
         baselineOffset,
         filters,

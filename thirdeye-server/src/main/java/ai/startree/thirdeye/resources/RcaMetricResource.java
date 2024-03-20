@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
  * by the
  * RCA frontend. It delivers metric timeseries, aggregates, and breakdowns (de-aggregations).</p>
  */
-@SecurityRequirement(name="oauth")
+@SecurityRequirement(name = "oauth")
 @OpenAPIDefinition(security = {
     @SecurityRequirement(name = "oauth")
 })
@@ -94,7 +94,9 @@ public class RcaMetricResource {
       if (limit == null) {
         limit = LIMIT_DEFAULT;
       }
-      final HeatMapResponseApi resultApi = rcaMetricService.computeHeatmap(anomalyId,
+      final HeatMapResponseApi resultApi = rcaMetricService.computeHeatmap(
+          principal,
+          anomalyId,
           baselineOffset,
           filters,
           dimensions,

@@ -13,36 +13,23 @@
  */
 package ai.startree.thirdeye.service;
 
-import ai.startree.thirdeye.auth.AuthorizationManager;
-import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
-import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.util.List;
 
 @Singleton
 public class ResourcesBootstrapService {
 
   private final AlertTemplateService alertTemplateService;
-  private final DatasetConfigManager datasetDAO;
 
   @Inject
-  public ResourcesBootstrapService(final AlertTemplateService alertTemplateService,
-      final DatasetConfigManager datasetDAO) {
+  public ResourcesBootstrapService(final AlertTemplateService alertTemplateService) {
     this.alertTemplateService = alertTemplateService;
-    this.datasetDAO = datasetDAO;
   }
 
-  public void bootstrap() {
-    // MIGRATION CODE: START
-    // TODO CYRIL - can be removed around November 2023/December 2024
-    // force migration of dataset configuration to the new timeFormat - migration is made inside DatasetConfigDto#getTimeFormat
-    final List<DatasetConfigDTO> datasets = datasetDAO.findAll();
-    datasetDAO.update(datasets);
-    // MIGRATION CODE: END
-    
-    // FIXME CYRIL - the templating loading should be performed for all namespaces
-    alertTemplateService.loadRecommendedTemplates(AuthorizationManager.getInternalValidPrincipal(),
-        true);
+  public void bootstrap(final ThirdEyeServerPrincipal principal) {
+    // FIXME CYRIL - the template loading should be performed with a principal that 
+    //  corresponds to a shared namespace? or in all namespaces? or without namespace? 
+    alertTemplateService.loadRecommendedTemplates(principal, true);
   }
 }

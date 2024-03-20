@@ -146,8 +146,8 @@ public class ArchitectureTest {
         .doNotBelongToAnyOf(
             // legitimate user
             DatabaseTransactionClient.class,
-            DatabaseAdministratorClient.class,
             // FIXME CYRIL remove ASAP - makes controls more complex and duplicate methods with DatabaseClient
+            DatabaseAdministratorClient.class,
             // legitimate initialization user 
             DataSourceBuilder.class,
             // uses a connection to init EntityMappingHolder - TODO CYRIL - should be refactored to be removed - should go away when 
@@ -203,7 +203,6 @@ public class ArchitectureTest {
         AlertTemplateRenderer.class,
         AlertInsightsProvider.class,
     };
-    
     final ArchRule rule = noClasses().that(
             doNot(
                 ARE_NON_SECURED_DB_LAYER_CLASSES
@@ -217,7 +216,7 @@ public class ArchitectureTest {
     rule.check(thirdeyeClasses);
   }
 
-  // FIXME SECOND ITERATION - CONSIDER LOOKING AT ALL USERS OF ARE_NON_SECURED_DB_LAYER_CLASSES INSTEAD
+  // FIXME CONSIDER LOOKING AT ALL USERS OF ARE_NON_SECURED_DB_LAYER_CLASSES INSTEAD ? 
   @Test
   public void testAllPublicMethodsOfServicesRequireAnIdentity() {
     final MethodsShouldConjunction rule = methods().that()
@@ -228,8 +227,10 @@ public class ArchitectureTest {
     rule.check(thirdeyeClasses);
   }
   
-  //@Test
-  // all services should consume the ThirdEyeAuthorizer one way or another 
+  @Test
+  public void testAllServicesPublicMethodsDependOnAndCallTheAuthorizer() {
+    // FIXME CYRIL add this next
+  }
 
   @Test
   public void testResourcesCannotUseNonSecuredDBLayers() {
@@ -307,6 +308,7 @@ public class ArchitectureTest {
       return javaClass.isTopLevelClass();
     }
   }
+  
 
   // TODO CYRIL next PR - 
   //  ensure no unknown users of generic PojoDAO and managers

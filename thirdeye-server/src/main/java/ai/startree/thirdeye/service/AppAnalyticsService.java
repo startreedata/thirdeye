@@ -124,5 +124,5 @@ public class AppAnalyticsService {
         .setAnomalyStats(anomalyMetricsProvider.computeAnomalyStats(predicate));
   }
 
-  public record MonitoredMetricWrapper(String datasource, String dataset, String metric) {}
+  private record MonitoredMetricWrapper(String datasource, String dataset, String metric) {}
 }

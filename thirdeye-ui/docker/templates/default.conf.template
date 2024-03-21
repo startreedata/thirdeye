@@ -5,6 +5,7 @@ server {
     
     #strict transport not set here to avoid breaking users running on http - should be set by the user
     #add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    #headers need to be repeated in all location that user the add-header directive - see https://serverfault.com/questions/400197/add-header-directives-in-location-overwriting-add-header-directives-in-server
     add_header X-Content-Type-Options nosniff always;
     add_header X-Frame-Options DENY always;
     add_header X-XSS-Protection "1; mode=block" always;
@@ -54,7 +55,6 @@ server {
     }
     location ~ /index.html {
         add_header Cache-Control "no-cache, no-store, must-revalidate";
-        # headers need to be repeated - see https://serverfault.com/questions/400197/add-header-directives-in-location-overwriting-add-header-directives-in-server
         add_header X-Content-Type-Options nosniff always;
         add_header X-Frame-Options DENY always;
         add_header X-XSS-Protection "1; mode=block" always;

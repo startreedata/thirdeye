@@ -114,7 +114,6 @@ spec:
               }
               location ~ /index.html {
                 add_header Cache-Control "no-cache, no-store, must-revalidate";
-                # headers need to be repeated - see https://serverfault.com/questions/400197/add-header-directives-in-location-overwriting-add-header-directives-in-server
                 add_header X-Content-Type-Options nosniff always;
                 add_header X-Frame-Options DENY always;
                 add_header X-XSS-Protection "1; mode=block" always;
@@ -126,7 +125,6 @@ spec:
               }
               location = /robots.txt {
                 add_header Content-Type text/plain;
-                # headers need to be repeated - see https://serverfault.com/questions/400197/add-header-directives-in-location-overwriting-add-header-directives-in-server
                 add_header X-Content-Type-Options nosniff always;
                 add_header X-Frame-Options DENY always;
                 add_header X-XSS-Protection "1; mode=block" always;

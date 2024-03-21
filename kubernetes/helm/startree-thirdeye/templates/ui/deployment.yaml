@@ -64,9 +64,16 @@ spec:
               ssl_certificate /home/thirdeye/tls/tls.crt;
               ssl_certificate_key /home/thirdeye/tls/tls.key;
               ssl_password_file /home/thirdeye/tls-pass/pass;
+              add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
               {{- end }}
               set $backend_servers ${THIRDEYE_API_BASE_URL};
               resolver {{ .Values.ui.resolver }} valid=30s;
+              add_header X-Content-Type-Options nosniff always;
+              add_header X-Frame-Options DENY always;
+              add_header X-XSS-Protection "1; mode=block" always;
+              add_header Referrer-Policy no-referrer-when-downgrade always;
+            
+              server_tokens off;
               location ~/api(.*) {
                 if ($args != "") {
                   proxy_pass $backend_servers/api$1?$args;

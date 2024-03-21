@@ -86,7 +86,7 @@ always-auth = true
 email = <your-email>
 ```
 
-Copy the authentication token and use it in **~/.npmrc**
+Copy the authentication token and use it in **~/.npmrc**:
 
 ```npmrc
 //repo.startreedata.io/artifactory/api/npm/startree-ui/:_auth=<authentication-token>

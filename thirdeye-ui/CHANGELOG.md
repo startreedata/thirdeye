@@ -1,3 +1,11 @@
+### [2.45.10](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.9...thirdeye-ui-2.45.10) (2024-03-21)
+
+
+### Bug Fixes
+
+* [TE-1](https://cortexdata.atlassian.net/browse/TE-1) force cut release ([2dd94c848](https://github.com/startreedata/thirdeye/commit/2dd94c848145872ad910f98efb2567bdefcbe6c4))
+* [TE-1](https://cortexdata.atlassian.net/browse/TE-1) update readme ([e29c73dd4](https://github.com/startreedata/thirdeye/commit/e29c73dd4e02e160e45dd8465d1af2c58f352135))
+
 ### [2.45.9](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.8...thirdeye-ui-2.45.9) (2024-03-19)
 
 

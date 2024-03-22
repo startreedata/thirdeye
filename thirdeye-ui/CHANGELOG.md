@@ -1,3 +1,17 @@
+### [2.45.11](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.10...thirdeye-ui-2.45.11) (2024-03-22)
+
+
+### Bug Fixes
+
+* [TE-1](https://cortexdata.atlassian.net/browse/TE-1) add heap to csp ([962f34129](https://github.com/startreedata/thirdeye/commit/962f34129c116a15abe07aa8ea6ca70acc5ab73b))
+* [TE-1](https://cortexdata.atlassian.net/browse/TE-1) fix connect-src csp ([39d819e17](https://github.com/startreedata/thirdeye/commit/39d819e17d0aac1912cb41543bacfe1782ac4030))
+* [TE-1](https://cortexdata.atlassian.net/browse/TE-1) force no nginx version in all locations ([ab596d2cf](https://github.com/startreedata/thirdeye/commit/ab596d2cf708c789db4955a112e337289fc46bc2))
+* [TE-1](https://cortexdata.atlassian.net/browse/TE-1) improve default nginx config ([5b67f9530](https://github.com/startreedata/thirdeye/commit/5b67f9530a2f89d97858e32159891b038bdc1f5a))
+* [TE-1](https://cortexdata.atlassian.net/browse/TE-1) improve default nginx config ([5a3e240f3](https://github.com/startreedata/thirdeye/commit/5a3e240f3c7a1fecf8a0e46380641bfb9734acb2))
+* [TE-1](https://cortexdata.atlassian.net/browse/TE-1) improve nginx config ([e02f415af](https://github.com/startreedata/thirdeye/commit/e02f415af3569a777f2c9d54103d45f234006216))
+* [TE-2112](https://cortexdata.atlassian.net/browse/TE-2112) ux feedback improvements for rca page ([f78fbba6b](https://github.com/startreedata/thirdeye/commit/f78fbba6b08a9c9d2b9ae95ee0c0da92dd588574))
+* don't set CSP for the moment ([4c4a50219](https://github.com/startreedata/thirdeye/commit/4c4a50219ee15c2a8b798591c0c1718dbe33fdbe))
+
 ### [2.45.9](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.8...thirdeye-ui-2.45.9) (2024-03-19)
 
 

@@ -30,6 +30,7 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Host $server_name;
         proxy_read_timeout 300;
+        server_tokens off;
     }
     location ~/swagger(.*) {
         proxy_pass $backend_servers/swagger$1;
@@ -40,6 +41,7 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Host $server_name;
         proxy_read_timeout 300;
+        server_tokens off;
     }
     location ~/openapi(.*) {
         proxy_pass $backend_servers/openapi$1;
@@ -50,6 +52,7 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Host $server_name;
         proxy_read_timeout 300;
+        server_tokens off;
     }
     location / {
         try_files $uri $uri/ /index.html;
@@ -57,6 +60,7 @@ server {
         add_header X-Frame-Options DENY always;
         add_header X-XSS-Protection "1; mode=block" always;
         add_header Referrer-Policy no-referrer-when-downgrade always;
+        server_tokens off;
         add_header Content-Security-Policy "default-src 'self';script-src 'self' https://cdn.heapanalytics.com https://heapanalytics.com 'unsafe-inline' 'unsafe-eval';style-src 'self' https://heapanalytics.com 'unsafe-inline';img-src 'self' data: https://heapanalytics.com;font-src 'self' https://heapanalytics.com data:;object-src 'none';frame-ancestors 'self';base-uri 'self';form-action 'self';block-all-mixed-content;upgrade-insecure-requests;reflected-xss block;referrer origin;connect-src 'self' https://heapanalytics.com;" always;
     }
     location ~ /index.html {
@@ -65,6 +69,7 @@ server {
         add_header X-Frame-Options DENY always;
         add_header X-XSS-Protection "1; mode=block" always;
         add_header Referrer-Policy no-referrer-when-downgrade always;
+        server_tokens off;
         add_header Content-Security-Policy "default-src 'self';script-src 'self' https://cdn.heapanalytics.com https://heapanalytics.com 'unsafe-inline' 'unsafe-eval';style-src 'self' https://heapanalytics.com 'unsafe-inline';img-src 'self' data: https://heapanalytics.com;font-src 'self' https://heapanalytics.com data:;object-src 'none';frame-ancestors 'self';base-uri 'self';form-action 'self';block-all-mixed-content;upgrade-insecure-requests;reflected-xss block;referrer origin;connect-src 'self' https://heapanalytics.com;" always;
     }
 }

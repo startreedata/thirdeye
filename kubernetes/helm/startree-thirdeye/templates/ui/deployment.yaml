@@ -72,7 +72,7 @@ spec:
               add_header X-Frame-Options DENY always;
               add_header X-XSS-Protection "1; mode=block" always;
               add_header Referrer-Policy no-referrer-when-downgrade always;
-              add_header Content-Security-Policy "default-src 'self';script-src 'self' https://cdn.heapanalytics.com https://heapanalytics.com 'unsafe-inline' 'unsafe-eval';style-src 'self' https://heapanalytics.com 'unsafe-inline';img-src 'self' data: https://heapanalytics.com;font-src 'self' https://heapanalytics.com data:;object-src 'none';frame-ancestors 'self';base-uri 'self';form-action 'self';block-all-mixed-content;upgrade-insecure-requests;reflected-xss block;referrer origin;connect-src https://heapanalytics.com;" always;
+              add_header Content-Security-Policy "default-src 'self';script-src 'self' https://cdn.heapanalytics.com https://heapanalytics.com 'unsafe-inline' 'unsafe-eval';style-src 'self' https://heapanalytics.com 'unsafe-inline';img-src 'self' data: https://heapanalytics.com;font-src 'self' https://heapanalytics.com data:;object-src 'none';frame-ancestors 'self';base-uri 'self';form-action 'self';block-all-mixed-content;upgrade-insecure-requests;reflected-xss block;referrer origin;connect-src 'self' https://heapanalytics.com;" always;
               server_tokens off;
               location ~/api(.*) {
                 if ($args != "") {
@@ -115,7 +115,7 @@ spec:
                 add_header X-Frame-Options DENY always;
                 add_header X-XSS-Protection "1; mode=block" always;
                 add_header Referrer-Policy no-referrer-when-downgrade always;
-                add_header Content-Security-Policy "default-src 'self';script-src 'self' https://cdn.heapanalytics.com https://heapanalytics.com 'unsafe-inline' 'unsafe-eval';style-src 'self' https://heapanalytics.com 'unsafe-inline';img-src 'self' data: https://heapanalytics.com;font-src 'self' https://heapanalytics.com data:;object-src 'none';frame-ancestors 'self';base-uri 'self';form-action 'self';block-all-mixed-content;upgrade-insecure-requests;reflected-xss block;referrer origin;connect-src https://heapanalytics.com;" always;
+                add_header Content-Security-Policy "default-src 'self';script-src 'self' https://cdn.heapanalytics.com https://heapanalytics.com 'unsafe-inline' 'unsafe-eval';style-src 'self' https://heapanalytics.com 'unsafe-inline';img-src 'self' data: https://heapanalytics.com;font-src 'self' https://heapanalytics.com data:;object-src 'none';frame-ancestors 'self';base-uri 'self';form-action 'self';block-all-mixed-content;upgrade-insecure-requests;reflected-xss block;referrer origin;connect-src 'self' https://heapanalytics.com;" always;
                 {{- if .Values.tls.enabled }}
                 add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
                 {{- end }}
@@ -126,7 +126,7 @@ spec:
                 add_header X-Frame-Options DENY always;
                 add_header X-XSS-Protection "1; mode=block" always;
                 add_header Referrer-Policy no-referrer-when-downgrade always;
-                add_header Content-Security-Policy "default-src 'self';script-src 'self' https://cdn.heapanalytics.com https://heapanalytics.com 'unsafe-inline' 'unsafe-eval';style-src 'self' https://heapanalytics.com 'unsafe-inline';img-src 'self' data: https://heapanalytics.com;font-src 'self' https://heapanalytics.com data:;object-src 'none';frame-ancestors 'self';base-uri 'self';form-action 'self';block-all-mixed-content;upgrade-insecure-requests;reflected-xss block;referrer origin;connect-src https://heapanalytics.com;" always;
+                add_header Content-Security-Policy "default-src 'self';script-src 'self' https://cdn.heapanalytics.com https://heapanalytics.com 'unsafe-inline' 'unsafe-eval';style-src 'self' https://heapanalytics.com 'unsafe-inline';img-src 'self' data: https://heapanalytics.com;font-src 'self' https://heapanalytics.com data:;object-src 'none';frame-ancestors 'self';base-uri 'self';form-action 'self';block-all-mixed-content;upgrade-insecure-requests;reflected-xss block;referrer origin;connect-src 'self' https://heapanalytics.com;" always;
                 {{- if .Values.tls.enabled }}
                 add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
                 {{- end }}
@@ -137,7 +137,7 @@ spec:
                 add_header X-Frame-Options DENY always;
                 add_header X-XSS-Protection "1; mode=block" always;
                 add_header Referrer-Policy no-referrer-when-downgrade always;
-                add_header Content-Security-Policy "default-src 'self';script-src 'self' https://cdn.heapanalytics.com https://heapanalytics.com 'unsafe-inline' 'unsafe-eval';style-src 'self' https://heapanalytics.com 'unsafe-inline';img-src 'self' data: https://heapanalytics.com;font-src 'self' https://heapanalytics.com data:;object-src 'none';frame-ancestors 'self';base-uri 'self';form-action 'self';block-all-mixed-content;upgrade-insecure-requests;reflected-xss block;referrer origin;connect-src https://heapanalytics.com;" always;
+                add_header Content-Security-Policy "default-src 'self';script-src 'self' https://cdn.heapanalytics.com https://heapanalytics.com 'unsafe-inline' 'unsafe-eval';style-src 'self' https://heapanalytics.com 'unsafe-inline';img-src 'self' data: https://heapanalytics.com;font-src 'self' https://heapanalytics.com data:;object-src 'none';frame-ancestors 'self';base-uri 'self';form-action 'self';block-all-mixed-content;upgrade-insecure-requests;reflected-xss block;referrer origin;connect-src 'self' https://heapanalytics.com;" always;
                 {{- if .Values.tls.enabled }}
                 add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
                 {{- end }}

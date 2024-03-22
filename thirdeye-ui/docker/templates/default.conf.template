@@ -11,7 +11,8 @@ server {
     add_header X-XSS-Protection "1; mode=block" always;
     add_header Referrer-Policy no-referrer-when-downgrade always;
     
-    add_header Content-Security-Policy "default-src 'self';script-src 'self' https://cdn.heapanalytics.com https://heapanalytics.com 'unsafe-inline' 'unsafe-eval';style-src 'self' https://heapanalytics.com 'unsafe-inline';img-src 'self' data: https://heapanalytics.com;font-src 'self' https://heapanalytics.com data:;object-src 'none';frame-ancestors 'self';base-uri 'self';form-action 'self';block-all-mixed-content;upgrade-insecure-requests;reflected-xss block;referrer origin;connect-src 'self' https://heapanalytics.com;" always;
+    # csp not set - should be set by the user
+    # add_header Content-Security-Policy "default-src 'self';script-src 'self' https://cdn.heapanalytics.com https://heapanalytics.com 'unsafe-inline' 'unsafe-eval';style-src 'self' https://heapanalytics.com 'unsafe-inline';img-src 'self' data: https://heapanalytics.com;font-src 'self' https://heapanalytics.com data:;object-src 'none';frame-ancestors 'self';base-uri 'self';form-action 'self';block-all-mixed-content;upgrade-insecure-requests;reflected-xss block;referrer origin;connect-src 'self' https://heapanalytics.com;" always;
     
     server_tokens off;
     

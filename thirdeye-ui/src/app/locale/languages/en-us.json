@@ -723,6 +723,7 @@
         "review-and-configure-data": "Review and configure data",
         "review-anomaly-decision": "Review anomaly decision",
         "review-the-recommended-dimension-combinations": "Review the recommended dimension combinations below determined by ThirdEye based on the time duration in the past used as the comparison. Expand to see more details on why ThirdEye determined them to be a dimension combination of interest. Note that the baseline used for a past date will be different than the \"predicted\" value for the date of the anomaly.",
+        "scroll-down-to-view-heatmap-and-dimension-investigation-preview": "Scroll down to view heatmap and dimension investigation preview",
         "select-a-datasource-to-view-available-datasets-to": "Select a datasource to view available datasets to onboard",
         "select-a-date-range-to-filter-data-by": "Select a date range to filter the data by",
         "select-a-dimension-to-generate-the-anomaly-preview": "Select a dimension to generate the anomaly preview",

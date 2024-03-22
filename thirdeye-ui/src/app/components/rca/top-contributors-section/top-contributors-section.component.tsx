@@ -12,21 +12,21 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import Accordion from "@material-ui/core/Accordion";
+import AccordionDetails from "@material-ui/core/AccordionDetails";
+import AccordionSummary from "@material-ui/core/AccordionSummary";
 import Box from "@material-ui/core/Box";
 import Button from "@material-ui/core/Button";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import every from "lodash/every";
 import isEmpty from "lodash/isEmpty";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useOutletContext, useParams } from "react-router-dom";
-import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
-import { EmptyStateSwitch } from "../../page-states/empty-state-switch/empty-state-switch.component";
-import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
-import { AnomalyFilterOption } from "../anomaly-dimension-analysis/anomaly-dimension-analysis.interfaces";
-import { PreviewChart } from "../top-contributors-table/preview-chart/preview-chart.component";
-import { TopContributorsTable } from "../top-contributors-table/top-contributors-table.component";
+import { InvestigationContext } from "../../../pages/rca/investigation-state-tracker-container-page/investigation-state-tracker.interfaces";
+import { RootCauseAnalysisForAnomalyPageParams } from "../../../pages/root-cause-analysis-for-anomaly-page/root-cause-analysis-for-anomaly-page.interfaces";
 import {
     SkeletonV1,
     useNotificationProviderV1,
@@ -40,18 +40,17 @@ import { areFiltersEqual } from "../../../utils/anomaly-dimension-analysis/anoma
 import { getFromSavedInvestigationOrDefault } from "../../../utils/investigation/investigation.util";
 import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
 import { serializeKeyValuePair } from "../../../utils/params/params.util";
-import { RootCauseAnalysisForAnomalyPageParams } from "../../../pages/root-cause-analysis-for-anomaly-page/root-cause-analysis-for-anomaly-page.interfaces";
-import { InvestigationContext } from "../../../pages/rca/investigation-state-tracker-container-page/investigation-state-tracker.interfaces";
+import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
+import { EmptyStateSwitch } from "../../page-states/empty-state-switch/empty-state-switch.component";
+import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
+import { AnomalyFilterOption } from "../anomaly-dimension-analysis/anomaly-dimension-analysis.interfaces";
+import { PreviewChart } from "../top-contributors-table/preview-chart/preview-chart.component";
+import { TopContributorsTable } from "../top-contributors-table/top-contributors-table.component";
 import { TopContributorsSectionProps } from "./top-contributors-section.interfaces";
-import {
-    Accordion,
-    AccordionDetails,
-    AccordionSummary,
-} from "@material-ui/core";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 
 export const TopContributorsSection: FunctionComponent<TopContributorsSectionProps> =
     ({ comparisonOffset, anomalyDimensionAnalysisFetch }) => {
+        const [expanded, setExpanded] = useState(true);
         const { notify } = useNotificationProviderV1();
         const { t } = useTranslation();
         const { id: anomalyId } =
@@ -90,6 +89,18 @@ export const TopContributorsSection: FunctionComponent<TopContributorsSectionPro
                     entity: t("label.dimension-analysis-data"),
                 })
             );
+
+            // Collapse the accordion if there is an error OR there is no data to show
+            if (anomalyDimensionAnalysisReqStatus === ActionStatus.Error) {
+                setExpanded(false);
+            }
+
+            if (
+                anomalyDimensionAnalysisReqStatus === ActionStatus.Done &&
+                isEmpty(anomalyDimensionAnalysisData?.responseRows)
+            ) {
+                setExpanded(false);
+            }
         }, [anomalyDimensionAnalysisReqStatus]);
 
         const handleRemoveBtnClick = (idx: number): void => {
@@ -140,7 +151,12 @@ export const TopContributorsSection: FunctionComponent<TopContributorsSectionPro
         };
 
         return (
-            <Accordion defaultExpanded square variant="outlined">
+            <Accordion
+                square
+                expanded={expanded}
+                variant="outlined"
+                onChange={(_e, val) => setExpanded(val)}
+            >
                 <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                     <Typography variant="h5">
                         {t("label.top-contributors")}

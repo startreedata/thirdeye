@@ -12,19 +12,20 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Grid, Typography } from "@material-ui/core";
+import { Box, Grid, Typography } from "@material-ui/core";
+import { InfoOutlined } from "@material-ui/icons";
 import React, { FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useOutletContext, useSearchParams } from "react-router-dom";
-import { InvestigationPreview } from "../../../components/rca/investigation-preview/investigation-preview.component";
-import { WizardBottomBar } from "../../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
-import { AppRouteRelative } from "../../../utils/routes/routes.util";
-import { InvestigationContext } from "../investigation-state-tracker-container-page/investigation-state-tracker.interfaces";
-import { TopContributorsSection } from "../../../components/rca/top-contributors-section/top-contributors-section.component";
-import { HeatMapSection } from "../../../components/rca/heat-map-section/heat-map-section.component";
 import { BaselineOffsetSelection } from "../../../components/rca/analysis-tabs/baseline-offset-selection/baseline-offset-selection.component";
+import { HeatMapSection } from "../../../components/rca/heat-map-section/heat-map-section.component";
+import { InvestigationPreview } from "../../../components/rca/investigation-preview/investigation-preview.component";
+import { TopContributorsSection } from "../../../components/rca/top-contributors-section/top-contributors-section.component";
+import { WizardBottomBar } from "../../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import { PageContentsCardV1 } from "../../../platform/components";
 import { useGetAnomalyDimensionAnalysis } from "../../../rest/rca/rca.actions";
+import { AppRouteRelative } from "../../../utils/routes/routes.util";
+import { InvestigationContext } from "../investigation-state-tracker-container-page/investigation-state-tracker.interfaces";
 
 export const WhatWherePage: FunctionComponent = () => {
     const { t } = useTranslation();
@@ -64,9 +65,27 @@ export const WhatWherePage: FunctionComponent = () => {
                                 justifyContent="space-between"
                             >
                                 <Grid item>
-                                    {t(
-                                        "message.select-the-top-contributors-to-see-the-dimensions"
-                                    )}
+                                    <Typography variant="body2">
+                                        {t(
+                                            "message.select-the-top-contributors-to-see-the-dimensions"
+                                        )}
+                                    </Typography>
+                                    <Box
+                                        alignItems="center"
+                                        display="flex"
+                                        gridGap={4}
+                                        mt={0.5}
+                                    >
+                                        <InfoOutlined
+                                            color="secondary"
+                                            fontSize="small"
+                                        />
+                                        <Typography variant="caption">
+                                            {t(
+                                                "message.scroll-down-to-view-heatmap-and-dimension-investigation-preview"
+                                            )}
+                                        </Typography>
+                                    </Box>
                                 </Grid>
 
                                 <Grid item>

@@ -83,9 +83,10 @@ public class RcaRelatedService {
   }
 
   @NonNull
-  public List<EventApi> getRelatedEvents(final Long anomalyId, final String type,
+  public List<EventApi> getRelatedEvents(final ThirdEyePrincipal principal, final Long anomalyId, final String type,
       final IntervalSimilarityScoring scoring, final int limit, final Period lookaround)
       throws IOException, ClassNotFoundException {
+    // FIXME CYRIL add authz
     final RcaInfo rcaInfo = rcaInfoFetcher.getRcaInfo(anomalyId);
     return getRelatedEvents(rcaInfo, type, scoring, limit, lookaround);
   }

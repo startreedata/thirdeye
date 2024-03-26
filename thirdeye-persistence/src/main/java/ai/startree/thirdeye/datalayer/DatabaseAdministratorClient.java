@@ -29,6 +29,7 @@ import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+// FIXME CYRIL remove this client - put everything in the database client
 @Singleton
 public class DatabaseAdministratorClient {
 

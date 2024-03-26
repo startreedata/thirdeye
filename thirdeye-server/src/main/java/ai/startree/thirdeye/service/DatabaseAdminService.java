@@ -15,6 +15,7 @@ package ai.startree.thirdeye.service;
 
 import static ai.startree.thirdeye.util.ResourceUtils.resultSetToMap;
 
+import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.datalayer.DatabaseAdministratorClient;
 import ai.startree.thirdeye.resources.DatabaseAdminResource;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
@@ -35,36 +36,40 @@ public class DatabaseAdminService {
   private static final Logger LOG = LoggerFactory.getLogger(DatabaseAdminResource.class);
 
   private final DatabaseAdministratorClient databaseAdministrator;
+  private final AuthorizationManager authorizationManager;
 
   @Inject
-  public DatabaseAdminService(final DatabaseAdministratorClient databaseAdministrator) {
+  public DatabaseAdminService(
+      final DatabaseAdministratorClient databaseAdministrator,
+      final AuthorizationManager authorizationManager) {
     this.databaseAdministrator = databaseAdministrator;
+    this.authorizationManager = authorizationManager;
   }
 
   public List<String> getTables(final ThirdEyePrincipal principal) throws SQLException {
-    // FIXME CYRIL ENSURE ROOT ACCESS
+    authorizationManager.hasRootAccess(principal);
     return databaseAdministrator.getTables();
   }
 
   @NonNull
   public List<Map<String, Object>> executeQuery(final ThirdEyePrincipal principal, final String sql) throws SQLException {
-    // FIXME CYRIL ENSURE ROOT ACCESS
+    authorizationManager.hasRootAccess(principal);
     return resultSetToMap(databaseAdministrator.executeQuery(sql));
   }
 
   public void createAllTables(final ThirdEyePrincipal principal) throws SQLException, IOException {
-    // FIXME CYRIL ENSURE ROOT ACCESS
+    authorizationManager.hasRootAccess(principal);
     databaseAdministrator.createAllTables();
   }
 
   public void deleteAllData(final ThirdEyePrincipal principal) throws SQLException {
-    // FIXME CYRIL ENSURE ROOT ACCESS
+    authorizationManager.hasRootAccess(principal);
     LOG.warn("DELETING ALL DATABASE DATA!!! TRUNCATING TABLES!!!");
     databaseAdministrator.truncateTables();
   }
 
   public void dropAllTables(final ThirdEyePrincipal principal) throws SQLException {
-    // FIXME CYRIL ENSURE ROOT ACCESS
+    authorizationManager.hasRootAccess(principal);
     LOG.warn("DELETING ALL DATABASE TABLES!!! DROPPING TABLES!!!");
     databaseAdministrator.dropTables();
   }

@@ -182,6 +182,6 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       @QueryParam("endTime") final Long endTime
   ) {
     ensureExists(id);
-    return respondOk(alertService.stats(id, enumerationId, startTime, endTime));
+    return respondOk(alertService.stats(principal, id, enumerationId, startTime, endTime));
   }
 }

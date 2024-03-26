@@ -315,11 +315,13 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
   }
 
   public AnomalyStatsApi stats(
+      final ThirdEyeServerPrincipal principal,
       final Long id,
       final Long enumerationId,
       final Long startTime,
       final Long endTime
   ) {
+    // FIXME CYRIL add authz
     final List<Predicate> predicates = new ArrayList<>();
     predicates.add(Predicate.EQ("detectionConfigId", id));
 

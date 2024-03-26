@@ -16,9 +16,11 @@ package ai.startree.thirdeye.service;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
+import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.scheduler.events.HolidayEventsLoader;
 import ai.startree.thirdeye.spi.api.EventApi;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
@@ -59,11 +61,13 @@ public class EventService extends CrudService<EventApi, EventDTO> {
     return ApiBeanMapper.toEventDto(api);
   }
 
-  public void loadHolidays(final long startTime, final long endTime) {
+  public void loadHolidays(final ThirdEyeServerPrincipal principal, final long startTime, final long endTime) {
+    // FIXME CYRIL add authz 
     holidayEventsLoader.loadHolidays(startTime, endTime);
   }
 
-  public EventApi createFromAnomaly(long anomalyId) {
+  public EventApi createFromAnomaly(final ThirdEyePrincipal principal, long anomalyId) {
+    // FIXME CYRIL add authz 
     final AnomalyDTO anomalyDto = ensureExists(anomalyManager.findById(anomalyId));
     final EventDTO eventDTO = new EventDTO()
         .setName("Anomaly " + anomalyId)

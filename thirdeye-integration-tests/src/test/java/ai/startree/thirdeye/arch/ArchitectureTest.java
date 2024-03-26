@@ -21,6 +21,7 @@ import static com.tngtech.archunit.core.domain.JavaClass.Predicates.containAnyMe
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAnyPackage;
 import static com.tngtech.archunit.core.domain.properties.CanBeAnnotated.Predicates.annotatedWith;
 import static com.tngtech.archunit.lang.conditions.ArchPredicates.are;
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.methods;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 
@@ -228,9 +229,11 @@ public class ArchitectureTest {
   }
   
   @Test
-  public void testAllServicesPublicMethodsDependOnAndCallTheAuthorizer() {
-    // FIXME CYRIL add this next
-    //   or consider adding authorization at the pojo level and separate databases from pojo?  
+  public void testAllServicesDependOnAndCallTheAuthorizer() {
+    // FIXME CYRIL - should be done per method? 
+    final ArchRule rule = classes().that(ARE_SERVICE_CLASSES).should()
+        .dependOnClassesThat().belongToAnyOf(AuthorizationManager.class);
+    rule.check(thirdeyeClasses);
   }
 
   @Test

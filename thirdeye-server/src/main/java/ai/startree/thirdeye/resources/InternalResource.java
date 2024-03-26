@@ -111,7 +111,8 @@ public class InternalResource {
       @QueryParam("subscriptionGroupId") final Long subscriptionGroupManagerById,
       @QueryParam("reset") final Boolean reset) {
     ensureExists(subscriptionGroupManagerById, "Query parameter required: alertId !");
-    final String emailHtml = internalService.generateHtmlEmail(subscriptionGroupManagerById, reset);
+    final String emailHtml = internalService.generateHtmlEmail(principal, 
+        subscriptionGroupManagerById, reset);
 
     return Response.ok(emailHtml).build();
   }
@@ -143,7 +144,7 @@ public class InternalResource {
       @FormParam("subscriptionGroupId") final Long subscriptionGroupId,
       @QueryParam("reset") final Boolean reset) throws Exception {
     ensureExists(subscriptionGroupId, "Query parameter required: alertId !");
-    internalService.notify(subscriptionGroupId, reset);
+    internalService.notify(principal, subscriptionGroupId, reset);
     return Response.ok().build();
   }
 
@@ -190,7 +191,7 @@ public class InternalResource {
     if (startTime == null) {
       startTime = endTime - TimeUnit.MINUTES.toMillis(1);
     }
-    internalService.runDetectionTaskLocally(alertId, startTime, endTime);
+    internalService.runDetectionTaskLocally(principal, alertId, startTime, endTime);
 
     return Response.ok().build();
   }

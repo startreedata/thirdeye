@@ -20,6 +20,7 @@ import ai.startree.thirdeye.notification.NotificationServiceRegistry;
 import ai.startree.thirdeye.notification.NotificationTaskFilter;
 import ai.startree.thirdeye.notification.NotificationTaskFilterResult;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DetectionPipelineTaskInfo;
@@ -59,7 +60,8 @@ public class InternalService {
     this.detectionPipelineTaskRunner = detectionPipelineTaskRunner;
   }
 
-  public void notify(final Long subscriptionGroupId, final Boolean reset) throws Exception {
+  public void notify(final ThirdEyePrincipal principal, final Long subscriptionGroupId, final Boolean reset) throws Exception {
+    // fixme cyril add authz
     final SubscriptionGroupDTO sg = subscriptionGroupManager.findById(subscriptionGroupId);
     if (reset == Boolean.TRUE) {
       sg.setVectorClocks(null);
@@ -68,7 +70,8 @@ public class InternalService {
     notificationTaskRunner.execute(subscriptionGroupId);
   }
 
-  public String generateHtmlEmail(final Long subscriptionGroupManagerById, final Boolean reset) {
+  public String generateHtmlEmail(final ThirdEyePrincipal principal, final Long subscriptionGroupManagerById, final Boolean reset) {
+    // FIXME CYRIL add authz
     final SubscriptionGroupDTO sg = subscriptionGroupManager.findById(subscriptionGroupManagerById);
     if (reset == Boolean.TRUE) {
       sg.setVectorClocks(null);
@@ -94,8 +97,9 @@ public class InternalService {
     return emailHtml;
   }
 
-  public void runDetectionTaskLocally(final long alertId, final long startTime,
+  public void runDetectionTaskLocally(final ThirdEyePrincipal principal, final long alertId, final long startTime,
       final long endTime) throws Exception {
+    // FIXME CYRIL add authz
     final DetectionPipelineTaskInfo info = new DetectionPipelineTaskInfo(alertId, startTime,
         endTime);
     detectionPipelineTaskRunner.execute(info, new TaskContext());

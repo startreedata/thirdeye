@@ -23,6 +23,7 @@ import static com.google.common.base.Suppliers.memoizeWithExpiration;
 
 import ai.startree.thirdeye.core.ConfusionMatrix;
 import ai.startree.thirdeye.spi.api.AnomalyStatsApi;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
@@ -47,7 +48,7 @@ public class AnomalyMetricsProvider {
   private final AnomalyManager anomalyManager;
 
   public Supplier<List<AnomalyFeedback>> anomalyFeedbacksSupplier =
-      memoizeWithExpiration(this::getAllAnomalyFeedbacks,
+      memoizeWithExpiration(() -> getAnomalyFeedbacks(null),
           METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES);
 
   @Inject
@@ -109,10 +110,10 @@ public class AnomalyMetricsProvider {
     return Predicate.EQ("ignored", false);
   }
 
-  public AnomalyStatsApi computeAnomalyStats(final Predicate predicate) {
-    final List<AnomalyFeedback> allFeedbacks = predicate == null
-        ? anomalyFeedbacksSupplier.get()
-        : getAnomalyFeedbacks(predicate);
+  public AnomalyStatsApi computeAnomalyStats(final ThirdEyePrincipal principal, final Predicate predicate) {
+    // FIXME CYRIL may be slow - cache the result? need to cache per (predicate, namespace)
+    // FIXME CYRIL add authz
+    final List<AnomalyFeedback> allFeedbacks = getAnomalyFeedbacks(predicate);
     return new AnomalyStatsApi()
         .setTotalCount(countTotal(predicate))
         .setCountWithFeedback(countFeedbacks(predicate))
@@ -136,7 +137,7 @@ public class AnomalyMetricsProvider {
     return countTotal(finalPredicate);
   }
 
-  public ConfusionMatrix computeConfusionMatrixForAnomalies() {
+  private ConfusionMatrix computeConfusionMatrixForAnomalies() {
     final ConfusionMatrix matrix = new ConfusionMatrix();
     // filter to get anomalies without feedback and which are not ignored
     final Predicate unclassified = Predicate.AND(notIgnored(),
@@ -151,10 +152,6 @@ public class AnomalyMetricsProvider {
         + Math.toIntExact(typeMap.get(ANOMALY_EXPECTED))
         + Math.toIntExact(typeMap.get(ANOMALY_NEW_TREND)));
     return matrix;
-  }
-
-  private List<AnomalyFeedback> getAllAnomalyFeedbacks() {
-    return getAnomalyFeedbacks(null);
   }
 
   private List<AnomalyFeedback> getAnomalyFeedbacks(final Predicate predicate) {

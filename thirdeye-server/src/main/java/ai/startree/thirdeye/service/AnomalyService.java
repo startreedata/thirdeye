@@ -129,6 +129,6 @@ public class AnomalyService extends CrudService<AnomalyApi, AnomalyDTO> {
         .ifPresent(end -> predicates.add(Predicate.LE("endTime", endTime)));
     final Predicate predicate = predicates.isEmpty()
         ? null : Predicate.AND(predicates.toArray(Predicate[]::new));
-    return anomalyMetricsProvider.computeAnomalyStats(predicate);
+    return anomalyMetricsProvider.computeAnomalyStats(principal, predicate);
   }
 }

@@ -51,6 +51,7 @@ public class AppAnalyticsService {
   private final AlertTemplateRenderer renderer;
   private final AnomalyMetricsProvider anomalyMetricsProvider;
 
+  // FIXME CYRIL need to implement a cache with namespace key 
   public Supplier<Set<MonitoredMetricWrapper>> uniqueMonitoredMetricsSupplier =
       Suppliers.memoizeWithExpiration(this::getUniqueMonitoredMetrics,
           METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES)::get;
@@ -107,9 +108,8 @@ public class AppAnalyticsService {
     return new AppAnalyticsApi()
         .setVersion(appVersion(null))
         // FIXME CYRIL need authz filter
-        .setnMonitoredMetrics(uniqueMonitoredMetricsSupplier.get().size())
-        // FIXME CYRIL need authz filter
-        .setAnomalyStats(anomalyMetricsProvider.computeAnomalyStats(predicate));
+        .setnMonitoredMetrics(getUniqueMonitoredMetrics().size())
+        .setAnomalyStats(anomalyMetricsProvider.computeAnomalyStats(principal, predicate));
   }
 
   private record MonitoredMetricWrapper(String datasource, String dataset, String metric) {}

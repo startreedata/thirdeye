@@ -333,7 +333,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     optional(endTime)
         .ifPresent(end -> predicates.add(Predicate.LE("endTime", endTime)));
 
-    return anomalyMetricsProvider.computeAnomalyStats(
+    return anomalyMetricsProvider.computeAnomalyStats(principal, 
         Predicate.AND(predicates.toArray(Predicate[]::new)));
   }
 

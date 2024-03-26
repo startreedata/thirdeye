@@ -134,6 +134,6 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
       @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
       @Context UriInfo uriInfo
   ) {
-    return Response.ok(crudService.count(uriInfo.getQueryParameters())).build();
+    return Response.ok(crudService.count(principal, uriInfo.getQueryParameters())).build();
   }
 }

@@ -244,7 +244,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
   }
 
   // FIXME CYRIL ADD NAMESPACE FILTER  
-  public CountApi count(final MultivaluedMap<String, String> queryParameters) {
+  public CountApi count(final ThirdEyeServerPrincipal principal, final MultivaluedMap<String, String> queryParameters) {
     final CountApi api = new CountApi();
     final Long count = queryParameters.size() > 0
         ? dtoManager.count(new DaoFilterBuilder(apiToIndexMap).buildFilter(queryParameters)

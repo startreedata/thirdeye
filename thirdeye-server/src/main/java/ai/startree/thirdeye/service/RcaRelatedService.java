@@ -217,9 +217,10 @@ public class RcaRelatedService {
     return String.join(" ", words) + ".";
   }
 
-  public List<AnomalyApi> getRelatedAnomalies(final long anomalyId,
+  public List<AnomalyApi> getRelatedAnomalies(final ThirdEyePrincipal principal, final long anomalyId,
       final IntervalSimilarityScoring scoring, final int limit, final Period lookaround)
       throws IOException, ClassNotFoundException {
+    // FIXME cyril add authz
     final RcaInfo rcaInfo = rcaInfoFetcher.getRcaInfo(anomalyId);
     return getRelatedAnomalies(rcaInfo, scoring, limit, lookaround);
   }

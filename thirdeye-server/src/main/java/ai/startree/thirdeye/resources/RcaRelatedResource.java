@@ -112,7 +112,7 @@ public class RcaRelatedResource {
       @Parameter(description = "Limit number of anomalies to return.") @QueryParam("limit") @DefaultValue(DEFAULT_LIMIT) int limit,
       @Parameter(description = "Period, in ISO-8601 format, to look after and before the anomaly start.") @QueryParam("lookaround") @DefaultValue(DEFAULT_ANOMALIES_LOOKAROUND) String lookaround)
       throws IOException, ClassNotFoundException {
-    final List<AnomalyApi> res = rcaRelatedService.getRelatedAnomalies(anomalyId, scoring, limit,
+    final List<AnomalyApi> res = rcaRelatedService.getRelatedAnomalies(principal, anomalyId, scoring, limit,
         isoPeriod(lookaround));
     return Response.ok(res).build();
   }

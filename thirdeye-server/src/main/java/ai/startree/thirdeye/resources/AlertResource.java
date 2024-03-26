@@ -114,7 +114,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
       final AlertInsightsRequestApi request) {
     final AlertApi alert = request.getAlert();
     ensureExists(alert);
-    return Response.ok(alertService.getInsights(request)).build();
+    return Response.ok(alertService.getInsights(principal, request)).build();
   }
 
   @Path("{id}/run")

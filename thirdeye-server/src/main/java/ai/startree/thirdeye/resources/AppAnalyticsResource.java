@@ -15,8 +15,11 @@ package ai.startree.thirdeye.resources;
 
 import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 
+import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.service.AppAnalyticsService;
+import io.dropwizard.auth.Auth;
 import io.micrometer.core.annotation.Timed;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -43,10 +46,11 @@ public class AppAnalyticsResource {
   @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
   public Response get(
+      @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
       @QueryParam("startTime") final Long startTime,
       @QueryParam("endTime") final Long endTime
   ) {
-    return respondOk(appAnalyticsService.getAppAnalytics(startTime, endTime));
+    return respondOk(appAnalyticsService.getAppAnalytics(principal, startTime, endTime));
   }
 
   @GET

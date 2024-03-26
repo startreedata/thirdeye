@@ -98,7 +98,7 @@ public class AppAnalyticsService {
         metadata.getDataset().getDataset(), metadata.getMetric().getName());
   }
 
-  public AppAnalyticsApi getAppAnalytics(final Long startTime, final Long endTime) {
+  public AppAnalyticsApi getAppAnalytics(final ThirdEyePrincipal principal, final Long startTime, final Long endTime) {
     final List<Predicate> predicates = new ArrayList<>();
     optional(startTime).ifPresent(start -> predicates.add(Predicate.GE("startTime", startTime)));
     optional(endTime).ifPresent(end -> predicates.add(Predicate.LE("endTime", endTime)));
@@ -106,7 +106,9 @@ public class AppAnalyticsService {
         ? null : Predicate.AND(predicates.toArray(Predicate[]::new));
     return new AppAnalyticsApi()
         .setVersion(appVersion(null))
+        // FIXME CYRIL need authz filter
         .setnMonitoredMetrics(uniqueMonitoredMetricsSupplier.get().size())
+        // FIXME CYRIL need authz filter
         .setAnomalyStats(anomalyMetricsProvider.computeAnomalyStats(predicate));
   }
 

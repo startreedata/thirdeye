@@ -94,7 +94,8 @@ public class RcaRelatedResource {
       @Parameter(description = "Period, in ISO-8601 format, to look after and before the anomaly start.") @QueryParam("lookaround") @DefaultValue(DEFAULT_EVENTS_LOOKAROUND) String lookaround)
       throws IOException, ClassNotFoundException {
 
-    final RelatedEventsAnalysisApi res = rcaRelatedService.getEventsAnalysis(anomalyId, type,
+    final RelatedEventsAnalysisApi res = rcaRelatedService.getEventsAnalysis(principal, 
+        anomalyId, type,
         scoring, limit, isoPeriod(lookaround));
 
     return Response.ok(res).build();

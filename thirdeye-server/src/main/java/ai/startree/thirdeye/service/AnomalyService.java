@@ -25,6 +25,7 @@ import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.AnomalyFeedbackApi;
 import ai.startree.thirdeye.spi.api.AnomalyStatsApi;
 import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
@@ -119,7 +120,8 @@ public class AnomalyService extends CrudService<AnomalyApi, AnomalyDTO> {
     }
   }
 
-  public AnomalyStatsApi stats(final Long startTime, final Long endTime) {
+  public AnomalyStatsApi stats(final ThirdEyePrincipal principal, final Long startTime, final Long endTime) {
+    // FIXME CYRIL add authz layer
     final List<Predicate> predicates = new ArrayList<>();
     optional(startTime)
         .ifPresent(start -> predicates.add(Predicate.GE("startTime", startTime)));

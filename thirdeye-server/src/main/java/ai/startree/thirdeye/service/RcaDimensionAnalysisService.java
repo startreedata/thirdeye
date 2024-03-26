@@ -23,6 +23,7 @@ import ai.startree.thirdeye.rca.RcaInfoFetcher;
 import ai.startree.thirdeye.rootcause.ContributorsFinderRunner;
 import ai.startree.thirdeye.spi.api.DimensionAnalysisResultApi;
 import ai.startree.thirdeye.spi.api.TextualAnalysis;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
@@ -62,10 +63,11 @@ public class RcaDimensionAnalysisService {
     return OBJECT_MAPPER.readValue(hierarchiesPayload, new TypeReference<>() {});
   }
 
-  public DimensionAnalysisResultApi dataCubeSummary(final long anomalyId,
+  public DimensionAnalysisResultApi dataCubeSummary(final ThirdEyePrincipal principal, final long anomalyId,
       final String baselineOffset, final List<String> filters, final int summarySize,
       final int depth, final boolean doOneSideError, final List<String> dimensions,
       final List<String> excludedDimensions, final String hierarchiesPayload) throws Exception {
+    // fixme cyril add authz
     final RcaInfo rcaInfo = rcaInfoFetcher.getRcaInfo(anomalyId);
     final Interval currentInterval = new Interval(rcaInfo.getAnomaly().getStartTime(),
         rcaInfo.getAnomaly().getEndTime(), rcaInfo.getChronology());

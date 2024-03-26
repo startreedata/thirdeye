@@ -96,6 +96,7 @@ public class RcaDimensionAnalysisResource {
   ) {
     try {
       return Response.ok(rcaDimensionAnalysisService.dataCubeSummary(
+          principal,
           anomalyId,
           baselineOffset,
           filters,

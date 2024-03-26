@@ -27,6 +27,7 @@ import ai.startree.thirdeye.spi.api.EventApi;
 import ai.startree.thirdeye.spi.api.RelatedAnomaliesAnalysisApi;
 import ai.startree.thirdeye.spi.api.RelatedEventsAnalysisApi;
 import ai.startree.thirdeye.spi.api.TextualAnalysis;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
@@ -221,9 +222,11 @@ public class RcaRelatedService {
     return getRelatedAnomalies(rcaInfo, scoring, limit, lookaround);
   }
 
-  public RelatedAnomaliesAnalysisApi getAnomaliesAnalysis(final long anomalyId,
+  public RelatedAnomaliesAnalysisApi getAnomaliesAnalysis(final ThirdEyePrincipal principal,
+      final long anomalyId,
       final IntervalSimilarityScoring scoring, final int limit, final Period lookaround)
       throws IOException, ClassNotFoundException {
+    // fixme cyril add authz
     final RcaInfo rcaInfo = rcaInfoFetcher.getRcaInfo(anomalyId);
     final List<AnomalyApi> anomalies = getRelatedAnomalies(rcaInfo, scoring, limit, lookaround);
 

@@ -32,6 +32,7 @@ import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertAssociationApi;
 import ai.startree.thirdeye.spi.api.NotificationSpecApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertAssociationDto;
@@ -172,7 +173,8 @@ public class SubscriptionGroupService extends
     return ApiBeanMapper.toApi(dto);
   }
 
-  public SubscriptionGroupApi reset(Long id) {
+  public SubscriptionGroupApi reset(final ThirdEyePrincipal principal, Long id) {
+    // FIXME CYRIL ensure access authz
     final SubscriptionGroupDTO sg = getDto(id);
     sg.setVectorClocks(null);
     dtoManager.save(sg);
@@ -180,7 +182,8 @@ public class SubscriptionGroupService extends
     return toApi(sg);
   }
 
-  public void sendTestMessage(final Long id) {
+  public void sendTestMessage(final ThirdEyePrincipal principal, final Long id) {
+    // FIXME CYRIL ensure access authz
     final SubscriptionGroupDTO sg = getDto(id);
     notificationDispatcher.sendTestMessage(sg);
   }

@@ -230,6 +230,7 @@ public class ArchitectureTest {
   @Test
   public void testAllServicesPublicMethodsDependOnAndCallTheAuthorizer() {
     // FIXME CYRIL add this next
+    //   or consider adding authorization at the pojo level and separate databases from pojo?  
   }
 
   @Test

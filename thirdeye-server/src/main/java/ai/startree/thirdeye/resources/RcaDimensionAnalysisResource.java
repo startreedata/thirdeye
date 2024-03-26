@@ -16,7 +16,6 @@ package ai.startree.thirdeye.resources;
 import static ai.startree.thirdeye.core.ExceptionHandler.handleRcaAlgorithmException;
 
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
-import ai.startree.thirdeye.rca.RcaInfoFetcher;
 import ai.startree.thirdeye.service.RcaDimensionAnalysisService;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -39,8 +38,6 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Tag(name = "Root Cause Analysis")
 @SecurityRequirement(name="oauth")
@@ -57,14 +54,12 @@ public class RcaDimensionAnalysisResource {
   public static final String DEFAULT_CUBE_DEPTH_STRING = "3";
   public static final String DEFAULT_CUBE_SUMMARY_SIZE_STRING = "4";
 
-  private static final Logger LOG = LoggerFactory.getLogger(RcaDimensionAnalysisResource.class);
   private static final String DEFAULT_BASELINE_OFFSET = "P1W";
 
   private final RcaDimensionAnalysisService rcaDimensionAnalysisService;
 
   @Inject
   public RcaDimensionAnalysisResource(
-      final RcaInfoFetcher rcaInfoFetcher,
       final RcaDimensionAnalysisService rcaDimensionAnalysisService) {
     this.rcaDimensionAnalysisService = rcaDimensionAnalysisService;
   }

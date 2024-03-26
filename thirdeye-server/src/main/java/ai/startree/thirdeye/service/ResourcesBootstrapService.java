@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.service;
 
+import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -21,14 +22,17 @@ import com.google.inject.Singleton;
 public class ResourcesBootstrapService {
 
   private final AlertTemplateService alertTemplateService;
+  private final AuthorizationManager authorizationManager;
 
   @Inject
-  public ResourcesBootstrapService(final AlertTemplateService alertTemplateService) {
+  public ResourcesBootstrapService(final AlertTemplateService alertTemplateService,
+      final AuthorizationManager authorizationManager) {
     this.alertTemplateService = alertTemplateService;
+    this.authorizationManager = authorizationManager;
   }
 
   public void bootstrap(final ThirdEyeServerPrincipal principal) {
-    // FIXME CYRIL - the template loading should be performed with a principal that 
+    // FIXME CYRIL - add authz the template loading should be performed with a principal that 
     //  corresponds to a shared namespace? or in all namespaces? or without namespace? 
     alertTemplateService.loadRecommendedTemplates(principal, true);
   }

@@ -17,6 +17,7 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.StringUtils.levenshteinDistance;
 import static ai.startree.thirdeye.util.StringUtils.timeFormatterFor;
 
+import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.rca.RcaInfo;
 import ai.startree.thirdeye.rca.RcaInfoFetcher;
@@ -69,17 +70,20 @@ public class RcaRelatedService {
   private final AnomalyManager anomalyDAO;
   private final AlertManager alertDAO;
   private final EnumerationItemManager enumerationItemDAO;
+  private final AuthorizationManager authorizationManager;
 
   @Inject
   public RcaRelatedService(final RcaInfoFetcher rcaInfoFetcher, final EventManager eventDAO,
       final AnomalyManager anomalyDAO, final AlertManager alertDAO,
-      final EnumerationItemManager enumerationItemDAO) {
+      final EnumerationItemManager enumerationItemDAO,
+      final AuthorizationManager authorizationManager) {
 
     this.rcaInfoFetcher = rcaInfoFetcher;
     this.eventDAO = eventDAO;
     this.anomalyDAO = anomalyDAO;
     this.alertDAO = alertDAO;
     this.enumerationItemDAO = enumerationItemDAO;
+    this.authorizationManager = authorizationManager;
   }
 
   @NonNull
@@ -105,6 +109,7 @@ public class RcaRelatedService {
     // todo cyril make the type parameter a list - ask FrontEnd if it's ok first
     final List<@NonNull String> types = optional(type).map(List::of)
         .orElse(optional(eventContext.getTypes()).map(Templatable::getValue).orElse(List.of()));
+    // FIXME cyril add authz
     final List<EventDTO> events = eventDAO.findEventsBetweenTimeRange(startWithLookback,
         endWithLookahead, types,
         // todo rca dimension filters can be set at call time?

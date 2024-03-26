@@ -18,6 +18,7 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 import static ai.startree.thirdeye.util.StringUtils.timeFormatterFor;
 
+import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.rca.RcaInfo;
 import ai.startree.thirdeye.rca.RcaInfoFetcher;
 import ai.startree.thirdeye.rootcause.ContributorsFinderRunner;
@@ -50,12 +51,15 @@ public class RcaDimensionAnalysisService {
 
   private final ContributorsFinderRunner contributorsFinderRunner;
   private final RcaInfoFetcher rcaInfoFetcher;
+  private final AuthorizationManager authorizationManager;
 
   @Inject
   public RcaDimensionAnalysisService(final ContributorsFinderRunner contributorsFinderRunner,
-      final RcaInfoFetcher rcaInfoFetcher) {
+      final RcaInfoFetcher rcaInfoFetcher,
+      final AuthorizationManager authorizationManager) {
     this.contributorsFinderRunner = contributorsFinderRunner;
     this.rcaInfoFetcher = rcaInfoFetcher;
+    this.authorizationManager = authorizationManager;
   }
 
   private static List<List<String>> parseHierarchiesPayload(final String hierarchiesPayload)

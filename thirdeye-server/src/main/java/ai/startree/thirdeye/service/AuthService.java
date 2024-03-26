@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.service;
 
 import ai.startree.thirdeye.auth.AuthRegistry;
+import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.oauth.OAuthConfiguration;
 import ai.startree.thirdeye.spi.api.AuthInfoApi;
 import ai.startree.thirdeye.spi.auth.OpenIdConfigurationProvider;
@@ -28,12 +29,15 @@ public class AuthService {
   private final AuthRegistry authRegistry;
   private final OAuthConfiguration oAuthConfiguration;
   private OpenIdConfigurationProvider openIdConfigurationProvider = null;
+  private final AuthorizationManager authorizationManager;
 
   @Inject
   public AuthService(final AuthRegistry authRegistry,
-      @Nullable final OAuthConfiguration oAuthConfiguration) {
+      @Nullable final OAuthConfiguration oAuthConfiguration,
+      final AuthorizationManager authorizationManager) {
     this.authRegistry = authRegistry;
     this.oAuthConfiguration = oAuthConfiguration;
+    this.authorizationManager = authorizationManager;
   }
 
   public AuthInfoApi getOpenIdConfiguration(@Nullable final ThirdEyePrincipal principal) {

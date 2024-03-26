@@ -13,7 +13,6 @@
  */
 package ai.startree.thirdeye.resources;
 
-import static ai.startree.thirdeye.service.AppAnalyticsService.appVersion;
 import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 
 import ai.startree.thirdeye.service.AppAnalyticsService;
@@ -53,6 +52,6 @@ public class AppAnalyticsResource {
   @GET
   @Path("version")
   public Response getVersion() {
-    return Response.ok(appVersion()).build();
+    return Response.ok(appAnalyticsService.appVersion(null)).build();
   }
 }

@@ -18,6 +18,7 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.spi.api.AppAnalyticsApi;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
@@ -37,6 +38,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import javax.ws.rs.BadRequestException;
 import org.joda.time.Interval;
 import org.slf4j.Logger;
@@ -66,7 +68,9 @@ public class AppAnalyticsService {
     registerMetrics(metricRegistry);
   }
 
-  public static String appVersion() {
+  public String appVersion(final @Nullable ThirdEyePrincipal principal) {
+    // this method does not require an identity for the moment - so the principal is not used 
+    //  still enforcing principal as a parameter to respect architecture constraints 
     return AppAnalyticsService.class.getPackage().getImplementationVersion();
   }
 
@@ -119,7 +123,7 @@ public class AppAnalyticsService {
     final Predicate predicate = predicates.isEmpty()
         ? null : Predicate.AND(predicates.toArray(Predicate[]::new));
     return new AppAnalyticsApi()
-        .setVersion(appVersion())
+        .setVersion(appVersion(null))
         .setnMonitoredMetrics(uniqueMonitoredMetricsCount())
         .setAnomalyStats(anomalyMetricsProvider.computeAnomalyStats(predicate));
   }

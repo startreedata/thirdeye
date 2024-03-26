@@ -21,6 +21,7 @@ import static ai.startree.thirdeye.spi.detection.AnomalyFeedbackType.NOT_ANOMALY
 import static ai.startree.thirdeye.spi.detection.AnomalyFeedbackType.NO_FEEDBACK;
 import static com.google.common.base.Suppliers.memoizeWithExpiration;
 
+import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.core.ConfusionMatrix;
 import ai.startree.thirdeye.spi.api.AnomalyStatsApi;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
@@ -46,6 +47,7 @@ import java.util.stream.Collectors;
 public class AnomalyMetricsProvider {
 
   private final AnomalyManager anomalyManager;
+  private final AuthorizationManager authorizationManager;
 
   public Supplier<List<AnomalyFeedback>> anomalyFeedbacksSupplier =
       memoizeWithExpiration(() -> getAnomalyFeedbacks(null),
@@ -53,8 +55,10 @@ public class AnomalyMetricsProvider {
 
   @Inject
   public AnomalyMetricsProvider(AnomalyManager anomalyManager,
+      final AuthorizationManager authorizationManager,
       final MetricRegistry metricRegistry) {
     this.anomalyManager = anomalyManager;
+    this.authorizationManager = authorizationManager;
     Gauge.builder("thirdeye_anomalies",
             memoizeWithExpiration(() -> countTotal(null), METRICS_CACHE_TIMEOUT.toMinutes(),
                 TimeUnit.MINUTES))

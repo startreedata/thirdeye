@@ -17,6 +17,7 @@ import static ai.startree.thirdeye.spi.Constants.METRICS_CACHE_TIMEOUT;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
+import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.spi.api.AppAnalyticsApi;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
@@ -50,6 +51,7 @@ public class AppAnalyticsService {
   private final AlertManager alertManager;
   private final AlertTemplateRenderer renderer;
   private final AnomalyMetricsProvider anomalyMetricsProvider;
+  private final AuthorizationManager authorizationManager;
 
   // FIXME CYRIL need to implement a cache with namespace key 
   public Supplier<Set<MonitoredMetricWrapper>> uniqueMonitoredMetricsSupplier =
@@ -59,13 +61,16 @@ public class AppAnalyticsService {
   @Inject
   public AppAnalyticsService(final AlertManager alertManager,
       final AlertTemplateRenderer renderer,
-      final AnomalyMetricsProvider anomalyMetricsProvider) {
+      final AnomalyMetricsProvider anomalyMetricsProvider,
+      final AuthorizationManager authorizationManager) {
     this.alertManager = alertManager;
     this.renderer = renderer;
     this.anomalyMetricsProvider = anomalyMetricsProvider;
+    this.authorizationManager = authorizationManager;
     Gauge.builder("thirdeye_active_distinct_metrics",
             () -> uniqueMonitoredMetricsSupplier.get().size())
         .register(Metrics.globalRegistry);
+    
   }
 
   public String appVersion(final @Nullable ThirdEyePrincipal principal) {
@@ -75,6 +80,7 @@ public class AppAnalyticsService {
   }
 
   private Set<MonitoredMetricWrapper> getUniqueMonitoredMetrics() {
+    // fixme cyril add authz
     return alertManager.findAllActive().stream()
         .map(this::getMetadata)
         .filter(Objects::nonNull)

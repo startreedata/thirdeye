@@ -57,7 +57,8 @@ public class TaskService extends CrudService<TaskApi, TaskDTO> {
     return ApiBeanMapper.toApi(dto);
   }
 
-  public void purge(final int nDaysToDelete, final int limit) {
+  public void purge(final ThirdEyeServerPrincipal principal, final int nDaysToDelete, final int limit) {
+    // fixme cyril add authz
     taskManager.purge(Duration.ofDays(nDaysToDelete), limit);
   }
 }

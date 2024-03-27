@@ -39,10 +39,10 @@ public class EntityMappingHolder {
   private static final int COLUMN_NAME_INDEX = 4;
 
   //Map<TableName,EntityName>
-  final BiMap<String, String> tableToEntityNameMap = HashBiMap.create();
+  protected final BiMap<String, String> tableToEntityNameMap = HashBiMap.create();
   final Map<String, LinkedHashMap<String, ColumnInfo>> columnInfoPerTable = new HashMap<>();
   //DB NAME to ENTITY NAME mapping
-  final Map<String, BiMap<String, String>> columnMappingPerTable = new HashMap<>();
+  protected final Map<String, BiMap<String, String>> columnMappingPerTable = new HashMap<>();
 
   private static List<Field> getAllFields(List<Field> fields, final Class<?> type) {
     fields.addAll(Arrays.asList(type.getDeclaredFields()));

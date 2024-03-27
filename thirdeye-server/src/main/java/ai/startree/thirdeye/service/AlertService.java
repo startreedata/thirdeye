@@ -194,8 +194,9 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     return alertInsightsProvider.getInsights(dto);
   }
 
-  public AlertInsightsApi getInsights(
+  public AlertInsightsApi getInsights(final ThirdEyeServerPrincipal principal, 
       final AlertInsightsRequestApi request) {
+    // FIXME CYRIL add authz
     return alertInsightsProvider.getInsights(request);
   }
 
@@ -314,11 +315,13 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
   }
 
   public AnomalyStatsApi stats(
+      final ThirdEyeServerPrincipal principal,
       final Long id,
       final Long enumerationId,
       final Long startTime,
       final Long endTime
   ) {
+    // FIXME CYRIL add authz
     final List<Predicate> predicates = new ArrayList<>();
     predicates.add(Predicate.EQ("detectionConfigId", id));
 
@@ -330,7 +333,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     optional(endTime)
         .ifPresent(end -> predicates.add(Predicate.LE("endTime", endTime)));
 
-    return anomalyMetricsProvider.computeAnomalyStats(
+    return anomalyMetricsProvider.computeAnomalyStats(principal, 
         Predicate.AND(predicates.toArray(Predicate[]::new)));
   }
 

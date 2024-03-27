@@ -17,13 +17,13 @@ import static ai.startree.thirdeye.spi.Constants.METRICS_CACHE_TIMEOUT;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
+import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.spi.api.AppAnalyticsApi;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
-import com.codahale.metrics.CachedGauge;
-import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Suppliers;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -37,6 +37,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import javax.ws.rs.BadRequestException;
 import org.joda.time.Interval;
 import org.slf4j.Logger;
@@ -50,7 +51,9 @@ public class AppAnalyticsService {
   private final AlertManager alertManager;
   private final AlertTemplateRenderer renderer;
   private final AnomalyMetricsProvider anomalyMetricsProvider;
+  private final AuthorizationManager authorizationManager;
 
+  // FIXME CYRIL need to implement a cache with namespace key 
   public Supplier<Set<MonitoredMetricWrapper>> uniqueMonitoredMetricsSupplier =
       Suppliers.memoizeWithExpiration(this::getUniqueMonitoredMetrics,
           METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES)::get;
@@ -58,36 +61,27 @@ public class AppAnalyticsService {
   @Inject
   public AppAnalyticsService(final AlertManager alertManager,
       final AlertTemplateRenderer renderer,
-      final MetricRegistry metricRegistry,
-      final AnomalyMetricsProvider anomalyMetricsProvider) {
+      final AnomalyMetricsProvider anomalyMetricsProvider,
+      final AuthorizationManager authorizationManager
+  ) {
     this.alertManager = alertManager;
     this.renderer = renderer;
     this.anomalyMetricsProvider = anomalyMetricsProvider;
-    registerMetrics(metricRegistry);
+    this.authorizationManager = authorizationManager;
+    Gauge.builder("thirdeye_active_distinct_metrics",
+            () -> uniqueMonitoredMetricsSupplier.get().size())
+        .register(Metrics.globalRegistry);
+    
   }
 
-  public static String appVersion() {
+  public String appVersion(final @Nullable ThirdEyePrincipal principal) {
+    // this method does not require an identity for the moment - so the principal is not used 
+    //  still enforcing principal as a parameter to respect architecture constraints 
     return AppAnalyticsService.class.getPackage().getImplementationVersion();
   }
 
-  private void registerMetrics(final MetricRegistry metricRegistry) {
-    Gauge.builder("thirdeye_active_distinct_metrics", this::uniqueMonitoredMetricsCount)
-        .register(Metrics.globalRegistry);
-    // deprecated - use thirdeye_active_distinct_metrics
-    metricRegistry.register("nMonitoredMetrics",
-        new CachedGauge<Integer>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
-          @Override
-          protected Integer loadValue() {
-            return uniqueMonitoredMetricsCount();
-          }
-        });
-  }
-
-  public Integer uniqueMonitoredMetricsCount() {
-    return uniqueMonitoredMetricsSupplier.get().size();
-  }
-
   private Set<MonitoredMetricWrapper> getUniqueMonitoredMetrics() {
+    // fixme cyril add authz
     return alertManager.findAllActive().stream()
         .map(this::getMetadata)
         .filter(Objects::nonNull)
@@ -112,17 +106,18 @@ public class AppAnalyticsService {
         metadata.getDataset().getDataset(), metadata.getMetric().getName());
   }
 
-  public AppAnalyticsApi getAppAnalytics(final Long startTime, final Long endTime) {
+  public AppAnalyticsApi getAppAnalytics(final ThirdEyePrincipal principal, final Long startTime, final Long endTime) {
     final List<Predicate> predicates = new ArrayList<>();
     optional(startTime).ifPresent(start -> predicates.add(Predicate.GE("startTime", startTime)));
     optional(endTime).ifPresent(end -> predicates.add(Predicate.LE("endTime", endTime)));
     final Predicate predicate = predicates.isEmpty()
         ? null : Predicate.AND(predicates.toArray(Predicate[]::new));
     return new AppAnalyticsApi()
-        .setVersion(appVersion())
-        .setnMonitoredMetrics(uniqueMonitoredMetricsCount())
-        .setAnomalyStats(anomalyMetricsProvider.computeAnomalyStats(predicate));
+        .setVersion(appVersion(null))
+        // FIXME CYRIL need authz filter
+        .setnMonitoredMetrics(getUniqueMonitoredMetrics().size())
+        .setAnomalyStats(anomalyMetricsProvider.computeAnomalyStats(principal, predicate));
   }
 
-  public record MonitoredMetricWrapper(String datasource, String dataset, String metric) {}
+  private record MonitoredMetricWrapper(String datasource, String dataset, String metric) {}
 }

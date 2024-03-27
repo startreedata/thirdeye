@@ -80,7 +80,7 @@ public class EventResource extends CrudResource<EventApi, EventDTO> {
     ensure(holidayEventsLoaderConfiguration.isEnabled(),
         ThirdEyeStatus.ERR_CONFIG,
         "Holiday events are disabled.");
-    eventService.loadHolidays(startTime, endTime);
+    eventService.loadHolidays(principal, startTime, endTime);
     return Response.ok().build();
   }
 
@@ -91,6 +91,6 @@ public class EventResource extends CrudResource<EventApi, EventDTO> {
       @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
       @FormParam("anomalyId") long anomalyId
   ) {
-    return Response.ok(eventService.createFromAnomaly(anomalyId)).build();
+    return Response.ok(eventService.createFromAnomaly(principal, anomalyId)).build();
   }
 }

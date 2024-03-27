@@ -23,6 +23,7 @@ import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
 import ai.startree.thirdeye.spi.api.DatasetApi;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
@@ -84,21 +85,24 @@ public class DataSourceService extends CrudService<DataSourceApi, DataSourceDTO>
     dataSourceCache.removeDataSource(existing.getName());
   }
 
-  public List<DatasetApi> getDatasets(final String name) {
+  public List<DatasetApi> getDatasets(final ThirdEyePrincipal principal, final String name) {
+    // fixme add datasource authz check - also need to have one datasourceCache per namespace or namespace aware datasource cache key to avoid name collisions
     final ThirdEyeDataSource dataSource = dataSourceCache.getDataSource(name);
     return dataSource.getDatasets().stream()
         .map(ApiBeanMapper::toApi)
         .collect(Collectors.toList());
   }
 
-  public DatasetApi onboardDataset(final String dataSourceName, final String datasetName) {
+  public DatasetApi onboardDataset(final ThirdEyePrincipal principal, final String dataSourceName, final String datasetName) {
+    // fixme add authz check
     final DatasetConfigDTO datasetConfigDTO = dataSourceOnboarder.onboardDataset(dataSourceName,
         datasetName);
 
     return ApiBeanMapper.toApi(datasetConfigDTO);
   }
 
-  public List<DatasetApi> onboardAll(final String name) {
+  public List<DatasetApi> onboardAll(final ThirdEyePrincipal principal, final String name) {
+    // FIXME add principal check
     final List<DatasetConfigDTO> datasets = dataSourceOnboarder.onboardAll(name);
 
     return datasets.stream()
@@ -106,7 +110,8 @@ public class DataSourceService extends CrudService<DataSourceApi, DataSourceDTO>
         .collect(Collectors.toList());
   }
 
-  public List<DatasetApi> offboardAll(final String name) {
+  public List<DatasetApi> offboardAll(final ThirdEyePrincipal principal, final String name) {
+    // FIXME add principal check
     final List<DatasetConfigDTO> datasets = dataSourceOnboarder.offboardAll(name);
 
     return datasets.stream()
@@ -114,11 +119,13 @@ public class DataSourceService extends CrudService<DataSourceApi, DataSourceDTO>
         .collect(Collectors.toList());
   }
 
-  public void clearDataSourceCache() {
+  public void clearDataSourceCache(final ThirdEyePrincipal principal) {
+    // FIXME ensure root access - next have one cache per namespace?
     dataSourceCache.clear();
   }
 
-  public boolean validate(final String name) {
+  public boolean validate(final ThirdEyePrincipal principal, final String name) {
+    // FIXME ensure access 
     return dataSourceCache.getDataSource(name).validate();
   }
 }

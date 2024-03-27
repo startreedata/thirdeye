@@ -65,7 +65,7 @@ public class SubscriptionGroupResource extends
   public Response reset(
       @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
       @PathParam("id") Long id) {
-    return Response.ok(subscriptionGroupService.reset(id)).build();
+    return Response.ok(subscriptionGroupService.reset(principal, id)).build();
   }
 
   @POST
@@ -75,7 +75,7 @@ public class SubscriptionGroupResource extends
   public Response test(
       @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
       @PathParam("id") Long id) {
-    subscriptionGroupService.sendTestMessage(id);
+    subscriptionGroupService.sendTestMessage(principal, id);
     return Response.ok().build();
   }
 }

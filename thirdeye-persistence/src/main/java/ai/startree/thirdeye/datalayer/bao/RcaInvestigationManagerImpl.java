@@ -20,8 +20,6 @@ import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.RcaInvestigationManager;
 import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
-import com.codahale.metrics.CachedGauge;
-import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.micrometer.core.instrument.Gauge;
@@ -34,20 +32,11 @@ public class RcaInvestigationManagerImpl extends AbstractManagerImpl<RcaInvestig
     RcaInvestigationManager {
   
   @Inject
-  public RcaInvestigationManagerImpl(final GenericPojoDao genericPojoDao,
-      final MetricRegistry metricRegistry) {
+  public RcaInvestigationManagerImpl(final GenericPojoDao genericPojoDao) {
     super(RcaInvestigationDTO.class, genericPojoDao);
     Gauge.builder("thirdeye_rca_investigations", 
         memoizeWithExpiration(this::count, METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES))
         .register(Metrics.globalRegistry);
-    // deprecated - use thirdeye_rca_investigations 
-    metricRegistry.register("rcaInvestigationCount",
-        new CachedGauge<Long>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
-      @Override
-      protected Long loadValue() {
-        return count();
-      }
-    });
   }
 
   @Override

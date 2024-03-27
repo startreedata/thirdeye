@@ -82,6 +82,6 @@ public class AnomalyResource extends CrudResource<AnomalyApi, AnomalyDTO> {
       @QueryParam("startTime") final Long startTime,
       @QueryParam("endTime") final Long endTime
   ) {
-    return Response.ok(anomalyService.stats(startTime, endTime)).build();
+    return Response.ok(anomalyService.stats(principal, startTime, endTime)).build();
   }
 }

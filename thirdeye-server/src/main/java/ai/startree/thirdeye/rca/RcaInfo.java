@@ -21,6 +21,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.joda.time.Chronology;
 import org.joda.time.Period;
 
+// fixme cyril authz - move this to service if it's actually a service
 public class RcaInfo {
 
   private final @NonNull AnomalyDTO anomaly;

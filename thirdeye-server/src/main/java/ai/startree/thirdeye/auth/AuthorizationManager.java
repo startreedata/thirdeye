@@ -24,6 +24,7 @@ import ai.startree.thirdeye.spi.auth.AccessType;
 import ai.startree.thirdeye.spi.auth.AuthenticationType;
 import ai.startree.thirdeye.spi.auth.ResourceIdentifier;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
@@ -182,7 +183,7 @@ public class AuthorizationManager {
     }
   }
 
-  public boolean hasRootAccess(final ThirdEyeServerPrincipal principal) {
+  public boolean hasRootAccess(final ThirdEyePrincipal principal) {
     return INTERNAL_VALID_PRINCIPAL.equals(principal) ||
         thirdEyeAuthorizer.authorize(principal, ROOT_RESOURCE_ID, AccessType.WRITE);
   }

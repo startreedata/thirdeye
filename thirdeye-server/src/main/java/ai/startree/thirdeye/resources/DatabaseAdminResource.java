@@ -50,21 +50,21 @@ public class DatabaseAdminResource {
   @Path("tables")
   public Response getTables(@Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal)
       throws Exception {
-    return Response.ok(databaseAdminService.getTables()).build();
+    return Response.ok(databaseAdminService.getTables(principal)).build();
   }
 
   @GET
   @Path("execute-query")
   public Response executeQuery(@Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
       @QueryParam("sql") String sql) throws Exception {
-    return Response.ok(databaseAdminService.executeQuery(sql)).build();
+    return Response.ok(databaseAdminService.executeQuery(principal, sql)).build();
   }
 
   @POST
   @Path("create-all-tables")
   public Response createAllTables(@Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal)
       throws Exception {
-    databaseAdminService.createAllTables();
+    databaseAdminService.createAllTables(principal);
     return Response.ok().build();
   }
 
@@ -72,7 +72,7 @@ public class DatabaseAdminResource {
   @Path("truncate-all-tables")
   public Response deleteAllData(@Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal)
       throws Exception {
-    databaseAdminService.deleteAllData();
+    databaseAdminService.deleteAllData(principal);
     return Response.ok().build();
   }
 
@@ -80,7 +80,7 @@ public class DatabaseAdminResource {
   @Path("drop-all-tables")
   public Response deleteAllTables(@Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal)
       throws Exception {
-    databaseAdminService.dropAllTables();
+    databaseAdminService.dropAllTables(principal);
     return Response.ok().build();
   }
 }

@@ -14,8 +14,6 @@
 package ai.startree.thirdeye.scheduler.autoonboard;
 
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
-import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
-import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceMetaBean;
 import ai.startree.thirdeye.spi.datasource.AutoOnboard;
@@ -47,8 +45,6 @@ public class AutoOnboardService implements Runnable {
 
   private final List<AutoOnboard> autoOnboardServices = new ArrayList<>();
   private final AutoOnboardConfiguration autoOnboardConfiguration;
-  private final MetricConfigManager metricConfigManager;
-  private final DatasetConfigManager datasetConfigManager;
   private final DataSourceManager dataSourceManager;
 
   /**
@@ -58,12 +54,8 @@ public class AutoOnboardService implements Runnable {
   @Inject
   public AutoOnboardService(
       final AutoOnboardConfiguration autoOnboardConfiguration,
-      final MetricConfigManager metricConfigManager,
-      final DatasetConfigManager datasetConfigManager,
       final DataSourceManager dataSourceManager) {
     this.autoOnboardConfiguration = autoOnboardConfiguration;
-    this.metricConfigManager = metricConfigManager;
-    this.datasetConfigManager = datasetConfigManager;
     this.dataSourceManager = dataSourceManager;
 
     scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat(

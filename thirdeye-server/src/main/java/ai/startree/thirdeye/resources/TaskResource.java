@@ -100,7 +100,7 @@ public class TaskResource extends CrudResource<TaskApi, TaskDTO> {
     final int nDaysToDelete = optional(nDays).orElse(Integer.valueOf(N_DAYS_TO_DELETE));
     final int limit = optional(limitOptional).orElse(Integer.valueOf(MAX_ENTRIES_TO_DELETE));
 
-    taskService.purge(nDaysToDelete, limit);
+    taskService.purge(principal, nDaysToDelete, limit);
     return Response.ok().build();
   }
 }

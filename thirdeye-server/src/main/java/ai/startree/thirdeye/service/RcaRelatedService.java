@@ -17,6 +17,7 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.StringUtils.levenshteinDistance;
 import static ai.startree.thirdeye.util.StringUtils.timeFormatterFor;
 
+import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.rca.RcaInfo;
 import ai.startree.thirdeye.rca.RcaInfoFetcher;
@@ -27,6 +28,7 @@ import ai.startree.thirdeye.spi.api.EventApi;
 import ai.startree.thirdeye.spi.api.RelatedAnomaliesAnalysisApi;
 import ai.startree.thirdeye.spi.api.RelatedEventsAnalysisApi;
 import ai.startree.thirdeye.spi.api.TextualAnalysis;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
@@ -68,23 +70,27 @@ public class RcaRelatedService {
   private final AnomalyManager anomalyDAO;
   private final AlertManager alertDAO;
   private final EnumerationItemManager enumerationItemDAO;
+  private final AuthorizationManager authorizationManager;
 
   @Inject
   public RcaRelatedService(final RcaInfoFetcher rcaInfoFetcher, final EventManager eventDAO,
       final AnomalyManager anomalyDAO, final AlertManager alertDAO,
-      final EnumerationItemManager enumerationItemDAO) {
+      final EnumerationItemManager enumerationItemDAO,
+      final AuthorizationManager authorizationManager) {
 
     this.rcaInfoFetcher = rcaInfoFetcher;
     this.eventDAO = eventDAO;
     this.anomalyDAO = anomalyDAO;
     this.alertDAO = alertDAO;
     this.enumerationItemDAO = enumerationItemDAO;
+    this.authorizationManager = authorizationManager;
   }
 
   @NonNull
-  public List<EventApi> getRelatedEvents(final Long anomalyId, final String type,
+  public List<EventApi> getRelatedEvents(final ThirdEyePrincipal principal, final Long anomalyId, final String type,
       final IntervalSimilarityScoring scoring, final int limit, final Period lookaround)
       throws IOException, ClassNotFoundException {
+    // FIXME CYRIL add authz
     final RcaInfo rcaInfo = rcaInfoFetcher.getRcaInfo(anomalyId);
     return getRelatedEvents(rcaInfo, type, scoring, limit, lookaround);
   }
@@ -103,6 +109,7 @@ public class RcaRelatedService {
     // todo cyril make the type parameter a list - ask FrontEnd if it's ok first
     final List<@NonNull String> types = optional(type).map(List::of)
         .orElse(optional(eventContext.getTypes()).map(Templatable::getValue).orElse(List.of()));
+    // FIXME cyril add authz
     final List<EventDTO> events = eventDAO.findEventsBetweenTimeRange(startWithLookback,
         endWithLookahead, types,
         // todo rca dimension filters can be set at call time?
@@ -121,9 +128,10 @@ public class RcaRelatedService {
   }
 
   @NonNull
-  public RelatedEventsAnalysisApi getEventsAnalysis(final Long anomalyId, final String type,
+  public RelatedEventsAnalysisApi getEventsAnalysis(final ThirdEyePrincipal principal, final Long anomalyId, final String type,
       final IntervalSimilarityScoring scoring, final int limit, final Period lookaround)
       throws IOException, ClassNotFoundException {
+    // FIXME CYRIL add authz
     final RcaInfo rcaInfo = rcaInfoFetcher.getRcaInfo(anomalyId);
     final List<EventApi> events = getRelatedEvents(rcaInfo, type, scoring, limit, lookaround);
     final RelatedEventsAnalysisApi result = new RelatedEventsAnalysisApi();
@@ -214,16 +222,19 @@ public class RcaRelatedService {
     return String.join(" ", words) + ".";
   }
 
-  public List<AnomalyApi> getRelatedAnomalies(final long anomalyId,
+  public List<AnomalyApi> getRelatedAnomalies(final ThirdEyePrincipal principal, final long anomalyId,
       final IntervalSimilarityScoring scoring, final int limit, final Period lookaround)
       throws IOException, ClassNotFoundException {
+    // FIXME cyril add authz
     final RcaInfo rcaInfo = rcaInfoFetcher.getRcaInfo(anomalyId);
     return getRelatedAnomalies(rcaInfo, scoring, limit, lookaround);
   }
 
-  public RelatedAnomaliesAnalysisApi getAnomaliesAnalysis(final long anomalyId,
+  public RelatedAnomaliesAnalysisApi getAnomaliesAnalysis(final ThirdEyePrincipal principal,
+      final long anomalyId,
       final IntervalSimilarityScoring scoring, final int limit, final Period lookaround)
       throws IOException, ClassNotFoundException {
+    // fixme cyril add authz
     final RcaInfo rcaInfo = rcaInfoFetcher.getRcaInfo(anomalyId);
     final List<AnomalyApi> anomalies = getRelatedAnomalies(rcaInfo, scoring, limit, lookaround);
 

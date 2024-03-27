@@ -15,11 +15,13 @@ package ai.startree.thirdeye.service;
 
 import static java.util.Objects.requireNonNull;
 
+import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.notification.NotificationPayloadBuilder;
 import ai.startree.thirdeye.notification.NotificationServiceRegistry;
 import ai.startree.thirdeye.notification.NotificationTaskFilter;
 import ai.startree.thirdeye.notification.NotificationTaskFilterResult;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DetectionPipelineTaskInfo;
@@ -33,7 +35,6 @@ import com.google.inject.Singleton;
 import java.util.HashMap;
 import java.util.Set;
 
-// FIXME CYRIL - does not have authorization and workspace checks everywhere because it is not exposed in production - add checks everywhere when time just in case - or remove
 @Singleton
 public class InternalService {
 
@@ -43,6 +44,7 @@ public class InternalService {
   private final NotificationTaskFilter notificationTaskFilter;
   private final NotificationServiceRegistry notificationServiceRegistry;
   private final DetectionPipelineTaskRunner detectionPipelineTaskRunner;
+  private final AuthorizationManager authorizationManager;
 
   @Inject
   public InternalService(final NotificationTaskRunner notificationTaskRunner,
@@ -50,16 +52,19 @@ public class InternalService {
       final NotificationPayloadBuilder notificationPayloadBuilder,
       final NotificationTaskFilter notificationTaskFilter,
       final NotificationServiceRegistry notificationServiceRegistry,
-      final DetectionPipelineTaskRunner detectionPipelineTaskRunner) {
+      final DetectionPipelineTaskRunner detectionPipelineTaskRunner,
+      final AuthorizationManager authorizationManager) {
     this.notificationTaskRunner = notificationTaskRunner;
     this.subscriptionGroupManager = subscriptionGroupManager;
     this.notificationPayloadBuilder = notificationPayloadBuilder;
     this.notificationTaskFilter = notificationTaskFilter;
     this.notificationServiceRegistry = notificationServiceRegistry;
     this.detectionPipelineTaskRunner = detectionPipelineTaskRunner;
+    this.authorizationManager = authorizationManager;
   }
 
-  public void notify(final Long subscriptionGroupId, final Boolean reset) throws Exception {
+  public void notify(final ThirdEyePrincipal principal, final Long subscriptionGroupId, final Boolean reset) throws Exception {
+    authorizationManager.hasRootAccess(principal);
     final SubscriptionGroupDTO sg = subscriptionGroupManager.findById(subscriptionGroupId);
     if (reset == Boolean.TRUE) {
       sg.setVectorClocks(null);
@@ -68,7 +73,8 @@ public class InternalService {
     notificationTaskRunner.execute(subscriptionGroupId);
   }
 
-  public String generateHtmlEmail(final Long subscriptionGroupManagerById, final Boolean reset) {
+  public String generateHtmlEmail(final ThirdEyePrincipal principal, final Long subscriptionGroupManagerById, final Boolean reset) {
+    authorizationManager.hasRootAccess(principal);
     final SubscriptionGroupDTO sg = subscriptionGroupManager.findById(subscriptionGroupManagerById);
     if (reset == Boolean.TRUE) {
       sg.setVectorClocks(null);
@@ -94,8 +100,9 @@ public class InternalService {
     return emailHtml;
   }
 
-  public void runDetectionTaskLocally(final long alertId, final long startTime,
+  public void runDetectionTaskLocally(final ThirdEyePrincipal principal, final long alertId, final long startTime,
       final long endTime) throws Exception {
+    authorizationManager.hasRootAccess(principal);
     final DetectionPipelineTaskInfo info = new DetectionPipelineTaskInfo(alertId, startTime,
         endTime);
     detectionPipelineTaskRunner.execute(info, new TaskContext());

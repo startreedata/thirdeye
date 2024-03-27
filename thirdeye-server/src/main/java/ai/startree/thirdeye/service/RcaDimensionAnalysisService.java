@@ -18,11 +18,13 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 import static ai.startree.thirdeye.util.StringUtils.timeFormatterFor;
 
+import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.rca.RcaInfo;
 import ai.startree.thirdeye.rca.RcaInfoFetcher;
 import ai.startree.thirdeye.rootcause.ContributorsFinderRunner;
 import ai.startree.thirdeye.spi.api.DimensionAnalysisResultApi;
 import ai.startree.thirdeye.spi.api.TextualAnalysis;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
@@ -49,12 +51,15 @@ public class RcaDimensionAnalysisService {
 
   private final ContributorsFinderRunner contributorsFinderRunner;
   private final RcaInfoFetcher rcaInfoFetcher;
+  private final AuthorizationManager authorizationManager;
 
   @Inject
   public RcaDimensionAnalysisService(final ContributorsFinderRunner contributorsFinderRunner,
-      final RcaInfoFetcher rcaInfoFetcher) {
+      final RcaInfoFetcher rcaInfoFetcher,
+      final AuthorizationManager authorizationManager) {
     this.contributorsFinderRunner = contributorsFinderRunner;
     this.rcaInfoFetcher = rcaInfoFetcher;
+    this.authorizationManager = authorizationManager;
   }
 
   private static List<List<String>> parseHierarchiesPayload(final String hierarchiesPayload)
@@ -62,10 +67,11 @@ public class RcaDimensionAnalysisService {
     return OBJECT_MAPPER.readValue(hierarchiesPayload, new TypeReference<>() {});
   }
 
-  public DimensionAnalysisResultApi dataCubeSummary(final long anomalyId,
+  public DimensionAnalysisResultApi dataCubeSummary(final ThirdEyePrincipal principal, final long anomalyId,
       final String baselineOffset, final List<String> filters, final int summarySize,
       final int depth, final boolean doOneSideError, final List<String> dimensions,
       final List<String> excludedDimensions, final String hierarchiesPayload) throws Exception {
+    // fixme cyril add authz
     final RcaInfo rcaInfo = rcaInfoFetcher.getRcaInfo(anomalyId);
     final Interval currentInterval = new Interval(rcaInfo.getAnomaly().getStartTime(),
         rcaInfo.getAnomaly().getEndTime(), rcaInfo.getChronology());

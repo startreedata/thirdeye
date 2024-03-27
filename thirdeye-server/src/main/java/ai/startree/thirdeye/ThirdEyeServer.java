@@ -20,6 +20,7 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.auth.AuthConfiguration;
 import ai.startree.thirdeye.auth.AuthDisabledRequestFilter;
+import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.config.BackendSentryConfiguration;
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
@@ -173,11 +174,13 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
       Metrics.globalRegistry.add(registry);
       Metrics.globalRegistry.config().commonTags("environment_url", environmentUrl);
       // add jersey instrumentation
-      env.jersey().getResourceConfig().register(new MetricsApplicationEventListener(Metrics.globalRegistry,
-          new DefaultJerseyTagsProvider(), "http.server.requests", true));
+      env.jersey()
+          .getResourceConfig()
+          .register(new MetricsApplicationEventListener(Metrics.globalRegistry,
+              new DefaultJerseyTagsProvider(), "http.server.requests", true));
       // add jetty instrumentation
       env.lifecycle().addServerLifecycleListener(server -> {
-        for (final Connector c: server.getConnectors()) {
+        for (final Connector c : server.getConnectors()) {
           c.addBean(new JettyConnectionMetrics(Metrics.globalRegistry, c));
         }
       });
@@ -188,7 +191,7 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
       new JvmGcMetrics().bindTo(registry);
       new ProcessorMetrics().bindTo(registry);
       new JvmThreadMetrics().bindTo(registry);
-      
+
       // old registry based on dropwizard-metrics
       final CollectorRegistry legacyRegistry = new CollectorRegistry();
       legacyRegistry.register(new DropwizardExports(env.metrics()));
@@ -226,7 +229,8 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
 
           // bootstrap resources before starting the scheduler
           // bootstrapping runs on the main thread. If it fails, the scheduler will not start.
-          injector.getInstance(ResourcesBootstrapService.class).bootstrap();
+          injector.getInstance(ResourcesBootstrapService.class)
+              .bootstrap(AuthorizationManager.getInternalValidPrincipal());
 
           // Start the scheduler
           schedulerService.start();

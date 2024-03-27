@@ -119,16 +119,26 @@ public class ArchitectureTest {
       .or(containAnyMethodsThat(annotatedWith(HEAD.class)))
       .or(containAnyMethodsThat(annotatedWith(GET.class)));
 
+  public static final DescribedPredicate<JavaClass> ARE_SERVICE_CLASSES = are(
+      assignableTo(CrudService.class)).or(resideInAnyPackage("ai.startree.thirdeye.service"));
+
   // any class that can perform db writes and does not apply the authorization layer
   public static final DescribedPredicate<JavaClass> ARE_NON_SECURED_DB_LAYER_CLASSES = or(
       assignableTo(AbstractManager.class),
       assignableTo(GenericPojoDao.class),
       assignableTo(TaskDao.class),
-      assignableTo(DatabaseOrm.class), 
+      assignableTo(DatabaseOrm.class),
       assignableTo(DatabaseClient.class));
 
-  public static final DescribedPredicate<JavaClass> ARE_SERVICE_CLASSES = are(
-      assignableTo(CrudService.class)).or(resideInAnyPackage("ai.startree.thirdeye.service"));
+  // no other classes should use 
+  public static final DescribedPredicate<JavaClass> ARE_ALLOWED_DATASOURCE_USER = belongToAnyOf(
+      // legitimate user
+      DatabaseClient.class,
+      // legitimate initialization user 
+      DataSourceBuilder.class,
+      // uses a connection to init EntityMappingHolder - TODO CYRIL - should be refactored to be removed - should go away when ORM is rewritten 
+      ThirdEyePersistenceModule.class
+  );
 
   public JavaClasses thirdeyeClasses;
 
@@ -143,15 +153,7 @@ public class ArchitectureTest {
   @Test
   public void testNoUnknownUserOfDatasource() {
     final ArchRule rule = noClasses()
-        .that()
-        .doNotBelongToAnyOf(
-            // legitimate user
-            DatabaseClient.class,
-            // legitimate initialization user 
-            DataSourceBuilder.class,
-            // uses a connection to init EntityMappingHolder - TODO CYRIL - should be refactored to be removed - should go away when 
-            ThirdEyePersistenceModule.class
-        )
+        .that(doNot(ARE_ALLOWED_DATASOURCE_USER))
         .should()
         .accessClassesThat()
         .areAssignableTo(DataSource.class);
@@ -225,10 +227,11 @@ public class ArchitectureTest {
         .should(HavePrincipalAsFirstParam.HAVE_PRINCIPAL_AS_FIRST_PARAM);
     rule.check(thirdeyeClasses);
   }
-  
+
   @Test
   public void testAllServicesDependOnAndCallTheAuthorizer() {
-    final ArchRule rule = classes().that(ARE_SERVICE_CLASSES.and(IsTopLevelClass.IS_TOP_LEVEL_CLASS))
+    final ArchRule rule = classes().that(
+            ARE_SERVICE_CLASSES.and(IsTopLevelClass.IS_TOP_LEVEL_CLASS))
         .should()
         .dependOnClassesThat(assignableTo(AuthorizationManager.class));
     rule.check(thirdeyeClasses);
@@ -290,9 +293,8 @@ public class ArchitectureTest {
         if (!firstParamIsPrincipal) {
           events.add(SimpleConditionEvent.violated(item,
               String.format("First parameter of the public method %s is not of type %s",
-                  item.getFullName(), ThirdEyePrincipal.class.getSimpleName())));  
+                  item.getFullName(), ThirdEyePrincipal.class.getSimpleName())));
         }
-        
       }
     }
   }
@@ -310,7 +312,6 @@ public class ArchitectureTest {
       return javaClass.isTopLevelClass();
     }
   }
-  
 
   // TODO CYRIL next PR - 
   //  ensure no unknown users of generic PojoDAO and managers

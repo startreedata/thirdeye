@@ -16,7 +16,7 @@ package ai.startree.thirdeye.service;
 import static ai.startree.thirdeye.util.ResourceUtils.resultSetToMap;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
-import ai.startree.thirdeye.datalayer.DatabaseAdministratorClient;
+import ai.startree.thirdeye.datalayer.DatabaseClient;
 import ai.startree.thirdeye.resources.DatabaseAdminResource;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import com.google.inject.Inject;
@@ -35,42 +35,44 @@ public class DatabaseAdminService {
 
   private static final Logger LOG = LoggerFactory.getLogger(DatabaseAdminResource.class);
 
-  private final DatabaseAdministratorClient databaseAdministrator;
+  private final DatabaseClient databaseClient;
   private final AuthorizationManager authorizationManager;
 
   @Inject
   public DatabaseAdminService(
-      final DatabaseAdministratorClient databaseAdministrator,
+      final DatabaseClient databaseClient,
       final AuthorizationManager authorizationManager) {
-    this.databaseAdministrator = databaseAdministrator;
+    this.databaseClient = databaseClient;
     this.authorizationManager = authorizationManager;
   }
 
   public List<String> getTables(final ThirdEyePrincipal principal) throws SQLException {
     authorizationManager.hasRootAccess(principal);
-    return databaseAdministrator.getTables();
+    return databaseClient.adminGetTables();
   }
 
   @NonNull
-  public List<Map<String, Object>> executeQuery(final ThirdEyePrincipal principal, final String sql) throws SQLException {
+  public List<Map<String, Object>> executeQuery(final ThirdEyePrincipal principal, final String sql)
+      throws SQLException {
     authorizationManager.hasRootAccess(principal);
-    return resultSetToMap(databaseAdministrator.executeQuery(sql));
+    return resultSetToMap(databaseClient.executeTransaction(
+        c -> c.createStatement().executeQuery(sql), null));
   }
 
   public void createAllTables(final ThirdEyePrincipal principal) throws SQLException, IOException {
     authorizationManager.hasRootAccess(principal);
-    databaseAdministrator.createAllTables();
+    databaseClient.adminCreateAllTables();
   }
 
   public void deleteAllData(final ThirdEyePrincipal principal) throws SQLException {
     authorizationManager.hasRootAccess(principal);
     LOG.warn("DELETING ALL DATABASE DATA!!! TRUNCATING TABLES!!!");
-    databaseAdministrator.truncateTables();
+    databaseClient.adminTruncateTables();
   }
 
   public void dropAllTables(final ThirdEyePrincipal principal) throws SQLException {
     authorizationManager.hasRootAccess(principal);
     LOG.warn("DELETING ALL DATABASE TABLES!!! DROPPING TABLES!!!");
-    databaseAdministrator.dropTables();
+    databaseClient.adminDropTables();
   }
 }

@@ -16,7 +16,7 @@ package ai.startree.thirdeye.datalayer.dao;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.datalayer.DatabaseClient;
-import ai.startree.thirdeye.datalayer.DatabaseTransactionClient;
+import ai.startree.thirdeye.datalayer.DatabaseOrm;
 import ai.startree.thirdeye.datalayer.entity.TaskEntity;
 import ai.startree.thirdeye.datalayer.mapper.TaskEntityMapper;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
@@ -46,14 +46,14 @@ public class TaskDao {
   private static final boolean IS_DEBUG = LOG.isDebugEnabled();
   private static final ObjectMapper OBJECT_MAPPER = ThirdEyeSerialization.getObjectMapper();
 
-  private final DatabaseClient databaseService;
-  private final DatabaseTransactionClient transactionService;
+  private final DatabaseOrm databaseOrm;
+  private final DatabaseClient databaseClient;
 
   @Inject
-  public TaskDao(final DatabaseClient databaseService,
-      final DatabaseTransactionClient transactionService) {
-    this.databaseService = databaseService;
-    this.transactionService = transactionService;
+  public TaskDao(final DatabaseOrm databaseOrm,
+      final DatabaseClient DatabaseClient) {
+    this.databaseOrm = databaseOrm;
+    this.databaseClient = DatabaseClient;
   }
 
   private TaskEntity toEntity(final TaskDTO dto)
@@ -98,8 +98,8 @@ public class TaskDao {
     }
     try {
       final TaskEntity entity = toEntity(pojo);
-      return transactionService.executeTransaction(
-          (connection) -> databaseService.save(entity, connection),
+      return databaseClient.executeTransaction(
+          (connection) -> databaseOrm.save(entity, connection),
           null);
     } catch (JsonProcessingException | SQLException e) {
       LOG.error(e.getMessage(), e);
@@ -146,8 +146,8 @@ public class TaskDao {
   public int update(final TaskDTO pojo, final Predicate predicate) {
     try {
       final TaskEntity entity = toEntity(pojo);
-      return transactionService.executeTransaction(
-          (connection) -> databaseService.update(entity, predicate, connection),
+      return databaseClient.executeTransaction(
+          (connection) -> databaseOrm.update(entity, predicate, connection),
           0);
     } catch (JsonProcessingException | SQLException e) {
       LOG.error(e.getMessage(), e);
@@ -157,8 +157,8 @@ public class TaskDao {
 
   public List<TaskDTO> getAll() {
     try {
-      final List<TaskEntity> entities = transactionService.executeTransaction(
-          (connection) -> databaseService.findAll(null,
+      final List<TaskEntity> entities = databaseClient.executeTransaction(
+          (connection) -> databaseOrm.findAll(null,
               null, null, TaskEntity.class, connection), Collections.emptyList());
       return toDto(entities);
     } catch (final JsonProcessingException | SQLException e) {
@@ -169,8 +169,8 @@ public class TaskDao {
 
   public List<TaskDTO> list(final long limit, final long offset) {
     try {
-      final List<TaskEntity> entities = transactionService.executeTransaction(
-          (connection) -> databaseService.findAll(null,
+      final List<TaskEntity> entities = databaseClient.executeTransaction(
+          (connection) -> databaseOrm.findAll(null,
               limit, offset, TaskEntity.class, connection), Collections.emptyList());
       return toDto(entities);
     } catch (final JsonProcessingException | SQLException e) {
@@ -181,8 +181,8 @@ public class TaskDao {
 
   public TaskDTO get(final Long id) {
     try {
-      final TaskEntity entity = transactionService.executeTransaction(
-          (connection) -> databaseService.find(id, TaskEntity.class, connection),
+      final TaskEntity entity = databaseClient.executeTransaction(
+          (connection) -> databaseOrm.find(id, TaskEntity.class, connection),
           null);
       if (entity == null) {
         return null;
@@ -220,8 +220,8 @@ public class TaskDao {
 
   public List<TaskDTO> get(final Predicate predicate) {
     try {
-      final List<TaskEntity> entities = transactionService.executeTransaction(
-          (connection) -> databaseService.findAll(
+      final List<TaskEntity> entities = databaseClient.executeTransaction(
+          (connection) -> databaseOrm.findAll(
               predicate, null, null, TaskEntity.class, connection),
           Collections.emptyList());
       return toDto(entities);
@@ -233,8 +233,8 @@ public class TaskDao {
 
   public long count() {
     try {
-      return transactionService.executeTransaction(
-          (connection) -> databaseService.count(null, TaskEntity.class, connection),
+      return databaseClient.executeTransaction(
+          (connection) -> databaseOrm.count(null, TaskEntity.class, connection),
           0L);
     } catch (SQLException e) {
       LOG.error(e.getMessage(), e);
@@ -244,8 +244,8 @@ public class TaskDao {
 
   public long count(final Predicate predicate) {
     try {
-      return transactionService.executeTransaction(
-          (connection) -> databaseService.count(predicate, TaskEntity.class, connection),
+      return databaseClient.executeTransaction(
+          (connection) -> databaseOrm.count(predicate, TaskEntity.class, connection),
           0L);
     } catch (SQLException e) {
       LOG.error(e.getMessage(), e);
@@ -259,8 +259,8 @@ public class TaskDao {
   public List<TaskDTO> executeParameterizedSQL(final String parameterizedSQL,
       final Map<String, Object> parameterMap) {
     try {
-      final List<TaskEntity> entities = transactionService.executeTransaction(
-          (connection) -> databaseService.runSQL(
+      final List<TaskEntity> entities = databaseClient.executeTransaction(
+          (connection) -> databaseOrm.runSQL(
               parameterizedSQL,
               parameterMap,
               TaskEntity.class,
@@ -281,8 +281,8 @@ public class TaskDao {
   private void dumpTable() {
     if (IS_DEBUG) {
       try {
-        final List<TaskEntity> entities = transactionService.executeTransaction(
-            (connection) -> databaseService.findAll(
+        final List<TaskEntity> entities = databaseClient.executeTransaction(
+            (connection) -> databaseOrm.findAll(
                 null, null, null, TaskEntity.class, connection),
             Collections.emptyList());
         for (final TaskEntity entity : entities) {
@@ -304,8 +304,8 @@ public class TaskDao {
 
   public int deleteByPredicate(final Predicate predicate) {
     try {
-      return transactionService.executeTransaction(
-          (connection) -> databaseService.delete(predicate, TaskEntity.class, connection),
+      return databaseClient.executeTransaction(
+          (connection) -> databaseOrm.delete(predicate, TaskEntity.class, connection),
           0);
     } catch (SQLException e) {
       LOG.error(e.getMessage(), e);

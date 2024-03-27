@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
+import javax.annotation.Nullable;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.InternalServerErrorException;
@@ -160,7 +161,10 @@ public class ResourceUtils {
     );
   }
 
-  public static List<Map<String, Object>> resultSetToMap(final ResultSet rs) throws SQLException {
+  public static List<Map<String, Object>> resultSetToMap(final @Nullable ResultSet rs) throws SQLException {
+    if (rs == null) {
+      return null;
+    }
     final List<Map<String, Object>> list = new ArrayList<>();
     final ResultSetMetaData rsmd = rs.getMetaData();
     while (rs.next()) {

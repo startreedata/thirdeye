@@ -28,12 +28,6 @@ public class IgnoreImportedTests implements ImportOption {
 
   @Override
   public boolean includes(final Location location) {
-    System.out.println(location);
-    if (location.toString().contains("MySql")) {
-      var res = !location.matches(IMPORTED_TEST_PACKAGE_PATTERN);
-      System.out.println("CYRIL");
-      System.out.println(res);
-    }
     return !location.matches(IMPORTED_TEST_PACKAGE_PATTERN);
   }
 }

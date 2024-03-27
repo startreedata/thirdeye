@@ -137,6 +137,7 @@ public class ArchitectureTest {
   public void loadClasses() {
     thirdeyeClasses = new ClassFileImporter()
         .withImportOption(new ImportOption.DoNotIncludeTests())
+        .withImportOption(new IgnoreImportedTests())
         .importPackages("ai.startree");
   }
 

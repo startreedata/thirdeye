@@ -15,8 +15,8 @@ package ai.startree.thirdeye.datalayer.dao;
 
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.datalayer.DatabaseOrm;
 import ai.startree.thirdeye.datalayer.DatabaseClient;
+import ai.startree.thirdeye.datalayer.DatabaseOrm;
 import ai.startree.thirdeye.datalayer.entity.TaskEntity;
 import ai.startree.thirdeye.datalayer.mapper.TaskEntityMapper;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;

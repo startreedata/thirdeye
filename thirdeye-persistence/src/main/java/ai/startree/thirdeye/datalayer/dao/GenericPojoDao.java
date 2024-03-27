@@ -27,8 +27,8 @@ import static com.google.common.base.Preconditions.checkState;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.datalayer.DatabaseOrm;
 import ai.startree.thirdeye.datalayer.DatabaseClient;
+import ai.startree.thirdeye.datalayer.DatabaseOrm;
 import ai.startree.thirdeye.datalayer.entity.AbstractEntity;
 import ai.startree.thirdeye.datalayer.entity.AbstractIndexEntity;
 import ai.startree.thirdeye.datalayer.entity.GenericJsonEntity;
@@ -53,6 +53,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.reflections.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+;
 
 @Singleton
 public class GenericPojoDao {

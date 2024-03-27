@@ -230,7 +230,6 @@ public class ArchitectureTest {
   
   @Test
   public void testAllServicesDependOnAndCallTheAuthorizer() {
-    // FIXME CYRIL - should be done for all public method? 
     final ArchRule rule = classes().that(ARE_SERVICE_CLASSES.and(IsTopLevelClass.IS_TOP_LEVEL_CLASS))
         .should()
         .dependOnClassesThat(assignableTo(AuthorizationManager.class));

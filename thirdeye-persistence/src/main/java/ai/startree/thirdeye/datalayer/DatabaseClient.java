@@ -46,8 +46,7 @@ public class DatabaseClient {
   private final AdministratorClient admin;
 
   @Inject
-  public DatabaseClient(final DataSource dataSource,
-      final MetricRegistry metricRegistry) {
+  public DatabaseClient(final DataSource dataSource, final MetricRegistry metricRegistry) {
     this.dataSource = dataSource;
     // should be disabled in a production environment
     this.admin = new AdministratorClient();
@@ -56,10 +55,12 @@ public class DatabaseClient {
     dbExceptionCounter = metricRegistry.counter("dbExceptionCounter");
     // deprecated - use thirdeye_persistence_transaction_total
     dbCallCounter = metricRegistry.counter("dbCallCounter");
-    this.dbTransactionCounterOfSuccess = io.micrometer.core.instrument.Counter.builder("thirdeye_persistence_transaction_total")
+    this.dbTransactionCounterOfSuccess = io.micrometer.core.instrument.Counter.builder(
+            "thirdeye_persistence_transaction_total")
         .tag("exception", "false")
         .register(Metrics.globalRegistry);
-    this.dbTransactionCounterOfException = io.micrometer.core.instrument.Counter.builder("thirdeye_persistence_transaction_total")
+    this.dbTransactionCounterOfException = io.micrometer.core.instrument.Counter.builder(
+            "thirdeye_persistence_transaction_total")
         .tag("exception", "true")
         .register(Metrics.globalRegistry);
   }
@@ -67,41 +68,32 @@ public class DatabaseClient {
   public <T> T executeTransaction(final DBOperation<T> operation, final T defaultReturn)
       throws SQLException {
     dbCallCounter.inc();
-    Connection connection = dataSource.getConnection();
-    try {
-      connection.setAutoCommit(false);
-      final T t = operation.handle(connection);
-      connection.commit();
-      dbTransactionCounterOfSuccess.increment();
-      return t;
-    } catch (final Exception e) {
-      LOG.error("Exception while executing query task", e);
-      dbTransactionCounterOfException.increment();
-      dbExceptionCounter.inc();
-
-      // Rollback transaction in case json table is updated but index table isn't due to any errors (duplicate key, etc.)
-      if (connection != null) {
-        try {
-          connection.rollback();
-        } catch (final SQLException e1) {
-          LOG.error("Failed to rollback SQL execution", e);
+    try (Connection connection = dataSource.getConnection()) {
+      try {
+        connection.setAutoCommit(false);
+        final T t = operation.handle(connection);
+        connection.commit();
+        dbTransactionCounterOfSuccess.increment();
+        return t;
+      } catch (final Exception e) {
+        LOG.error("Exception while executing query task", e);
+        dbTransactionCounterOfException.increment();
+        dbExceptionCounter.inc();
+        // Rollback transaction in case json table is updated but index table isn't due to any errors (duplicate key, etc.)
+        if (connection != null) {
+          try {
+            connection.rollback();
+          } catch (final SQLException e1) {
+            LOG.error("Failed to rollback SQL execution", e);
+          }
         }
-      }
-      return defaultReturn;
-    } finally {
-      // Always close connection before leaving
-      if (connection != null) {
-        try {
-          connection.close();
-        } catch (final SQLException e) {
-          LOG.error("Failed to close connection", e);
-        }
+        return defaultReturn;
       }
     }
   }
 
   public boolean validate() {
-    try (final ResultSet resultSet = executeQuery("SELECT 1"))  {
+    try (final ResultSet resultSet = executeQuery("SELECT 1")) {
       return resultSet.next();
     } catch (SQLException | RuntimeException e) {
       LOG.error("Exception while performing database validation.", e);
@@ -117,16 +109,18 @@ public class DatabaseClient {
       throw new RuntimeException(e);
     }
   }
-  
+
   public AdministratorClient admin() {
     return admin;
   }
 
   public interface DBOperation<T> {
+
     T handle(Connection connection) throws Exception;
   }
-  
+
   public class AdministratorClient {
+
     public List<String> getTables() throws SQLException {
       try (Connection connection = dataSource.getConnection()) {
         DatabaseMetaData md = connection.getMetaData();
@@ -152,8 +146,7 @@ public class DatabaseClient {
       try (Connection connection = dataSource.getConnection()) {
         String databaseName = connection.getCatalog();
         for (String table : getTables()) {
-          connection
-              .createStatement()
+          connection.createStatement()
               .executeUpdate(String.format("%s %s.%s", command, databaseName, table));
         }
       }

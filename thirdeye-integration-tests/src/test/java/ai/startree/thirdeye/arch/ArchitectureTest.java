@@ -34,9 +34,8 @@ import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.NamespaceResolver;
 import ai.startree.thirdeye.core.DataSourceOnboarder;
 import ai.startree.thirdeye.datalayer.DataSourceBuilder;
-import ai.startree.thirdeye.datalayer.DatabaseAdministratorClient;
 import ai.startree.thirdeye.datalayer.DatabaseClient;
-import ai.startree.thirdeye.datalayer.DatabaseTransactionClient;
+import ai.startree.thirdeye.datalayer.DatabaseOrm;
 import ai.startree.thirdeye.datalayer.ThirdEyePersistenceModule;
 import ai.startree.thirdeye.datalayer.bao.AlertManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.TaskManagerImpl;
@@ -125,8 +124,7 @@ public class ArchitectureTest {
       assignableTo(AbstractManager.class),
       assignableTo(GenericPojoDao.class),
       assignableTo(TaskDao.class),
-      assignableTo(DatabaseClient.class), assignableTo(DatabaseTransactionClient.class),
-      assignableTo(DatabaseAdministratorClient.class));
+      assignableTo(DatabaseOrm.class), assignableTo(DatabaseClient.class));
 
   public static final DescribedPredicate<JavaClass> ARE_SERVICE_CLASSES = are(
       assignableTo(CrudService.class)).or(resideInAnyPackage("ai.startree.thirdeye.service"));
@@ -147,9 +145,7 @@ public class ArchitectureTest {
         .that()
         .doNotBelongToAnyOf(
             // legitimate user
-            DatabaseTransactionClient.class,
-            // FIXME CYRIL remove ASAP - makes controls more complex and duplicate methods with DatabaseClient
-            DatabaseAdministratorClient.class,
+            DatabaseClient.class,
             // legitimate initialization user 
             DataSourceBuilder.class,
             // uses a connection to init EntityMappingHolder - TODO CYRIL - should be refactored to be removed - should go away when 

@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.datalayer;
 
 import ai.startree.thirdeye.datalayer.util.DatabaseConfiguration;
+import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import java.sql.Connection;
@@ -149,9 +150,8 @@ public class MySqlTestDatabase {
   public static DataSource newDataSource(final DatabaseConfiguration dbConfig) throws Exception {
 
     final DataSource ds = buildDataSource(dbConfig);
-
     // Create tables
-    new DatabaseAdministratorClient(ds).createAllTables();
+    new DatabaseClient(ds, new MetricRegistry()).admin().createAllTables();
 
     return ds;
   }

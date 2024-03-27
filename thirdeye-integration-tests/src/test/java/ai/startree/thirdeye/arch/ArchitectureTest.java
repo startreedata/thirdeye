@@ -312,16 +312,7 @@ public class ArchitectureTest {
       return javaClass.isTopLevelClass();
     }
   }
-
-  // TODO CYRIL next PR - 
-  //  ensure no unknown users of generic PojoDAO and managers
-  //  ensure Services do their job of using the authorization manager 
-  //  and taking the principal as input of all public methods
-
-  // todo add test - all service public methods should ask for principle 
-  //  how is a public method of service supposed to check auth 
-  //  if it does not require a principal ?
-
+  
   // FIXME CYRIL - for testResourcesCannotUseDaosDirectly: consider a stricter design: 
   //  enforce resources only use Service classes as fields
   //  then Service classes can be checked easily for properties

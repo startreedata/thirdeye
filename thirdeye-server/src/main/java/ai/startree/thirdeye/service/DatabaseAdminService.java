@@ -48,7 +48,7 @@ public class DatabaseAdminService {
 
   public List<String> getTables(final ThirdEyePrincipal principal) throws SQLException {
     authorizationManager.hasRootAccess(principal);
-    return databaseClient.admin().getTables();
+    return databaseClient.adminGetTables();
   }
 
   @NonNull
@@ -61,18 +61,18 @@ public class DatabaseAdminService {
 
   public void createAllTables(final ThirdEyePrincipal principal) throws SQLException, IOException {
     authorizationManager.hasRootAccess(principal);
-    databaseClient.admin().createAllTables();
+    databaseClient.adminCreateAllTables();
   }
 
   public void deleteAllData(final ThirdEyePrincipal principal) throws SQLException {
     authorizationManager.hasRootAccess(principal);
     LOG.warn("DELETING ALL DATABASE DATA!!! TRUNCATING TABLES!!!");
-    databaseClient.admin().truncateTables();
+    databaseClient.adminTruncateTables();
   }
 
   public void dropAllTables(final ThirdEyePrincipal principal) throws SQLException {
     authorizationManager.hasRootAccess(principal);
     LOG.warn("DELETING ALL DATABASE TABLES!!! DROPPING TABLES!!!");
-    databaseClient.admin().dropTables();
+    databaseClient.adminDropTables();
   }
 }

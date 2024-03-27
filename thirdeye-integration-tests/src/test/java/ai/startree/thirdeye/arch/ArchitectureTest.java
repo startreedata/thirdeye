@@ -124,7 +124,8 @@ public class ArchitectureTest {
       assignableTo(AbstractManager.class),
       assignableTo(GenericPojoDao.class),
       assignableTo(TaskDao.class),
-      assignableTo(DatabaseOrm.class), assignableTo(DatabaseClient.class));
+      assignableTo(DatabaseOrm.class), 
+      assignableTo(DatabaseClient.class));
 
   public static final DescribedPredicate<JavaClass> ARE_SERVICE_CLASSES = are(
       assignableTo(CrudService.class)).or(resideInAnyPackage("ai.startree.thirdeye.service"));

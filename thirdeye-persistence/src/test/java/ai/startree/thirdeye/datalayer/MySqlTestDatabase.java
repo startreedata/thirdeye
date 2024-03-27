@@ -151,7 +151,7 @@ public class MySqlTestDatabase {
 
     final DataSource ds = buildDataSource(dbConfig);
     // Create tables
-    new DatabaseClient(ds, new MetricRegistry()).admin().createAllTables();
+    new DatabaseClient(ds, new MetricRegistry()).adminCreateAllTables();
 
     return ds;
   }

@@ -43,13 +43,10 @@ public class DatabaseClient {
   private final Counter dbCallCounter;
   private final io.micrometer.core.instrument.Counter dbTransactionCounterOfSuccess;
   private final io.micrometer.core.instrument.Counter dbTransactionCounterOfException;
-  private final AdministratorClient admin;
 
   @Inject
   public DatabaseClient(final DataSource dataSource, final MetricRegistry metricRegistry) {
     this.dataSource = dataSource;
-    // should be disabled in a production environment
-    this.admin = new AdministratorClient();
 
     // deprecated - use thirdeye_persistence_transaction_total
     dbExceptionCounter = metricRegistry.counter("dbExceptionCounter");
@@ -110,50 +107,44 @@ public class DatabaseClient {
     }
   }
 
-  public AdministratorClient admin() {
-    return admin;
+  // admin methods below should be disabled in prod - as of today they are disabled with the proxy
+  public List<String> adminGetTables() throws SQLException {
+    try (Connection connection = dataSource.getConnection()) {
+      DatabaseMetaData md = connection.getMetaData();
+      ResultSet rs = md.getTables(null, null, "%", null);
+
+      List<String> tables = new ArrayList<>();
+      while (rs.next()) {
+        tables.add(rs.getString(3));
+      }
+      return tables;
+    }
+  }
+
+  private void runOnAllTables(final String command) throws SQLException {
+    try (Connection connection = dataSource.getConnection()) {
+      String databaseName = connection.getCatalog();
+      for (String table : adminGetTables()) {
+        connection.createStatement()
+            .executeUpdate(String.format("%s %s.%s", command, databaseName, table));
+      }
+    }
+  }
+
+  public void adminTruncateTables() throws SQLException {
+    runOnAllTables("TRUNCATE TABLE");
+  }
+
+  public void adminDropTables() throws SQLException {
+    runOnAllTables("DROP TABLE");
+  }
+
+  public void adminCreateAllTables() throws SQLException {
+    migrateDatabase(dataSource);
   }
 
   public interface DBOperation<T> {
 
     T handle(Connection connection) throws Exception;
-  }
-
-  public class AdministratorClient {
-
-    public List<String> getTables() throws SQLException {
-      try (Connection connection = dataSource.getConnection()) {
-        DatabaseMetaData md = connection.getMetaData();
-        ResultSet rs = md.getTables(null, null, "%", null);
-
-        List<String> tables = new ArrayList<>();
-        while (rs.next()) {
-          tables.add(rs.getString(3));
-        }
-        return tables;
-      }
-    }
-
-    public void truncateTables() throws SQLException {
-      runOnAllTables("TRUNCATE TABLE");
-    }
-
-    public void dropTables() throws SQLException {
-      runOnAllTables("DROP TABLE");
-    }
-
-    private void runOnAllTables(final String command) throws SQLException {
-      try (Connection connection = dataSource.getConnection()) {
-        String databaseName = connection.getCatalog();
-        for (String table : getTables()) {
-          connection.createStatement()
-              .executeUpdate(String.format("%s %s.%s", command, databaseName, table));
-        }
-      }
-    }
-
-    public void createAllTables() throws SQLException {
-      migrateDatabase(dataSource);
-    }
   }
 }

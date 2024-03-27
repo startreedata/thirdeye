@@ -62,7 +62,8 @@ public class AppAnalyticsService {
   public AppAnalyticsService(final AlertManager alertManager,
       final AlertTemplateRenderer renderer,
       final AnomalyMetricsProvider anomalyMetricsProvider,
-      final AuthorizationManager authorizationManager) {
+      final AuthorizationManager authorizationManager
+  ) {
     this.alertManager = alertManager;
     this.renderer = renderer;
     this.anomalyMetricsProvider = anomalyMetricsProvider;

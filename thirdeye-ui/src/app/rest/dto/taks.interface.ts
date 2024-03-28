@@ -22,8 +22,6 @@ export enum TaskStatus {
 
 export enum TaskType {
     DETECTION = "DETECTION",
-    MONITOR = "MONITOR",
-    ONBOARDING = "ONBOARDING",
     NOTIFICATION = "NOTIFICATION",
 }
 

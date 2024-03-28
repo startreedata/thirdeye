@@ -15,13 +15,15 @@ package ai.startree.thirdeye.scheduler;
 
 import ai.startree.thirdeye.scheduler.autoonboard.AutoOnboardConfiguration;
 import ai.startree.thirdeye.scheduler.events.HolidayEventsLoaderConfiguration;
-import ai.startree.thirdeye.scheduler.monitor.MonitorConfiguration;
-import ai.startree.thirdeye.scheduler.monitor.TaskCleanUpConfiguration;
+import ai.startree.thirdeye.scheduler.taskcleanup.TaskCleanUpConfiguration;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ThirdEyeSchedulerConfiguration {
 
   private boolean enabled = false;
+  // TODO CYRIL not used anymore - can be removed around 09/2024
   private boolean monitor = false;
   private boolean detectionPipeline = false;
   private boolean detectionAlert = false;
@@ -40,7 +42,8 @@ public class ThirdEyeSchedulerConfiguration {
   @JsonProperty("autoOnboard")
   private AutoOnboardConfiguration autoOnboardConfiguration = new AutoOnboardConfiguration();
 
-  private MonitorConfiguration monitorConfiguration = new MonitorConfiguration();
+  // TODO CYRIL not used anymore - can be removed 
+  private Map<String, Object> monitorConfiguration = new HashMap<>();
 
   public boolean isEnabled() {
     return enabled;
@@ -127,12 +130,12 @@ public class ThirdEyeSchedulerConfiguration {
     return this;
   }
 
-  public MonitorConfiguration getMonitorConfiguration() {
+  public Map<String, Object> getMonitorConfiguration() {
     return monitorConfiguration;
   }
 
   public ThirdEyeSchedulerConfiguration setMonitorConfiguration(
-      final MonitorConfiguration monitorConfiguration) {
+      final Map<String, Object> monitorConfiguration) {
     this.monitorConfiguration = monitorConfiguration;
     return this;
   }

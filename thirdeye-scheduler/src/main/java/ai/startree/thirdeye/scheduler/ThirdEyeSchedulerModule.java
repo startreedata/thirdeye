@@ -15,10 +15,10 @@ package ai.startree.thirdeye.scheduler;
 
 import ai.startree.thirdeye.scheduler.autoonboard.AutoOnboardConfiguration;
 import ai.startree.thirdeye.scheduler.events.HolidayEventsLoaderConfiguration;
-import ai.startree.thirdeye.scheduler.monitor.MonitorConfiguration;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import java.util.Map;
 
 public class ThirdEyeSchedulerModule extends AbstractModule {
 
@@ -49,7 +49,7 @@ public class ThirdEyeSchedulerModule extends AbstractModule {
 
   @Singleton
   @Provides
-  public MonitorConfiguration getMonitorConfiguration(
+  public Map<String, Object> getMonitorConfiguration(
       ThirdEyeSchedulerConfiguration schedulerConfiguration) {
     return schedulerConfiguration.getMonitorConfiguration();
   }

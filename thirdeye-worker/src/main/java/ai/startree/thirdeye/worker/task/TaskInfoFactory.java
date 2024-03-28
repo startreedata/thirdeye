@@ -14,7 +14,6 @@
 package ai.startree.thirdeye.worker.task;
 
 import static ai.startree.thirdeye.spi.task.TaskType.DETECTION;
-import static ai.startree.thirdeye.spi.task.TaskType.MONITOR;
 import static ai.startree.thirdeye.spi.task.TaskType.NOTIFICATION;
 import static java.util.Objects.requireNonNull;
 
@@ -40,7 +39,6 @@ public class TaskInfoFactory {
       ImmutableMap.<TaskType, Class<? extends TaskInfo>>builder()
           .put(DETECTION, DetectionPipelineTaskInfo.class)
           .put(NOTIFICATION, DetectionAlertTaskInfo.class)
-          .put(MONITOR, MonitorTaskInfo.class)
           .build();
 
   public static TaskInfo get(TaskType taskType, String jsonPayload) throws JsonProcessingException {

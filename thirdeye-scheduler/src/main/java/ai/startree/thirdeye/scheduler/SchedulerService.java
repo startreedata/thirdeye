@@ -17,8 +17,7 @@ import ai.startree.thirdeye.scheduler.autoonboard.AutoOnboardConfiguration;
 import ai.startree.thirdeye.scheduler.autoonboard.AutoOnboardService;
 import ai.startree.thirdeye.scheduler.events.HolidayEventsLoader;
 import ai.startree.thirdeye.scheduler.events.HolidayEventsLoaderConfiguration;
-import ai.startree.thirdeye.scheduler.monitor.MonitorJobScheduler;
-import ai.startree.thirdeye.scheduler.monitor.TaskCleanUpConfiguration;
+import ai.startree.thirdeye.scheduler.taskcleanup.TaskCleanUpConfiguration;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.worker.task.TaskDriverConfiguration;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -43,7 +42,6 @@ public class SchedulerService implements Managed {
   private final HolidayEventsLoaderConfiguration holidayEventsLoaderConfiguration;
   private final AutoOnboardConfiguration autoOnboardConfiguration;
   private final TaskDriverConfiguration taskDriverConfiguration;
-  private final MonitorJobScheduler monitorJobScheduler;
   private final AutoOnboardService autoOnboardService;
   private final HolidayEventsLoader holidayEventsLoader;
   private final DetectionCronScheduler detectionScheduler;
@@ -57,7 +55,6 @@ public class SchedulerService implements Managed {
       final HolidayEventsLoaderConfiguration holidayEventsLoaderConfiguration,
       final AutoOnboardConfiguration autoOnboardConfiguration,
       final TaskDriverConfiguration taskDriverConfiguration,
-      final MonitorJobScheduler monitorJobScheduler,
       final AutoOnboardService autoOnboardService,
       final HolidayEventsLoader holidayEventsLoader,
       final DetectionCronScheduler detectionScheduler,
@@ -67,7 +64,6 @@ public class SchedulerService implements Managed {
     this.holidayEventsLoaderConfiguration = holidayEventsLoaderConfiguration;
     this.autoOnboardConfiguration = autoOnboardConfiguration;
     this.taskDriverConfiguration = taskDriverConfiguration;
-    this.monitorJobScheduler = monitorJobScheduler;
     this.autoOnboardService = autoOnboardService;
     this.holidayEventsLoader = holidayEventsLoader;
     this.detectionScheduler = detectionScheduler;
@@ -80,10 +76,6 @@ public class SchedulerService implements Managed {
 
   @Override
   public void start() throws Exception {
-    if (config.isMonitor()) {
-      monitorJobScheduler.start();
-    }
-
     if (autoOnboardConfiguration.isEnabled()) {
       autoOnboardService.start();
     }
@@ -145,10 +137,6 @@ public class SchedulerService implements Managed {
   @Override
   public void stop() throws Exception {
     executorService.shutdown();
-
-    if (monitorJobScheduler != null) {
-      monitorJobScheduler.shutdown();
-    }
     if (holidayEventsLoaderConfiguration.isEnabled()) {
       holidayEventsLoader.shutdown();
     }

@@ -15,7 +15,6 @@ package ai.startree.thirdeye.worker.task;
 
 import ai.startree.thirdeye.spi.task.TaskType;
 import ai.startree.thirdeye.worker.task.runner.DetectionPipelineTaskRunner;
-import ai.startree.thirdeye.worker.task.runner.MonitorTaskRunner;
 import ai.startree.thirdeye.worker.task.runner.NotificationTaskRunner;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -25,16 +24,13 @@ public class TaskRunnerFactory {
 
   private final DetectionPipelineTaskRunner detectionPipelineTaskRunner;
   private final NotificationTaskRunner notificationTaskRunner;
-  private final MonitorTaskRunner monitorTaskRunner;
 
   @Inject
   public TaskRunnerFactory(
       final DetectionPipelineTaskRunner detectionPipelineTaskRunner,
-      final NotificationTaskRunner notificationTaskRunner,
-      final MonitorTaskRunner monitorTaskRunner) {
+      final NotificationTaskRunner notificationTaskRunner) {
     this.detectionPipelineTaskRunner = detectionPipelineTaskRunner;
     this.notificationTaskRunner = notificationTaskRunner;
-    this.monitorTaskRunner = monitorTaskRunner;
   }
 
   public TaskRunner get(TaskType taskType) {
@@ -43,8 +39,6 @@ public class TaskRunnerFactory {
         return detectionPipelineTaskRunner;
       case NOTIFICATION:
         return notificationTaskRunner;
-      case MONITOR:
-        return monitorTaskRunner;
       default:
         throw new RuntimeException("Invalid TaskType: " + taskType);
     }

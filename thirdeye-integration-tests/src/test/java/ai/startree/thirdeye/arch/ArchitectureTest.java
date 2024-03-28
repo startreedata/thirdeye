@@ -66,7 +66,6 @@ import ai.startree.thirdeye.scheduler.events.HolidayEventsLoader;
 import ai.startree.thirdeye.scheduler.events.MockEventsLoader;
 import ai.startree.thirdeye.scheduler.job.DetectionPipelineJob;
 import ai.startree.thirdeye.scheduler.job.NotificationPipelineTaskCreator;
-import ai.startree.thirdeye.scheduler.monitor.MonitorJobRunnable;
 import ai.startree.thirdeye.service.CrudService;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer.ThirdEyeAuthorizerFactory;
@@ -76,7 +75,6 @@ import ai.startree.thirdeye.spi.detection.health.DetectionHealth;
 import ai.startree.thirdeye.worker.task.TaskDriver;
 import ai.startree.thirdeye.worker.task.TaskDriverRunnable;
 import ai.startree.thirdeye.worker.task.runner.DetectionPipelineTaskRunner;
-import ai.startree.thirdeye.worker.task.runner.MonitorTaskRunner;
 import ai.startree.thirdeye.worker.task.runner.NotificationTaskRunner;
 import com.tngtech.archunit.base.DescribedPredicate;
 import com.tngtech.archunit.core.domain.JavaClass;
@@ -167,12 +165,10 @@ public class ArchitectureTest {
     // review, and enforce namespace isolation where necessary
     //  or all methods should require an identity
     final Class[] NON_SECURED_DB_LAYER_USERS_WHITELIST = {NotificationTaskRunner.class,
-        MonitorTaskRunner.class,
         DetectionPipelineTaskRunner.class,
         TaskDriverRunnable.class,
         TaskDriver.class,
         DetectionHealth.class,
-        MonitorJobRunnable.class,
         NotificationPipelineTaskCreator.class,
         DetectionPipelineJob.class,
         MockEventsLoader.class,

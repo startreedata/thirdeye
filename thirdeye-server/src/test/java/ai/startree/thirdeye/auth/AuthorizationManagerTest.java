@@ -23,6 +23,7 @@ import ai.startree.thirdeye.spi.auth.ResourceIdentifier;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
+import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
@@ -47,7 +48,7 @@ public class AuthorizationManagerTest {
     final List<Object[]> testCases = new ArrayList<>();
 
     String testName = "null dto returns default values";
-    testCases.add(testCase(testName, null, null, null, null,
+    testCases.add(testCase(testName, null, null, null, null, null,
         ResourceIdentifier.from(DEFAULT_NAME, DEFAULT_NAMESPACE,
             ResourceIdentifier.DEFAULT_ENTITY_TYPE)));
 
@@ -55,26 +56,26 @@ public class AuthorizationManagerTest {
     DataSourceDTO dataSourceDTO = new DataSourceDTO();
     dataSourceDTO.setId(3L);
     dataSourceDTO.setAuth(new AuthorizationConfigurationDTO().setNamespace("datasource_namespace"));
-    testCases.add(testCase(testName, null, null, null, dataSourceDTO,
+    testCases.add(testCase(testName, null, null, null, null, dataSourceDTO,
         ResourceIdentifier.from("3", "datasource_namespace", "DATA_SOURCE")));
 
     testName = "DataSourceDto - Datasource without resource";
     dataSourceDTO = new DataSourceDTO();
     dataSourceDTO.setId(3L);
-    testCases.add(testCase(testName, null, null, null, dataSourceDTO,
+    testCases.add(testCase(testName, null, null, null, null, dataSourceDTO,
         ResourceIdentifier.from("3", "default", "DATA_SOURCE")));
 
     testName = "DatasetConfigDTO - Dataset with resource";
     DatasetConfigDTO datasetDto = new DatasetConfigDTO();
     datasetDto.setId(4L);
     datasetDto.setAuth(new AuthorizationConfigurationDTO().setNamespace("dataset_namespace"));
-    testCases.add(testCase(testName, null, null, null, datasetDto,
+    testCases.add(testCase(testName, null, null, null, null, datasetDto,
         ResourceIdentifier.from("4", "dataset_namespace", "DATASET")));
 
     testName = "DatasetConfigDTO - Dataset without resource";
     datasetDto = new DatasetConfigDTO();
     datasetDto.setId(4L);
-    testCases.add(testCase(testName, null, null, null, datasetDto,
+    testCases.add(testCase(testName, null, null, null, null, datasetDto,
         ResourceIdentifier.from("4", "default", "DATASET")));
 
     testName = "AlertTemplateDTO - Template with resource";
@@ -82,51 +83,51 @@ public class AuthorizationManagerTest {
     alertTemplateDTO.setId(5L);
     alertTemplateDTO.setAuth(
         new AuthorizationConfigurationDTO().setNamespace("alert_template_namespace"));
-    testCases.add(testCase(testName, null, null, null, alertTemplateDTO,
+    testCases.add(testCase(testName, null, null, null, null, alertTemplateDTO,
         ResourceIdentifier.from("5", "alert_template_namespace", "ALERT_TEMPLATE")));
 
     testName = "AlertTemplateDTO - Template without resource";
     alertTemplateDTO = new AlertTemplateDTO();
     alertTemplateDTO.setId(5L);
-    testCases.add(testCase(testName, null, null, null, alertTemplateDTO,
+    testCases.add(testCase(testName, null, null, null, null, alertTemplateDTO,
         ResourceIdentifier.from("5", "default", "ALERT_TEMPLATE")));
 
     testName = "AlertDTO - Alert with resource";
     AlertDTO alertDTO = new AlertDTO();
     alertDTO.setId(6L);
     alertDTO.setAuth(new AuthorizationConfigurationDTO().setNamespace("alert_template_namespace"));
-    testCases.add(testCase(testName, null, null, null, alertDTO,
+    testCases.add(testCase(testName, null, null, null, null, alertDTO,
         ResourceIdentifier.from("6", "alert_template_namespace", "ALERT")));
 
     testName = "AlertDTO - Alert without resource";
     alertDTO = new AlertDTO();
     alertDTO.setId(6L);
-    testCases.add(testCase(testName, null, null, null, alertDTO,
+    testCases.add(testCase(testName, null, null, null, null, alertDTO,
         ResourceIdentifier.from("6", "default", "ALERT")));
 
     // Enumeration item can inherit from alert
     testName = "EnumerationItemDto - Enum with resource, alert with resource.";
     AlertDTO alertDto = alertWithResource();
     EnumerationItemDTO enumItem = enumWithResource();
-    testCases.add(testCase(testName, alertDto, enumItem, null, enumItem,
+    testCases.add(testCase(testName, alertDto, enumItem, null, null, enumItem,
         ResourceIdentifier.from("2", "enum_namespace", "ENUMERATION_ITEM")));
 
     testName = "EnumerationItemDto - Enum without resource, alert with resource.";
     alertDto = alertWithResource();
     enumItem = enumWithoutResource();
-    testCases.add(testCase(testName, alertDto, enumItem, null, enumItem,
+    testCases.add(testCase(testName, alertDto, enumItem, null, null, enumItem,
         ResourceIdentifier.from("2", "alert_namespace", "ENUMERATION_ITEM")));
 
     testName = "EnumerationItemDto - Enum with resource, alert without resource.";
     alertDto = alertWithoutResource();
     enumItem = enumWithResource();
-    testCases.add(testCase(testName, alertDto, enumItem, null, enumItem,
+    testCases.add(testCase(testName, alertDto, enumItem, null, null, enumItem,
         ResourceIdentifier.from("2", "enum_namespace", "ENUMERATION_ITEM")));
 
     testName = "EnumerationItemDto - Enum without resource, alert without resource.";
     alertDto = alertWithoutResource();
     enumItem = enumWithoutResource();
-    testCases.add(testCase(testName, alertDto, enumItem, null, enumItem,
+    testCases.add(testCase(testName, alertDto, enumItem, null, null, enumItem,
         ResourceIdentifier.from("2", "default", "ENUMERATION_ITEM")));
 
     // Anomalies can inherit from enumeration item or alert
@@ -134,40 +135,40 @@ public class AuthorizationManagerTest {
     alertDto = alertWithResource();
     enumItem = enumWithResource();
     AnomalyDTO anomalyDTO = anomalyWithEnum();
-    testCases.add(testCase(testName, alertDto, enumItem, null, anomalyDTO,
+    testCases.add(testCase(testName, alertDto, enumItem, null, null, anomalyDTO,
         ResourceIdentifier.from("3", "enum_namespace", "ANOMALY")));
 
     testName = "AnomalyDto - Enum without resource, alert with resource.";
     alertDto = alertWithResource();
     enumItem = enumWithoutResource();
     anomalyDTO = anomalyWithEnum();
-    testCases.add(testCase(testName, alertDto, enumItem, null, anomalyDTO,
+    testCases.add(testCase(testName, alertDto, enumItem, null, null, anomalyDTO,
         ResourceIdentifier.from("3", "alert_namespace", "ANOMALY")));
 
     testName = "AnomalyDto - Enum with resource, alert without resource.";
     alertDto = alertWithoutResource();
     enumItem = enumWithResource();
     anomalyDTO = anomalyWithEnum();
-    testCases.add(testCase(testName, alertDto, enumItem, null, anomalyDTO,
+    testCases.add(testCase(testName, alertDto, enumItem, null, null, anomalyDTO,
         ResourceIdentifier.from("3", "enum_namespace", "ANOMALY")));
 
     testName = "AnomalyDto - Enum without resource, alert without resource.";
     alertDto = alertWithoutResource();
     enumItem = enumWithoutResource();
     anomalyDTO = anomalyWithEnum();
-    testCases.add(testCase(testName, alertDto, enumItem, null, anomalyDTO,
+    testCases.add(testCase(testName, alertDto, enumItem, null, null, anomalyDTO,
         ResourceIdentifier.from("3", "default", "ANOMALY")));
 
     testName = "AnomalyDto - No enum, alert with resource.";
     alertDto = alertWithResource();
     anomalyDTO = anomalyWithoutEnum();
-    testCases.add(testCase(testName, alertDto, null, null, anomalyDTO,
+    testCases.add(testCase(testName, alertDto, null, null, null, anomalyDTO,
         ResourceIdentifier.from("3", "alert_namespace", "ANOMALY")));
 
     testName = "AnomalyDto - No enum, alert without resource.";
     alertDto = alertWithoutResource();
     anomalyDTO = anomalyWithoutEnum();
-    testCases.add(testCase(testName, alertDto, null, null, anomalyDTO,
+    testCases.add(testCase(testName, alertDto, null, null, null, anomalyDTO,
         ResourceIdentifier.from("3", "default", "ANOMALY")));
 
     // rca investigation inherit from the anomaly
@@ -176,7 +177,7 @@ public class AuthorizationManagerTest {
     enumItem = enumWithResource();
     anomalyDTO = anomalyWithEnum();
     RcaInvestigationDTO rcaDto = rcaOfAnomaly(anomalyDTO);
-    testCases.add(testCase(testName, alertDto, enumItem, anomalyDTO, rcaDto,
+    testCases.add(testCase(testName, alertDto, enumItem, anomalyDTO, null, rcaDto,
         ResourceIdentifier.from("7", "enum_namespace", "RCA_INVESTIGATION")));
 
     testName = "RcaInvestigationDTO - Enum without resource, alert with resource.";
@@ -184,7 +185,7 @@ public class AuthorizationManagerTest {
     enumItem = enumWithoutResource();
     anomalyDTO = anomalyWithEnum();
     rcaDto = rcaOfAnomaly(anomalyDTO);
-    testCases.add(testCase(testName, alertDto, enumItem, anomalyDTO, rcaDto,
+    testCases.add(testCase(testName, alertDto, enumItem, anomalyDTO, null, rcaDto,
         ResourceIdentifier.from("7", "alert_namespace", "RCA_INVESTIGATION")));
 
     testName = "RcaInvestigationDTO - Enum with resource, alert without resource.";
@@ -192,7 +193,7 @@ public class AuthorizationManagerTest {
     enumItem = enumWithResource();
     anomalyDTO = anomalyWithEnum();
     rcaDto = rcaOfAnomaly(anomalyDTO);
-    testCases.add(testCase(testName, alertDto, enumItem, anomalyDTO, rcaDto,
+    testCases.add(testCase(testName, alertDto, enumItem, anomalyDTO, null, rcaDto,
         ResourceIdentifier.from("7", "enum_namespace", "RCA_INVESTIGATION")));
 
     testName = "RcaInvestigationDTO - Enum without resource, alert without resource.";
@@ -200,22 +201,30 @@ public class AuthorizationManagerTest {
     enumItem = enumWithoutResource();
     anomalyDTO = anomalyWithEnum();
     rcaDto = rcaOfAnomaly(anomalyDTO);
-    testCases.add(testCase(testName, alertDto, enumItem, anomalyDTO, rcaDto,
+    testCases.add(testCase(testName, alertDto, enumItem, anomalyDTO, null, rcaDto,
         ResourceIdentifier.from("7", "default", "RCA_INVESTIGATION")));
 
     testName = "RcaInvestigationDTO - No enum, alert with resource.";
     alertDto = alertWithResource();
     anomalyDTO = anomalyWithoutEnum();
     rcaDto = rcaOfAnomaly(anomalyDTO);
-    testCases.add(testCase(testName, alertDto, null, anomalyDTO, rcaDto,
+    testCases.add(testCase(testName, alertDto, null, anomalyDTO, null, rcaDto,
         ResourceIdentifier.from("7", "alert_namespace", "RCA_INVESTIGATION")));
 
     testName = "RcaInvestigationDTO - No enum, alert without resource.";
     alertDto = alertWithoutResource();
     anomalyDTO = anomalyWithoutEnum();
     rcaDto = rcaOfAnomaly(anomalyDTO);
-    testCases.add(testCase(testName, alertDto, null, anomalyDTO, rcaDto,
+    testCases.add(testCase(testName, alertDto, null, anomalyDTO, null, rcaDto,
         ResourceIdentifier.from("7", "default", "RCA_INVESTIGATION")));
+
+    testName = "TaskDTO - DETECTION type with Alert with resource.";
+
+    testName = "TaskDTO - DETECTION type with Alert without resource.";
+
+    testName = "TaskDTO - NOTIFICATION type with SubscriptionGroup with resource.";
+
+    testName = "TaskDTO - NOTIFICATION type with SubscriptionGroup without resource.";
 
     // FIXME use cases below are not clearly defined in the spec: https://dev.startree.ai/docs/get-started-with-thirdeye/access-control-in-thirdeye#namespaces-for-thirdeye-resources
     //  testing the current behaviour to detect behaviour changes but feel free to change the behaviour
@@ -226,16 +235,18 @@ public class AuthorizationManagerTest {
     subscriptionGroup.setId(8L);
     subscriptionGroup.setAuth(
         new AuthorizationConfigurationDTO().setNamespace("subscription_namespace"));
-    testCases.add(testCase(testName, alertDto, null, anomalyDTO, subscriptionGroup,
+    testCases.add(testCase(testName, alertDto, null, anomalyDTO, null, subscriptionGroup,
         ResourceIdentifier.from("8", "subscription_namespace", "SUBSCRIPTION_GROUP")));
 
     return testCases.toArray(new Object[][]{});
   }
 
   private static Object[] testCase(final String testName, final AlertDTO alert,
-      final EnumerationItemDTO enumItem, final AnomalyDTO anomaly, final AbstractDTO inputDto,
-      ResourceIdentifier expected) {
-    return new Object[]{testName, alert, enumItem, anomaly, inputDto, expected};
+      final EnumerationItemDTO enumItem, final AnomalyDTO anomaly,
+      final SubscriptionGroupDTO subscriptionGroup,
+      final AbstractDTO inputDto,
+      final ResourceIdentifier expected) {
+    return new Object[]{testName, alert, enumItem, anomaly, inputDto, subscriptionGroup, expected};
   }
 
   // inputDto is the entity having its namespace resolved
@@ -243,7 +254,7 @@ public class AuthorizationManagerTest {
   @Test(dataProvider = "namespaceResolutionCases")
   public void testNamespaceResolution(final String testName, final AlertDTO alert,
       final EnumerationItemDTO enumItem, final AnomalyDTO anomaly, final AbstractDTO inputDto,
-      ResourceIdentifier expected) {
+      final SubscriptionGroupDTO subscriptionGroup, final ResourceIdentifier expected) {
     final AlertManager alertManager = mock(AlertManager.class);
     if (alert != null) {
       when(alertManager.findById(alert.getId())).thenReturn(alert);
@@ -256,8 +267,13 @@ public class AuthorizationManagerTest {
     if (anomaly != null) {
       when(anomalyManager.findById(anomaly.getId())).thenReturn(anomaly);
     }
+    final SubscriptionGroupManager subscriptionGroupManager = mock(SubscriptionGroupManager.class);
+    if (subscriptionGroup != null) {
+      when(subscriptionGroupManager.findById(subscriptionGroup.getId())).thenReturn(
+          subscriptionGroup);
+    }
     final AuthorizationManager authorizationManager = new AuthorizationManager(null, null,
-        new NamespaceResolver(alertManager, enumManager, anomalyManager));
+        new NamespaceResolver(alertManager, enumManager, anomalyManager, subscriptionGroupManager));
     final ResourceIdentifier output = authorizationManager.resourceId(inputDto);
     // FIXME CYRIL write equals method
     assertThat(output.getName()).isEqualTo(expected.getName());

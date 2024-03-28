@@ -196,9 +196,9 @@ public class AuthorizationManager {
         .map(Objects::toString)
         .orElse(DEFAULT_NAME);
 
-    final var namespace = namespaceResolver.resolveNamespace(dto);
+    final String namespace = namespaceResolver.resolveNamespace(dto);
 
-    final var entityType = optional(dto)
+    final String entityType = optional(dto)
         .map(AbstractDTO::getClass)
         .map(SubEntities.BEAN_TYPE_MAP::get)
         .map(Objects::toString)

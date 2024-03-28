@@ -69,6 +69,7 @@ import ai.startree.thirdeye.scheduler.job.NotificationPipelineTaskCreator;
 import ai.startree.thirdeye.scheduler.monitor.MonitorJobRunnable;
 import ai.startree.thirdeye.service.CrudService;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
+import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer.ThirdEyeAuthorizerFactory;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.bao.AbstractManager;
 import ai.startree.thirdeye.spi.detection.health.DetectionHealth;
@@ -261,6 +262,8 @@ public class ArchitectureTest {
     // here we ensure there are no unknown users of the lower levels
     final ArchRule rule = noClasses().that()
         .doNotImplement(ThirdEyeAuthorizer.class)
+        .and()
+        .doNotImplement(ThirdEyeAuthorizerFactory.class)
         .and()
         .doNotBelongToAnyOf(AuthorizationManager.class, ThirdEyeServerModule.class,
             PluginLoader.class)

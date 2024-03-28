@@ -139,7 +139,8 @@ public class CrudResourceTest {
     try (Response resp = resource.list(nobody(), uriInfo)) {
       assertThat(resp.getStatus()).isEqualTo(200);
 
-      final List<DummyApi> entities = ((Stream<DummyApi>) resp.getEntity()).collect(Collectors.toList());
+      final List<DummyApi> entities = ((Stream<DummyApi>) resp.getEntity()).collect(
+          Collectors.toList());
       assertThat(entities).isEmpty();
     }
   }
@@ -161,7 +162,8 @@ public class CrudResourceTest {
     try (Response resp = resource.list(nobody(), uriInfo)) {
       assertThat(resp.getStatus()).isEqualTo(200);
 
-      final List<DummyApi> entities = ((Stream<DummyApi>) resp.getEntity()).collect(Collectors.toList());
+      final List<DummyApi> entities = ((Stream<DummyApi>) resp.getEntity()).collect(
+          Collectors.toList());
       assertThat(1).isEqualTo(entities.size());
       assertThat(2L).isEqualTo(entities.get(0).getId());
     }
@@ -377,7 +379,7 @@ class DummyResource extends CrudResource<DummyApi, DummyDto> {
       final ThirdEyeAuthorizer thirdEyeAuthorizer) {
     super(new DummyService(
         new AuthorizationManager(mock(AlertTemplateRenderer.class),
-            thirdEyeAuthorizer, new NamespaceResolver(null, null, null)),
+            thirdEyeAuthorizer, new NamespaceResolver(null, null, null, null)),
         dtoManager,
         apiToBeanMap));
   }

@@ -13,13 +13,14 @@
  */
 package ai.startree.thirdeye.auth;
 
+import static ai.startree.thirdeye.datalayer.dao.SubEntities.BEAN_TYPE_MAP;
 import static ai.startree.thirdeye.spi.auth.ResourceIdentifier.DEFAULT_ENTITY_TYPE;
 import static ai.startree.thirdeye.spi.auth.ResourceIdentifier.DEFAULT_NAME;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.ResourceUtils.authorize;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
-import ai.startree.thirdeye.datalayer.dao.SubEntities;
+import ai.startree.thirdeye.datalayer.entity.SubEntityType;
 import ai.startree.thirdeye.spi.auth.AccessType;
 import ai.startree.thirdeye.spi.auth.AuthenticationType;
 import ai.startree.thirdeye.spi.auth.ResourceIdentifier;
@@ -29,10 +30,13 @@ import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import com.google.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotAuthorizedException;
@@ -54,6 +58,13 @@ public class AuthorizationManager {
   private final ThirdEyeAuthorizer thirdEyeAuthorizer;
   private final NamespaceResolver namespaceResolver;
   private final boolean requireNamespace;
+  
+  private final static Map<Class<? extends AbstractDTO>, SubEntityType> DTO_TO_ENTITY_TYPE;
+  static {
+    // could be independent of BEAN_TYPE_MAP but for the moment the code is the same
+    DTO_TO_ENTITY_TYPE = new HashMap<>(BEAN_TYPE_MAP);
+    DTO_TO_ENTITY_TYPE.put(TaskDTO.class, SubEntityType.TASK);
+  }
 
   @Inject
   public AuthorizationManager(
@@ -196,11 +207,11 @@ public class AuthorizationManager {
         .map(Objects::toString)
         .orElse(DEFAULT_NAME);
 
-    final var namespace = namespaceResolver.resolveNamespace(dto);
+    final String namespace = namespaceResolver.resolveNamespace(dto);
 
-    final var entityType = optional(dto)
+    final String entityType = optional(dto)
         .map(AbstractDTO::getClass)
-        .map(SubEntities.BEAN_TYPE_MAP::get)
+        .map(DTO_TO_ENTITY_TYPE::get)
         .map(Objects::toString)
         .orElse(DEFAULT_ENTITY_TYPE);
 

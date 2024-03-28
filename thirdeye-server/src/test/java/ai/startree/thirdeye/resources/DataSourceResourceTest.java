@@ -56,7 +56,7 @@ public class DataSourceResourceTest {
         new AuthorizationManager(
             mock(AlertTemplateRenderer.class),
             ThirdEyeAuthorizerProvider.ALWAYS_ALLOW,
-            new NamespaceResolver(null, null, null)
+            new NamespaceResolver(null, null, null, null)
         )));
   }
 

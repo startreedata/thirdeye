@@ -54,6 +54,7 @@ public class RcaInvestigationService extends CrudService<RcaInvestigationApi, Rc
   @Override
   protected RcaInvestigationApi toApi(final RcaInvestigationDTO dto) {
     final var investigationApi = ApiBeanMapper.toApi(dto);
+    // FIXME CYRIL ASAP authz - IS INJECTING the namespace like this a good pattern?
     investigationApi.setAuth(new AuthorizationConfigurationApi()
         .setNamespace(authorizationManager.resourceId(dto).getNamespace()));
     return investigationApi;

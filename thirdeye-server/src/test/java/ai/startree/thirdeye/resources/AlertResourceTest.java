@@ -100,7 +100,7 @@ public class AlertResourceTest {
       final AlertTemplateRenderer alertTemplateRenderer,
       final ThirdEyeAuthorizer thirdEyeAuthorizer) {
     return new AuthorizationManager(alertTemplateRenderer,
-        thirdEyeAuthorizer, new NamespaceResolver(null, null, null));
+        thirdEyeAuthorizer, new NamespaceResolver(null, null, null, null));
   }
 
   @Test

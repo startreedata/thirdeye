@@ -34,6 +34,8 @@ import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
+import ai.startree.thirdeye.spi.task.TaskType;
 import java.util.ArrayList;
 import java.util.List;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -93,21 +95,21 @@ public class AuthorizationManagerTest {
         ResourceIdentifier.from("5", "default", "ALERT_TEMPLATE")));
 
     testName = "AlertDTO - Alert with resource";
-    AlertDTO alertDTO = new AlertDTO();
-    alertDTO.setId(6L);
-    alertDTO.setAuth(new AuthorizationConfigurationDTO().setNamespace("alert_template_namespace"));
-    testCases.add(testCase(testName, null, null, null, null, alertDTO,
+    AlertDTO alertDto = new AlertDTO();
+    alertDto.setId(6L);
+    alertDto.setAuth(new AuthorizationConfigurationDTO().setNamespace("alert_template_namespace"));
+    testCases.add(testCase(testName, null, null, null, null, alertDto,
         ResourceIdentifier.from("6", "alert_template_namespace", "ALERT")));
 
     testName = "AlertDTO - Alert without resource";
-    alertDTO = new AlertDTO();
-    alertDTO.setId(6L);
-    testCases.add(testCase(testName, null, null, null, null, alertDTO,
+    alertDto = new AlertDTO();
+    alertDto.setId(6L);
+    testCases.add(testCase(testName, null, null, null, null, alertDto,
         ResourceIdentifier.from("6", "default", "ALERT")));
 
     // Enumeration item can inherit from alert
     testName = "EnumerationItemDto - Enum with resource, alert with resource.";
-    AlertDTO alertDto = alertWithResource();
+    alertDto = alertWithResource();
     EnumerationItemDTO enumItem = enumWithResource();
     testCases.add(testCase(testName, alertDto, enumItem, null, null, enumItem,
         ResourceIdentifier.from("2", "enum_namespace", "ENUMERATION_ITEM")));
@@ -219,12 +221,28 @@ public class AuthorizationManagerTest {
         ResourceIdentifier.from("7", "default", "RCA_INVESTIGATION")));
 
     testName = "TaskDTO - DETECTION type with Alert with resource.";
+    alertDto = alertWithResource();
+    TaskDTO taskDto = (TaskDTO) new TaskDTO().setTaskType(TaskType.DETECTION).setRefId(alertDto.getId()).setId(9L);
+    testCases.add(testCase(testName, alertDto, null, null, null, taskDto,
+        ResourceIdentifier.from("9", "alert_namespace", "TASK")));
 
     testName = "TaskDTO - DETECTION type with Alert without resource.";
+    alertDto = alertWithoutResource();
+    taskDto = (TaskDTO) new TaskDTO().setTaskType(TaskType.DETECTION).setRefId(alertDto.getId()).setId(10L);
+    testCases.add(testCase(testName, alertDto, null, null, null, taskDto,
+        ResourceIdentifier.from("10", "default", "TASK")));
 
     testName = "TaskDTO - NOTIFICATION type with SubscriptionGroup with resource.";
+    SubscriptionGroupDTO subscriptionGroupDto = subscriptionGroupWithResource();
+    taskDto = (TaskDTO) new TaskDTO().setTaskType(TaskType.NOTIFICATION).setRefId(subscriptionGroupDto.getId()).setId(11L);
+    testCases.add(testCase(testName, null, null, null, subscriptionGroupDto, taskDto,
+        ResourceIdentifier.from("11", "subscription_namespace", "TASK")));
 
     testName = "TaskDTO - NOTIFICATION type with SubscriptionGroup without resource.";
+    subscriptionGroupDto = subscriptionGroupWithoutResource();
+    taskDto = (TaskDTO) new TaskDTO().setTaskType(TaskType.NOTIFICATION).setRefId(subscriptionGroupDto.getId()).setId(12L);
+    testCases.add(testCase(testName, null, null, null, subscriptionGroupDto, taskDto,
+        ResourceIdentifier.from("12", "default", "TASK")));
 
     // FIXME use cases below are not clearly defined in the spec: https://dev.startree.ai/docs/get-started-with-thirdeye/access-control-in-thirdeye#namespaces-for-thirdeye-resources
     //  testing the current behaviour to detect behaviour changes but feel free to change the behaviour
@@ -302,15 +320,14 @@ public class AuthorizationManagerTest {
 
   @NonNull
   private static AlertDTO alertWithResource() {
-    AlertDTO alertDto = new AlertDTO();
-    alertDto.setId(1L);
+    final AlertDTO alertDto = alertWithoutResource();
     alertDto.setAuth(new AuthorizationConfigurationDTO().setNamespace("alert_namespace"));
     return alertDto;
   }
 
   @NonNull
   private static AlertDTO alertWithoutResource() {
-    AlertDTO alertDto = new AlertDTO();
+    final AlertDTO alertDto = new AlertDTO();
     alertDto.setId(1L);
     return alertDto;
   }
@@ -329,6 +346,19 @@ public class AuthorizationManagerTest {
     anomalyDTO.setDetectionConfigId(1L);
     anomalyDTO.setId(3L);
     return anomalyDTO;
+  }
+
+  @NonNull
+  private static SubscriptionGroupDTO subscriptionGroupWithoutResource() {
+    final SubscriptionGroupDTO dto = new SubscriptionGroupDTO();
+    dto.setId(4L);
+    return dto;
+  }
+
+  private static SubscriptionGroupDTO subscriptionGroupWithResource() {
+    final SubscriptionGroupDTO dto = subscriptionGroupWithoutResource();
+    dto.setAuth(new AuthorizationConfigurationDTO().setNamespace("subscription_namespace"));
+    return dto;
   }
 
   @NonNull

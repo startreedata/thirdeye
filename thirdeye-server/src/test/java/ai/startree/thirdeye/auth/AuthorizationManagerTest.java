@@ -28,6 +28,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
@@ -244,17 +245,28 @@ public class AuthorizationManagerTest {
     testCases.add(testCase(testName, null, null, null, subscriptionGroupDto, taskDto,
         ResourceIdentifier.from("12", "default", "TASK")));
 
-    // FIXME use cases below are not clearly defined in the spec: https://dev.startree.ai/docs/get-started-with-thirdeye/access-control-in-thirdeye#namespaces-for-thirdeye-resources
-    //  testing the current behaviour to detect behaviour changes but feel free to change the behaviour
-    // spec: other DTOs always return the default namespace
-    // --> it's not enforced in the Namespace resolver
-    testName = "SubscriptionDto - returns a custom namespace";
-    SubscriptionGroupDTO subscriptionGroup = new SubscriptionGroupDTO();
-    subscriptionGroup.setId(8L);
-    subscriptionGroup.setAuth(
-        new AuthorizationConfigurationDTO().setNamespace("subscription_namespace"));
-    testCases.add(testCase(testName, alertDto, null, anomalyDTO, null, subscriptionGroup,
-        ResourceIdentifier.from("8", "subscription_namespace", "SUBSCRIPTION_GROUP")));
+    testName = "SubscriptionGroupDTO - Subscription with resource";
+    subscriptionGroupDto = subscriptionGroupWithResource();
+    testCases.add(testCase(testName, null, null, null, null, subscriptionGroupDto,
+        ResourceIdentifier.from("4", "subscription_namespace", "SUBSCRIPTION_GROUP")));
+
+    testName = "SubscriptionGroupDTO - Subscription without resource";
+    subscriptionGroupDto = subscriptionGroupWithoutResource();
+    testCases.add(testCase(testName, null, null, null, null, subscriptionGroupDto,
+        ResourceIdentifier.from("4", "default", "SUBSCRIPTION_GROUP")));
+
+    // FIXME CYRIL authz do metricDTO
+    // FIXME CYRIL authz do Events - need shared namespace
+
+    // spec:other DTOs always return the default namespace - https://dev.startree.ai/docs/get-started-with-thirdeye/access-control-in-thirdeye#namespaces-for-thirdeye-resources
+    // --> it's not enforced in the Namespace resolver - so capturing this undefined behavior in this test to catch changes
+    testName = "OtherDto - returns a custom namespace - undefined behavior";
+    AnomalyFeedbackDTO undefinedBehaviorDto = new AnomalyFeedbackDTO();
+    undefinedBehaviorDto.setId(8L);
+    undefinedBehaviorDto.setAuth(
+        new AuthorizationConfigurationDTO().setNamespace("custom_namespace"));
+    testCases.add(testCase(testName, alertDto, null, anomalyDTO, null, undefinedBehaviorDto,
+        ResourceIdentifier.from("8", "custom_namespace", "ANOMALY_FEEDBACK")));
 
     return testCases.toArray(new Object[][]{});
   }

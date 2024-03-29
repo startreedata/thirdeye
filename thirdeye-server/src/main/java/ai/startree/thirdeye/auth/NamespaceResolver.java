@@ -18,13 +18,19 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
+import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -40,7 +46,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Long term, should not be necessary anymore when requireNamespace = true;
+ * TODO CYRIL when requireNamespace = true is true, it is not possible to change the namespace of an entity 
+ *  and all entities should have a namespace directly - no need to inherit 
  */
 @Singleton
 public class NamespaceResolver {
@@ -51,6 +58,7 @@ public class NamespaceResolver {
   private final EnumerationItemManager enumerationItemManager;
   private final AnomalyManager anomalyManager;
   private final SubscriptionGroupManager subscriptionGroupDao;
+  private DataSourceManager dataSourceManager;
 
   private final Cache<Long, @NonNull Optional<String>> namespaceCache = CacheBuilder.newBuilder()
       .maximumSize(2048)
@@ -72,6 +80,7 @@ public class NamespaceResolver {
     namespaceCache.invalidateAll();
   }
 
+  // should match with the doc https://dev.startree.ai/docs/get-started-with-thirdeye/access-control-in-thirdeye#namespaces-for-thirdeye-resources
   public @NonNull String resolveNamespace(final @Nullable AbstractDTO dto) {
     Optional<String> namespace;
     if (dto instanceof AnomalyDTO anomalyDto) {
@@ -82,14 +91,33 @@ public class NamespaceResolver {
       namespace = resolveEnumerationItemNamespace(enumerationItemDto);
     } else if (dto instanceof TaskDTO taskDto) {
       namespace = resolveTaskDtoNamespace(taskDto);
+    } else if (dto instanceof DatasetConfigDTO datasetDto) {
+      namespace = resolveDatasetDtoNamespace(datasetDto);
+    } else if (dto instanceof DataSourceDTO || dto instanceof AlertTemplateDTO || dto instanceof AlertDTO || dto instanceof SubscriptionGroupDTO) {
+      namespace = getNamespaceFromAuth(dto);
     } else {
+      // please define cases explicitly as above - keeping this codepath to prevent workspace leaks and find changes, but should not happen
+      LOG.error("Limited namespace support for {} entity. Please reach out to StarTree support.", optional(dto).map(AbstractDTO::getClass).orElse(null));
       namespace = getNamespaceFromAuth(dto);
     }
+    // FIXME CYRIL authz do metricDTO
+    // FIXME CYRIL authz do Events - need shared namespace
 
     return namespace.orElse(DEFAULT_NAMESPACE);
   }
 
-  private Optional<String> resolveTaskDtoNamespace(final TaskDTO taskDto) {
+  private @NonNull Optional<String> resolveDatasetDtoNamespace(final DatasetConfigDTO dto) {
+    // dataset link to datasource by name - but name is not unique across workspaces - 
+    //   so cannot resolve workspace based on parent datasource so cannot inherit workspace from datasource
+    // FIXME - dataset should link to datasource by id, not by name - also editing the pointing datasource may cause leakage
+    // FIXME cyril authz - onboarding dataset will add a namespace 
+    return getNamespaceFromAuth(dto);
+  }
+
+  private @NonNull Optional<String> resolveTaskDtoNamespace(final @Nullable TaskDTO taskDto) {
+    if (taskDto == null) {
+      return Optional.empty();
+    }
     final Long refId = Objects.requireNonNull(taskDto.getRefId(), String.format(
         "TaskDto %s has no refId. This should never happen", taskDto.getId()
     ));

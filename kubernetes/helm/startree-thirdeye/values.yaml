@@ -164,6 +164,9 @@ auth:
 #    cache:
 #      size: 64
 #      ttl: 60000
+  authorization:
+    # set to true to enable the new namespace system
+    requireNamespace: false;
 
 # Do not remove me.
 config:

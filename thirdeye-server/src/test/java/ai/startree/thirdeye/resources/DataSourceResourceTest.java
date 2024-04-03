@@ -18,6 +18,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
+import ai.startree.thirdeye.auth.AuthConfiguration;
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.NamespaceResolver;
 import ai.startree.thirdeye.auth.ThirdEyeAuthorizerProvider;
@@ -56,7 +57,8 @@ public class DataSourceResourceTest {
         new AuthorizationManager(
             mock(AlertTemplateRenderer.class),
             ThirdEyeAuthorizerProvider.ALWAYS_ALLOW,
-            new NamespaceResolver(null, null, null, null)
+            new NamespaceResolver(null, null, null, null),
+            new AuthConfiguration()
         )));
   }
 

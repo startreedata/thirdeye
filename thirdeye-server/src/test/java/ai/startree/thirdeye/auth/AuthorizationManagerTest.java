@@ -303,7 +303,7 @@ public class AuthorizationManagerTest {
           subscriptionGroup);
     }
     final AuthorizationManager authorizationManager = new AuthorizationManager(null, null,
-        new NamespaceResolver(alertManager, enumManager, anomalyManager, subscriptionGroupManager));
+        new NamespaceResolver(alertManager, enumManager, anomalyManager, subscriptionGroupManager), new AuthConfiguration());
     final ResourceIdentifier output = authorizationManager.resourceId(inputDto);
     // FIXME CYRIL write equals method
     assertThat(output.getName()).isEqualTo(expected.getName());

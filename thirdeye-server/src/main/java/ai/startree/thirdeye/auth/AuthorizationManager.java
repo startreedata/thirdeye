@@ -70,13 +70,13 @@ public class AuthorizationManager {
   public AuthorizationManager(
       final AlertTemplateRenderer alertTemplateRenderer,
       final ThirdEyeAuthorizer thirdEyeAuthorizer,
-      final NamespaceResolver namespaceResolver) {
+      final NamespaceResolver namespaceResolver,
+      final AuthConfiguration authConfiguration) {
     this.alertTemplateRenderer = alertTemplateRenderer;
     this.thirdEyeAuthorizer = thirdEyeAuthorizer;
     this.namespaceResolver = namespaceResolver;
 
-    // TODO CYRIL next PR - make this configurable in server.yaml - for the moment the codepath is disabled
-    this.requireNamespace = false;
+    this.requireNamespace = authConfiguration.isEnabled() && authConfiguration.getAuthorization().isRequireNamespace();
   }
 
   /**

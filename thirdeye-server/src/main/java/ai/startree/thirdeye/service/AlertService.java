@@ -234,8 +234,10 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     for (final AlertApi api : list) {
       final AlertDTO existing =
           api.getId() == null ? null : ensureExists(dtoManager.findById(api.getId()));
+      final AlertDTO entity = optional(existing).orElse(toDto(api));
+      authorizationManager.enrichNamespace(principal, entity);
+      authorizationManager.ensureCanValidate(principal, entity);
       validate(api, existing);
-      authorizationManager.ensureCanValidate(principal, optional(existing).orElse(toDto(api)));
     }
   }
 

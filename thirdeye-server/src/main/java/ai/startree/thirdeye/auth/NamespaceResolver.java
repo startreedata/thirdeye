@@ -104,6 +104,8 @@ public class NamespaceResolver {
       namespace = getNamespaceFromAuth(dto);
     }
     // FIXME CYRIL add authz do EventDTO and AlertTemplateDto - requires a shared read-only namespace
+    
+    // FIXME CYRIL if requireNamespace is set - WARN if there is SOMETHING in DEFAULT NAMESPACE
 
     return namespace.orElse(DEFAULT_NAMESPACE);
   }

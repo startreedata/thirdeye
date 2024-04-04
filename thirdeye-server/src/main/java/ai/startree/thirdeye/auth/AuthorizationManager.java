@@ -31,6 +31,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
+import ai.startree.thirdeye.util.ResourceUtils;
 import com.google.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -81,20 +82,18 @@ public class AuthorizationManager {
 
   /**
    * Set a namespace in the entity if necessary, based on the principal.
-   * Note: following the review, we decided to put this logic outside
+   * Note: following the review, this logic is put outside {@link AuthorizationManager#ensureCanCreate}
    * {@link AuthorizationManager#ensureCanCreate}.
-   * FIXME CYRIL REVIEW AGAIN WITH SUVODEEP 
    * Should always be called before {@link AuthorizationManager#ensureCanCreate},  
    * {@link AuthorizationManager#ensureCanEdit}, {@link AuthorizationManager#ensureCanValidate}
    */
-  // TODO CYRIL next PR - use this method in the Service layer
   public <T extends AbstractDTO> void enrichNamespace(final ThirdEyeServerPrincipal principal,
       final T entity) {
     // enrich with the namespace if it is not set and required
     if (requireNamespace) {
       if (!namespaceIsSet(entity)) {
         final List<String> namespaces = thirdEyeAuthorizer.listNamespaces(principal);
-        authorize(!namespaces.isEmpty());
+        ResourceUtils.authorize(!namespaces.isEmpty());
         if (namespaces.size() == 1) {
           entity.setAuth(new AuthorizationConfigurationDTO().setNamespace(namespaces.get(0)));
         } else if (namespaces.size() > 1) {
@@ -109,7 +108,6 @@ public class AuthorizationManager {
     }
   }
 
-  // TODO DON'T UPDATE HERE
   public <T extends AbstractDTO> void ensureCanCreate(final ThirdEyeServerPrincipal principal,
       final T entity) {
     ensureHasAccess(principal, resourceId(entity), AccessType.WRITE);

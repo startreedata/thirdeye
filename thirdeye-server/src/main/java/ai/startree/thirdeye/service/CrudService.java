@@ -136,6 +136,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
     final var result = list.stream()
         .peek(api -> validate(api, null))
         .map(this::toDto)
+        .peek(dto -> authorizationManager.enrichNamespace(principal, dto))
         .peek(dto -> authorizationManager.ensureCanCreate(principal, dto))
         .map(dto -> setSystemFields(principal, dto))
         .peek(dto -> prepareCreatedDto(principal, dto))
@@ -152,7 +153,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
   public List<ApiT> editMultiple(final ThirdEyeServerPrincipal principal,
       final List<ApiT> list) {
     final RequestCache cache = createRequestCache();
-    final var result = list.stream()
+    final List<ApiT> result = list.stream()
         .map(o -> updateDto(principal, o))
         .peek(dtoManager::update)
         .peek(this::postUpdate)

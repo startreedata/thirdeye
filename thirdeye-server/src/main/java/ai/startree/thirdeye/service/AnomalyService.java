@@ -25,6 +25,7 @@ import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.AnomalyFeedbackApi;
 import ai.startree.thirdeye.spi.api.AnomalyStatsApi;
 import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
+import ai.startree.thirdeye.spi.auth.ResourceIdentifier;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
@@ -84,8 +85,8 @@ public class AnomalyService extends CrudService<AnomalyApi, AnomalyDTO> {
 
   @Override
   protected AnomalyDTO toDto(final AnomalyApi api) {
-    final var dto = ApiBeanMapper.toDto(api);
-    final var authId = authorizationManager.resourceId(dto);
+    final AnomalyDTO dto = ApiBeanMapper.toDto(api);
+    final ResourceIdentifier authId = authorizationManager.resourceId(dto);
     dto.setAuth(new AuthorizationConfigurationDTO().setNamespace(authId.getNamespace()));
     return dto;
   }

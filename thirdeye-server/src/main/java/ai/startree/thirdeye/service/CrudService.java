@@ -153,7 +153,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
   public List<ApiT> editMultiple(final ThirdEyeServerPrincipal principal,
       final List<ApiT> list) {
     final RequestCache cache = createRequestCache();
-    final var result = list.stream()
+    final List<ApiT> result = list.stream()
         .map(o -> updateDto(principal, o))
         .peek(dtoManager::update)
         .peek(this::postUpdate)

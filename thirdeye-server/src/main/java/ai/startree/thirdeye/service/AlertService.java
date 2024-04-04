@@ -232,12 +232,15 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
 
   public void validateMultiple(final ThirdEyeServerPrincipal principal, final List<AlertApi> list) {
     for (final AlertApi api : list) {
-      final AlertDTO existing =
-          api.getId() == null ? null : ensureExists(dtoManager.findById(api.getId()));
-      final AlertDTO entity = optional(existing).orElse(toDto(api));
-      authorizationManager.enrichNamespace(principal, entity);
-      authorizationManager.ensureCanValidate(principal, entity);
-      validate(api, existing);
+      final AlertDTO alertDto;
+      if (api.getId() != null) {
+        alertDto =  ensureExists(dtoManager.findById(api.getId()));
+      } else {
+        alertDto = toDto(api);
+        authorizationManager.enrichNamespace(principal, alertDto);
+      }
+      authorizationManager.ensureCanValidate(principal, alertDto);
+      validate(api, alertDto);
     }
   }
 
@@ -255,7 +258,9 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
       final AlertDTO alertDto = ensureExists(dtoManager.findById(alertApi.getId()));
       authorizationManager.ensureCanRead(principal, alertDto);
     } else {
-      authorizationManager.ensureCanCreate(principal, toDto(alertApi));
+      final AlertDTO alertDto = toDto(alertApi);
+      authorizationManager.enrichNamespace(principal, alertDto);
+      authorizationManager.ensureCanCreate(principal, alertDto);
     }
 
     final AlertEvaluationApi results = alertEvaluator.evaluate(request);

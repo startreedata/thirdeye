@@ -43,6 +43,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+// FIXME CYRIL authz move in subpackage 
 @Singleton
 public class AnomalyMetricsProvider {
 
@@ -113,10 +114,10 @@ public class AnomalyMetricsProvider {
   private static Predicate notIgnored() {
     return Predicate.EQ("ignored", false);
   }
-
+  
   public AnomalyStatsApi computeAnomalyStats(final ThirdEyePrincipal principal, final Predicate predicate) {
     // FIXME CYRIL may be slow - cache the result? need to cache per (predicate, namespace)
-    // FIXME CYRIL add authz
+    // FIXME CYRIL add authz - must apply authz independently of the predicate - will need to inject namespace predicate for speed and to prevent noisy neighbours  
     final List<AnomalyFeedback> allFeedbacks = getAnomalyFeedbacks(predicate);
     return new AnomalyStatsApi()
         .setTotalCount(countTotal(predicate))
@@ -163,6 +164,7 @@ public class AnomalyMetricsProvider {
     if (predicate != null) {
       finalPredicate = Predicate.AND(finalPredicate, predicate);
     }
+    // FIXME CYRIL add authz
     return anomalyManager.findParentAnomaliesWithFeedback(finalPredicate).stream()
         .map(AnomalyDTO::getFeedback)
         .collect(Collectors.toList());

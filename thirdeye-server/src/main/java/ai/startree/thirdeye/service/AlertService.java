@@ -13,8 +13,8 @@
  */
 package ai.startree.thirdeye.service;
 
-import static ai.startree.thirdeye.service.alert.AlertInsightsProvider.currentMaximumPossibleEndTime;
 import static ai.startree.thirdeye.mapper.ApiBeanMapper.toEnumerationItemDTO;
+import static ai.startree.thirdeye.service.alert.AlertInsightsProvider.currentMaximumPossibleEndTime;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_CRON_FREQUENCY_TOO_HIGH;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_CRON_INVALID;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DUPLICATE_NAME;
@@ -27,11 +27,11 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.singleton;
 
 import ai.startree.thirdeye.alert.AlertEvaluator;
-import ai.startree.thirdeye.service.alert.AlertInsightsProvider;
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.config.TimeConfiguration;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
+import ai.startree.thirdeye.service.alert.AlertInsightsProvider;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.api.AlertInsightsApi;
@@ -328,11 +328,13 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
       final Long startTime,
       final Long endTime
   ) {
-    // FIXME CYRIL add authz
     final List<Predicate> predicates = new ArrayList<>();
     predicates.add(Predicate.EQ("detectionConfigId", id));
-
+    final AlertDTO dto = ensureExists(getDto(id));
+    authorizationManager.ensureHasAccess(principal, dto, AccessType.READ);
+    
     // optional filters
+    // no need to check authz for the enumerationItem - in the new workspace system, if the user has access to the alert then he has access to the enumerationItem
     optional(enumerationId)
         .ifPresent(enumId -> predicates.add(Predicate.EQ("enumerationItemId", enumerationId)));
     optional(startTime)

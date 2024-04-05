@@ -100,8 +100,8 @@ public class SubscriptionGroupService extends
   }
 
   @Override
-  protected void validate(final SubscriptionGroupApi api, final SubscriptionGroupDTO existing) {
-    super.validate(api, existing);
+  protected void validate(final ThirdEyePrincipal principal, final SubscriptionGroupApi api, final SubscriptionGroupDTO existing) {
+    super.validate(principal, api, existing);
     ensureExists(api.getName(), "name value must be set.");
     validateCron(api);
 

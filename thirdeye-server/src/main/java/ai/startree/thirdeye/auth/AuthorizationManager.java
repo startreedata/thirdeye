@@ -44,6 +44,7 @@ import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class AuthorizationManager {
 
@@ -87,7 +88,7 @@ public class AuthorizationManager {
    * Should always be called before {@link AuthorizationManager#ensureCanCreate},  
    * {@link AuthorizationManager#ensureCanEdit}, {@link AuthorizationManager#ensureCanValidate}
    */
-  public <T extends AbstractDTO> void enrichNamespace(final ThirdEyeServerPrincipal principal,
+  public <T extends AbstractDTO> void enrichNamespace(final ThirdEyePrincipal principal,
       final T entity) {
     // enrich with the namespace if it is not set and required
     if (requireNamespace) {
@@ -106,6 +107,15 @@ public class AuthorizationManager {
       // do not enrich namespaces on the fly
       return;
     }
+  }
+  
+  // FIXME CYRIL I AM HERE
+  public <T extends AbstractDTO> List<T> filterByNamespace(final ThirdEyePrincipal principal, final @Nullable String s,
+      final List<AlertDTO> sameName) {
+    // use the provided namespace if provided 
+    // else try to resolve it from the thirdEyeAuthorizer 
+    // then filter elements based on the resolved namespace of all entities and the namespace computed above.
+    return null;
   }
 
   public <T extends AbstractDTO> void ensureCanCreate(final ThirdEyeServerPrincipal principal,

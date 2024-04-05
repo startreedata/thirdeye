@@ -78,8 +78,9 @@ public class AnomalyService extends CrudService<AnomalyApi, AnomalyDTO> {
   }
 
   @Override
-  protected void validate(final AnomalyApi api, @Nullable final AnomalyDTO existing) {
-    super.validate(api, existing);
+  protected void validate(final ThirdEyePrincipal principal, final AnomalyApi api, @Nullable final AnomalyDTO existing) {
+    super.validate(principal, api, existing);
+    // fixme cyril - auth should be set for manually created anomalies
     ensureNull(api.getAuth(), "cannot set auth for anomalies");
   }
 

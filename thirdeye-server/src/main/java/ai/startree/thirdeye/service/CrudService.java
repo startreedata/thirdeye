@@ -31,6 +31,7 @@ import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.spi.api.CountApi;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
 import ai.startree.thirdeye.spi.auth.AccessType;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AbstractManager;
@@ -156,7 +157,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
     final List<ApiT> result = list.stream()
         .map(o -> updateDto(principal, o))
         .peek(dtoManager::update)
-        .peek(this::postUpdate)
+        .peek(dto -> this.postUpdate(principal, dto))
         .map(dto -> toApi(dto, cache))
         .collect(Collectors.toList());
     authorizationManager.invalidateCache();
@@ -309,7 +310,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
     return dto;
   }
 
-  protected void postUpdate(final DtoT dto) {
+  protected void postUpdate(final ThirdEyePrincipal principal, final DtoT dto) {
     // default is a no-op
   }
 

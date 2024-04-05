@@ -13,8 +13,8 @@
  */
 package ai.startree.thirdeye.service;
 
-import static ai.startree.thirdeye.alert.AlertInsightsProvider.currentMaximumPossibleEndTime;
 import static ai.startree.thirdeye.mapper.ApiBeanMapper.toEnumerationItemDTO;
+import static ai.startree.thirdeye.service.alert.AlertInsightsProvider.currentMaximumPossibleEndTime;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_CRON_FREQUENCY_TOO_HIGH;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_CRON_INVALID;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DUPLICATE_NAME;
@@ -27,11 +27,11 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.singleton;
 
 import ai.startree.thirdeye.alert.AlertEvaluator;
-import ai.startree.thirdeye.alert.AlertInsightsProvider;
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.config.TimeConfiguration;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
+import ai.startree.thirdeye.service.alert.AlertInsightsProvider;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.api.AlertInsightsApi;
@@ -40,6 +40,7 @@ import ai.startree.thirdeye.spi.api.AnomalyStatsApi;
 import ai.startree.thirdeye.spi.api.DetectionEvaluationApi;
 import ai.startree.thirdeye.spi.api.UserApi;
 import ai.startree.thirdeye.spi.auth.AccessType;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
@@ -125,7 +126,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
   @Override
   protected void prepareCreatedDto(final ThirdEyeServerPrincipal principal, final AlertDTO dto) {
     if (dto.getLastTimestamp() < minimumOnboardingStartTime) {
-      dto.setLastTimestamp(minimumLastTimestamp(dto));
+      dto.setLastTimestamp(minimumLastTimestamp(principal, dto));
     }
   }
 
@@ -167,7 +168,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
   }
 
   @Override
-  protected void postUpdate(final AlertDTO dto) {
+  protected void postUpdate(final ThirdEyePrincipal principal, final AlertDTO dto) {
     /*
      * Running the detection task after updating an alert ensures that enumeration items if
      * updated are reflected in the dtos as well. Enumeration Items are updated after executing
@@ -180,7 +181,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     // perform a soft-reset - rerun the detection on the whole historical data - existing and new anomalies will be merged
     // note: the 2 detection tasks can run concurrently, the order does not matter because the last timestamp after the run of the 2 tasks is the same
     //   we could remove the first one but this would make the UI feel less snappy, because a new enumeration would not appear until the full historical replay is finished
-    createDetectionTask(dto.getId(), minimumLastTimestamp(dto), dto.getLastTimestamp());
+    createDetectionTask(dto.getId(), minimumLastTimestamp(principal, dto), dto.getLastTimestamp());
   }
 
   @Override
@@ -191,13 +192,12 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
   public AlertInsightsApi getInsightsById(final ThirdEyeServerPrincipal principal, final Long id) {
     final AlertDTO dto = getDto(id);
     authorizationManager.ensureHasAccess(principal, dto, AccessType.READ);
-    return alertInsightsProvider.getInsights(dto);
+    return alertInsightsProvider.getInsights(principal, dto);
   }
 
   public AlertInsightsApi getInsights(final ThirdEyeServerPrincipal principal, 
       final AlertInsightsRequestApi request) {
-    // FIXME CYRIL add authz
-    return alertInsightsProvider.getInsights(request);
+    return alertInsightsProvider.getInsights(principal, request);
   }
 
   public void runTask(
@@ -314,7 +314,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
      */
     deleteAssociatedAnomalies(dto.getId());
     // reset lastTimestamp
-    dto.setLastTimestamp(minimumLastTimestamp(dto));
+    dto.setLastTimestamp(minimumLastTimestamp(principal, dto));
     dtoManager.update(dto);
     postCreate(dto);
 
@@ -328,11 +328,13 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
       final Long startTime,
       final Long endTime
   ) {
-    // FIXME CYRIL add authz
     final List<Predicate> predicates = new ArrayList<>();
     predicates.add(Predicate.EQ("detectionConfigId", id));
-
+    final AlertDTO dto = ensureExists(getDto(id));
+    authorizationManager.ensureHasAccess(principal, dto, AccessType.READ);
+    
     // optional filters
+    // no need to check authz for the enumerationItem - in the new workspace system, if the user has access to the alert then he has access to the enumerationItem
     optional(enumerationId)
         .ifPresent(enumId -> predicates.add(Predicate.EQ("enumerationItemId", enumerationId)));
     optional(startTime)
@@ -376,9 +378,9 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     enumerationItemManager.deleteByIds(ids);
   }
 
-  private long minimumLastTimestamp(final AlertDTO dto) {
+  private long minimumLastTimestamp(final ThirdEyePrincipal principal, final AlertDTO dto) {
     try {
-      final AlertInsightsApi insights = alertInsightsProvider.getInsights(dto);
+      final AlertInsightsApi insights = alertInsightsProvider.getInsights(principal, dto);
       final Long datasetStartTime = insights.getDatasetStartTime();
       if (datasetStartTime < minimumOnboardingStartTime) {
         LOG.warn(
@@ -406,7 +408,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
         end);
 
     try {
-      // fixme cyril authz review assume createTaskDto si responsible for setting the namespace info of the created task - as of today it's not set but resolved at readTime
+      // todo cyril authz review assume createTaskDto si responsible for setting the namespace info of the created task - as of today it's not set but resolved at readTime
       final TaskDTO t = taskManager.createTaskDto(alertId, info, DETECTION);
       LOG.info("Created {} task {} with settings {}", DETECTION, t.getId(), t);
     } catch (final JsonProcessingException e) {

@@ -15,7 +15,6 @@ package ai.startree.thirdeye.service;
 
 import static ai.startree.thirdeye.RequestCache.buildCache;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
-import static ai.startree.thirdeye.util.ResourceUtils.ensureNull;
 
 import ai.startree.thirdeye.RequestCache;
 import ai.startree.thirdeye.auth.AuthorizationManager;
@@ -80,8 +79,6 @@ public class AnomalyService extends CrudService<AnomalyApi, AnomalyDTO> {
   @Override
   protected void validate(final ThirdEyePrincipal principal, final AnomalyApi api, @Nullable final AnomalyDTO existing) {
     super.validate(principal, api, existing);
-    // fixme cyril - auth should be set for manually created anomalies
-    ensureNull(api.getAuth(), "cannot set auth for anomalies");
   }
 
   @Override

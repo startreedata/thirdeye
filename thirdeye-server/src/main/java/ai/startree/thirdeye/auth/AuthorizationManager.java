@@ -111,7 +111,7 @@ public class AuthorizationManager {
     }
   }
 
-  // TODO CYRIL authz should be moved down to ThirdEyeAuthorizer once we implement multi-namespace UI support
+  // TODO CYRIL authz should be moved down to ThirdEyeAuthorizer once we implement multi-namespace UI support?
   // only returns null when requireNamespace is false - Nullable can be removed once migration is done
   public @Nullable String currentNamespace(final ThirdEyePrincipal principal) {
     if (requireNamespace) {

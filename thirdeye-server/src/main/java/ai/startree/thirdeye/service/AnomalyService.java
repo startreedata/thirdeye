@@ -35,7 +35,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import com.google.common.collect.ImmutableMap;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -74,11 +73,6 @@ public class AnomalyService extends CrudService<AnomalyApi, AnomalyDTO> {
   protected RequestCache createRequestCache() {
     return super.createRequestCache()
         .setAlerts(buildCache(alertManager::findById));
-  }
-
-  @Override
-  protected void validate(final ThirdEyePrincipal principal, final AnomalyApi api, @Nullable final AnomalyDTO existing) {
-    super.validate(principal, api, existing);
   }
 
   @Override

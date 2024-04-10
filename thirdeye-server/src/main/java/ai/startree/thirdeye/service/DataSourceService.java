@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.service;
 
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DUPLICATE_NAME;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
@@ -21,6 +22,7 @@ import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.core.DataSourceOnboarder;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
+import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
 import ai.startree.thirdeye.spi.api.DatasetApi;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
@@ -55,10 +57,12 @@ public class DataSourceService extends CrudService<DataSourceApi, DataSourceDTO>
   @Override
   protected void validate(final ThirdEyePrincipal principal, final DataSourceApi api, @Nullable final DataSourceDTO existing) {
     super.validate(principal, api, existing);
-    // FIXME cyril authz - name match should be namespace aware
     /* new entity creation or name change in existing entity */
     if (existing == null || !existing.getName().equals(api.getName())) {
-      ensure(dtoManager.findByName(api.getName()).size() == 0, ERR_DUPLICATE_NAME, api.getName());
+      final List<DataSourceDTO> sameName = dtoManager.findByName(api.getName());
+      final List<DataSourceDTO> sameNameSameNamespace = authorizationManager.filterByNamespace(principal,
+          optional(api.getAuth()).map(AuthorizationConfigurationApi::getNamespace).orElse(null), sameName);
+      ensure(sameNameSameNamespace.isEmpty(), ERR_DUPLICATE_NAME, api.getName());
     }
   }
 

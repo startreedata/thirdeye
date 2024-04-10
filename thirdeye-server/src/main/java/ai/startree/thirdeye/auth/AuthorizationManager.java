@@ -131,6 +131,7 @@ public class AuthorizationManager {
   }
 
   // FIXME CYRIL I AM HERE - maybe will need a filterByNamespace with an existing dto --> will need to resolve namespace with the namespace resolver
+  // TODO CYRIL authz perf - in most cases places using this method should filter at fetch time on the namespace to avoid noisy neighbours effect / stressing the instance   
   public <T extends AbstractDTO> List<T> filterByNamespace(final ThirdEyePrincipal principal,
       final @Nullable String explicitNamespace, final List<T> entities) {
     if (requireNamespace) {

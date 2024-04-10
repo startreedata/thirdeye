@@ -83,6 +83,7 @@ public class SubscriptionGroupService extends
     final AlertApi alert = alertAssociation.getAlert();
     ensureExists(alert, "alert missing in alert association");
     ensureExists(alert.getId(), "alert.id is missing in alert association");
+    // fixme cyril authz - a user should have read access to the alerts
   }
 
   private static void initSystemFields(final AlertAssociationDto aa, final Timestamp created) {
@@ -110,6 +111,7 @@ public class SubscriptionGroupService extends
 
     // For new Subscription Group or existing Subscription Group with different name
     if (existing == null || !existing.getName().equals(api.getName())) {
+      // fixme cyril authz filter by namespace
       ensure(dtoManager.findByName(api.getName()).isEmpty(), ERR_DUPLICATE_NAME, api.getName());
     }
     optional(api.getAlertAssociations())

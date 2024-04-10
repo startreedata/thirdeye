@@ -49,11 +49,13 @@ public class MetricService extends CrudService<MetricApi, MetricConfigDTO> {
     super.validate(principal, api, existing);
 
     ensureExists(api.getDataset(), "dataset");
+    // fixme cyril authz - filter by namespace
     ensureExists(datasetConfigManager.findByDataset(api.getDataset().getName()),
         ERR_DATASET_NOT_FOUND, api.getDataset().getName());
 
     // For new Metric or existing metric with different name
     if (existing == null || !existing.getName().equals(api.getName())) {
+      // fixme cyril authz - filter by namespace
       final var nMetricsSameNameAndDataset = dtoManager.findByName(api.getName())
           .stream()
           .map(MetricConfigDTO::getDataset)

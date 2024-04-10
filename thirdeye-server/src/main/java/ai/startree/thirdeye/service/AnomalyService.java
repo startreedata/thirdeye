@@ -15,7 +15,6 @@ package ai.startree.thirdeye.service;
 
 import static ai.startree.thirdeye.RequestCache.buildCache;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
-import static ai.startree.thirdeye.util.ResourceUtils.ensureNull;
 
 import ai.startree.thirdeye.RequestCache;
 import ai.startree.thirdeye.auth.AuthorizationManager;
@@ -36,7 +35,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import com.google.common.collect.ImmutableMap;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -75,12 +73,6 @@ public class AnomalyService extends CrudService<AnomalyApi, AnomalyDTO> {
   protected RequestCache createRequestCache() {
     return super.createRequestCache()
         .setAlerts(buildCache(alertManager::findById));
-  }
-
-  @Override
-  protected void validate(final AnomalyApi api, @Nullable final AnomalyDTO existing) {
-    super.validate(api, existing);
-    ensureNull(api.getAuth(), "cannot set auth for anomalies");
   }
 
   @Override

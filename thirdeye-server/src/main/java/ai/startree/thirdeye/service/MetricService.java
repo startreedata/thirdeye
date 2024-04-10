@@ -21,6 +21,7 @@ import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.MetricApi;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
@@ -44,15 +45,17 @@ public class MetricService extends CrudService<MetricApi, MetricConfigDTO> {
   }
 
   @Override
-  protected void validate(final MetricApi api, final MetricConfigDTO existing) {
-    super.validate(api, existing);
+  protected void validate(final ThirdEyePrincipal principal, final MetricApi api, final MetricConfigDTO existing) {
+    super.validate(principal, api, existing);
 
     ensureExists(api.getDataset(), "dataset");
+    // fixme cyril authz - filter by namespace
     ensureExists(datasetConfigManager.findByDataset(api.getDataset().getName()),
         ERR_DATASET_NOT_FOUND, api.getDataset().getName());
 
     // For new Metric or existing metric with different name
     if (existing == null || !existing.getName().equals(api.getName())) {
+      // fixme cyril authz - filter by namespace
       final var nMetricsSameNameAndDataset = dtoManager.findByName(api.getName())
           .stream()
           .map(MetricConfigDTO::getDataset)

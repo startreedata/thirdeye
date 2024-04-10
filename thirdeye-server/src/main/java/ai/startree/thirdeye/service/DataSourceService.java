@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.service;
 
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DUPLICATE_NAME;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
@@ -21,6 +22,7 @@ import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.core.DataSourceOnboarder;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
+import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
 import ai.startree.thirdeye.spi.api.DatasetApi;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
@@ -53,11 +55,14 @@ public class DataSourceService extends CrudService<DataSourceApi, DataSourceDTO>
   }
 
   @Override
-  protected void validate(final DataSourceApi api, @Nullable final DataSourceDTO existing) {
-    super.validate(api, existing);
+  protected void validate(final ThirdEyePrincipal principal, final DataSourceApi api, @Nullable final DataSourceDTO existing) {
+    super.validate(principal, api, existing);
     /* new entity creation or name change in existing entity */
     if (existing == null || !existing.getName().equals(api.getName())) {
-      ensure(dtoManager.findByName(api.getName()).size() == 0, ERR_DUPLICATE_NAME, api.getName());
+      final List<DataSourceDTO> sameName = dtoManager.findByName(api.getName());
+      final List<DataSourceDTO> sameNameSameNamespace = authorizationManager.filterByNamespace(principal,
+          optional(api.getAuth()).map(AuthorizationConfigurationApi::getNamespace).orElse(null), sameName);
+      ensure(sameNameSameNamespace.isEmpty(), ERR_DUPLICATE_NAME, api.getName());
     }
   }
 
@@ -102,7 +107,7 @@ public class DataSourceService extends CrudService<DataSourceApi, DataSourceDTO>
   }
 
   public List<DatasetApi> onboardAll(final ThirdEyePrincipal principal, final String name) {
-    // FIXME add principal check
+    // // FIXME cyril add principal check authz
     final List<DatasetConfigDTO> datasets = dataSourceOnboarder.onboardAll(name);
 
     return datasets.stream()
@@ -111,7 +116,7 @@ public class DataSourceService extends CrudService<DataSourceApi, DataSourceDTO>
   }
 
   public List<DatasetApi> offboardAll(final ThirdEyePrincipal principal, final String name) {
-    // FIXME add principal check
+    // FIXME cyril add principal check authz
     final List<DatasetConfigDTO> datasets = dataSourceOnboarder.offboardAll(name);
 
     return datasets.stream()
@@ -120,12 +125,12 @@ public class DataSourceService extends CrudService<DataSourceApi, DataSourceDTO>
   }
 
   public void clearDataSourceCache(final ThirdEyePrincipal principal) {
-    // FIXME ensure root access - next have one cache per namespace?
+    // // FIXME cyril  ensure root access - next have one cache per namespace? authz
     dataSourceCache.clear();
   }
 
   public boolean validate(final ThirdEyePrincipal principal, final String name) {
-    // FIXME ensure access 
+    // // FIXME cyril  ensure access  authz
     return dataSourceCache.getDataSource(name).validate();
   }
 }

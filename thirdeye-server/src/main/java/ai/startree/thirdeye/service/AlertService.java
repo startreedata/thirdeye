@@ -37,6 +37,7 @@ import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.api.AlertInsightsApi;
 import ai.startree.thirdeye.spi.api.AlertInsightsRequestApi;
 import ai.startree.thirdeye.spi.api.AnomalyStatsApi;
+import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
 import ai.startree.thirdeye.spi.api.DetectionEvaluationApi;
 import ai.startree.thirdeye.spi.api.UserApi;
 import ai.startree.thirdeye.spi.auth.AccessType;
@@ -136,8 +137,9 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
   }
 
   @Override
-  protected void validate(final AlertApi api, final AlertDTO existing) {
-    super.validate(api, existing);
+  protected void validate(final ThirdEyePrincipal principal, final AlertApi api,
+      final AlertDTO existing) {
+    super.validate(principal, api, existing);
     ensureExists(api.getName(), "name value must be set.");
     ensureExists(api.getCron(), "cron value must be set.");
     ensure(CronExpression.isValidExpression(api.getCron()), ERR_CRON_INVALID, api.getCron());
@@ -149,7 +151,10 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
         ALERT_CRON_MAX_TRIGGERS_PER_MINUTE);
     /* new entity creation or name change in existing entity */
     if (existing == null || !existing.getName().equals(api.getName())) {
-      ensure(dtoManager.findByName(api.getName()).isEmpty(), ERR_DUPLICATE_NAME, api.getName());
+      final List<AlertDTO> sameName = dtoManager.findByName(api.getName());
+      final List<AlertDTO> sameNameSameNamespace = authorizationManager.filterByNamespace(principal,
+          optional(api.getAuth()).map(AuthorizationConfigurationApi::getNamespace).orElse(null), sameName);
+      ensure(sameNameSameNamespace.isEmpty(), ERR_DUPLICATE_NAME, api.getName());
     }
   }
 
@@ -195,7 +200,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     return alertInsightsProvider.getInsights(principal, dto);
   }
 
-  public AlertInsightsApi getInsights(final ThirdEyeServerPrincipal principal, 
+  public AlertInsightsApi getInsights(final ThirdEyeServerPrincipal principal,
       final AlertInsightsRequestApi request) {
     return alertInsightsProvider.getInsights(principal, request);
   }
@@ -234,13 +239,13 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     for (final AlertApi api : list) {
       final AlertDTO alertDto;
       if (api.getId() != null) {
-        alertDto =  ensureExists(dtoManager.findById(api.getId()));
+        alertDto = ensureExists(dtoManager.findById(api.getId()));
       } else {
         alertDto = toDto(api);
         authorizationManager.enrichNamespace(principal, alertDto);
       }
       authorizationManager.ensureCanValidate(principal, alertDto);
-      validate(api, alertDto);
+      validate(principal, api, alertDto);
     }
   }
 
@@ -332,7 +337,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     predicates.add(Predicate.EQ("detectionConfigId", id));
     final AlertDTO dto = ensureExists(getDto(id));
     authorizationManager.ensureHasAccess(principal, dto, AccessType.READ);
-    
+
     // optional filters
     // no need to check authz for the enumerationItem - in the new workspace system, if the user has access to the alert then he has access to the enumerationItem
     optional(enumerationId)
@@ -342,7 +347,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     optional(endTime)
         .ifPresent(end -> predicates.add(Predicate.LE("endTime", endTime)));
 
-    return anomalyMetricsProvider.computeAnomalyStats(principal, 
+    return anomalyMetricsProvider.computeAnomalyStats(principal,
         Predicate.AND(predicates.toArray(Predicate[]::new)));
   }
 

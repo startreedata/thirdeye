@@ -181,6 +181,7 @@ public class NamespaceResolver {
   }
 
   private @NonNull Optional<String> resolveRcaNamespace(final @NonNull RcaInvestigationDTO dto) {
+    // fixme cyril authz when modifying rcaInvestigationService - change this - use the dto auth if it's set  
     final Long anomalyId = optional(dto.getAnomaly()).map(AbstractDTO::getId).orElse(null);
     if (anomalyId != null) {
       return getAnomalyNamespaceById(anomalyId);

@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
 
 public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT extends AbstractDTO> {
 
-  private static final Logger log = LoggerFactory.getLogger(CrudResource.class);
+  private static final Logger LOG = LoggerFactory.getLogger(CrudResource.class);
 
   protected final CrudService<ApiT, DtoT> crudService;
 
@@ -80,6 +80,7 @@ public abstract class CrudResource<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exte
   public Response get(
       @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
       @PathParam("name") String name) {
+    LOG.warn("Deprecated endpoint /name/<name> used with name {}", name);
     return respondOk(crudService.findByName(principal, name));
   }
 

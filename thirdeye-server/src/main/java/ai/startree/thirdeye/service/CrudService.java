@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
 
 public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT extends AbstractDTO> {
 
-  private static final Logger log = LoggerFactory.getLogger(CrudService.class);
+  private static final Logger LOG = LoggerFactory.getLogger(CrudService.class);
   protected final AuthorizationManager authorizationManager;
 
   protected final AbstractManager<DtoT> dtoManager;
@@ -104,8 +104,9 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
     final List<DtoT> byName = dtoManager.filter(new DaoFilter()
         .setPredicate(Predicate.EQ(nameColumn, name)));
 
-    // FIXME CYRIL -- add namespace filter - try to deprecate this route instead 
-
+    // FIXME CYRIL authz - CANNOT BE RESOLVED CORRECTLY WITHOUT KNOWING THE CURRENT NAMESPACE 
+    //  cc Suvodeep for instance if a user has access to two namespaces and the two namespaces have a datasource called "pinot", then there is no way to know which one should be returned
+    //  best would be to remove this method
     ensure(byName.size() > 0, ERR_OBJECT_DOES_NOT_EXIST, name);
     if (byName.size() > 1) {
       throw serverError(ERR_UNKNOWN, "Error. Multiple objects with name: " + name);
@@ -134,8 +135,8 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
   public List<ApiT> createMultiple(final ThirdEyeServerPrincipal principal,
       final List<ApiT> list) {
     final RequestCache cache = createRequestCache();
-    final var result = list.stream()
-        .peek(api -> validate(api, null))
+    final List<ApiT> result = list.stream()
+        .peek(api -> validate(principal, api, null))
         .map(this::toDto)
         .peek(dto -> authorizationManager.enrichNamespace(principal, dto))
         .peek(dto -> authorizationManager.ensureCanCreate(principal, dto))
@@ -167,7 +168,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
   private DtoT updateDto(final ThirdEyeServerPrincipal principal, final ApiT api) {
     final Long id = ensureExists(api.getId(), ERR_MISSING_ID);
     final DtoT existing = ensureExists(dtoManager.findById(id));
-    validate(api, existing);
+    validate(principal, api, existing);
 
     final DtoT updated = toDto(api);
 
@@ -228,7 +229,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
       authorizationManager.ensureCanDelete(principal, dto);
 
       deleteDto(dto);
-      log.warn(String.format("Deleted id: %d by principal: %s", id, principal.getName()));
+      LOG.warn(String.format("Deleted id: %d by principal: %s", id, principal.getName()));
 
       final RequestCache cache = createRequestCache();
       return toApi(dto, cache);
@@ -294,7 +295,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
    * @param api The request api object
    * @param existing the existing dto. On Creation the existing dto will be null
    */
-  protected void validate(final ApiT api, @Nullable final DtoT existing) {
+  protected void validate(final ThirdEyePrincipal principal, final ApiT api, @Nullable final DtoT existing) {
     if (existing == null) {
       ensureNull(api.getId(), ERR_ID_UNEXPECTED_AT_CREATION);
     }

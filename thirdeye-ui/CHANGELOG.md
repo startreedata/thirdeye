@@ -1,3 +1,10 @@
+### [2.45.13](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.12...thirdeye-ui-2.45.13) (2024-04-12)
+
+
+### Bug Fixes
+
+* [TE-2112](https://cortexdata.atlassian.net/browse/TE-2112) update text ([bca2089a6](https://github.com/startreedata/thirdeye/commit/bca2089a60156143d09b6b29cf1e2078d2073ae9))
+
 ### [2.45.9](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.8...thirdeye-ui-2.45.9) (2024-03-19)
 
 

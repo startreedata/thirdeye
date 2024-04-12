@@ -745,7 +745,7 @@
         "select-the-dimensions-below-to-drill-down-into-the": "Select the dimensions below to drill down into the data to see it plotted in the chart below.",
         "select-the-events-to-see-the-dates-plotted-in-the": "Select the events to see the dates plotted in the chart below.",
         "select-the-start-and-end-date-time-range-for-the-anomalous-behavior": "Select the start and end date-time range for the anomalous behavior",
-        "select-the-top-contributors-to-see-the-dimensions": "Select the Top Contributors to see the dimensions plotted in the chart below.",
+        "select-the-top-contributors-to-see-the-dimensions": "Expand/collapse to view the Top Contributors. Select the Top Contributors to see the dimensions plotted in the chart below.",
         "select-who-to-notify-when-finding-anomalies": "Select who to notify when finding anomalies",
         "set-chart-height": "Set the chart height",
         "set-currently-selected-as-default-filters": "Set currently selected as default filters",

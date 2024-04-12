@@ -140,35 +140,39 @@ public class AuthorizationManager {
       return entities.stream()
           .filter(e -> filteringNamespace.equals(namespaceResolver.resolveNamespace(e))).toList();
     } else {
-      // namespace is not enforced
-      @Nullable String filteringNamespace = optional(explicitNamespace).orElse(null);
-      if (filteringNamespace == null) {
-        // filter on the "not set" namespace
-        return entities.stream()
-            .filter(e -> e.getAuth() == null || e.getAuth().getNamespace() == null)
-            .toList();
-      } else {
-        return entities.stream()
-            .filter(
-                e -> e.getAuth() != null || filteringNamespace.equals(e.getAuth().getNamespace()))
-            .toList();
+      List<T> filtered = entities
+          .stream()
+          .filter(e -> Objects.equals(explicitNamespace, e.namespace())).toList();
+      if (!entities.isEmpty() && filtered.isEmpty()) {
+        // to keep backward compatibility with different legacy namespace setups, if requireNamespace is not true 
+        // and the filter by namespace filters everything, then try to re-run a filtering on the null namespace 
+        // this may leak some entities but the legacy leak entities anyway - so better not to break existing setups
+        // if user wants correct namespacing they requireNamespace should be set to true
+        filtered = entities
+            .stream()
+            .filter(e -> e.namespace() == null).toList();
+        if (!filtered.isEmpty()) {
+          LOG.warn("No entities matching namespace {} in {}. Some entities have their namespace undefined. " 
+              + "Returning entities with an undefined namespace.", explicitNamespace, entities);
+        }
       }
+      return filtered;
     }
   }
 
-  public <T extends AbstractDTO> void ensureCanCreate(final ThirdEyeServerPrincipal principal,
+  public <T extends AbstractDTO> void ensureCanCreate(final ThirdEyePrincipal principal,
       final T entity) {
     ensureHasAccess(principal, resourceId(entity), AccessType.WRITE);
     relatedEntities(entity).forEach(relatedId ->
         ensureHasAccess(principal, relatedId, AccessType.READ));
   }
 
-  public <T extends AbstractDTO> void ensureCanDelete(final ThirdEyeServerPrincipal principal,
+  public <T extends AbstractDTO> void ensureCanDelete(final ThirdEyePrincipal principal,
       final T entity) {
     ensureHasAccess(principal, resourceId(entity), AccessType.WRITE);
   }
 
-  public <T extends AbstractDTO> void ensureCanEdit(final ThirdEyeServerPrincipal principal,
+  public <T extends AbstractDTO> void ensureCanEdit(final ThirdEyePrincipal principal,
       final T before, final T after) {
     ensureHasAccess(principal, resourceId(before), AccessType.WRITE);
     ensureHasAccess(principal, resourceId(after), AccessType.WRITE);
@@ -188,38 +192,38 @@ public class AuthorizationManager {
         ensureHasAccess(principal, related, AccessType.READ));
   }
 
-  public <T extends AbstractDTO> void ensureCanRead(final ThirdEyeServerPrincipal principal,
+  public <T extends AbstractDTO> void ensureCanRead(final ThirdEyePrincipal principal,
       final T entity) {
     ensureHasAccess(principal, resourceId(entity), AccessType.READ);
   }
 
-  public void ensureCanValidate(final ThirdEyeServerPrincipal principal, final AlertDTO entity) {
+  public void ensureCanValidate(final ThirdEyePrincipal principal, final AlertDTO entity) {
     ensureCanCreate(principal, entity);
   }
 
-  public <T extends AbstractDTO> void ensureHasAccess(final ThirdEyeServerPrincipal principal,
+  public <T extends AbstractDTO> void ensureHasAccess(final ThirdEyePrincipal principal,
       final T entity, final AccessType accessType) {
     ensureHasAccess(principal, resourceId(entity), accessType);
   }
 
-  public void ensureHasAccess(final ThirdEyeServerPrincipal principal,
+  public void ensureHasAccess(final ThirdEyePrincipal principal,
       final ResourceIdentifier identifier, final AccessType accessType) {
     if (!hasAccess(principal, identifier, accessType)) {
       throw forbiddenExceptionFor(principal, identifier, accessType);
     }
   }
 
-  public <T extends AbstractDTO> boolean canRead(final ThirdEyeServerPrincipal principal,
+  public <T extends AbstractDTO> boolean canRead(final ThirdEyePrincipal principal,
       final T entity) {
     return hasAccess(principal, resourceId(entity), AccessType.READ);
   }
 
-  public <T extends AbstractDTO> boolean hasAccess(final ThirdEyeServerPrincipal principal,
+  public <T extends AbstractDTO> boolean hasAccess(final ThirdEyePrincipal principal,
       final T entity, final AccessType accessType) {
     return hasAccess(principal, resourceId(entity), accessType);
   }
 
-  public boolean hasAccess(final ThirdEyeServerPrincipal principal,
+  public boolean hasAccess(final ThirdEyePrincipal principal,
       final ResourceIdentifier identifier, final AccessType accessType) {
     if (INTERNAL_VALID_PRINCIPAL.equals(principal)) {
       return true;
@@ -231,7 +235,7 @@ public class AuthorizationManager {
     // TODO CYRIL ADD A case for a PUBLIC identifier for immutable READ ok, WRITE not ok shared resources (eg templates)
   }
 
-  public void ensureHasRootAccess(final ThirdEyeServerPrincipal principal) {
+  public void ensureHasRootAccess(final ThirdEyePrincipal principal) {
     if (!hasRootAccess(principal)) {
       throw new ForbiddenException(Response.status(
           Status.FORBIDDEN.getStatusCode(),
@@ -275,7 +279,7 @@ public class AuthorizationManager {
   }
 
   public ForbiddenException forbiddenExceptionFor(
-      final ThirdEyeServerPrincipal principal,
+      final ThirdEyePrincipal principal,
       final ResourceIdentifier resourceIdentifier,
       final AccessType accessType
   ) {

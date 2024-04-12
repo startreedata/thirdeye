@@ -206,7 +206,7 @@ public class DefaultAggregationLoader implements AggregationLoader {
     return executorService.submit(() -> getQueryResult(request, dataSource));
   }
 
-  public DataFrame getQueryResult(final SelectQueryTranslator request, final String dataSource)
+  private DataFrame getQueryResult(final SelectQueryTranslator request, final String dataSource)
       throws Exception {
     final ThirdEyeDataSource thirdEyeDataSource = dataSourceCache.getDataSource(dataSource);
     final String query = request.getSql(thirdEyeDataSource.getSqlLanguage(),

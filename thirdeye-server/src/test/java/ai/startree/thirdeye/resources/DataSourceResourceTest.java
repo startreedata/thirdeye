@@ -23,7 +23,7 @@ import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.NamespaceResolver;
 import ai.startree.thirdeye.auth.ThirdEyeAuthorizerProvider;
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
-import ai.startree.thirdeye.core.DataSourceOnboarder;
+import ai.startree.thirdeye.datasource.DataSourceOnboarder;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.service.DataSourceService;
 import ai.startree.thirdeye.spi.ThirdEyeStatus;
@@ -59,7 +59,8 @@ public class DataSourceResourceTest {
             ThirdEyeAuthorizerProvider.ALWAYS_ALLOW,
             new NamespaceResolver(null, null, null, null),
             new AuthConfiguration()
-        )));
+        ),
+        new AuthConfiguration()));
   }
 
   @Test
@@ -67,7 +68,7 @@ public class DataSourceResourceTest {
     when(dataSource.validate()).thenReturn(true);
     when(dataSourceCache.getDataSource(dataSourceName)).thenReturn(dataSource);
 
-    final Response response = dataSourceResource.validate(principal, dataSourceName);
+    final Response response = dataSourceResource.validate(principal, dataSourceName, null);
     assertThat(response.getStatus()).isEqualTo(200);
 
     final StatusApi entity = (StatusApi) response.getEntity();
@@ -79,7 +80,7 @@ public class DataSourceResourceTest {
   public void testValidateFailure() {
     when(dataSource.validate()).thenReturn(false);
     when(dataSourceCache.getDataSource(dataSourceName)).thenReturn(dataSource);
-    final Response response = dataSourceResource.validate(principal, dataSourceName);
+    final Response response = dataSourceResource.validate(principal, dataSourceName, null);
     assertThat(response.getStatus()).isEqualTo(200);
 
     final StatusListApi entity = (StatusListApi) response.getEntity();

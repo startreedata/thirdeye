@@ -19,7 +19,6 @@ import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
-import ai.startree.thirdeye.auth.AuthConfiguration;
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.datasource.DataSourceOnboarder;
@@ -51,8 +50,7 @@ public class DataSourceService extends CrudService<DataSourceApi, DataSourceDTO>
       final DataSourceManager dataSourceManager,
       final DataSourceCache dataSourceCache,
       final DataSourceOnboarder dataSourceOnboarder,
-      final AuthorizationManager authorizationManager,
-      final AuthConfiguration authConfiguration) { // FIXME CYRIL ASAP - remove this - not used
+      final AuthorizationManager authorizationManager) {
     super(authorizationManager, dataSourceManager, ImmutableMap.of());
     this.dataSourceCache = dataSourceCache;
     this.dataSourceOnboarder = dataSourceOnboarder;

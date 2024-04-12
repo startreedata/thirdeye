@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.spi.metric;
 
 import ai.startree.thirdeye.spi.datalayer.Predicate;
+import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import com.google.common.base.MoreObjects;
@@ -38,35 +39,41 @@ public final class MetricSlice {
   // use predicates - remove this asap - kept for compatibility with deprecated classes
   private final Multimap<String, String> filters;
   private final @NonNull DatasetConfigDTO datasetConfigDTO;
+  private final DataSourceDTO dataSourceDto;
 
-  protected MetricSlice(final @NonNull MetricConfigDTO metricConfigDTO,
+  private MetricSlice(final @NonNull MetricConfigDTO metricConfigDTO,
       final @NonNull Interval interval,
       final List<Predicate> predicates, Multimap<String, String> filters,
-      final @NonNull DatasetConfigDTO datasetConfigDTO) {
+      final @NonNull DatasetConfigDTO datasetConfigDTO,
+      final @NonNull DataSourceDTO dataSourceDTO) {
     this.metricConfigDTO = metricConfigDTO;
     this.interval = interval;
     this.predicates = predicates;
     this.filters = filters;
     this.datasetConfigDTO = datasetConfigDTO;
+    this.dataSourceDto = dataSourceDTO;
   }
 
   public static MetricSlice from(final @NonNull MetricConfigDTO metricConfigDTO,
-      final Interval interval, final @NonNull DatasetConfigDTO datasetConfigDTO) {
+      final Interval interval, final @NonNull DatasetConfigDTO datasetConfigDTO, 
+      final @NonNull DataSourceDTO dataSourceDTO) {
     return new MetricSlice(metricConfigDTO,
         interval,
         List.of(),
         ArrayListMultimap.create(),
-        datasetConfigDTO);
+        datasetConfigDTO, 
+        dataSourceDTO);
   }
 
   public static MetricSlice from(final @NonNull MetricConfigDTO metricConfigDTO,
       final Interval interval,
-      final List<Predicate> predicates, final @NonNull DatasetConfigDTO datasetConfigDTO) {
+      final List<Predicate> predicates, final @NonNull DatasetConfigDTO datasetConfigDTO, final @NonNull
+      DataSourceDTO dataSourceDTO) {
     return new MetricSlice(metricConfigDTO,
         interval,
         predicates,
         ArrayListMultimap.create(),
-        datasetConfigDTO);
+        datasetConfigDTO, dataSourceDTO);
   }
 
   public @NonNull MetricConfigDTO getMetricConfigDTO() {
@@ -152,5 +159,9 @@ public final class MetricSlice {
         .add("filters", filters)
         .add("dataset", datasetConfigDTO.getDataset())
         .toString();
+  }
+
+  public DataSourceDTO getDataSourceDto() {
+    return dataSourceDto;
   }
 }

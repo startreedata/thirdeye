@@ -29,6 +29,7 @@ import ai.startree.thirdeye.spi.dataframe.LongSeries;
 import ai.startree.thirdeye.spi.dataframe.StringSeries;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
+import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datasource.DataSourceRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
@@ -46,7 +47,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import org.apache.calcite.sql.SqlIdentifier;
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
@@ -124,7 +124,7 @@ public class DefaultAggregationLoader implements AggregationLoader {
     dimensions.removeAll(slice.getPredicates()
         .stream()
         .map(Predicate::getLhs)
-        .collect(Collectors.toList()));
+        .toList());
     dimensions.remove(datasetConfigDTO.getTimeColumn());
 
     LOG.info("Querying breakdown '{}' for dimensions '{}'", slice, dimensions);
@@ -148,8 +148,7 @@ public class DefaultAggregationLoader implements AggregationLoader {
           .orderBy(identifierDescOf(Constants.COL_VALUE))
           .limit(limit)
           .build();
-      final Future<DataFrame> res = getQueryResultAsync(request,
-          datasetConfigDTO.getDataSource());
+      final Future<DataFrame> res = getQueryResultAsync(request, slice.getDataSourceDto());
 
       responses.put(dimension, res);
     }
@@ -197,18 +196,17 @@ public class DefaultAggregationLoader implements AggregationLoader {
           .select(dimensionIdentifier)
           .groupBy(dimensionIdentifier);
     }
-    final String dataSource = slice.getDatasetConfigDTO().getDataSource();
-    return getQueryResultAsync(selectQuery.build(), dataSource);
+    return getQueryResultAsync(selectQuery.build(), slice.getDataSourceDto());
   }
 
   private Future<DataFrame> getQueryResultAsync(final SelectQueryTranslator request,
-      final String dataSource) {
-    return executorService.submit(() -> getQueryResult(request, dataSource));
+      final DataSourceDTO dataSourceDto) {
+    return executorService.submit(() -> getQueryResult(request, dataSourceDto));
   }
 
-  private DataFrame getQueryResult(final SelectQueryTranslator request, final String dataSource)
+  private DataFrame getQueryResult(final SelectQueryTranslator request, final DataSourceDTO dataSourceDto)
       throws Exception {
-    final ThirdEyeDataSource thirdEyeDataSource = dataSourceCache.getDataSource(dataSource);
+    final ThirdEyeDataSource thirdEyeDataSource = dataSourceCache.getDataSource(dataSourceDto);
     final String query = request.getSql(thirdEyeDataSource.getSqlLanguage(),
         thirdEyeDataSource.getSqlExpressionBuilder());
     final Map<String, String> customOptions = Map.of(); // custom query options not implemented in MinMaxTimeLoader

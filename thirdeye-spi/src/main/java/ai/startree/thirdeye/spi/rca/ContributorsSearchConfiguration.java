@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.spi.rca;
 
 import ai.startree.thirdeye.spi.datalayer.Predicate;
+import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import java.util.List;
@@ -26,6 +27,7 @@ public class ContributorsSearchConfiguration {
    */
   private final MetricConfigDTO metricConfigDTO;
   private final DatasetConfigDTO datasetConfigDTO;
+  private final DataSourceDTO dataSourceDTO;
   /**
    * period of the anomaly
    */
@@ -60,7 +62,8 @@ public class ContributorsSearchConfiguration {
   private final List<List<String>> hierarchies;
 
   public ContributorsSearchConfiguration(final MetricConfigDTO metricConfigDTO,
-      final DatasetConfigDTO datasetConfigDTO, final Interval currentInterval,
+      final DatasetConfigDTO datasetConfigDTO, final DataSourceDTO dataSourceDto, 
+      final Interval currentInterval,
       final Interval baselineInterval, final int summarySize, final int depth,
       final boolean doOneSideError, final List<Predicate> filters,
       final List<List<String>> hierarchies) {
@@ -73,6 +76,7 @@ public class ContributorsSearchConfiguration {
     this.doOneSideError = doOneSideError;
     this.filters = filters;
     this.hierarchies = hierarchies;
+    this.dataSourceDTO = dataSourceDto;
   }
 
   public MetricConfigDTO getMetricConfigDTO() {
@@ -109,5 +113,9 @@ public class ContributorsSearchConfiguration {
 
   public List<List<String>> getHierarchies() {
     return hierarchies;
+  }
+
+  public DataSourceDTO getDataSourceDTO() {
+    return dataSourceDTO;
   }
 }

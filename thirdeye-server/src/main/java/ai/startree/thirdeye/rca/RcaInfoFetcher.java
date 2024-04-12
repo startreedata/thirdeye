@@ -54,9 +54,9 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class RcaInfoFetcher {
 
-  public static final Interval UNUSED_DETECTION_INTERVAL = new Interval(0L, 0L, DateTimeZone.UTC);
+  private static final Interval UNUSED_DETECTION_INTERVAL = new Interval(0L, 0L, DateTimeZone.UTC);
   private static final Logger LOG = LoggerFactory.getLogger(RcaInfoFetcher.class);
-  public static final EventContextDto EMPTY_CONTEXT_DTO = new EventContextDto();
+  private static final EventContextDto EMPTY_CONTEXT_DTO = new EventContextDto();
   private final AnomalyManager mergedAnomalyDAO;
   private final AlertManager alertDAO;
   private final DatasetConfigManager datasetDAO;
@@ -120,10 +120,13 @@ public class RcaInfoFetcher {
    */
   public RcaInfo getRcaInfo(final long anomalyId)
       throws IOException, ClassNotFoundException {
+    // fixme cyril authz necessary here or in consuming layers - maybe inside rcaInfoFetcher?
+    // need to know the namespace - but how to get the namespace ? anomaly does not have it :/ 
     final AnomalyDTO anomalyDTO = ensureExists(mergedAnomalyDAO.findById(anomalyId),
         String.format("Anomaly ID: %d", anomalyId));
     final long detectionConfigId = anomalyDTO.getDetectionConfigId();
     final AlertDTO alertDTO = alertDAO.findById(detectionConfigId);
+    // fixme cyril authz - here we can get the namespace from the alert id - and filter in a backward compatible way - look in namespace - is not found, look in not set namespace
     final EnumerationItemDTO enumerationItemDTO = optional(anomalyDTO.getEnumerationItem())
         .map(AbstractDTO::getId)
         .map(enumerationItemManager::findById)
@@ -150,6 +153,7 @@ public class RcaInfoFetcher {
         "metadata$dataset$name");
 
     // take config from persistence - ensure dataset/metric DTO configs are correct for RCA
+    // fixme authz need a filter on namespace - but actually need a fullrewrite of how metric is used
     MetricConfigDTO metricConfigDTO = metricDAO.findByMetricAndDataset(metricName, datasetName);
     if (metricConfigDTO == null) {
       LOG.warn("Could not find metric {} for dataset {}. Building a custom metric for RCA.", metricName, datasetName);

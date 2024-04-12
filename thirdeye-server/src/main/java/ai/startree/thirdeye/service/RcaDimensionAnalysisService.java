@@ -71,10 +71,10 @@ public class RcaDimensionAnalysisService {
       final String baselineOffset, final List<String> filters, final int summarySize,
       final int depth, final boolean doOneSideError, final List<String> dimensions,
       final List<String> excludedDimensions, final String hierarchiesPayload) throws Exception {
-    // fixme cyril add authz
+    // fixme cyril add authz - if the user has access to the anomalyId, assumes he has access to everything?
     final RcaInfo rcaInfo = rcaInfoFetcher.getRcaInfo(anomalyId);
-    final Interval currentInterval = new Interval(rcaInfo.getAnomaly().getStartTime(),
-        rcaInfo.getAnomaly().getEndTime(), rcaInfo.getChronology());
+    final Interval currentInterval = new Interval(rcaInfo.anomaly().getStartTime(),
+        rcaInfo.anomaly().getEndTime(), rcaInfo.chronology());
 
     Period baselineOffsetPeriod = isoPeriod(baselineOffset);
     final Interval baselineInterval = new Interval(
@@ -82,14 +82,14 @@ public class RcaDimensionAnalysisService {
         currentInterval.getEnd().minus(baselineOffsetPeriod));
 
     // override dimensions
-    final DatasetConfigDTO datasetConfigDTO = rcaInfo.getDataset();
+    final DatasetConfigDTO datasetConfigDTO = rcaInfo.dataset();
     List<String> rcaDimensions = getRcaDimensions(dimensions, excludedDimensions, datasetConfigDTO);
     datasetConfigDTO.setDimensions(Templatable.of(rcaDimensions));
 
     final List<List<String>> hierarchies = parseHierarchiesPayload(hierarchiesPayload);
 
     final ContributorsSearchConfiguration searchConfiguration = new ContributorsSearchConfiguration(
-        rcaInfo.getMetric(), datasetConfigDTO, currentInterval, baselineInterval, summarySize,
+        rcaInfo.metric(), datasetConfigDTO, rcaInfo.dataSourceDto(), currentInterval, baselineInterval, summarySize,
         depth, doOneSideError, Predicate.parseAndCombinePredicates(filters), hierarchies);
 
     final ContributorsFinderResult result = contributorsFinderRunner.run(searchConfiguration);
@@ -109,12 +109,12 @@ public class RcaDimensionAnalysisService {
 
   private String generateAnomalyDescriptionText(final RcaInfo rcaInfo) {
     final StringBuilder text = new StringBuilder();
-    final double expected = rcaInfo.getAnomaly().getAvgBaselineVal();
-    final double current = rcaInfo.getAnomaly().getAvgCurrentVal();
-    final DateTimeFormatter timeFormatter = timeFormatterFor(rcaInfo.getGranularity(),
-        rcaInfo.getChronology());
+    final double expected = rcaInfo.anomaly().getAvgBaselineVal();
+    final double current = rcaInfo.anomaly().getAvgCurrentVal();
+    final DateTimeFormatter timeFormatter = timeFormatterFor(rcaInfo.granularity(),
+        rcaInfo.chronology());
     text.append("An anomaly was detected on ")
-        .append(new DateTime(rcaInfo.getAnomaly().getStartTime(), rcaInfo.getChronology()).toString(
+        .append(new DateTime(rcaInfo.anomaly().getStartTime(), rcaInfo.chronology()).toString(
             timeFormatter))
         .append(". ")
         // TODO prefer giving the expected range rather than the expected mean

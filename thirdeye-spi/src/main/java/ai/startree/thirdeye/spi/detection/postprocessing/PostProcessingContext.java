@@ -27,6 +27,7 @@ public class PostProcessingContext {
   private final MinMaxTimeLoader minMaxTimeLoader;
   private final AnomalyManager anomalyManager;
   private final Long alertId;
+  private final String namespace;
   private final DetectionPipelineUsage usage;
   private final EnumerationItemDTO enumerationItemDTO;
 
@@ -35,13 +36,14 @@ public class PostProcessingContext {
       final MinMaxTimeLoader minMaxTimeLoader,
       final AnomalyManager anomalyManager,
       final Long alertId,
-      final DetectionPipelineUsage usage,
+      final String namespace, final DetectionPipelineUsage usage,
       final EnumerationItemDTO enumerationItemDTO) {
     this.dataSourceManager = dataSourceManager;
     this.datasetConfigManager = datasetConfigManager;
     this.minMaxTimeLoader = minMaxTimeLoader;
     this.anomalyManager = anomalyManager;
     this.alertId = alertId;
+    this.namespace = namespace;
     this.usage = usage;
     this.enumerationItemDTO = enumerationItemDTO;
   }
@@ -72,5 +74,9 @@ public class PostProcessingContext {
 
   public DataSourceManager getDataSourceManager() {
     return dataSourceManager;
+  }
+
+  public String getNamespace() {
+    return namespace;
   }
 }

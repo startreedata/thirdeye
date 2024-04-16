@@ -267,7 +267,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
       authorizationManager.enrichNamespace(principal, alertDto);
       authorizationManager.ensureCanCreate(principal, alertDto);
     }
-
+    // fixme cyril authz ASAP - inject namespace in the request (do this in the if-else above) 
     final AlertEvaluationApi results = alertEvaluator.evaluate(request);
     final Map<String, DetectionEvaluationApi> filtered = allowedEvaluations(principal,
         results.getDetectionEvaluations());

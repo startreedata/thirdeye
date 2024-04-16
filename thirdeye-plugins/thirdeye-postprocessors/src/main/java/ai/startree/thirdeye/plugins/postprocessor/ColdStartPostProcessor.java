@@ -18,7 +18,6 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 import static com.google.common.base.Preconditions.checkState;
 
-import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
@@ -50,6 +49,7 @@ public class ColdStartPostProcessor implements AnomalyPostProcessor {
   private final boolean ignore;
   private final Period coldStartPeriod;
   private final String tableName;
+  private final String namespace;
 
   private final MinMaxTimeLoader minMaxTimeLoader;
   private final DatasetConfigManager datasetDao;
@@ -65,6 +65,7 @@ public class ColdStartPostProcessor implements AnomalyPostProcessor {
     this.minMaxTimeLoader = spec.getMinMaxTimeLoader();
     this.datasetDao = spec.getDatasetConfigManager();
     this.dataSourceDao = spec.getDataSourceManager();
+    this.namespace = spec.getNamespace();
 
     this.labelName = labelName(this.coldStartPeriod);
   }
@@ -133,6 +134,7 @@ public class ColdStartPostProcessor implements AnomalyPostProcessor {
       spec.setMinMaxTimeLoader(context.getMinMaxTimeLoader());
       spec.setDatasetConfigManager(context.getDatasetConfigManager());
       spec.setDataSourceManager(context.getDataSourceManager());
+      spec.setNamespace(context.getNamespace());
       return new ColdStartPostProcessor(spec);
     }
   }

@@ -31,19 +31,24 @@ public class ColdStartPostProcessorSpec {
 
   /**
    * Expected to be set by the factory
-   * */
+   */
   private DatasetConfigManager datasetConfigManager;
 
   /**
    * Expected to be set by the factory
-   * */
-  
+   */
+
   private DataSourceManager dataSourceManager;
 
   /**
    * Expected to be set by the factory
    */
   private MinMaxTimeLoader minMaxTimeLoader;
+
+  /**
+   * Expected to be set by the factory
+   */
+  private String namespace;
 
   public String getColdStartPeriod() {
     return coldStartPeriod;
@@ -99,6 +104,15 @@ public class ColdStartPostProcessorSpec {
   public ColdStartPostProcessorSpec setDataSourceManager(
       final DataSourceManager dataSourceManager) {
     this.dataSourceManager = dataSourceManager;
+    return this;
+  }
+
+  public String getNamespace() {
+    return namespace;
+  }
+
+  public ColdStartPostProcessorSpec setNamespace(final String namespace) {
+    this.namespace = namespace;
     return this;
   }
 }

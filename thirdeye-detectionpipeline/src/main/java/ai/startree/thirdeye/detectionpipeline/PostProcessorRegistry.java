@@ -19,6 +19,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
+import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datasource.loader.MinMaxTimeLoader;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessor;
@@ -40,13 +41,15 @@ public class PostProcessorRegistry {
   private static final Logger LOG = LoggerFactory.getLogger(PostProcessorRegistry.class);
 
   private final Map<String, AnomalyPostProcessorFactory> anomalyPostProcessorFactoryMap = new HashMap<>();
+  private final DataSourceManager dataSourceDao;
   private final DatasetConfigManager datasetDao;
   private final MinMaxTimeLoader minMaxTimeLoader;
   private final AnomalyManager anomalyDao;
 
   @Inject
-  public PostProcessorRegistry(final DatasetConfigManager datasetDao,
+  public PostProcessorRegistry(final DataSourceManager dataSourceDao, final DatasetConfigManager datasetDao,
       final MinMaxTimeLoader minMaxTimeLoader, final AnomalyManager anomalyDao) {
+    this.dataSourceDao = dataSourceDao;
     this.datasetDao = datasetDao;
     this.minMaxTimeLoader = minMaxTimeLoader;
     this.anomalyDao = anomalyDao;
@@ -69,10 +72,12 @@ public class PostProcessorRegistry {
 
     final DetectionPipelineContext detectionPipelineContext = context.getPlanNodeContext()
         .getDetectionPipelineContext();
-    final PostProcessingContext postProcessingContext = new PostProcessingContext(dataSourceManager,
+    final PostProcessingContext postProcessingContext = new PostProcessingContext(
+        dataSourceDao,
         datasetDao,
         minMaxTimeLoader, anomalyDao,
         detectionPipelineContext.getAlertId(),
+        detectionPipelineContext.getNamespace(),
         requireNonNull(detectionPipelineContext.getUsage(), "Detection pipeline usage is not set"),
         detectionPipelineContext.getEnumerationItem()
     );

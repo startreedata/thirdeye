@@ -41,6 +41,7 @@ public class MetricApi implements ThirdEyeCrudApi<MetricApi> {
   private Double rollupThreshold;
   private List<LogicalView> views;
   private String where;
+  private AuthorizationConfigurationApi auth;
 
   public Long getId() {
     return id;
@@ -158,6 +159,15 @@ public class MetricApi implements ThirdEyeCrudApi<MetricApi> {
 
   public MetricApi setWhere(String where) {
     this.where = where;
+    return this;
+  }
+
+  public AuthorizationConfigurationApi getAuth() {
+    return auth;
+  }
+
+  public MetricApi setAuth(final AuthorizationConfigurationApi auth) {
+    this.auth = auth;
     return this;
   }
 }

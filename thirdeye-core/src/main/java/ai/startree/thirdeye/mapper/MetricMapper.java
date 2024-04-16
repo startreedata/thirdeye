@@ -52,6 +52,9 @@ public interface MetricMapper {
         .setWhere(api.getWhere())
         .setDerivedMetricExpression(api.getDerivedMetricExpression());
 
+    optional(api.getAuth()).map(ApiBeanMapper::toAuthorizationConfigurationDTO)
+        .ifPresent(dto::setAuth);
+
     return dto;
   }
 
@@ -74,6 +77,8 @@ public interface MetricMapper {
         .setDatatype(dto.getDatatype())
         .setAggregationFunction(dto.getDefaultAggFunction())
         .setViews(dto.getViews())
+        .setAuth(optional(dto.getAuth())
+            .map(ApiBeanMapper::toApi).orElse(null))
         ;
   }
 }

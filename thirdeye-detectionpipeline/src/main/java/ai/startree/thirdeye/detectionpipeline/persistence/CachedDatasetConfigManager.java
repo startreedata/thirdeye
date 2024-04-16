@@ -21,7 +21,7 @@ import com.google.common.cache.LoadingCache;
 
 public class CachedDatasetConfigManager extends DelegateDatasetConfigManager {
 
-  private final LoadingCache<String, DatasetConfigDTO> datasetNameCache;
+  private final LoadingCache<CacheKey, DatasetConfigDTO> datasetNameCache;
 
   public CachedDatasetConfigManager(final DatasetConfigManager delegate) {
     super(delegate);
@@ -35,18 +35,21 @@ public class CachedDatasetConfigManager extends DelegateDatasetConfigManager {
    * and is consistent during the execution of the pipeline. Meaning, if a dataset is modified
    * midway during execution, the pipeline will still run with the old dataset config.
    */
-  private LoadingCache<String, DatasetConfigDTO> createDatasetNameCache() {
+  private LoadingCache<CacheKey, DatasetConfigDTO> createDatasetNameCache() {
     return CacheBuilder.newBuilder()
         .build(new CacheLoader<>() {
           @Override
-          public DatasetConfigDTO load(final String name) {
-            return CachedDatasetConfigManager.super.findByDataset(name);
+          public DatasetConfigDTO load(final CacheKey cacheKey) {
+            return CachedDatasetConfigManager.super.findByDatasetAndNamespace(cacheKey.name(),
+                cacheKey.namespace());
           }
         });
   }
 
   @Override
-  public DatasetConfigDTO findByDataset(final String name) {
-    return datasetNameCache.getUnchecked(name);
+  public DatasetConfigDTO findByDatasetAndNamespace(final String name, final String namespace) {
+    return datasetNameCache.getUnchecked(new CacheKey(name, namespace));
   }
+  
+  private record CacheKey(String name, String namespace){}
 }

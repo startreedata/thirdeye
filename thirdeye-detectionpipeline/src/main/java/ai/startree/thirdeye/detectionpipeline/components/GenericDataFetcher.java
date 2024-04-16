@@ -16,12 +16,15 @@ package ai.startree.thirdeye.detectionpipeline.components;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
+import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.datasource.query.QueryPredicate;
 import ai.startree.thirdeye.detectionpipeline.spec.DataFetcherSpec;
 import ai.startree.thirdeye.detectionpipeline.sql.filter.FilterEngine;
 import ai.startree.thirdeye.detectionpipeline.sql.macro.MacroEngine;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
+import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
+import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datasource.DataSourceRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
@@ -74,19 +77,25 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
   @Override
   public void init(final DataFetcherSpec dataFetcherSpec) {
     this.query = dataFetcherSpec.getQuery();
-    this.tableName = dataFetcherSpec.getTableName();
-    if (tableName != null) {
-      final DatasetConfigManager datasetDao = Objects.requireNonNull(dataFetcherSpec.getDatasetDao());
-      this.datasetConfigDTO = Objects.requireNonNull(datasetDao.findByDataset(dataFetcherSpec.getTableName()),
-          "Could not find dataset " + dataFetcherSpec.getTableName());
-    }
-    if (dataFetcherSpec.getDataSourceCache() != null) {
-      final String dataSource = requireNonNull(dataFetcherSpec.getDataSource(),
-          "DataFetcher: data source is not set.");
-      this.thirdEyeDataSource = requireNonNull(dataFetcherSpec
-          .getDataSourceCache()
-          .getDataSource(dataSource), "data source is unavailable");
-    }
+    this.tableName = requireNonNull(dataFetcherSpec.getTableName());
+    final DatasetConfigManager datasetDao = Objects.requireNonNull(
+        dataFetcherSpec.getDatasetDao());
+    this.datasetConfigDTO = Objects.requireNonNull(
+        datasetDao.findByDatasetAndNamespace(dataFetcherSpec.getTableName(),
+            dataFetcherSpec.getNamespace()),
+        "Could not find dataset " + dataFetcherSpec.getTableName());
+    // FIXME CYRIL ASAP authz - to maintain compatibility - look for dataset in undefined namespace if not found in spec (alert) namespace
+
+    // todo cyril - code is not compatible with same dataset name in multiple datasource in same namespace - not a very important use case for the moment
+    final String dataSource = requireNonNull(dataFetcherSpec.getDataSource(),
+        "DataFetcher: data source is not set.");
+    final DataSourceManager dataSourceDao = requireNonNull(dataFetcherSpec.getDataSourceDao());
+    final DataSourceDTO dataSourceDTO = requireNonNull(dataSourceDao.findUniqueByNameAndNamespace(dataSource,
+        datasetConfigDTO.namespace()));
+
+    final DataSourceCache dataSourceCache = requireNonNull(dataFetcherSpec.getDataSourceCache());
+    this.thirdEyeDataSource = requireNonNull(dataSourceCache
+        .getDataSource(dataSourceDTO), "data source is unavailable");
 
     if (!dataFetcherSpec.getTimeseriesFilters().isEmpty()) {
       checkArgument(tableName != null,

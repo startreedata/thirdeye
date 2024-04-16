@@ -85,7 +85,7 @@ public class ColdStartPostProcessor implements AnomalyPostProcessor {
       final Map<String, OperatorResult> resultMap) throws Exception {
     // fixme cyril add authz namespace
     final DatasetConfigDTO datasetConfigDTO = datasetDao.findByDatasetAndNamespace(tableName, namespace);
-    // FIXME CYRIL authz if not found by namespace - search in the null namespace - log if found
+    // FIXME CYRIL authz ASAP if not found by namespace - search in the null namespace - log if found
     checkState(datasetConfigDTO != null, "Could not find dataset %s in namespace %s",
         tableName, namespace);
     final DataSourceDTO dataSourceDTO = dataSourceDao.findUniqueByNameAndNamespace(datasetConfigDTO.getDataSource(), datasetConfigDTO.namespace());

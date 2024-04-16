@@ -15,6 +15,7 @@ package ai.startree.thirdeye.detectionpipeline;
 
 import ai.startree.thirdeye.datalayer.core.EnumerationItemMaintainer;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
+import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import java.util.concurrent.ExecutorService;
@@ -25,6 +26,7 @@ public class ApplicationContext {
   private final DetectionRegistry detectionRegistry;
   private final PostProcessorRegistry postProcessorRegistry;
   private final EventManager eventManager;
+  private final DataSourceManager dataSourceDao;
   private final DatasetConfigManager datasetConfigManager;
   private final ExecutorService subTaskExecutor;
   private final DetectionPipelineConfiguration configuration;
@@ -34,7 +36,7 @@ public class ApplicationContext {
       final DetectionRegistry detectionRegistry,
       final PostProcessorRegistry postProcessorRegistry,
       final EventManager eventManager,
-      final DatasetConfigManager datasetConfigManager,
+      final DataSourceManager dataSourceDao, final DatasetConfigManager datasetConfigManager,
       final ExecutorService subTaskExecutor,
       final DetectionPipelineConfiguration detectionPipelineConfiguration,
       final EnumerationItemMaintainer enumerationItemMaintainer) {
@@ -42,6 +44,7 @@ public class ApplicationContext {
     this.detectionRegistry = detectionRegistry;
     this.postProcessorRegistry = postProcessorRegistry;
     this.eventManager = eventManager;
+    this.dataSourceDao = dataSourceDao;
     this.subTaskExecutor = subTaskExecutor;
     this.enumerationItemMaintainer = enumerationItemMaintainer;
     configuration = detectionPipelineConfiguration;
@@ -78,5 +81,9 @@ public class ApplicationContext {
 
   public EnumerationItemMaintainer getEnumerationItemMaintainer() {
     return enumerationItemMaintainer;
+  }
+
+  public DataSourceManager getDataSourceDao() {
+    return dataSourceDao;
   }
 }

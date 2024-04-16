@@ -30,8 +30,10 @@ import ai.startree.thirdeye.detectionpipeline.PostProcessorRegistry;
 import ai.startree.thirdeye.detectionpipeline.components.GenericDataFetcher;
 import ai.startree.thirdeye.detectionpipeline.spec.DataFetcherSpec;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
+import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
+import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
@@ -56,12 +58,14 @@ public class DataFetcherOperatorTest {
   @BeforeMethod
   public void setUp() {
     dataSourceName = "pinot-cluster-1";
+    final DataSourceDTO dataSourceDTO = new DataSourceDTO().setName("datasource1");
+    dataSourceDTO.setId(1L);
     final DataSourceCache dataSourceCache = mock(DataSourceCache.class);
     final DatasetConfigManager datasetDao = mock(DatasetConfigManager.class);
-    when(datasetDao.findByDataset(anyString())).thenReturn(new DatasetConfigDTO().setDataset
-        (TABLE_NAME));
+    when(datasetDao.findByDatasetAndNamespace(anyString(), anyString()))
+        .thenReturn(new DatasetConfigDTO().setDataset(TABLE_NAME));
     final ThirdEyeDataSource thirdEyeDataSource = mock(ThirdEyeDataSource.class);
-    when(dataSourceCache.getDataSource(dataSourceName))
+    when(dataSourceCache.getDataSource(dataSourceDTO))
         .thenReturn(thirdEyeDataSource);
     planNodeContext = new PlanNodeContext().setDetectionPipelineContext(
         new DetectionPipelineContext().setApplicationContext(
@@ -70,6 +74,7 @@ public class DataFetcherOperatorTest {
                 mock(DetectionRegistry.class),
                 mock(PostProcessorRegistry.class),
                 mock(EventManager.class),
+                mock(DataSourceManager.class), 
                 datasetDao,
                 mock(ExecutorService.class),
                 new DetectionPipelineConfiguration(),

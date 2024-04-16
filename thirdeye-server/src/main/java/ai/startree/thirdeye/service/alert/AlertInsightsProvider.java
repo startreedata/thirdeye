@@ -92,12 +92,13 @@ public class AlertInsightsProvider {
 
   public AlertInsightsApi getInsights(final ThirdEyePrincipal principal,
       final AlertInsightsRequestApi request) {
-    // fixme cyril add authz 
+    // fixme cyril add authz on template, dataset, datasource, etc - next PR - requires redesign
     final AlertApi alertApi = request.getAlert();
+    final String namespace = authorizationManager.currentNamespace(principal);
     try {
       final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertApi,
           NOT_USED_INTERVAL);
-      return buildInsights(templateWithProperties);
+      return buildInsights(templateWithProperties, namespace);
     } catch (final WebApplicationException e) {
       throw e;
     } catch (final Exception e) {
@@ -106,12 +107,16 @@ public class AlertInsightsProvider {
     }
   }
 
+  /**
+   * This method is not responsible for checking authz of the alertDto
+   */
   public AlertInsightsApi getInsights(final ThirdEyePrincipal principal, final AlertDTO alertDTO) {
-    // fixme cyril add authz - not responsible for checking access of the input DTO but responsible for checking access of templates and datasets
+    // fixme cyril add authz on template, dataset, datasource, etc  - next PR - requires redesign
+    authorizationManager.enrichNamespace(principal, alertDTO);
     try {
       final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertDTO,
           NOT_USED_INTERVAL);
-      return buildInsights(templateWithProperties);
+      return buildInsights(templateWithProperties, alertDTO.namespace());
     } catch (final WebApplicationException e) {
       throw e;
     } catch (final Exception e) {
@@ -120,29 +125,37 @@ public class AlertInsightsProvider {
     }
   }
 
-  private AlertInsightsApi buildInsights(final AlertTemplateDTO templateWithProperties)
+  private AlertInsightsApi buildInsights(final AlertTemplateDTO templateWithProperties,
+      final @Nullable String namespace)
       throws Exception {
     final AlertMetadataDTO metadata = templateWithProperties.getMetadata();
 
     final AlertInsightsApi insights = new AlertInsightsApi().setAnalysisRunInfo(
             AnalysisRunInfo.success())
         .setTemplateWithProperties(toAlertTemplateApi(templateWithProperties));
-    addDatasetTimes(insights, metadata);
+    addDatasetTimes(insights, metadata, namespace);
 
     return insights;
   }
 
   private void addDatasetTimes(@NonNull final AlertInsightsApi insights,
-      @NonNull final AlertMetadataDTO metadata) throws Exception {
+      @NonNull final AlertMetadataDTO metadata, final @Nullable String namespace) throws Exception {
     final String datasetName = metadata.getDataset().getDataset();
     if (datasetName == null) {
       throw new ThirdEyeException(ERR_MISSING_CONFIGURATION_FIELD,
           "Dataset name not found in alert metadata.");
     }
     // FIXME CYRIL add authz
-    final DatasetConfigDTO datasetConfigDTO = datasetConfigManager.findByDatasetAndNamespace(datasetName);
+    DatasetConfigDTO datasetConfigDTO = datasetConfigManager.findByDatasetAndNamespace(
+        datasetName, namespace);
     if (datasetConfigDTO == null) {
-      throw new ThirdEyeException(ERR_DATASET_NOT_FOUND, datasetName);
+      // to maintain backward compatibility - will be removed soon or conditioned or requireNamespace = false
+      datasetConfigDTO = datasetConfigManager.findByDatasetAndNamespace(datasetName, null);
+      if (datasetConfigDTO != null) {
+        LOG.warn("Could not find dataset {} in namespace {} but found a dataset with this name with an unset namespace. Falling back to this dataset. Make sure to migrate datasets to namespace. This fallback will be removed soon.", datasetName, namespace);
+      } else {
+        throw new ThirdEyeException(ERR_DATASET_NOT_FOUND, datasetName); 
+      }
     }
 
     // fetch dataset interval

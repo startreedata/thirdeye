@@ -15,6 +15,7 @@ package ai.startree.thirdeye.detectionpipeline.operator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -62,11 +63,14 @@ public class DataFetcherOperatorTest {
     dataSourceDTO.setId(1L);
     final DataSourceCache dataSourceCache = mock(DataSourceCache.class);
     final DatasetConfigManager datasetDao = mock(DatasetConfigManager.class);
-    when(datasetDao.findByDatasetAndNamespace(anyString(), anyString()))
+    when(datasetDao.findByDatasetAndNamespace(anyString(), nullable(String.class)))
         .thenReturn(new DatasetConfigDTO().setDataset(TABLE_NAME));
     final ThirdEyeDataSource thirdEyeDataSource = mock(ThirdEyeDataSource.class);
     when(dataSourceCache.getDataSource(dataSourceDTO))
         .thenReturn(thirdEyeDataSource);
+    final DataSourceManager dataSourceDao = mock(DataSourceManager.class);
+    when(dataSourceDao.findUniqueByNameAndNamespace(anyString(), nullable(String.class)))
+        .thenReturn(dataSourceDTO);
     planNodeContext = new PlanNodeContext().setDetectionPipelineContext(
         new DetectionPipelineContext().setApplicationContext(
             new ApplicationContext(
@@ -74,7 +78,7 @@ public class DataFetcherOperatorTest {
                 mock(DetectionRegistry.class),
                 mock(PostProcessorRegistry.class),
                 mock(EventManager.class),
-                mock(DataSourceManager.class), 
+                dataSourceDao, 
                 datasetDao,
                 mock(ExecutorService.class),
                 new DetectionPipelineConfiguration(),

@@ -60,7 +60,7 @@ public class DataFetcherOperator extends DetectionPipelineOperator {
     spec.setDataSourceCache(requireNonNull(applicationContext.getDataSourceCache()));
     spec.setDatasetDao(requireNonNull(applicationContext.getDatasetConfigManager()));
     spec.setDataSourceDao(requireNonNull(applicationContext.getDataSourceDao()));
-    spec.setNamespace(requireNonNull(pipelineContext.getNamespace()));
+    spec.setNamespace(pipelineContext.getNamespace());
     spec.setTimeseriesFilters(predicates);
 
     final GenericDataFetcher genericDataFetcher = new GenericDataFetcher();

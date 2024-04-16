@@ -16,10 +16,14 @@ package ai.startree.thirdeye.plugins.postprocessor;
 import static ai.startree.thirdeye.spi.util.AnomalyUtils.addLabel;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
+import static com.google.common.base.Preconditions.checkState;
 
+import ai.startree.thirdeye.spi.ThirdEyeStatus;
+import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datasource.loader.MinMaxTimeLoader;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessor;
@@ -51,6 +55,7 @@ public class ColdStartPostProcessor implements AnomalyPostProcessor {
   private final DatasetConfigManager datasetDao;
 
   private final String labelName;
+  private final DataSourceManager dataSourceDao;
 
   public ColdStartPostProcessor(final ColdStartPostProcessorSpec spec) {
     this.ignore = optional(spec.getIgnore()).orElse(DEFAULT_IGNORE);
@@ -59,6 +64,7 @@ public class ColdStartPostProcessor implements AnomalyPostProcessor {
 
     this.minMaxTimeLoader = spec.getMinMaxTimeLoader();
     this.datasetDao = spec.getDatasetConfigManager();
+    this.dataSourceDao = spec.getDataSourceManager();
 
     this.labelName = labelName(this.coldStartPeriod);
   }
@@ -77,10 +83,16 @@ public class ColdStartPostProcessor implements AnomalyPostProcessor {
   public Map<String, OperatorResult> postProcess(final Interval detectionInterval,
       final Map<String, OperatorResult> resultMap) throws Exception {
     // fixme cyril add authz namespace
-    final DatasetConfigDTO datasetConfigDTO = datasetDao.findByDataset(tableName);
-    Objects.requireNonNull(datasetConfigDTO);
+    final DatasetConfigDTO datasetConfigDTO = datasetDao.findByDatasetAndNamespace(tableName, namespace);
+    // FIXME CYRIL authz if not found by namespace - search in the null namespace - log if found
+    checkState(datasetConfigDTO != null, "Could not find dataset %s in namespace %s",
+        tableName, namespace);
+    final DataSourceDTO dataSourceDTO = dataSourceDao.findUniqueByNameAndNamespace(datasetConfigDTO.getDataSource(), datasetConfigDTO.namespace());
+    checkState(dataSourceDTO != null, "Could not find datasource %s in namespace %s",
+        datasetConfigDTO.getDataSource(), datasetConfigDTO.namespace());
+    
     // don't fail if dataset min is not found - continue with a 0 minDateTime
-    final long datasetMinTime = optional(minMaxTimeLoader.fetchMinTimeAsync(datasetConfigDTO, null)
+    final long datasetMinTime = optional(minMaxTimeLoader.fetchMinTimeAsync(dataSourceDTO, datasetConfigDTO, null)
         .get(TIMEOUT, TimeUnit.MILLISECONDS)).orElse(0L);
     final DateTime datasetMinDateTime = new DateTime(datasetMinTime,
         detectionInterval.getChronology());
@@ -120,6 +132,7 @@ public class ColdStartPostProcessor implements AnomalyPostProcessor {
       final ColdStartPostProcessorSpec spec = new ObjectMapper().convertValue(params, ColdStartPostProcessorSpec.class);
       spec.setMinMaxTimeLoader(context.getMinMaxTimeLoader());
       spec.setDatasetConfigManager(context.getDatasetConfigManager());
+      spec.setDataSourceManager(context.getDataSourceManager());
       return new ColdStartPostProcessor(spec);
     }
   }

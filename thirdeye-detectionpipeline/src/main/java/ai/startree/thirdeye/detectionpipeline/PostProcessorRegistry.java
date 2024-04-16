@@ -69,7 +69,8 @@ public class PostProcessorRegistry {
 
     final DetectionPipelineContext detectionPipelineContext = context.getPlanNodeContext()
         .getDetectionPipelineContext();
-    final PostProcessingContext postProcessingContext = new PostProcessingContext(datasetDao,
+    final PostProcessingContext postProcessingContext = new PostProcessingContext(dataSourceManager,
+        datasetDao,
         minMaxTimeLoader, anomalyDao,
         detectionPipelineContext.getAlertId(),
         requireNonNull(detectionPipelineContext.getUsage(), "Detection pipeline usage is not set"),

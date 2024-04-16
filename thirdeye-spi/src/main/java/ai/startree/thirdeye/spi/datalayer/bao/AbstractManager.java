@@ -17,6 +17,9 @@ import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import java.util.List;
+import java.util.Objects;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface AbstractManager<E extends AbstractDTO> {
 
@@ -36,7 +39,19 @@ public interface AbstractManager<E extends AbstractDTO> {
    * @param name
    * @return
    */
+  @Deprecated // use findUniqueByNameAndNamespace instead
   List<E> findByName(String name);
+  
+  // returns null if the entity is not found or not unique // TODO CYRIL differentiate behaviour when not unique 
+  default @Nullable E findUniqueByNameAndNamespace(final @NonNull String name, final @Nullable String namespace) {
+    final List<E> list =  findByName(name)
+        // TODO CYRIL authz - filter in the sql read, not in app - remove findByName and don't provide a default
+        .stream().filter(d -> Objects.equals(d.namespace(), namespace)).toList();
+    if (list.size() == 1) {
+      return list.iterator().next();
+    }
+    return null;
+  }
 
   List<E> findByIds(List<Long> id);
 

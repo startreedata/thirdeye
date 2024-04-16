@@ -140,7 +140,7 @@ public class AlertInsightsProvider {
           "Dataset name not found in alert metadata.");
     }
     // FIXME CYRIL add authz
-    final DatasetConfigDTO datasetConfigDTO = datasetConfigManager.findByDataset(datasetName);
+    final DatasetConfigDTO datasetConfigDTO = datasetConfigManager.findByDatasetAndNamespace(datasetName);
     if (datasetConfigDTO == null) {
       throw new ThirdEyeException(ERR_DATASET_NOT_FOUND, datasetName);
     }

@@ -50,7 +50,7 @@ public class MetricService extends CrudService<MetricApi, MetricConfigDTO> {
 
     ensureExists(api.getDataset(), "dataset");
     // fixme cyril authz - filter by namespace
-    ensureExists(datasetConfigManager.findByDataset(api.getDataset().getName()),
+    ensureExists(datasetConfigManager.findByDatasetAndNamespace(api.getDataset().getName()),
         ERR_DATASET_NOT_FOUND, api.getDataset().getName());
 
     // For new Metric or existing metric with different name

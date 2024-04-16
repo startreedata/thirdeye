@@ -39,6 +39,7 @@ import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class ResourceUtils {
 
@@ -79,15 +80,15 @@ public class ResourceUtils {
     return new NotAuthorizedException("Authentication Failure.");  // throw 401
   }
 
-  public static <T> T ensureExists(final T o) {
+  public static <T> @NonNull T ensureExists(final T o) {
     return ensureExists(o, ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST, "");
   }
 
-  public static <T> T ensureExists(final T o, final Object... args) {
+  public static <T> @NonNull T ensureExists(final T o, final Object... args) {
     return ensureExists(o, ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST, args);
   }
 
-  public static <T> T ensureExists(final T o, final ThirdEyeStatus status, final Object... args) {
+  public static <T> @NonNull T ensureExists(final T o, final ThirdEyeStatus status, final Object... args) {
     ensure(o != null, status, args);
     return o;
   }

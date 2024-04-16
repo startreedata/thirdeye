@@ -122,18 +122,12 @@ public class DelegateDatasetConfigManager implements DatasetConfigManager {
   }
 
   @Override
-  public DatasetConfigDTO findByDataset(final String dataset) {
-    return delegate.findByDataset(dataset);
+  public DatasetConfigDTO findByDatasetAndNamespace(final String dataset, final String namespace) {
+    return delegate.findByDatasetAndNamespace(dataset, namespace);
   }
 
   @Override
   public List<DatasetConfigDTO> findActive() {
     return delegate.findActive();
-  }
-
-  @Override
-  public void updateLastRefreshTime(final String dataset, final long lastRefreshTime,
-      final long lastEventTime) {
-    delegate.updateLastRefreshTime(dataset, lastRefreshTime, lastEventTime);
   }
 }

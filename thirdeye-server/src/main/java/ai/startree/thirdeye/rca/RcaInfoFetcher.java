@@ -25,6 +25,7 @@ import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
+import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
@@ -33,6 +34,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EventContextDto;
@@ -51,6 +53,9 @@ import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Consumer of this class should ensure authz is performed. 
+ * */
 @Singleton
 public class RcaInfoFetcher {
 
@@ -63,6 +68,7 @@ public class RcaInfoFetcher {
   private final MetricConfigManager metricDAO;
   private final AlertTemplateRenderer alertTemplateRenderer;
   private final EnumerationItemManager enumerationItemManager;
+  private final DataSourceManager dataSourceManager;
 
   @Inject
   public RcaInfoFetcher(final AnomalyManager mergedAnomalyDAO,
@@ -70,37 +76,15 @@ public class RcaInfoFetcher {
       final DatasetConfigManager datasetDAO,
       final MetricConfigManager metricDAO,
       final AlertTemplateRenderer alertTemplateRenderer,
-      final EnumerationItemManager enumerationItemManager) {
+      final EnumerationItemManager enumerationItemManager,
+      final DataSourceManager dataSourceManager) {
     this.mergedAnomalyDAO = mergedAnomalyDAO;
     this.alertDAO = alertDAO;
     this.datasetDAO = datasetDAO;
     this.metricDAO = metricDAO;
     this.alertTemplateRenderer = alertTemplateRenderer;
     this.enumerationItemManager = enumerationItemManager;
-  }
-
-  @VisibleForTesting
-  protected static void addCustomFields(final DatasetConfigDTO dataset,
-      final DatasetConfigDTO metadataDataset) {
-    // fields that can be configured at the alert level are parsed in this method
-    final boolean includedListIsNotEmpty = templatableListIsNotEmpty(metadataDataset.getDimensions());
-    final boolean excludedListIsNotEmpty = templatableListIsNotEmpty(metadataDataset.getRcaExcludedDimensions());
-    checkArgument(!(includedListIsNotEmpty && excludedListIsNotEmpty),
-        "Both dimensions and rcaExcludedDimensions are not empty. Cannot use an inclusion and an exclusion list at the same time.");
-    if (excludedListIsNotEmpty) {
-      dataset.setRcaExcludedDimensions(metadataDataset.getRcaExcludedDimensions());
-    }
-    if (includedListIsNotEmpty) {
-      dataset.setDimensions(metadataDataset.getDimensions());
-    }
-  }
-
-  private static void addCustomFields(final MetricConfigDTO metricConfigDTO,
-      final MetricConfigDTO metadataMetricDTO) {
-    // fields that can be configured at the alert level can be added here
-    optional(metadataMetricDTO.getWhere()).ifPresent(metricConfigDTO::setWhere);
-    optional(metadataMetricDTO.getDefaultAggFunction()).filter(StringUtils::isNotBlank)
-        .ifPresent(metricConfigDTO::setDefaultAggFunction);
+    this.dataSourceManager = dataSourceManager;
   }
 
   private static <E> boolean templatableListIsNotEmpty(
@@ -120,13 +104,10 @@ public class RcaInfoFetcher {
    */
   public RcaInfo getRcaInfo(final long anomalyId)
       throws IOException, ClassNotFoundException {
-    // fixme cyril authz necessary here or in consuming layers - maybe inside rcaInfoFetcher?
-    // need to know the namespace - but how to get the namespace ? anomaly does not have it :/ 
     final AnomalyDTO anomalyDTO = ensureExists(mergedAnomalyDAO.findById(anomalyId),
         String.format("Anomaly ID: %d", anomalyId));
     final long detectionConfigId = anomalyDTO.getDetectionConfigId();
     final AlertDTO alertDTO = alertDAO.findById(detectionConfigId);
-    // fixme cyril authz - here we can get the namespace from the alert id - and filter in a backward compatible way - look in namespace - is not found, look in not set namespace
     final EnumerationItemDTO enumerationItemDTO = optional(anomalyDTO.getEnumerationItem())
         .map(AbstractDTO::getId)
         .map(enumerationItemManager::findById)
@@ -153,23 +134,52 @@ public class RcaInfoFetcher {
         "metadata$dataset$name");
 
     // take config from persistence - ensure dataset/metric DTO configs are correct for RCA
-    // fixme authz need a filter on namespace - but actually need a fullrewrite of how metric is used
-    MetricConfigDTO metricConfigDTO = metricDAO.findByMetricAndDataset(metricName, datasetName);
+    // we get the namespace from the alert and inject it in all persistence access - authz is not performed - the consumer of this method should ensure authz on the anomaly
+    final String alertNamespace = alertDTO.namespace();
+    // FIXME CYRIL ASAP need to expose a new method - find by namespace too
+    MetricConfigDTO metricConfigDTO = metricDAO.findBy(metricName, datasetName, alertNamespace);
     if (metricConfigDTO == null) {
-      LOG.warn("Could not find metric {} for dataset {}. Building a custom metric for RCA.", metricName, datasetName);
+      LOG.warn("Could not find metric {} for dataset {}. Building a custom metric for RCA.",
+          metricName, datasetName);
       String metricAggFunction = metadataMetricDTO.getDefaultAggFunction();
       if (StringUtils.isBlank(metricAggFunction)) {
-        LOG.warn("Custom aggregation function not provided in alert configuration for metric {} for dataset {}. Defaulting to COUNT", metricName, datasetName);
+        LOG.warn(
+            "Custom aggregation function not provided in alert configuration for metric {} for dataset {}. Defaulting to COUNT",
+            metricName, datasetName);
         metricAggFunction = COUNT.toString();
       }
       metricConfigDTO = new MetricConfigDTO().setDataset(datasetName)
           .setName(metricName)
           .setDefaultAggFunction(metricAggFunction);
     }
-    final DatasetConfigDTO datasetConfigDTO = ensureExists(datasetDAO.findByDataset(metricConfigDTO.getDataset()),
-        String.format("Dataset name: %s", metricConfigDTO.getDataset()));
+
+    DatasetConfigDTO datasetConfigDto;
+    if (metricConfigDTO.getDatasetConfig() != null) {
+      datasetConfigDto = datasetDAO.findById(metricConfigDTO.getDatasetConfig().getId());
+    } else {
+      LOG.warn(
+          "Running on a legacy metrics that does not contain the id of its parent dataset. Finding dataset by name and namespace.");
+      datasetConfigDto = datasetDAO.findByDatasetAndNamespace(metricConfigDTO.getDataset(),
+          alertNamespace);
+      if (datasetConfigDto == null) {
+        // TODO CYRIL authz - to ensure backward compatibility with existing setups, look in the undefined namespace if the dataset was not found in the alert namespace - will be removed or conditionned on requireNamespace = false soon
+        datasetConfigDto = datasetDAO.findByDatasetAndNamespace(metricConfigDTO.getDataset(), null);
+        if (datasetConfigDto != null) {
+          LOG.warn(
+              "Did not find dataset {} in namespace {}, but found a dataset with this name that has its namespace undefined. Using this dataset. This behavior will be removed when requireNamespace=true soon. Ensure your datasets are namespaced correctly.",
+              metricConfigDTO.getDataset(), alertNamespace);
+        }
+      }
+    }
+    ensureExists(datasetConfigDto, "Dataset name: %s. Namespace: %s", metricConfigDTO.getDataset(),
+        alertNamespace);
     addCustomFields(metricConfigDTO, metadataMetricDTO);
-    addCustomFields(datasetConfigDTO, metadataDatasetDTO);
+    addCustomFields(datasetConfigDto, metadataDatasetDTO);
+
+    final DataSourceDTO dataSourceDto = dataSourceManager.findUniqueByNameAndNamespace(
+        datasetConfigDto.getDataSource(), datasetConfigDto.namespace());
+    ensureExists(dataSourceDto, "Datasource name: %s. Namespace: %s", datasetConfigDto.getDataSource(),
+        datasetConfigDto.namespace());
 
     final Period granularity = isoPeriod(alertMetadataDto.getGranularity());
     final Chronology chronology = getDateTimeZone(alertMetadataDto);
@@ -180,7 +190,7 @@ public class RcaInfoFetcher {
           EMPTY_CONTEXT_DTO);
     }
 
-    return new RcaInfo(anomalyDTO, metricConfigDTO, datasetConfigDTO, chronology, granularity,
+    return new RcaInfo(anomalyDTO, metricConfigDTO, datasetConfigDto, dataSourceDto, chronology, granularity,
         eventContext);
   }
 
@@ -188,8 +198,8 @@ public class RcaInfoFetcher {
   private EventContextDto findFromAlert(final AlertDTO alertDTO,
       final EnumerationItemDTO enumerationItem) {
     final Map<String, Object> properties = optional(enumerationItem)
-            .map(EnumerationItemDTO::getParams)
-            .orElse(alertDTO.getTemplateProperties());
+        .map(EnumerationItemDTO::getParams)
+        .orElse(alertDTO.getTemplateProperties());
     try {
       final List<String> eventTypes = (List<String>) properties.get("eventTypes");
       final String eventSqlFilter = (String) properties.get("eventSqlFilter");
@@ -202,5 +212,31 @@ public class RcaInfoFetcher {
       LOG.error("error applying eventContext on anomaly! alert id: " + alertDTO.getId(), e);
     }
     return null;
+  }
+
+  @VisibleForTesting
+  protected static void addCustomFields(final DatasetConfigDTO dataset,
+      final DatasetConfigDTO metadataDataset) {
+    // fields that can be configured at the alert level are parsed in this method
+    final boolean includedListIsNotEmpty = templatableListIsNotEmpty(
+        metadataDataset.getDimensions());
+    final boolean excludedListIsNotEmpty = templatableListIsNotEmpty(
+        metadataDataset.getRcaExcludedDimensions());
+    checkArgument(!(includedListIsNotEmpty && excludedListIsNotEmpty),
+        "Both dimensions and rcaExcludedDimensions are not empty. Cannot use an inclusion and an exclusion list at the same time.");
+    if (excludedListIsNotEmpty) {
+      dataset.setRcaExcludedDimensions(metadataDataset.getRcaExcludedDimensions());
+    }
+    if (includedListIsNotEmpty) {
+      dataset.setDimensions(metadataDataset.getDimensions());
+    }
+  }
+
+  private static void addCustomFields(final MetricConfigDTO metricConfigDTO,
+      final MetricConfigDTO metadataMetricDTO) {
+    // fields that can be configured at the alert level can be added here
+    optional(metadataMetricDTO.getWhere()).ifPresent(metricConfigDTO::setWhere);
+    optional(metadataMetricDTO.getDefaultAggFunction()).filter(StringUtils::isNotBlank)
+        .ifPresent(metricConfigDTO::setDefaultAggFunction);
   }
 }

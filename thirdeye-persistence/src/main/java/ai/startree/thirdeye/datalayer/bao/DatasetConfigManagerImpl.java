@@ -20,6 +20,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Singleton
 public class DatasetConfigManagerImpl extends AbstractManagerImpl<DatasetConfigDTO>
@@ -35,27 +36,15 @@ public class DatasetConfigManagerImpl extends AbstractManagerImpl<DatasetConfigD
     return findByPredicate(Predicate.EQ("dataset", name));
   }
 
+  
   @Override
-  public DatasetConfigDTO findByDataset(String dataset) {
-    Predicate predicate = Predicate.EQ("dataset", dataset);
-    List<DatasetConfigDTO> list = findByPredicate(predicate);
-    if (list.size() == 1) {
-      return list.iterator().next();
-    }
-    return null;
+  public DatasetConfigDTO findByDatasetAndNamespace(final String dataset, final @Nullable String namespace) {
+    return findUniqueByNameAndNamespace(dataset, namespace);
   }
 
   @Override
   public List<DatasetConfigDTO> findActive() {
     Predicate activePredicate = Predicate.EQ("active", true);
     return findByPredicate(activePredicate);
-  }
-
-  @Override
-  public void updateLastRefreshTime(String dataset, long refreshTime, long eventTime) {
-    DatasetConfigDTO datasetConfigDTO = findByDataset(dataset);
-    datasetConfigDTO.setLastRefreshTime(refreshTime);
-    datasetConfigDTO.setLastRefreshEventTime(eventTime);
-    update(datasetConfigDTO);
   }
 }

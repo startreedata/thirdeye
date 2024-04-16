@@ -49,15 +49,15 @@ public class MetricConfigDTO extends AbstractDTO {
   private List<LogicalView> views;
   private String where;
 
-  @JsonIgnore
   private DatasetConfigDTO datasetConfig;
 
   public DatasetConfigDTO getDatasetConfig() {
     return datasetConfig;
   }
 
-  public void setDatasetConfig(DatasetConfigDTO datasetConfig) {
+  public MetricConfigDTO setDatasetConfig(DatasetConfigDTO datasetConfig) {
     this.datasetConfig = datasetConfig;
+    return this;
   }
 
   public String getName() {

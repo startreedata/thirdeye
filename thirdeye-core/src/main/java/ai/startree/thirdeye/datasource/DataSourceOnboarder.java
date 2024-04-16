@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.datasource;
 
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
+import static com.google.common.base.Preconditions.checkState;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.spi.ThirdEyeStatus;
@@ -130,10 +131,17 @@ public class DataSourceOnboarder {
     final List<MetricConfigDTO> metrics = datasetConfigDTO.getMetrics();
     datasetConfigDTO.setAuth(auth);
     datasetConfigDTO.setMetrics(null);
-    datasetConfigManager.save(datasetConfigDTO);
+    final Long datasetId = datasetConfigManager.save(datasetConfigDTO);
+    checkState(datasetId != null, "Failed creating dataset %s", datasetConfigDTO.getDataset());
 
     // onboard metrics with the same namespace as the dataset
-    metrics.stream().peek(m -> m.setAuth(auth)).forEach(metricConfigManager::save);
+    final DatasetConfigDTO datasetConfigMinimalInfo = new DatasetConfigDTO();
+    datasetConfigMinimalInfo.setId(datasetId);
+    datasetConfigMinimalInfo.setDataset(datasetConfigDTO.getDataset());
+    metrics.stream()
+        .peek(m -> m.setAuth(auth))
+        .peek(m -> m.setDatasetConfig(datasetConfigMinimalInfo))
+        .forEach(metricConfigManager::save);
     return datasetConfigDTO;
   }
 }

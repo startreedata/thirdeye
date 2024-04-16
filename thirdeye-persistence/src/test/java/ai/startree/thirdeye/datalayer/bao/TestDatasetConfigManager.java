@@ -16,6 +16,7 @@ package ai.startree.thirdeye.datalayer.bao;
 import ai.startree.thirdeye.datalayer.DatalayerTestUtils;
 import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import java.util.List;
 import org.testng.Assert;
@@ -27,6 +28,7 @@ public class TestDatasetConfigManager {
 
   private static final String collection1 = "my dataset1";
   private static final String collection2 = "my dataset2";
+  // FIXME CYRIL ASAP - test with null (not set) namespace
   private static final String NAMESPACE_1 = "namespace1";
 
   private Long datasetConfigId1;
@@ -47,6 +49,7 @@ public class TestDatasetConfigManager {
   public void testCreate() {
 
     DatasetConfigDTO datasetConfig1 = DatalayerTestUtils.getTestDatasetConfig(collection1);
+    datasetConfig1.setAuth(new AuthorizationConfigurationDTO().setNamespace(NAMESPACE_1));
     datasetConfigId1 = datasetConfigDAO.save(datasetConfig1);
     Assert.assertNotNull(datasetConfigId1);
 

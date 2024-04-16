@@ -136,7 +136,6 @@ public class RcaInfoFetcher {
     // take config from persistence - ensure dataset/metric DTO configs are correct for RCA
     // we get the namespace from the alert and inject it in all persistence access - authz is not performed - the consumer of this method should ensure authz on the anomaly
     final String alertNamespace = alertDTO.namespace();
-    // FIXME CYRIL ASAP need to expose a new method - find by namespace too
     MetricConfigDTO metricConfigDTO = metricDAO.findBy(metricName, datasetName, alertNamespace);
     if (metricConfigDTO == null) {
       LOG.warn("Could not find metric {} for dataset {}. Building a custom metric for RCA.",

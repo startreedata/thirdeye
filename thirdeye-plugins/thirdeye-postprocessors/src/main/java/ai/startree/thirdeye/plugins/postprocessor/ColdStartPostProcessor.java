@@ -77,8 +77,8 @@ public class ColdStartPostProcessor implements AnomalyPostProcessor {
   public Map<String, OperatorResult> postProcess(final Interval detectionInterval,
       final Map<String, OperatorResult> resultMap) throws Exception {
     // fixme cyril add authz namespace
-    final DatasetConfigDTO datasetConfigDTO = Objects.requireNonNull(datasetDao.findByDataset(
-        tableName), "Could not find dataset " + tableName);
+    final DatasetConfigDTO datasetConfigDTO = datasetDao.findByDataset(tableName);
+    Objects.requireNonNull(datasetConfigDTO);
     // don't fail if dataset min is not found - continue with a 0 minDateTime
     final long datasetMinTime = optional(minMaxTimeLoader.fetchMinTimeAsync(datasetConfigDTO, null)
         .get(TIMEOUT, TimeUnit.MILLISECONDS)).orElse(0L);

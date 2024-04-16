@@ -22,6 +22,7 @@ import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.datasource.query.SelectQuery;
 import ai.startree.thirdeye.detectionpipeline.sql.SqlLanguageTranslator;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
+import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datasource.DataSourceRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
@@ -35,7 +36,6 @@ import com.google.inject.Singleton;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.binder.jvm.ExecutorServiceMetrics;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -71,24 +71,25 @@ public class DefaultMinMaxTimeLoader implements MinMaxTimeLoader {
   }
 
   @Override
-  public Future<@Nullable Long> fetchMinTimeAsync(final DatasetConfigDTO datasetConfigDTO,
-      final @Nullable Interval timeFilterInterval) throws Exception {
-    return executorService.submit(() -> fetchExtremumTime(Extremum.MIN, datasetConfigDTO,
-        timeFilterInterval));
+  public Future<@Nullable Long> fetchMinTimeAsync(final DataSourceDTO dataSourceDto,
+      final DatasetConfigDTO datasetConfigDTO, final @Nullable Interval timeFilterInterval)
+      throws Exception {
+    return executorService.submit(
+        () -> fetchExtremumTime(Extremum.MIN, dataSourceDto, datasetConfigDTO, timeFilterInterval));
   }
 
   @Override
-  public Future<@Nullable Long> fetchMaxTimeAsync(final DatasetConfigDTO datasetConfigDTO,
-      final @Nullable Interval timeFilterInterval) throws Exception {
+  public Future<@Nullable Long> fetchMaxTimeAsync(final DataSourceDTO dataSourceDto,
+      final DatasetConfigDTO datasetConfigDTO, final @Nullable Interval timeFilterInterval)
+      throws Exception {
     return executorService.submit(
-        () -> fetchExtremumTime(Extremum.MAX, datasetConfigDTO, timeFilterInterval));
+        () -> fetchExtremumTime(Extremum.MAX, dataSourceDto, datasetConfigDTO, timeFilterInterval));
   }
 
   private @Nullable Long fetchExtremumTime(final Extremum extremum,
-      final DatasetConfigDTO datasetConfigDTO, final @Nullable Interval timeFilterInterval)
-      throws Exception {
-    final String dataSourceName = Objects.requireNonNull(datasetConfigDTO.getDataSource());
-    final @NonNull ThirdEyeDataSource dataSource = dataSourceCache.getDataSource(dataSourceName);
+      final DataSourceDTO dataSourceDTO, final DatasetConfigDTO datasetConfigDTO,
+      final @Nullable Interval timeFilterInterval) throws Exception {
+    final @NonNull ThirdEyeDataSource dataSource = dataSourceCache.getDataSource(dataSourceDTO);
     final String sqlQuery = extremumTimeSqlQuery(datasetConfigDTO, dataSource, extremum,
         timeFilterInterval);
     final Map<String, String> customOptions = Map.of(); // custom query options not implemented in MinMaxTimeLoader

@@ -22,6 +22,7 @@ import static ai.startree.thirdeye.spi.util.AlertMetadataUtils.getDelay;
 import static ai.startree.thirdeye.spi.util.AlertMetadataUtils.getGranularity;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.timezonesAreEquivalent;
+import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.ResourceUtils.serverError;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
@@ -29,15 +30,18 @@ import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.ThirdEyeException;
+import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertInsightsApi;
 import ai.startree.thirdeye.spi.api.AlertInsightsRequestApi;
 import ai.startree.thirdeye.spi.api.AnalysisRunInfo;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datasource.loader.MinMaxTimeLoader;
 import ai.startree.thirdeye.spi.util.TimeUtils;
@@ -77,15 +81,18 @@ public class AlertInsightsProvider {
 
   private final AlertTemplateRenderer alertTemplateRenderer;
   private final DatasetConfigManager datasetConfigManager;
+  private final DataSourceManager dataSourceDao;
   private final MinMaxTimeLoader minMaxTimeLoader;
   final AuthorizationManager authorizationManager;
 
   @Inject
   public AlertInsightsProvider(final AlertTemplateRenderer alertTemplateRenderer,
-      final DatasetConfigManager datasetConfigManager, final MinMaxTimeLoader minMaxTimeLoader,
+      final DatasetConfigManager datasetConfigManager, final DataSourceManager dataSourceManager,
+      final MinMaxTimeLoader minMaxTimeLoader,
       final AuthorizationManager authorizationManager) {
     this.alertTemplateRenderer = alertTemplateRenderer;
     this.datasetConfigManager = datasetConfigManager;
+    this.dataSourceDao = dataSourceManager;
     this.minMaxTimeLoader = minMaxTimeLoader;
     this.authorizationManager = authorizationManager;
   }
@@ -145,7 +152,6 @@ public class AlertInsightsProvider {
       throw new ThirdEyeException(ERR_MISSING_CONFIGURATION_FIELD,
           "Dataset name not found in alert metadata.");
     }
-    // FIXME CYRIL add authz
     DatasetConfigDTO datasetConfigDTO = datasetConfigManager.findByDatasetAndNamespace(
         datasetName, namespace);
     if (datasetConfigDTO == null) {
@@ -158,22 +164,27 @@ public class AlertInsightsProvider {
       }
     }
 
+    // TODO CYRIL add authz - later inject datasource id in datasetConfig and use it instead of fetching by name/namespace
+    final DataSourceDTO dataSourceDTO = dataSourceDao.findUniqueByNameAndNamespace(datasetConfigDTO.getDataSource(), datasetConfigDTO.namespace());
+    ensureExists(dataSourceDTO, ThirdEyeStatus.ERR_DATASOURCE_NOT_FOUND, datasetName + " in namespace " + datasetConfigDTO.namespace());
+
     // fetch dataset interval
-    addDatasetStartEndTimes(insights, datasetConfigDTO);
+    addDatasetStartEndTimes(insights, dataSourceDTO, datasetConfigDTO);
     addDefaults(insights, metadata);
   }
 
   private void addDatasetStartEndTimes(final AlertInsightsApi insights,
+      final DataSourceDTO dataSourceDTO,
       final DatasetConfigDTO datasetConfigDTO) throws Exception {
     // launch min, max, safeMax queries async
     final Future<@Nullable Long> minTimeFuture = minMaxTimeLoader.fetchMinTimeAsync(
-        datasetConfigDTO, null);
+        dataSourceDTO, datasetConfigDTO, null);
     final Future<@Nullable Long> maxTimeFuture = minMaxTimeLoader.fetchMaxTimeAsync(
-        datasetConfigDTO, null);
+        dataSourceDTO, datasetConfigDTO, null);
     final long maximumPossibleEndTime = currentMaximumPossibleEndTime();
     final Interval safeInterval = new Interval(0L, maximumPossibleEndTime);
     final Future<@Nullable Long> safeMaxTimeFuture = minMaxTimeLoader.fetchMaxTimeAsync(
-        datasetConfigDTO, safeInterval);
+        dataSourceDTO, datasetConfigDTO, safeInterval);
 
     // process futures
     // process startTime

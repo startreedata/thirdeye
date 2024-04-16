@@ -27,7 +27,6 @@ import static java.util.Collections.emptyList;
 
 import ai.startree.thirdeye.datasource.DataSourcesLoader;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
-import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import com.codahale.metrics.CachedGauge;
@@ -38,10 +37,8 @@ import com.google.inject.Singleton;
 import io.micrometer.core.instrument.Metrics;
 import java.sql.Timestamp;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.SynchronousQueue;
@@ -102,6 +99,7 @@ public class DataSourceCache {
     metricRegistry.register("cachedDatasourceCount", (Gauge<Integer>) cache::size);
   }
 
+  // TODO CYRIL authz refacto - move this DataSourceCache should not have access to DataSourceManager - update architectureTest
   private Integer getHealthyDatasourceCount() {
     return Math.toIntExact(dataSourceManager.findAll().stream()
         .map(this::getDataSource)
@@ -149,18 +147,6 @@ public class DataSourceCache {
     cache.put(Objects.requireNonNull(dataSourceDto.getId()),
         new CachedDataSourceEntry(wrapped, dataSourceDto.getUpdateTime()));
     return wrapped;
-  }
-
-  private Optional<DataSourceDTO> findBy(final String name, final String namespace) {
-    final List<DataSourceDTO> results = 
-        dataSourceManager.findByName(name)
-            .stream()
-            .filter(d -> Objects.equals(namespace, optional(d.getAuth()).map(
-                AuthorizationConfigurationDTO::getNamespace).orElse(null)))
-            .toList();
-    checkState(results.size() <= 1, "Multiple data sources found with name: %s, namespace: ", name,
-        namespace);
-    return results.stream().findFirst();
   }
 
   public void removeDataSource(final DataSourceDTO dataSourceDTO) {

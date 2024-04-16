@@ -47,6 +47,7 @@ public class ColdStartPostProcessorTest {
   // time is not used
   private static final Interval UTC_DETECTION_INTERVAL = new Interval(0L, 0L, DateTimeZone.UTC);
   private static final String TABLE_NAME = "tableName";
+  private static final String NAMESPACE = "namespaceName";
   private static final long JANUARY_1_2022 = 1640995200000L;
   private static final long JANUARY_3_2022 = 1641168000000L;
   private static final long JANUARY_5_2022 = 1641340800000L;
@@ -64,9 +65,9 @@ public class ColdStartPostProcessorTest {
   @BeforeClass
   public void initMocks() throws Exception {
     datasetDao = mock(DatasetConfigManager.class);
-    when(datasetDao.findByDataset(TABLE_NAME)).thenReturn(new DatasetConfigDTO());
+    when(datasetDao.findByDatasetAndNamespace(TABLE_NAME, NAMESPACE)).thenReturn(new DatasetConfigDTO());
     minMaxTimeLoader = mock(MinMaxTimeLoader.class);
-    when(minMaxTimeLoader.fetchMinTimeAsync(any(), any())).thenReturn(new FutureMinTime(
+    when(minMaxTimeLoader.fetchMinTimeAsync(any(), any(), any())).thenReturn(new FutureMinTime(
         JANUARY_1_2022));
   }
 

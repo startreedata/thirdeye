@@ -27,6 +27,7 @@ public class TestDatasetConfigManager {
 
   private static final String collection1 = "my dataset1";
   private static final String collection2 = "my dataset2";
+  private static final String NAMESPACE_1 = "namespace1";
 
   private Long datasetConfigId1;
   private Long datasetConfigId2;
@@ -63,7 +64,7 @@ public class TestDatasetConfigManager {
 
   @Test(dependsOnMethods = {"testCreate"})
   public void testFindByDataset() {
-    DatasetConfigDTO datasetConfigs = datasetConfigDAO.findByDataset(collection1);
+    DatasetConfigDTO datasetConfigs = datasetConfigDAO.findByDatasetAndNamespace(collection1, NAMESPACE_1);
     Assert.assertEquals(datasetConfigs.getDataset(), collection1);
   }
 

@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.rca;
 
+import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
@@ -25,6 +26,7 @@ import org.joda.time.Period;
 public record RcaInfo(
     // todo cyril consider not exposing all objects - once refactored, only expose what is really used
     @NonNull AnomalyDTO anomaly,
+    @NonNull AlertDTO alert,
     @NonNull MetricConfigDTO metric,
     @NonNull DatasetConfigDTO dataset,
     @NonNull DataSourceDTO dataSourceDto,

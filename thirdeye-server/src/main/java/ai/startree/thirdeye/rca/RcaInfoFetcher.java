@@ -54,8 +54,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Consumer of this class should ensure authz is performed. 
- * */
+ * Consumer of this class should ensure authz is performed.
+ */
 @Singleton
 public class RcaInfoFetcher {
 
@@ -101,11 +101,11 @@ public class RcaInfoFetcher {
    * template.
    * This method gets the metric and dataset info from the alert template.
    * It could be more intelligent: metric and dataset could be inferred from the query.
+   * 
+   * Consumer of this method should ensure authz on the anomaly entity.
    */
-  public RcaInfo getRcaInfo(final long anomalyId)
+  public RcaInfo getRcaInfo(final AnomalyDTO anomalyDTO)
       throws IOException, ClassNotFoundException {
-    final AnomalyDTO anomalyDTO = ensureExists(mergedAnomalyDAO.findById(anomalyId),
-        String.format("Anomaly ID: %d", anomalyId));
     final long detectionConfigId = anomalyDTO.getDetectionConfigId();
     final AlertDTO alertDTO = alertDAO.findById(detectionConfigId);
     final EnumerationItemDTO enumerationItemDTO = optional(anomalyDTO.getEnumerationItem())
@@ -178,7 +178,8 @@ public class RcaInfoFetcher {
 
     final DataSourceDTO dataSourceDto = dataSourceManager.findUniqueByNameAndNamespace(
         datasetConfigDto.getDataSource(), datasetConfigDto.namespace());
-    ensureExists(dataSourceDto, "Datasource name: %s. Namespace: %s", datasetConfigDto.getDataSource(),
+    ensureExists(dataSourceDto, "Datasource name: %s. Namespace: %s",
+        datasetConfigDto.getDataSource(),
         datasetConfigDto.namespace());
 
     final Period granularity = isoPeriod(alertMetadataDto.getGranularity());
@@ -190,7 +191,8 @@ public class RcaInfoFetcher {
           EMPTY_CONTEXT_DTO);
     }
 
-    return new RcaInfo(anomalyDTO, metricConfigDTO, datasetConfigDto, dataSourceDto, chronology, granularity,
+    return new RcaInfo(anomalyDTO, alertDTO, metricConfigDTO, datasetConfigDto, dataSourceDto, chronology,
+        granularity,
         eventContext);
   }
 

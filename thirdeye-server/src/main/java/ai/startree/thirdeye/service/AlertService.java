@@ -196,7 +196,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
 
   public AlertInsightsApi getInsightsById(final ThirdEyeServerPrincipal principal, final Long id) {
     final AlertDTO dto = getDto(id);
-    authorizationManager.ensureHasAccess(principal, dto, AccessType.READ);
+    authorizationManager.ensureCanRead(principal, dto);
     return alertInsightsProvider.getInsights(principal, dto);
   }
 

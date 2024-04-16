@@ -16,6 +16,7 @@ package ai.startree.thirdeye.service;
 import static ai.startree.thirdeye.rca.RcaDimensionFilterHelper.getRcaDimensions;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
+import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.StringUtils.timeFormatterFor;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
@@ -27,6 +28,8 @@ import ai.startree.thirdeye.spi.api.TextualAnalysis;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
+import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.rca.ContributorsFinderResult;
 import ai.startree.thirdeye.spi.rca.ContributorsSearchConfiguration;
@@ -51,14 +54,16 @@ public class RcaDimensionAnalysisService {
 
   private final ContributorsFinderRunner contributorsFinderRunner;
   private final RcaInfoFetcher rcaInfoFetcher;
+  private final AnomalyManager anomalyDao;
   private final AuthorizationManager authorizationManager;
 
   @Inject
   public RcaDimensionAnalysisService(final ContributorsFinderRunner contributorsFinderRunner,
       final RcaInfoFetcher rcaInfoFetcher,
-      final AuthorizationManager authorizationManager) {
+      final AnomalyManager anomalyDao, final AuthorizationManager authorizationManager) {
     this.contributorsFinderRunner = contributorsFinderRunner;
     this.rcaInfoFetcher = rcaInfoFetcher;
+    this.anomalyDao = anomalyDao;
     this.authorizationManager = authorizationManager;
   }
 
@@ -71,8 +76,10 @@ public class RcaDimensionAnalysisService {
       final String baselineOffset, final List<String> filters, final int summarySize,
       final int depth, final boolean doOneSideError, final List<String> dimensions,
       final List<String> excludedDimensions, final String hierarchiesPayload) throws Exception {
-    // fixme cyril add authz - if the user has access to the anomalyId, assumes he has access to everything?
-    final RcaInfo rcaInfo = rcaInfoFetcher.getRcaInfo(anomalyId);
+    final AnomalyDTO anomalyDto = ensureExists(anomalyDao.findById(anomalyId),
+        String.format("Anomaly ID: %d", anomalyId));
+    authorizationManager.ensureCanRead(principal, anomalyDto);
+    final RcaInfo rcaInfo = rcaInfoFetcher.getRcaInfo(anomalyDto);
     final Interval currentInterval = new Interval(rcaInfo.anomaly().getStartTime(),
         rcaInfo.anomaly().getEndTime(), rcaInfo.chronology());
 

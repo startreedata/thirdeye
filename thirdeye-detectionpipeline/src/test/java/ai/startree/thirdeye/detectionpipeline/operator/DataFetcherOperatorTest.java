@@ -90,8 +90,9 @@ public class DataFetcherOperatorTest {
   public void testNewInstance() {
     final DataFetcherOperator dataFetcherOperator = new DataFetcherOperator();
     final PlanNodeBean planNodeBean = new PlanNodeBean()
-        .setParams(TemplatableMap.fromValueMap(ImmutableMap.of("component.dataSource",
-            dataSourceName)))
+        .setParams(TemplatableMap.fromValueMap(ImmutableMap.of(
+            "component.dataSource", dataSourceName,
+            "component.tableName", TABLE_NAME)))
         .setOutputs(ImmutableList.of());
     final long startTime = System.currentTimeMillis();
     final long endTime = startTime + 1000L;

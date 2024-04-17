@@ -89,8 +89,7 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
             dataFetcherSpec.getNamespace());
     if (datasetConfigDTO == null) {
       this.datasetConfigDTO =
-          datasetDao.findByDatasetAndNamespace(dataFetcherSpec.getTableName(),
-              dataFetcherSpec.getNamespace());
+          datasetDao.findByDatasetAndNamespace(dataFetcherSpec.getTableName(), null);
       if (datasetConfigDTO != null) {
         LOG.warn("Could not find dataset {} in namespace {}, but found a dataset with this name with an unset namespace. Using this dataset. This behaviour will change. Please migrate your dataset to a namespace.",
             dataFetcherSpec.getTableName(), dataFetcherSpec.getNamespace());

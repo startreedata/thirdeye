@@ -91,7 +91,7 @@ public class ColdStartPostProcessor implements AnomalyPostProcessor {
       final Map<String, OperatorResult> resultMap) throws Exception {
     DatasetConfigDTO datasetConfigDTO = datasetDao.findByDatasetAndNamespace(tableName, namespace);
     if (datasetConfigDTO == null) {
-      datasetConfigDTO = datasetDao.findByDatasetAndNamespace(tableName, namespace);
+      datasetConfigDTO = datasetDao.findByDatasetAndNamespace(tableName, null);
       if (datasetConfigDTO != null) {
         LOG.warn("Could not find dataset {} in namespace {}, but found a dataset with this name with an unset namespace. Using this dataset. This behaviour will change. Please migrate your dataset to a namespace.",
             tableName, namespace);

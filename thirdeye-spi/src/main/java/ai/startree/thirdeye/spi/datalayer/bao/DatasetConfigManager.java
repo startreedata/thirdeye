@@ -15,11 +15,13 @@ package ai.startree.thirdeye.spi.datalayer.bao;
 
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import java.util.List;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface DatasetConfigManager extends AbstractManager<DatasetConfigDTO> {
 
   // fixme cyril authz ASAP - this method is often used with a fallback on the null namespace - implement it once?
-  DatasetConfigDTO findByDatasetAndNamespace(final String dataset, final String namespace);
+  // returns null if not found
+  @Nullable DatasetConfigDTO findByDatasetAndNamespace(final String dataset, final String namespace);
 
   List<DatasetConfigDTO> findActive();
 }

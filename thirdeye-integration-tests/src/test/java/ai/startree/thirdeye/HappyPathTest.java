@@ -595,20 +595,21 @@ public class HappyPathTest {
 
   @Test(timeOut = 60000, dependsOnMethods = "testAnomalyCount")
   public void testGetRcaInvestigationAuth() throws InterruptedException {
-    final var alertId = mustCreateAlert(
+    final long alertId = mustCreateAlert(
         newRunnableAlertApiWithAuth("TestGetRcaInvestigationAuth", "alert-namespace"));
 
     waitForAnyAnomalies(alertId);
-    final var anomalyId = mustGetAnomaliesForAlert(alertId).get(0).getId();
-    final var investigationId = mustCreateInvestigation(new RcaInvestigationApi()
+    final Long anomalyId = mustGetAnomaliesForAlert(alertId).get(0).getId();
+    final long investigationId = mustCreateInvestigation(new RcaInvestigationApi()
         .setName("my-investigation")
         .setAnomaly(new AnomalyApi().setId(anomalyId)));
 
-    final var investigationApi = mustGetInvestigation(investigationId);
+    final RcaInvestigationApi investigationApi = mustGetInvestigation(investigationId);
     assertThat(investigationApi.getAuth()).isNotNull();
     assertThat(investigationApi.getAuth().getNamespace()).isEqualTo("alert-namespace");
   }
 
+  // TODO CYRIL authz - if requireNamespace=true, it should not be possible to change a namespace
   @Test(timeOut = 60000, dependsOnMethods = "testAnomalyCount")
   public void testUpdateAlertAuth() throws InterruptedException {
     final long alertId = mustCreateAlert(

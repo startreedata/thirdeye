@@ -611,29 +611,29 @@ public class HappyPathTest {
 
   @Test(timeOut = 60000, dependsOnMethods = "testAnomalyCount")
   public void testUpdateAlertAuth() throws InterruptedException {
-    final var alertId = mustCreateAlert(
+    final long alertId = mustCreateAlert(
         newRunnableAlertApiWithAuth("TestUpdateAlertAuth", "alert-namespace"));
 
     waitForAnyAnomalies(alertId);
-    final var anomalyId = mustGetAnomaliesForAlert(alertId).get(0).getId();
-    final var investigationId = mustCreateInvestigation(new RcaInvestigationApi()
+    final Long anomalyId = mustGetAnomaliesForAlert(alertId).get(0).getId();
+    final long investigationId = mustCreateInvestigation(new RcaInvestigationApi()
         .setName("my-investigation")
         .setAnomaly(new AnomalyApi().setId(anomalyId)));
 
-    final var alertApi = newRunnableAlertApiWithAuth("test-alert", "new-alert-namespace").setId(
+    final AlertApi alertApi = newRunnableAlertApiWithAuth("test-alert", "new-alert-namespace").setId(
         alertId);
-    final var updateAlertResp = request("api/alerts").put(Entity.json(List.of(alertApi)));
+    final Response updateAlertResp = request("api/alerts").put(Entity.json(List.of(alertApi)));
     assertThat(updateAlertResp.getStatus()).isEqualTo(200);
 
-    final var gotAlertApi = updateAlertResp.readEntity(new GenericType<List<AlertApi>>() {}).get(0);
+    final AlertApi gotAlertApi = updateAlertResp.readEntity(new GenericType<List<AlertApi>>() {}).get(0);
     assertThat(gotAlertApi.getAuth()).isNotNull();
     assertThat(gotAlertApi.getAuth().getNamespace()).isEqualTo("new-alert-namespace");
 
-    final var anomalyApi = mustGetAnomaliesForAlert(alertId).get(0);
+    final AnomalyApi anomalyApi = mustGetAnomaliesForAlert(alertId).get(0);
     assertThat(anomalyApi.getAuth()).isNotNull();
     assertThat(anomalyApi.getAuth().getNamespace()).isEqualTo("new-alert-namespace");
 
-    final var investigationApi = mustGetInvestigation(investigationId);
+    final RcaInvestigationApi investigationApi = mustGetInvestigation(investigationId);
     assertThat(investigationApi.getAuth()).isNotNull();
     assertThat(investigationApi.getAuth().getNamespace()).isEqualTo("new-alert-namespace");
   }

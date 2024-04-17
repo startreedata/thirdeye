@@ -186,8 +186,7 @@ public class DataSourceService extends CrudService<DataSourceApi, DataSourceDTO>
 
   @Deprecated // use validate by id
   public boolean validate(final ThirdEyePrincipal principal, final String name) {
-    final DataSourceDTO dataSourceDto = getDatasourceByName(
-        principal, name);
+    final DataSourceDTO dataSourceDto = getDatasourceByName(principal, name);
     authorizationManager.ensureCanRead(principal, dataSourceDto);
     return dataSourceCache.getDataSource(dataSourceDto).validate();
   }

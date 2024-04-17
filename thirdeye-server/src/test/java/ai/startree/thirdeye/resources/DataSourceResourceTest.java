@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.resources;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -33,6 +34,7 @@ import ai.startree.thirdeye.spi.auth.AuthenticationType;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
+import java.util.List;
 import javax.ws.rs.core.Response;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -52,8 +54,10 @@ public class DataSourceResourceTest {
   void setup() {
     dataSource = mock(ThirdEyeDataSource.class);
     dataSourceCache = mock(DataSourceCache.class);
-    dataSourceResource = new DataSourceResource(new DataSourceService(
-        mock(DataSourceManager.class),
+    final DataSourceManager datasourceDao = mock(DataSourceManager.class);
+    when(datasourceDao.findByName(anyString())).thenReturn(List.of(dataSourceDTO));
+    final DataSourceService dataSourceService = new DataSourceService(
+        datasourceDao,
         dataSourceCache,
         mock(DataSourceOnboarder.class),
         new AuthorizationManager(
@@ -61,7 +65,8 @@ public class DataSourceResourceTest {
             ThirdEyeAuthorizerProvider.ALWAYS_ALLOW,
             new NamespaceResolver(null, null, null, null),
             new AuthConfiguration()
-        )));
+        ));
+    dataSourceResource = new DataSourceResource(dataSourceService);
   }
 
   @Test

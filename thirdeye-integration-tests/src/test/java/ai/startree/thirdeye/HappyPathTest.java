@@ -578,8 +578,8 @@ public class HappyPathTest {
             .setAnomaly(new AnomalyApi().setId(anomalyId))
             .setAuth(new AuthorizationConfigurationApi().setNamespace("anomaly-namespace"))
     )));
-    // Investigations cannot be created with a namespace.
-    assertThat(createInvestigationResp.getStatus()).isEqualTo(400);
+    // before investigations could not be created with a namespace but now it's possible
+    assertThat(createInvestigationResp.getStatus()).isEqualTo(200);
   }
 
   @Test(timeOut = 60000, dependsOnMethods = "testAnomalyCount")

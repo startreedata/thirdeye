@@ -725,7 +725,7 @@ public class HappyPathTest {
   }
 
   private List<AnomalyApi> mustGetAnomaliesForAlert(long alertId) {
-    final var resp = request("/api/anomalies?alert.id=" + alertId).get();
+    final Response resp = request("/api/anomalies?alert.id=" + alertId).get();
     assertThat(resp.getStatus()).isEqualTo(200);
     return resp.readEntity(new GenericType<>() {});
   }

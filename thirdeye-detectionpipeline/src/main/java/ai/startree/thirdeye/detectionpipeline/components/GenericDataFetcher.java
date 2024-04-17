@@ -40,8 +40,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import org.joda.time.Interval;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
+  
+  private static final Logger LOG = LoggerFactory.getLogger(GenericDataFetcher.class);
 
   /**
    * Query to execute.
@@ -80,11 +84,22 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
     this.tableName = requireNonNull(dataFetcherSpec.getTableName());
     final DatasetConfigManager datasetDao = Objects.requireNonNull(
         dataFetcherSpec.getDatasetDao());
-    this.datasetConfigDTO = Objects.requireNonNull(
+    this.datasetConfigDTO = 
         datasetDao.findByDatasetAndNamespace(dataFetcherSpec.getTableName(),
-            dataFetcherSpec.getNamespace()),
-        "Could not find dataset " + dataFetcherSpec.getTableName());
-    // FIXME CYRIL ASAP authz - to maintain compatibility - look for dataset in undefined namespace if not found in spec (alert) namespace
+            dataFetcherSpec.getNamespace());
+    if (datasetConfigDTO == null) {
+      this.datasetConfigDTO =
+          datasetDao.findByDatasetAndNamespace(dataFetcherSpec.getTableName(),
+              dataFetcherSpec.getNamespace());
+      if (datasetConfigDTO != null) {
+        LOG.warn("Could not find dataset {} in namespace {}, but found a dataset with this name with an unset namespace. Using this dataset. This behaviour will change. Please migrate your dataset to a namespace.",
+            dataFetcherSpec.getTableName(), dataFetcherSpec.getNamespace());
+      } else {
+        throw new IllegalArgumentException(String.format("Could not find dataset %s with namespace %s, neither with an unset namespace.", 
+            dataFetcherSpec.getTableName(), dataFetcherSpec.getNamespace()));
+      }
+      // "Could not find dataset " + dataFetcherSpec.getTableName()
+    }
 
     // todo cyril - code is not compatible with same dataset name in multiple datasource in same namespace - not a very important use case for the moment
     final String dataSource = requireNonNull(dataFetcherSpec.getDataSource(),

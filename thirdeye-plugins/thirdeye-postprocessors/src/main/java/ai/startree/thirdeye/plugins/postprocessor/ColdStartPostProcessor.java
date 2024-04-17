@@ -40,8 +40,12 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.Period;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ColdStartPostProcessor implements AnomalyPostProcessor {
+  
+  private static final Logger LOG = LoggerFactory.getLogger(ColdStartPostProcessor.class);
 
   private static final String NAME = "COLD_START";
   private static final boolean DEFAULT_IGNORE = false;
@@ -85,9 +89,19 @@ public class ColdStartPostProcessor implements AnomalyPostProcessor {
   @Override
   public Map<String, OperatorResult> postProcess(final Interval detectionInterval,
       final Map<String, OperatorResult> resultMap) throws Exception {
-    // fixme cyril add authz namespace
-    final DatasetConfigDTO datasetConfigDTO = datasetDao.findByDatasetAndNamespace(tableName, namespace);
-    // FIXME CYRIL authz ASAP if not found by namespace - search in the null namespace - log if found
+    DatasetConfigDTO datasetConfigDTO = datasetDao.findByDatasetAndNamespace(tableName, namespace);
+    if (datasetConfigDTO == null) {
+      datasetConfigDTO = datasetDao.findByDatasetAndNamespace(tableName, namespace);
+      if (datasetConfigDTO != null) {
+        LOG.warn("Could not find dataset {} in namespace {}, but found a dataset with this name with an unset namespace. Using this dataset. This behaviour will change. Please migrate your dataset to a namespace.",
+            tableName, namespace);
+      } else {
+        throw new IllegalArgumentException(String.format("Could not find dataset %s with namespace %s, neither with an unset namespace.",
+            tableName, namespace));
+      }
+      // "Could not find dataset " + dataFetcherSpec.getTableName()
+    }
+    
     checkState(datasetConfigDTO != null, "Could not find dataset %s in namespace %s",
         tableName, namespace);
     final DataSourceDTO dataSourceDTO = dataSourceDao.findUniqueByNameAndNamespace(datasetConfigDTO.getDataSource(), datasetConfigDTO.namespace());

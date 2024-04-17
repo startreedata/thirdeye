@@ -18,6 +18,7 @@ import java.util.List;
 
 public interface DatasetConfigManager extends AbstractManager<DatasetConfigDTO> {
 
+  // fixme cyril authz ASAP - this method is often used with a fallback on the null namespace - implement it once?
   DatasetConfigDTO findByDatasetAndNamespace(final String dataset, final String namespace);
 
   List<DatasetConfigDTO> findActive();

@@ -16,15 +16,19 @@ package ai.startree.thirdeye.plugins.postprocessor;
 import static ai.startree.thirdeye.plugins.postprocessor.ColdStartPostProcessor.labelName;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import ai.startree.thirdeye.detectionpipeline.operator.AnomalyDetectorOperatorResult;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
+import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datasource.loader.MinMaxTimeLoader;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
@@ -57,24 +61,36 @@ public class ColdStartPostProcessorTest {
   private static final long FEBRUARY_3_2022 = 1643846400000L;
   private static final String RES_1_KEY = "res1";
   private static final String RES_2_KEY = "res2";
+  public static final String DATASOURCE_1 = "datasource1";
 
   private DatasetConfigManager datasetDao;
   private MinMaxTimeLoader minMaxTimeLoader;
   private ColdStartPostProcessorSpec spec;
+  private DataSourceManager dataSourceDao;
 
   @BeforeClass
   public void initMocks() throws Exception {
     datasetDao = mock(DatasetConfigManager.class);
-    when(datasetDao.findByDatasetAndNamespace(TABLE_NAME, NAMESPACE)).thenReturn(new DatasetConfigDTO());
+    final DatasetConfigDTO datasetDto = new DatasetConfigDTO().setDataSource(
+        DATASOURCE_1);
+    datasetDto.setAuth(new AuthorizationConfigurationDTO().setNamespace(NAMESPACE));
+    when(datasetDao.findByDatasetAndNamespace(TABLE_NAME, NAMESPACE)).thenReturn(datasetDto);
+    dataSourceDao = mock(DataSourceManager.class);
+    final DataSourceDTO datasourceDto = new DataSourceDTO();
+    when(dataSourceDao.findUniqueByNameAndNamespace(DATASOURCE_1, NAMESPACE))
+        .thenReturn(datasourceDto);
     minMaxTimeLoader = mock(MinMaxTimeLoader.class);
-    when(minMaxTimeLoader.fetchMinTimeAsync(any(), any(), any())).thenReturn(new FutureMinTime(
+    when(minMaxTimeLoader.fetchMinTimeAsync(eq(datasourceDto), eq(datasetDto), any())).thenReturn(new FutureMinTime(
         JANUARY_1_2022));
   }
 
   @BeforeMethod
   public void initSpec() {
-    spec = new ColdStartPostProcessorSpec().setTableName(TABLE_NAME)
+    spec = new ColdStartPostProcessorSpec()
+        .setTableName(TABLE_NAME)
         .setDatasetConfigManager(datasetDao)
+        .setDataSourceManager(dataSourceDao)
+        .setNamespace(NAMESPACE)
         .setMinMaxTimeLoader(minMaxTimeLoader);
   }
 

@@ -17,6 +17,7 @@ import static ai.startree.thirdeye.spi.util.AnomalyUtils.addLabel;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
@@ -33,8 +34,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.Period;
@@ -49,22 +51,22 @@ public class ColdStartPostProcessor implements AnomalyPostProcessor {
   private final boolean ignore;
   private final Period coldStartPeriod;
   private final String tableName;
-  private final String namespace;
+  private final @Nullable String namespace;
 
-  private final MinMaxTimeLoader minMaxTimeLoader;
-  private final DatasetConfigManager datasetDao;
+  private final @NonNull MinMaxTimeLoader minMaxTimeLoader;
+  private final @NonNull DatasetConfigManager datasetDao;
 
   private final String labelName;
-  private final DataSourceManager dataSourceDao;
+  private final @NonNull DataSourceManager dataSourceDao;
 
   public ColdStartPostProcessor(final ColdStartPostProcessorSpec spec) {
     this.ignore = optional(spec.getIgnore()).orElse(DEFAULT_IGNORE);
     this.coldStartPeriod = isoPeriod(spec.getColdStartPeriod(), DEFAULT_COLD_START_PERIOD);
-    this.tableName = Objects.requireNonNull(spec.getTableName());
+    this.tableName = requireNonNull(spec.getTableName());
 
-    this.minMaxTimeLoader = spec.getMinMaxTimeLoader();
-    this.datasetDao = spec.getDatasetConfigManager();
-    this.dataSourceDao = spec.getDataSourceManager();
+    this.minMaxTimeLoader = requireNonNull(spec.getMinMaxTimeLoader());
+    this.datasetDao = requireNonNull(spec.getDatasetConfigManager());
+    this.dataSourceDao = requireNonNull(spec.getDataSourceManager());
     this.namespace = spec.getNamespace();
 
     this.labelName = labelName(this.coldStartPeriod);

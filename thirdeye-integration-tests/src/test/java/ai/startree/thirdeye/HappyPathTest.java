@@ -731,9 +731,9 @@ public class HappyPathTest {
   }
 
   private RcaInvestigationApi mustGetInvestigation(long id) {
-    final var response = request("/api/rca/investigations/" + id).get();
+    final Response response = request("/api/rca/investigations/" + id).get();
     assertThat(response.getStatus()).isEqualTo(200);
-    final var investigationApi = response.readEntity(RcaInvestigationApi.class);
+    final RcaInvestigationApi investigationApi = response.readEntity(RcaInvestigationApi.class);
     assertThat(investigationApi).isNotNull();
     return investigationApi;
   }

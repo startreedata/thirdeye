@@ -12,21 +12,21 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import {
-    Button,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    FormControl,
-    FormControlLabel,
-    Grid,
-    Radio,
-    RadioGroup,
-    TextField,
-    Typography,
-} from "@material-ui/core";
-import { Autocomplete } from "@material-ui/lab";
+import Button from "@material-ui/core/Button";
+import Checkbox from "@material-ui/core/Checkbox";
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogTitle from "@material-ui/core/DialogTitle";
+import Divider from "@material-ui/core/Divider";
+import FormControl from "@material-ui/core/FormControl";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import Grid from "@material-ui/core/Grid";
+import Radio from "@material-ui/core/Radio";
+import RadioGroup from "@material-ui/core/RadioGroup";
+import TextField from "@material-ui/core/TextField";
+import Typography from "@material-ui/core/Typography";
+import Autocomplete from "@material-ui/lab/Autocomplete";
 import i18n from "i18next";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -133,6 +133,10 @@ export const AnomalyFeedbackModal: FunctionComponent<AnomalyFeedbackModalProps> 
                 return null;
             });
 
+        const [updateAlertOnFeedback, setUpdateAlertOnFeedback] = useState(
+            anomalyFeedback?.updateAlertConfiguration === "ASYNC"
+        );
+
         useEffect(() => {
             if (status === ActionStatus.Done) {
                 notify(
@@ -164,6 +168,12 @@ export const AnomalyFeedbackModal: FunctionComponent<AnomalyFeedbackModalProps> 
 
             if (reason) {
                 feedbackObject.cause = reason.serverValue;
+            }
+
+            if (updateAlertOnFeedback) {
+                feedbackObject.updateAlertConfiguration = "ASYNC";
+            } else {
+                delete feedbackObject.updateAlertConfiguration;
             }
 
             if (anomalyFeedback?.id) {
@@ -283,12 +293,39 @@ export const AnomalyFeedbackModal: FunctionComponent<AnomalyFeedbackModalProps> 
                                     }
                                 />
                             </Grid>
+                            <Grid item xs={12}>
+                                <Divider />
+                            </Grid>
+                            <Grid item xs={12}>
+                                <Typography variant="subtitle2">
+                                    {t(
+                                        "message.do-you-want-to-tune-the-alert-config-based-on-feedback"
+                                    )}
+                                </Typography>
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            checked={updateAlertOnFeedback}
+                                            color="primary"
+                                            onChange={(e) => {
+                                                setUpdateAlertOnFeedback(
+                                                    e.target.checked
+                                                );
+                                            }}
+                                        />
+                                    }
+                                    label={t(
+                                        "message.yes-tune-the-alert-configuration"
+                                    )}
+                                />
+                            </Grid>
                         </Grid>
                     </DialogContent>
                     <DialogActions>
                         <Button
                             color="primary"
                             disabled={status === ActionStatus.Working}
+                            variant="outlined"
                             onClick={() => setIsOpen(false)}
                         >
                             {t("label.cancel")}

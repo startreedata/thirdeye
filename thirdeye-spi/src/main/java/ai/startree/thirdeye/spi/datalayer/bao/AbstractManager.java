@@ -39,7 +39,7 @@ public interface AbstractManager<E extends AbstractDTO> {
    * @param name
    * @return
    */
-  @Deprecated // use findUniqueByNameAndNamespace instead
+  @Deprecated // FIXME CYRIL authz use findUniqueByNameAndNamespace or findByNameAndNamespace instead
   List<E> findByName(String name);
   
   // returns null if the entity is not found or not unique // TODO CYRIL differentiate behaviour when not unique 

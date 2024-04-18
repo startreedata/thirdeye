@@ -32,6 +32,7 @@ import ai.startree.thirdeye.spi.dataframe.DoubleSeries;
 import ai.startree.thirdeye.spi.dataframe.LongSeries;
 import ai.startree.thirdeye.spi.dataframe.StringSeries;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
+import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datasource.loader.AggregationLoader;
@@ -65,6 +66,7 @@ public class SimpleContributorsFinderTest {
 
   private static final MetricConfigDTO METRIC_CONFIG_DTO = new MetricConfigDTO();
   private static final DatasetConfigDTO DATASET_CONFIG_DTO = new DatasetConfigDTO();
+  private static final DataSourceDTO DATASOURCE_DTO = new DataSourceDTO();
   private static final int SUMMARY_SIZE = 2;
   private static final int DEPTH = 2; // not used by the algorithm
   private static final boolean DO_ONE_SIDE_ERROR = true;
@@ -74,11 +76,13 @@ public class SimpleContributorsFinderTest {
   private static final MetricSlice BASELINE_SLICE = MetricSlice.from(METRIC_CONFIG_DTO,
       BASELINE_INTERVAL,
       FILTERS,
-      DATASET_CONFIG_DTO);
+      DATASET_CONFIG_DTO,
+      DATASOURCE_DTO);
   private static final MetricSlice CURRENT_SLICE = MetricSlice.from(METRIC_CONFIG_DTO,
       CURRENT_INTERVAL,
       FILTERS,
-      DATASET_CONFIG_DTO);
+      DATASET_CONFIG_DTO,
+      DATASOURCE_DTO);
 
   // os in android, osx. browser in chrome, safari
   private static final Supplier<DataFrame> BASELINE_DATAFRAME = () -> new DataFrame().addSeries(
@@ -111,7 +115,8 @@ public class SimpleContributorsFinderTest {
     final ContributorsFinderResult output = contributorsFinder.search(
         new ContributorsSearchConfiguration(
             METRIC_CONFIG_DTO,
-            DATASET_CONFIG_DTO,
+            DATASET_CONFIG_DTO, 
+            DATASOURCE_DTO,
             CURRENT_INTERVAL,
             BASELINE_INTERVAL,
             SUMMARY_SIZE,
@@ -146,6 +151,7 @@ public class SimpleContributorsFinderTest {
     final DimensionAnalysisResultApi res = contributorsFinder.search(new ContributorsSearchConfiguration(
         METRIC_CONFIG_DTO,
         DATASET_CONFIG_DTO,
+        DATASOURCE_DTO,
         CURRENT_INTERVAL,
         BASELINE_INTERVAL,
         SUMMARY_SIZE,
@@ -171,6 +177,7 @@ public class SimpleContributorsFinderTest {
     final DimensionAnalysisResultApi res = contributorsFinder.search(new ContributorsSearchConfiguration(
         METRIC_CONFIG_DTO,
         DATASET_CONFIG_DTO,
+        DATASOURCE_DTO,
         CURRENT_INTERVAL,
         BASELINE_INTERVAL,
         SUMMARY_SIZE,

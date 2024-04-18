@@ -14,15 +14,9 @@
 package ai.startree.thirdeye.spi.datalayer.bao;
 
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import java.util.List;
 
 public interface MetricConfigManager extends AbstractManager<MetricConfigDTO> {
 
-  List<MetricConfigDTO> findByDataset(String dataset);
+  MetricConfigDTO findBy(String metricName, String dataset, final String namespace);
 
-  MetricConfigDTO findByMetricAndDataset(String metricName, String dataset);
-
-  List<MetricConfigDTO> findActiveByDataset(String dataset);
-
-  List<MetricConfigDTO> findByMetricName(String metricName);
 }

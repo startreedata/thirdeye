@@ -15,6 +15,7 @@ package ai.startree.thirdeye.detectionpipeline.operator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -30,8 +31,10 @@ import ai.startree.thirdeye.detectionpipeline.PostProcessorRegistry;
 import ai.startree.thirdeye.detectionpipeline.components.GenericDataFetcher;
 import ai.startree.thirdeye.detectionpipeline.spec.DataFetcherSpec;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
+import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
+import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
@@ -56,13 +59,18 @@ public class DataFetcherOperatorTest {
   @BeforeMethod
   public void setUp() {
     dataSourceName = "pinot-cluster-1";
+    final DataSourceDTO dataSourceDTO = new DataSourceDTO().setName("datasource1");
+    dataSourceDTO.setId(1L);
     final DataSourceCache dataSourceCache = mock(DataSourceCache.class);
     final DatasetConfigManager datasetDao = mock(DatasetConfigManager.class);
-    when(datasetDao.findByDataset(anyString())).thenReturn(new DatasetConfigDTO().setDataset
-        (TABLE_NAME));
+    when(datasetDao.findByDatasetAndNamespaceOrUnsetNamespace(anyString(), nullable(String.class)))
+        .thenReturn(new DatasetConfigDTO().setDataset(TABLE_NAME));
     final ThirdEyeDataSource thirdEyeDataSource = mock(ThirdEyeDataSource.class);
-    when(dataSourceCache.getDataSource(dataSourceName))
+    when(dataSourceCache.getDataSource(dataSourceDTO))
         .thenReturn(thirdEyeDataSource);
+    final DataSourceManager dataSourceDao = mock(DataSourceManager.class);
+    when(dataSourceDao.findUniqueByNameAndNamespace(anyString(), nullable(String.class)))
+        .thenReturn(dataSourceDTO);
     planNodeContext = new PlanNodeContext().setDetectionPipelineContext(
         new DetectionPipelineContext().setApplicationContext(
             new ApplicationContext(
@@ -70,6 +78,7 @@ public class DataFetcherOperatorTest {
                 mock(DetectionRegistry.class),
                 mock(PostProcessorRegistry.class),
                 mock(EventManager.class),
+                dataSourceDao, 
                 datasetDao,
                 mock(ExecutorService.class),
                 new DetectionPipelineConfiguration(),
@@ -81,8 +90,9 @@ public class DataFetcherOperatorTest {
   public void testNewInstance() {
     final DataFetcherOperator dataFetcherOperator = new DataFetcherOperator();
     final PlanNodeBean planNodeBean = new PlanNodeBean()
-        .setParams(TemplatableMap.fromValueMap(ImmutableMap.of("component.dataSource",
-            dataSourceName)))
+        .setParams(TemplatableMap.fromValueMap(ImmutableMap.of(
+            "component.dataSource", dataSourceName,
+            "component.tableName", TABLE_NAME)))
         .setOutputs(ImmutableList.of());
     final long startTime = System.currentTimeMillis();
     final long endTime = startTime + 1000L;

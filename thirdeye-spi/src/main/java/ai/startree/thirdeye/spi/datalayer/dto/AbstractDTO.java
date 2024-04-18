@@ -94,6 +94,13 @@ public abstract class AbstractDTO implements Serializable {
     this.auth = auth;
     return this;
   }
+  
+  // should only be used internally to look at the namespace 
+  // should not be used for user facing auth - use NamespaceResolver
+  // should not be used for authorization - use AuthorizationManager
+  public String namespace() {
+    return auth != null ? auth.getNamespace() : null;
+  }
 
   @Override
   public String toString() {

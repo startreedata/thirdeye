@@ -67,12 +67,14 @@ public class SimpleContributorsFinder implements ContributorsFinder {
     final MetricSlice baselineSlice = MetricSlice.from(searchConfiguration.getMetricConfigDTO(),
         searchConfiguration.getBaselineInterval(),
         searchConfiguration.getFilters(),
-        searchConfiguration.getDatasetConfigDTO());
+        searchConfiguration.getDatasetConfigDTO(),
+        searchConfiguration.getDataSourceDTO());
 
     final MetricSlice currentSlice = MetricSlice.from(searchConfiguration.getMetricConfigDTO(),
         searchConfiguration.getCurrentInterval(),
         searchConfiguration.getFilters(),
-        searchConfiguration.getDatasetConfigDTO());
+        searchConfiguration.getDatasetConfigDTO(),
+        searchConfiguration.getDataSourceDTO());
 
     final DataFrame baseline = aggregationLoader.loadBreakdown(baselineSlice, LIMIT_DEFAULT);
     if (baseline.size() <= 0) {

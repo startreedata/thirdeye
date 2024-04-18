@@ -22,6 +22,7 @@ import static java.util.Collections.emptyList;
 import ai.startree.thirdeye.datalayer.core.EnumerationItemMaintainer;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.detectionpipeline.persistence.CachedDatasetConfigManager;
+import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
@@ -50,6 +51,7 @@ public class PlanExecutor implements AutoCloseable {
   private final DetectionRegistry detectionRegistry;
   private final PostProcessorRegistry postProcessorRegistry;
   private final EventManager eventManager;
+  private final DataSourceManager dataSourceDao;
   private final DatasetConfigManager datasetConfigManager;
   private final DetectionPipelineConfiguration detectionPipelineConfiguration;
   private final EnumerationItemMaintainer enumerationItemMaintainer;
@@ -62,7 +64,7 @@ public class PlanExecutor implements AutoCloseable {
       final DetectionRegistry detectionRegistry,
       final PostProcessorRegistry postProcessorRegistry,
       final EventManager eventManager,
-      final DatasetConfigManager datasetConfigManager,
+      final DataSourceManager dataSourceDao, final DatasetConfigManager datasetConfigManager,
       final DetectionPipelineConfiguration detectionPipelineConfiguration,
       final EnumerationItemMaintainer enumerationItemMaintainer) {
     this.planNodeFactory = planNodeFactory;
@@ -70,6 +72,7 @@ public class PlanExecutor implements AutoCloseable {
     this.detectionRegistry = detectionRegistry;
     this.postProcessorRegistry = postProcessorRegistry;
     this.eventManager = eventManager;
+    this.dataSourceDao = dataSourceDao;
     this.datasetConfigManager = datasetConfigManager;
     this.detectionPipelineConfiguration = detectionPipelineConfiguration;
     this.enumerationItemMaintainer = enumerationItemMaintainer;
@@ -131,6 +134,8 @@ public class PlanExecutor implements AutoCloseable {
         detectionRegistry,
         postProcessorRegistry,
         eventManager,
+        // todo cyril authz - see comment below - I think the same should be done for datasource 
+        dataSourceDao,
         /* Use a caching instance for pipeline execution. Ensures dataset entity is consistent across nodes and is only fetched once. */
         new CachedDatasetConfigManager(datasetConfigManager),
         subTaskExecutor,

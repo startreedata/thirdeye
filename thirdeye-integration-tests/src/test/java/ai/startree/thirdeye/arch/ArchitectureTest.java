@@ -31,7 +31,7 @@ import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.alert.EvaluationContextProcessor;
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.NamespaceResolver;
-import ai.startree.thirdeye.core.DataSourceOnboarder;
+import ai.startree.thirdeye.datasource.DataSourceOnboarder;
 import ai.startree.thirdeye.datalayer.DataSourceBuilder;
 import ai.startree.thirdeye.datalayer.DatabaseClient;
 import ai.startree.thirdeye.datalayer.DatabaseOrm;
@@ -194,7 +194,7 @@ public class ArchitectureTest {
         EnumerationItemDeleter.class,
         TaskManagerImpl.class,
         AlertManagerImpl.class,
-        DataSourceOnboarder.class,
+        DataSourceOnboarder.class, // OK - REVIEWED ON APRIL 12 2024
         NamespaceResolver.class,
         EvaluationContextProcessor.class,
         AlertTemplateRenderer.class

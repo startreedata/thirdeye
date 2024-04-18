@@ -31,6 +31,7 @@ import ai.startree.thirdeye.detectionpipeline.PostProcessorRegistry;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
+import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
@@ -99,6 +100,7 @@ public class EventFetcherOperatorTest {
                 mock(DetectionRegistry.class),
                 mock(PostProcessorRegistry.class),
                 eventDao,
+                mock(DataSourceManager.class), 
                 mock(DatasetConfigManager.class),
                 mock(ExecutorService.class),
                 new DetectionPipelineConfiguration(),

@@ -13,7 +13,9 @@
  */
 package ai.startree.thirdeye.rca;
 
+import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EventContextDto;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
@@ -21,54 +23,15 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.joda.time.Chronology;
 import org.joda.time.Period;
 
-// fixme cyril authz - move this to service if it's actually a service
-public class RcaInfo {
-
-  private final @NonNull AnomalyDTO anomaly;
-  private final @NonNull MetricConfigDTO metric;
-  private final @NonNull DatasetConfigDTO dataset;
-  // avoid passing the whole AlertMetadataDTO
-  private final @NonNull Chronology chronology;
-  private final @NonNull Period granularity;
-
-
-  private final @NonNull EventContextDto eventContext;
-
-  public RcaInfo(
-      final @NonNull AnomalyDTO anomaly,
-      final @NonNull MetricConfigDTO metric,
-      final @NonNull DatasetConfigDTO dataset,
-      final @NonNull Chronology chronology, final @NonNull Period granularity, @NonNull final EventContextDto eventContext) {
-    this.anomaly = anomaly;
-    this.metric = metric;
-    this.dataset = dataset;
-    this.chronology = chronology;
-    this.granularity = granularity;
-    this.eventContext = eventContext;
-  }
-
-  // todo cyril for refactoring I expose all objects - once refactored, only expose what is really used
-  public @NonNull AnomalyDTO getAnomaly() {
-    return anomaly;
-  }
-
-  public @NonNull MetricConfigDTO getMetric() {
-    return metric;
-  }
-
-  public @NonNull DatasetConfigDTO getDataset() {
-    return dataset;
-  }
-
-  public @NonNull Chronology getChronology() {
-    return chronology;
-  }
-
-  public @NonNull EventContextDto getEventContext() {
-    return eventContext;
-  }
-
-  public Period getGranularity() {
-    return granularity;
-  }
-}
+public record RcaInfo(
+    // todo cyril consider not exposing all objects - once refactored, only expose what is really used
+    @NonNull AnomalyDTO anomaly,
+    @NonNull AlertDTO alert,
+    @NonNull MetricConfigDTO metric,
+    @NonNull DatasetConfigDTO dataset,
+    @NonNull DataSourceDTO dataSourceDto,
+    // avoid passing the whole AlertMetadataDTO
+    @NonNull Chronology chronology,
+    @NonNull Period granularity,
+    @NonNull EventContextDto eventContext) {}
+  

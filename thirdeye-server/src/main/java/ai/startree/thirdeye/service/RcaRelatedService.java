@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.service;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.StringUtils.levenshteinDistance;
 import static ai.startree.thirdeye.util.StringUtils.timeFormatterFor;
 
@@ -90,8 +91,10 @@ public class RcaRelatedService {
   public List<EventApi> getRelatedEvents(final ThirdEyePrincipal principal, final Long anomalyId, final String type,
       final IntervalSimilarityScoring scoring, final int limit, final Period lookaround)
       throws IOException, ClassNotFoundException {
-    // FIXME CYRIL add authz
-    final RcaInfo rcaInfo = rcaInfoFetcher.getRcaInfo(anomalyId);
+    final AnomalyDTO anomalyDto = ensureExists(anomalyDAO.findById(anomalyId),
+        String.format("Anomaly ID: %d", anomalyId));
+    authorizationManager.ensureCanRead(principal, anomalyDto);
+    final RcaInfo rcaInfo = rcaInfoFetcher.getRcaInfo(anomalyDto);
     return getRelatedEvents(rcaInfo, type, scoring, limit, lookaround);
   }
 
@@ -99,17 +102,17 @@ public class RcaRelatedService {
   private List<EventApi> getRelatedEvents(final RcaInfo rcaInfo,
       final @org.checkerframework.checker.nullness.qual.Nullable String type,
       final IntervalSimilarityScoring scoring, final int limit, final Period lookaround) {
-    final Interval anomalyInterval = new Interval(rcaInfo.getAnomaly().getStartTime(),
-        rcaInfo.getAnomaly().getEndTime(), rcaInfo.getChronology());
+    final Interval anomalyInterval = new Interval(rcaInfo.anomaly().getStartTime(),
+        rcaInfo.anomaly().getEndTime(), rcaInfo.chronology());
     final long startWithLookback = anomalyInterval.getStart().minus(lookaround).getMillis();
     final long endWithLookahead = Math.max(anomalyInterval.getStart().plus(lookaround).getMillis(),
         anomalyInterval.getEnd().getMillis());
 
-    final @NonNull EventContextDto eventContext = rcaInfo.getEventContext();
+    final @NonNull EventContextDto eventContext = rcaInfo.eventContext();
     // todo cyril make the type parameter a list - ask FrontEnd if it's ok first
     final List<@NonNull String> types = optional(type).map(List::of)
         .orElse(optional(eventContext.getTypes()).map(Templatable::getValue).orElse(List.of()));
-    // FIXME cyril add authz
+    // FIXME cyril add authz - filter by namespace
     final List<EventDTO> events = eventDAO.findEventsBetweenTimeRange(startWithLookback,
         endWithLookahead, types,
         // todo rca dimension filters can be set at call time?
@@ -131,8 +134,10 @@ public class RcaRelatedService {
   public RelatedEventsAnalysisApi getEventsAnalysis(final ThirdEyePrincipal principal, final Long anomalyId, final String type,
       final IntervalSimilarityScoring scoring, final int limit, final Period lookaround)
       throws IOException, ClassNotFoundException {
-    // FIXME CYRIL add authz
-    final RcaInfo rcaInfo = rcaInfoFetcher.getRcaInfo(anomalyId);
+    final AnomalyDTO anomalyDto = ensureExists(anomalyDAO.findById(anomalyId),
+        String.format("Anomaly ID: %d", anomalyId));
+    authorizationManager.ensureCanRead(principal, anomalyDto);
+    final RcaInfo rcaInfo = rcaInfoFetcher.getRcaInfo(anomalyDto);
     final List<EventApi> events = getRelatedEvents(rcaInfo, type, scoring, limit, lookaround);
     final RelatedEventsAnalysisApi result = new RelatedEventsAnalysisApi();
     result.setEvents(events);
@@ -199,15 +204,15 @@ public class RcaRelatedService {
 
   // TODO add weekend analysis wordings eg: "the previous week-end or the following week-end)
   private static String generateAnalysisText(final EventApi event, final RcaInfo rcaInfo) {
-    final DateTimeFormatter timeFormatter = timeFormatterFor(rcaInfo.getGranularity(),
-        rcaInfo.getChronology());
-    final DateTime eventStart = new DateTime(event.getStartTime(), rcaInfo.getChronology());
+    final DateTimeFormatter timeFormatter = timeFormatterFor(rcaInfo.granularity(),
+        rcaInfo.chronology());
+    final DateTime eventStart = new DateTime(event.getStartTime(), rcaInfo.chronology());
 
     final String timeRelation;
-    if (event.getEndTime() <= rcaInfo.getAnomaly().getStartTime()) {
+    if (event.getEndTime() <= rcaInfo.anomaly().getStartTime()) {
       timeRelation = "occurred just before, on " + eventStart.toString(timeFormatter);
       // todo replace just before by "x days before ..." the event
-    } else if (event.getStartTime() >= rcaInfo.getAnomaly().getEndTime()) {
+    } else if (event.getStartTime() >= rcaInfo.anomaly().getEndTime()) {
       // event happens after the anomaly without overlap
       // todo replace soon after by a more precise wording
       timeRelation = "happens soon after, on " + eventStart.toString(timeFormatter);
@@ -225,8 +230,10 @@ public class RcaRelatedService {
   public List<AnomalyApi> getRelatedAnomalies(final ThirdEyePrincipal principal, final long anomalyId,
       final IntervalSimilarityScoring scoring, final int limit, final Period lookaround)
       throws IOException, ClassNotFoundException {
-    // FIXME cyril add authz
-    final RcaInfo rcaInfo = rcaInfoFetcher.getRcaInfo(anomalyId);
+    final AnomalyDTO anomalyDto = ensureExists(anomalyDAO.findById(anomalyId),
+        String.format("Anomaly ID: %d", anomalyId));
+    authorizationManager.ensureCanRead(principal, anomalyDto);
+    final RcaInfo rcaInfo = rcaInfoFetcher.getRcaInfo(anomalyDto);
     return getRelatedAnomalies(rcaInfo, scoring, limit, lookaround);
   }
 
@@ -234,8 +241,10 @@ public class RcaRelatedService {
       final long anomalyId,
       final IntervalSimilarityScoring scoring, final int limit, final Period lookaround)
       throws IOException, ClassNotFoundException {
-    // fixme cyril add authz
-    final RcaInfo rcaInfo = rcaInfoFetcher.getRcaInfo(anomalyId);
+    final AnomalyDTO anomalyDto = ensureExists(anomalyDAO.findById(anomalyId),
+        String.format("Anomaly ID: %d", anomalyId));
+    authorizationManager.ensureCanRead(principal, anomalyDto);
+    final RcaInfo rcaInfo = rcaInfoFetcher.getRcaInfo(anomalyDto);
     final List<AnomalyApi> anomalies = getRelatedAnomalies(rcaInfo, scoring, limit, lookaround);
 
     final RelatedAnomaliesAnalysisApi result = new RelatedAnomaliesAnalysisApi();
@@ -249,12 +258,12 @@ public class RcaRelatedService {
   @NonNull
   private List<AnomalyApi> getRelatedAnomalies(final RcaInfo rcaInfo,
       final IntervalSimilarityScoring scoring, final int limit, final Period lookaround) {
-    final Interval anomalyInterval = new Interval(rcaInfo.getAnomaly().getStartTime(),
-        rcaInfo.getAnomaly().getEndTime(), rcaInfo.getChronology());
+    final Interval anomalyInterval = new Interval(rcaInfo.anomaly().getStartTime(),
+        rcaInfo.anomaly().getEndTime(), rcaInfo.chronology());
     final long startWithLookback = anomalyInterval.getStart().minus(lookaround).getMillis();
     final long endWithLookahead = Math.max(anomalyInterval.getStart().plus(lookaround).getMillis(),
         anomalyInterval.getEnd().getMillis());
-
+    // FIXME CYRIL - authz filter by namespace
     final List<AnomalyDTO> anomalies = anomalyDAO.filter(new AnomalyFilter()
         .setStartEndWindow(new Interval(startWithLookback, endWithLookahead))
         .setIsChild(false)
@@ -268,7 +277,7 @@ public class RcaRelatedService {
 
     return anomalies.stream()
         .limit(limit)
-        .filter(dto -> !dto.getId().equals(rcaInfo.getAnomaly().getId()))
+        .filter(dto -> !dto.getId().equals(rcaInfo.anomaly().getId()))
         .map(ApiBeanMapper::toApi)
         .collect(Collectors.toList());
   }
@@ -280,9 +289,9 @@ public class RcaRelatedService {
     List<AnomalyApi> anomaliesOfSameMetric = new ArrayList<>();
     List<AnomalyApi> otherAnomalies = new ArrayList<>();
     for (final AnomalyApi relatedAnomaly : anomalies) {
-      if (isOfSameAlertDifferentEnumAndClose(rcaInfo.getAnomaly(), relatedAnomaly)) {
+      if (isOfSameAlertDifferentEnumAndClose(rcaInfo.anomaly(), relatedAnomaly)) {
         anomaliesOfSameAlertDifferentEnumAndClose.add(relatedAnomaly);
-      } else if (isOfSameAlertSameEnum(rcaInfo.getAnomaly(), relatedAnomaly)) {
+      } else if (isOfSameAlertSameEnum(rcaInfo.anomaly(), relatedAnomaly)) {
         anomaliesOfSameMetric.add(relatedAnomaly);
       } else {
         otherAnomalies.add(relatedAnomaly);
@@ -315,7 +324,7 @@ public class RcaRelatedService {
         text.append(" and ").append(relatedEnums.size() - 3).append(" others");
       }
       text.append(". ");
-    } else if (rcaInfo.getAnomaly().getEnumerationItem() != null) {
+    } else if (rcaInfo.anomaly().getEnumerationItem() != null) {
       // the problem is specific to this enumeration
       text.append(
           "The anomaly is specific to this dimension. No anomalies were detected in other dimensions of this alert. ");
@@ -326,8 +335,8 @@ public class RcaRelatedService {
 
   private static StringBuilder textForAnomaliesOfSameMetric(
       final List<AnomalyApi> anomaliesOfSameAlertSameEnum, final RcaInfo rcaInfo) {
-    final DateTimeFormatter timeFormatter = timeFormatterFor(rcaInfo.getGranularity(),
-        rcaInfo.getChronology());
+    final DateTimeFormatter timeFormatter = timeFormatterFor(rcaInfo.granularity(),
+        rcaInfo.chronology());
     final StringBuilder text = new StringBuilder();
     if (anomaliesOfSameAlertSameEnum.isEmpty()) {
       return text;
@@ -349,8 +358,8 @@ public class RcaRelatedService {
     if (otherAnomalies.isEmpty()) {
       return text;
     }
-    final DateTimeFormatter timeFormatter = timeFormatterFor(rcaInfo.getGranularity(),
-        rcaInfo.getChronology());
+    final DateTimeFormatter timeFormatter = timeFormatterFor(rcaInfo.granularity(),
+        rcaInfo.chronology());
     text.append("Anomalies in different metrics were also detected around the same time for: ");
     for (int i = 0; i < otherAnomalies.size(); i++) {
       final AnomalyApi anomaly = otherAnomalies.get(i);

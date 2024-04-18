@@ -15,6 +15,7 @@ package ai.startree.thirdeye.detectionpipeline.spec;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
+import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -47,9 +48,20 @@ public class DataFetcherSpec extends AbstractSpec {
   private DatasetConfigManager datasetDao;
 
   /**
+   * Expected to be set during DataFetcherOperator init
+   * */
+  private DataSourceManager dataSourceDao;
+
+  /**
    * Expected to be set during DataFetcherOperator init.
    */
   private List<Predicate> timeseriesFilters;
+
+  /**
+   * Expected to be set during DataFetcherOperator init.
+   */
+  private String namespace;
+  
 
   public String getDataSource() {
     return dataSource;
@@ -102,6 +114,25 @@ public class DataFetcherSpec extends AbstractSpec {
   public DataFetcherSpec setTimeseriesFilters(
       final List<Predicate> timeseriesFilters) {
     this.timeseriesFilters = timeseriesFilters;
+    return this;
+  }
+
+  public String getNamespace() {
+    return namespace;
+  }
+
+  public DataFetcherSpec setNamespace(final String namespace) {
+    this.namespace = namespace;
+    return this;
+  }
+
+  public DataSourceManager getDataSourceDao() {
+    return dataSourceDao;
+  }
+
+  public DataFetcherSpec setDataSourceDao(
+      final DataSourceManager dataSourceDao) {
+    this.dataSourceDao = dataSourceDao;
     return this;
   }
 }

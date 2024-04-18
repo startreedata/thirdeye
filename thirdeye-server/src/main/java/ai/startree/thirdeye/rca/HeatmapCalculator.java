@@ -27,6 +27,8 @@ import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.dataframe.LongSeries;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datasource.loader.AggregationLoader;
@@ -46,9 +48,12 @@ import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Consumer of this class should ensure authz is performed.
+ */
 public class HeatmapCalculator {
 
-  public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormat.forStyle("LL");
+  private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormat.forStyle("LL");
   private static final Logger LOG = LoggerFactory.getLogger(HeatmapCalculator.class);
   private static final long TIMEOUT_MILLIS = 60_000;
 
@@ -62,43 +67,47 @@ public class HeatmapCalculator {
     this.aggregationLoader = aggregationLoader;
   }
 
-  public HeatMapResponseApi compute(final long anomalyId,
+  /**
+   * Consumer of this method should ensure authz on the anomaly entity.
+   * */
+  public HeatMapResponseApi compute(final AnomalyDTO anomalyDto,
       final String baselineOffset,
       final List<String> filters,
       final Integer limit,
       final List<String> dimensions,
       final List<String> excludedDimensions) throws Exception {
-    final RcaInfo rcaInfo = rcaInfoFetcher.getRcaInfo(
-        anomalyId);
-    final Interval currentInterval = new Interval(rcaInfo.getAnomaly()
+    final RcaInfo rcaInfo = rcaInfoFetcher.getRcaInfo(anomalyDto);
+    final Interval currentInterval = new Interval(rcaInfo.anomaly()
         .getStartTime(),
-        rcaInfo.getAnomaly().getEndTime(),
-        rcaInfo.getChronology());
+        rcaInfo.anomaly().getEndTime(),
+        rcaInfo.chronology());
 
     final Period baselineOffsetPeriod = isoPeriod(baselineOffset);
     final Interval baselineInterval = new Interval(currentInterval.getStart()
         .minus(baselineOffsetPeriod), currentInterval.getEnd().minus(baselineOffsetPeriod));
 
     // override dimensions
-    final DatasetConfigDTO datasetConfigDTO = rcaInfo.getDataset();
+    final DatasetConfigDTO datasetConfigDTO = rcaInfo.dataset();
     final List<String> rcaDimensions = getRcaDimensions(dimensions,
         excludedDimensions,
         datasetConfigDTO);
     datasetConfigDTO.setDimensions(Templatable.of(rcaDimensions));
 
     final Map<String, Map<String, Double>> anomalyBreakdown = computeBreakdown(
-        rcaInfo.getMetric(),
+        rcaInfo.metric(),
         parseAndCombinePredicates(filters),
         currentInterval,
         limit,
-        datasetConfigDTO);
+        datasetConfigDTO,
+        rcaInfo.dataSourceDto());
 
     final Map<String, Map<String, Double>> baselineBreakdown = computeBreakdown(
-        rcaInfo.getMetric(),
+        rcaInfo.metric(),
         parseAndCombinePredicates(filters),
         baselineInterval,
         limit,
-        datasetConfigDTO);
+        datasetConfigDTO,
+        rcaInfo.dataSourceDto());
 
     // if a dimension value is not observed in a breakdown but observed in the other, add it with a count of 0
     fillMissingKeysWithZeroes(baselineBreakdown, anomalyBreakdown);
@@ -106,7 +115,7 @@ public class HeatmapCalculator {
 
     return new HeatMapResponseApi()
         .setMetric(new MetricApi()
-            .setName(rcaInfo.getMetric().getName())
+            .setName(rcaInfo.metric().getName())
             .setDataset(new DatasetApi().setName(datasetConfigDTO.getDataset())))
         .setCurrent(new HeatMapBreakdownApi().setBreakdown(anomalyBreakdown))
         .setBaseline(new HeatMapBreakdownApi().setBreakdown(baselineBreakdown));
@@ -134,16 +143,17 @@ public class HeatmapCalculator {
     }
   }
 
-  public Map<String, Map<String, Double>> computeBreakdown(final MetricConfigDTO metricConfigDTO,
+  private Map<String, Map<String, Double>> computeBreakdown(final MetricConfigDTO metricConfigDTO,
       final List<Predicate> predicates,
       final Interval interval,
       final int limit,
-      final DatasetConfigDTO datasetConfigDTO) throws Exception {
+      final DatasetConfigDTO datasetConfigDTO, final DataSourceDTO dataSourceDto) throws Exception {
 
     final MetricSlice baseSlice = MetricSlice.from(metricConfigDTO,
         interval,
         predicates,
-        datasetConfigDTO);
+        datasetConfigDTO, 
+        dataSourceDto);
 
     LOG.info("RCA metric analysis - Slice: {} - {}",
         DATE_TIME_FORMATTER.print(baseSlice.getInterval().getStartMillis()),

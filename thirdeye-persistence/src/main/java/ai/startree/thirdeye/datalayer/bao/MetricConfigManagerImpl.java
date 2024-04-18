@@ -20,6 +20,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
+import java.util.Objects;
 import org.apache.commons.collections4.CollectionUtils;
 
 @Singleton
@@ -32,34 +33,18 @@ public class MetricConfigManagerImpl extends AbstractManagerImpl<MetricConfigDTO
   }
 
   @Override
-  public List<MetricConfigDTO> findByDataset(String dataset) {
-    Predicate predicate = Predicate.EQ("dataset", dataset);
-    return findByPredicate(predicate);
-  }
-
-  @Override
-  public List<MetricConfigDTO> findActiveByDataset(String dataset) {
-    Predicate datasetPredicate = Predicate.EQ("dataset", dataset);
-    Predicate activePredicate = Predicate.EQ("active", true);
-    Predicate predicate = Predicate.AND(datasetPredicate, activePredicate);
-    return findByPredicate(predicate);
-  }
-
-  @Override
-  public MetricConfigDTO findByMetricAndDataset(String metricName, String dataset) {
-    Predicate datasetPredicate = Predicate.EQ("dataset", dataset);
-    Predicate metricNamePredicate = Predicate.EQ("name", metricName);
-    Predicate predicate = Predicate.AND(datasetPredicate, metricNamePredicate);
-    List<MetricConfigDTO> list = findByPredicate(predicate);
+  public MetricConfigDTO findBy(final String metricName,
+      final String dataset, final String namespace) {
+    final Predicate datasetPredicate = Predicate.EQ("dataset", dataset);
+    final Predicate metricNamePredicate = Predicate.EQ("name", metricName);
+    final Predicate predicate = Predicate.AND(datasetPredicate, metricNamePredicate);
+    final List<MetricConfigDTO> list = findByPredicate(predicate)
+        // TODO CYRIL authz - filter in the sql read, not in app
+        .stream().filter(d -> Objects.equals(d.namespace(), namespace)).toList();
     if (CollectionUtils.isNotEmpty(list)) {
+      // TODO CYRIL behavior is different in AbstractManager#findUniqueByNameAndNamespace --> clarify
       return list.get(0);
     }
     return null;
-  }
-
-  @Override
-  public List<MetricConfigDTO> findByMetricName(String metricName) {
-    Predicate metricNamePredicate = Predicate.EQ("name", metricName);
-    return findByPredicate(metricNamePredicate);
   }
 }

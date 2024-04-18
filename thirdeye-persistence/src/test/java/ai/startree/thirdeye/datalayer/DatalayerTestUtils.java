@@ -20,6 +20,7 @@ import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.bao.OverrideConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DetectionStatusDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.JobDTO;
@@ -47,12 +48,13 @@ public class DatalayerTestUtils {
   }
 
 
-  public static MetricConfigDTO getTestMetricConfig(String collection, String metric, Long id) {
+  public static MetricConfigDTO getTestMetricConfig(String collection, String metric, final String namespace, Long id) {
     MetricConfigDTO metricConfigDTO = new MetricConfigDTO();
     if (id != null) {
       metricConfigDTO.setId(id);
     }
     metricConfigDTO.setDataset(collection);
+    metricConfigDTO.setAuth(new AuthorizationConfigurationDTO().setNamespace(namespace));
     metricConfigDTO.setDatatype(MetricType.LONG);
     metricConfigDTO.setName(metric);
     metricConfigDTO.setActive(Boolean.TRUE);

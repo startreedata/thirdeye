@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.spi.detection.postprocessing;
 
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
+import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datasource.loader.MinMaxTimeLoader;
@@ -21,24 +22,28 @@ import ai.startree.thirdeye.spi.detection.DetectionPipelineUsage;
 
 public class PostProcessingContext {
 
+  private final DataSourceManager dataSourceManager;
   private final DatasetConfigManager datasetConfigManager;
   private final MinMaxTimeLoader minMaxTimeLoader;
   private final AnomalyManager anomalyManager;
   private final Long alertId;
+  private final String namespace;
   private final DetectionPipelineUsage usage;
   private final EnumerationItemDTO enumerationItemDTO;
 
   public PostProcessingContext(
-      final DatasetConfigManager datasetConfigManager,
+      final DataSourceManager dataSourceManager, final DatasetConfigManager datasetConfigManager,
       final MinMaxTimeLoader minMaxTimeLoader,
       final AnomalyManager anomalyManager,
       final Long alertId,
-      final DetectionPipelineUsage usage,
+      final String namespace, final DetectionPipelineUsage usage,
       final EnumerationItemDTO enumerationItemDTO) {
+    this.dataSourceManager = dataSourceManager;
     this.datasetConfigManager = datasetConfigManager;
     this.minMaxTimeLoader = minMaxTimeLoader;
     this.anomalyManager = anomalyManager;
     this.alertId = alertId;
+    this.namespace = namespace;
     this.usage = usage;
     this.enumerationItemDTO = enumerationItemDTO;
   }
@@ -65,5 +70,13 @@ public class PostProcessingContext {
 
   public EnumerationItemDTO getEnumerationItemDTO() {
     return enumerationItemDTO;
+  }
+
+  public DataSourceManager getDataSourceManager() {
+    return dataSourceManager;
+  }
+
+  public String getNamespace() {
+    return namespace;
   }
 }

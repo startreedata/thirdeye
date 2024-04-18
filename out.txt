@@ -1,0 +1,259 @@
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] thirdeye                                                           [pom]
+[INFO] thirdeye-dataframe                                                 [jar]
+[INFO] thirdeye-spi                                                       [jar]
+[INFO] thirdeye-persistence                                               [jar]
+[INFO] thirdeye-core                                                      [jar]
+[INFO] thirdeye-detectionpipeline                                         [jar]
+[INFO] thirdeye-notification                                              [jar]
+[INFO] thirdeye-worker                                                    [jar]
+[INFO] thirdeye-scheduler                                                 [jar]
+[INFO] thirdeye-server                                                    [jar]
+[INFO] thirdeye-plugins                                                   [pom]
+[INFO] thirdeye-oauth                                                     [jar]
+[INFO] thirdeye-contributors-simple                                       [jar]
+[INFO] thirdeye-plugin-example                                            [jar]
+[INFO] thirdeye-detection-components                                      [jar]
+[INFO] thirdeye-detectors                                                 [jar]
+[INFO] thirdeye-pinot                                                     [jar]
+[INFO] thirdeye-notification-email                                        [jar]
+[INFO] thirdeye-bootstrap-open-core                                       [jar]
+[INFO] thirdeye-enumerators                                               [jar]
+[INFO] thirdeye-postprocessors                                            [jar]
+[INFO] thirdeye-distribution                                              [jar]
+[INFO] pinot-test-container                                               [jar]
+[INFO] thirdeye-integration-tests                                         [jar]
+[INFO] 
+[INFO] -------------------< ai.startree.thirdeye:thirdeye >--------------------
+[INFO] Building thirdeye 1.267.0-SNAPSHOT                                [1/24]
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- maven-clean-plugin:3.0.0:clean (default-clean) @ thirdeye ---
+[INFO] Deleting /Users/cyril/IdeaProjects/te-2/target
+[INFO] 
+[INFO] --- maven-checkstyle-plugin:3.3.1:check (validate) @ thirdeye ---
+[INFO] Starting audit...
+Audit done.
+[INFO] You have 0 Checkstyle violations.
+[INFO] 
+[INFO] --- maven-dependency-plugin:3.3.0:get (resolve) @ thirdeye ---
+[INFO] Resolving org.aspectj:aspectjweaver:jar:1.9.21 with transitive dependencies
+[INFO] 
+[INFO] --- buildnumber-maven-plugin:1.4:create (default) @ thirdeye ---
+[INFO] Executing: /bin/sh -c cd '/Users/cyril/IdeaProjects/te-2' && 'git' 'rev-parse' '--verify' 'HEAD'
+[INFO] Working directory: /Users/cyril/IdeaProjects/te-2
+[INFO] Storing buildNumber: e9c679a4fd8f3acbb3ba7c8495972c7d99a8b082 at timestamp: 1711550268882
+[INFO] Storing buildScmBranch: te-2166-refactor-database-client
+[INFO] 
+[INFO] --- buildnumber-maven-plugin:1.4:create-metadata (default) @ thirdeye ---
+[INFO] Executing: /bin/sh -c cd '/Users/cyril/IdeaProjects/te-2' && 'git' 'rev-parse' '--verify' 'HEAD'
+[INFO] Working directory: /Users/cyril/IdeaProjects/te-2
+[INFO] 
+[INFO] --- build-helper-maven-plugin:3.2.0:parse-version (parse-versions-for-release) @ thirdeye ---
+[INFO] 
+[INFO] --- maven-jar-plugin:2.4:test-jar (default) @ thirdeye ---
+[INFO] Skipping packaging of the test-jar
+[INFO] 
+[INFO] --- maven-dependency-plugin:3.3.0:analyze-only (analyze) @ thirdeye ---
+[INFO] Skipping pom project
+[INFO] 
+[INFO] --- license-maven-plugin:4.0:check (default) @ thirdeye ---
+[INFO] Checking licenses...
+[INFO] 
+[INFO] --- maven-install-plugin:2.4:install (default-install) @ thirdeye ---
+[INFO] Installing /Users/cyril/IdeaProjects/te-2/pom.xml to /Users/cyril/.m2/repository/ai/startree/thirdeye/thirdeye/1.267.0-SNAPSHOT/thirdeye-1.267.0-SNAPSHOT.pom
+[INFO] 
+[INFO] --------------< ai.startree.thirdeye:thirdeye-dataframe >---------------
+[INFO] Building thirdeye-dataframe 1.267.0-SNAPSHOT                      [2/24]
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- maven-clean-plugin:3.0.0:clean (default-clean) @ thirdeye-dataframe ---
+[INFO] Deleting /Users/cyril/IdeaProjects/te-2/thirdeye-dataframe/target
+[INFO] 
+[INFO] --- maven-checkstyle-plugin:3.3.1:check (validate) @ thirdeye-dataframe ---
+[INFO] Starting audit...
+Audit done.
+[INFO] You have 0 Checkstyle violations.
+[INFO] 
+[INFO] --- maven-dependency-plugin:3.3.0:get (resolve) @ thirdeye-dataframe ---
+[INFO] Resolving org.aspectj:aspectjweaver:jar:1.9.21 with transitive dependencies
+[INFO] 
+[INFO] --- buildnumber-maven-plugin:1.4:create (default) @ thirdeye-dataframe ---
+[INFO] Executing: /bin/sh -c cd '/Users/cyril/IdeaProjects/te-2/thirdeye-dataframe' && 'git' 'rev-parse' '--verify' 'HEAD'
+[INFO] Working directory: /Users/cyril/IdeaProjects/te-2/thirdeye-dataframe
+[INFO] Storing buildNumber: e9c679a4fd8f3acbb3ba7c8495972c7d99a8b082 at timestamp: 1711550277632
+[INFO] Storing buildScmBranch: te-2166-refactor-database-client
+[INFO] 
+[INFO] --- buildnumber-maven-plugin:1.4:create-metadata (default) @ thirdeye-dataframe ---
+[INFO] Executing: /bin/sh -c cd '/Users/cyril/IdeaProjects/te-2/thirdeye-dataframe' && 'git' 'rev-parse' '--verify' 'HEAD'
+[INFO] Working directory: /Users/cyril/IdeaProjects/te-2/thirdeye-dataframe
+[INFO] 
+[INFO] --- build-helper-maven-plugin:3.2.0:parse-version (parse-versions-for-release) @ thirdeye-dataframe ---
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:resources (default-resources) @ thirdeye-dataframe ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] skip non existing resourceDirectory /Users/cyril/IdeaProjects/te-2/thirdeye-dataframe/src/main/resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.8.0:compile (default-compile) @ thirdeye-dataframe ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 10 source files to /Users/cyril/IdeaProjects/te-2/thirdeye-dataframe/target/classes
+[INFO] /Users/cyril/IdeaProjects/te-2/thirdeye-dataframe/src/main/java/ai/startree/thirdeye/spi/dataframe/StringSeries.java: Some input files use or override a deprecated API.
+[INFO] /Users/cyril/IdeaProjects/te-2/thirdeye-dataframe/src/main/java/ai/startree/thirdeye/spi/dataframe/StringSeries.java: Recompile with -Xlint:deprecation for details.
+[INFO] /Users/cyril/IdeaProjects/te-2/thirdeye-dataframe/src/main/java/ai/startree/thirdeye/spi/dataframe/ObjectSeries.java: Some input files use unchecked or unsafe operations.
+[INFO] /Users/cyril/IdeaProjects/te-2/thirdeye-dataframe/src/main/java/ai/startree/thirdeye/spi/dataframe/ObjectSeries.java: Recompile with -Xlint:unchecked for details.
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:testResources (default-testResources) @ thirdeye-dataframe ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 4 resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.8.0:testCompile (default-testCompile) @ thirdeye-dataframe ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 6 source files to /Users/cyril/IdeaProjects/te-2/thirdeye-dataframe/target/test-classes
+[INFO] /Users/cyril/IdeaProjects/te-2/thirdeye-dataframe/src/test/java/ai/startree/thirdeye/spi/dataframe/AbstractTestResultSet.java: /Users/cyril/IdeaProjects/te-2/thirdeye-dataframe/src/test/java/ai/startree/thirdeye/spi/dataframe/AbstractTestResultSet.java uses or overrides a deprecated API.
+[INFO] /Users/cyril/IdeaProjects/te-2/thirdeye-dataframe/src/test/java/ai/startree/thirdeye/spi/dataframe/AbstractTestResultSet.java: Recompile with -Xlint:deprecation for details.
+[INFO] 
+[INFO] --- maven-surefire-plugin:3.0.0-M1:test (default-test) @ thirdeye-dataframe ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- maven-jar-plugin:2.4:jar (default-jar) @ thirdeye-dataframe ---
+[INFO] Building jar: /Users/cyril/IdeaProjects/te-2/thirdeye-dataframe/target/thirdeye-dataframe-1.267.0-SNAPSHOT.jar
+[INFO] 
+[INFO] --- maven-jar-plugin:2.4:test-jar (default) @ thirdeye-dataframe ---
+[INFO] Building jar: /Users/cyril/IdeaProjects/te-2/thirdeye-dataframe/target/thirdeye-dataframe-1.267.0-SNAPSHOT-tests.jar
+[INFO] 
+[INFO] --- maven-dependency-plugin:3.3.0:analyze-only (analyze) @ thirdeye-dataframe ---
+[INFO] No dependency problems found
+[INFO] 
+[INFO] --- license-maven-plugin:4.0:check (default) @ thirdeye-dataframe ---
+[INFO] Checking licenses...
+[INFO] 
+[INFO] --- maven-install-plugin:2.4:install (default-install) @ thirdeye-dataframe ---
+[INFO] Installing /Users/cyril/IdeaProjects/te-2/thirdeye-dataframe/target/thirdeye-dataframe-1.267.0-SNAPSHOT.jar to /Users/cyril/.m2/repository/ai/startree/thirdeye/thirdeye-dataframe/1.267.0-SNAPSHOT/thirdeye-dataframe-1.267.0-SNAPSHOT.jar
+[INFO] Installing /Users/cyril/IdeaProjects/te-2/thirdeye-dataframe/pom.xml to /Users/cyril/.m2/repository/ai/startree/thirdeye/thirdeye-dataframe/1.267.0-SNAPSHOT/thirdeye-dataframe-1.267.0-SNAPSHOT.pom
+[INFO] Installing /Users/cyril/IdeaProjects/te-2/thirdeye-dataframe/target/thirdeye-dataframe-1.267.0-SNAPSHOT-tests.jar to /Users/cyril/.m2/repository/ai/startree/thirdeye/thirdeye-dataframe/1.267.0-SNAPSHOT/thirdeye-dataframe-1.267.0-SNAPSHOT-tests.jar
+[INFO] 
+[INFO] -----------------< ai.startree.thirdeye:thirdeye-spi >------------------
+[INFO] Building thirdeye-spi 1.267.0-SNAPSHOT                            [3/24]
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- maven-clean-plugin:3.0.0:clean (default-clean) @ thirdeye-spi ---
+[INFO] Deleting /Users/cyril/IdeaProjects/te-2/thirdeye-spi/target
+[INFO] 
+[INFO] --- maven-checkstyle-plugin:3.3.1:check (validate) @ thirdeye-spi ---
+[INFO] Starting audit...
+Audit done.
+[INFO] You have 0 Checkstyle violations.
+[INFO] 
+[INFO] --- maven-dependency-plugin:3.3.0:get (resolve) @ thirdeye-spi ---
+[INFO] Resolving org.aspectj:aspectjweaver:jar:1.9.21 with transitive dependencies
+[INFO] 
+[INFO] --- buildnumber-maven-plugin:1.4:create (default) @ thirdeye-spi ---
+[INFO] Executing: /bin/sh -c cd '/Users/cyril/IdeaProjects/te-2/thirdeye-spi' && 'git' 'rev-parse' '--verify' 'HEAD'
+[INFO] Working directory: /Users/cyril/IdeaProjects/te-2/thirdeye-spi
+[INFO] Storing buildNumber: e9c679a4fd8f3acbb3ba7c8495972c7d99a8b082 at timestamp: 1711550283258
+[INFO] Storing buildScmBranch: te-2166-refactor-database-client
+[INFO] 
+[INFO] --- buildnumber-maven-plugin:1.4:create-metadata (default) @ thirdeye-spi ---
+[INFO] Executing: /bin/sh -c cd '/Users/cyril/IdeaProjects/te-2/thirdeye-spi' && 'git' 'rev-parse' '--verify' 'HEAD'
+[INFO] Working directory: /Users/cyril/IdeaProjects/te-2/thirdeye-spi
+[INFO] 
+[INFO] --- build-helper-maven-plugin:3.2.0:parse-version (parse-versions-for-release) @ thirdeye-spi ---
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:resources (default-resources) @ thirdeye-spi ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] skip non existing resourceDirectory /Users/cyril/IdeaProjects/te-2/thirdeye-spi/src/main/resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.8.0:compile (default-compile) @ thirdeye-spi ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 232 source files to /Users/cyril/IdeaProjects/te-2/thirdeye-spi/target/classes
+[INFO] /Users/cyril/IdeaProjects/te-2/thirdeye-spi/src/main/java/ai/startree/thirdeye/spi/detection/dimension/DimensionMap.java: /Users/cyril/IdeaProjects/te-2/thirdeye-spi/src/main/java/ai/startree/thirdeye/spi/detection/dimension/DimensionMap.java uses unchecked or unsafe operations.
+[INFO] /Users/cyril/IdeaProjects/te-2/thirdeye-spi/src/main/java/ai/startree/thirdeye/spi/detection/dimension/DimensionMap.java: Recompile with -Xlint:unchecked for details.
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:testResources (default-testResources) @ thirdeye-spi ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 4 resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.8.0:testCompile (default-testCompile) @ thirdeye-spi ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 9 source files to /Users/cyril/IdeaProjects/te-2/thirdeye-spi/target/test-classes
+[INFO] 
+[INFO] --- maven-surefire-plugin:3.0.0-M1:test (default-test) @ thirdeye-spi ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- maven-jar-plugin:2.4:jar (default-jar) @ thirdeye-spi ---
+[INFO] Building jar: /Users/cyril/IdeaProjects/te-2/thirdeye-spi/target/thirdeye-spi-1.267.0-SNAPSHOT.jar
+[INFO] 
+[INFO] --- maven-jar-plugin:2.4:test-jar (default) @ thirdeye-spi ---
+[INFO] Building jar: /Users/cyril/IdeaProjects/te-2/thirdeye-spi/target/thirdeye-spi-1.267.0-SNAPSHOT-tests.jar
+[INFO] 
+[INFO] --- maven-dependency-plugin:3.3.0:analyze-only (analyze) @ thirdeye-spi ---
+[WARNING] Unused declared dependencies found:
+[WARNING]    org.apache.commons:commons-collections4:jar:4.1:compile
+[WARNING]    commons-io:commons-io:jar:2.11.0:compile
+[INFO] 
+[INFO] --- license-maven-plugin:4.0:check (default) @ thirdeye-spi ---
+[INFO] Checking licenses...
+[INFO] 
+[INFO] --- maven-install-plugin:2.4:install (default-install) @ thirdeye-spi ---
+[INFO] Installing /Users/cyril/IdeaProjects/te-2/thirdeye-spi/target/thirdeye-spi-1.267.0-SNAPSHOT.jar to /Users/cyril/.m2/repository/ai/startree/thirdeye/thirdeye-spi/1.267.0-SNAPSHOT/thirdeye-spi-1.267.0-SNAPSHOT.jar
+[INFO] Installing /Users/cyril/IdeaProjects/te-2/thirdeye-spi/pom.xml to /Users/cyril/.m2/repository/ai/startree/thirdeye/thirdeye-spi/1.267.0-SNAPSHOT/thirdeye-spi-1.267.0-SNAPSHOT.pom
+[INFO] Installing /Users/cyril/IdeaProjects/te-2/thirdeye-spi/target/thirdeye-spi-1.267.0-SNAPSHOT-tests.jar to /Users/cyril/.m2/repository/ai/startree/thirdeye/thirdeye-spi/1.267.0-SNAPSHOT/thirdeye-spi-1.267.0-SNAPSHOT-tests.jar
+[INFO] 
+[INFO] -------------< ai.startree.thirdeye:thirdeye-persistence >--------------
+[INFO] Building thirdeye-persistence 1.267.0-SNAPSHOT                    [4/24]
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- maven-clean-plugin:3.0.0:clean (default-clean) @ thirdeye-persistence ---
+[INFO] Deleting /Users/cyril/IdeaProjects/te-2/thirdeye-persistence/target
+[INFO] 
+[INFO] --- maven-checkstyle-plugin:3.3.1:check (validate) @ thirdeye-persistence ---
+[INFO] Starting audit...
+[ERROR] /Users/cyril/IdeaProjects/te-2/thirdeye-persistence/src/main/java/ai/startree/thirdeye/datalayer/dao/GenericPojoDao.java:31:1: Wrong lexicographical order for 'ai.startree.thirdeye.datalayer.DatabaseClient' import. Should be before 'ai.startree.thirdeye.datalayer.DatabaseOrm'. [CustomImportOrder]
+[ERROR] /Users/cyril/IdeaProjects/te-2/thirdeye-persistence/src/main/java/ai/startree/thirdeye/datalayer/dao/TaskDao.java:19:1: Wrong lexicographical order for 'ai.startree.thirdeye.datalayer.DatabaseClient' import. Should be before 'ai.startree.thirdeye.datalayer.DatabaseOrm'. [CustomImportOrder]
+Audit done.
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for thirdeye 1.267.0-SNAPSHOT:
+[INFO] 
+[INFO] thirdeye ........................................... SUCCESS [ 10.129 s]
+[INFO] thirdeye-dataframe ................................. SUCCESS [  6.894 s]
+[INFO] thirdeye-spi ....................................... SUCCESS [  3.667 s]
+[INFO] thirdeye-persistence ............................... FAILURE [  1.418 s]
+[INFO] thirdeye-core ...................................... SKIPPED
+[INFO] thirdeye-detectionpipeline ......................... SKIPPED
+[INFO] thirdeye-notification .............................. SKIPPED
+[INFO] thirdeye-worker .................................... SKIPPED
+[INFO] thirdeye-scheduler ................................. SKIPPED
+[INFO] thirdeye-server .................................... SKIPPED
+[INFO] thirdeye-plugins ................................... SKIPPED
+[INFO] thirdeye-oauth ..................................... SKIPPED
+[INFO] thirdeye-contributors-simple ....................... SKIPPED
+[INFO] thirdeye-plugin-example ............................ SKIPPED
+[INFO] thirdeye-detection-components ...................... SKIPPED
+[INFO] thirdeye-detectors ................................. SKIPPED
+[INFO] thirdeye-pinot ..................................... SKIPPED
+[INFO] thirdeye-notification-email ........................ SKIPPED
+[INFO] thirdeye-bootstrap-open-core ....................... SKIPPED
+[INFO] thirdeye-enumerators ............................... SKIPPED
+[INFO] thirdeye-postprocessors ............................ SKIPPED
+[INFO] thirdeye-distribution .............................. SKIPPED
+[INFO] pinot-test-container ............................... SKIPPED
+[INFO] thirdeye-integration-tests ......................... SKIPPED
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  22.408 s
+[INFO] Finished at: 2024-03-27T15:38:07+01:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-checkstyle-plugin:3.3.1:check (validate) on project thirdeye-persistence: Failed during checkstyle execution: There are 2 errors reported by Checkstyle 9.3 with thirdeye-checkstyle.xml ruleset. -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException
+[ERROR] 
+[ERROR] After correcting the problems, you can resume the build with the command
+[ERROR]   mvn <args> -rf :thirdeye-persistence

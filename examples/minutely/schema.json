@@ -1,0 +1,17 @@
+
+{
+  "schemaName": "minutely",
+  "dimensionFieldSpecs": [],
+  "metricFieldSpecs": [
+    {
+      "name": "val",
+      "dataType": "DOUBLE"
+    }
+  ],
+  "dateTimeFieldSpecs": [{
+    "name": "ts",
+    "dataType": "TIMESTAMP",
+    "format" : "1:MILLISECONDS:TIMESTAMP",
+    "granularity": "1:MILLISECONDS"
+  }]
+}

@@ -122,8 +122,8 @@ public class DelegateDatasetConfigManager implements DatasetConfigManager {
   }
 
   @Override
-  public DatasetConfigDTO findByDatasetAndNamespace(final String dataset, final String namespace) {
-    return delegate.findByDatasetAndNamespace(dataset, namespace);
+  public DatasetConfigDTO findByDatasetAndNamespaceOrUnsetNamespace(final String dataset, final String namespace) {
+    return delegate.findByDatasetAndNamespaceOrUnsetNamespace(dataset, namespace);
   }
 
   @Override

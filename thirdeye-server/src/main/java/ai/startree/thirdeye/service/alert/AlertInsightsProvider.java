@@ -15,7 +15,7 @@ package ai.startree.thirdeye.service.alert;
 
 import static ai.startree.thirdeye.mapper.ApiBeanMapper.toAlertTemplateApi;
 import static ai.startree.thirdeye.spi.Constants.UTC_TIMEZONE;
-import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DATASET_NOT_FOUND;
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DATASET_NOT_FOUND_IN_NAMESPACE;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_CONFIGURATION_FIELD;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_UNKNOWN;
 import static ai.startree.thirdeye.spi.util.AlertMetadataUtils.getDelay;
@@ -152,17 +152,9 @@ public class AlertInsightsProvider {
       throw new ThirdEyeException(ERR_MISSING_CONFIGURATION_FIELD,
           "Dataset name not found in alert metadata.");
     }
-    DatasetConfigDTO datasetConfigDTO = datasetConfigManager.findByDatasetAndNamespace(
+    DatasetConfigDTO datasetConfigDTO = datasetConfigManager.findByDatasetAndNamespaceOrUnsetNamespace(
         datasetName, namespace);
-    if (datasetConfigDTO == null) {
-      // to maintain backward compatibility - will be removed soon or conditioned or requireNamespace = false
-      datasetConfigDTO = datasetConfigManager.findByDatasetAndNamespace(datasetName, null);
-      if (datasetConfigDTO != null) {
-        LOG.warn("Could not find dataset {} in namespace {} but found a dataset with this name with an unset namespace. Falling back to this dataset. Make sure to migrate datasets to namespace. This fallback will be removed soon.", datasetName, namespace);
-      } else {
-        throw new ThirdEyeException(ERR_DATASET_NOT_FOUND, datasetName); 
-      }
-    }
+    ensureExists(datasetConfigDTO, ERR_DATASET_NOT_FOUND_IN_NAMESPACE, datasetName, namespace);
 
     // TODO CYRIL add authz - later inject datasource id in datasetConfig and use it instead of fetching by name/namespace
     final DataSourceDTO dataSourceDTO = dataSourceDao.findUniqueByNameAndNamespace(datasetConfigDTO.getDataSource(), datasetConfigDTO.namespace());

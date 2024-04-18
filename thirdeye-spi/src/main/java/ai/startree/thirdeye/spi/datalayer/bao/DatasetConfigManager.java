@@ -19,9 +19,17 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface DatasetConfigManager extends AbstractManager<DatasetConfigDTO> {
 
-  // fixme cyril authz ASAP - this method is often used with a fallback on the null namespace - implement it once?
-  // returns null if not found
-  @Nullable DatasetConfigDTO findByDatasetAndNamespace(final String dataset, final String namespace);
+  /**
+   * Find a dataset in a given namespace. If namespace is null, look in the undefined namespace.
+   * If the dataset is not found in the provided namespace, look in the undefined namespace, and
+   * if a matching dataset is found in the undefined namespace, log a warning and return it.
+   * Returns null if the dataset is not found in the namespace and the unset namespace.
+   *
+   * Used to maintain backward compatibility with existing instances.
+   * To have a strict search that does not fallback to the undefined namespace, use
+   * {@link AbstractManager#findUniqueByNameAndNamespace}.
+   */
+  @Nullable DatasetConfigDTO findByDatasetAndNamespaceOrUnsetNamespace(final String dataset, final String namespace);
 
   List<DatasetConfigDTO> findActive();
 }

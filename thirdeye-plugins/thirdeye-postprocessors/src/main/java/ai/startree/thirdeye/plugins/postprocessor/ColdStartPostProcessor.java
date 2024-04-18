@@ -16,6 +16,7 @@ package ai.startree.thirdeye.plugins.postprocessor;
 import static ai.startree.thirdeye.spi.util.AnomalyUtils.addLabel;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
@@ -44,7 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ColdStartPostProcessor implements AnomalyPostProcessor {
-  
+
   private static final Logger LOG = LoggerFactory.getLogger(ColdStartPostProcessor.class);
 
   private static final String NAME = "COLD_START";
@@ -89,28 +90,20 @@ public class ColdStartPostProcessor implements AnomalyPostProcessor {
   @Override
   public Map<String, OperatorResult> postProcess(final Interval detectionInterval,
       final Map<String, OperatorResult> resultMap) throws Exception {
-    DatasetConfigDTO datasetConfigDTO = datasetDao.findByDatasetAndNamespace(tableName, namespace);
-    if (datasetConfigDTO == null) {
-      datasetConfigDTO = datasetDao.findByDatasetAndNamespace(tableName, null);
-      if (datasetConfigDTO != null) {
-        LOG.warn("Could not find dataset {} in namespace {}, but found a dataset with this name with an unset namespace. Using this dataset. This behaviour will change. Please migrate your dataset to a namespace.",
-            tableName, namespace);
-      } else {
-        throw new IllegalArgumentException(String.format("Could not find dataset %s with namespace %s, neither with an unset namespace.",
-            tableName, namespace));
-      }
-      // "Could not find dataset " + dataFetcherSpec.getTableName()
-    }
-    
-    checkState(datasetConfigDTO != null, "Could not find dataset %s in namespace %s",
+    final DatasetConfigDTO datasetConfigDTO = datasetDao.findByDatasetAndNamespaceOrUnsetNamespace(
         tableName, namespace);
-    final DataSourceDTO dataSourceDTO = dataSourceDao.findUniqueByNameAndNamespace(datasetConfigDTO.getDataSource(), datasetConfigDTO.namespace());
+    checkArgument(datasetConfigDTO != null,
+        "Could not find dataset %s with namespace %s.",
+        tableName, namespace);
+    final DataSourceDTO dataSourceDTO = dataSourceDao.findUniqueByNameAndNamespace(
+        datasetConfigDTO.getDataSource(), datasetConfigDTO.namespace());
     checkState(dataSourceDTO != null, "Could not find datasource %s in namespace %s",
         datasetConfigDTO.getDataSource(), datasetConfigDTO.namespace());
-    
+
     // don't fail if dataset min is not found - continue with a 0 minDateTime
-    final long datasetMinTime = optional(minMaxTimeLoader.fetchMinTimeAsync(dataSourceDTO, datasetConfigDTO, null)
-        .get(TIMEOUT, TimeUnit.MILLISECONDS)).orElse(0L);
+    final long datasetMinTime = optional(
+        minMaxTimeLoader.fetchMinTimeAsync(dataSourceDTO, datasetConfigDTO, null)
+            .get(TIMEOUT, TimeUnit.MILLISECONDS)).orElse(0L);
     final DateTime datasetMinDateTime = new DateTime(datasetMinTime,
         detectionInterval.getChronology());
     final DateTime endOfColdStart = datasetMinDateTime.plus(coldStartPeriod);
@@ -145,8 +138,10 @@ public class ColdStartPostProcessor implements AnomalyPostProcessor {
     }
 
     @Override
-    public AnomalyPostProcessor build(final Map<String, Object> params, final PostProcessingContext context) {
-      final ColdStartPostProcessorSpec spec = new ObjectMapper().convertValue(params, ColdStartPostProcessorSpec.class);
+    public AnomalyPostProcessor build(final Map<String, Object> params,
+        final PostProcessingContext context) {
+      final ColdStartPostProcessorSpec spec = new ObjectMapper().convertValue(params,
+          ColdStartPostProcessorSpec.class);
       spec.setMinMaxTimeLoader(context.getMinMaxTimeLoader());
       spec.setDatasetConfigManager(context.getDatasetConfigManager());
       spec.setDataSourceManager(context.getDataSourceManager());

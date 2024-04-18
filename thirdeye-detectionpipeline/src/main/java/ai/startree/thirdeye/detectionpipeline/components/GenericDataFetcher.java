@@ -44,7 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
-  
+
   private static final Logger LOG = LoggerFactory.getLogger(GenericDataFetcher.class);
 
   /**
@@ -84,28 +84,19 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
     this.tableName = requireNonNull(dataFetcherSpec.getTableName());
     final DatasetConfigManager datasetDao = Objects.requireNonNull(
         dataFetcherSpec.getDatasetDao());
-    this.datasetConfigDTO = 
-        datasetDao.findByDatasetAndNamespace(dataFetcherSpec.getTableName(),
+    this.datasetConfigDTO =
+        datasetDao.findByDatasetAndNamespaceOrUnsetNamespace(dataFetcherSpec.getTableName(),
             dataFetcherSpec.getNamespace());
-    if (datasetConfigDTO == null) {
-      this.datasetConfigDTO =
-          datasetDao.findByDatasetAndNamespace(dataFetcherSpec.getTableName(), null);
-      if (datasetConfigDTO != null) {
-        LOG.warn("Could not find dataset {} in namespace {}, but found a dataset with this name with an unset namespace. Using this dataset. This behaviour will change. Please migrate your dataset to a namespace.",
-            dataFetcherSpec.getTableName(), dataFetcherSpec.getNamespace());
-      } else {
-        throw new IllegalArgumentException(String.format("Could not find dataset %s with namespace %s, neither with an unset namespace.", 
-            dataFetcherSpec.getTableName(), dataFetcherSpec.getNamespace()));
-      }
-      // "Could not find dataset " + dataFetcherSpec.getTableName()
-    }
+    checkArgument(this.datasetConfigDTO != null, "Could not find dataset %s within namespace %s.",
+        dataFetcherSpec.getTableName(), dataFetcherSpec.getNamespace());
 
     // todo cyril - code is not compatible with same dataset name in multiple datasource in same namespace - not a very important use case for the moment
     final String dataSource = requireNonNull(dataFetcherSpec.getDataSource(),
         "DataFetcher: data source is not set.");
     final DataSourceManager dataSourceDao = requireNonNull(dataFetcherSpec.getDataSourceDao());
-    final DataSourceDTO dataSourceDTO = requireNonNull(dataSourceDao.findUniqueByNameAndNamespace(dataSource,
-        datasetConfigDTO.namespace()));
+    final DataSourceDTO dataSourceDTO = requireNonNull(
+        dataSourceDao.findUniqueByNameAndNamespace(dataSource,
+            datasetConfigDTO.namespace()));
 
     final DataSourceCache dataSourceCache = requireNonNull(dataFetcherSpec.getDataSourceCache());
     this.thirdEyeDataSource = requireNonNull(dataSourceCache

@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.rca;
 
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DATASET_NOT_FOUND_IN_NAMESPACE;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_CONFIGURATION_FIELD;
 import static ai.startree.thirdeye.spi.metric.MetricAggFunction.COUNT;
 import static ai.startree.thirdeye.spi.util.AlertMetadataUtils.getDateTimeZone;
@@ -101,7 +102,7 @@ public class RcaInfoFetcher {
    * template.
    * This method gets the metric and dataset info from the alert template.
    * It could be more intelligent: metric and dataset could be inferred from the query.
-   * 
+   *
    * Consumer of this method should ensure authz on the anomaly entity.
    */
   public RcaInfo getRcaInfo(final AnomalyDTO anomalyDTO)
@@ -152,25 +153,17 @@ public class RcaInfoFetcher {
           .setDefaultAggFunction(metricAggFunction);
     }
 
-    DatasetConfigDTO datasetConfigDto;
+    final DatasetConfigDTO datasetConfigDto;
     if (metricConfigDTO.getDatasetConfig() != null) {
       datasetConfigDto = datasetDAO.findById(metricConfigDTO.getDatasetConfig().getId());
     } else {
       LOG.warn(
           "Running on a legacy metrics that does not contain the id of its parent dataset. Finding dataset by name and namespace.");
-      datasetConfigDto = datasetDAO.findByDatasetAndNamespace(metricConfigDTO.getDataset(),
+      datasetConfigDto = datasetDAO.findByDatasetAndNamespaceOrUnsetNamespace(
+          metricConfigDTO.getDataset(),
           alertNamespace);
-      if (datasetConfigDto == null) {
-        // TODO CYRIL authz - to ensure backward compatibility with existing setups, look in the undefined namespace if the dataset was not found in the alert namespace - will be removed or conditionned on requireNamespace = false soon
-        datasetConfigDto = datasetDAO.findByDatasetAndNamespace(metricConfigDTO.getDataset(), null);
-        if (datasetConfigDto != null) {
-          LOG.warn(
-              "Did not find dataset {} in namespace {}, but found a dataset with this name that has its namespace undefined. Using this dataset. This behavior will be removed when requireNamespace=true soon. Ensure your datasets are namespaced correctly.",
-              metricConfigDTO.getDataset(), alertNamespace);
-        }
-      }
     }
-    ensureExists(datasetConfigDto, "Dataset name: %s. Namespace: %s", metricConfigDTO.getDataset(),
+    ensureExists(datasetConfigDto, ERR_DATASET_NOT_FOUND_IN_NAMESPACE, metricConfigDTO.getDataset(),
         alertNamespace);
     addCustomFields(metricConfigDTO, metadataMetricDTO);
     addCustomFields(datasetConfigDto, metadataDatasetDTO);
@@ -190,7 +183,8 @@ public class RcaInfoFetcher {
           EMPTY_CONTEXT_DTO);
     }
 
-    return new RcaInfo(anomalyDTO, alertDTO, metricConfigDTO, datasetConfigDto, dataSourceDto, chronology,
+    return new RcaInfo(anomalyDTO, alertDTO, metricConfigDTO, datasetConfigDto, dataSourceDto,
+        chronology,
         granularity,
         eventContext);
   }

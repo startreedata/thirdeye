@@ -17,6 +17,7 @@ import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DATASOURCE_VALIDATION_
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 import static ai.startree.thirdeye.util.ResourceUtils.statusResponse;
+import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.service.DataSourceService;
@@ -50,6 +51,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Tag(name = "Data Source")
 @SecurityRequirement(name="oauth")
@@ -61,6 +64,8 @@ import javax.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDTO> {
+  
+  private final Logger LOG = LoggerFactory.getLogger(DataSourceResource.class);
 
   private final DataSourceService dataSourceService;
 
@@ -73,10 +78,21 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
   @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @GET
   @Path("/name/{name}/datasets")
+  @Deprecated // use getDatasetsById
   public Response getDatasets(
       @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
       @PathParam("name") String name) {
+    LOG.warn("Using deprecated endpoint /name/<name>/datasets. Prefer /<id>/datasets");
     return respondOk(dataSourceService.getDatasets(principal, name));
+  }
+
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
+  @GET
+  @Path("/{id}/datasets")
+  public Response getDatasetsById(
+      @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
+      @PathParam("id") Long id) {
+    return respondOk(dataSourceService.getDatasets(principal, id));
   }
 
   @POST
@@ -87,12 +103,20 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
   public Response onboardDataset(
       @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
       @FormParam("dataSourceName") String dataSourceName,
+      @FormParam("dataSourceId") Long dataSourceId,
       @FormParam("datasetName") String datasetName) {
-
-    ensureExists(dataSourceName, "dataSourceName is a required field");
     ensureExists(datasetName, "datasetName is a required field");
-
-    return respondOk(dataSourceService.onboardDataset(principal, dataSourceName, datasetName));
+    // ensureExists(dataSourceId, "dataSourceId is a required field");
+    // temporary migration code todo cyril only use id once frontend has migrated
+    final boolean nameIsUsed = dataSourceName != null && dataSourceId == null;
+    final boolean idIsUsed = dataSourceName == null && dataSourceId != null;
+    checkArgument(nameIsUsed || idIsUsed, "Either name or id parameters must be set.");
+    if (nameIsUsed) {
+      LOG.warn("Using deprecated onboard-dataset with param 'dataSourceName'. Prefer id.");
+      return respondOk(dataSourceService.onboardDataset(principal, dataSourceName, datasetName));
+    } else {
+      return respondOk(dataSourceService.onboardDataset(principal, dataSourceId, datasetName));
+    }
   }
 
   @POST
@@ -102,10 +126,19 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
   @Produces(MediaType.APPLICATION_JSON)
   public Response onboardAll(
       @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
-      @FormParam("name") String name) {
-
-    ensureExists(name, "name is a required field");
-    final List<DatasetApi> onboarded = dataSourceService.onboardAll(principal, name);
+      @Deprecated @FormParam("name") String name, @FormParam("id") Long id) {
+    // ensureExists(id, "id is a required field");
+    // temporary migration code todo cyril  only use id once frontend has migrated
+    final boolean nameIsUsed = name != null && id == null;
+    final boolean idIsUsed = name == null && id != null;
+    checkArgument(nameIsUsed || idIsUsed, "Either name or id parameters must be set.");
+    final List<DatasetApi> onboarded;
+    if (nameIsUsed) {
+      LOG.warn("Using deprecated onboard-all with param 'name'. Prefer id.");
+      onboarded = dataSourceService.onboardAll(principal, name);
+    } else {
+      onboarded = dataSourceService.onboardAll(principal, id); 
+    }
     return respondOk(onboarded);
   }
 
@@ -116,9 +149,18 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
   @Produces(MediaType.APPLICATION_JSON)
   public Response offboardAll(
       @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
-      @FormParam("name") String name) {
-    ensureExists(name, "name is a required field");
-    return respondOk(dataSourceService.offboardAll(principal, name));
+      @Deprecated @FormParam("name") String name, @FormParam("id") Long id) {
+    // ensureExists(id, "id is a required field");
+    // temporary migration code todo cyril  only use id once frontend has migrated
+    final boolean nameIsUsed = name != null && id == null;
+    final boolean idIsUsed = name == null && id != null;
+    checkArgument(nameIsUsed || idIsUsed, "Either name or id parameters must be set.");
+    if (nameIsUsed) {
+      LOG.warn("Using deprecated offboard-all with param 'name'. Prefer id.");
+      return respondOk(dataSourceService.offboardAll(principal, name));  
+    } else {
+      return respondOk(dataSourceService.offboardAll(principal, id));
+    }
   }
 
   @DELETE
@@ -136,13 +178,25 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
   @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
   public Response validate(@Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
-      @QueryParam("name") String name) {
-    ensureExists(name, "name is a required field");
+      @Deprecated @QueryParam("name") String name, @QueryParam("id") Long id) {
+    // do not use name anymore - use id instead
+    // ensureExists(id, "id is a required field");
+    // temporary migration code todo cyril  only use id once frontend has migrated
+    final boolean nameIsUsed = name != null && id == null;
+    final boolean idIsUsed = name == null && id != null;
+    checkArgument(nameIsUsed || idIsUsed, "Either name or id parameters must be set.");
     try {
-      // throws ThirdEyeException on datasource not found in DB
-      // returns null when not able to load datasource
-      if (dataSourceService.validate(principal, name)) {
-        return respondOk(new StatusApi().setCode(ThirdEyeStatus.OK));
+      if (nameIsUsed) {
+        LOG.warn("Using deprecated validate with param 'name'. Prefer id.");
+        // throws ThirdEyeException on datasource not found in DB
+        // returns null when not able to load datasource
+        if (dataSourceService.validate(principal, name)) {
+          return respondOk(new StatusApi().setCode(ThirdEyeStatus.OK));
+        }  
+      } else {
+        if (dataSourceService.validate(principal, id)) {
+          return respondOk(new StatusApi().setCode(ThirdEyeStatus.OK));
+        }
       }
     } catch (ThirdEyeException e) {
       return respondOk(statusResponse(e));

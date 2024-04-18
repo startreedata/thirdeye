@@ -26,6 +26,8 @@ public class AuthConfiguration {
 
   @JsonProperty("basic")
   private BasicAuthConfiguration basicAuthConfig;
+  
+  private AuthorizationConfiguration authorization = new AuthorizationConfiguration();
 
   public OAuthConfiguration getOAuthConfig() {
     return oAuthConfig;
@@ -52,6 +54,16 @@ public class AuthConfiguration {
   public AuthConfiguration setBasicAuthConfig(
       final BasicAuthConfiguration basicAuthConfig) {
     this.basicAuthConfig = basicAuthConfig;
+    return this;
+  }
+
+  public AuthorizationConfiguration getAuthorization() {
+    return authorization;
+  }
+
+  public AuthConfiguration setAuthorization(
+      final AuthorizationConfiguration authorization) {
+    this.authorization = authorization;
     return this;
   }
 }

@@ -11,12 +11,19 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.spi.datalayer.bao;
+package ai.startree.thirdeye.auth;
 
-import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+public class AuthorizationConfiguration {
+  
+  // long term this should always be true - need to migrate current user to this new namespace design first
+  private boolean requireNamespace = false;
 
-public interface MetricConfigManager extends AbstractManager<MetricConfigDTO> {
+  public boolean isRequireNamespace() {
+    return requireNamespace;
+  }
 
-  MetricConfigDTO findBy(String metricName, String dataset, final String namespace);
-
+  public AuthorizationConfiguration setRequireNamespace(final boolean requireNamespace) {
+    this.requireNamespace = requireNamespace;
+    return this;
+  }
 }

@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.spi.datasource.loader;
 
+import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import java.util.concurrent.Future;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -20,9 +21,11 @@ import org.joda.time.Interval;
 
 public interface MinMaxTimeLoader {
 
-  Future<@Nullable Long> fetchMinTimeAsync(final DatasetConfigDTO datasetConfigDTO,
+  Future<@Nullable Long> fetchMinTimeAsync(final DataSourceDTO dataSourceDto, 
+      final DatasetConfigDTO datasetConfigDTO,
       final @Nullable Interval timeFilterInterval) throws Exception;
 
-  Future<@Nullable Long> fetchMaxTimeAsync(final DatasetConfigDTO datasetConfigDTO,
+  Future<@Nullable Long> fetchMaxTimeAsync(final DataSourceDTO dataSourceDto, 
+      final DatasetConfigDTO datasetConfigDTO,
       final @Nullable Interval timeFilterInterval) throws Exception;
 }

@@ -17,14 +17,12 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.detectionpipeline.ApplicationContext;
 import ai.startree.thirdeye.detectionpipeline.OperatorContext;
 import ai.startree.thirdeye.detectionpipeline.components.GenericDataFetcher;
 import ai.startree.thirdeye.detectionpipeline.spec.DataFetcherSpec;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
-import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.OutputBean;
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
 import ai.startree.thirdeye.spi.detection.DataFetcher;
@@ -51,30 +49,24 @@ public class DataFetcherOperator extends DetectionPipelineOperator {
 
     final ApplicationContext applicationContext = context.getPlanNodeContext()
         .getApplicationContext();
-    final DataSourceCache dataSourceCache = requireNonNull(applicationContext.getDataSourceCache());
-    final DatasetConfigManager datasetDao = requireNonNull(
-        applicationContext.getDatasetConfigManager());
+    final var pipelineContext = context.getPlanNodeContext().getDetectionPipelineContext();
     final Map<String, Object> params = optional(planNode.getParams()).map(TemplatableMap::valueMap)
         .orElse(null);
     final List<Predicate> predicates = optional(context.getPredicates()).orElse(List.of());
-    dataFetcher = createDataFetcher(params, dataSourceCache, datasetDao, predicates);
-  }
-
-  protected DataFetcher<DataFetcherSpec> createDataFetcher(final Map<String, Object> params,
-      final DataSourceCache dataSourceCache, final DatasetConfigManager datasetDao,
-      final List<Predicate> predicates) {
     final Map<String, Object> componentSpec = getComponentSpec(params);
     final DataFetcherSpec spec = requireNonNull(
         AbstractSpec.fromProperties(componentSpec, DataFetcherSpec.class),
         "Unable to construct DataFetcherSpec");
-    spec.setDataSourceCache(dataSourceCache);
-    spec.setDatasetDao(datasetDao);
+    spec.setDataSourceCache(requireNonNull(applicationContext.getDataSourceCache()));
+    spec.setDatasetDao(requireNonNull(applicationContext.getDatasetConfigManager()));
+    spec.setDataSourceDao(requireNonNull(applicationContext.getDataSourceDao()));
+    spec.setNamespace(pipelineContext.getNamespace());
     spec.setTimeseriesFilters(predicates);
 
     final GenericDataFetcher genericDataFetcher = new GenericDataFetcher();
     genericDataFetcher.init(spec);
 
-    return genericDataFetcher;
+    dataFetcher = genericDataFetcher;
   }
 
   @Override

@@ -18,7 +18,6 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
-import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
@@ -29,6 +28,8 @@ import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
@@ -46,8 +47,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * TODO CYRIL when requireNamespace = true is true, it is not possible to change the namespace of an entity 
- *  and all entities should have a namespace directly - no need to inherit 
+ * TODO CYRIL when requireNamespace = true is true, it is not possible to change the namespace of an entity
+ *  and all entities should have a namespace directly - no need to inherit
  */
 @Singleton
 public class NamespaceResolver {
@@ -58,7 +59,6 @@ public class NamespaceResolver {
   private final EnumerationItemManager enumerationItemManager;
   private final AnomalyManager anomalyManager;
   private final SubscriptionGroupManager subscriptionGroupDao;
-  private DataSourceManager dataSourceManager;
 
   private final Cache<Long, @NonNull Optional<String>> namespaceCache = CacheBuilder.newBuilder()
       .maximumSize(2048)
@@ -67,8 +67,7 @@ public class NamespaceResolver {
 
   @Inject
   public NamespaceResolver(final AlertManager alertManager,
-      final EnumerationItemManager enumerationItemManager,
-      final AnomalyManager anomalyManager,
+      final EnumerationItemManager enumerationItemManager, final AnomalyManager anomalyManager,
       final SubscriptionGroupManager subscriptionGroupDao) {
     this.alertManager = alertManager;
     this.enumerationItemManager = enumerationItemManager;
@@ -93,23 +92,39 @@ public class NamespaceResolver {
       namespace = resolveTaskDtoNamespace(taskDto);
     } else if (dto instanceof DatasetConfigDTO datasetDto) {
       namespace = resolveDatasetDtoNamespace(datasetDto);
-    } else if (dto instanceof DataSourceDTO || dto instanceof AlertTemplateDTO || dto instanceof AlertDTO || dto instanceof SubscriptionGroupDTO) {
+    } else if (dto instanceof MetricConfigDTO metricConfigDTO) {
+      namespace = resolveMetricConfigDtoNamespace(metricConfigDTO);
+    } else if (dto instanceof DataSourceDTO || dto instanceof AlertTemplateDTO
+        || dto instanceof AlertDTO || dto instanceof SubscriptionGroupDTO || dto instanceof EventDTO) {
       namespace = getNamespaceFromAuth(dto);
     } else {
       // please define cases explicitly as above - keeping this codepath to prevent workspace leaks and find changes, but should not happen
-      LOG.error("Limited namespace support for {} entity. Please reach out to StarTree support.", optional(dto).map(AbstractDTO::getClass).orElse(null));
+      LOG.error("Limited namespace support for {} entity. Please reach out to StarTree support.",
+          optional(dto).map(AbstractDTO::getClass).orElse(null));
       namespace = getNamespaceFromAuth(dto);
     }
-    // FIXME CYRIL authz do metricDTO
-    // FIXME CYRIL authz do Events - need shared namespace
+    // FIXME CYRIL add authz do EventDTO and AlertTemplateDto - requires a shared read-only namespace
+    
+    // FIXME CYRIL if requireNamespace is set - WARN if there is SOMETHING in DEFAULT NAMESPACE
 
     return namespace.orElse(DEFAULT_NAMESPACE);
+  }
+
+  private @NonNull Optional<String> resolveMetricConfigDtoNamespace(
+      final @Nullable MetricConfigDTO dto) {
+    // metric link to dataset by name - but name is not unique across workspaces - 
+    //   so cannot resolve workspace based on parent datasource so cannot inherit workspace from datasource
+    // FIXME - dataset should link to datasource by id, not by name - also editing the pointing datasource may cause leakage
+    // FIXME - best would be to ensure metrics are created with a namespace
+    // FIXME cyril authz - onboarding dataset will add a namespace 
+    return getNamespaceFromAuth(dto);
   }
 
   private @NonNull Optional<String> resolveDatasetDtoNamespace(final DatasetConfigDTO dto) {
     // dataset link to datasource by name - but name is not unique across workspaces - 
     //   so cannot resolve workspace based on parent datasource so cannot inherit workspace from datasource
     // FIXME - dataset should link to datasource by id, not by name - also editing the pointing datasource may cause leakage
+    // FIXME - best would be to ensure datasource are created with a namespace 
     // FIXME cyril authz - onboarding dataset will add a namespace 
     return getNamespaceFromAuth(dto);
   }
@@ -118,9 +133,8 @@ public class NamespaceResolver {
     if (taskDto == null) {
       return Optional.empty();
     }
-    final Long refId = Objects.requireNonNull(taskDto.getRefId(), String.format(
-        "TaskDto %s has no refId. This should never happen", taskDto.getId()
-    ));
+    final Long refId = Objects.requireNonNull(taskDto.getRefId(),
+        String.format("TaskDto %s has no refId. This should never happen", taskDto.getId()));
     return switch (taskDto.getTaskType()) {
       case DETECTION -> getAlertNamespaceById(refId);
       case NOTIFICATION -> getSubscriptionGroupNamespaceById(refId);
@@ -167,6 +181,7 @@ public class NamespaceResolver {
   }
 
   private @NonNull Optional<String> resolveRcaNamespace(final @NonNull RcaInvestigationDTO dto) {
+    // fixme cyril authz when modifying rcaInvestigationService - change this - use the dto auth if it's set  
     final Long anomalyId = optional(dto.getAnomaly()).map(AbstractDTO::getId).orElse(null);
     if (anomalyId != null) {
       return getAnomalyNamespaceById(anomalyId);

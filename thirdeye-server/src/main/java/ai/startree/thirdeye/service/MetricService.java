@@ -15,16 +15,22 @@ package ai.startree.thirdeye.service;
 
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DATASET_NOT_FOUND;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DUPLICATE_ENTITY;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
+import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
 import ai.startree.thirdeye.spi.api.MetricApi;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
+import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import com.google.common.collect.ImmutableMap;
+import java.util.List;
+import java.util.Objects;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -32,7 +38,6 @@ import javax.inject.Singleton;
 public class MetricService extends CrudService<MetricApi, MetricConfigDTO> {
 
   private final DatasetConfigManager datasetConfigManager;
-  private final MetricConfigManager metricConfigManager;
 
   @Inject
   public MetricService(final MetricConfigManager metricConfigManager,
@@ -40,25 +45,30 @@ public class MetricService extends CrudService<MetricApi, MetricConfigDTO> {
       final AuthorizationManager authorizationManager) {
     super(authorizationManager, metricConfigManager, ImmutableMap.of());
     this.datasetConfigManager = datasetConfigManager;
-    this.metricConfigManager = metricConfigManager;
   }
 
   @Override
-  protected void validate(final MetricApi api, final MetricConfigDTO existing) {
-    super.validate(api, existing);
+  protected void validate(final ThirdEyePrincipal principal, final MetricApi api, final MetricConfigDTO existing) {
+    super.validate(principal, api, existing);
 
     ensureExists(api.getDataset(), "dataset");
-    ensureExists(datasetConfigManager.findByDataset(api.getDataset().getName()),
-        ERR_DATASET_NOT_FOUND, api.getDataset().getName());
+    // fixme cyril authz - filter by namespace
+    final List<DatasetConfigDTO> sameName = datasetConfigManager.findByName(api.getDataset().getName());
+    final List<DatasetConfigDTO> sameNameSameNamespace = authorizationManager.filterByNamespace(principal,
+        optional(api.getAuth()).map(AuthorizationConfigurationApi::getNamespace).orElse(null), 
+        sameName);
+    ensure(!sameNameSameNamespace.isEmpty(), ERR_DATASET_NOT_FOUND, api.getDataset().getName());
+    ensure(sameNameSameNamespace.size() == 1, ERR_DUPLICATE_ENTITY, api.getDataset().getName());
+    final DatasetConfigDTO datasetDto = sameNameSameNamespace.get(0);
 
     // For new Metric or existing metric with different name
     if (existing == null || !existing.getName().equals(api.getName())) {
-      final var nMetricsSameNameAndDataset = dtoManager.findByName(api.getName())
+      final long nMetricsSameNameAndDataset = dtoManager.findByName(api.getName())
           .stream()
-          .map(MetricConfigDTO::getDataset)
-          .filter(m -> api.getDataset().getName().equals(m))
+          // TODO CYRIL authz introduce proper method in MetricManager instead of doing filtering here
+          .filter(m -> Objects.equals(api.getDataset().getName(), m.getDataset()))
+          .filter(m -> Objects.equals(datasetDto.namespace(), m.namespace()))
           .count();
-
       ensure(nMetricsSameNameAndDataset <= 0,
           ERR_DUPLICATE_ENTITY,
           String.format("Metric with name: %s and dataset: %s already exists.",

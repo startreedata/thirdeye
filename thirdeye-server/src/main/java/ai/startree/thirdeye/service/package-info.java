@@ -11,12 +11,11 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.spi.datalayer.bao;
-
-import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-
-public interface MetricConfigManager extends AbstractManager<MetricConfigDTO> {
-
-  MetricConfigDTO findBy(String metricName, String dataset, final String namespace);
-
-}
+/**
+ * The  Service package and subpackages contains the Service logical layer.
+ * The Service layer is responsible for performing authorization.
+ * The Service package and subpackages are subject to architecture test.
+ * In most cases any change breaking the assumptions should be caught by the architecture tests, 
+ * but be sure to understand the implications before moving classes outside of this package.
+ * */
+package ai.startree.thirdeye.service;

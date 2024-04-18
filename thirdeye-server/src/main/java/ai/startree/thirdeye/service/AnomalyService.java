@@ -15,7 +15,6 @@ package ai.startree.thirdeye.service;
 
 import static ai.startree.thirdeye.RequestCache.buildCache;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
-import static ai.startree.thirdeye.util.ResourceUtils.ensureNull;
 
 import ai.startree.thirdeye.RequestCache;
 import ai.startree.thirdeye.auth.AuthorizationManager;
@@ -25,6 +24,7 @@ import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.AnomalyFeedbackApi;
 import ai.startree.thirdeye.spi.api.AnomalyStatsApi;
 import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
+import ai.startree.thirdeye.spi.auth.ResourceIdentifier;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
@@ -35,7 +35,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import com.google.common.collect.ImmutableMap;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -77,15 +76,9 @@ public class AnomalyService extends CrudService<AnomalyApi, AnomalyDTO> {
   }
 
   @Override
-  protected void validate(final AnomalyApi api, @Nullable final AnomalyDTO existing) {
-    super.validate(api, existing);
-    ensureNull(api.getAuth(), "cannot set auth for anomalies");
-  }
-
-  @Override
   protected AnomalyDTO toDto(final AnomalyApi api) {
-    final var dto = ApiBeanMapper.toDto(api);
-    final var authId = authorizationManager.resourceId(dto);
+    final AnomalyDTO dto = ApiBeanMapper.toDto(api);
+    final ResourceIdentifier authId = authorizationManager.resourceId(dto);
     dto.setAuth(new AuthorizationConfigurationDTO().setNamespace(authId.getNamespace()));
     return dto;
   }
@@ -106,6 +99,8 @@ public class AnomalyService extends CrudService<AnomalyApi, AnomalyDTO> {
   public void setFeedback(final ThirdEyeServerPrincipal principal, final Long id,
       final AnomalyFeedbackApi api) {
     final AnomalyDTO dto = getDto(id);
+    // todo cyril review authz - only require read right to add a feedback to an anomaly - to avoid feedback frictions for the moment
+    authorizationManager.ensureCanRead(principal, dto);
     final AnomalyFeedbackDTO feedbackDTO = ApiBeanMapper.toAnomalyFeedbackDTO(api);
     feedbackDTO.setUpdatedBy(principal.getName());
     dto.setFeedback(feedbackDTO);
@@ -121,7 +116,6 @@ public class AnomalyService extends CrudService<AnomalyApi, AnomalyDTO> {
   }
 
   public AnomalyStatsApi stats(final ThirdEyePrincipal principal, final Long startTime, final Long endTime) {
-    // FIXME CYRIL add authz layer
     final List<Predicate> predicates = new ArrayList<>();
     optional(startTime)
         .ifPresent(start -> predicates.add(Predicate.GE("startTime", startTime)));

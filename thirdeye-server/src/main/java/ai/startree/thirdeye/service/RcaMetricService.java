@@ -13,10 +13,14 @@
  */
 package ai.startree.thirdeye.service;
 
+import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
+
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.rca.HeatmapCalculator;
 import ai.startree.thirdeye.spi.api.HeatMapResponseApi;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
@@ -24,12 +28,15 @@ import java.util.List;
 @Singleton
 public class RcaMetricService {
 
+  
+  private final AnomalyManager anomalyDao;
   private final HeatmapCalculator heatmapCalculator;
   private final AuthorizationManager authorizationManager;
 
   @Inject
-  public RcaMetricService(final HeatmapCalculator heatmapCalculator,
+  public RcaMetricService(final AnomalyManager anomalyDao, final HeatmapCalculator heatmapCalculator,
       final AuthorizationManager authorizationManager) {
+    this.anomalyDao = anomalyDao;
     this.heatmapCalculator = heatmapCalculator;
     this.authorizationManager = authorizationManager;
   }
@@ -40,8 +47,10 @@ public class RcaMetricService {
       final List<String> dimensions,
       final List<String> excludedDimensions,
       final Integer limit) throws Exception {
-    // FIXME CYRIL add authz
-    return heatmapCalculator.compute(anomalyId,
+    final AnomalyDTO anomalyDto = ensureExists(anomalyDao.findById(anomalyId),
+        String.format("Anomaly ID: %d", anomalyId));
+    authorizationManager.ensureCanRead(principal, anomalyDto);
+    return heatmapCalculator.compute(anomalyDto,
         baselineOffset,
         filters,
         limit,

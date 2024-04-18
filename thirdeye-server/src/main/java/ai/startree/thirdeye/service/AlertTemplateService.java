@@ -53,6 +53,8 @@ public class AlertTemplateService extends CrudService<AlertTemplateApi, AlertTem
   protected AlertTemplateApi toApi(final AlertTemplateDTO dto) {
     return ApiBeanMapper.toAlertTemplateApi(dto);
   }
+  
+  // fixme cyril authz related: override validate and prevent duplicate name?  
 
   public List<AlertTemplateApi> loadRecommendedTemplates(final ThirdEyeServerPrincipal principal,
       final boolean updateExisting) {

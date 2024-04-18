@@ -43,6 +43,7 @@ public interface MetricMapper {
         .setDataset(optional(api.getDataset())
             .map(DatasetApi::getName)
             .orElse(null))
+        .setDatasetConfig(DatasetMapper.INSTANCE.toBean(api.getDataset()))
         .setAggregationColumn(api.getAggregationColumn())
         .setDatatype(api.getDatatype())
         .setDefaultAggFunction(api.getAggregationFunction())
@@ -50,6 +51,9 @@ public interface MetricMapper {
         .setViews(api.getViews())
         .setWhere(api.getWhere())
         .setDerivedMetricExpression(api.getDerivedMetricExpression());
+
+    optional(api.getAuth()).map(ApiBeanMapper::toAuthorizationConfigurationDTO)
+        .ifPresent(dto::setAuth);
 
     return dto;
   }
@@ -63,14 +67,18 @@ public interface MetricMapper {
         .setActive(dto.getActive())
         .setName(dto.getName())
         .setUpdated(dto.getUpdateTime())
-        .setDataset(optional(dto.getDataset())
-            .map(datasetName -> new DatasetApi().setName(datasetName)).orElse(null))
+        .setDataset(optional(DatasetMapper.INSTANCE.toApi(dto.getDatasetConfig()))
+            .orElse(
+                optional(dto.getDataset()).map(datasetName -> new DatasetApi().setName(datasetName))
+                    .orElse(null)))
         .setDerivedMetricExpression(dto.getDerivedMetricExpression())
         .setWhere(dto.getWhere())
         .setAggregationColumn(dto.getAggregationColumn())
         .setDatatype(dto.getDatatype())
         .setAggregationFunction(dto.getDefaultAggFunction())
         .setViews(dto.getViews())
+        .setAuth(optional(dto.getAuth())
+            .map(ApiBeanMapper::toApi).orElse(null))
         ;
   }
 }

@@ -16,6 +16,7 @@ package ai.startree.thirdeye.service;
 import static ai.startree.thirdeye.rca.RcaDimensionFilterHelper.getRcaDimensions;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
+import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.StringUtils.timeFormatterFor;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
@@ -27,6 +28,8 @@ import ai.startree.thirdeye.spi.api.TextualAnalysis;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
+import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.rca.ContributorsFinderResult;
 import ai.startree.thirdeye.spi.rca.ContributorsSearchConfiguration;
@@ -51,14 +54,16 @@ public class RcaDimensionAnalysisService {
 
   private final ContributorsFinderRunner contributorsFinderRunner;
   private final RcaInfoFetcher rcaInfoFetcher;
+  private final AnomalyManager anomalyDao;
   private final AuthorizationManager authorizationManager;
 
   @Inject
   public RcaDimensionAnalysisService(final ContributorsFinderRunner contributorsFinderRunner,
       final RcaInfoFetcher rcaInfoFetcher,
-      final AuthorizationManager authorizationManager) {
+      final AnomalyManager anomalyDao, final AuthorizationManager authorizationManager) {
     this.contributorsFinderRunner = contributorsFinderRunner;
     this.rcaInfoFetcher = rcaInfoFetcher;
+    this.anomalyDao = anomalyDao;
     this.authorizationManager = authorizationManager;
   }
 
@@ -71,10 +76,12 @@ public class RcaDimensionAnalysisService {
       final String baselineOffset, final List<String> filters, final int summarySize,
       final int depth, final boolean doOneSideError, final List<String> dimensions,
       final List<String> excludedDimensions, final String hierarchiesPayload) throws Exception {
-    // fixme cyril add authz
-    final RcaInfo rcaInfo = rcaInfoFetcher.getRcaInfo(anomalyId);
-    final Interval currentInterval = new Interval(rcaInfo.getAnomaly().getStartTime(),
-        rcaInfo.getAnomaly().getEndTime(), rcaInfo.getChronology());
+    final AnomalyDTO anomalyDto = ensureExists(anomalyDao.findById(anomalyId),
+        String.format("Anomaly ID: %d", anomalyId));
+    authorizationManager.ensureCanRead(principal, anomalyDto);
+    final RcaInfo rcaInfo = rcaInfoFetcher.getRcaInfo(anomalyDto);
+    final Interval currentInterval = new Interval(rcaInfo.anomaly().getStartTime(),
+        rcaInfo.anomaly().getEndTime(), rcaInfo.chronology());
 
     Period baselineOffsetPeriod = isoPeriod(baselineOffset);
     final Interval baselineInterval = new Interval(
@@ -82,14 +89,14 @@ public class RcaDimensionAnalysisService {
         currentInterval.getEnd().minus(baselineOffsetPeriod));
 
     // override dimensions
-    final DatasetConfigDTO datasetConfigDTO = rcaInfo.getDataset();
+    final DatasetConfigDTO datasetConfigDTO = rcaInfo.dataset();
     List<String> rcaDimensions = getRcaDimensions(dimensions, excludedDimensions, datasetConfigDTO);
     datasetConfigDTO.setDimensions(Templatable.of(rcaDimensions));
 
     final List<List<String>> hierarchies = parseHierarchiesPayload(hierarchiesPayload);
 
     final ContributorsSearchConfiguration searchConfiguration = new ContributorsSearchConfiguration(
-        rcaInfo.getMetric(), datasetConfigDTO, currentInterval, baselineInterval, summarySize,
+        rcaInfo.metric(), datasetConfigDTO, rcaInfo.dataSourceDto(), currentInterval, baselineInterval, summarySize,
         depth, doOneSideError, Predicate.parseAndCombinePredicates(filters), hierarchies);
 
     final ContributorsFinderResult result = contributorsFinderRunner.run(searchConfiguration);
@@ -109,12 +116,12 @@ public class RcaDimensionAnalysisService {
 
   private String generateAnomalyDescriptionText(final RcaInfo rcaInfo) {
     final StringBuilder text = new StringBuilder();
-    final double expected = rcaInfo.getAnomaly().getAvgBaselineVal();
-    final double current = rcaInfo.getAnomaly().getAvgCurrentVal();
-    final DateTimeFormatter timeFormatter = timeFormatterFor(rcaInfo.getGranularity(),
-        rcaInfo.getChronology());
+    final double expected = rcaInfo.anomaly().getAvgBaselineVal();
+    final double current = rcaInfo.anomaly().getAvgCurrentVal();
+    final DateTimeFormatter timeFormatter = timeFormatterFor(rcaInfo.granularity(),
+        rcaInfo.chronology());
     text.append("An anomaly was detected on ")
-        .append(new DateTime(rcaInfo.getAnomaly().getStartTime(), rcaInfo.getChronology()).toString(
+        .append(new DateTime(rcaInfo.anomaly().getStartTime(), rcaInfo.chronology()).toString(
             timeFormatter))
         .append(". ")
         // TODO prefer giving the expected range rather than the expected mean

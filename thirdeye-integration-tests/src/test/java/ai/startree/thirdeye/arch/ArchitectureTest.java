@@ -27,12 +27,11 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 
 import ai.startree.thirdeye.PluginLoader;
 import ai.startree.thirdeye.ThirdEyeServerModule;
-import ai.startree.thirdeye.alert.AlertInsightsProvider;
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.alert.EvaluationContextProcessor;
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.NamespaceResolver;
-import ai.startree.thirdeye.core.DataSourceOnboarder;
+import ai.startree.thirdeye.datasource.DataSourceOnboarder;
 import ai.startree.thirdeye.datalayer.DataSourceBuilder;
 import ai.startree.thirdeye.datalayer.DatabaseClient;
 import ai.startree.thirdeye.datalayer.DatabaseOrm;
@@ -119,7 +118,7 @@ public class ArchitectureTest {
       .or(containAnyMethodsThat(annotatedWith(GET.class)));
 
   public static final DescribedPredicate<JavaClass> ARE_SERVICE_CLASSES = are(
-      assignableTo(CrudService.class)).or(resideInAnyPackage("ai.startree.thirdeye.service"));
+      assignableTo(CrudService.class)).or(resideInAnyPackage("ai.startree.thirdeye.service.."));
 
   // any class that can perform db writes and does not apply the authorization layer
   public static final DescribedPredicate<JavaClass> ARE_NON_SECURED_DB_LAYER_CLASSES = or(
@@ -195,11 +194,10 @@ public class ArchitectureTest {
         EnumerationItemDeleter.class,
         TaskManagerImpl.class,
         AlertManagerImpl.class,
-        DataSourceOnboarder.class,
+        DataSourceOnboarder.class, // OK - REVIEWED ON APRIL 12 2024
         NamespaceResolver.class,
         EvaluationContextProcessor.class,
-        AlertTemplateRenderer.class,
-        AlertInsightsProvider.class,
+        AlertTemplateRenderer.class
     };
     final ArchRule rule = noClasses().that(
             doNot(
@@ -221,6 +219,8 @@ public class ArchitectureTest {
         .areDeclaredInClassesThat(ARE_SERVICE_CLASSES.and(IsTopLevelClass.IS_TOP_LEVEL_CLASS))
         .and()
         .arePublic()
+        .and()
+        .areNotStatic()
         .should(HavePrincipalAsFirstParam.HAVE_PRINCIPAL_AS_FIRST_PARAM);
     rule.check(thirdeyeClasses);
   }

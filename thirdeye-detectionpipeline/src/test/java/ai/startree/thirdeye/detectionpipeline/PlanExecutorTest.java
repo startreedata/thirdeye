@@ -24,6 +24,7 @@ import ai.startree.thirdeye.detectionpipeline.operator.EchoOperator;
 import ai.startree.thirdeye.detectionpipeline.operator.EchoOperator.EchoResult;
 import ai.startree.thirdeye.detectionpipeline.plan.EchoPlanNode;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
+import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
@@ -50,6 +51,7 @@ public class PlanExecutorTest {
     final PostProcessorRegistry postProcessorRegistry = mock(PostProcessorRegistry.class);
     final EventManager eventManager = mock(EventManager.class);
     final DatasetConfigManager datasetConfigManager = mock(DatasetConfigManager.class);
+    final DataSourceManager dataSourceDao = mock(DataSourceManager.class);
     final PlanNodeFactory planNodeFactory = new PlanNodeFactory(
     );
     final EnumerationItemManager enumerationItemManager = mock(EnumerationItemManager.class);
@@ -62,6 +64,7 @@ public class PlanExecutorTest {
         detectionRegistry,
         postProcessorRegistry,
         eventManager,
+        dataSourceDao, 
         datasetConfigManager,
         new DetectionPipelineConfiguration(),
         mock(EnumerationItemMaintainer.class));

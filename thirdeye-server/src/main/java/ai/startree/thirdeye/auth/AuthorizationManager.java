@@ -43,8 +43,14 @@ import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AuthorizationManager {
+
+  private static final Logger LOG = LoggerFactory.getLogger(AuthorizationManager.class);
 
   // A meta-resource to authorize thirdeye automation/maintenance.
   static final ResourceIdentifier ROOT_RESOURCE_ID = ResourceIdentifier.from("thirdeye-root",
@@ -58,8 +64,9 @@ public class AuthorizationManager {
   private final ThirdEyeAuthorizer thirdEyeAuthorizer;
   private final NamespaceResolver namespaceResolver;
   private final boolean requireNamespace;
-  
+
   private final static Map<Class<? extends AbstractDTO>, SubEntityType> DTO_TO_ENTITY_TYPE;
+
   static {
     // could be independent of BEAN_TYPE_MAP but for the moment the code is the same
     DTO_TO_ENTITY_TYPE = new HashMap<>(BEAN_TYPE_MAP);
@@ -70,59 +77,102 @@ public class AuthorizationManager {
   public AuthorizationManager(
       final AlertTemplateRenderer alertTemplateRenderer,
       final ThirdEyeAuthorizer thirdEyeAuthorizer,
-      final NamespaceResolver namespaceResolver) {
+      final NamespaceResolver namespaceResolver,
+      final AuthConfiguration authConfiguration) {
     this.alertTemplateRenderer = alertTemplateRenderer;
     this.thirdEyeAuthorizer = thirdEyeAuthorizer;
     this.namespaceResolver = namespaceResolver;
 
-    // TODO CYRIL next PR - make this configurable in server.yaml - for the moment the codepath is disabled
-    this.requireNamespace = false;
+    this.requireNamespace =
+        authConfiguration.isEnabled() && authConfiguration.getAuthorization().isRequireNamespace();
   }
 
   /**
    * Set a namespace in the entity if necessary, based on the principal.
-   * Note: following the review, we decided to put this logic outside
+   * Note: following the review, this logic is put outside
+   * {@link AuthorizationManager#ensureCanCreate}
    * {@link AuthorizationManager#ensureCanCreate}.
-   * FIXME CYRIL REVIEW AGAIN WITH SUVODEEP 
-   * Should always be called before {@link AuthorizationManager#ensureCanCreate},  
+   * Should always be called before {@link AuthorizationManager#ensureCanCreate},
    * {@link AuthorizationManager#ensureCanEdit}, {@link AuthorizationManager#ensureCanValidate}
    */
-  // TODO CYRIL next PR - use this method in the Service layer
-  public <T extends AbstractDTO> void enrichNamespace(final ThirdEyeServerPrincipal principal,
+  public <T extends AbstractDTO> void enrichNamespace(final ThirdEyePrincipal principal,
       final T entity) {
     // enrich with the namespace if it is not set and required
     if (requireNamespace) {
       if (!namespaceIsSet(entity)) {
-        final List<String> namespaces = thirdEyeAuthorizer.listNamespaces(principal);
-        authorize(!namespaces.isEmpty());
-        if (namespaces.size() == 1) {
-          entity.setAuth(new AuthorizationConfigurationDTO().setNamespace(namespaces.get(0)));
-        } else if (namespaces.size() > 1) {
-          throw new NotAuthorizedException(String.format(
-              "Namespace not provided and cannot be resolved automatically. "
-                  + "Please provide a namespace explicitly. Namespaces: %s", namespaces));
-        }
+        final String currentNamespace = currentNamespace(principal);
+        entity.setAuth(new AuthorizationConfigurationDTO().setNamespace(currentNamespace));
+      } else {
+        // namespace is passed explicitly - don't modify it
+        return;
       }
     } else {
-      // do not enrich namespaces on the fly
-      return;
+      // requireNamespace is false - don't enrich
     }
   }
 
-  // TODO DON'T UPDATE HERE
-  public <T extends AbstractDTO> void ensureCanCreate(final ThirdEyeServerPrincipal principal,
+  // TODO CYRIL authz should be moved down to ThirdEyeAuthorizer once we implement multi-namespace UI support?
+  // only returns null when requireNamespace is false - Nullable can be removed once migration is done
+  public @Nullable String currentNamespace(final ThirdEyePrincipal principal) {
+    if (requireNamespace) {
+      final List<String> namespaces = thirdEyeAuthorizer.listNamespaces(principal);
+      if (namespaces.size() == 0) {
+        throw new ForbiddenException("Access Denied.");  // throw 403
+      } else if (namespaces.size() == 1) {
+        return namespaces.get(0);
+      } else {
+        throw new NotAuthorizedException(String.format(
+            "Namespace not cannot be resolved automatically. Please provide a namespace explicitly. Namespaces: %s",
+            namespaces));
+      }
+    } else {
+      return null;
+    }
+  }
+
+  // FIXME CYRIL I AM HERE - maybe will need a filterByNamespace with an existing dto --> will need to resolve namespace with the namespace resolver
+  // TODO CYRIL authz perf - in most cases places using this method should filter at fetch time on the namespace to avoid noisy neighbours effect / stressing the instance   
+  public <T extends AbstractDTO> List<T> filterByNamespace(final ThirdEyePrincipal principal,
+      final @Nullable String explicitNamespace, final List<T> entities) {
+    if (requireNamespace) {
+      @NonNull String filteringNamespace = optional(explicitNamespace).orElse(
+          Objects.requireNonNull(currentNamespace(principal)));
+      return entities.stream()
+          .filter(e -> filteringNamespace.equals(namespaceResolver.resolveNamespace(e))).toList();
+    } else {
+      List<T> filtered = entities
+          .stream()
+          .filter(e -> Objects.equals(explicitNamespace, e.namespace())).toList();
+      if (!entities.isEmpty() && filtered.isEmpty()) {
+        // to keep backward compatibility with different legacy namespace setups, if requireNamespace is not true 
+        // and the filter by namespace filters everything, then try to re-run a filtering on the null namespace 
+        // this may leak some entities but the legacy leak entities anyway - so better not to break existing setups
+        // if user wants correct namespacing they requireNamespace should be set to true
+        filtered = entities
+            .stream()
+            .filter(e -> e.namespace() == null).toList();
+        if (!filtered.isEmpty()) {
+          LOG.warn("No entities matching namespace {} in {}. Some entities have their namespace undefined. " 
+              + "Returning entities with an undefined namespace.", explicitNamespace, entities);
+        }
+      }
+      return filtered;
+    }
+  }
+
+  public <T extends AbstractDTO> void ensureCanCreate(final ThirdEyePrincipal principal,
       final T entity) {
     ensureHasAccess(principal, resourceId(entity), AccessType.WRITE);
     relatedEntities(entity).forEach(relatedId ->
         ensureHasAccess(principal, relatedId, AccessType.READ));
   }
 
-  public <T extends AbstractDTO> void ensureCanDelete(final ThirdEyeServerPrincipal principal,
+  public <T extends AbstractDTO> void ensureCanDelete(final ThirdEyePrincipal principal,
       final T entity) {
     ensureHasAccess(principal, resourceId(entity), AccessType.WRITE);
   }
 
-  public <T extends AbstractDTO> void ensureCanEdit(final ThirdEyeServerPrincipal principal,
+  public <T extends AbstractDTO> void ensureCanEdit(final ThirdEyePrincipal principal,
       final T before, final T after) {
     ensureHasAccess(principal, resourceId(before), AccessType.WRITE);
     ensureHasAccess(principal, resourceId(after), AccessType.WRITE);
@@ -142,38 +192,38 @@ public class AuthorizationManager {
         ensureHasAccess(principal, related, AccessType.READ));
   }
 
-  public <T extends AbstractDTO> void ensureCanRead(final ThirdEyeServerPrincipal principal,
+  public <T extends AbstractDTO> void ensureCanRead(final ThirdEyePrincipal principal,
       final T entity) {
     ensureHasAccess(principal, resourceId(entity), AccessType.READ);
   }
 
-  public void ensureCanValidate(final ThirdEyeServerPrincipal principal, final AlertDTO entity) {
+  public void ensureCanValidate(final ThirdEyePrincipal principal, final AlertDTO entity) {
     ensureCanCreate(principal, entity);
   }
 
-  public <T extends AbstractDTO> void ensureHasAccess(final ThirdEyeServerPrincipal principal,
+  public <T extends AbstractDTO> void ensureHasAccess(final ThirdEyePrincipal principal,
       final T entity, final AccessType accessType) {
     ensureHasAccess(principal, resourceId(entity), accessType);
   }
 
-  public void ensureHasAccess(final ThirdEyeServerPrincipal principal,
+  public void ensureHasAccess(final ThirdEyePrincipal principal,
       final ResourceIdentifier identifier, final AccessType accessType) {
     if (!hasAccess(principal, identifier, accessType)) {
       throw forbiddenExceptionFor(principal, identifier, accessType);
     }
   }
 
-  public <T extends AbstractDTO> boolean canRead(final ThirdEyeServerPrincipal principal,
+  public <T extends AbstractDTO> boolean canRead(final ThirdEyePrincipal principal,
       final T entity) {
     return hasAccess(principal, resourceId(entity), AccessType.READ);
   }
 
-  public <T extends AbstractDTO> boolean hasAccess(final ThirdEyeServerPrincipal principal,
+  public <T extends AbstractDTO> boolean hasAccess(final ThirdEyePrincipal principal,
       final T entity, final AccessType accessType) {
     return hasAccess(principal, resourceId(entity), accessType);
   }
 
-  public boolean hasAccess(final ThirdEyeServerPrincipal principal,
+  public boolean hasAccess(final ThirdEyePrincipal principal,
       final ResourceIdentifier identifier, final AccessType accessType) {
     if (INTERNAL_VALID_PRINCIPAL.equals(principal)) {
       return true;
@@ -185,7 +235,7 @@ public class AuthorizationManager {
     // TODO CYRIL ADD A case for a PUBLIC identifier for immutable READ ok, WRITE not ok shared resources (eg templates)
   }
 
-  public void ensureHasRootAccess(final ThirdEyeServerPrincipal principal) {
+  public void ensureHasRootAccess(final ThirdEyePrincipal principal) {
     if (!hasRootAccess(principal)) {
       throw new ForbiddenException(Response.status(
           Status.FORBIDDEN.getStatusCode(),
@@ -221,21 +271,23 @@ public class AuthorizationManager {
   private <T extends AbstractDTO> List<ResourceIdentifier> relatedEntities(T entity) {
     if (entity instanceof AlertDTO) {
       final AlertDTO alertDto = (AlertDTO) entity;
-      final AlertTemplateDTO alertTemplateDTO = alertTemplateRenderer.getTemplate(alertDto.getTemplate());
+      final AlertTemplateDTO alertTemplateDTO = alertTemplateRenderer.getTemplate(
+          alertDto.getTemplate());
       return Collections.singletonList(resourceId(alertTemplateDTO));
     }
     return new ArrayList<>();
   }
 
   public ForbiddenException forbiddenExceptionFor(
-      final ThirdEyeServerPrincipal principal,
+      final ThirdEyePrincipal principal,
       final ResourceIdentifier resourceIdentifier,
       final AccessType accessType
   ) {
     return new ForbiddenException(Response.status(
         Status.FORBIDDEN.getStatusCode(),
         String.format("%s access denied to %s for entity %s %s",
-            accessType, principal.getName(), resourceIdentifier.getEntityType(), resourceIdentifier.getName())
+            accessType, principal.getName(), resourceIdentifier.getEntityType(),
+            resourceIdentifier.getName())
     ).build());
   }
 

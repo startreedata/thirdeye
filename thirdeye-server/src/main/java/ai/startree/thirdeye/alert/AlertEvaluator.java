@@ -24,6 +24,7 @@ import ai.startree.thirdeye.detectionpipeline.DetectionPipelineContext;
 import ai.startree.thirdeye.detectionpipeline.PlanExecutor;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
+import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
 import ai.startree.thirdeye.spi.api.EvaluationContextApi;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
@@ -81,6 +82,7 @@ public class AlertEvaluator {
     executorService.shutdownNow();
   }
 
+  // does not resolve namespace - assumes namespace is set in the request by the consumer 
   public AlertEvaluationApi evaluate(final AlertEvaluationApi request)
       throws ExecutionException {
     try {
@@ -108,6 +110,8 @@ public class AlertEvaluator {
 
     final DetectionPipelineContext context = new DetectionPipelineContext()
         .setAlertId(request.getAlert().getId())
+        .setNamespace(optional(request.getAlert().getAuth()).map(
+            AuthorizationConfigurationApi::getNamespace).orElse(null))
         .setUsage(DetectionPipelineUsage.EVALUATION)
         .setDetectionInterval(detectionInterval);
 

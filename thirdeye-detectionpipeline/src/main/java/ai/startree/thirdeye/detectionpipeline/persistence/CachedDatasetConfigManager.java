@@ -15,38 +15,30 @@ package ai.startree.thirdeye.detectionpipeline.persistence;
 
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class CachedDatasetConfigManager extends DelegateDatasetConfigManager {
 
-  private final LoadingCache<String, DatasetConfigDTO> datasetNameCache;
-
-  public CachedDatasetConfigManager(final DatasetConfigManager delegate) {
-    super(delegate);
-
-    datasetNameCache = createDatasetNameCache();
-  }
-
   /**
-   * This cache does not have an expiry and is intentional. The cache is renewed on every
+   * Simple cache that does not have an expiry mechanism. The cache is renewed on every
    * restart of the detection pipeline. This is to ensure that the cache is always up to date
    * and is consistent during the execution of the pipeline. Meaning, if a dataset is modified
    * midway during execution, the pipeline will still run with the old dataset config.
    */
-  private LoadingCache<String, DatasetConfigDTO> createDatasetNameCache() {
-    return CacheBuilder.newBuilder()
-        .build(new CacheLoader<>() {
-          @Override
-          public DatasetConfigDTO load(final String name) {
-            return CachedDatasetConfigManager.super.findByDataset(name);
-          }
-        });
+  private final Map<CacheKey, DatasetConfigDTO> datasetNameCache;
+
+  public CachedDatasetConfigManager(final DatasetConfigManager delegate) {
+    super(delegate);
+    datasetNameCache = new ConcurrentHashMap<>();
   }
 
   @Override
-  public DatasetConfigDTO findByDataset(final String name) {
-    return datasetNameCache.getUnchecked(name);
+  public DatasetConfigDTO findByDatasetAndNamespaceOrUnsetNamespace(final String name, final String namespace) {
+    return 
+        datasetNameCache.computeIfAbsent(new CacheKey(name, namespace), (k) -> 
+        CachedDatasetConfigManager.super.findByDatasetAndNamespaceOrUnsetNamespace(k.name(), k.namespace()));
   }
+  
+  private record CacheKey(String name, String namespace){}
 }

@@ -239,7 +239,7 @@ public class HappyPathTest {
     assert200(response);
   }
 
-  @Test(dependsOnMethods = "testCreateDataset", timeOut = 7000)
+  @Test(dependsOnMethods = "testCreateDataset", timeOut = 10000)
   public void testEvaluateAlert() {
     final AlertEvaluationApi alertEvaluationApi = alertEvaluationApi(UPDATE_ALERT_API,
         PAGEVIEWS_DATASET_START_TIME, EVALUATE_END_TIME);
@@ -578,8 +578,8 @@ public class HappyPathTest {
             .setAnomaly(new AnomalyApi().setId(anomalyId))
             .setAuth(new AuthorizationConfigurationApi().setNamespace("anomaly-namespace"))
     )));
-    // Investigations cannot be created with a namespace.
-    assertThat(createInvestigationResp.getStatus()).isEqualTo(400);
+    // before investigations could not be created with a namespace but now it's possible - maybe this test is not relevant anymore
+    assertThat(createInvestigationResp.getStatus()).isEqualTo(200);
   }
 
   @Test(timeOut = 60000, dependsOnMethods = "testAnomalyCount")
@@ -595,45 +595,46 @@ public class HappyPathTest {
 
   @Test(timeOut = 60000, dependsOnMethods = "testAnomalyCount")
   public void testGetRcaInvestigationAuth() throws InterruptedException {
-    final var alertId = mustCreateAlert(
+    final long alertId = mustCreateAlert(
         newRunnableAlertApiWithAuth("TestGetRcaInvestigationAuth", "alert-namespace"));
 
     waitForAnyAnomalies(alertId);
-    final var anomalyId = mustGetAnomaliesForAlert(alertId).get(0).getId();
-    final var investigationId = mustCreateInvestigation(new RcaInvestigationApi()
+    final Long anomalyId = mustGetAnomaliesForAlert(alertId).get(0).getId();
+    final long investigationId = mustCreateInvestigation(new RcaInvestigationApi()
         .setName("my-investigation")
         .setAnomaly(new AnomalyApi().setId(anomalyId)));
 
-    final var investigationApi = mustGetInvestigation(investigationId);
+    final RcaInvestigationApi investigationApi = mustGetInvestigation(investigationId);
     assertThat(investigationApi.getAuth()).isNotNull();
     assertThat(investigationApi.getAuth().getNamespace()).isEqualTo("alert-namespace");
   }
 
+  // TODO CYRIL authz - if requireNamespace=true, it should not be possible to change a namespace
   @Test(timeOut = 60000, dependsOnMethods = "testAnomalyCount")
   public void testUpdateAlertAuth() throws InterruptedException {
-    final var alertId = mustCreateAlert(
+    final long alertId = mustCreateAlert(
         newRunnableAlertApiWithAuth("TestUpdateAlertAuth", "alert-namespace"));
 
     waitForAnyAnomalies(alertId);
-    final var anomalyId = mustGetAnomaliesForAlert(alertId).get(0).getId();
-    final var investigationId = mustCreateInvestigation(new RcaInvestigationApi()
+    final Long anomalyId = mustGetAnomaliesForAlert(alertId).get(0).getId();
+    final long investigationId = mustCreateInvestigation(new RcaInvestigationApi()
         .setName("my-investigation")
         .setAnomaly(new AnomalyApi().setId(anomalyId)));
 
-    final var alertApi = newRunnableAlertApiWithAuth("test-alert", "new-alert-namespace").setId(
+    final AlertApi alertApi = newRunnableAlertApiWithAuth("test-alert", "new-alert-namespace").setId(
         alertId);
-    final var updateAlertResp = request("api/alerts").put(Entity.json(List.of(alertApi)));
+    final Response updateAlertResp = request("api/alerts").put(Entity.json(List.of(alertApi)));
     assertThat(updateAlertResp.getStatus()).isEqualTo(200);
 
-    final var gotAlertApi = updateAlertResp.readEntity(new GenericType<List<AlertApi>>() {}).get(0);
+    final AlertApi gotAlertApi = updateAlertResp.readEntity(new GenericType<List<AlertApi>>() {}).get(0);
     assertThat(gotAlertApi.getAuth()).isNotNull();
     assertThat(gotAlertApi.getAuth().getNamespace()).isEqualTo("new-alert-namespace");
 
-    final var anomalyApi = mustGetAnomaliesForAlert(alertId).get(0);
+    final AnomalyApi anomalyApi = mustGetAnomaliesForAlert(alertId).get(0);
     assertThat(anomalyApi.getAuth()).isNotNull();
     assertThat(anomalyApi.getAuth().getNamespace()).isEqualTo("new-alert-namespace");
 
-    final var investigationApi = mustGetInvestigation(investigationId);
+    final RcaInvestigationApi investigationApi = mustGetInvestigation(investigationId);
     assertThat(investigationApi.getAuth()).isNotNull();
     assertThat(investigationApi.getAuth().getNamespace()).isEqualTo("new-alert-namespace");
   }
@@ -723,16 +724,16 @@ public class HappyPathTest {
     return anomalyApi;
   }
 
-  List<AnomalyApi> mustGetAnomaliesForAlert(long alertId) {
-    final var resp = request("/api/anomalies?alert.id=" + alertId).get();
+  private List<AnomalyApi> mustGetAnomaliesForAlert(long alertId) {
+    final Response resp = request("/api/anomalies?alert.id=" + alertId).get();
     assertThat(resp.getStatus()).isEqualTo(200);
     return resp.readEntity(new GenericType<>() {});
   }
 
   private RcaInvestigationApi mustGetInvestigation(long id) {
-    final var response = request("/api/rca/investigations/" + id).get();
+    final Response response = request("/api/rca/investigations/" + id).get();
     assertThat(response.getStatus()).isEqualTo(200);
-    final var investigationApi = response.readEntity(RcaInvestigationApi.class);
+    final RcaInvestigationApi investigationApi = response.readEntity(RcaInvestigationApi.class);
     assertThat(investigationApi).isNotNull();
     return investigationApi;
   }

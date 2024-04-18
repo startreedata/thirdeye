@@ -13,9 +13,12 @@
  */
 package ai.startree.thirdeye.datalayer.bao;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import ai.startree.thirdeye.datalayer.DatalayerTestUtils;
 import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import java.util.List;
 import org.testng.Assert;
@@ -25,8 +28,9 @@ import org.testng.annotations.Test;
 
 public class TestDatasetConfigManager {
 
-  private static final String collection1 = "my dataset1";
-  private static final String collection2 = "my dataset2";
+  private static final String DATASET_1 = "my dataset1";
+  private static final String DATASET_2 = "my dataset2";
+  private static final String NAMESPACE_1 = "namespace1";
 
   private Long datasetConfigId1;
   private Long datasetConfigId2;
@@ -44,12 +48,13 @@ public class TestDatasetConfigManager {
 
   @Test
   public void testCreate() {
-
-    DatasetConfigDTO datasetConfig1 = DatalayerTestUtils.getTestDatasetConfig(collection1);
+    DatasetConfigDTO datasetConfig1 = DatalayerTestUtils.getTestDatasetConfig(DATASET_1);
+    datasetConfig1.setAuth(new AuthorizationConfigurationDTO().setNamespace(NAMESPACE_1));
     datasetConfigId1 = datasetConfigDAO.save(datasetConfig1);
     Assert.assertNotNull(datasetConfigId1);
 
-    DatasetConfigDTO datasetConfig2 = DatalayerTestUtils.getTestDatasetConfig(collection2);
+    DatasetConfigDTO datasetConfig2 = DatalayerTestUtils.getTestDatasetConfig(DATASET_2);
+    // this dataset has no namespace
     datasetConfig2.setActive(false);
     datasetConfigId2 = datasetConfigDAO.save(datasetConfig2);
     Assert.assertNotNull(datasetConfigId2);
@@ -63,8 +68,18 @@ public class TestDatasetConfigManager {
 
   @Test(dependsOnMethods = {"testCreate"})
   public void testFindByDataset() {
-    DatasetConfigDTO datasetConfigs = datasetConfigDAO.findByDataset(collection1);
-    Assert.assertEquals(datasetConfigs.getDataset(), collection1);
+    final DatasetConfigDTO dataset1InNamespace1 = datasetConfigDAO.findByDatasetAndNamespaceOrUnsetNamespace(DATASET_1, NAMESPACE_1);
+    assertThat(dataset1InNamespace1.getDataset()).isEqualTo(DATASET_1);
+    final DatasetConfigDTO dataset1InUnsetNamespace = datasetConfigDAO.findByDatasetAndNamespaceOrUnsetNamespace(DATASET_1, null);
+    assertThat(dataset1InUnsetNamespace).isNull();
+
+    final DatasetConfigDTO dataset2InNamespace1 = datasetConfigDAO.findUniqueByNameAndNamespace(DATASET_2, NAMESPACE_1);
+    assertThat(dataset2InNamespace1).isNull();
+    final DatasetConfigDTO dataset2InNamespace1WithFallback = datasetConfigDAO.findByDatasetAndNamespaceOrUnsetNamespace(DATASET_2, NAMESPACE_1);
+    // found because the method falls back to the undefined namespace if it cannot find in the input namespace - this behaviour may change in the future 
+    assertThat(dataset2InNamespace1WithFallback.getDataset()).isEqualTo(DATASET_2);
+    final DatasetConfigDTO dataset2InUnsetNamespace = datasetConfigDAO.findByDatasetAndNamespaceOrUnsetNamespace(DATASET_2, null);
+    assertThat(dataset2InUnsetNamespace.getDataset()).isEqualTo(DATASET_2);
   }
 
   @Test(dependsOnMethods = {"testFindByDataset"})

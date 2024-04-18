@@ -11,30 +11,37 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.alert;
+package ai.startree.thirdeye.service.alert;
 
 import static ai.startree.thirdeye.mapper.ApiBeanMapper.toAlertTemplateApi;
 import static ai.startree.thirdeye.spi.Constants.UTC_TIMEZONE;
-import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DATASET_NOT_FOUND;
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DATASET_NOT_FOUND_IN_NAMESPACE;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_CONFIGURATION_FIELD;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_UNKNOWN;
 import static ai.startree.thirdeye.spi.util.AlertMetadataUtils.getDelay;
 import static ai.startree.thirdeye.spi.util.AlertMetadataUtils.getGranularity;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.timezonesAreEquivalent;
+import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.ResourceUtils.serverError;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
+import ai.startree.thirdeye.alert.AlertTemplateRenderer;
+import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.ThirdEyeException;
+import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertInsightsApi;
 import ai.startree.thirdeye.spi.api.AlertInsightsRequestApi;
 import ai.startree.thirdeye.spi.api.AnalysisRunInfo;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datasource.loader.MinMaxTimeLoader;
 import ai.startree.thirdeye.spi.util.TimeUtils;
@@ -74,22 +81,31 @@ public class AlertInsightsProvider {
 
   private final AlertTemplateRenderer alertTemplateRenderer;
   private final DatasetConfigManager datasetConfigManager;
+  private final DataSourceManager dataSourceDao;
   private final MinMaxTimeLoader minMaxTimeLoader;
+  final AuthorizationManager authorizationManager;
 
   @Inject
   public AlertInsightsProvider(final AlertTemplateRenderer alertTemplateRenderer,
-      final DatasetConfigManager datasetConfigManager, final MinMaxTimeLoader minMaxTimeLoader) {
+      final DatasetConfigManager datasetConfigManager, final DataSourceManager dataSourceManager,
+      final MinMaxTimeLoader minMaxTimeLoader,
+      final AuthorizationManager authorizationManager) {
     this.alertTemplateRenderer = alertTemplateRenderer;
     this.datasetConfigManager = datasetConfigManager;
+    this.dataSourceDao = dataSourceManager;
     this.minMaxTimeLoader = minMaxTimeLoader;
+    this.authorizationManager = authorizationManager;
   }
 
-  public AlertInsightsApi getInsights(final AlertInsightsRequestApi request) {
+  public AlertInsightsApi getInsights(final ThirdEyePrincipal principal,
+      final AlertInsightsRequestApi request) {
+    // fixme cyril add authz on template, dataset, datasource, etc - next PR - requires redesign
     final AlertApi alertApi = request.getAlert();
+    final String namespace = authorizationManager.currentNamespace(principal);
     try {
       final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertApi,
           NOT_USED_INTERVAL);
-      return buildInsights(templateWithProperties);
+      return buildInsights(templateWithProperties, namespace);
     } catch (final WebApplicationException e) {
       throw e;
     } catch (final Exception e) {
@@ -98,11 +114,16 @@ public class AlertInsightsProvider {
     }
   }
 
-  public AlertInsightsApi getInsights(final AlertDTO alertDTO) {
+  /**
+   * This method is not responsible for checking authz of the alertDto
+   */
+  public AlertInsightsApi getInsights(final ThirdEyePrincipal principal, final AlertDTO alertDTO) {
+    // fixme cyril add authz on template, dataset, datasource, etc  - next PR - requires redesign
+    authorizationManager.enrichNamespace(principal, alertDTO);
     try {
       final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertDTO,
           NOT_USED_INTERVAL);
-      return buildInsights(templateWithProperties);
+      return buildInsights(templateWithProperties, alertDTO.namespace());
     } catch (final WebApplicationException e) {
       throw e;
     } catch (final Exception e) {
@@ -111,46 +132,51 @@ public class AlertInsightsProvider {
     }
   }
 
-  private AlertInsightsApi buildInsights(final AlertTemplateDTO templateWithProperties)
+  private AlertInsightsApi buildInsights(final AlertTemplateDTO templateWithProperties,
+      final @Nullable String namespace)
       throws Exception {
     final AlertMetadataDTO metadata = templateWithProperties.getMetadata();
 
     final AlertInsightsApi insights = new AlertInsightsApi().setAnalysisRunInfo(
             AnalysisRunInfo.success())
         .setTemplateWithProperties(toAlertTemplateApi(templateWithProperties));
-    addDatasetTimes(insights, metadata);
+    addDatasetTimes(insights, metadata, namespace);
 
     return insights;
   }
 
   private void addDatasetTimes(@NonNull final AlertInsightsApi insights,
-      @NonNull final AlertMetadataDTO metadata) throws Exception {
+      @NonNull final AlertMetadataDTO metadata, final @Nullable String namespace) throws Exception {
     final String datasetName = metadata.getDataset().getDataset();
     if (datasetName == null) {
       throw new ThirdEyeException(ERR_MISSING_CONFIGURATION_FIELD,
           "Dataset name not found in alert metadata.");
     }
-    final DatasetConfigDTO datasetConfigDTO = datasetConfigManager.findByDataset(datasetName);
-    if (datasetConfigDTO == null) {
-      throw new ThirdEyeException(ERR_DATASET_NOT_FOUND, datasetName);
-    }
+    DatasetConfigDTO datasetConfigDTO = datasetConfigManager.findByDatasetAndNamespaceOrUnsetNamespace(
+        datasetName, namespace);
+    ensureExists(datasetConfigDTO, ERR_DATASET_NOT_FOUND_IN_NAMESPACE, datasetName, namespace);
+
+    // TODO CYRIL add authz - later inject datasource id in datasetConfig and use it instead of fetching by name/namespace
+    final DataSourceDTO dataSourceDTO = dataSourceDao.findUniqueByNameAndNamespace(datasetConfigDTO.getDataSource(), datasetConfigDTO.namespace());
+    ensureExists(dataSourceDTO, ThirdEyeStatus.ERR_DATASOURCE_NOT_FOUND, datasetName + " in namespace " + datasetConfigDTO.namespace());
 
     // fetch dataset interval
-    addDatasetStartEndTimes(insights, datasetConfigDTO);
+    addDatasetStartEndTimes(insights, dataSourceDTO, datasetConfigDTO);
     addDefaults(insights, metadata);
   }
 
   private void addDatasetStartEndTimes(final AlertInsightsApi insights,
+      final DataSourceDTO dataSourceDTO,
       final DatasetConfigDTO datasetConfigDTO) throws Exception {
     // launch min, max, safeMax queries async
     final Future<@Nullable Long> minTimeFuture = minMaxTimeLoader.fetchMinTimeAsync(
-        datasetConfigDTO, null);
+        dataSourceDTO, datasetConfigDTO, null);
     final Future<@Nullable Long> maxTimeFuture = minMaxTimeLoader.fetchMaxTimeAsync(
-        datasetConfigDTO, null);
+        dataSourceDTO, datasetConfigDTO, null);
     final long maximumPossibleEndTime = currentMaximumPossibleEndTime();
     final Interval safeInterval = new Interval(0L, maximumPossibleEndTime);
     final Future<@Nullable Long> safeMaxTimeFuture = minMaxTimeLoader.fetchMaxTimeAsync(
-        datasetConfigDTO, safeInterval);
+        dataSourceDTO, datasetConfigDTO, safeInterval);
 
     // process futures
     // process startTime

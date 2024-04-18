@@ -262,12 +262,15 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     if (alertApi.getId() != null) {
       final AlertDTO alertDto = ensureExists(dtoManager.findById(alertApi.getId()));
       authorizationManager.ensureCanRead(principal, alertDto);
+      // inject namespace in the request - looks hacky todo cyril consider rewrite 
+      alertApi.setAuth(new AuthorizationConfigurationApi().setNamespace(alertDto.namespace()));
     } else {
       final AlertDTO alertDto = toDto(alertApi);
       authorizationManager.enrichNamespace(principal, alertDto);
       authorizationManager.ensureCanCreate(principal, alertDto);
+      // inject namespace in the request - looks hacky todo cyril consider rewrite
+      alertApi.setAuth(new AuthorizationConfigurationApi().setNamespace(alertDto.namespace()));
     }
-    // fixme cyril authz ASAP - inject namespace in the request (do this in the if-else above) 
     final AlertEvaluationApi results = alertEvaluator.evaluate(request);
     final Map<String, DetectionEvaluationApi> filtered = allowedEvaluations(principal,
         results.getDetectionEvaluations());

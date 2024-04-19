@@ -1,3 +1,11 @@
+### [2.45.14](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.13...thirdeye-ui-2.45.14) (2024-04-19)
+
+
+### Bug Fixes
+
+* [TE-2076](https://cortexdata.atlassian.net/browse/TE-2076) show error for invalid alert json ([d4baeb975](https://github.com/startreedata/thirdeye/commit/d4baeb975efbb2f359837300c4aa199dc1071b8c))
+* [TE-2114](https://cortexdata.atlassian.net/browse/TE-2114) ask user if feedback should re-tune alert ([a71acc5a1](https://github.com/startreedata/thirdeye/commit/a71acc5a1746aea8593e73a5db7468f330e4224b))
+
 ### [2.45.13](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.12...thirdeye-ui-2.45.13) (2024-04-12)
 
 

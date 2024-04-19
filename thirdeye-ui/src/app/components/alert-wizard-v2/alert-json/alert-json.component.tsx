@@ -21,6 +21,7 @@ import { JSONEditorV1 } from "../../../platform/components";
 import { EditableAlert } from "../../../rest/dto/alert.interfaces";
 import { THIRDEYE_DOC_LINK } from "../../../utils/constants/constants.util";
 import { getAlertTemplatesAllPath } from "../../../utils/routes/routes.util";
+import { validateJSON } from "../../../utils/validation/validation.util";
 import { NavigateAlertCreationFlowsDropdown } from "../../alert-wizard-v3/navigate-alert-creation-flows-dropdown/navigate-alert-creation-flows-dropdown";
 import { useAlertWizardV2Styles } from "../alert-wizard-v2.styles";
 import { AlertJsonProps } from "./alert-json.interfaces";
@@ -34,13 +35,21 @@ export const AlertJson: FunctionComponent<AlertJsonProps> = ({
     // proxy the given alert so users can freely type in the json editor
     const [initialAlert] = useState<EditableAlert>(alert);
 
-    const handleJSONChange = (json: string): void => {
+    const [editedAlert, setEditedAlert] = useState<string>(
+        JSON.stringify(alert)
+    );
+
+    const handleJSONChange = (newJson: string): void => {
+        setEditedAlert(newJson);
+
         try {
-            onAlertPropertyChange(JSON.parse(json), true);
+            onAlertPropertyChange(JSON.parse(newJson), true);
         } catch {
             // do nothing if invalid JSON string
         }
     };
+
+    const isAlertValid = validateJSON(editedAlert).valid;
 
     return (
         <Grid container>
@@ -104,6 +113,20 @@ export const AlertJson: FunctionComponent<AlertJsonProps> = ({
                     onChange={handleJSONChange}
                 />
             </Grid>
+
+            {!isAlertValid && (
+                <Grid item xs={12}>
+                    <Alert
+                        icon={<InfoIcon />}
+                        severity="error"
+                        variant="outlined"
+                    >
+                        {t(
+                            "message.invalid-alert-configuration-please-fix-the-configuration"
+                        )}
+                    </Alert>
+                </Grid>
+            )}
         </Grid>
     );
 };

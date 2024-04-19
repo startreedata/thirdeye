@@ -46,6 +46,7 @@ import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.detectionpipeline.PlanExecutor;
 import ai.startree.thirdeye.detectionpipeline.components.EventDataFetcher;
 import ai.startree.thirdeye.detectionpipeline.components.GenericDataFetcher;
+import ai.startree.thirdeye.detectionpipeline.operator.DetectionPipelineOperator;
 import ai.startree.thirdeye.detectionpipeline.persistence.CachedDatasetConfigManager;
 import ai.startree.thirdeye.events.HolidayEventProvider;
 import ai.startree.thirdeye.healthcheck.DatabaseHealthCheck;
@@ -203,9 +204,9 @@ public class ArchitectureTest {
             doNot(
                 ARE_NON_SECURED_DB_LAYER_CLASSES
                     .or(ARE_SERVICE_CLASSES)
-                    .or(belongToAnyOf(
-                        NON_SECURED_DB_LAYER_USERS_WHITELIST
-                    ))
+                    .or(belongToAnyOf(NON_SECURED_DB_LAYER_USERS_WHITELIST))
+                    // operators in enterprise distribution may use non secured db layer classes
+                    .or(assignableTo(DetectionPipelineOperator.class))
             ))
         .should()
         .accessClassesThat(ARE_NON_SECURED_DB_LAYER_CLASSES);

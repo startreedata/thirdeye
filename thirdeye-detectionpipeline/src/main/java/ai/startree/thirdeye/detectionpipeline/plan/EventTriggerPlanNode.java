@@ -34,7 +34,7 @@ public class EventTriggerPlanNode extends DetectionPipelinePlanNode {
   @Override
   public void init(final PlanNodeContext planNodeContext) {
     super.init(planNodeContext);
-    detectionRegistry = planNodeContext.getApplicationContext().getDetectionRegistry();
+    detectionRegistry = planNodeContext.getApplicationContext().detectionRegistry();
     requireNonNull(detectionRegistry, "DetectionRegistry is not set");
   }
 

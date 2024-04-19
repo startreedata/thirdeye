@@ -42,7 +42,7 @@ public class EventTriggerOperator extends DetectionPipelineOperator {
     super.init(context);
     final DetectionRegistry detectionRegistry = requireNonNull(context.getPlanNodeContext()
         .getApplicationContext()
-        .getDetectionRegistry());
+        .detectionRegistry());
 
     eventTrigger = createEventTrigger(
         optional(planNode.getParams()).map(TemplatableMap::valueMap).orElse(null),

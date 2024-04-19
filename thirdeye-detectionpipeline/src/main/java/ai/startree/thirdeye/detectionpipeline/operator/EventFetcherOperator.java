@@ -38,7 +38,7 @@ public class EventFetcherOperator extends DetectionPipelineOperator {
     super.init(context);
     final EventManager eventDao = requireNonNull(context.getPlanNodeContext()
         .getApplicationContext()
-        .getEventManager());
+        .eventManager());
     final Map<String, Object> params = optional(planNode.getParams()).map(TemplatableMap::valueMap)
         .orElse(null);
     this.eventFetcher = createEventFetcher(params, eventDao);

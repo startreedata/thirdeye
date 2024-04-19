@@ -57,9 +57,9 @@ public class DataFetcherOperator extends DetectionPipelineOperator {
     final DataFetcherSpec spec = requireNonNull(
         AbstractSpec.fromProperties(componentSpec, DataFetcherSpec.class),
         "Unable to construct DataFetcherSpec");
-    spec.setDataSourceCache(requireNonNull(applicationContext.getDataSourceCache()));
-    spec.setDatasetDao(requireNonNull(applicationContext.getDatasetConfigManager()));
-    spec.setDataSourceDao(requireNonNull(applicationContext.getDataSourceDao()));
+    spec.setDataSourceCache(requireNonNull(applicationContext.dataSourceCache()));
+    spec.setDatasetDao(requireNonNull(applicationContext.datasetConfigManager()));
+    spec.setDataSourceDao(requireNonNull(applicationContext.dataSourceDao()));
     spec.setNamespace(pipelineContext.getNamespace());
     spec.setTimeseriesFilters(predicates);
 

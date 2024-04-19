@@ -45,7 +45,7 @@ public class PostProcessorPlanNode extends DetectionPipelinePlanNode {
       }
     }
 
-    postProcessorRegistry = planNodeContext.getApplicationContext().getPostProcessorRegistry();
+    postProcessorRegistry = planNodeContext.getApplicationContext().postProcessorRegistry();
     requireNonNull(postProcessorRegistry, "PostProcessorRegistry is not set");
   }
 

@@ -47,7 +47,7 @@ public class PostProcessorOperator extends DetectionPipelineOperator {
     final PostProcessorRegistry postProcessorRegistry = context
         .getPlanNodeContext()
         .getApplicationContext()
-        .getPostProcessorRegistry();
+        .postProcessorRegistry();
 
     final Map<String, Object> nodeParams = optional(planNode.getParams()).map(
             TemplatableMap::valueMap)

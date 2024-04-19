@@ -38,8 +38,8 @@ public class DataFetcherPlanNode extends DetectionPipelinePlanNode {
   @Override
   public void init(final PlanNodeContext planNodeContext) {
     super.init(planNodeContext);
-    this.dataSourceCache = planNodeContext.getApplicationContext().getDataSourceCache();
-    this.datasetDao = planNodeContext.getApplicationContext().getDatasetConfigManager();
+    this.dataSourceCache = planNodeContext.getApplicationContext().dataSourceCache();
+    this.datasetDao = planNodeContext.getApplicationContext().datasetConfigManager();
     this.predicates = planNodeContext.getPredicates();
   }
 

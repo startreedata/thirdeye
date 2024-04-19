@@ -25,9 +25,9 @@ export const QUERY_PARAM_KEYS: { [key: string]: string } = {
     SHOW_FIRST_ALERT_SUCCESS: "showFirstAlertSuccess",
 };
 
-// Sensitivity range for anomalies filter defined in the backend
+// sensitivity range for ETS and other templates that use confidence-based sensitivity
 export const SENSITIVITY_RANGE = {
-    LOW: -26.2,
-    HIGH: 14.9,
-    MEDIUM: -5.65,
+    LOW: -26,
+    HIGH: 14,
+    MEDIUM: -6,
 };

@@ -28,6 +28,6 @@ public interface DataSourceManager extends AbstractManager<DataSourceDTO> {
    * To have a strict search that does not fallback to the undefined namespace, use
    * {@link AbstractManager#findUniqueByNameAndNamespace}.
    */
-  @Nullable DataSourceDTO findByNameAndNamespaceOrUnsetNamespace(final String name, final String namespace);
+  @Nullable DataSourceDTO findByNameAndNamespaceOrUnsetNamespace(final String name, final @Nullable String namespace);
 
 }

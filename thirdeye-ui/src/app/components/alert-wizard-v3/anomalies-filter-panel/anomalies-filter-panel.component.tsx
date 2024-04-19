@@ -107,22 +107,22 @@ export const AnomaliesFilterPanel: FunctionComponent<AnomaliesFilterPanelProps> 
                                                 }
                                                 marks={[
                                                     {
-                                                        value: -14,
+                                                        value: -26.2,
                                                         label: t("label.low"),
                                                     },
                                                     {
-                                                        value: 6,
+                                                        value: -5.65,
                                                         label: t(
                                                             "label.medium"
                                                         ),
                                                     },
                                                     {
-                                                        value: 26,
+                                                        value: 14.9,
                                                         label: t("label.high"),
                                                     },
                                                 ]}
-                                                max={26}
-                                                min={-14}
+                                                max={14.9}
+                                                min={-26.2}
                                                 step={1}
                                                 onChange={(_, value) => {
                                                     onAlertPropertyChange({

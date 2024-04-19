@@ -74,7 +74,7 @@ public class ColdStartPostProcessorTest {
     final DatasetConfigDTO datasetDto = new DatasetConfigDTO().setDataSource(
         DATASOURCE_1);
     datasetDto.setAuth(new AuthorizationConfigurationDTO().setNamespace(NAMESPACE));
-    when(datasetDao.findByDatasetAndNamespaceOrUnsetNamespace(TABLE_NAME, NAMESPACE)).thenReturn(datasetDto);
+    when(datasetDao.findByNameAndNamespaceOrUnsetNamespace(TABLE_NAME, NAMESPACE)).thenReturn(datasetDto);
     dataSourceDao = mock(DataSourceManager.class);
     final DataSourceDTO datasourceDto = new DataSourceDTO();
     when(dataSourceDao.findUniqueByNameAndNamespace(DATASOURCE_1, NAMESPACE))

@@ -29,7 +29,7 @@ public interface DatasetConfigManager extends AbstractManager<DatasetConfigDTO> 
    * To have a strict search that does not fallback to the undefined namespace, use
    * {@link AbstractManager#findUniqueByNameAndNamespace}.
    */
-  @Nullable DatasetConfigDTO findByDatasetAndNamespaceOrUnsetNamespace(final String dataset, final String namespace);
+  @Nullable DatasetConfigDTO findByNameAndNamespaceOrUnsetNamespace(final String name, final String namespace);
 
   List<DatasetConfigDTO> findActive();
 }

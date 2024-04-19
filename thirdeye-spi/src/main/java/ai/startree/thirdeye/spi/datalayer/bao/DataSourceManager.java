@@ -14,7 +14,20 @@
 package ai.startree.thirdeye.spi.datalayer.bao;
 
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface DataSourceManager extends AbstractManager<DataSourceDTO> {
+
+  /**
+   * Find a dataset in a given namespace. If namespace is null, look in the undefined namespace.
+   * If the dataset is not found in the provided namespace, look in the undefined namespace, and
+   * if a matching dataset is found in the undefined namespace, log a warning and return it.
+   * Returns null if the dataset is not found in the namespace and the unset namespace.
+   *
+   * Used to maintain backward compatibility with existing instances.
+   * To have a strict search that does not fallback to the undefined namespace, use
+   * {@link AbstractManager#findUniqueByNameAndNamespace}.
+   */
+  @Nullable DataSourceDTO findByNameAndNamespaceOrUnsetNamespace(final String name, final String namespace);
 
 }

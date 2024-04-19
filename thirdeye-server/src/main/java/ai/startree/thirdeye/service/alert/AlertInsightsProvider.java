@@ -152,7 +152,7 @@ public class AlertInsightsProvider {
       throw new ThirdEyeException(ERR_MISSING_CONFIGURATION_FIELD,
           "Dataset name not found in alert metadata.");
     }
-    DatasetConfigDTO datasetConfigDTO = datasetConfigManager.findByDatasetAndNamespaceOrUnsetNamespace(
+    DatasetConfigDTO datasetConfigDTO = datasetConfigManager.findByNameAndNamespaceOrUnsetNamespace(
         datasetName, namespace);
     ensureExists(datasetConfigDTO, ERR_DATASET_NOT_FOUND_IN_NAMESPACE, datasetName, namespace);
 

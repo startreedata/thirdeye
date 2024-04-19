@@ -52,7 +52,7 @@ public class DatasetConfigManagerImpl extends AbstractManagerImpl<DatasetConfigD
    * {@link AbstractManager#findUniqueByNameAndNamespace}.
    */
   @Override
-  public @Nullable DatasetConfigDTO findByDatasetAndNamespaceOrUnsetNamespace(final String dataset,
+  public @Nullable DatasetConfigDTO findByNameAndNamespaceOrUnsetNamespace(final String dataset,
       final @Nullable String namespace) {
     DatasetConfigDTO datasetConfigDTO = findUniqueByNameAndNamespace(dataset, namespace);
     if (datasetConfigDTO == null && namespace != null) {

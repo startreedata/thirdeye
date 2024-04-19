@@ -31,7 +31,6 @@ import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.alert.EvaluationContextProcessor;
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.NamespaceResolver;
-import ai.startree.thirdeye.datasource.DataSourceOnboarder;
 import ai.startree.thirdeye.datalayer.DataSourceBuilder;
 import ai.startree.thirdeye.datalayer.DatabaseClient;
 import ai.startree.thirdeye.datalayer.DatabaseOrm;
@@ -42,11 +41,12 @@ import ai.startree.thirdeye.datalayer.core.EnumerationItemDeleter;
 import ai.startree.thirdeye.datalayer.core.EnumerationItemMaintainer;
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.datalayer.dao.TaskDao;
+import ai.startree.thirdeye.datasource.DataSourceOnboarder;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
+import ai.startree.thirdeye.detectionpipeline.Operator;
 import ai.startree.thirdeye.detectionpipeline.PlanExecutor;
 import ai.startree.thirdeye.detectionpipeline.components.EventDataFetcher;
 import ai.startree.thirdeye.detectionpipeline.components.GenericDataFetcher;
-import ai.startree.thirdeye.detectionpipeline.operator.DetectionPipelineOperator;
 import ai.startree.thirdeye.detectionpipeline.persistence.CachedDatasetConfigManager;
 import ai.startree.thirdeye.events.HolidayEventProvider;
 import ai.startree.thirdeye.healthcheck.DatabaseHealthCheck;
@@ -206,7 +206,7 @@ public class ArchitectureTest {
                     .or(ARE_SERVICE_CLASSES)
                     .or(belongToAnyOf(NON_SECURED_DB_LAYER_USERS_WHITELIST))
                     // operators in enterprise distribution may use non secured db layer classes
-                    .or(assignableTo(DetectionPipelineOperator.class))
+                    .or(assignableTo(Operator.class))
             ))
         .should()
         .accessClassesThat(ARE_NON_SECURED_DB_LAYER_CLASSES);

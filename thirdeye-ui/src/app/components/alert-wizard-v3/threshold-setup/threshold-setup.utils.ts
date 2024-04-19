@@ -37,6 +37,7 @@ import {
 } from "../../../rest/dto/alert.interfaces";
 import { Dataset } from "../../../rest/dto/dataset.interfaces";
 import { MetricAggFunction } from "../../../rest/dto/metric.interfaces";
+import { SENSITIVITY_RANGE } from "../../../utils/constants/constants.util";
 import { DatasetInfo } from "../../../utils/datasources/datasources.util";
 import {
     AlgorithmOptionInputFieldConfig,
@@ -104,8 +105,8 @@ const SUPPORTED_SIMPLE_MODE_PROPERTIES: {
         templatePropertyName: "sensitivity",
         label: i18n.t("label.sensitivity"),
         type: "slider",
-        min: -26,
-        max: 14,
+        min: SENSITIVITY_RANGE.LOW,
+        max: SENSITIVITY_RANGE.HIGH,
     },
     baselineOffset: {
         templatePropertyName: "baselineOffset",

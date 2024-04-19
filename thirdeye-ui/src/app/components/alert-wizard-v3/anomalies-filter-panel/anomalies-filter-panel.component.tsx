@@ -25,6 +25,7 @@ import CloseIcon from "@material-ui/icons/Close";
 import React, { FunctionComponent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { MetadataProperty } from "../../../rest/dto/alert-template.interfaces";
+import { SENSITIVITY_RANGE } from "../../../utils/constants/constants.util";
 import { AnomaliesFilterPanelProps } from "./anomalies-filter-panel.interfaces";
 import { FilterConfigurator } from "./filter-configurator/filter-configurator";
 
@@ -107,22 +108,22 @@ export const AnomaliesFilterPanel: FunctionComponent<AnomaliesFilterPanelProps> 
                                                 }
                                                 marks={[
                                                     {
-                                                        value: -14,
+                                                        value: SENSITIVITY_RANGE.LOW,
                                                         label: t("label.low"),
                                                     },
                                                     {
-                                                        value: 6,
+                                                        value: SENSITIVITY_RANGE.MEDIUM,
                                                         label: t(
                                                             "label.medium"
                                                         ),
                                                     },
                                                     {
-                                                        value: 26,
+                                                        value: SENSITIVITY_RANGE.HIGH,
                                                         label: t("label.high"),
                                                     },
                                                 ]}
-                                                max={26}
-                                                min={-14}
+                                                max={SENSITIVITY_RANGE.HIGH}
+                                                min={SENSITIVITY_RANGE.LOW}
                                                 step={1}
                                                 onChange={(_, value) => {
                                                     onAlertPropertyChange({

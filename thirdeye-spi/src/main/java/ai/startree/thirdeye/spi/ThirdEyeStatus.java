@@ -24,6 +24,7 @@ public enum ThirdEyeStatus {
   ERR_DATASET_NOT_FOUND("Dataset not found: %s. Dataset is not onboarded?"),
   ERR_DATASET_NOT_FOUND_IN_NAMESPACE("Dataset not found: %s in namespace: %s. Dataset is not onboarded?"),
   ERR_DATASOURCE_NOT_FOUND("Data Source not found: %s. Data Source is not created?"),
+  ERR_DATASOURCE_NOT_FOUND_IN_NAMESPACE("Data Source not found: %s in namespace %s. Data Source is not created?"),
   ERR_DATASOURCE_NOT_LOADED("Data source cannot be instantiated! %s"),
   ERR_DATASOURCE_VALIDATION_FAILED("Data source validation failed! name: %s. %s"),
   ERR_DATA_UNAVAILABLE("Data not available! %s"),

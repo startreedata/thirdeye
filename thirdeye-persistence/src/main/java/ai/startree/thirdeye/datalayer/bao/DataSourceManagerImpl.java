@@ -47,6 +47,6 @@ public class DataSourceManagerImpl extends AbstractManagerImpl<DataSourceDTO>
             name, namespace);
       }
     }
-    return null;
+    return dataSourceDTO;
   }
 }

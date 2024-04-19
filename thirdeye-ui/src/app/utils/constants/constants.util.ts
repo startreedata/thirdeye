@@ -24,3 +24,10 @@ export const THIRDEYE_DOC_LINK =
 export const QUERY_PARAM_KEYS: { [key: string]: string } = {
     SHOW_FIRST_ALERT_SUCCESS: "showFirstAlertSuccess",
 };
+
+// Sensitivity range for anomalies filter defined in the backend
+export const SENSITIVITY_RANGE = {
+    LOW: -26.2,
+    HIGH: 14.9,
+    MEDIUM: -5.65,
+};

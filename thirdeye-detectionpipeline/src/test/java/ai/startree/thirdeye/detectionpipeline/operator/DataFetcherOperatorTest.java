@@ -69,7 +69,7 @@ public class DataFetcherOperatorTest {
     when(dataSourceCache.getDataSource(dataSourceDTO))
         .thenReturn(thirdEyeDataSource);
     final DataSourceManager dataSourceDao = mock(DataSourceManager.class);
-    when(dataSourceDao.findUniqueByNameAndNamespace(anyString(), nullable(String.class)))
+    when(dataSourceDao.findByNameAndNamespaceOrUnsetNamespace(anyString(), nullable(String.class)))
         .thenReturn(dataSourceDTO);
     planNodeContext = new PlanNodeContext().setDetectionPipelineContext(
         new DetectionPipelineContext().setApplicationContext(

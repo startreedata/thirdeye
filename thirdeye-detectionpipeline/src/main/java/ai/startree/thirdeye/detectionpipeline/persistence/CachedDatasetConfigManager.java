@@ -34,10 +34,10 @@ public class CachedDatasetConfigManager extends DelegateDatasetConfigManager {
   }
 
   @Override
-  public DatasetConfigDTO findByDatasetAndNamespaceOrUnsetNamespace(final String name, final String namespace) {
+  public DatasetConfigDTO findByNameAndNamespaceOrUnsetNamespace(final String name, final String namespace) {
     return 
         datasetNameCache.computeIfAbsent(new CacheKey(name, namespace), (k) -> 
-        CachedDatasetConfigManager.super.findByDatasetAndNamespaceOrUnsetNamespace(k.name(), k.namespace()));
+        CachedDatasetConfigManager.super.findByNameAndNamespaceOrUnsetNamespace(k.name(), k.namespace()));
   }
   
   private record CacheKey(String name, String namespace){}

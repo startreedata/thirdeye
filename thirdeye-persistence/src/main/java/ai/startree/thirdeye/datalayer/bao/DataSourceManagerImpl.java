@@ -18,13 +18,35 @@ import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public class DataSourceManagerImpl extends AbstractManagerImpl<DataSourceDTO>
     implements DataSourceManager {
+  
+  private static final Logger LOG = LoggerFactory.getLogger(DataSourceManagerImpl.class);
 
   @Inject
   public DataSourceManagerImpl(GenericPojoDao genericPojoDao) {
     super(DataSourceDTO.class, genericPojoDao);
+  }
+
+  @Override
+  public @Nullable DataSourceDTO findByNameAndNamespaceOrUnsetNamespace(final String name,
+      final String namespace) {
+    DataSourceDTO dataSourceDTO = findUniqueByNameAndNamespace(name, namespace);
+    if (dataSourceDTO == null && namespace != null) {
+      // look in the unset namespace
+      dataSourceDTO = findUniqueByNameAndNamespace(name, null);
+      if (dataSourceDTO != null) {
+        LOG.warn(
+            "Could not find datasource {} in namespace {}, but found a datasource with this name with an unset namespace. "
+                + "Using this datasource. This behaviour will change. Please migrate your datasource to a namespace.",
+            name, namespace);
+      }
+    }
+    return dataSourceDTO;
   }
 }

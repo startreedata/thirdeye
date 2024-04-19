@@ -63,13 +63,13 @@ public class DataFetcherOperatorTest {
     dataSourceDTO.setId(1L);
     final DataSourceCache dataSourceCache = mock(DataSourceCache.class);
     final DatasetConfigManager datasetDao = mock(DatasetConfigManager.class);
-    when(datasetDao.findByDatasetAndNamespaceOrUnsetNamespace(anyString(), nullable(String.class)))
+    when(datasetDao.findByNameAndNamespaceOrUnsetNamespace(anyString(), nullable(String.class)))
         .thenReturn(new DatasetConfigDTO().setDataset(TABLE_NAME));
     final ThirdEyeDataSource thirdEyeDataSource = mock(ThirdEyeDataSource.class);
     when(dataSourceCache.getDataSource(dataSourceDTO))
         .thenReturn(thirdEyeDataSource);
     final DataSourceManager dataSourceDao = mock(DataSourceManager.class);
-    when(dataSourceDao.findUniqueByNameAndNamespace(anyString(), nullable(String.class)))
+    when(dataSourceDao.findByNameAndNamespaceOrUnsetNamespace(anyString(), nullable(String.class)))
         .thenReturn(dataSourceDTO);
     planNodeContext = new PlanNodeContext().setDetectionPipelineContext(
         new DetectionPipelineContext().setApplicationContext(

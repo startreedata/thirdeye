@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.detectionpipeline.components;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
@@ -24,6 +25,7 @@ import ai.startree.thirdeye.detectionpipeline.sql.macro.MacroEngine;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datasource.DataSourceRequest;
@@ -81,26 +83,28 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
   @Override
   public void init(final DataFetcherSpec dataFetcherSpec) {
     this.query = dataFetcherSpec.getQuery();
-    this.tableName = requireNonNull(dataFetcherSpec.getTableName());
-    final DatasetConfigManager datasetDao = Objects.requireNonNull(
-        dataFetcherSpec.getDatasetDao());
-    this.datasetConfigDTO =
-        datasetDao.findByDatasetAndNamespaceOrUnsetNamespace(dataFetcherSpec.getTableName(),
-            dataFetcherSpec.getNamespace());
-    checkArgument(this.datasetConfigDTO != null, "Could not find dataset %s within namespace %s.",
-        dataFetcherSpec.getTableName(), dataFetcherSpec.getNamespace());
-
+    this.tableName = dataFetcherSpec.getTableName();
+    if (tableName != null) {
+      // tableName is not set when the datafetcher is used for the query enumerator for instance
+      final DatasetConfigManager datasetDao = Objects.requireNonNull(
+          dataFetcherSpec.getDatasetDao());
+      this.datasetConfigDTO =
+          datasetDao.findByNameAndNamespaceOrUnsetNamespace(dataFetcherSpec.getTableName(),
+              dataFetcherSpec.getNamespace());
+      checkArgument(this.datasetConfigDTO != null, "Could not find dataset %s within namespace %s.",
+          dataFetcherSpec.getTableName(), dataFetcherSpec.getNamespace());
+    }
     // todo cyril - code is not compatible with same dataset name in multiple datasource in same namespace - not a very important use case for the moment
     final String dataSource = requireNonNull(dataFetcherSpec.getDataSource(),
         "DataFetcher: data source is not set.");
     final DataSourceManager dataSourceDao = requireNonNull(dataFetcherSpec.getDataSourceDao());
-    final DataSourceDTO dataSourceDTO = requireNonNull(
-        dataSourceDao.findUniqueByNameAndNamespace(dataSource,
-            datasetConfigDTO.namespace()));
-
+    final String datasourceNamespace = optional(datasetConfigDTO).map(AbstractDTO::namespace)
+        .orElse(dataFetcherSpec.getNamespace());
+    final DataSourceDTO dataSourceDto = dataSourceDao.findByNameAndNamespaceOrUnsetNamespace(dataSource, datasourceNamespace);
+    requireNonNull(dataSourceDto);
     final DataSourceCache dataSourceCache = requireNonNull(dataFetcherSpec.getDataSourceCache());
     this.thirdEyeDataSource = requireNonNull(dataSourceCache
-        .getDataSource(dataSourceDTO), "data source is unavailable");
+        .getDataSource(dataSourceDto), "data source is unavailable");
 
     if (!dataFetcherSpec.getTimeseriesFilters().isEmpty()) {
       checkArgument(tableName != null,

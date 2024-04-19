@@ -90,7 +90,7 @@ public class ColdStartPostProcessor implements AnomalyPostProcessor {
   @Override
   public Map<String, OperatorResult> postProcess(final Interval detectionInterval,
       final Map<String, OperatorResult> resultMap) throws Exception {
-    final DatasetConfigDTO datasetConfigDTO = datasetDao.findByDatasetAndNamespaceOrUnsetNamespace(
+    final DatasetConfigDTO datasetConfigDTO = datasetDao.findByNameAndNamespaceOrUnsetNamespace(
         tableName, namespace);
     checkArgument(datasetConfigDTO != null,
         "Could not find dataset %s with namespace %s.",

@@ -159,7 +159,7 @@ public class RcaInfoFetcher {
     } else {
       LOG.warn(
           "Running on a legacy metrics that does not contain the id of its parent dataset. Finding dataset by name and namespace.");
-      datasetConfigDto = datasetDAO.findByDatasetAndNamespaceOrUnsetNamespace(
+      datasetConfigDto = datasetDAO.findByNameAndNamespaceOrUnsetNamespace(
           metricConfigDTO.getDataset(),
           alertNamespace);
     }

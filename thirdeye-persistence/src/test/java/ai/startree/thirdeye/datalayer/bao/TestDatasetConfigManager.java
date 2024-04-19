@@ -68,17 +68,17 @@ public class TestDatasetConfigManager {
 
   @Test(dependsOnMethods = {"testCreate"})
   public void testFindByDataset() {
-    final DatasetConfigDTO dataset1InNamespace1 = datasetConfigDAO.findByDatasetAndNamespaceOrUnsetNamespace(DATASET_1, NAMESPACE_1);
+    final DatasetConfigDTO dataset1InNamespace1 = datasetConfigDAO.findByNameAndNamespaceOrUnsetNamespace(DATASET_1, NAMESPACE_1);
     assertThat(dataset1InNamespace1.getDataset()).isEqualTo(DATASET_1);
-    final DatasetConfigDTO dataset1InUnsetNamespace = datasetConfigDAO.findByDatasetAndNamespaceOrUnsetNamespace(DATASET_1, null);
+    final DatasetConfigDTO dataset1InUnsetNamespace = datasetConfigDAO.findByNameAndNamespaceOrUnsetNamespace(DATASET_1, null);
     assertThat(dataset1InUnsetNamespace).isNull();
 
     final DatasetConfigDTO dataset2InNamespace1 = datasetConfigDAO.findUniqueByNameAndNamespace(DATASET_2, NAMESPACE_1);
     assertThat(dataset2InNamespace1).isNull();
-    final DatasetConfigDTO dataset2InNamespace1WithFallback = datasetConfigDAO.findByDatasetAndNamespaceOrUnsetNamespace(DATASET_2, NAMESPACE_1);
+    final DatasetConfigDTO dataset2InNamespace1WithFallback = datasetConfigDAO.findByNameAndNamespaceOrUnsetNamespace(DATASET_2, NAMESPACE_1);
     // found because the method falls back to the undefined namespace if it cannot find in the input namespace - this behaviour may change in the future 
     assertThat(dataset2InNamespace1WithFallback.getDataset()).isEqualTo(DATASET_2);
-    final DatasetConfigDTO dataset2InUnsetNamespace = datasetConfigDAO.findByDatasetAndNamespaceOrUnsetNamespace(DATASET_2, null);
+    final DatasetConfigDTO dataset2InUnsetNamespace = datasetConfigDAO.findByNameAndNamespaceOrUnsetNamespace(DATASET_2, null);
     assertThat(dataset2InUnsetNamespace.getDataset()).isEqualTo(DATASET_2);
   }
 

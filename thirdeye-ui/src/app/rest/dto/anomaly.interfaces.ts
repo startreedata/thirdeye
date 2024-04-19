@@ -61,6 +61,7 @@ export interface AnomalyFeedback {
         principal: string;
     };
     updated?: number;
+    updateAlertConfiguration?: "ASYNC";
 }
 
 export enum AnomalyCause {

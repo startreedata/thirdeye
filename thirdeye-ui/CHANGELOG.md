@@ -1,3 +1,10 @@
+### [2.45.15](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.14...thirdeye-ui-2.45.15) (2024-04-19)
+
+
+### Bug Fixes
+
+* [TE-2134](https://cortexdata.atlassian.net/browse/TE-2134) correct sensitivity range in filters page ([67f8bcace](https://github.com/startreedata/thirdeye/commit/67f8bcace3e14c0e7698381af5b644b8d3ab9cb1))
+
 ### [2.45.14](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.13...thirdeye-ui-2.45.14) (2024-04-19)
 
 

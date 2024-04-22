@@ -18,6 +18,7 @@ export interface PreviewChartProps {
     alert: EditableAlert;
     onChartDataLoadSuccess?: () => void;
     hideCallToActionPrompt?: boolean;
+    disableReload?: boolean;
     onAlertPropertyChange: (
         contents: Partial<EditableAlert>,
         isTotalReplace?: boolean

@@ -15,7 +15,7 @@
 import { Box, Divider, Grid, Link, Typography } from "@material-ui/core";
 import InfoIcon from "@material-ui/icons/Info";
 import Alert from "@material-ui/lab/Alert";
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { JSONEditorV1 } from "../../../platform/components";
 import { EditableAlert } from "../../../rest/dto/alert.interfaces";
@@ -29,6 +29,7 @@ import { AlertJsonProps } from "./alert-json.interfaces";
 export const AlertJson: FunctionComponent<AlertJsonProps> = ({
     alert,
     onAlertPropertyChange,
+    setIsAlertValid,
 }) => {
     const { t } = useTranslation();
     const classes = useAlertWizardV2Styles();
@@ -50,6 +51,10 @@ export const AlertJson: FunctionComponent<AlertJsonProps> = ({
     };
 
     const isAlertValid = validateJSON(editedAlert).valid;
+
+    useEffect(() => {
+        setIsAlertValid(isAlertValid);
+    }, [editedAlert]);
 
     return (
         <Grid container>

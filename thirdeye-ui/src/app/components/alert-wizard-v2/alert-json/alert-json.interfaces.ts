@@ -16,6 +16,7 @@ import { EditableAlert } from "../../../rest/dto/alert.interfaces";
 
 export interface AlertJsonProps {
     alert: EditableAlert;
+    setIsAlertValid: (isValid: boolean) => void;
     onAlertPropertyChange: (
         contents: Partial<EditableAlert>,
         fullReplace: boolean

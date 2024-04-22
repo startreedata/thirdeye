@@ -52,6 +52,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
     alert,
     onChartDataLoadSuccess,
     hideCallToActionPrompt,
+    disableReload,
 }) => {
     const { t } = useTranslation();
     const [searchParams, setSearchParams] = useSearchParams();
@@ -224,6 +225,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
             {/** Header Section **/}
             <PreviewChartHeader
                 alertInsight={alertInsight}
+                disableReload={disableReload}
                 getEvaluationStatus={getEvaluationStatus}
                 showConfigurationNotReflective={
                     !isEqual(alertForCurrentEvaluation, alert) &&

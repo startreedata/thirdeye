@@ -46,6 +46,8 @@ export const AlertsCreateJSONPage: FunctionComponent = () => {
         onPageExit,
     } = useOutletContext<AlertsSimpleAdvancedJsonContainerPageOutletContextProps>();
 
+    const [isAlertValid, setIsAlertValid] = React.useState(false);
+
     const availableFields = useMemo(() => {
         if (selectedAlertTemplate) {
             return determinePropertyFieldConfiguration(selectedAlertTemplate);
@@ -71,6 +73,7 @@ export const AlertsCreateJSONPage: FunctionComponent = () => {
                     <PageContentsCardV1>
                         <AlertJson
                             alert={alert}
+                            setIsAlertValid={setIsAlertValid}
                             onAlertPropertyChange={onAlertPropertyChange}
                         />
                         <Box marginBottom={3} marginTop={3}>
@@ -79,6 +82,7 @@ export const AlertsCreateJSONPage: FunctionComponent = () => {
                         <Box>
                             <PreviewChart
                                 alert={alert}
+                                disableReload={!isAlertValid}
                                 hideCallToActionPrompt={areBasicFieldsFilled}
                                 onAlertPropertyChange={onAlertPropertyChange}
                             />
@@ -99,7 +103,9 @@ export const AlertsCreateJSONPage: FunctionComponent = () => {
                     backButtonLabel={t("label.cancel")}
                     handleBackClick={onPageExit}
                     handleNextClick={() => handleSubmitAlertClick(alert)}
-                    nextButtonIsDisabled={isEditRequestInFlight}
+                    nextButtonIsDisabled={
+                        isEditRequestInFlight || !isAlertValid
+                    }
                     nextButtonLabel={t("label.create-entity", {
                         entity: t("label.alert"),
                     })}

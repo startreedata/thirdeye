@@ -39,6 +39,7 @@ export const AlertsUpdateJSONPage: FunctionComponent = () => {
         })
     );
     const [isSubmitBtnEnabled, setIsSubmitBtnEnabled] = useState(false);
+    const [isAlertValid, setIsAlertValid] = useState(true);
     const {
         alert,
         handleAlertPropertyChange: onAlertPropertyChange,
@@ -63,6 +64,7 @@ export const AlertsUpdateJSONPage: FunctionComponent = () => {
                     <PageContentsCardV1>
                         <AlertJson
                             alert={alert}
+                            setIsAlertValid={setIsAlertValid}
                             onAlertPropertyChange={onAlertPropertyChange}
                         />
                         <Box marginBottom={3} marginTop={3}>
@@ -71,6 +73,7 @@ export const AlertsUpdateJSONPage: FunctionComponent = () => {
                         <Box>
                             <PreviewChart
                                 alert={alert}
+                                disableReload={!isAlertValid}
                                 onAlertPropertyChange={onAlertPropertyChange}
                                 onChartDataLoadSuccess={() => {
                                     setIsSubmitBtnEnabled(true);
@@ -102,7 +105,9 @@ export const AlertsUpdateJSONPage: FunctionComponent = () => {
                     handleBackClick={onPageExit}
                     handleNextClick={() => handleSubmitAlertClick(alert)}
                     nextButtonIsDisabled={
-                        !isSubmitBtnEnabled || isEditRequestInFlight
+                        !isSubmitBtnEnabled ||
+                        isEditRequestInFlight ||
+                        !isAlertValid
                     }
                     nextButtonLabel={submitBtnLabel}
                 />

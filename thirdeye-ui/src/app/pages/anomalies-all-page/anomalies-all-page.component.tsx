@@ -145,7 +145,11 @@ export const AnomaliesAllPage: FunctionComponent = () => {
                             subscriptionGroup.alertAssociations.forEach(
                                 (association) => {
                                     associatedAlertsEnumerationKey.push(
-                                        `${association.alert.id}-${association?.enumerationItem?.id}`
+                                        `${association.alert.id}${
+                                            association?.enumerationItem?.id
+                                                ? `-${association?.enumerationItem?.id}`
+                                                : ""
+                                        }`
                                     );
                                 }
                             );
@@ -154,8 +158,22 @@ export const AnomaliesAllPage: FunctionComponent = () => {
 
                 filteredAnomalies = anomaliesRequestDataResponse.filter(
                     (anomaly) => {
-                        return associatedAlertsEnumerationKey.includes(
-                            `${anomaly.alert.id}-${anomaly?.enumerationItem?.id}`
+                        return associatedAlertsEnumerationKey.some(
+                            (k: string) => {
+                                const hasEnumerationId = k.includes("-");
+                                if (hasEnumerationId) {
+                                    const [alertId, enumerationId] =
+                                        k.split("-");
+
+                                    return (
+                                        anomaly.alert.id === Number(alertId) &&
+                                        anomaly.enumerationItem?.id ===
+                                            Number(enumerationId)
+                                    );
+                                }
+
+                                return Number(k) === anomaly.alert.id;
+                            }
                         );
                     }
                 );

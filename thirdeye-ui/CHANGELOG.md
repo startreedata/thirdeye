@@ -1,3 +1,10 @@
+### [2.45.16](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.15...thirdeye-ui-2.45.16) (2024-04-24)
+
+
+### Bug Fixes
+
+* [TE-2076](https://cortexdata.atlassian.net/browse/TE-2076) improve error messaging in JSON editor ([1fc2a1ce9](https://github.com/startreedata/thirdeye/commit/1fc2a1ce9776cb303677aa3df805d6f200ae6793))
+
 ### [2.45.15](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.14...thirdeye-ui-2.45.15) (2024-04-19)
 
 

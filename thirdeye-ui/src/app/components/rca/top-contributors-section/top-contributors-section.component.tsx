@@ -37,6 +37,7 @@ import {
     SavedStateKeys,
 } from "../../../rest/dto/rca.interfaces";
 import { areFiltersEqual } from "../../../utils/anomaly-dimension-analysis/anomaly-dimension-analysis";
+import { generateCustomErrorMessage } from "../../../utils/errors/errors.utils";
 import { getFromSavedInvestigationOrDefault } from "../../../utils/investigation/investigation.util";
 import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
 import { serializeKeyValuePair } from "../../../utils/params/params.util";
@@ -83,7 +84,15 @@ export const TopContributorsSection: FunctionComponent<TopContributorsSectionPro
         useEffect(() => {
             notifyIfErrors(
                 anomalyDimensionAnalysisReqStatus,
-                errorMessages,
+                generateCustomErrorMessage(errorMessages, [
+                    {
+                        criteriaFunction: (error) =>
+                            error
+                                .toLowerCase()
+                                .includes("pinotclientexception"),
+                        customMessage: t("message.pinot-broker-error"),
+                    },
+                ]),
                 notify,
                 t("message.error-while-fetching", {
                     entity: t("label.dimension-analysis-data"),

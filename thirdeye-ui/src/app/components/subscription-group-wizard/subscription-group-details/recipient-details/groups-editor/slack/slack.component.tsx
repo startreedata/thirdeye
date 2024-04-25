@@ -84,6 +84,15 @@ export const Slack: FunctionComponent<SlackProps> = ({
         onSpecChange(copied);
     };
 
+    const handleOneMessagePerAnomalyChange = (newValue: boolean): void => {
+        const copied = {
+            ...configuration,
+        };
+        copied.params.sendOneMessagePerAnomaly = newValue;
+
+        onSpecChange(copied);
+    };
+
     return (
         <Card>
             <CardContent>
@@ -180,6 +189,34 @@ export const Slack: FunctionComponent<SlackProps> = ({
                                         onChange={(_e, checked) => {
                                             onChange(checked);
                                             handleNotifyResolvedAnomaliesChange(
+                                                checked
+                                            );
+                                        }}
+                                    />
+                                }
+                            />
+                        )}
+                    />
+                    <Controller
+                        control={control}
+                        name="sendOneMessagePerAnomaly"
+                        render={({ field: { name, value, onChange } }) => (
+                            <InputSection
+                                inputComponent={
+                                    <FormControlLabel
+                                        checked={value}
+                                        control={<Checkbox color="primary" />}
+                                        label={
+                                            <Typography variant="body2">
+                                                {t(
+                                                    "message.send-separate-slack-messages"
+                                                )}
+                                            </Typography>
+                                        }
+                                        name={name}
+                                        onChange={(_e, checked) => {
+                                            onChange(checked);
+                                            handleOneMessagePerAnomalyChange(
                                                 checked
                                             );
                                         }}

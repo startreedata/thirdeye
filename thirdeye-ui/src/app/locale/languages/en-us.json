@@ -749,6 +749,7 @@
         "select-the-start-and-end-date-time-range-for-the-anomalous-behavior": "Select the start and end date-time range for the anomalous behavior",
         "select-the-top-contributors-to-see-the-dimensions": "Expand/collapse to view the Top Contributors. Select the Top Contributors to see the dimensions plotted in the chart below.",
         "select-who-to-notify-when-finding-anomalies": "Select who to notify when finding anomalies",
+        "send-separate-slack-messages": "Send separate Slack messages",
         "set-chart-height": "Set the chart height",
         "set-currently-selected-as-default-filters": "Set currently selected as default filters",
         "set-the-date-range-of-the-alert-chart-below": "Set the date range of the alert chart below",

@@ -52,6 +52,7 @@ export interface SlackSpec extends SpecConfiguration {
     params: {
         webhookUrl: string;
         notifyResolvedAnomalies: boolean;
+        sendOneMessagePerAnomaly: boolean;
     };
 }
 

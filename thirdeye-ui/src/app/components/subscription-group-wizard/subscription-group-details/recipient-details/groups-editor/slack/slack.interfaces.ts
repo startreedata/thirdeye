@@ -23,4 +23,5 @@ export interface SlackProps {
 export interface SlackFormEntries {
     webhookUrl: string;
     notifyResolvedAnomalies: boolean;
+    sendOneMessagePerAnomaly: boolean;
 }

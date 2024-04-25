@@ -96,6 +96,20 @@ export const getCardProps = (
                 ),
             });
 
+            cardProps.rows.push({
+                label: t("message.send-separate-slack-messages"),
+                value: (
+                    <Box clone ml={-1.25}>
+                        <Checkbox
+                            disabled
+                            checked={channel.params.sendOneMessagePerAnomaly}
+                            color="primary"
+                            size="small"
+                        />
+                    </Box>
+                ),
+            });
+
             break;
 
         case SpecType.EmailSendgrid:

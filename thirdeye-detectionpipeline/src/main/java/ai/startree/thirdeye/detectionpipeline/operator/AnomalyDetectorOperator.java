@@ -178,6 +178,8 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
     final BooleanSeries isAnomalySeries = df.getBooleans(Constants.COL_ANOMALY);
     final DoubleSeries currentSeries = df.getDoubles(Constants.COL_CURRENT);
     final DoubleSeries baselineSeries = df.getDoubles(Constants.COL_VALUE);
+    final DoubleSeries lowerBoundSeries = df.getDoubles(Constants.COL_LOWER_BOUND);
+    final DoubleSeries upperBoundSeries = df.getDoubles(Constants.COL_UPPER_BOUND);
 
     for (int i = 0; i < df.size(); i++) {
       if (!isAnomalySeries.isNull(i) && BooleanSeries.booleanValueOf(isAnomalySeries.get(i))) {
@@ -199,6 +201,12 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
         }
         if (!baselineSeries.isNull(i)) {
           anomaly.setAvgBaselineVal(baselineSeries.getDouble(i));
+        }
+        if (!lowerBoundSeries.isNull(i)) {
+          anomaly.setLowerBound(lowerBoundSeries.getDouble(i));
+        }
+        if (!upperBoundSeries.isNull(i)) {
+          anomaly.setUpperBound(upperBoundSeries.getDouble(i));
         }
         anomalies.add(anomaly);
       }

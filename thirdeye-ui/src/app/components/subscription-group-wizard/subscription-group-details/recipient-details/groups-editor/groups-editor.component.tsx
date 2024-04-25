@@ -70,6 +70,7 @@ export const GroupsEditor: FunctionComponent<GroupsEditorProps> = ({
                             params: {
                                 webhookUrl: "",
                                 notifyResolvedAnomalies: false,
+                                sendOneMessagePerAnomaly: false,
                             },
                         },
                     ];

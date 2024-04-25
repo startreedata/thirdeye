@@ -226,6 +226,8 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     to.setAnomalyResultSource(from.getAnomalyResultSource());
     to.setAvgBaselineVal(from.getAvgBaselineVal());
     to.setAvgCurrentVal(from.getAvgCurrentVal());
+    to.setLowerBound(from.getLowerBound());
+    to.setUpperBound(from.getUpperBound());
     to.setFeedback(from.getFeedback());
     to.setAnomalyFeedbackId(from.getAnomalyFeedbackId());
     to.setScore(from.getScore());
@@ -243,6 +245,8 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
   private static void updateAnomalyWithNewValues(final AnomalyDTO currentA, final AnomalyDTO newA) {
     currentA.setAvgBaselineVal(newA.getAvgBaselineVal());
     currentA.setAvgCurrentVal(newA.getAvgCurrentVal());
+    currentA.setUpperBound(newA.getUpperBound());
+    currentA.setLowerBound(newA.getLowerBound());
     currentA.setScore(newA.getScore());
   }
 

@@ -52,11 +52,11 @@ public class AnomalyDTO extends AbstractDTO implements Comparable<AnomalyDTO>, S
   /**
    * Lower bound of the first point of the anomaly
    */
-  private double lowerBound;
+  private Double lowerBound;
   /**
    * Upper bound of the first point of the anomaly
    */
-  private double upperBound;
+  private Double upperBound;
   private double score; // confidence level
   private double weight; // change percentage, whose absolute value is severity
   private double impactToGlobal; // the impact of this anomaly to the global metric
@@ -446,20 +446,20 @@ public class AnomalyDTO extends AbstractDTO implements Comparable<AnomalyDTO>, S
     return this;
   }
 
-  public double getLowerBound() {
+  public Double getLowerBound() {
     return lowerBound;
   }
 
-  public AnomalyDTO setLowerBound(final double lowerBound) {
+  public AnomalyDTO setLowerBound(final Double lowerBound) {
     this.lowerBound = lowerBound;
     return this;
   }
 
-  public double getUpperBound() {
+  public Double getUpperBound() {
     return upperBound;
   }
 
-  public AnomalyDTO setUpperBound(final double upperBound) {
+  public AnomalyDTO setUpperBound(final Double upperBound) {
     this.upperBound = upperBound;
     return this;
   }

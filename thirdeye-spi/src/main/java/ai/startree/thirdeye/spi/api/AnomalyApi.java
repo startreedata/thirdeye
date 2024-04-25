@@ -30,6 +30,8 @@ public class AnomalyApi implements ThirdEyeCrudApi<AnomalyApi> {
 
   private Double avgCurrentVal;
   private Double avgBaselineVal;
+  private Double lowerBound;
+  private Double upperBound;
   private Double score;
   private Double weight;
   private Double impactToGlobal;
@@ -280,6 +282,24 @@ public class AnomalyApi implements ThirdEyeCrudApi<AnomalyApi> {
 
   public AnomalyApi setAuth(final AuthorizationConfigurationApi auth) {
     this.auth = auth;
+    return this;
+  }
+
+  public Double getLowerBound() {
+    return lowerBound;
+  }
+
+  public AnomalyApi setLowerBound(final Double lowerBound) {
+    this.lowerBound = lowerBound;
+    return this;
+  }
+
+  public Double getUpperBound() {
+    return upperBound;
+  }
+
+  public AnomalyApi setUpperBound(final Double upperBound) {
+    this.upperBound = upperBound;
     return this;
   }
 }

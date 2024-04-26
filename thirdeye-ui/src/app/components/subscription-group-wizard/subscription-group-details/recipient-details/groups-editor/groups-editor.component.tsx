@@ -71,6 +71,10 @@ export const GroupsEditor: FunctionComponent<GroupsEditorProps> = ({
                                 webhookUrl: "",
                                 notifyResolvedAnomalies: false,
                                 sendOneMessagePerAnomaly: false,
+                                textConfiguration: {
+                                    owner: "",
+                                    mentionMemberIds: [],
+                                },
                             },
                         },
                     ];

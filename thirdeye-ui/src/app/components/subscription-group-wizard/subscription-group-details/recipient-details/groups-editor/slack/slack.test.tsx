@@ -100,5 +100,9 @@ const MOCK_CONFIGURATION: SlackSpec = {
         webhookUrl: INITIAL_URL,
         notifyResolvedAnomalies: false,
         sendOneMessagePerAnomaly: false,
+        textConfiguration: {
+            owner: "",
+            mentionMemberIds: [],
+        },
     },
 };

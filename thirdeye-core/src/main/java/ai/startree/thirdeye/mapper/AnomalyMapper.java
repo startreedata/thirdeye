@@ -82,6 +82,8 @@ public interface AnomalyMapper {
         .setCreated(dto.getCreateTime())
         .setAvgCurrentVal(dto.getAvgCurrentVal())
         .setAvgBaselineVal(dto.getAvgBaselineVal())
+        .setLowerBound(dto.getLowerBound())
+        .setUpperBound(dto.getUpperBound())
         .setScore(dto.getScore())
         .setWeight(dto.getWeight())
         .setImpactToGlobal(dto.getImpactToGlobal())

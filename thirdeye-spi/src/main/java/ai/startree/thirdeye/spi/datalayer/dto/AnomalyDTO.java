@@ -49,6 +49,14 @@ public class AnomalyDTO extends AbstractDTO implements Comparable<AnomalyDTO>, S
   private long endTime;
   private double avgCurrentVal; // actual value
   private double avgBaselineVal; // expected value
+  /**
+   * Lower bound of the first point of the anomaly
+   */
+  private Double lowerBound;
+  /**
+   * Upper bound of the first point of the anomaly
+   */
+  private Double upperBound;
   private double score; // confidence level
   private double weight; // change percentage, whose absolute value is severity
   private double impactToGlobal; // the impact of this anomaly to the global metric
@@ -325,7 +333,7 @@ public class AnomalyDTO extends AbstractDTO implements Comparable<AnomalyDTO>, S
     return Objects
         .hash(getId(), startTime, endTime, collection, metric, score, impactToGlobal,
             avgBaselineVal, avgCurrentVal, anomalyResultSource, detectionConfigId,
-            childIds, isChild, anomalyLabels);
+            childIds, isChild, anomalyLabels, lowerBound, upperBound);
   }
 
   @Override
@@ -342,6 +350,8 @@ public class AnomalyDTO extends AbstractDTO implements Comparable<AnomalyDTO>, S
         .equals(endTime, m.getEndTime()) && Objects.equals(collection, m.getCollection()) && Objects
         .equals(metric, m.getMetric()) && Objects.equals(score, m.getScore())
         && Objects.equals(avgBaselineVal, m.getAvgBaselineVal())
+        && Objects.equals(lowerBound, m.lowerBound)
+        && Objects.equals(upperBound, m.upperBound)
         && Objects
         .equals(avgCurrentVal, m.getAvgCurrentVal()) && Objects
         .equals(impactToGlobal, m.getImpactToGlobal()) &&
@@ -433,6 +443,24 @@ public class AnomalyDTO extends AbstractDTO implements Comparable<AnomalyDTO>, S
   @Override
   public AnomalyDTO setCreateTime(final Timestamp createTime) {
     super.setCreateTime(createTime);
+    return this;
+  }
+
+  public Double getLowerBound() {
+    return lowerBound;
+  }
+
+  public AnomalyDTO setLowerBound(final Double lowerBound) {
+    this.lowerBound = lowerBound;
+    return this;
+  }
+
+  public Double getUpperBound() {
+    return upperBound;
+  }
+
+  public AnomalyDTO setUpperBound(final Double upperBound) {
+    this.upperBound = upperBound;
     return this;
   }
 }

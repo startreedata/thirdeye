@@ -32,6 +32,7 @@ import java.util.Properties;
 import java.util.TimeZone;
 import org.apache.commons.collections4.MapUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormatter;
 
@@ -46,13 +47,15 @@ public class AnomalyReportHelper {
     final Properties props = new Properties();
     props.putAll(anomaly.getProperties());
     final double lift = getLift(anomaly.getAvgCurrentVal(), anomaly.getAvgBaselineVal());
-    final String baselineVal = getPredictedValue(anomaly);
+    final String baselineVal = roundedNanSafeOf(anomaly.getAvgBaselineVal());
 
     return new AnomalyReportDataApi()
         .setAnomalyId(String.valueOf(anomaly.getId()))
         .setAnomalyURL(getAnomalyURL(uiPublicUrl))
         .setBaselineVal(baselineVal)
-        .setCurrentVal(getCurrentValue(anomaly))
+        .setCurrentVal(roundedNanSafeOf(anomaly.getAvgCurrentVal()))
+        .setLowerBound(roundedNanSafeOf(anomaly.getLowerBound()))
+        .setUpperBound(roundedNanSafeOf(anomaly.getUpperBound()))
         .setLift(baselineVal.equals("-") ? "" : formattedLiftValue(lift))
         .setPositiveLift(getLiftDirection(lift))
         .setSwi(String.format(NOTIFICATIONS_PERCENTAGE_FORMAT, 0d))
@@ -132,29 +135,12 @@ public class AnomalyReportHelper {
 
     return String.format(Constants.NOTIFICATIONS_PERCENTAGE_FORMAT, lift * 100);
   }
-
-  /**
-   * Retrieve the predicted value for the anomaly
-   */
-  public static String getPredictedValue(AnomalyDTO anomaly) {
-    String predicted = ThirdEyeUtils.getRoundedValue(anomaly.getAvgBaselineVal());
-
-    if (predicted.equalsIgnoreCase(String.valueOf(Double.NaN))) {
-      predicted = "-";
+  
+  private static String roundedNanSafeOf(final @Nullable Double value) {
+    if (value == null || value.isNaN()) {
+      return "-";
     }
-    return predicted;
-  }
-
-  /**
-   * Retrieve the current value for the anomaly
-   */
-  public static String getCurrentValue(AnomalyDTO anomaly) {
-    String current = ThirdEyeUtils.getRoundedValue(anomaly.getAvgCurrentVal());
-
-    if (current.equalsIgnoreCase(String.valueOf(Double.NaN))) {
-      current = "-";
-    }
-    return current;
+    return ThirdEyeUtils.getRoundedValue(value);
   }
 
   /**

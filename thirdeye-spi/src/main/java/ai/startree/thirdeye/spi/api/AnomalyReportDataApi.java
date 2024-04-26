@@ -43,6 +43,8 @@ public class AnomalyReportDataApi {
   private String anomalyURL;
   private String currentVal; // avg current val
   private String baselineVal; // avg baseline val
+  private String lowerBound;
+  private String upperBound;
   private List<String> dimensions;
   private String swi;
   private String function;
@@ -383,6 +385,24 @@ public class AnomalyReportDataApi {
 
   public AnomalyReportDataApi setMetricUrn(final String metricUrn) {
     this.metricUrn = metricUrn;
+    return this;
+  }
+
+  public String getLowerBound() {
+    return lowerBound;
+  }
+
+  public AnomalyReportDataApi setLowerBound(final String lowerBound) {
+    this.lowerBound = lowerBound;
+    return this;
+  }
+
+  public String getUpperBound() {
+    return upperBound;
+  }
+
+  public AnomalyReportDataApi setUpperBound(final String upperBound) {
+    this.upperBound = upperBound;
     return this;
   }
 }

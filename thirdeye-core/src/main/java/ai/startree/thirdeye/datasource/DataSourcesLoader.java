@@ -21,8 +21,10 @@ import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceFactory;
+import ai.startree.thirdeye.util.StringTemplateUtils;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -73,6 +75,14 @@ public class DataSourcesLoader {
   }
 
   private ThirdEyeDataSourceContext buildContext(final DataSourceDTO dataSource) {
-    return new ThirdEyeDataSourceContext().setDataSourceDTO(dataSource);
+    final Map<String, Object> values = new HashMap<>(System.getenv());
+    try {
+      final DataSourceDTO dataSourceWithEnvVarResolved = StringTemplateUtils.applyContext(
+          dataSource, values);
+      return new ThirdEyeDataSourceContext().setDataSourceDTO(dataSourceWithEnvVarResolved);
+    } catch (IOException | ClassNotFoundException e) {
+      throw new RuntimeException(
+          "Error while replacing env variables in datasource spec. spec: " + dataSource);
+    }
   }
 }

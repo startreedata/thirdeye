@@ -117,6 +117,8 @@ public class IntegrationTestUtils {
     assertThat(actual.getEndTime()).isEqualTo(expected.getEndTime());
     assertThat(actual.getAvgBaselineVal()).isEqualTo(expected.getAvgBaselineVal());
     assertThat(actual.getAvgCurrentVal()).isEqualTo(expected.getAvgCurrentVal());
+    assertThat(actual.getLowerBound()).isEqualTo(expected.getLowerBound());
+    assertThat(actual.getUpperBound()).isEqualTo(expected.getUpperBound());
     if (expected.getAnomalyLabels() != null) {
       assertThat(actual.getAnomalyLabels()).hasSize(expected.getAnomalyLabels().size());
     }

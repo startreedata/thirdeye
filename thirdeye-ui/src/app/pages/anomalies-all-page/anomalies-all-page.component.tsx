@@ -41,6 +41,7 @@ import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
 import { useGetEnumerationItems } from "../../rest/enumeration-items/enumeration-items.actions";
 import { useGetSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.actions";
+import { filterAnomaliesBySubscriptionGroup } from "../../utils/anomalies/anomalies.util";
 import {
     makeDeleteRequest,
     promptDeleteConfirmation,
@@ -136,48 +137,11 @@ export const AnomaliesAllPage: FunctionComponent = () => {
             anomaliesRequestDataResponse &&
             anomaliesRequestDataResponse.length > 0
         ) {
-            if (subscriptionGroups && subscriptionGroupFilter.length > 0) {
-                const associatedAlertsEnumerationKey: string[] = [];
+            filteredAnomalies = filterAnomaliesBySubscriptionGroup(
+                anomaliesRequestDataResponse,
+                subscriptionGroupFilter,
                 subscriptionGroups
-                    .filter((s) => subscriptionGroupFilter.includes(s.id))
-                    .forEach((subscriptionGroup) => {
-                        if (subscriptionGroup.alertAssociations) {
-                            subscriptionGroup.alertAssociations.forEach(
-                                (association) => {
-                                    associatedAlertsEnumerationKey.push(
-                                        `${association.alert.id}${
-                                            association?.enumerationItem?.id
-                                                ? `-${association?.enumerationItem?.id}`
-                                                : ""
-                                        }`
-                                    );
-                                }
-                            );
-                        }
-                    });
-
-                filteredAnomalies = anomaliesRequestDataResponse.filter(
-                    (anomaly) => {
-                        return associatedAlertsEnumerationKey.some(
-                            (k: string) => {
-                                const hasEnumerationId = k.includes("-");
-                                if (hasEnumerationId) {
-                                    const [alertId, enumerationId] =
-                                        k.split("-");
-
-                                    return (
-                                        anomaly.alert.id === Number(alertId) &&
-                                        anomaly.enumerationItem?.id ===
-                                            Number(enumerationId)
-                                    );
-                                }
-
-                                return Number(k) === anomaly.alert.id;
-                            }
-                        );
-                    }
-                );
-            }
+            );
         }
 
         setAnomalies(filteredAnomalies);

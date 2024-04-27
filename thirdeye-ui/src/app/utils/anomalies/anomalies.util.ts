@@ -636,3 +636,48 @@ export const getMetricString = (
 
     return "";
 };
+
+export const filterAnomaliesBySubscriptionGroup = (
+    anomalies: Anomaly[],
+    subscriptionGroupFilter: number[],
+    subscriptionGroups: SubscriptionGroup[] | null
+): Anomaly[] => {
+    let filteredAnomalies = [...anomalies];
+    if (subscriptionGroups && subscriptionGroupFilter.length > 0) {
+        const associatedAlertsEnumerationKey: Array<{
+            alertId: number;
+            enumerationItemId?: number;
+        }> = [];
+        subscriptionGroups
+            .filter((s) => subscriptionGroupFilter.includes(s.id))
+            .forEach((subscriptionGroup) => {
+                if (subscriptionGroup.alertAssociations) {
+                    subscriptionGroup.alertAssociations.forEach(
+                        (association) => {
+                            associatedAlertsEnumerationKey.push({
+                                alertId: association.alert.id,
+                                enumerationItemId:
+                                    association.enumerationItem?.id,
+                            });
+                        }
+                    );
+                }
+            });
+
+        filteredAnomalies = anomalies.filter((anomaly) => {
+            return associatedAlertsEnumerationKey.some(
+                (k: { alertId: number; enumerationItemId?: number }) => {
+                    return (
+                        k.alertId === anomaly.alert.id &&
+                        (k.enumerationItemId === undefined ||
+                            k.enumerationItemId === anomaly.enumerationItem?.id)
+                    );
+                }
+            );
+        });
+
+        return filteredAnomalies;
+    }
+
+    return anomalies;
+};

@@ -13,8 +13,10 @@
  * the License.
  */
 import { isEmpty } from "lodash";
+import { SlackFormEntries } from "../../components/subscription-group-wizard/subscription-group-details/recipient-details/groups-editor/slack/slack.interfaces";
 import { NotificationTypeV1 } from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
+import { SlackSpec } from "../../rest/dto/subscription-group.interfaces";
 
 export const notifyIfErrors = (
     requestStatus: ActionStatus,
@@ -33,4 +35,25 @@ export const notifyIfErrors = (
     } else {
         notify(NotificationTypeV1.Error, fallbackMsg);
     }
+};
+
+export const convertSlackConfigurationToSlackFormEntries = (
+    slackConfig: SlackSpec["params"]
+): SlackFormEntries => {
+    return {
+        webhookUrl: slackConfig.webhookUrl,
+        notifyResolvedAnomalies: slackConfig.notifyResolvedAnomalies,
+        sendOneMessagePerAnomaly: slackConfig.sendOneMessagePerAnomaly,
+        textConfiguration: {
+            owner: slackConfig.textConfiguration?.owner ?? "",
+            mentionMemberIds:
+                slackConfig.textConfiguration?.mentionMemberIds?.map((id) => ({
+                    value: id,
+                })) ?? [],
+        },
+    };
+};
+
+export const validateSlackMemberIDFormat = (memberId: string): boolean => {
+    return /^U[0-9A-Z]{10}$/.test(memberId);
 };

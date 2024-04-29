@@ -83,12 +83,39 @@ export const getCardProps = (
             });
 
             cardProps.rows.push({
+                label: t("label.slack-owner"),
+                value: channel.params.textConfiguration?.owner,
+            });
+
+            cardProps.rows.push({
+                label: t("label.slack-member-ids"),
+                value:
+                    channel.params.textConfiguration?.mentionMemberIds.join(
+                        ", "
+                    ) ?? "",
+            });
+
+            cardProps.rows.push({
                 label: t("message.notify-when-the-anomaly-period-ends"),
                 value: (
                     <Box clone ml={-1.25}>
                         <Checkbox
                             disabled
                             checked={channel.params.notifyResolvedAnomalies}
+                            color="primary"
+                            size="small"
+                        />
+                    </Box>
+                ),
+            });
+
+            cardProps.rows.push({
+                label: t("message.send-separate-slack-messages"),
+                value: (
+                    <Box clone ml={-1.25}>
+                        <Checkbox
+                            disabled
+                            checked={channel.params.sendOneMessagePerAnomaly}
                             color="primary"
                             size="small"
                         />

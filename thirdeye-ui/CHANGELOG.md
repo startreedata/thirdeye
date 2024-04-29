@@ -1,3 +1,11 @@
+### [2.45.17](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.16...thirdeye-ui-2.45.17) (2024-04-29)
+
+
+### Bug Fixes
+
+* [TE-2150](https://cortexdata.atlassian.net/browse/TE-2150) send separate slack message per anomaly ([b664f9be1](https://github.com/startreedata/thirdeye/commit/b664f9be15f145b3d6988fc7f3bd58c4ac8bc8fd))
+* [TE-2212](https://cortexdata.atlassian.net/browse/TE-2212) search by subscription group for anomalies bug fix ([024975821](https://github.com/startreedata/thirdeye/commit/02497582178ab90d05e35a771913871247a13fea))
+
 ### [2.45.16](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.15...thirdeye-ui-2.45.16) (2024-04-24)
 
 

@@ -38,6 +38,7 @@ public interface DatasetMapper {
         .setDataset(api.getName())
         .setActive(api.getActive())
         .setCompletenessDelay(api.getCompletenessDelay())
+        .setMutabilityPeriod(api.getMutabilityPeriod())
         .setDataSource(optional(api.getDataSource()).map(DataSourceApi::getName).orElse(null))
         .setDimensions(api.getDimensions())
         .setRcaExcludedDimensions(api.getRcaExcludedDimensions())
@@ -67,7 +68,8 @@ public interface DatasetMapper {
         .setDataSource(optional(dto.getDataSource())
             .map(datasourceName -> new DataSourceApi().setName(datasourceName))
             .orElse(null))
-        .setCompletenessDelay(optional(dto.getCompletenessDelay()).orElse(null))
+        .setCompletenessDelay(dto.getCompletenessDelay())
+        .setMutabilityPeriod(dto.getMutabilityPeriod())
         .setAuth(optional(dto.getAuth())
             .map(ApiBeanMapper::toApi).orElse(null))
         .setTimeColumns(dto.getTimeColumns());

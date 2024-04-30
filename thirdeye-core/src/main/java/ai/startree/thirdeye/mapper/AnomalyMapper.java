@@ -34,7 +34,11 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
-@Mapper(uses = {AnomalyFeedbackMapper.class, AnomalyLabelMapper.class, MetricMapper.class,
+@Mapper(uses = {
+    AnomalyFeedbackMapper.class, 
+    AnomalyLabelMapper.class,
+    AuthorizationConfigurationMapper.class,
+    MetricMapper.class,
     EnumerationItemMapper.class})
 public interface AnomalyMapper {
 

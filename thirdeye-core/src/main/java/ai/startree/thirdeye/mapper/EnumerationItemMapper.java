@@ -21,7 +21,10 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
-@Mapper(uses = {IdMapper.class})
+@Mapper(uses = {
+    IdMapper.class,
+    AuthorizationConfigurationMapper.class
+})
 public interface EnumerationItemMapper {
 
   EnumerationItemMapper INSTANCE = Mappers.getMapper(EnumerationItemMapper.class);

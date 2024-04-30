@@ -36,6 +36,8 @@ public class SubscriptionGroupApi implements ThirdEyeCrudApi<SubscriptionGroupAp
 
   private List<NotificationSpecApi> specs;
 
+  private AuthorizationConfigurationApi auth;
+
   @Deprecated
   private NotificationSchemesApi notificationSchemes;
   private TimeWindowSuppressorApi alertSuppressors;
@@ -170,6 +172,16 @@ public class SubscriptionGroupApi implements ThirdEyeCrudApi<SubscriptionGroupAp
   public SubscriptionGroupApi setNotifyHistoricalAnomalies(
       final Boolean notifyHistoricalAnomalies) {
     this.notifyHistoricalAnomalies = notifyHistoricalAnomalies;
+    return this;
+  }
+
+  public AuthorizationConfigurationApi getAuth() {
+    return auth;
+  }
+
+  public SubscriptionGroupApi setAuth(
+      final AuthorizationConfigurationApi auth) {
+    this.auth = auth;
     return this;
   }
 }

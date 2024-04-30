@@ -33,7 +33,8 @@ import org.mapstruct.factory.Mappers;
 @Mapper(uses = {
     NotificationSpecMapper.class,
     NotificationSchemeMapper.class,
-    AlertAssociationMapper.class
+    AlertAssociationMapper.class,
+    AuthorizationConfigurationMapper.class
 })
 public interface SubscriptionGroupMapper {
 

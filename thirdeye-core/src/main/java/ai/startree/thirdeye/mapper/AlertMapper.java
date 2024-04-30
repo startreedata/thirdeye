@@ -26,6 +26,7 @@ import org.mapstruct.factory.Mappers;
 
 @Mapper(uses = {
     AlertTemplateMapper.class,
+    AuthorizationConfigurationMapper.class,
     DatasetMapper.class,
     DataSourceMapper.class,
     MetricMapper.class}, mappingControl = DeepClone.class)

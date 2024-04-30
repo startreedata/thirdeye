@@ -23,7 +23,10 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.mapstruct.factory.Mappers;
 
-@Mapper(uses = {AnomalyMapper.class})
+@Mapper(uses = {
+    AnomalyMapper.class,
+    AuthorizationConfigurationMapper.class
+})
 public interface RcaInvestigationMapper {
 
   RcaInvestigationMapper INSTANCE = Mappers.getMapper(RcaInvestigationMapper.class);

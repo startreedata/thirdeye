@@ -22,4 +22,5 @@ export interface InputSectionProps {
     inputComponent: ReactElement;
     fullWidth?: boolean;
     gridContainerProps?: GridProps;
+    tooltipInfoText?: string;
 }

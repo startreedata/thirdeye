@@ -664,6 +664,7 @@
         "monitor-number-of-page-views-across-multiple": "Monitor number of page views across multiple dimensions such as location, device, browser",
         "monitor-store-sales-for-ecommerce-retail-stores": "Monitor store sales for eCommerce retail stores",
         "monitor-website-traffic-for-consumer-products": "Monitor website traffic for consumer products",
+        "monitoring-granularity-beta-tooltip": "Monitoring granularity < 1 hour is in Beta. Work with StarTree team incase run into performance issues",
         "mouse-drag-behavior": "Mouse drag behavior",
         "multidimension-setup": "Multi-dimension setup",
         "name-your-investigation": "Name your investigation",

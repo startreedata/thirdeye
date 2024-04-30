@@ -29,8 +29,8 @@ import { InputSection } from "../../form-basics/input-section/input-section.comp
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { SelectMetricProps } from "./select-metric.interfaces";
 import {
-    determineDatasetInitialSelectionsFromServerData,
     GRANULARITY_OPTIONS,
+    determineDatasetInitialSelectionsFromServerData,
 } from "./select-metric.utils";
 
 export const SelectMetric: FunctionComponent<SelectMetricProps> = ({
@@ -348,6 +348,9 @@ export const SelectMetric: FunctionComponent<SelectMetricProps> = ({
                             </>
                         }
                         label="Granularity"
+                        tooltipInfoText={`${t(
+                            "message.monitoring-granularity-beta-tooltip"
+                        )}`}
                     />
                 </Grid>
             </LoadingErrorStateSwitch>

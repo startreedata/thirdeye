@@ -191,7 +191,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
 
     useEffect(() => {
         fetchFilteredAlertEvaluations();
-    }, [alertInsight, anomaly, startTime, endTime, dimensionCombinations]);
+    }, [alertInsight, anomaly, startTime, endTime]);
 
     return (
         <Grid container>

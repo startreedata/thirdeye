@@ -12,8 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Grid, Tooltip, Typography } from "@material-ui/core";
-import InfoOutlined from "@material-ui/icons/InfoOutlined";
+import { Grid, Typography } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import { InputSectionProps } from "./input-section.interfaces";
 
@@ -24,7 +23,6 @@ export const InputSection: FunctionComponent<InputSectionProps> = ({
     inputComponent,
     fullWidth,
     gridContainerProps,
-    tooltipInfoText,
 }) => {
     return (
         <Grid item xs={12}>
@@ -33,22 +31,7 @@ export const InputSection: FunctionComponent<InputSectionProps> = ({
                     {!!labelComponent && labelComponent}
                     {!labelComponent && label && (
                         <>
-                            <Box alignItems="center" display="flex" gridGap={1}>
-                                <Typography variant="body2">{label}</Typography>
-                                {tooltipInfoText && (
-                                    <Tooltip
-                                        arrow
-                                        interactive
-                                        placement="top"
-                                        title={tooltipInfoText}
-                                    >
-                                        <InfoOutlined
-                                            color="secondary"
-                                            fontSize="small"
-                                        />
-                                    </Tooltip>
-                                )}
-                            </Box>
+                            <Typography variant="body2">{label}</Typography>
                             {helperLabel && (
                                 <Typography variant="caption">
                                     {helperLabel}

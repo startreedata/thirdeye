@@ -12,7 +12,16 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Divider, Grid, TextField, Typography } from "@material-ui/core";
+import {
+    Box,
+    Chip,
+    Divider,
+    Grid,
+    TextField,
+    Tooltip,
+    Typography,
+    useTheme,
+} from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
 import { toLower } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
@@ -43,6 +52,7 @@ export const SelectMetric: FunctionComponent<SelectMetricProps> = ({
 }) => {
     const classes = useAlertWizardV2Styles();
     const { t } = useTranslation();
+    const theme = useTheme();
 
     const [isPinotInfraLoading, setIsPinotInfraLoading] = useState(true);
 
@@ -337,6 +347,42 @@ export const SelectMetric: FunctionComponent<SelectMetricProps> = ({
                                             variant="outlined"
                                         />
                                     )}
+                                    renderOption={({ value, label }) => (
+                                        <Box
+                                            alignItems="center"
+                                            display="flex"
+                                            justifyContent="space-between"
+                                            width="100%"
+                                        >
+                                            {label}
+                                            {["PT15M", "PT5M", "PT1M"].includes(
+                                                value
+                                            ) && (
+                                                <Tooltip
+                                                    arrow
+                                                    placement="top"
+                                                    title={t(
+                                                        "message.monitoring-granularity-beta-tooltip"
+                                                    )}
+                                                >
+                                                    <Chip
+                                                        color="primary"
+                                                        label={t("label.beta")}
+                                                        size="small"
+                                                        style={{
+                                                            backgroundColor:
+                                                                theme.palette
+                                                                    .primary
+                                                                    .dark,
+                                                            color: theme.palette
+                                                                .secondary
+                                                                .contrastText,
+                                                        }}
+                                                    />
+                                                </Tooltip>
+                                            )}
+                                        </Box>
+                                    )}
                                     value={selectedGranularity || undefined}
                                     onChange={handleGranularityChange}
                                 />
@@ -348,9 +394,6 @@ export const SelectMetric: FunctionComponent<SelectMetricProps> = ({
                             </>
                         }
                         label="Granularity"
-                        tooltipInfoText={`${t(
-                            "message.monitoring-granularity-beta-tooltip"
-                        )}`}
                     />
                 </Grid>
             </LoadingErrorStateSwitch>

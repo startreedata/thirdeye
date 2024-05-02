@@ -157,30 +157,39 @@ export function generateInputFieldConfigsForAlertTemplate(
     return inputFieldConfigs;
 }
 
+export enum GranularityValue {
+    WEEKLY = "P7D",
+    DAILY = "P1D",
+    HOURLY = "PT1H",
+    FIFTEEN_MINUTES = "PT15M",
+    FIVE_MINUTES = "PT5M",
+    ONE_MINUTE = "PT1M",
+}
+
 export const GRANULARITY_OPTIONS = [
     {
         label: i18n.t("label.weekly"),
-        value: "P7D",
+        value: GranularityValue.WEEKLY,
     },
     {
         label: i18n.t("label.daily"),
-        value: "P1D",
+        value: GranularityValue.DAILY,
     },
     {
         label: i18n.t("label.hourly"),
-        value: "PT1H",
+        value: GranularityValue.HOURLY,
     },
     {
         label: i18n.t("label.15-minutes"),
-        value: "PT15M",
+        value: GranularityValue.FIFTEEN_MINUTES,
     },
     {
         label: i18n.t("label.5-minutes"),
-        value: "PT5M",
+        value: GranularityValue.FIVE_MINUTES,
     },
     {
         label: i18n.t("label.1-minute"),
-        value: "PT1M",
+        value: GranularityValue.ONE_MINUTE,
     },
 ];
 

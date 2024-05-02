@@ -19,12 +19,15 @@ import { useOutletContext } from "react-router-dom";
 import { AlertJson } from "../../components/alert-wizard-v2/alert-json/alert-json.component";
 import { AlertNotifications } from "../../components/alert-wizard-v2/alert-notifications/alert-notifications.component";
 import { PreviewChart } from "../../components/alert-wizard-v2/alert-template/preview-chart/preview-chart.component";
+import { GranularityValue } from "../../components/alert-wizard-v3/select-metric/select-metric.utils";
 import { Portal } from "../../components/portal/portal.component";
 import { WizardBottomBar } from "../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import {
     PageContentsCardV1,
     PageContentsGridV1,
+    useDialogProviderV1,
 } from "../../platform/components";
+import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import {
     AlertsSimpleAdvancedJsonContainerPageOutletContextProps,
     BOTTOM_BAR_ELEMENT_ID,
@@ -32,6 +35,8 @@ import {
 
 export const AlertsUpdateJSONPage: FunctionComponent = () => {
     const { t } = useTranslation();
+
+    const { showDialog } = useDialogProviderV1();
 
     const [submitBtnLabel, setSubmitBtnLabel] = useState<string>(
         t("label.update-entity", {
@@ -56,6 +61,28 @@ export const AlertsUpdateJSONPage: FunctionComponent = () => {
             t("message.preview-alert-in-chart-before-submitting")
         );
     }, []);
+
+    const onCreateAlertClick: () => void = async () => {
+        if (
+            alert.templateProperties.monitoringGranularity &&
+            (alert.templateProperties.monitoringGranularity ===
+                GranularityValue.ONE_MINUTE ||
+                alert.templateProperties.monitoringGranularity ===
+                    GranularityValue.FIVE_MINUTES)
+        ) {
+            showDialog({
+                type: DialogType.ALERT,
+                contents: t(
+                    "message.monitoring-granularity-below-15-minutes-warning"
+                ),
+                okButtonText: t("label.confirm"),
+                cancelButtonText: t("label.cancel"),
+                onOk: () => handleSubmitAlertClick(alert),
+            });
+        } else {
+            handleSubmitAlertClick(alert);
+        }
+    };
 
     return (
         <>
@@ -103,7 +130,7 @@ export const AlertsUpdateJSONPage: FunctionComponent = () => {
                     doNotWrapInContainer
                     backButtonLabel={t("label.cancel")}
                     handleBackClick={onPageExit}
-                    handleNextClick={() => handleSubmitAlertClick(alert)}
+                    handleNextClick={onCreateAlertClick}
                     nextButtonIsDisabled={
                         !isSubmitBtnEnabled ||
                         isEditRequestInFlight ||

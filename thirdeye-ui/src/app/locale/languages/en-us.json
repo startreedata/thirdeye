@@ -666,6 +666,7 @@
         "monitor-number-of-page-views-across-multiple": "Monitor number of page views across multiple dimensions such as location, device, browser",
         "monitor-store-sales-for-ecommerce-retail-stores": "Monitor store sales for eCommerce retail stores",
         "monitor-website-traffic-for-consumer-products": "Monitor website traffic for consumer products",
+        "monitoring-granularity-below-15-minutes-warning": "If the monitoring granularity is less than 15 mins, it may take time for anomalies to appear. Please check back later for updated results. To avoid unnecessary changes, make sure all detection tasks are finished before editing alerts.",
         "mouse-drag-behavior": "Mouse drag behavior",
         "multidimension-setup": "Multi-dimension setup",
         "name-your-investigation": "Name your investigation",

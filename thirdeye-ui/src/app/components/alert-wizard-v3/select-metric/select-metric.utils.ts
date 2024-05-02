@@ -183,3 +183,8 @@ export const GRANULARITY_OPTIONS = [
         value: "PT1M",
     },
 ];
+
+export const GRANULARITY_OPTIONS_TOOLTIP: Record<string, string> = {
+    PT1M: i18n.t("message.one-min-monitoring-granularity-beta-tooltip"),
+    PT5M: i18n.t("message.five-min-monitoring-granularity-beta-tooltip"),
+};

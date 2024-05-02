@@ -39,6 +39,7 @@ import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-s
 import { SelectMetricProps } from "./select-metric.interfaces";
 import {
     GRANULARITY_OPTIONS,
+    GRANULARITY_OPTIONS_TOOLTIP,
     determineDatasetInitialSelectionsFromServerData,
 } from "./select-metric.utils";
 
@@ -355,15 +356,17 @@ export const SelectMetric: FunctionComponent<SelectMetricProps> = ({
                                             width="100%"
                                         >
                                             {label}
-                                            {["PT15M", "PT5M", "PT1M"].includes(
+                                            {GRANULARITY_OPTIONS_TOOLTIP[
                                                 value
-                                            ) && (
+                                            ] && (
                                                 <Tooltip
                                                     arrow
                                                     placement="top"
-                                                    title={t(
-                                                        "message.monitoring-granularity-beta-tooltip"
-                                                    )}
+                                                    title={
+                                                        GRANULARITY_OPTIONS_TOOLTIP[
+                                                            value
+                                                        ]
+                                                    }
                                                 >
                                                     <Chip
                                                         color="primary"

@@ -709,7 +709,7 @@
         "onboard-datasource-select-datasource": "Select datasource",
         "onboard-error": "Error onboarding {{entity}}",
         "onboard-success": "{{entity}} onboarded successfully",
-        "one-min-monitoring-granularity-beta-tooltip": "1 minutes granularity is in Beta. Please reach out to the StarTree team in case you run into performance issues.",
+        "one-min-monitoring-granularity-beta-tooltip": "1 minute granularity is in Beta. Please reach out to the StarTree team in case you run into performance issues.",
         "other-sources": "Other sources",
         "our-new-feature-sets-up-your-alert-with-the-parameters": "Our new feature sets up your alert with the parameters that best fit your data. (currently in beta)",
         "page-not-found": "Requested page could not be found",

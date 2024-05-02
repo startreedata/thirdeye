@@ -1,3 +1,11 @@
+### [2.45.18](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.17...thirdeye-ui-2.45.18) (2024-05-02)
+
+
+### Bug Fixes
+
+* [TE-2131](https://cortexdata.atlassian.net/browse/TE-2131) fixing duplicate evaluate calls for anomaly heatmap ([3b88b00a7](https://github.com/startreedata/thirdeye/commit/3b88b00a77a7a972685337fda5a9fb746fce2c26))
+* [TE-2154](https://cortexdata.atlassian.net/browse/TE-2154) added info tooltip for granularity input field ([7c8b66fc6](https://github.com/startreedata/thirdeye/commit/7c8b66fc6113e470df1dbb2d8c5f1a78be307a02))
+
 ### [2.45.16](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.15...thirdeye-ui-2.45.16) (2024-04-24)
 
 

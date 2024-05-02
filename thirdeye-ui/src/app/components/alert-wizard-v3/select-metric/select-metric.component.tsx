@@ -12,7 +12,16 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Divider, Grid, TextField, Typography } from "@material-ui/core";
+import {
+    Box,
+    Chip,
+    Divider,
+    Grid,
+    TextField,
+    Tooltip,
+    Typography,
+    useTheme,
+} from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
 import { toLower } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
@@ -29,8 +38,9 @@ import { InputSection } from "../../form-basics/input-section/input-section.comp
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { SelectMetricProps } from "./select-metric.interfaces";
 import {
-    determineDatasetInitialSelectionsFromServerData,
     GRANULARITY_OPTIONS,
+    GRANULARITY_OPTIONS_TOOLTIP,
+    determineDatasetInitialSelectionsFromServerData,
 } from "./select-metric.utils";
 
 export const SelectMetric: FunctionComponent<SelectMetricProps> = ({
@@ -43,6 +53,7 @@ export const SelectMetric: FunctionComponent<SelectMetricProps> = ({
 }) => {
     const classes = useAlertWizardV2Styles();
     const { t } = useTranslation();
+    const theme = useTheme();
 
     const [isPinotInfraLoading, setIsPinotInfraLoading] = useState(true);
 
@@ -336,6 +347,44 @@ export const SelectMetric: FunctionComponent<SelectMetricProps> = ({
                                             )}
                                             variant="outlined"
                                         />
+                                    )}
+                                    renderOption={({ value, label }) => (
+                                        <Box
+                                            alignItems="center"
+                                            display="flex"
+                                            justifyContent="space-between"
+                                            width="100%"
+                                        >
+                                            {label}
+                                            {GRANULARITY_OPTIONS_TOOLTIP[
+                                                value
+                                            ] && (
+                                                <Tooltip
+                                                    arrow
+                                                    placement="top"
+                                                    title={
+                                                        GRANULARITY_OPTIONS_TOOLTIP[
+                                                            value
+                                                        ]
+                                                    }
+                                                >
+                                                    <Chip
+                                                        color="primary"
+                                                        label={t("label.beta")}
+                                                        size="small"
+                                                        style={{
+                                                            backgroundColor:
+                                                                theme.palette
+                                                                    .primary
+                                                                    .dark,
+                                                            color: theme.palette
+                                                                .secondary
+                                                                .contrastText,
+                                                        }}
+                                                    />
+                                                </Tooltip>
+                                            )}
+                                        </Box>
                                     )}
                                     value={selectedGranularity || undefined}
                                     onChange={handleGranularityChange}

@@ -170,9 +170,9 @@ public class RcaInfoFetcher {
 
     final DataSourceDTO dataSourceDto = dataSourceManager.findUniqueByNameAndNamespace(
         datasetConfigDto.getDataSource(), datasetConfigDto.namespace());
-    ensureExists(dataSourceDto, "Datasource name: %s. Namespace: %s",
+    ensureExists(dataSourceDto, "Datasource name: %s. Namespace: %s".formatted(
         datasetConfigDto.getDataSource(),
-        datasetConfigDto.namespace());
+        datasetConfigDto.namespace()));
 
     final Period granularity = isoPeriod(alertMetadataDto.getGranularity());
     final Chronology chronology = getDateTimeZone(alertMetadataDto);

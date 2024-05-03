@@ -177,10 +177,14 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   public DataTable fetchDataTable(final DataSourceRequest request) throws Exception {
     final Map<String, String> options = new HashMap<>(dataSourceDTO.getDefaultQueryOptions());
     options.putAll(request.getOptions());
-    final ThirdEyeResultSet thirdEyeResultSet = executeSQL(new PinotQuery(
+    final ThirdEyeResultSetGroup thirdEyeResultSetGroup = executeSQL(new PinotQuery(
         request.getQuery(),
         request.getTable(),
-        options)).get(0);
+        options));
+    if (thirdEyeResultSetGroup.size() < 1) {
+      throw new RuntimeException("Query returned no result. Table is empty? Original query: %s".formatted(request.getQuery()));
+    }
+    final ThirdEyeResultSet thirdEyeResultSet = thirdEyeResultSetGroup.get(0);
     return new ThirdEyeResultSetDataTable(thirdEyeResultSet);
   }
 

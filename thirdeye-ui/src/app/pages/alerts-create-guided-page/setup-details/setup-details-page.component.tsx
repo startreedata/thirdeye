@@ -14,8 +14,8 @@
  */
 import { Box, Grid, Switch, TextField, Typography } from "@material-ui/core";
 import {
-    default as React,
     FunctionComponent,
+    default as React,
     useEffect,
     useState,
 } from "react";
@@ -28,18 +28,21 @@ import {
 import { AlertFrequency } from "../../../components/alert-wizard-v2/alert-details/alert-frequency/alert-frequency.component";
 import { NavigateAlertCreationFlowsDropdown } from "../../../components/alert-wizard-v3/navigate-alert-creation-flows-dropdown/navigate-alert-creation-flows-dropdown";
 import { NotificationConfiguration } from "../../../components/alert-wizard-v3/notification-configuration/notification-configuration.component";
+import { GranularityValue } from "../../../components/alert-wizard-v3/select-metric/select-metric.utils";
 import { InputSection } from "../../../components/form-basics/input-section/input-section.component";
 import { WizardBottomBar } from "../../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import {
     PageContentsCardV1,
     PageContentsGridV1,
+    useDialogProviderV1,
 } from "../../../platform/components";
+import { DialogType } from "../../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { generateGenericNameForAlert } from "../../../utils/alerts/alerts.util";
 import { AppRouteRelative } from "../../../utils/routes/routes.util";
 import { AlertCreatedGuidedPageOutletContext } from "../alerts-create-guided-page.interfaces";
 import {
-    SetupDetailsPageProps,
     SETUP_DETAILS_TEST_IDS,
+    SetupDetailsPageProps,
 } from "./setup-details-page.interface";
 
 export const SetupDetailsPage: FunctionComponent<SetupDetailsPageProps> = ({
@@ -62,6 +65,8 @@ export const SetupDetailsPage: FunctionComponent<SetupDetailsPageProps> = ({
         onNewSubscriptionGroupChange,
     } = useOutletContext<AlertCreatedGuidedPageOutletContext>();
 
+    const { showDialog } = useDialogProviderV1();
+
     const [
         shouldDisplayScheduleConfiguration,
         setShouldDisplayScheduleConfiguration,
@@ -80,6 +85,28 @@ export const SetupDetailsPage: FunctionComponent<SetupDetailsPageProps> = ({
             navigate(`../${AppRouteRelative.WELCOME_CREATE_ALERT_TUNE_ALERT}`);
         }
     }, []);
+
+    const onCreateAlertClick: () => void = async () => {
+        if (
+            alert.templateProperties.monitoringGranularity &&
+            (alert.templateProperties.monitoringGranularity ===
+                GranularityValue.ONE_MINUTE ||
+                alert.templateProperties.monitoringGranularity ===
+                    GranularityValue.FIVE_MINUTES)
+        ) {
+            showDialog({
+                type: DialogType.ALERT,
+                contents: t(
+                    "message.monitoring-granularity-below-15-minutes-warning"
+                ),
+                okButtonText: t("label.confirm"),
+                cancelButtonText: t("label.cancel"),
+                onOk: () => handleCreateAlertClick(alert),
+            });
+        } else {
+            handleCreateAlertClick(alert);
+        }
+    };
 
     return (
         <>
@@ -265,7 +292,7 @@ export const SetupDetailsPage: FunctionComponent<SetupDetailsPageProps> = ({
                 backBtnLink={`../${
                     AppRouteRelative.WELCOME_CREATE_ALERT_ANOMALIES_FILTER
                 }?${searchParams.toString()}`}
-                handleNextClick={() => handleCreateAlertClick(alert)}
+                handleNextClick={onCreateAlertClick}
                 nextButtonIsDisabled={isCreatingAlert}
                 nextButtonLabel={
                     isCreatingAlert ? inProgressLabel : createLabel

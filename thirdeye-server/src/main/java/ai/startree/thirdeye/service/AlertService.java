@@ -168,25 +168,31 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
 
   @Override
   protected void postCreate(final AlertDTO dto) {
-    // run the detection task on the historical data
-    createDetectionTask(dto.getId(), dto.getLastTimestamp(), System.currentTimeMillis());
+    if (dto.isActive()) {
+      // run the detection task on the historical data
+      // note: the alert will not be initialized if it has isActive to false
+      // FIXME cyril - should we run a dummy task like in postupdate to refresh enumeration items quickly? 
+      createDetectionTask(dto.getId(), dto.getLastTimestamp(), System.currentTimeMillis());  
+    }
   }
 
   @Override
   protected void postUpdate(final ThirdEyePrincipal principal, final AlertDTO dto) {
-    /*
-     * Running the detection task after updating an alert ensures that enumeration items if
-     * updated are reflected in the dtos as well. Enumeration Items are updated after executing
-     * the Enumerator Operator node.
-     *
-     * In this case the start and end timestamp is the same to ensure that we update the enumeration
-     * items but we don't actually run the detection task.
-     */
-    createDetectionTask(dto.getId(), dto.getLastTimestamp(), dto.getLastTimestamp());
-    // perform a soft-reset - rerun the detection on the whole historical data - existing and new anomalies will be merged
-    // note: the 2 detection tasks can run concurrently, the order does not matter because the last timestamp after the run of the 2 tasks is the same
-    //   we could remove the first one but this would make the UI feel less snappy, because a new enumeration would not appear until the full historical replay is finished
-    createDetectionTask(dto.getId(), minimumLastTimestamp(principal, dto), dto.getLastTimestamp());
+    if (dto.isActive()) {
+      /*
+       * Running the detection task after updating an alert ensures that enumeration items if
+       * updated are reflected in the dtos as well. Enumeration Items are updated after executing
+       * the Enumerator Operator node.
+       *
+       * In this case the start and end timestamp is the same to ensure that we update the enumeration
+       * items but we don't actually run the detection task.
+       */
+      createDetectionTask(dto.getId(), dto.getLastTimestamp(), dto.getLastTimestamp());
+      // perform a soft-reset - rerun the detection on the whole historical data - existing and new anomalies will be merged
+      // note: the 2 detection tasks can run concurrently, the order does not matter because the last timestamp after the run of the 2 tasks is the same
+      //   we could remove the first one but this would make the UI feel less snappy, because a new enumeration would not appear until the full historical replay is finished
+      createDetectionTask(dto.getId(), minimumLastTimestamp(principal, dto), dto.getLastTimestamp()); 
+    }
   }
 
   @Override

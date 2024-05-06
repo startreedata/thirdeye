@@ -43,7 +43,7 @@ import {
 } from "../../../../platform/components";
 import { ActionStatus } from "../../../../rest/actions.interfaces";
 import { onBoardDataset } from "../../../../rest/datasets/datasets.rest";
-import { useGetTablesForDatasourceName } from "../../../../rest/datasources/datasources.actions";
+import { useGetTablesForDatasourceID } from "../../../../rest/datasources/datasources.actions";
 import { notifyIfErrors } from "../../../../utils/notifications/notifications.util";
 import { getErrorMessages } from "../../../../utils/rest/rest.util";
 import {
@@ -57,14 +57,14 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
     const { notify } = useNotificationProviderV1();
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const { name: datasourceName } = useParams<{ name: string }>();
+    const { id: datasourceId } = useParams<{ id: string }>();
 
     const {
         tables,
-        getTableForDatasourceName,
+        getTableForDatasourceID,
         status: getTablesStatus,
         errorMessages,
-    } = useGetTablesForDatasourceName();
+    } = useGetTablesForDatasourceID();
 
     const handleToggleCheckbox = useCallback(
         (event: React.ChangeEvent<HTMLInputElement>): void => {
@@ -86,8 +86,8 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
     );
 
     useEffect(() => {
-        if (datasourceName) {
-            getTableForDatasourceName(datasourceName).then((datasets) => {
+        if (datasourceId) {
+            getTableForDatasourceID(Number(datasourceId)).then((datasets) => {
                 if (!datasets) {
                     return;
                 }
@@ -124,10 +124,10 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
     }, [getTablesStatus]);
 
     const handleOnboardDatasets = useCallback(
-        (datasetNames: string[], datasourceName: string) =>
+        (datasetNames: string[], datasourceId: string) =>
             Promise.all(
                 datasetNames.map((datasetName) =>
-                    onBoardDataset(datasetName, datasourceName)
+                    onBoardDataset(datasetName, datasourceId)
                         .then(() => {
                             notify(
                                 NotificationTypeV1.Success,
@@ -158,14 +158,14 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
     );
 
     const handleNext = useCallback(() => {
-        if (!datasourceName) {
+        if (!datasourceId) {
             return;
         }
 
-        handleOnboardDatasets(selectedDatasets, datasourceName).then(() => {
+        handleOnboardDatasets(selectedDatasets, datasourceId).then(() => {
             navigate(getWelcomeLandingPath());
         });
-    }, [selectedDatasets, datasourceName]);
+    }, [selectedDatasets, datasourceId]);
 
     return (
         <>
@@ -186,7 +186,7 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
                                     {t(
                                         "message.onboard-datasource-onboard-datasets-for",
                                         {
-                                            datasetName: datasourceName,
+                                            datasetName: datasourceId,
                                         }
                                     )}
                                 </Typography>

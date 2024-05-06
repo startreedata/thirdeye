@@ -73,12 +73,12 @@ export const updateDatasources = async (
 };
 
 export const onboardAllDatasets = async (
-    datasourceName: string
+    datasourceId: number
 ): Promise<Dataset[]> => {
     const response = await axios.post(
         `${BASE_URL_DATASOURCES}/onboard-all`,
         new URLSearchParams({
-            name: datasourceName,
+            id: datasourceId.toString(),
         })
     );
 
@@ -92,9 +92,9 @@ export const deleteDatasource = async (id: number): Promise<Datasource> => {
 };
 
 export const getStatusForDatasource = async (
-    datasourceName: string
+    datasourceId: string
 ): Promise<GetStatusResponse> => {
-    const queryParams = new URLSearchParams([["name", datasourceName]]);
+    const queryParams = new URLSearchParams([["id", datasourceId]]);
     const url = `${BASE_URL_DATASOURCES}/validate?${queryParams.toString()}`;
 
     const response = await axios.get(url);
@@ -103,10 +103,10 @@ export const getStatusForDatasource = async (
 };
 
 export const getTablesForDatasource = async (
-    dataSourceName: string
+    dataSourceId: number
 ): Promise<Dataset[]> => {
     const response = await axios.get(
-        `${BASE_URL_DATASOURCES}/name/${dataSourceName}/datasets`
+        `${BASE_URL_DATASOURCES}/${dataSourceId}/datasets`
     );
 
     return response.data;

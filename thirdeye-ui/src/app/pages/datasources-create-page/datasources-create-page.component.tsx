@@ -62,7 +62,7 @@ export const DatasourcesCreatePage: FunctionComponent = () => {
                 // Onboarding datasets won't be a blocker.
                 // So we won't stop navigate for this API call
                 onboardDatasets &&
-                    onboardAllDatasets(datasource.name)
+                    onboardAllDatasets(datasource.id)
                         .then((): void => {
                             notify(
                                 NotificationTypeV1.Success,

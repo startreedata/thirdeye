@@ -14,5 +14,5 @@
  */
 
 export interface DatasourceVerificationProps {
-    datasourceName: string;
+    datasourceId: number;
 }

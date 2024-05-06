@@ -46,12 +46,12 @@ export const createDatasets = async (
 
 export const onBoardDataset = async (
     datasetName: string,
-    dataSourceName: string
+    id: string
 ): Promise<Dataset> => {
     const response = await axios.post(
         `${BASE_URL_DATASOURCE}/onboard-dataset/`,
         new URLSearchParams({
-            dataSourceName,
+            dataSourceId: id,
             datasetName,
         })
     );

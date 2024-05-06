@@ -28,7 +28,7 @@ import {
     PageContentsGridV1,
     useNotificationProviderV1,
 } from "../../../platform/components";
-import { useGetTablesForDatasourceName } from "../../../rest/datasources/datasources.actions";
+import { useGetTablesForDatasourceID } from "../../../rest/datasources/datasources.actions";
 import { Dataset } from "../../../rest/dto/dataset.interfaces";
 import { Datasource } from "../../../rest/dto/datasource.interfaces";
 import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
@@ -37,8 +37,8 @@ import { SelectDatasetOption } from "../../welcome-onboard-datasource/select-dat
 import { WizardBottomBar } from "../../welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import { DatasourceVerification } from "../datasource-verification/datasource-verification.component";
 import {
-    DatasetPropertiesFormProps,
     DATASET_FORM_TEST_IDS,
+    DatasetPropertiesFormProps,
 } from "./dataset-properties-form.interfaces";
 
 export const DatasetPropertiesForm: FunctionComponent<DatasetPropertiesFormProps> =
@@ -48,10 +48,10 @@ export const DatasetPropertiesForm: FunctionComponent<DatasetPropertiesFormProps
 
         const {
             tables,
-            getTableForDatasourceName,
+            getTableForDatasourceID,
             status: getTablesStatus,
             errorMessages: getTableForDatasourceNameErrors,
-        } = useGetTablesForDatasourceName();
+        } = useGetTablesForDatasourceID();
 
         const [selectedDataSource, setSelectedDataSource] =
             useState<Datasource>();
@@ -79,7 +79,7 @@ export const DatasetPropertiesForm: FunctionComponent<DatasetPropertiesFormProps
 
         useEffect(() => {
             if (selectedDataSource) {
-                getTableForDatasourceName(selectedDataSource.name);
+                getTableForDatasourceID(selectedDataSource.id);
             }
         }, [selectedDataSource]);
 
@@ -128,8 +128,8 @@ export const DatasetPropertiesForm: FunctionComponent<DatasetPropertiesFormProps
                                     helperLabel={
                                         selectedDataSource && (
                                             <DatasourceVerification
-                                                datasourceName={
-                                                    selectedDataSource.name
+                                                datasourceId={
+                                                    selectedDataSource.id
                                                 }
                                             />
                                         )
@@ -287,7 +287,7 @@ export const DatasetPropertiesForm: FunctionComponent<DatasetPropertiesFormProps
                             selectedDataSource &&
                             onSubmit(
                                 selectedDatasetsToOnboard,
-                                selectedDataSource.name
+                                selectedDataSource.id
                             );
                     }}
                     nextButtonLabel={t("label.submit")}

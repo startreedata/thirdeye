@@ -186,7 +186,7 @@ describe("Datasources REST", () => {
         });
 
         await expect(
-            onboardAllDatasets(mockDatasourceRequest.name)
+            onboardAllDatasets(mockDatasourceRequest.id)
         ).resolves.toEqual([mockDatasetsResponse]);
 
         expect(axios.post).toHaveBeenCalledWith(
@@ -199,7 +199,7 @@ describe("Datasources REST", () => {
         jest.spyOn(axios, "post").mockRejectedValue(mockError);
 
         await expect(
-            onboardAllDatasets(mockDatasourceRequest.name)
+            onboardAllDatasets(mockDatasourceRequest.id)
         ).rejects.toThrow("testError");
     });
 
@@ -249,7 +249,7 @@ describe("Datasources REST", () => {
         });
 
         await expect(
-            getTablesForDatasource("datasource-name")
+            getTablesForDatasource(mockDatasourceRequest.id)
         ).resolves.toEqual(mockStatusResponse);
 
         expect(axios.get).toHaveBeenCalledWith(
@@ -260,14 +260,15 @@ describe("Datasources REST", () => {
     it("getTablesForDatasource should throw encountered error", async () => {
         jest.spyOn(axios, "get").mockRejectedValue(mockError);
 
-        await expect(getTablesForDatasource("datasource-name")).rejects.toThrow(
-            "testError"
-        );
+        await expect(
+            getTablesForDatasource(mockDatasourceRequest.id)
+        ).rejects.toThrow("testError");
     });
 });
 
 const mockDatasourceRequest = {
     name: "testNameDatasourceRequest",
+    id: 1,
 } as Datasource;
 
 const mockDatasetsResponse = {

@@ -69,7 +69,7 @@ export const WelcomeSelectDatasource: FunctionComponent = () => {
     const [editedDatasource, setEditedDatasource] = useState<Datasource>(
         createDefaultDatasource()
     );
-    const [selectedDatasourceName, setSelectedDatasourceName] =
+    const [selectedDatasourceValue, setSelectedDatasourceValue] =
         useState<SelectedDatasource>(null);
 
     const { notify } = useNotificationProviderV1();
@@ -83,7 +83,7 @@ export const WelcomeSelectDatasource: FunctionComponent = () => {
         _e: React.ChangeEvent<HTMLInputElement>,
         value: string
     ): void => {
-        setSelectedDatasourceName(value as SelectedDatasource);
+        setSelectedDatasourceValue(value as SelectedDatasource);
     };
 
     const { datasources, getDatasources, status, errorMessages } =
@@ -98,7 +98,7 @@ export const WelcomeSelectDatasource: FunctionComponent = () => {
         getDatasources().then((data) => {
             data &&
                 data.length === 0 &&
-                setSelectedDatasourceName(ADD_NEW_DATASOURCE);
+                setSelectedDatasourceValue(ADD_NEW_DATASOURCE);
         });
     }, []);
 
@@ -114,15 +114,15 @@ export const WelcomeSelectDatasource: FunctionComponent = () => {
     }, [status]);
 
     const goToDatasetPage = useCallback(
-        (datasourceName: string) =>
-            navigate(getDataConfigurationCreateDatasetsPath(datasourceName)),
+        (datasourceId: number) =>
+            navigate(getDataConfigurationCreateDatasetsPath(datasourceId)),
         []
     );
 
     const handleCreateNewDatasource = useCallback(
         (editedDatasourceProp: Datasource) =>
             createDatasource(editedDatasourceProp)
-                .then((datasource: Datasource): string => {
+                .then((datasource: Datasource): number => {
                     notify(
                         NotificationTypeV1.Success,
                         t("message.create-success", {
@@ -130,9 +130,9 @@ export const WelcomeSelectDatasource: FunctionComponent = () => {
                         })
                     );
 
-                    setSelectedDatasourceName(datasource.name);
+                    setSelectedDatasourceValue(datasource.id);
 
-                    return datasource.name;
+                    return datasource.id;
                 })
                 .catch((error: AxiosError): void => {
                     notifyIfErrors(
@@ -148,7 +148,7 @@ export const WelcomeSelectDatasource: FunctionComponent = () => {
     );
 
     const handleNext = useCallback((): void | Promise<void> => {
-        if (selectedDatasourceName === null) {
+        if (selectedDatasourceValue === null) {
             notify(
                 NotificationTypeV1.Error,
                 "Please select a valid dataset or create a new one"
@@ -157,7 +157,7 @@ export const WelcomeSelectDatasource: FunctionComponent = () => {
             return;
         }
 
-        if (selectedDatasourceName === ADD_NEW_DATASOURCE) {
+        if (selectedDatasourceValue === ADD_NEW_DATASOURCE) {
             return handleCreateNewDatasource(editedDatasource).then(
                 (created) => {
                     if (!created) {
@@ -169,8 +169,8 @@ export const WelcomeSelectDatasource: FunctionComponent = () => {
             );
         }
 
-        goToDatasetPage(selectedDatasourceName);
-    }, [editedDatasource, selectedDatasourceName]);
+        goToDatasetPage(selectedDatasourceValue);
+    }, [editedDatasource, selectedDatasourceValue]);
 
     return (
         <>
@@ -228,7 +228,7 @@ export const WelcomeSelectDatasource: FunctionComponent = () => {
                                                     )}
                                                     name="select-datasource"
                                                     value={
-                                                        selectedDatasourceName
+                                                        selectedDatasourceValue
                                                     }
                                                     onChange={handleRadioChange}
                                                 >
@@ -256,7 +256,7 @@ export const WelcomeSelectDatasource: FunctionComponent = () => {
                             ))}
                         </LoadingErrorStateSwitch>
 
-                        {selectedDatasourceName === ADD_NEW_DATASOURCE ? (
+                        {selectedDatasourceValue === ADD_NEW_DATASOURCE ? (
                             <JSONEditorV1<Datasource>
                                 hideValidationSuccessIcon
                                 value={editedDatasource}

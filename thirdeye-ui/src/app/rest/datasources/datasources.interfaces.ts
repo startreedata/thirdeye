@@ -27,7 +27,7 @@ export interface GetStatusResponse {
 export interface GetDatasourceStatus extends ActionHook {
     healthStatus: GetStatusResponse | null;
     getDatasourceStatus: (
-        datasourceName: string
+        datasourceId: number
     ) => Promise<GetStatusResponse | undefined>;
 }
 
@@ -48,5 +48,5 @@ export interface GetDatasourceByName extends ActionHook {
 
 export interface GetTablesForDatasourceByName extends ActionHook {
     tables: Dataset[] | null;
-    getTableForDatasourceName: (name: string) => Promise<Dataset[] | undefined>;
+    getTableForDatasourceID: (name: number) => Promise<Dataset[] | undefined>;
 }

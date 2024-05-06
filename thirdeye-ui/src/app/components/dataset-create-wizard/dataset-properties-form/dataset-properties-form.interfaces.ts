@@ -18,7 +18,7 @@ import { Datasource } from "../../../rest/dto/datasource.interfaces";
 export interface DatasetPropertiesFormProps {
     existingDatasets: Dataset[];
     datasources: Datasource[];
-    onSubmit: (datasets: Dataset[], datasourceName: string) => void;
+    onSubmit: (datasets: Dataset[], datasourceId: number) => void;
 }
 
 export const DATASET_FORM_TEST_IDS = {

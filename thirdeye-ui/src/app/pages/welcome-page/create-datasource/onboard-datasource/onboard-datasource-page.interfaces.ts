@@ -17,7 +17,7 @@ import type { ADD_NEW_DATASOURCE } from "./onboard-datasource-page.utils";
 
 export interface DatasourceOption {
     label: string;
-    value: string;
+    value: string | number;
     sourceType: "startree-cloud" | "other-sources";
 }
 
@@ -27,4 +27,4 @@ export interface DatasourceOptionGroups {
     options: DatasourceOption[];
 }
 
-export type SelectedDatasource = typeof ADD_NEW_DATASOURCE | string | null;
+export type SelectedDatasource = typeof ADD_NEW_DATASOURCE | number | null;

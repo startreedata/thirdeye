@@ -103,10 +103,10 @@ export const getStatusForDatasource = async (
 };
 
 export const getTablesForDatasource = async (
-    dataSourceName: string
+    dataSourceId: number
 ): Promise<Dataset[]> => {
     const response = await axios.get(
-        `${BASE_URL_DATASOURCES}/name/${dataSourceName}/datasets`
+        `${BASE_URL_DATASOURCES}/${dataSourceId}/datasets`
     );
 
     return response.data;

@@ -43,7 +43,7 @@ import {
 } from "../../../../platform/components";
 import { ActionStatus } from "../../../../rest/actions.interfaces";
 import { onBoardDataset } from "../../../../rest/datasets/datasets.rest";
-import { useGetTablesForDatasourceName } from "../../../../rest/datasources/datasources.actions";
+import { useGetTablesForDatasourceID } from "../../../../rest/datasources/datasources.actions";
 import { notifyIfErrors } from "../../../../utils/notifications/notifications.util";
 import { getErrorMessages } from "../../../../utils/rest/rest.util";
 import {
@@ -61,10 +61,10 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
 
     const {
         tables,
-        getTableForDatasourceName,
+        getTableForDatasourceID,
         status: getTablesStatus,
         errorMessages,
-    } = useGetTablesForDatasourceName();
+    } = useGetTablesForDatasourceID();
 
     const handleToggleCheckbox = useCallback(
         (event: React.ChangeEvent<HTMLInputElement>): void => {
@@ -87,7 +87,7 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
 
     useEffect(() => {
         if (datasourceName) {
-            getTableForDatasourceName(datasourceName).then((datasets) => {
+            getTableForDatasourceID(datasourceName).then((datasets) => {
                 if (!datasets) {
                     return;
                 }

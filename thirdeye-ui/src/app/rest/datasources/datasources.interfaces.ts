@@ -48,5 +48,5 @@ export interface GetDatasourceByName extends ActionHook {
 
 export interface GetTablesForDatasourceByName extends ActionHook {
     tables: Dataset[] | null;
-    getTableForDatasourceName: (name: string) => Promise<Dataset[] | undefined>;
+    getTableForDatasourceID: (name: number) => Promise<Dataset[] | undefined>;
 }

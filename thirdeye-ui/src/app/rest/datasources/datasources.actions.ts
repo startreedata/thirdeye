@@ -25,8 +25,8 @@ import {
 } from "./datasources.interfaces";
 import {
     getAllDatasources,
-    getDatasource as getDatasourceREST,
     getDatasourceByName as getDatasourceByNameREST,
+    getDatasource as getDatasourceREST,
     getStatusForDatasource,
     getTablesForDatasource,
 } from "./datasources.rest";
@@ -104,22 +104,21 @@ export const useGetDatasourceByName = (): GetDatasourceByName => {
     };
 };
 
-export const useGetTablesForDatasourceName =
-    (): GetTablesForDatasourceByName => {
-        const { data, makeRequest, status, errorMessages, resetData } =
-            useHTTPAction<Dataset[]>(getTablesForDatasource);
+export const useGetTablesForDatasourceID = (): GetTablesForDatasourceByName => {
+    const { data, makeRequest, status, errorMessages, resetData } =
+        useHTTPAction<Dataset[]>(getTablesForDatasource);
 
-        const getTableForDatasourceName = (
-            name: string
-        ): Promise<Dataset[] | undefined> => {
-            return makeRequest(name);
-        };
-
-        return {
-            tables: data,
-            getTableForDatasourceName,
-            status,
-            errorMessages,
-            resetData,
-        };
+    const getTableForDatasourceID = (
+        name: number
+    ): Promise<Dataset[] | undefined> => {
+        return makeRequest(name);
     };
+
+    return {
+        tables: data,
+        getTableForDatasourceID,
+        status,
+        errorMessages,
+        resetData,
+    };
+};

@@ -1,3 +1,11 @@
+### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
+
+
+### Bug Fixes
+
+* [TE-2152](https://cortexdata.atlassian.net/browse/TE-2152) show confirmation if monitoring granularity less than 15m ([223a54bf6](https://github.com/startreedata/thirdeye/commit/223a54bf69d5d903013ca38f0798346ed08c2d05))
+* [TE-2256](https://cortexdata.atlassian.net/browse/TE-2256) fix the datasets and datasource api signatures ([287b777fa](https://github.com/startreedata/thirdeye/commit/287b777fad33f936dc35f204a56ff7d821fe032b))
+
 ### [2.45.16](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.15...thirdeye-ui-2.45.16) (2024-04-24)
 
 

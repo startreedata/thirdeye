@@ -270,6 +270,7 @@ public class AuthorizationManager {
 
   private <T extends AbstractDTO> List<ResourceIdentifier> relatedEntities(T entity) {
     if (entity instanceof AlertDTO) {
+      // fixme cyril authz - related entities should be namespaced
       final AlertDTO alertDto = (AlertDTO) entity;
       final AlertTemplateDTO alertTemplateDTO = alertTemplateRenderer.getTemplate(
           alertDto.getTemplate());

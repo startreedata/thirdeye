@@ -51,7 +51,7 @@ export const onBoardDataset = async (
     const response = await axios.post(
         `${BASE_URL_DATASOURCE}/onboard-dataset/`,
         new URLSearchParams({
-            id,
+            dataSourceId: id,
             datasetName,
         })
     );

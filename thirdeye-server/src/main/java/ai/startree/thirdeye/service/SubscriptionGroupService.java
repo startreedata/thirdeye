@@ -44,7 +44,6 @@ import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import javax.inject.Inject;
 import org.quartz.CronExpression;
 
@@ -148,11 +147,11 @@ public class SubscriptionGroupService extends
         .orElse(emptyList())
         .stream()
         .collect(HashMap::new,
-            (map, aa) -> map.put(new AlertAssociationId(aa), aa),
+            (map, aa) -> map.put(AlertAssociationId.from(aa), aa),
             HashMap::putAll);
 
     // Restore system fields from existing alert associations or initialize them
-    updated.forEach(aa -> restoreSystemFields(aa, m.get(new AlertAssociationId(aa))));
+    updated.forEach(aa -> restoreSystemFields(aa, m.get(AlertAssociationId.from(aa))));
   }
 
   private void restoreSystemFields(final AlertAssociationDto dest, final AlertAssociationDto src) {
@@ -189,37 +188,18 @@ public class SubscriptionGroupService extends
     final SubscriptionGroupDTO sg = getDto(id);
     notificationDispatcher.sendTestMessage(sg);
   }
+  
+  private record AlertAssociationId(Long  alertId, Long enumerationItemId) {
 
-  private static class AlertAssociationId {
-
-    private final Long alertId;
-    private final Long enumerationItemId;
-
-    private AlertAssociationId(AlertAssociationDto aa) {
-      alertId = requireNonNull(aa.getAlert().getId());
-      enumerationItemId = optional(aa.getEnumerationItem())
-          .map(AbstractDTO::getId)
-          .orElse(null);
+    private static AlertAssociationId from(AlertAssociationDto aa) {
+      return new AlertAssociationId(
+          requireNonNull(aa.getAlert().getId()),
+          optional(aa.getEnumerationItem())
+              .map(AbstractDTO::getId)
+              .orElse(null)
+      );
     }
-
-    @Override
-    public boolean equals(final Object o) {
-      if (this == o) {
-        return true;
-      }
-      if (o == null || getClass() != o.getClass()) {
-        return false;
-      }
-      final AlertAssociationId that = (AlertAssociationId) o;
-      return Objects.equals(alertId, that.alertId) && Objects.equals(
-          enumerationItemId,
-          that.enumerationItemId);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(alertId, enumerationItemId);
-    }
+    
   }
 }
 

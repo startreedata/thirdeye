@@ -33,6 +33,7 @@ import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
 import ai.startree.thirdeye.spi.auth.AuthenticationType;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
 import ai.startree.thirdeye.spi.datalayer.bao.AbstractManager;
+import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
@@ -380,6 +381,7 @@ class DummyResource extends CrudResource<DummyApi, DummyDto> {
       final ThirdEyeAuthorizer thirdEyeAuthorizer) {
     super(new DummyService(
         new AuthorizationManager(mock(AlertTemplateRenderer.class),
+            mock(AlertManager.class),
             thirdEyeAuthorizer, new NamespaceResolver(null, null, null, null),
             new AuthConfiguration()),
         dtoManager,

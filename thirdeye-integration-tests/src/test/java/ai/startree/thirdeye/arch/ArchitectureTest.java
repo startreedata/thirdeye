@@ -198,7 +198,8 @@ public class ArchitectureTest {
         DataSourceOnboarder.class, // OK - REVIEWED ON APRIL 12 2024
         NamespaceResolver.class,
         EvaluationContextProcessor.class,
-        AlertTemplateRenderer.class
+        AlertTemplateRenderer.class,
+        AuthorizationManager.class // OK - REVIEW ON MAY 6 2024
     };
     final ArchRule rule = noClasses().that(
             doNot(

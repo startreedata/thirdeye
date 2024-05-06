@@ -30,6 +30,7 @@ import ai.startree.thirdeye.notification.NotificationDispatcher;
 import ai.startree.thirdeye.notification.NotificationServiceRegistry;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertAssociationApi;
+import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
 import ai.startree.thirdeye.spi.api.NotificationSpecApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
@@ -44,7 +45,6 @@ import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import javax.inject.Inject;
 import org.quartz.CronExpression;
 
@@ -83,7 +83,6 @@ public class SubscriptionGroupService extends
     final AlertApi alert = alertAssociation.getAlert();
     ensureExists(alert, "alert missing in alert association");
     ensureExists(alert.getId(), "alert.id is missing in alert association");
-    // fixme cyril authz - a user should have read access to the alerts
   }
 
   private static void initSystemFields(final AlertAssociationDto aa, final Timestamp created) {
@@ -111,8 +110,10 @@ public class SubscriptionGroupService extends
 
     // For new Subscription Group or existing Subscription Group with different name
     if (existing == null || !existing.getName().equals(api.getName())) {
-      // fixme cyril authz filter by namespace
-      ensure(dtoManager.findByName(api.getName()).isEmpty(), ERR_DUPLICATE_NAME, api.getName());
+      final List<SubscriptionGroupDTO> sameName = dtoManager.findByName(api.getName());
+      final List<SubscriptionGroupDTO> sameNameSameNamespace = authorizationManager.filterByNamespace(principal,
+          optional(api.getAuth()).map(AuthorizationConfigurationApi::getNamespace).orElse(null), sameName);
+      ensure(sameNameSameNamespace.isEmpty(), ERR_DUPLICATE_NAME, api.getName());
     }
     optional(api.getAlertAssociations())
         .ifPresent(l -> l.forEach(SubscriptionGroupService::validateAlertAssociation));
@@ -148,11 +149,11 @@ public class SubscriptionGroupService extends
         .orElse(emptyList())
         .stream()
         .collect(HashMap::new,
-            (map, aa) -> map.put(new AlertAssociationId(aa), aa),
+            (map, aa) -> map.put(AlertAssociationId.from(aa), aa),
             HashMap::putAll);
 
     // Restore system fields from existing alert associations or initialize them
-    updated.forEach(aa -> restoreSystemFields(aa, m.get(new AlertAssociationId(aa))));
+    updated.forEach(aa -> restoreSystemFields(aa, m.get(AlertAssociationId.from(aa))));
   }
 
   private void restoreSystemFields(final AlertAssociationDto dest, final AlertAssociationDto src) {
@@ -176,50 +177,34 @@ public class SubscriptionGroupService extends
   }
 
   public SubscriptionGroupApi reset(final ThirdEyePrincipal principal, Long id) {
-    // FIXME CYRIL ensure access authz
     final SubscriptionGroupDTO sg = getDto(id);
     sg.setVectorClocks(null);
+    // todo authz ensureCanEdit is used to also go through related entities - but it's not a great design - consider related entities should be done in the Service? 
+    authorizationManager.ensureCanEdit(principal, sg, sg);
     dtoManager.save(sg);
 
     return toApi(sg);
   }
 
   public void sendTestMessage(final ThirdEyePrincipal principal, final Long id) {
-    // FIXME CYRIL ensure access authz
     final SubscriptionGroupDTO sg = getDto(id);
+    // no need to check read access of all associated alerts, because the test message should not use alerts. 
+    // todo authz change role?
+    authorizationManager.ensureCanRead(principal, sg);
     notificationDispatcher.sendTestMessage(sg);
   }
+  
+  private record AlertAssociationId(Long  alertId, Long enumerationItemId) {
 
-  private static class AlertAssociationId {
-
-    private final Long alertId;
-    private final Long enumerationItemId;
-
-    private AlertAssociationId(AlertAssociationDto aa) {
-      alertId = requireNonNull(aa.getAlert().getId());
-      enumerationItemId = optional(aa.getEnumerationItem())
-          .map(AbstractDTO::getId)
-          .orElse(null);
+    private static AlertAssociationId from(AlertAssociationDto aa) {
+      return new AlertAssociationId(
+          requireNonNull(aa.getAlert().getId()),
+          optional(aa.getEnumerationItem())
+              .map(AbstractDTO::getId)
+              .orElse(null)
+      );
     }
-
-    @Override
-    public boolean equals(final Object o) {
-      if (this == o) {
-        return true;
-      }
-      if (o == null || getClass() != o.getClass()) {
-        return false;
-      }
-      final AlertAssociationId that = (AlertAssociationId) o;
-      return Objects.equals(alertId, that.alertId) && Objects.equals(
-          enumerationItemId,
-          that.enumerationItemId);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(alertId, enumerationItemId);
-    }
+    
   }
 }
 

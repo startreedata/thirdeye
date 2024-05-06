@@ -101,6 +101,7 @@ public class AlertResourceTest {
       final AlertTemplateRenderer alertTemplateRenderer,
       final ThirdEyeAuthorizer thirdEyeAuthorizer) {
     return new AuthorizationManager(alertTemplateRenderer,
+        mock(AlertManager.class), 
         thirdEyeAuthorizer, new NamespaceResolver(null, null, null, null), new AuthConfiguration());
   }
 

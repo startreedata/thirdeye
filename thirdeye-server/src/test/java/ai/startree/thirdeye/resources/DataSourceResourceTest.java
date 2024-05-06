@@ -31,6 +31,7 @@ import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.api.StatusApi;
 import ai.startree.thirdeye.spi.api.StatusListApi;
 import ai.startree.thirdeye.spi.auth.AuthenticationType;
+import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
@@ -62,6 +63,7 @@ public class DataSourceResourceTest {
         mock(DataSourceOnboarder.class),
         new AuthorizationManager(
             mock(AlertTemplateRenderer.class),
+            mock(AlertManager.class), 
             ThirdEyeAuthorizerProvider.ALWAYS_ALLOW,
             new NamespaceResolver(null, null, null, null),
             new AuthConfiguration()

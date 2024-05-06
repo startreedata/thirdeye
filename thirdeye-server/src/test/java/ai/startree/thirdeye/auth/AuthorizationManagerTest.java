@@ -223,25 +223,33 @@ public class AuthorizationManagerTest {
 
     testName = "TaskDTO - DETECTION type with Alert with resource.";
     alertDto = alertWithResource();
-    TaskDTO taskDto = (TaskDTO) new TaskDTO().setTaskType(TaskType.DETECTION).setRefId(alertDto.getId()).setId(9L);
+    TaskDTO taskDto = (TaskDTO) new TaskDTO().setTaskType(TaskType.DETECTION)
+        .setRefId(alertDto.getId())
+        .setId(9L);
     testCases.add(testCase(testName, alertDto, null, null, null, taskDto,
         ResourceIdentifier.from("9", "alert_namespace", "TASK")));
 
     testName = "TaskDTO - DETECTION type with Alert without resource.";
     alertDto = alertWithoutResource();
-    taskDto = (TaskDTO) new TaskDTO().setTaskType(TaskType.DETECTION).setRefId(alertDto.getId()).setId(10L);
+    taskDto = (TaskDTO) new TaskDTO().setTaskType(TaskType.DETECTION)
+        .setRefId(alertDto.getId())
+        .setId(10L);
     testCases.add(testCase(testName, alertDto, null, null, null, taskDto,
         ResourceIdentifier.from("10", "default", "TASK")));
 
     testName = "TaskDTO - NOTIFICATION type with SubscriptionGroup with resource.";
     SubscriptionGroupDTO subscriptionGroupDto = subscriptionGroupWithResource();
-    taskDto = (TaskDTO) new TaskDTO().setTaskType(TaskType.NOTIFICATION).setRefId(subscriptionGroupDto.getId()).setId(11L);
+    taskDto = (TaskDTO) new TaskDTO().setTaskType(TaskType.NOTIFICATION)
+        .setRefId(subscriptionGroupDto.getId())
+        .setId(11L);
     testCases.add(testCase(testName, null, null, null, subscriptionGroupDto, taskDto,
         ResourceIdentifier.from("11", "subscription_namespace", "TASK")));
 
     testName = "TaskDTO - NOTIFICATION type with SubscriptionGroup without resource.";
     subscriptionGroupDto = subscriptionGroupWithoutResource();
-    taskDto = (TaskDTO) new TaskDTO().setTaskType(TaskType.NOTIFICATION).setRefId(subscriptionGroupDto.getId()).setId(12L);
+    taskDto = (TaskDTO) new TaskDTO().setTaskType(TaskType.NOTIFICATION)
+        .setRefId(subscriptionGroupDto.getId())
+        .setId(12L);
     testCases.add(testCase(testName, null, null, null, subscriptionGroupDto, taskDto,
         ResourceIdentifier.from("12", "default", "TASK")));
 
@@ -302,8 +310,9 @@ public class AuthorizationManagerTest {
       when(subscriptionGroupManager.findById(subscriptionGroup.getId())).thenReturn(
           subscriptionGroup);
     }
-    final AuthorizationManager authorizationManager = new AuthorizationManager(null, null,
-        new NamespaceResolver(alertManager, enumManager, anomalyManager, subscriptionGroupManager), new AuthConfiguration());
+    final AuthorizationManager authorizationManager = new AuthorizationManager(null, null, null,
+        new NamespaceResolver(alertManager, enumManager, anomalyManager, subscriptionGroupManager),
+        new AuthConfiguration());
     final ResourceIdentifier output = authorizationManager.resourceId(inputDto);
     // FIXME CYRIL write equals method
     assertThat(output.getName()).isEqualTo(expected.getName());

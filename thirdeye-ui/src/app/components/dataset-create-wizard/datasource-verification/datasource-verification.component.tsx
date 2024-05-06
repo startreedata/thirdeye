@@ -22,7 +22,7 @@ import { DatasourceVerificationProps } from "./datasource-verification.interface
 import { useDatasourceVerificationStyles } from "./datasource-verification.styles";
 
 export const DatasourceVerification: FunctionComponent<DatasourceVerificationProps> =
-    ({ datasourceName }) => {
+    ({ datasourceId }) => {
         const classes = useDatasourceVerificationStyles();
         const {
             getDatasourceStatus,
@@ -33,8 +33,8 @@ export const DatasourceVerification: FunctionComponent<DatasourceVerificationPro
         const { t } = useTranslation();
 
         useEffect(() => {
-            getDatasourceStatus(datasourceName);
-        }, [datasourceName]);
+            getDatasourceStatus(datasourceId);
+        }, [datasourceId]);
 
         if (requestStatus === ActionStatus.Working) {
             return (

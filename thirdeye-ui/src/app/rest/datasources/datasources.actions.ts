@@ -36,9 +36,9 @@ export const useGetDatasourceStatus = (): GetDatasourceStatus => {
         useHTTPAction<GetStatusResponse>(getStatusForDatasource);
 
     const getDatasourceStatus = (
-        datasourceName: string
+        datasourceId: number
     ): Promise<GetStatusResponse | undefined> => {
-        return makeRequest(datasourceName);
+        return makeRequest(datasourceId);
     };
 
     return {

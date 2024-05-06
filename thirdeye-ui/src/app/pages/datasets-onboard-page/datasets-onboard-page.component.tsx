@@ -39,16 +39,16 @@ export const DatasetsOnboardPage: FunctionComponent = () => {
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
 
-    const handleSubmit = (
-        datasets: Dataset[],
-        datasourceName: string
-    ): void => {
+    const handleSubmit = (datasets: Dataset[], datasourceId: number): void => {
         if (isEmpty(datasets)) {
             return;
         }
 
         const datasetsAndPromises: [Dataset, Promise<Dataset>][] = datasets.map(
-            (dataset) => [dataset, onBoardDataset(dataset.name, datasourceName)]
+            (dataset) => [
+                dataset,
+                onBoardDataset(dataset.name, datasourceId.toString()),
+            ]
         );
 
         datasetsAndPromises.forEach(([, onboardPromise]) => {

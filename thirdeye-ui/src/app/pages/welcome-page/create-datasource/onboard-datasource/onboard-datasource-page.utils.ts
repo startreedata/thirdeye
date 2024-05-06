@@ -30,7 +30,7 @@ export const getDatasources = (
     return [
         ...((datasources || []).map((d) => ({
             label: d.name,
-            value: d.name,
+            value: d.id,
             sourceType: STARTREE_CLOUD,
         })) as DatasourceOption[]),
         {

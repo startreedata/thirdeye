@@ -15,5 +15,5 @@
 import { Dataset } from "../../rest/dto/dataset.interfaces";
 
 export interface DatasetCreateWizardProps {
-    onSubmit: (datasets: Dataset[], datasourceName: string) => void;
+    onSubmit: (datasets: Dataset[], datasourceId: number) => void;
 }

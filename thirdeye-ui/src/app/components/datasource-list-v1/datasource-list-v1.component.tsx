@@ -93,7 +93,7 @@ export const DatasourceListV1: FunctionComponent<DatasourceListV1Props> = ({
     };
 
     const renderStatusCheck = (params: GridRenderCellParams): ReactElement => {
-        return <DatasourceVerification datasourceName={params.row.name} />;
+        return <DatasourceVerification datasourceId={params.row.id} />;
     };
 
     const datasourceColumns: GridColumns = [

@@ -27,7 +27,7 @@ export interface GetStatusResponse {
 export interface GetDatasourceStatus extends ActionHook {
     healthStatus: GetStatusResponse | null;
     getDatasourceStatus: (
-        datasourceName: string
+        datasourceId: number
     ) => Promise<GetStatusResponse | undefined>;
 }
 

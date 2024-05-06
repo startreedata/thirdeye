@@ -23,7 +23,7 @@ import { ActiveIndicator } from "../../active-indicator/active-indicator.compone
 import { DatasourceVerificationProps } from "./datasource-verification.interfaces";
 
 export const DatasourceVerification: FunctionComponent<DatasourceVerificationProps> =
-    ({ datasourceName }) => {
+    ({ datasourceId }) => {
         const {
             getDatasourceStatus,
             healthStatus,
@@ -33,8 +33,8 @@ export const DatasourceVerification: FunctionComponent<DatasourceVerificationPro
         const { t } = useTranslation();
 
         useEffect(() => {
-            getDatasourceStatus(datasourceName);
-        }, [datasourceName]);
+            getDatasourceStatus(datasourceId);
+        }, [datasourceId]);
 
         if (requestStatus === ActionStatus.Working) {
             return <span>{t("message.checking-datasource-health")}</span>;

@@ -128,8 +128,8 @@ export const DatasetPropertiesForm: FunctionComponent<DatasetPropertiesFormProps
                                     helperLabel={
                                         selectedDataSource && (
                                             <DatasourceVerification
-                                                datasourceName={
-                                                    selectedDataSource.name
+                                                datasourceId={
+                                                    selectedDataSource.id
                                                 }
                                             />
                                         )
@@ -287,7 +287,7 @@ export const DatasetPropertiesForm: FunctionComponent<DatasetPropertiesFormProps
                             selectedDataSource &&
                             onSubmit(
                                 selectedDatasetsToOnboard,
-                                selectedDataSource.name
+                                selectedDataSource.id
                             );
                     }}
                     nextButtonLabel={t("label.submit")}

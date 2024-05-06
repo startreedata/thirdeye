@@ -30,6 +30,7 @@ import ai.startree.thirdeye.notification.NotificationDispatcher;
 import ai.startree.thirdeye.notification.NotificationServiceRegistry;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertAssociationApi;
+import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
 import ai.startree.thirdeye.spi.api.NotificationSpecApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
@@ -109,8 +110,10 @@ public class SubscriptionGroupService extends
 
     // For new Subscription Group or existing Subscription Group with different name
     if (existing == null || !existing.getName().equals(api.getName())) {
-      // fixme cyril authz filter by namespace
-      ensure(dtoManager.findByName(api.getName()).isEmpty(), ERR_DUPLICATE_NAME, api.getName());
+      final List<SubscriptionGroupDTO> sameName = dtoManager.findByName(api.getName());
+      final List<SubscriptionGroupDTO> sameNameSameNamespace = authorizationManager.filterByNamespace(principal,
+          optional(api.getAuth()).map(AuthorizationConfigurationApi::getNamespace).orElse(null), sameName);
+      ensure(sameNameSameNamespace.isEmpty(), ERR_DUPLICATE_NAME, api.getName());
     }
     optional(api.getAlertAssociations())
         .ifPresent(l -> l.forEach(SubscriptionGroupService::validateAlertAssociation));

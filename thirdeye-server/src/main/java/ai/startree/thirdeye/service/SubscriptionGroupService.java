@@ -82,7 +82,6 @@ public class SubscriptionGroupService extends
     final AlertApi alert = alertAssociation.getAlert();
     ensureExists(alert, "alert missing in alert association");
     ensureExists(alert.getId(), "alert.id is missing in alert association");
-    // fixme cyril authz - a user should have read access to the alerts
   }
 
   private static void initSystemFields(final AlertAssociationDto aa, final Timestamp created) {

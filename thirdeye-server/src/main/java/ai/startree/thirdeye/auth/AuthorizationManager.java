@@ -26,10 +26,13 @@ import ai.startree.thirdeye.spi.auth.AuthenticationType;
 import ai.startree.thirdeye.spi.auth.ResourceIdentifier;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AlertAssociationDto;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import com.google.inject.Inject;
 import java.util.ArrayList;
@@ -38,6 +41,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.core.Response;
@@ -61,6 +66,7 @@ public class AuthorizationManager {
       "thirdeye-internal", RandomStringUtils.random(1024, true, true), AuthenticationType.INTERNAL);
 
   private final AlertTemplateRenderer alertTemplateRenderer;
+  private final AlertManager alertDao;
   private final ThirdEyeAuthorizer thirdEyeAuthorizer;
   private final NamespaceResolver namespaceResolver;
   private final boolean requireNamespace;
@@ -76,10 +82,11 @@ public class AuthorizationManager {
   @Inject
   public AuthorizationManager(
       final AlertTemplateRenderer alertTemplateRenderer,
-      final ThirdEyeAuthorizer thirdEyeAuthorizer,
+      final AlertManager alertManager, final ThirdEyeAuthorizer thirdEyeAuthorizer,
       final NamespaceResolver namespaceResolver,
       final AuthConfiguration authConfiguration) {
     this.alertTemplateRenderer = alertTemplateRenderer;
+    this.alertDao = alertManager;
     this.thirdEyeAuthorizer = thirdEyeAuthorizer;
     this.namespaceResolver = namespaceResolver;
 
@@ -190,6 +197,7 @@ public class AuthorizationManager {
     }
     relatedEntities(after).forEach(related ->
         ensureHasAccess(principal, related, AccessType.READ));
+    // fixme cyril authz - related entities should be in the same namespace
   }
 
   public <T extends AbstractDTO> void ensureCanRead(final ThirdEyePrincipal principal,
@@ -252,7 +260,7 @@ public class AuthorizationManager {
   // Returns the resource identifier for a dto.
   // Null is ok and maps to a default resource id.
   public ResourceIdentifier resourceId(final AbstractDTO dto) {
-    final var name = optional(dto)
+    final String name = optional(dto)
         .map(AbstractDTO::getId)
         .map(Objects::toString)
         .orElse(DEFAULT_NAME);
@@ -269,12 +277,23 @@ public class AuthorizationManager {
   }
 
   private <T extends AbstractDTO> List<ResourceIdentifier> relatedEntities(T entity) {
-    if (entity instanceof AlertDTO) {
+    if (entity instanceof final AlertDTO alertDto) {
       // fixme cyril authz - related entities should be namespaced
-      final AlertDTO alertDto = (AlertDTO) entity;
       final AlertTemplateDTO alertTemplateDTO = alertTemplateRenderer.getTemplate(
           alertDto.getTemplate());
       return Collections.singletonList(resourceId(alertTemplateDTO));
+    } else if (entity instanceof SubscriptionGroupDTO subscriptionGroupDto) {
+      final List<AlertAssociationDto> alertAssociations = optional(
+          subscriptionGroupDto.getAlertAssociations()).orElse(Collections.emptyList());
+      final Set<Long> alertIds = alertAssociations.stream()
+          // getAlert.getId is never null
+          .map(aa -> aa.getAlert().getId())
+          .collect(Collectors.toSet());
+      return alertIds.stream()
+          .map(alertDao::findById)
+          .filter(Objects::nonNull) // we ignore null here - deleting an alert should not break a subscription group here - it seems it is allowed in other places in the codebase
+          .map(this::resourceId)
+          .toList();
     }
     return new ArrayList<>();
   }

@@ -184,8 +184,10 @@ public class SubscriptionGroupService extends
   }
 
   public void sendTestMessage(final ThirdEyePrincipal principal, final Long id) {
-    // FIXME CYRIL ensure access authz
     final SubscriptionGroupDTO sg = getDto(id);
+    // no need to check read access of all associated alerts, because the test message should not use alerts. 
+    // todo authz change role?
+    authorizationManager.ensureCanRead(principal, sg);
     notificationDispatcher.sendTestMessage(sg);
   }
   

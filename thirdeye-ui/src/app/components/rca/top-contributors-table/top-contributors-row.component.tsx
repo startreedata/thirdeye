@@ -37,10 +37,11 @@ import { TopContributorsRowExpanded } from "./top-contributors-row-expanded.comp
 import { useAlgorithmRowExpandedStyles } from "./top-contributors-row-expanded.styles";
 import { TopContributorsRowProps } from "./top-contributors-table.interfaces";
 import {
+    SERVER_VALUE_FOR_OTHERS,
     generateFilterOptions,
     generateName,
     generateOtherDimensionTooltipString,
-    SERVER_VALUE_FOR_OTHERS,
+    isValidChangePercentage,
 } from "./top-contributors-table.utils";
 
 const SCORE_INDICATOR_HEIGHT = 30;
@@ -160,6 +161,47 @@ export const TopContributorsRow: FunctionComponent<TopContributorsRowProps> = ({
                                             )
                                         )}
                                         %
+                                    </Box>
+                                </Grid>
+                            </Grid>
+                        </Box>
+                    </Box>
+                </TableCell>
+                <TableCell>
+                    <Box position="relative">
+                        <ScoreIndicator
+                            value={
+                                isValidChangePercentage(row.changePercentage)
+                                    ? row.changePercentage
+                                    : 0
+                            }
+                            variant="determinate"
+                        />
+                        <Box position="absolute" top={0}>
+                            <Grid container spacing={1}>
+                                {isValidChangePercentage(
+                                    row.changePercentage
+                                ) ? (
+                                    <Grid item>
+                                        <Box mt="3px">
+                                            {row.names.length > 0 && isDown && (
+                                                <ArrowDownwardIcon />
+                                            )}
+                                            {row.names.length > 0 &&
+                                                !isDown && <ArrowUpwardIcon />}
+                                        </Box>
+                                    </Grid>
+                                ) : null}
+                                <Grid item>
+                                    <Box mt="4px">
+                                        {formatLargeNumberV1(
+                                            Number(row.changePercentage)
+                                        )}
+                                        {isValidChangePercentage(
+                                            row.changePercentage
+                                        )
+                                            ? "%"
+                                            : ""}
                                     </Box>
                                 </Grid>
                             </Grid>

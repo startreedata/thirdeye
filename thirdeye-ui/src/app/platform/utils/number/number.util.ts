@@ -64,7 +64,7 @@ export const formatLargeNumberV1 = (
     mantissa: number = MANTISSA_DEFAULT,
     optionalMantissa: boolean = OPTIONAL_MANTISSA_DEFAULT
 ): string => {
-    if (isNil(num)) {
+    if (isNil(num) || isNaN(num)) {
         return "";
     }
 

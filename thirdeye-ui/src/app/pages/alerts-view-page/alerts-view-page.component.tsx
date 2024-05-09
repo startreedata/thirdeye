@@ -362,6 +362,10 @@ export const AlertsViewPage: FunctionComponent = () => {
         // fetchData();
     };
 
+    const isDxAlert =
+        getAlertQuery.data?.templateProperties?.enumerationItems ||
+        getAlertQuery?.data?.templateProperties.enumeratorQuery;
+
     return (
         <PageV1>
             <PageHeader
@@ -511,8 +515,7 @@ export const AlertsViewPage: FunctionComponent = () => {
                             </Card>
                         }
                     >
-                        {getAlertQuery.data?.templateProperties
-                            ?.enumerationItems ? (
+                        {isDxAlert ? (
                             <EnumerationItemsTable
                                 alertId={Number(alertId)}
                                 anomalies={getAnomaliesQuery.data || []}

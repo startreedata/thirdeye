@@ -110,6 +110,9 @@ smtp:
   host: localhost
   port: 65
 
+starforge:
+  enabled: false
+
 tls:
   enabled: false
   password: changeit

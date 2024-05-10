@@ -27,7 +27,7 @@
 # the License.
 #
 
-apiVersion: traefik.containo.us/v1alpha1
+apiVersion: {{ ternary traefik.io/v1alpha1 traefik.containo.us/v1alpha1 .Value.starforge.enabled }}
 kind: IngressRoute
 metadata:
   name: {{ printf "%s-%s" (include "thirdeye.traefik.fullname" . ) "thirdeye" | trunc -63 }}

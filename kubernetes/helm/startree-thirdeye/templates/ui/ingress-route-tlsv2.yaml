@@ -14,7 +14,7 @@
 
 {{ if and .Values.traefik.enabled .Values.tls.enabled .Values.tls.v2 -}}
 
-apiVersion: {{ ternary "traefik.io/v1alpha1" "traefik.containo.us/v1alpha1" .Value.starforge.enabled }}
+apiVersion: {{ ternary "traefik.io/v1alpha1" "traefik.containo.us/v1alpha1" .Values.starforge.enabled }}
 kind: IngressRoute
 metadata:
   name: {{ include "thirdeye.ui.fullname" . }}

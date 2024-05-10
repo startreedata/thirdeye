@@ -24,7 +24,11 @@ spec:
   - websecure
   routes:
     - kind: Rule
+      {{- if .Values.starforge.enabled }}
+      match: Host(`thirdeye.{{ required "domain is required." .Values.domain }}`)
+      {{ else }}
       match: Host(`{{ .Release.Namespace }}.{{ required "domain is required." .Values.domain }}`)
+      {{ end -}}
       services:
       - name: {{ include "thirdeye.ui.headless" . }}
         namespace: {{ .Release.Namespace }}

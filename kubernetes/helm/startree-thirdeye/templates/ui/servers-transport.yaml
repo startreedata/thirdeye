@@ -20,8 +20,13 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   insecureSkipVerify: {{ default false .Values.tls.traefik.serversTransport.skipVerify }}
+  {{- if .Values.starforge.enabled }}
+  rootCAsSecrets:
+    - {{ .Values.tls.cert.internal.secretName }}
+  { { else } }
   rootCAsSecrets:
     - {{ .Values.tls.rootCaSecretName }}
+  {{ end -}}
   serverName: '{{ .Release.Namespace }}.svc'
 
 {{- end }}

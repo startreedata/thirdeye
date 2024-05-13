@@ -23,7 +23,7 @@ spec:
   {{- if .Values.starforge.enabled }}
   rootCAsSecrets:
     - {{ .Values.tls.cert.internal.secretName }}
-  { { else } }
+  {{ else }}
   rootCAsSecrets:
     - {{ .Values.tls.rootCaSecretName }}
   {{ end -}}

@@ -1,3 +1,11 @@
+### [2.45.20](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.19...thirdeye-ui-2.45.20) (2024-05-14)
+
+
+### Bug Fixes
+
+* [TE-2026](https://cortexdata.atlassian.net/browse/TE-2026) change column label in task table in alert details page ([a44917a60](https://github.com/startreedata/thirdeye/commit/a44917a6097da19ad3792fdd74e06a927311a7f2))
+* [TE-2236](https://cortexdata.atlassian.net/browse/TE-2236) fix condition for showing dimension for a dx alert ([b005ba9de](https://github.com/startreedata/thirdeye/commit/b005ba9de105819a163dcf74ff76dbce97a22a06))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

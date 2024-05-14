@@ -481,6 +481,7 @@
         "view-details": "View Details",
         "view-entity": "View {{entity}}",
         "view-investigation": "View Investigation",
+        "view-logs": "View Logs",
         "view-recent-entities": "View recent {{entity}}",
         "view-recipe": "View recipe",
         "view-subscription-groups-for-alert": "View Subscription Groups for Alert",

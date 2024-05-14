@@ -13,6 +13,8 @@
  * the License.
  */
 import { Box, Chip, Link, Typography } from "@material-ui/core";
+import { GridColumns, GridSortModel } from "@mui/x-data-grid";
+import { useQuery } from "@tanstack/react-query";
 import React, { FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -20,17 +22,15 @@ import {
     SkeletonV1,
     useDialogProviderV1,
 } from "../../../platform/components";
-import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
-import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
-import { useQuery } from "@tanstack/react-query";
-import { getTasks } from "../../../rest/tasks/tasks.rest";
-import { generateDateRangeDaysFromNow } from "../../../utils/routes/routes.util";
-import { TaskTableProps } from "./task-table.interfaces";
-import { GridColumns, GridSortModel } from "@mui/x-data-grid";
+import { DialogType } from "../../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { formatDateAndTimeV1, lightV1 } from "../../../platform/utils";
 import { Task, TaskStatus } from "../../../rest/dto/taks.interface";
-import { DialogType } from "../../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
+import { getTasks } from "../../../rest/tasks/tasks.rest";
+import { generateDateRangeDaysFromNow } from "../../../utils/routes/routes.util";
 import { StyledDataGrid } from "../../data-grid/styled-data-grid.component";
+import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
+import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
+import { TaskTableProps } from "./task-table.interfaces";
 
 export const TasksTable: FunctionComponent<TaskTableProps> = ({
     alertId,
@@ -85,7 +85,7 @@ export const TasksTable: FunctionComponent<TaskTableProps> = ({
         {
             field: "status",
             headerName: t("label.status"),
-            flex: 3,
+            flex: 2,
             renderCell: (params) => {
                 return (
                     <LocalThemeProviderV1
@@ -115,8 +115,8 @@ export const TasksTable: FunctionComponent<TaskTableProps> = ({
         },
         {
             field: "message",
-            headerName: t("label.options"),
-            flex: 1,
+            headerName: t("label.view-logs"),
+            flex: 2,
             sortable: false,
             renderCell: (params) => {
                 return (

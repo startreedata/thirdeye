@@ -434,3 +434,7 @@ export const generateFilterStrings = (
         .map((item) => concatKeyValueWithEqual(item, false))
         .sort();
 };
+
+export const isValidChangePercentage = (
+    changePercentage: string | number
+): boolean => typeof changePercentage === "number";

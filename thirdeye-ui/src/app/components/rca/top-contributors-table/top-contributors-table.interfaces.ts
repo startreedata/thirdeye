@@ -63,3 +63,8 @@ export interface ExtraDataForAnomalyDimensionAnalysisData {
     anomalyStart: number;
     anomalyEnd: number;
 }
+
+export enum TopContributorsTableChangePercentSort {
+    ASC = "asc",
+    DESC = "desc",
+}

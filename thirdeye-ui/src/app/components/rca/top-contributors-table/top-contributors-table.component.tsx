@@ -18,9 +18,12 @@ import {
     TableCell,
     TableHead,
     TableRow,
+    withStyles,
 } from "@material-ui/core";
+import { KeyboardArrowDown, KeyboardArrowUp } from "@material-ui/icons";
 import React, { FunctionComponent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { AnomalyDimensionAnalysisMetricRow } from "../../../rest/dto/rca.interfaces";
 import {
     determineTimezoneFromAlertInEvaluation,
     shouldHideTimeInDatetimeFormat,
@@ -28,8 +31,22 @@ import {
 import { concatKeyValueWithEqual } from "../../../utils/params/params.util";
 import { EmptyStateSwitch } from "../../page-states/empty-state-switch/empty-state-switch.component";
 import { TopContributorsRow } from "./top-contributors-row.component";
-import { TopContributorsTableProps } from "./top-contributors-table.interfaces";
-import { generateFilterStrings } from "./top-contributors-table.utils";
+import {
+    TopContributorsTableChangePercentSort,
+    TopContributorsTableProps,
+} from "./top-contributors-table.interfaces";
+import {
+    generateFilterStrings,
+    isValidChangePercentage,
+} from "./top-contributors-table.utils";
+
+const SortableTableHeader = withStyles(() => ({
+    root: {
+        cursor: "pointer",
+        display: "flex",
+        alignItems: "center",
+    },
+}))(TableCell);
 
 export const TopContributorsTable: FunctionComponent<TopContributorsTableProps> =
     ({
@@ -41,6 +58,8 @@ export const TopContributorsTable: FunctionComponent<TopContributorsTableProps> 
         alertInsight,
     }) => {
         const { t } = useTranslation();
+        const [changePercentSort, setChangePercentSort] =
+            React.useState<TopContributorsTableChangePercentSort | null>(null);
         const totalSum = anomalyDimensionAnalysisData.responseRows.reduce(
             (countSoFar: number, current) => {
                 return countSoFar + current.cost;
@@ -65,6 +84,44 @@ export const TopContributorsTable: FunctionComponent<TopContributorsTableProps> 
             ];
         }, [alertInsight]);
 
+        const toggleSort = (): void => {
+            if (
+                changePercentSort === TopContributorsTableChangePercentSort.ASC
+            ) {
+                setChangePercentSort(
+                    TopContributorsTableChangePercentSort.DESC
+                );
+            } else {
+                setChangePercentSort(TopContributorsTableChangePercentSort.ASC);
+            }
+        };
+
+        const sortFunction = (
+            a: AnomalyDimensionAnalysisMetricRow,
+            b: AnomalyDimensionAnalysisMetricRow
+        ): number => {
+            if (changePercentSort === null) {
+                return 0;
+            }
+            const aChangePercentage: number = isValidChangePercentage(
+                a.changePercentage
+            )
+                ? (a.changePercentage as number)
+                : 0;
+            const bChangePercentage: number = isValidChangePercentage(
+                b.changePercentage
+            )
+                ? (b.changePercentage as number)
+                : 0;
+            if (
+                changePercentSort === TopContributorsTableChangePercentSort.ASC
+            ) {
+                return aChangePercentage - bChangePercentage;
+            } else {
+                return bChangePercentage - aChangePercentage;
+            }
+        };
+
         return (
             <Table size="small">
                 <TableHead>
@@ -76,6 +133,17 @@ export const TopContributorsTable: FunctionComponent<TopContributorsTableProps> 
                         <TableCell>
                             <strong>{t("label.impact-percentage")}</strong>
                         </TableCell>
+                        <SortableTableHeader onClick={toggleSort}>
+                            <strong>{t("label.change-percentage")}</strong>
+                            {changePercentSort === null ? (
+                                <></>
+                            ) : changePercentSort ===
+                              TopContributorsTableChangePercentSort.ASC ? (
+                                <KeyboardArrowUp />
+                            ) : (
+                                <KeyboardArrowDown />
+                            )}
+                        </SortableTableHeader>
                         <TableCell width="20px">
                             <strong>{t("label.details")}</strong>
                         </TableCell>
@@ -97,7 +165,7 @@ export const TopContributorsTable: FunctionComponent<TopContributorsTableProps> 
                             rowsData[0].names.length === 0
                         }
                     >
-                        {rowsData.map((row) => {
+                        {rowsData.sort(sortFunction).map((row) => {
                             const id = generateFilterStrings(
                                 row.names,
                                 anomalyDimensionAnalysisData.dimensions,

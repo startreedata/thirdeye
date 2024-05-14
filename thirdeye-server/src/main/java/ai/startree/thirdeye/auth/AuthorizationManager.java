@@ -18,6 +18,7 @@ import static ai.startree.thirdeye.spi.auth.ResourceIdentifier.DEFAULT_ENTITY_TY
 import static ai.startree.thirdeye.spi.auth.ResourceIdentifier.DEFAULT_NAME;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.ResourceUtils.authorize;
+import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.datalayer.entity.SubEntityType;
@@ -159,8 +160,9 @@ public class AuthorizationManager {
             .stream()
             .filter(e -> e.namespace() == null).toList();
         if (!filtered.isEmpty()) {
-          LOG.warn("No entities matching namespace {} in {}. Some entities have their namespace undefined. " 
-              + "Returning entities with an undefined namespace.", explicitNamespace, entities);
+          LOG.warn(
+              "No entities matching namespace {} in {}. Some entities have their namespace undefined. "
+                  + "Returning entities with an undefined namespace.", explicitNamespace, entities);
         }
       }
       return filtered;
@@ -289,9 +291,20 @@ public class AuthorizationManager {
           // getAlert.getId is never null
           .map(aa -> aa.getAlert().getId())
           .collect(Collectors.toSet());
-      return alertIds.stream()
+      // hack we ensure alerts belong to the same namespace here 
+      // this should be done in some validate step but the current validate step does not have the namespace context FIXME design
+      final List<AlertDTO> alertDtos = alertIds.stream()
           .map(alertDao::findById)
           .filter(Objects::nonNull) // we ignore null here - deleting an alert should not break a subscription group here - it seems it is allowed in other places in the codebase
+          .toList();
+      for (final AlertDTO alert : alertDtos) {
+        // cannot print the alert id in the error message because it would potentially leak the namespace of an alert for which authz has not been performed yet
+        checkArgument(Objects.equals(subscriptionGroupDto.namespace(), alert.namespace()),
+            "Subscription namespace %s and alert namespace do not match for alert id %s.", subscriptionGroupDto.namespace(), alert.getId());
+      }
+      // end of hack
+
+      return alertDtos.stream() 
           .map(this::resourceId)
           .toList();
     }

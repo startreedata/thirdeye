@@ -14,7 +14,9 @@
  */
 import i18n from "i18next";
 import { cloneDeep, isEmpty, kebabCase, omit } from "lodash";
+import { PropertyRenderConfig } from "../../components/alert-wizard-v2/alert-template/alert-template-properties-builder/alert-template-properties-builder.interfaces";
 import { GetAlertEvaluationPayload } from "../../rest/alerts/alerts.interfaces";
+import { MetadataPropertyStep } from "../../rest/dto/alert-template.interfaces";
 import {
     Alert,
     AlertAnomalyDetectorNode,
@@ -456,4 +458,52 @@ export const shouldHideTimeInDatetimeFormat = (
     }
 
     return false;
+};
+
+export const propertyStepNameMap: Record<MetadataPropertyStep, string> = {
+    [MetadataPropertyStep.DATA]: "Data",
+    [MetadataPropertyStep.PREPROCESS]: "Preprocessing",
+    [MetadataPropertyStep.DETECTION]: "Detection",
+    [MetadataPropertyStep.FILTER]: "Filtering",
+    [MetadataPropertyStep.POSTPROCESS]: "Postprocessing",
+    [MetadataPropertyStep.RCA]: "Root Cause Analysis",
+    [MetadataPropertyStep.OTHER]: "Other",
+};
+
+export const existingPropertySteps: MetadataPropertyStep[] = [
+    MetadataPropertyStep.DATA,
+    MetadataPropertyStep.PREPROCESS,
+    MetadataPropertyStep.DETECTION,
+    MetadataPropertyStep.FILTER,
+    MetadataPropertyStep.POSTPROCESS,
+    MetadataPropertyStep.RCA,
+    MetadataPropertyStep.OTHER,
+];
+
+export const groupPropertyByStep = (
+    properties: PropertyRenderConfig[]
+): Record<MetadataPropertyStep, PropertyRenderConfig[]> => {
+    const groupedProperties: Record<
+        MetadataPropertyStep,
+        PropertyRenderConfig[]
+    > = properties.reduce((acc, property) => {
+        if (!property.metadata.step) {
+            return acc;
+        }
+        if (!existingPropertySteps.includes(property.metadata.step)) {
+            acc[MetadataPropertyStep.OTHER] = [
+                ...(acc[MetadataPropertyStep.OTHER] ?? []),
+                property,
+            ];
+
+            return acc;
+        }
+        acc[property.metadata.step] = (
+            (acc[property.metadata.step] as PropertyRenderConfig[]) || []
+        ).concat([property]);
+
+        return acc;
+    }, {} as Record<MetadataPropertyStep, PropertyRenderConfig[]>);
+
+    return groupedProperties;
 };

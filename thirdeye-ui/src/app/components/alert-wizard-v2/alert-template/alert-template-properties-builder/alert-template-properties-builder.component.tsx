@@ -19,6 +19,7 @@ import {
     Grid,
     Link,
     Typography,
+    withStyles,
 } from "@material-ui/core";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
@@ -32,6 +33,11 @@ import React, {
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
+import {
+    existingPropertySteps,
+    groupPropertyByStep,
+    propertyStepNameMap,
+} from "../../../../utils/alerts/alerts.util";
 import { getAlertTemplatesUpdatePath } from "../../../../utils/routes/routes.util";
 import { useAlertWizardV2Styles } from "../../alert-wizard-v2.styles";
 import { AlertTemplateFormField } from "../alert-template-form-field/alert-template-form-field.component";
@@ -40,6 +46,12 @@ import {
     AlertTemplatePropertiesBuilderProps,
     PropertyRenderConfig,
 } from "./alert-template-properties-builder.interfaces";
+
+const PropertySectionHeader = withStyles((theme) => ({
+    root: {
+        paddingTop: theme.spacing(4),
+    },
+}))(Typography);
 
 export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplatePropertiesBuilderProps> =
     ({
@@ -79,6 +91,9 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplateProp
             [onPropertyValueChange]
         );
 
+        const groupedRequiredKeys = groupPropertyByStep(requiredKeys);
+        const groupedOptionalKeys = groupPropertyByStep(optionalKeys);
+
         return (
             <>
                 <Grid item xs={12}>
@@ -112,20 +127,36 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplateProp
                         </Typography>
                     </Box>
                 </Grid>
-                {requiredKeys.map((item, idx) => (
-                    <AlertTemplateFormField
-                        item={item}
-                        key={item.key}
-                        placeholder={t("label.add-property-value", {
-                            key: item.key,
-                        })}
-                        tabIndex={idx + 1}
-                        tooltipText={item.metadata.description}
-                        onChange={(selected) => {
-                            handlePropertyValueChange(item.key, selected);
-                        }}
-                    />
-                ))}
+                {existingPropertySteps.map((step, stepIdx) => {
+                    const properties = groupedRequiredKeys[step] || [];
+
+                    return (
+                        <>
+                            {properties.length ? (
+                                <PropertySectionHeader variant="h6">
+                                    {propertyStepNameMap[step]}
+                                </PropertySectionHeader>
+                            ) : null}
+                            {properties.map((item, idx) => (
+                                <AlertTemplateFormField
+                                    item={item}
+                                    key={item.key}
+                                    placeholder={t("label.add-property-value", {
+                                        key: item.key,
+                                    })}
+                                    tabIndex={idx + stepIdx + 1}
+                                    tooltipText={item.metadata.description}
+                                    onChange={(selected) => {
+                                        handlePropertyValueChange(
+                                            item.key,
+                                            selected
+                                        );
+                                    }}
+                                />
+                            ))}
+                        </>
+                    );
+                })}
                 {!showMore && optionalKeys.length > 0 && (
                     <>
                         <Grid item xs={12}>
@@ -163,25 +194,45 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplateProp
                                 </Typography>
                             </Box>
                         </Grid>
-                        {optionalKeys.map((item, idx) => (
-                            <AlertTemplateFormField
-                                item={item}
-                                key={item.key}
-                                placeholder={
-                                    item.metadata.defaultValue
-                                        ? item.metadata.defaultValue.toString()
-                                        : ""
-                                }
-                                tabIndex={requiredKeys.length + idx + 1}
-                                tooltipText={item.metadata.description}
-                                onChange={(selected) => {
-                                    handlePropertyValueChange(
-                                        item.key,
-                                        selected
-                                    );
-                                }}
-                            />
-                        ))}
+                        {existingPropertySteps.map((step, idx) => {
+                            const properties = groupedOptionalKeys[step] || [];
+
+                            return (
+                                <>
+                                    {properties.length ? (
+                                        <PropertySectionHeader variant="h6">
+                                            {propertyStepNameMap[step]}
+                                        </PropertySectionHeader>
+                                    ) : null}
+                                    {properties.map((item, propertyIdx) => (
+                                        <AlertTemplateFormField
+                                            item={item}
+                                            key={item.key}
+                                            placeholder={
+                                                item.metadata.defaultValue
+                                                    ? item.metadata.defaultValue.toString()
+                                                    : ""
+                                            }
+                                            tabIndex={
+                                                requiredKeys.length +
+                                                idx +
+                                                propertyIdx +
+                                                1
+                                            }
+                                            tooltipText={
+                                                item.metadata.description
+                                            }
+                                            onChange={(selected) => {
+                                                handlePropertyValueChange(
+                                                    item.key,
+                                                    selected
+                                                );
+                                            }}
+                                        />
+                                    ))}
+                                </>
+                            );
+                        })}
                     </>
                 )}
                 {showMore && optionalKeys.length > 0 && (

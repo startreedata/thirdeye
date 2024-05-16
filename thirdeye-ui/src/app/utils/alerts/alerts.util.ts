@@ -498,8 +498,11 @@ export const groupPropertyByStepAndSubStep = (
 
     for (const property of properties) {
         const step = property.metadata.step || MetadataPropertyStep.OTHER;
+        if (!groupedProperties[step]) {
+            groupedProperties[step] = {};
+        }
         const subStep = property.metadata.subStep || "DIRECT";
-        if (!groupedProperties[step][subStep]) {
+        if (!groupedProperties?.[step]?.[subStep]) {
             groupedProperties[step][subStep] = [];
         }
 

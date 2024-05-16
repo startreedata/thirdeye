@@ -480,30 +480,47 @@ export const existingPropertySteps: MetadataPropertyStep[] = [
     MetadataPropertyStep.OTHER,
 ];
 
-export const groupPropertyByStep = (
+export const groupPropertyByStepAndSubStep = (
     properties: PropertyRenderConfig[]
-): Record<MetadataPropertyStep, PropertyRenderConfig[]> => {
+): Record<MetadataPropertyStep, Record<string, PropertyRenderConfig[]>> => {
     const groupedProperties: Record<
         MetadataPropertyStep,
-        PropertyRenderConfig[]
-    > = properties.reduce((acc, property) => {
-        if (!property.metadata.step) {
-            return acc;
-        }
-        if (!existingPropertySteps.includes(property.metadata.step)) {
-            acc[MetadataPropertyStep.OTHER] = [
-                ...(acc[MetadataPropertyStep.OTHER] ?? []),
-                property,
-            ];
+        Record<string, PropertyRenderConfig[]>
+    > = {
+        [MetadataPropertyStep.DATA]: {},
+        [MetadataPropertyStep.PREPROCESS]: {},
+        [MetadataPropertyStep.DETECTION]: {},
+        [MetadataPropertyStep.FILTER]: {},
+        [MetadataPropertyStep.POSTPROCESS]: {},
+        [MetadataPropertyStep.RCA]: {},
+        [MetadataPropertyStep.OTHER]: {},
+    };
 
-            return acc;
+    for (const property of properties) {
+        const step = property.metadata.step || MetadataPropertyStep.OTHER;
+        const subStep = property.metadata.subStep || "DIRECT";
+        if (!groupedProperties[step][subStep]) {
+            groupedProperties[step][subStep] = [];
         }
-        acc[property.metadata.step] = (
-            (acc[property.metadata.step] as PropertyRenderConfig[]) || []
-        ).concat([property]);
 
-        return acc;
-    }, {} as Record<MetadataPropertyStep, PropertyRenderConfig[]>);
+        groupedProperties[step][subStep].push(property);
+    }
 
     return groupedProperties;
+};
+
+export const isStepEmpty = (
+    step: MetadataPropertyStep,
+    groupedProperties: Record<
+        MetadataPropertyStep,
+        Record<string, PropertyRenderConfig[]>
+    >
+): boolean => {
+    for (const subStep in groupedProperties[step]) {
+        if (groupedProperties[step][subStep].length > 0) {
+            return false;
+        }
+    }
+
+    return true;
 };

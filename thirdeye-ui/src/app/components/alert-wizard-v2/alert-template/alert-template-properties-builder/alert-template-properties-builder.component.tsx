@@ -19,7 +19,6 @@ import {
     Grid,
     Link,
     Typography,
-    withStyles,
 } from "@material-ui/core";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
@@ -33,25 +32,26 @@ import React, {
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import {
-    existingPropertySteps,
-    groupPropertyByStep,
-    propertyStepNameMap,
-} from "../../../../utils/alerts/alerts.util";
+import { groupPropertyByStepAndSubStep } from "../../../../utils/alerts/alerts.util";
 import { getAlertTemplatesUpdatePath } from "../../../../utils/routes/routes.util";
 import { useAlertWizardV2Styles } from "../../alert-wizard-v2.styles";
-import { AlertTemplateFormField } from "../alert-template-form-field/alert-template-form-field.component";
 import { setUpFieldInputRenderConfig } from "../alert-template.utils";
 import {
     AlertTemplatePropertiesBuilderProps,
     PropertyRenderConfig,
 } from "./alert-template-properties-builder.interfaces";
+import { AlertTemplateSectionedProperties } from "./alert-template-sectioned-properties/alert-template-sectioned-properties.component";
 
-const PropertySectionHeader = withStyles((theme) => ({
-    root: {
-        paddingTop: theme.spacing(4),
-    },
-}))(Typography);
+// const PropertySectionHeader = withStyles<
+//     "root",
+//     Record<string, unknown>,
+//     { index: number }
+// >((theme) => ({
+//     root: (props) => ({
+//         paddingTop: theme.spacing(props.index > 0 ? 4 : 0),
+//         paddingLeft: theme.spacing(1),
+//     }),
+// }))(Typography);
 
 export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplatePropertiesBuilderProps> =
     ({
@@ -91,8 +91,8 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplateProp
             [onPropertyValueChange]
         );
 
-        const groupedRequiredKeys = groupPropertyByStep(requiredKeys);
-        const groupedOptionalKeys = groupPropertyByStep(optionalKeys);
+        const groupedRequiredKeys = groupPropertyByStepAndSubStep(requiredKeys);
+        const groupedOptionalKeys = groupPropertyByStepAndSubStep(optionalKeys);
 
         return (
             <>
@@ -127,36 +127,10 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplateProp
                         </Typography>
                     </Box>
                 </Grid>
-                {existingPropertySteps.map((step, stepIdx) => {
-                    const properties = groupedRequiredKeys[step] || [];
-
-                    return (
-                        <>
-                            {properties.length ? (
-                                <PropertySectionHeader variant="h6">
-                                    {propertyStepNameMap[step]}
-                                </PropertySectionHeader>
-                            ) : null}
-                            {properties.map((item, idx) => (
-                                <AlertTemplateFormField
-                                    item={item}
-                                    key={item.key}
-                                    placeholder={t("label.add-property-value", {
-                                        key: item.key,
-                                    })}
-                                    tabIndex={idx + stepIdx + 1}
-                                    tooltipText={item.metadata.description}
-                                    onChange={(selected) => {
-                                        handlePropertyValueChange(
-                                            item.key,
-                                            selected
-                                        );
-                                    }}
-                                />
-                            ))}
-                        </>
-                    );
-                })}
+                <AlertTemplateSectionedProperties
+                    groupedProperties={groupedRequiredKeys}
+                    handlePropertyValueChange={handlePropertyValueChange}
+                />
                 {!showMore && optionalKeys.length > 0 && (
                     <>
                         <Grid item xs={12}>
@@ -169,7 +143,7 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplateProp
                                 variant="text"
                                 onClick={() => setShowMore(true)}
                             >
-                                {t("label.show-count-default-properties", {
+                                {t("label.show-count-optional-properties", {
                                     count: optionalKeys.length,
                                 })}
                                 <ExpandMore />
@@ -194,45 +168,12 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplateProp
                                 </Typography>
                             </Box>
                         </Grid>
-                        {existingPropertySteps.map((step, idx) => {
-                            const properties = groupedOptionalKeys[step] || [];
-
-                            return (
-                                <>
-                                    {properties.length ? (
-                                        <PropertySectionHeader variant="h6">
-                                            {propertyStepNameMap[step]}
-                                        </PropertySectionHeader>
-                                    ) : null}
-                                    {properties.map((item, propertyIdx) => (
-                                        <AlertTemplateFormField
-                                            item={item}
-                                            key={item.key}
-                                            placeholder={
-                                                item.metadata.defaultValue
-                                                    ? item.metadata.defaultValue.toString()
-                                                    : ""
-                                            }
-                                            tabIndex={
-                                                requiredKeys.length +
-                                                idx +
-                                                propertyIdx +
-                                                1
-                                            }
-                                            tooltipText={
-                                                item.metadata.description
-                                            }
-                                            onChange={(selected) => {
-                                                handlePropertyValueChange(
-                                                    item.key,
-                                                    selected
-                                                );
-                                            }}
-                                        />
-                                    ))}
-                                </>
-                            );
-                        })}
+                        <AlertTemplateSectionedProperties
+                            groupedProperties={groupedOptionalKeys}
+                            handlePropertyValueChange={
+                                handlePropertyValueChange
+                            }
+                        />
                     </>
                 )}
                 {showMore && optionalKeys.length > 0 && (
@@ -244,7 +185,7 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplateProp
                                 variant="text"
                                 onClick={() => setShowMore(false)}
                             >
-                                {t("label.hide-count-default-properties", {
+                                {t("label.hide-count-optional-properties", {
                                     count: optionalKeys.length,
                                 })}
                                 <ExpandLess />

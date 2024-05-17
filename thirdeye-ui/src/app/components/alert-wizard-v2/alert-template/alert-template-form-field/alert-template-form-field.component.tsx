@@ -12,15 +12,25 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { PropertyConfigValueTypes } from "../../../../rest/dto/alert.interfaces";
 import { InputSection } from "../../../form-basics/input-section/input-section.component";
 import { AlertTemplateFormFieldProps } from "./alert-template-form-field.interfaces";
 import { FormComponentForTemplateField } from "./form-component-for-template-field/form-component-for-template-field.component";
 import { LabelForTemplateField } from "./label-for-template-field/label-for-template-field.component";
 
+function isDefaultValueStringArray(
+    defaultValue?: PropertyConfigValueTypes
+): boolean {
+    return (
+        Array.isArray(defaultValue) &&
+        !!defaultValue.length &&
+        defaultValue.every((element: unknown) => typeof element === "string")
+    );
+}
+
 export const AlertTemplateFormField: FunctionComponent<AlertTemplateFormFieldProps> =
-    ({ item, tabIndex, placeholder, tooltipText, onChange }) => {
+    ({ item, tabIndex, tooltipText, onChange, placeholder, defaultValue }) => {
         const [localValueCopy, setLocalValueCopy] =
             useState<PropertyConfigValueTypes>(item.value);
 
@@ -29,12 +39,31 @@ export const AlertTemplateFormField: FunctionComponent<AlertTemplateFormFieldPro
             onChange(newValue);
         };
 
+        useEffect(() => {
+            if (isDefaultValueStringArray(defaultValue)) {
+                handleOnChange(defaultValue as PropertyConfigValueTypes);
+            }
+        }, [defaultValue]);
+
+        const getPlaceholder = (): string => {
+            if (placeholder) {
+                return placeholder;
+            }
+            if (isDefaultValueStringArray(defaultValue)) {
+                return "";
+            } else if (defaultValue !== undefined && defaultValue !== null) {
+                return defaultValue.toString();
+            }
+
+            return "";
+        };
+
         return (
             <InputSection
                 gridContainerProps={{ alignItems: "flex-start" }}
                 inputComponent={
                     <FormComponentForTemplateField
-                        placeholder={placeholder}
+                        placeholder={getPlaceholder()}
                         propertyKey={item.key}
                         tabIndex={tabIndex}
                         templateFieldProperty={item.metadata}

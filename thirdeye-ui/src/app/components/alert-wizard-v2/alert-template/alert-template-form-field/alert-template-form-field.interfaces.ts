@@ -18,7 +18,8 @@ import type { PropertyRenderConfig } from "../alert-template-properties-builder/
 export interface AlertTemplateFormFieldProps {
     item: PropertyRenderConfig;
     tabIndex: number;
-    placeholder: string;
+    placeholder?: string;
+    defaultValue?: PropertyConfigValueTypes;
     tooltipText?: string | null;
     onChange: (selected: PropertyConfigValueTypes) => void;
 }

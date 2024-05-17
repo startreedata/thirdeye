@@ -50,14 +50,12 @@ export const AlertTemplateSectionedProperties: FunctionComponent<AlertTemplateSe
                                 {subStepMap?.["DIRECT"]?.map(
                                     (directSubStep, directSubStepIdx) => (
                                         <AlertTemplateFormField
-                                            item={directSubStep}
-                                            key={directSubStep.key}
-                                            placeholder={
+                                            defaultValue={
                                                 directSubStep.metadata
                                                     .defaultValue
-                                                    ? directSubStep.metadata.defaultValue.toString()
-                                                    : ""
                                             }
+                                            item={directSubStep}
+                                            key={directSubStep.key}
                                             tabIndex={directSubStepIdx + 1}
                                             tooltipText={
                                                 directSubStep.metadata

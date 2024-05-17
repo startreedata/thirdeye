@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Grid, Typography } from "@material-ui/core";
+import { Box, Grid, Typography, withStyles } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -23,12 +23,18 @@ import {
 import { AlertTemplateFormField } from "../../alert-template-form-field/alert-template-form-field.component";
 import { AlertTemplateSectionedPropertiesProps } from "./alert-template-sectioned-properties.interfaces";
 
+const StyledGrid = withStyles((theme) => ({
+    root: {
+        paddingLeft: theme.spacing(1),
+    },
+}))(Grid);
+
 export const AlertTemplateSectionedProperties: FunctionComponent<AlertTemplateSectionedPropertiesProps> =
     ({ groupedProperties, handlePropertyValueChange }) => {
         const { t } = useTranslation();
 
         return (
-            <Grid container>
+            <StyledGrid container>
                 {existingPropertySteps.map((step, stepIdx) => {
                     const subStepMap = groupedProperties[step];
                     if (isStepEmpty(step, groupedProperties)) {
@@ -84,7 +90,6 @@ export const AlertTemplateSectionedProperties: FunctionComponent<AlertTemplateSe
                                             >
                                                 <Box
                                                     paddingBottom={2}
-                                                    paddingLeft={2}
                                                     paddingTop={2}
                                                 >
                                                     <Typography variant="h6">
@@ -137,6 +142,6 @@ export const AlertTemplateSectionedProperties: FunctionComponent<AlertTemplateSe
                         </Grid>
                     );
                 })}
-            </Grid>
+            </StyledGrid>
         );
     };

@@ -14,7 +14,9 @@
  */
 import i18n from "i18next";
 import { cloneDeep, isEmpty, kebabCase, omit } from "lodash";
+import { PropertyRenderConfig } from "../../components/alert-wizard-v2/alert-template/alert-template-properties-builder/alert-template-properties-builder.interfaces";
 import { GetAlertEvaluationPayload } from "../../rest/alerts/alerts.interfaces";
+import { MetadataPropertyStep } from "../../rest/dto/alert-template.interfaces";
 import {
     Alert,
     AlertAnomalyDetectorNode,
@@ -456,4 +458,72 @@ export const shouldHideTimeInDatetimeFormat = (
     }
 
     return false;
+};
+
+export const propertyStepNameMap: Record<MetadataPropertyStep, string> = {
+    [MetadataPropertyStep.DATA]: "Data",
+    [MetadataPropertyStep.PREPROCESS]: "Preprocessing",
+    [MetadataPropertyStep.DETECTION]: "Detection",
+    [MetadataPropertyStep.FILTER]: "Filtering",
+    [MetadataPropertyStep.POSTPROCESS]: "Postprocessing",
+    [MetadataPropertyStep.RCA]: "Root Cause Analysis",
+    [MetadataPropertyStep.OTHER]: "Other",
+};
+
+export const existingPropertySteps: MetadataPropertyStep[] = [
+    MetadataPropertyStep.DATA,
+    MetadataPropertyStep.PREPROCESS,
+    MetadataPropertyStep.DETECTION,
+    MetadataPropertyStep.FILTER,
+    MetadataPropertyStep.POSTPROCESS,
+    MetadataPropertyStep.RCA,
+    MetadataPropertyStep.OTHER,
+];
+
+export const groupPropertyByStepAndSubStep = (
+    properties: PropertyRenderConfig[]
+): Record<MetadataPropertyStep, Record<string, PropertyRenderConfig[]>> => {
+    const groupedProperties: Record<
+        MetadataPropertyStep,
+        Record<string, PropertyRenderConfig[]>
+    > = {
+        [MetadataPropertyStep.DATA]: {},
+        [MetadataPropertyStep.PREPROCESS]: {},
+        [MetadataPropertyStep.DETECTION]: {},
+        [MetadataPropertyStep.FILTER]: {},
+        [MetadataPropertyStep.POSTPROCESS]: {},
+        [MetadataPropertyStep.RCA]: {},
+        [MetadataPropertyStep.OTHER]: {},
+    };
+
+    for (const property of properties) {
+        const step = property.metadata.step || MetadataPropertyStep.OTHER;
+        if (!groupedProperties[step]) {
+            groupedProperties[step] = {};
+        }
+        const subStep = property.metadata.subStep || "DIRECT";
+        if (!groupedProperties?.[step]?.[subStep]) {
+            groupedProperties[step][subStep] = [];
+        }
+
+        groupedProperties[step][subStep].push(property);
+    }
+
+    return groupedProperties;
+};
+
+export const isStepEmpty = (
+    step: MetadataPropertyStep,
+    groupedProperties: Record<
+        MetadataPropertyStep,
+        Record<string, PropertyRenderConfig[]>
+    >
+): boolean => {
+    for (const subStep in groupedProperties[step]) {
+        if (groupedProperties[step][subStep].length > 0) {
+            return false;
+        }
+    }
+
+    return true;
 };

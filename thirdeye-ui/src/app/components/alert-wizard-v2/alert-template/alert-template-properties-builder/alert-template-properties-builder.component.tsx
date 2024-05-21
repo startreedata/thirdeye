@@ -32,14 +32,15 @@ import React, {
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
+import { groupPropertyByStepAndSubStep } from "../../../../utils/alerts/alerts.util";
 import { getAlertTemplatesUpdatePath } from "../../../../utils/routes/routes.util";
 import { useAlertWizardV2Styles } from "../../alert-wizard-v2.styles";
-import { AlertTemplateFormField } from "../alert-template-form-field/alert-template-form-field.component";
 import { setUpFieldInputRenderConfig } from "../alert-template.utils";
 import {
     AlertTemplatePropertiesBuilderProps,
     PropertyRenderConfig,
 } from "./alert-template-properties-builder.interfaces";
+import { AlertTemplateSectionedProperties } from "./alert-template-sectioned-properties/alert-template-sectioned-properties.component";
 
 export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplatePropertiesBuilderProps> =
     ({
@@ -79,6 +80,9 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplateProp
             [onPropertyValueChange]
         );
 
+        const groupedRequiredKeys = groupPropertyByStepAndSubStep(requiredKeys);
+        const groupedOptionalKeys = groupPropertyByStepAndSubStep(optionalKeys);
+
         return (
             <>
                 <Grid item xs={12}>
@@ -112,20 +116,10 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplateProp
                         </Typography>
                     </Box>
                 </Grid>
-                {requiredKeys.map((item, idx) => (
-                    <AlertTemplateFormField
-                        item={item}
-                        key={item.key}
-                        placeholder={t("label.add-property-value", {
-                            key: item.key,
-                        })}
-                        tabIndex={idx + 1}
-                        tooltipText={item.metadata.description}
-                        onChange={(selected) => {
-                            handlePropertyValueChange(item.key, selected);
-                        }}
-                    />
-                ))}
+                <AlertTemplateSectionedProperties
+                    groupedProperties={groupedRequiredKeys}
+                    handlePropertyValueChange={handlePropertyValueChange}
+                />
                 {!showMore && optionalKeys.length > 0 && (
                     <>
                         <Grid item xs={12}>
@@ -138,7 +132,7 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplateProp
                                 variant="text"
                                 onClick={() => setShowMore(true)}
                             >
-                                {t("label.show-count-default-properties", {
+                                {t("label.show-count-optional-properties", {
                                     count: optionalKeys.length,
                                 })}
                                 <ExpandMore />
@@ -163,25 +157,12 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplateProp
                                 </Typography>
                             </Box>
                         </Grid>
-                        {optionalKeys.map((item, idx) => (
-                            <AlertTemplateFormField
-                                item={item}
-                                key={item.key}
-                                placeholder={
-                                    item.metadata.defaultValue
-                                        ? item.metadata.defaultValue.toString()
-                                        : ""
-                                }
-                                tabIndex={requiredKeys.length + idx + 1}
-                                tooltipText={item.metadata.description}
-                                onChange={(selected) => {
-                                    handlePropertyValueChange(
-                                        item.key,
-                                        selected
-                                    );
-                                }}
-                            />
-                        ))}
+                        <AlertTemplateSectionedProperties
+                            groupedProperties={groupedOptionalKeys}
+                            handlePropertyValueChange={
+                                handlePropertyValueChange
+                            }
+                        />
                     </>
                 )}
                 {showMore && optionalKeys.length > 0 && (
@@ -193,7 +174,7 @@ export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplateProp
                                 variant="text"
                                 onClick={() => setShowMore(false)}
                             >
-                                {t("label.hide-count-default-properties", {
+                                {t("label.hide-count-optional-properties", {
                                     count: optionalKeys.length,
                                 })}
                                 <ExpandLess />

@@ -12,14 +12,17 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { PropertyConfigValueTypes } from "../../../../rest/dto/alert.interfaces";
-import type { PropertyRenderConfig } from "../alert-template-properties-builder/alert-template-properties-builder.interfaces";
 
-export interface AlertTemplateFormFieldProps {
-    item: PropertyRenderConfig;
-    tabIndex: number;
-    placeholder?: string;
-    defaultValue?: PropertyConfigValueTypes;
-    tooltipText?: string | null;
-    onChange: (selected: PropertyConfigValueTypes) => void;
+import { DebouncedFunc } from "lodash";
+import { MetadataPropertyStep } from "../../../../../rest/dto/alert-template.interfaces";
+import { PropertyRenderConfig } from "../alert-template-properties-builder.interfaces";
+
+export interface AlertTemplateSectionedPropertiesProps {
+    groupedProperties: Record<
+        MetadataPropertyStep,
+        Record<string, PropertyRenderConfig[]>
+    >;
+    handlePropertyValueChange: DebouncedFunc<
+        (key: unknown, value: unknown) => void
+    >;
 }

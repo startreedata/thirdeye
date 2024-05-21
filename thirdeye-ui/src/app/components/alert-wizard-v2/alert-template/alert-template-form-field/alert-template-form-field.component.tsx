@@ -25,7 +25,9 @@ function isDefaultValueStringArray(
     return (
         Array.isArray(defaultValue) &&
         !!defaultValue.length &&
-        defaultValue.every((element: unknown) => typeof element === "string")
+        (defaultValue as Array<unknown>).every(
+            (element: unknown) => typeof element === "string"
+        )
     );
 }
 

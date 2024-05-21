@@ -35,52 +35,46 @@ export const AlertTemplateSectionedProperties: FunctionComponent<AlertTemplateSe
 
         return (
             <StyledGrid container>
-                {existingPropertySteps.map((step, stepIdx) => {
-                    const subStepMap = groupedProperties[step];
-                    if (isStepEmpty(step, groupedProperties)) {
-                        return null;
-                    }
+                {existingPropertySteps
+                    .filter((s) => !isStepEmpty(s, groupedProperties))
+                    .map((step, stepIdx) => {
+                        const subStepMap = groupedProperties[step];
 
-                    return (
-                        <Grid item key={`existing-${step}`} xs={12}>
-                            <Box paddingBottom={2}>
-                                <Typography variant="h5">
-                                    {propertyStepNameMap[step]}
-                                </Typography>
-                                {subStepMap?.["DIRECT"]?.map(
-                                    (directSubStep, directSubStepIdx) => (
-                                        <AlertTemplateFormField
-                                            defaultValue={
-                                                directSubStep.metadata
-                                                    .defaultValue
-                                            }
-                                            item={directSubStep}
-                                            key={directSubStep.key}
-                                            tabIndex={directSubStepIdx + 1}
-                                            tooltipText={
-                                                directSubStep.metadata
-                                                    .description
-                                            }
-                                            onChange={(selected) =>
-                                                handlePropertyValueChange(
-                                                    directSubStep.key,
-                                                    selected
-                                                )
-                                            }
-                                        />
-                                    )
-                                )}
-                                {Object.keys(subStepMap)
-                                    .slice(1)
-                                    .map((currentSubStep) => {
-                                        const isSubStepEmpty =
-                                            subStepMap[currentSubStep]
-                                                .length === 0;
-                                        if (isSubStepEmpty) {
-                                            return null;
-                                        }
-
-                                        return (
+                        return (
+                            <Grid item key={`existing-${step}`} xs={12}>
+                                <Box paddingBottom={2}>
+                                    <Typography variant="h5">
+                                        {propertyStepNameMap[step]}
+                                    </Typography>
+                                    {subStepMap?.["DIRECT"]?.map(
+                                        (directSubStep, directSubStepIdx) => (
+                                            <AlertTemplateFormField
+                                                defaultValue={
+                                                    directSubStep.metadata
+                                                        .defaultValue
+                                                }
+                                                item={directSubStep}
+                                                key={directSubStep.key}
+                                                tabIndex={directSubStepIdx + 1}
+                                                tooltipText={
+                                                    directSubStep.metadata
+                                                        .description
+                                                }
+                                                onChange={(selected) =>
+                                                    handlePropertyValueChange(
+                                                        directSubStep.key,
+                                                        selected
+                                                    )
+                                                }
+                                            />
+                                        )
+                                    )}
+                                    {Object.keys(subStepMap)
+                                        .slice(1)
+                                        .filter(
+                                            (cs) => subStepMap[cs].length > 0
+                                        )
+                                        .map((currentSubStep) => (
                                             <Grid
                                                 item
                                                 key={`required-${step}-${currentSubStep}`}
@@ -134,12 +128,11 @@ export const AlertTemplateSectionedProperties: FunctionComponent<AlertTemplateSe
                                                     )}
                                                 </Box>
                                             </Grid>
-                                        );
-                                    })}
-                            </Box>
-                        </Grid>
-                    );
-                })}
+                                        ))}
+                                </Box>
+                            </Grid>
+                        );
+                    })}
             </StyledGrid>
         );
     };

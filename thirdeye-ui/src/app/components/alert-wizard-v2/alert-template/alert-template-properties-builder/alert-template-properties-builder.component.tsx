@@ -42,17 +42,6 @@ import {
 } from "./alert-template-properties-builder.interfaces";
 import { AlertTemplateSectionedProperties } from "./alert-template-sectioned-properties/alert-template-sectioned-properties.component";
 
-// const PropertySectionHeader = withStyles<
-//     "root",
-//     Record<string, unknown>,
-//     { index: number }
-// >((theme) => ({
-//     root: (props) => ({
-//         paddingTop: theme.spacing(props.index > 0 ? 4 : 0),
-//         paddingLeft: theme.spacing(1),
-//     }),
-// }))(Typography);
-
 export const AlertTemplatePropertiesBuilder: FunctionComponent<AlertTemplatePropertiesBuilderProps> =
     ({
         alertTemplateId,

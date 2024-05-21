@@ -603,6 +603,7 @@
         "entity-id-verbose-header": "{{entity}} ID",
         "error-encountered-while-fetching-datasource-status": "An issue was experienced when trying to validate datasource.",
         "error-while-fetching": "An issue was experienced while retrieving {{entity}} data",
+        "error-while-fetching-datasource": "An issue was experienced while retrieving datasource details",
         "event-end-time-required": "End time is required",
         "event-name-required": "Name is required",
         "event-start-time-required": "Start time is required",

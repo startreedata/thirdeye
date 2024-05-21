@@ -43,7 +43,10 @@ import {
 } from "../../../../platform/components";
 import { ActionStatus } from "../../../../rest/actions.interfaces";
 import { onBoardDataset } from "../../../../rest/datasets/datasets.rest";
-import { useGetTablesForDatasourceID } from "../../../../rest/datasources/datasources.actions";
+import {
+    useGetDatasource,
+    useGetTablesForDatasourceID,
+} from "../../../../rest/datasources/datasources.actions";
 import { notifyIfErrors } from "../../../../utils/notifications/notifications.util";
 import { getErrorMessages } from "../../../../utils/rest/rest.util";
 import {
@@ -66,6 +69,13 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
         errorMessages,
     } = useGetTablesForDatasourceID();
 
+    const {
+        getDatasource,
+        datasource,
+        status: getDataSourceStatus,
+        errorMessages: getDatSourceErrorMessages,
+    } = useGetDatasource();
+
     const handleToggleCheckbox = useCallback(
         (event: React.ChangeEvent<HTMLInputElement>): void => {
             const { name, checked } = event.target;
@@ -87,6 +97,7 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
 
     useEffect(() => {
         if (datasourceId) {
+            getDatasource(Number(datasourceId));
             getTableForDatasourceID(Number(datasourceId)).then((datasets) => {
                 if (!datasets) {
                     return;
@@ -107,6 +118,15 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
             t("message.error-while-fetching", {
                 entity: t("label.datasets"),
             })
+        );
+    }, [getTablesStatus]);
+
+    useEffect(() => {
+        notifyIfErrors(
+            getDataSourceStatus,
+            getDatSourceErrorMessages,
+            notify,
+            t("message.error-while-fetching-datasource")
         );
     }, [getTablesStatus]);
 
@@ -186,7 +206,7 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
                                     {t(
                                         "message.onboard-datasource-onboard-datasets-for",
                                         {
-                                            datasetName: datasourceId,
+                                            datasetName: datasource?.name,
                                         }
                                     )}
                                 </Typography>

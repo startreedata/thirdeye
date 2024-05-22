@@ -24,7 +24,7 @@ import java.util.List;
 
 public interface TaskManager extends AbstractManager<TaskDTO> {
 
-  TaskDTO createTaskDto(final long refId, final TaskInfo taskInfo, final TaskType taskType)
+  TaskDTO createTaskDto(final TaskInfo taskInfo, final TaskType taskType)
       throws JsonProcessingException;
 
   TaskDTO findNextTaskToRun();

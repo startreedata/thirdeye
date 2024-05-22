@@ -423,7 +423,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
 
     try {
       // todo cyril authz review assume createTaskDto si responsible for setting the namespace info of the created task - as of today it's not set but resolved at readTime
-      final TaskDTO t = taskManager.createTaskDto(alertId, info, DETECTION);
+      final TaskDTO t = taskManager.createTaskDto(info, DETECTION);
       LOG.info("Created {} task {} with settings {}", DETECTION, t.getId(), t);
     } catch (final JsonProcessingException e) {
       throw new RuntimeException(String.format("Error while serializing %s: %s",

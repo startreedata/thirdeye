@@ -72,13 +72,13 @@ public class TaskManagerImpl implements TaskManager {
   }
 
   // FIXME CYRIL authz this method or consumers can inherit the namespace of the refId instead of inheriting at read time with NamespaceResolver
-  public TaskDTO createTaskDto(final long refId, final TaskInfo taskInfo, final TaskType taskType)
+  public TaskDTO createTaskDto(final TaskInfo taskInfo, final TaskType taskType)
       throws JsonProcessingException {
     final String taskInfoJson = OBJECT_MAPPER.writeValueAsString(taskInfo);
 
     final TaskDTO task = new TaskDTO()
         .setTaskType(taskType)
-        .setJobName(taskType.toString() + "_" + refId)
+        .setJobName(taskType.toString() + "_" + taskInfo.getRefId())
         .setStatus(TaskStatus.WAITING)
         .setTaskInfo(taskInfoJson)
         .setRefId(taskInfo.getRefId());

@@ -108,7 +108,7 @@ public class TestTaskManager {
   @Test
   public void testRefId() throws JsonProcessingException {
     final long refId = 4321L;
-    final TaskDTO taskDto = taskManager.createTaskDto(refId,
+    final TaskDTO taskDto = taskManager.createTaskDto(
         new TaskInfo() {
           @SuppressWarnings("unused")
           public final int dummyVariable = 0; // required for jackson json serialization

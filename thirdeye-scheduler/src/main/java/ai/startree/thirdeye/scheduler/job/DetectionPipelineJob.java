@@ -54,9 +54,7 @@ public class DetectionPipelineJob extends ThirdEyeAbstractJob {
 
     try {
       final TaskManager taskManager = getInstance(ctx, TaskManager.class);
-      final TaskDTO taskDTO = taskManager.createTaskDto(taskInfo.getConfigId(),
-          taskInfo,
-          TaskType.DETECTION);
+      final TaskDTO taskDTO = taskManager.createTaskDto(taskInfo, TaskType.DETECTION);
       LOG.info("Created {} task {} with settings {}", TaskType.DETECTION, taskDTO.getId(), taskDTO);
     } catch (JsonProcessingException e) {
       LOG.error("Exception when converting DetectionPipelineTaskInfo {} to jsonString",

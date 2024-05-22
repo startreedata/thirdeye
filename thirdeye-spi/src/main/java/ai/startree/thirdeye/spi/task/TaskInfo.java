@@ -27,7 +27,5 @@ public interface TaskInfo {
    * @return the id of the reference entity
    */
   @JsonIgnore
-  default Long getRefId() {
-    return null;
-  }
+  Long getRefId();
 }

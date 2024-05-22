@@ -53,17 +53,13 @@ public class NotificationPipelineTaskCreator {
     }
 
     try {
-      createTask0(subscriptionGroupId);
+      final DetectionAlertTaskInfo taskInfo = new DetectionAlertTaskInfo(subscriptionGroupId);
+      final TaskDTO t = taskManager.createTaskDto(taskInfo, NOTIFICATION);
+      LOG.info("Created {} task {}. taskInfo: {}", NOTIFICATION, t.getId(), t);
     } catch (final JsonProcessingException e) {
       LOG.error("Exception in Json Serialization in taskInfo for subscription group: {}",
           subscriptionGroupId,
           e);
     }
-  }
-
-  private void createTask0(final long subscriptionGroupId) throws JsonProcessingException {
-    final DetectionAlertTaskInfo taskInfo = new DetectionAlertTaskInfo(subscriptionGroupId);
-    final TaskDTO t = taskManager.createTaskDto(subscriptionGroupId, taskInfo, NOTIFICATION);
-    LOG.info("Created {} task {}. taskInfo: {}", NOTIFICATION, t.getId(), t);
   }
 }

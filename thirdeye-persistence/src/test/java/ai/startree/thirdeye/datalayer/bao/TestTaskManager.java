@@ -113,7 +113,7 @@ public class TestTaskManager {
           @SuppressWarnings("unused")
           public final int dummyVariable = 0; // required for jackson json serialization
           @Override
-          public Long getRefId() {
+          public long getRefId() {
             return refId;
           }
         },

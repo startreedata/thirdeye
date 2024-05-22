@@ -23,6 +23,7 @@ import ai.startree.thirdeye.datalayer.dao.TaskDao;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskInfo;
 import ai.startree.thirdeye.spi.task.TaskStatus;
@@ -58,7 +59,7 @@ public class TaskManagerImpl implements TaskManager {
   private final TaskDao dao;
 
   private static final Logger LOG = LoggerFactory.getLogger(TaskManagerImpl.class);
-
+  
   private final Meter orphanTasksCount;
   private final MetricRegistry metricRegistry;
 
@@ -72,9 +73,9 @@ public class TaskManagerImpl implements TaskManager {
   }
 
   // FIXME CYRIL authz this method or consumers can inherit the namespace of the refId instead of inheriting at read time with NamespaceResolver
-  // TODO cyril refactor - only the task refId, the taskType and the auth are necessary to build a TaskDto. overloaded TaskInfo is not used 
   @Override
-  public TaskDTO createTaskDto(final TaskInfo taskInfo, final TaskType taskType)
+  public TaskDTO createTaskDto(final TaskInfo taskInfo, final TaskType taskType, final
+  AuthorizationConfigurationDTO auth)
       throws JsonProcessingException {
     final String taskInfoJson = OBJECT_MAPPER.writeValueAsString(taskInfo);
 
@@ -84,8 +85,21 @@ public class TaskManagerImpl implements TaskManager {
         .setStatus(TaskStatus.WAITING)
         .setTaskInfo(taskInfoJson)
         .setRefId(taskInfo.getRefId());
+    task.setAuth(auth);
     save(task);
     return task;
+  }
+
+  @Override
+  public boolean isAlreadyRunning(final String taskName) {
+    final List<TaskDTO> scheduledTasks = findByPredicate(Predicate.AND(
+        Predicate.EQ("name", taskName),
+        Predicate.OR(
+            Predicate.EQ("status", TaskStatus.RUNNING.toString()),
+            Predicate.EQ("status", TaskStatus.WAITING.toString())
+        ))
+    );
+    return !scheduledTasks.isEmpty();
   }
 
   @Override
@@ -118,7 +132,7 @@ public class TaskManagerImpl implements TaskManager {
   /**
    * This method has side effects on the task DTO, even if the acquisition attempt fails.
    * Re-fetch the taskDto if you need to ensure consistency with the persistence layer.
-   * */
+   */
   @Override
   public boolean acquireTaskToRun(final TaskDTO task, final long workerId) {
     task.setStatus(TaskStatus.RUNNING);

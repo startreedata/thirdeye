@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.scheduler;/*
+package ai.startree.thirdeye.scheduler.job;/*
  * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
@@ -25,6 +25,7 @@ package ai.startree.thirdeye.scheduler;/*
  * the License.
  */
 
+import static ai.startree.thirdeye.spi.Constants.CTX_INJECTOR;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -35,22 +36,39 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
+import com.google.inject.Injector;
 import java.io.IOException;
 import org.joda.time.Period;
+import org.quartz.JobExecutionContext;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerContext;
+import org.quartz.SchedulerException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-public class JobSchedulerServiceTest {
-
-  private JobSchedulerService jobSchedulerService;
+public class DetectionPipelineJobTest {
+  
+  private DetectionPipelineJob detectionPipelineJob = new DetectionPipelineJob();
+  private JobExecutionContext ctx;
 
   @BeforeMethod
-  public void setUp() throws IOException, ClassNotFoundException {
+  public void setUp() throws IOException, ClassNotFoundException, SchedulerException {
     final AlertTemplateRenderer alertTemplateRenderer = mock(AlertTemplateRenderer.class);
     when(alertTemplateRenderer.renderAlert(any(AlertDTO.class), any())).then(
         i -> ((AlertDTO) i.getArguments()[0]).getTemplate());
-    jobSchedulerService = new JobSchedulerService(null, null, alertTemplateRenderer);
+
+    final Scheduler scheduler = mock(Scheduler.class);
+    final Injector injector = mock(Injector.class);
+    when(injector.getInstance(AlertTemplateRenderer.class)).thenReturn(alertTemplateRenderer);
+    final SchedulerContext schedulerContext = new SchedulerContext();
+    schedulerContext.put(CTX_INJECTOR, injector);
+    when(scheduler.getContext()).thenReturn(schedulerContext);
+    ctx = mock(JobExecutionContext.class);
+    // context.getScheduler().getContext().get(key)
+    when(ctx.getScheduler()).thenReturn(scheduler);
+    // detectionPipelineJob.buildTaskInfo();
+    //jobSchedulerService = new JobSchedulerService(null, alertTemplateRenderer);
   }
 
   @DataProvider(name = "computeTaskStartTestCases")
@@ -73,7 +91,7 @@ public class JobSchedulerServiceTest {
             new AlertMetadataDTO().setDataset(
                 new DatasetConfigDTO().setMutabilityPeriod(mutabilityPeriod))))
         .setLastTimestamp(lastTimestamp);
-    final var output = jobSchedulerService.computeTaskStart(alert, endTime);
+    final var output = detectionPipelineJob.computeTaskStart(ctx, alert, endTime);
     assertThat(output).isEqualTo(expectedStartTime);
   }
 }

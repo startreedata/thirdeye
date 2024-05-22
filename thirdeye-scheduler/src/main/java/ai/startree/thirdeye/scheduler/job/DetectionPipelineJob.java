@@ -13,36 +13,60 @@
  */
 package ai.startree.thirdeye.scheduler.job;
 
+import static ai.startree.thirdeye.scheduler.JobUtils.getIdFromJobKey;
+import static ai.startree.thirdeye.spi.Constants.DEFAULT_CHRONOLOGY;
 import static ai.startree.thirdeye.spi.task.TaskType.DETECTION;
+import static ai.startree.thirdeye.spi.util.AlertMetadataUtils.getDateTimeZone;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
-import ai.startree.thirdeye.scheduler.JobSchedulerService;
+import ai.startree.thirdeye.alert.AlertTemplateRenderer;
+import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DetectionPipelineTaskInfo;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskType;
+import ai.startree.thirdeye.spi.util.TimeUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.annotations.VisibleForTesting;
+import java.io.IOException;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.joda.time.Chronology;
+import org.joda.time.DateTime;
+import org.joda.time.Interval;
+import org.joda.time.Period;
 import org.quartz.JobExecutionContext;
+import org.quartz.JobKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DetectionPipelineJob extends ThirdEyeAbstractJob {
 
+  private static final Interval UNUSED_DETECTION_INTERVAL = new Interval(0, 0, DEFAULT_CHRONOLOGY);
   private static final Logger LOG = LoggerFactory.getLogger(DetectionPipelineJob.class);
 
   @Override
   public void execute(JobExecutionContext ctx) {
-    final JobSchedulerService service = getInstance(ctx, JobSchedulerService.class);
-    final DetectionPipelineTaskInfo taskInfo = service.buildTaskInfo(ctx.getJobDetail().getKey(),
-        ctx.getScheduledFireTime().getTime());
-
-    if (taskInfo == null) {
-      // Possible if the alert has been deleted, the task has no use.
+    final JobKey jobKey = ctx.getJobDetail().getKey();
+    final Long alertId = getIdFromJobKey(jobKey);
+    final AlertManager alertManager = getInstance(ctx, AlertManager.class);
+    final AlertDTO alert = alertManager.findById(alertId);
+    if (alert == null) {
+      // possible if the alert was deleted - no need to run the task
+      LOG.warn("Alert with id {} not found. Alert was deleted? Skipping detection job scheduling.", alertId);
       return;
     }
+    final long endTime = ctx.getScheduledFireTime().getTime();
+    final long start = computeTaskStart(ctx, alert, endTime);
+    final DetectionPipelineTaskInfo taskInfo = new DetectionPipelineTaskInfo(alert.getId(), start, endTime);
 
     // if a task is pending and not time out yet, don't schedule more
-    String jobName = ctx.getJobDetail().getKey().getName();
-    if (service.taskAlreadyRunning(jobName)) {
+    final String jobName = jobKey.getName();
+    final TaskManager taskManager = getInstance(ctx, TaskManager.class);
+    if (taskManager.isAlreadyRunning(jobName)) {
       LOG.warn(
           "Skipped scheduling detection task for {} with start time {} and end time {}. A task for the same entity is already in the queue.",
           jobName,
@@ -53,14 +77,55 @@ public class DetectionPipelineJob extends ThirdEyeAbstractJob {
     }
 
     try {
-      final TaskManager taskManager = getInstance(ctx, TaskManager.class);
-      final TaskDTO taskDTO = taskManager.createTaskDto(taskInfo, TaskType.DETECTION);
+      final TaskDTO taskDTO = taskManager.createTaskDto(taskInfo, TaskType.DETECTION,
+          alert.getAuth());
       LOG.info("Created {} task {} with settings {}", TaskType.DETECTION, taskDTO.getId(), taskDTO);
     } catch (JsonProcessingException e) {
       LOG.error("Exception when converting DetectionPipelineTaskInfo {} to jsonString",
           taskInfo,
           e);
     }
+  }
+
+  @VisibleForTesting
+  protected long computeTaskStart(final JobExecutionContext ctx, final AlertDTO alert,
+      final long endTime) {
+    try {
+      final AlertTemplateRenderer alertTemplateRenderer = getInstance(ctx,
+          AlertTemplateRenderer.class);
+      final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alert,
+          UNUSED_DETECTION_INTERVAL);
+      final Chronology chronology = getDateTimeZone(templateWithProperties.getMetadata());
+      final DateTime defaultStartTime = new DateTime(alert.getLastTimestamp(), chronology);
+      final DateTime endDateTime = new DateTime(endTime, chronology);
+      final Period mutabilityPeriod = getMutabilityPeriod(templateWithProperties);
+      final DateTime mutabilityStart = endDateTime.minus(mutabilityPeriod);
+      if (mutabilityStart.isBefore(defaultStartTime)) {
+        LOG.info(
+            "Applied mutability period of {} for alert id {} between {} and {}. Corrected task interval is between {} and {}",
+            mutabilityPeriod,
+            alert.getId(),
+            defaultStartTime,
+            endDateTime,
+            mutabilityStart,
+            endDateTime
+        );
+        return mutabilityStart.getMillis();
+      } else {
+        return defaultStartTime.getMillis();
+      }
+    } catch (IOException | ClassNotFoundException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @NonNull
+  private static Period getMutabilityPeriod(final AlertTemplateDTO templateWithProperties) {
+    return optional(templateWithProperties.getMetadata())
+        .map(AlertMetadataDTO::getDataset)
+        .map(DatasetConfigDTO::getMutabilityPeriod)
+        .map(TimeUtils::isoPeriod)
+        .orElse(Period.ZERO);
   }
 }
 

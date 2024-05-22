@@ -172,7 +172,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
       // run the detection task on the historical data
       // note: the alert will not be initialized if it has isActive to false
       // FIXME cyril - should we run a dummy task like in postupdate to refresh enumeration items quickly? 
-      createDetectionTask(dto.getId(), dto.getLastTimestamp(), System.currentTimeMillis());  
+      createDetectionTask(dto, dto.getLastTimestamp(), System.currentTimeMillis());  
     }
   }
 
@@ -187,11 +187,11 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
        * In this case the start and end timestamp is the same to ensure that we update the enumeration
        * items but we don't actually run the detection task.
        */
-      createDetectionTask(dto.getId(), dto.getLastTimestamp(), dto.getLastTimestamp());
+      createDetectionTask(dto, dto.getLastTimestamp(), dto.getLastTimestamp());
       // perform a soft-reset - rerun the detection on the whole historical data - existing and new anomalies will be merged
       // note: the 2 detection tasks can run concurrently, the order does not matter because the last timestamp after the run of the 2 tasks is the same
       //   we could remove the first one but this would make the UI feel less snappy, because a new enumeration would not appear until the full historical replay is finished
-      createDetectionTask(dto.getId(), minimumLastTimestamp(principal, dto), dto.getLastTimestamp()); 
+      createDetectionTask(dto, minimumLastTimestamp(principal, dto), dto.getLastTimestamp()); 
     }
   }
 
@@ -222,7 +222,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     ensureExists(startTime, "start");
     authorizationManager.ensureHasAccess(principal, dto, AccessType.WRITE);
 
-    createDetectionTask(id, startTime, safeEndTime(endTime));
+    createDetectionTask(dto, startTime, safeEndTime(endTime));
   }
 
   private long safeEndTime(final @Nullable Long endTime) {
@@ -415,15 +415,14 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     }
   }
 
-  private void createDetectionTask(final Long alertId, final long start, final long end) {
-    checkArgument(alertId != null && alertId >= 0);
+  private void createDetectionTask(final AlertDTO alertDto, final long start, final long end) {
+    checkArgument(alertDto.getId() != null && alertDto.getId() >= 0);
     checkArgument(start <= end);
-    final DetectionPipelineTaskInfo info = new DetectionPipelineTaskInfo(alertId, start,
+    final DetectionPipelineTaskInfo info = new DetectionPipelineTaskInfo(alertDto.getId(), start,
         end);
 
     try {
-      // todo cyril authz review assume createTaskDto si responsible for setting the namespace info of the created task - as of today it's not set but resolved at readTime
-      final TaskDTO t = taskManager.createTaskDto(info, DETECTION);
+      final TaskDTO t = taskManager.createTaskDto(info, DETECTION, alertDto.getAuth());
       LOG.info("Created {} task {} with settings {}", DETECTION, t.getId(), t);
     } catch (final JsonProcessingException e) {
       throw new RuntimeException(String.format("Error while serializing %s: %s",

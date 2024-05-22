@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.scheduler;
 
-import static ai.startree.thirdeye.scheduler.JobSchedulerService.getIdFromJobKey;
+import static ai.startree.thirdeye.scheduler.JobUtils.getIdFromJobKey;
 import static ai.startree.thirdeye.spi.Constants.CRON_TIMEZONE;
 import static ai.startree.thirdeye.spi.util.ExecutorUtils.shutdownExecutionService;
 import static ai.startree.thirdeye.spi.util.TimeUtils.maximumTriggersPerMinute;
@@ -215,7 +215,7 @@ public class SubscriptionCronScheduler implements Runnable {
   @VisibleForTesting
   void deleteIfNotInDatabase(final JobKey jobKey) {
     try {
-      final Long id = getIdFromJobKey(jobKey.getName());
+      final Long id = getIdFromJobKey(jobKey);
       if (subscriptionGroupManager.findById(id) == null) {
         stopJob(jobKey);
         LOG.info("Deleted job not in database: {}", jobKey);

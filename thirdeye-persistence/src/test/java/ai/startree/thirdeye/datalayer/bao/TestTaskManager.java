@@ -22,6 +22,7 @@ import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.datalayer.dao.TaskDao;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskInfo;
 import ai.startree.thirdeye.spi.task.TaskStatus;
@@ -117,7 +118,7 @@ public class TestTaskManager {
             return refId;
           }
         },
-        TaskType.NOTIFICATION);
+        TaskType.NOTIFICATION, new AuthorizationConfigurationDTO());
     assertThat(taskDto.getRefId()).isEqualTo(refId);
 
     final TaskDTO byId = taskManager.findById(taskDto.getId());

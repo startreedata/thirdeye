@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.spi.datalayer.bao;
 
+import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskInfo;
 import ai.startree.thirdeye.spi.task.TaskStatus;
@@ -24,10 +25,13 @@ import java.util.List;
 
 public interface TaskManager extends AbstractManager<TaskDTO> {
 
-  TaskDTO createTaskDto(final TaskInfo taskInfo, final TaskType taskType)
+  TaskDTO createTaskDto(final TaskInfo taskInfo, final TaskType taskType, final
+  AuthorizationConfigurationDTO auth)
       throws JsonProcessingException;
 
   TaskDTO findNextTaskToRun();
+
+  boolean isAlreadyRunning(final String taskName);
   
   boolean acquireTaskToRun(TaskDTO taskDTO, final long workerId);
 

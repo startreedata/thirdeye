@@ -49,7 +49,6 @@ import ai.startree.thirdeye.datalayer.entity.GenericJsonEntity;
 import ai.startree.thirdeye.datalayer.entity.JobIndex;
 import ai.startree.thirdeye.datalayer.entity.MergedAnomalyResultIndex;
 import ai.startree.thirdeye.datalayer.entity.MetricConfigIndex;
-import ai.startree.thirdeye.datalayer.entity.OnboardDatasetMetricIndex;
 import ai.startree.thirdeye.datalayer.entity.OnlineDetectionDataIndex;
 import ai.startree.thirdeye.datalayer.entity.OverrideConfigIndex;
 import ai.startree.thirdeye.datalayer.entity.RcaInvestigationIndex;
@@ -103,7 +102,6 @@ public class ThirdEyePersistenceModule extends AbstractModule {
       JobIndex.class,
       MergedAnomalyResultIndex.class,
       MetricConfigIndex.class,
-      OnboardDatasetMetricIndex.class,
       OnlineDetectionDataIndex.class,
       OverrideConfigIndex.class,
       RcaInvestigationIndex.class,

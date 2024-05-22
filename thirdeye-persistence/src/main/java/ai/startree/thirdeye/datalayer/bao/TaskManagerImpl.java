@@ -72,6 +72,7 @@ public class TaskManagerImpl implements TaskManager {
   }
 
   // FIXME CYRIL authz this method or consumers can inherit the namespace of the refId instead of inheriting at read time with NamespaceResolver
+  // TODO cyril refactor - only the task refId, the taskType and the auth are necessary to build a TaskDto. overloaded TaskInfo is not used 
   public TaskDTO createTaskDto(final TaskInfo taskInfo, final TaskType taskType)
       throws JsonProcessingException {
     final String taskInfoJson = OBJECT_MAPPER.writeValueAsString(taskInfo);

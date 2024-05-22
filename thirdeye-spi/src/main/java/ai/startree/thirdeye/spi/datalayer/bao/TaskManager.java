@@ -35,6 +35,7 @@ public interface TaskManager extends AbstractManager<TaskDTO> {
   
   boolean acquireTaskToRun(TaskDTO taskDTO, final long workerId);
 
+  // fixme authz required ?
   List<TaskDTO> findByStatusAndWorkerId(Long workerId, TaskStatus status);
 
   void updateStatusAndTaskEndTime(Long id, TaskStatus oldStatus, TaskStatus newStatus,
@@ -48,5 +49,6 @@ public interface TaskManager extends AbstractManager<TaskDTO> {
 
   void orphanTaskCleanUp(Timestamp activeThreshold);
 
+  // fixme authz required ?
   long countByStatus(final TaskStatus status);
 }

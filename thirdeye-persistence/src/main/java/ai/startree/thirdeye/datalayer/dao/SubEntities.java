@@ -30,7 +30,6 @@ import ai.startree.thirdeye.datalayer.entity.EventIndex;
 import ai.startree.thirdeye.datalayer.entity.JobIndex;
 import ai.startree.thirdeye.datalayer.entity.MergedAnomalyResultIndex;
 import ai.startree.thirdeye.datalayer.entity.MetricConfigIndex;
-import ai.startree.thirdeye.datalayer.entity.OnboardDatasetMetricIndex;
 import ai.startree.thirdeye.datalayer.entity.OnlineDetectionDataIndex;
 import ai.startree.thirdeye.datalayer.entity.OverrideConfigIndex;
 import ai.startree.thirdeye.datalayer.entity.RcaInvestigationIndex;
@@ -50,7 +49,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.JobDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.OnboardDatasetMetricDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.OnlineDetectionDataDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.OverrideConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
@@ -87,7 +85,6 @@ public class SubEntities {
         .put(JobDTO.class, JobIndex.class)
         .put(AnomalyDTO.class, MergedAnomalyResultIndex.class)
         .put(MetricConfigDTO.class, MetricConfigIndex.class)
-        .put(OnboardDatasetMetricDTO.class, OnboardDatasetMetricIndex.class)
         .put(OnlineDetectionDataDTO.class, OnlineDetectionDataIndex.class)
         .put(OverrideConfigDTO.class, OverrideConfigIndex.class)
         .put(RcaInvestigationDTO.class, RcaInvestigationIndex.class)
@@ -112,7 +109,6 @@ public class SubEntities {
         .put(JobDTO.class, SubEntityType.JOB)
         .put(AnomalyDTO.class, SubEntityType.ANOMALY)
         .put(MetricConfigDTO.class, SubEntityType.METRIC)
-        .put(OnboardDatasetMetricDTO.class, SubEntityType.ONBOARD_DATASET_METRIC)
         .put(OnlineDetectionDataDTO.class, SubEntityType.ONLINE_DETECTION_DATA)
         .put(OverrideConfigDTO.class, SubEntityType.OVERRIDE_CONFIG)
         .put(RcaInvestigationDTO.class, SubEntityType.RCA_INVESTIGATION)

@@ -57,18 +57,6 @@ public class TaskManagerImpl implements TaskManager {
   private final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private final TaskDao dao;
 
-  private static final String FIND_BY_STATUS_ORDER_BY_CREATE_TIME_ASC =
-      " WHERE status = :status order by startTime asc limit ";
-
-  private static final String FIND_BY_STATUS_ORDER_BY_CREATE_TIME_DESC =
-      " WHERE status = :status order by startTime desc limit ";
-
-  private static final String FIND_BY_NAME_ORDER_BY_CREATE_TIME_ASC =
-      " WHERE name = :name order by createTime asc limit ";
-
-  private static final String FIND_BY_NAME_ORDER_BY_CREATE_TIME_DESC =
-      " WHERE name = :name order by createTime desc limit ";
-
   private static final Logger LOG = LoggerFactory.getLogger(TaskManagerImpl.class);
 
   private final Meter orphanTasksCount;
@@ -108,14 +96,6 @@ public class TaskManagerImpl implements TaskManager {
     final Long id = dao.put(entity);
     entity.setId(id);
     return id;
-  }
-
-  @Override
-  public List<TaskDTO> findByJobIdStatusNotIn(final Long jobId, final TaskStatus status) {
-    final Predicate jobIdPredicate = Predicate.EQ("jobId", jobId);
-    final Predicate statusPredicate = Predicate.NEQ("status", status.toString());
-    final Predicate predicate = Predicate.AND(statusPredicate, jobIdPredicate);
-    return findByPredicate(predicate);
   }
 
   // TODO CYRIL NOTE - RETRY IS NOT IMPLEMENTED BUT IT SHOULD BE EASY BY ACCEPTING STATUS = FAILED IN THE 2 METHODS BELOW AND PUTTING A LIMIT ON THE VALUE OF VERSION
@@ -176,39 +156,6 @@ public class TaskManagerImpl implements TaskManager {
     final TaskDTO task = findById(id);
     task.setLastActive(new Timestamp(System.currentTimeMillis()));
     save(task);
-  }
-
-  @Override
-  @Transactional
-  public int deleteRecordsOlderThanDaysWithStatus(final int days, final TaskStatus status) {
-    final DateTime expireDate = new DateTime(DateTimeZone.UTC).minusDays(days);
-    final Timestamp expireTimestamp = new Timestamp(expireDate.getMillis());
-
-    final Predicate timestampPredicate = Predicate.LT("createTime", expireTimestamp);
-    final Predicate statusPredicate = Predicate.EQ("status", status.toString());
-    return deleteByPredicate(Predicate.AND(statusPredicate, timestampPredicate));
-  }
-
-  @Override
-  public List<TaskDTO> findByStatusWithinDays(final TaskStatus status, final int days) {
-    final DateTime activeDate = new DateTime(DateTimeZone.UTC).minusDays(days);
-    final Timestamp activeTimestamp = new Timestamp(activeDate.getMillis());
-    final Predicate statusPredicate = Predicate.EQ("status", status.toString());
-    final Predicate timestampPredicate = Predicate.GE("createTime", activeTimestamp);
-    return findByPredicate(Predicate.AND(statusPredicate, timestampPredicate));
-  }
-
-  @Override
-  public List<TaskDTO> findTimeoutTasksWithinDays(final int days, final long maxTaskTime) {
-    final DateTime activeDate = new DateTime(DateTimeZone.UTC).minusDays(days);
-    final Timestamp activeTimestamp = new Timestamp(activeDate.getMillis());
-    final DateTime timeoutDate = new DateTime(DateTimeZone.UTC).minus(maxTaskTime);
-    final Timestamp timeoutTimestamp = new Timestamp(timeoutDate.getMillis());
-    final Predicate statusPredicate = Predicate.EQ("status", TaskStatus.RUNNING.toString());
-    final Predicate daysTimestampPredicate = Predicate.GE("createTime", activeTimestamp);
-    final Predicate timeoutTimestampPredicate = Predicate.LT("updateTime", timeoutTimestamp);
-    return findByPredicate(
-        Predicate.AND(statusPredicate, daysTimestampPredicate, timeoutTimestampPredicate));
   }
 
   @Override

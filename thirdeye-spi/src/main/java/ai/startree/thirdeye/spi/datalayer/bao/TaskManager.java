@@ -27,12 +27,6 @@ public interface TaskManager extends AbstractManager<TaskDTO> {
   TaskDTO createTaskDto(final long refId, final TaskInfo taskInfo, final TaskType taskType)
       throws JsonProcessingException;
 
-  List<TaskDTO> findByJobIdStatusNotIn(Long jobId, TaskStatus status);
-
-  List<TaskDTO> findByStatusWithinDays(TaskStatus status, int days);
-
-  List<TaskDTO> findTimeoutTasksWithinDays(int days, long maxTaskTime);
-
   TaskDTO findNextTaskToRun();
   
   boolean acquireTaskToRun(TaskDTO taskDTO, final long workerId);
@@ -45,8 +39,6 @@ public interface TaskManager extends AbstractManager<TaskDTO> {
   void updateTaskStartTime(Long id, Long taskStartTime);
 
   void updateLastActive(Long id);
-
-  int deleteRecordsOlderThanDaysWithStatus(int days, TaskStatus status);
 
   void purge(Duration expiryDuration, Integer limitOptional);
 

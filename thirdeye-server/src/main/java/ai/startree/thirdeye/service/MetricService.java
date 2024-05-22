@@ -30,7 +30,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
-import java.util.Objects;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -38,6 +37,7 @@ import javax.inject.Singleton;
 public class MetricService extends CrudService<MetricApi, MetricConfigDTO> {
 
   private final DatasetConfigManager datasetConfigManager;
+  private final MetricConfigManager metricDao;
 
   @Inject
   public MetricService(final MetricConfigManager metricConfigManager,
@@ -45,6 +45,7 @@ public class MetricService extends CrudService<MetricApi, MetricConfigDTO> {
       final AuthorizationManager authorizationManager) {
     super(authorizationManager, metricConfigManager, ImmutableMap.of());
     this.datasetConfigManager = datasetConfigManager;
+    this.metricDao = metricConfigManager;
   }
 
   @Override
@@ -62,15 +63,8 @@ public class MetricService extends CrudService<MetricApi, MetricConfigDTO> {
 
     // For new Metric or existing metric with different name
     if (existing == null || !existing.getName().equals(api.getName())) {
-      final List<MetricConfigDTO> metricsWithSameNameSameDataset = dtoManager.findByName(api.getName())
-          .stream()
-          // TODO CYRIL authz introduce proper method in MetricManager instead of doing filtering here
-          .filter(m -> Objects.equals(api.getDataset().getName(), m.getDataset()))
-          .filter(m -> Objects.equals(datasetDto.namespace(), m.namespace()))
-          .toList();
-      final List<MetricConfigDTO> metricsWithSameNameSameDatasetSameNamespace = authorizationManager.filterByNamespace(principal,
-          optional(api.getAuth()).map(AuthorizationConfigurationApi::getNamespace).orElse(null), metricsWithSameNameSameDataset);
-      ensure(metricsWithSameNameSameDatasetSameNamespace.isEmpty(),
+      final MetricConfigDTO metricInDbWithSameName = metricDao.findBy(api.getName(), api.getDataset().getName(), datasetDto.namespace());
+      ensure(metricInDbWithSameName == null,
           ERR_DUPLICATE_ENTITY,
           String.format("Metric with name: %s and dataset: %s already exists.",
               api.getName(),

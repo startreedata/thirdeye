@@ -46,7 +46,7 @@ public class TaskService extends CrudService<TaskApi, TaskDTO> {
     this.taskManager = taskManager;
   }
 
-  // Operation not supported to prevent create of tasks
+  // operation not supported to prevent creation of tasks via API
   @Override
   protected void prepareCreatedDto(final ThirdEyeServerPrincipal principal, final TaskDTO taskDTO) {
     throw new UnsupportedOperationException();

@@ -158,5 +158,10 @@ public class TestAnomalyTaskManager {
 
   public static class MockTaskInfo implements TaskInfo {
     public int property = 10;
+
+    @Override
+    public long getRefId() {
+      return 0;
+    }
   }
 }

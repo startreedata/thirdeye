@@ -27,7 +27,6 @@ import ai.startree.thirdeye.datalayer.bao.EnumerationItemManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.EventManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.JobManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.MetricConfigManagerImpl;
-import ai.startree.thirdeye.datalayer.bao.OnboardDatasetMetricManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.OnlineDetectionDataManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.OverrideConfigManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.RcaInvestigationManagerImpl;
@@ -50,7 +49,6 @@ import ai.startree.thirdeye.datalayer.entity.GenericJsonEntity;
 import ai.startree.thirdeye.datalayer.entity.JobIndex;
 import ai.startree.thirdeye.datalayer.entity.MergedAnomalyResultIndex;
 import ai.startree.thirdeye.datalayer.entity.MetricConfigIndex;
-import ai.startree.thirdeye.datalayer.entity.OnboardDatasetMetricIndex;
 import ai.startree.thirdeye.datalayer.entity.OnlineDetectionDataIndex;
 import ai.startree.thirdeye.datalayer.entity.OverrideConfigIndex;
 import ai.startree.thirdeye.datalayer.entity.RcaInvestigationIndex;
@@ -68,7 +66,6 @@ import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.bao.JobManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
-import ai.startree.thirdeye.spi.datalayer.bao.OnboardDatasetMetricManager;
 import ai.startree.thirdeye.spi.datalayer.bao.OnlineDetectionDataManager;
 import ai.startree.thirdeye.spi.datalayer.bao.OverrideConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.RcaInvestigationManager;
@@ -105,7 +102,6 @@ public class ThirdEyePersistenceModule extends AbstractModule {
       JobIndex.class,
       MergedAnomalyResultIndex.class,
       MetricConfigIndex.class,
-      OnboardDatasetMetricIndex.class,
       OnlineDetectionDataIndex.class,
       OverrideConfigIndex.class,
       RcaInvestigationIndex.class,
@@ -139,8 +135,6 @@ public class ThirdEyePersistenceModule extends AbstractModule {
     bind(OverrideConfigManager.class).to(OverrideConfigManagerImpl.class).in(Scopes.SINGLETON);
     bind(EventManager.class).to(EventManagerImpl.class).in(Scopes.SINGLETON);
     bind(DetectionStatusManager.class).to(DetectionStatusManagerImpl.class).in(Scopes.SINGLETON);
-    bind(OnboardDatasetMetricManager.class).to(OnboardDatasetMetricManagerImpl.class).in(
-        Scopes.SINGLETON);
     bind(RcaInvestigationManager.class).to(RcaInvestigationManagerImpl.class).in(Scopes.SINGLETON);
     bind(RootcauseTemplateManager.class).to(RootcauseTemplateManagerImpl.class)
         .in(Scopes.SINGLETON);

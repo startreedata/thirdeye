@@ -25,7 +25,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DetectionStatusDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.JobDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.OnboardDatasetMetricDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.OverrideConfigDTO;
 import ai.startree.thirdeye.spi.metric.MetricType;
 import ai.startree.thirdeye.spi.task.TaskType;
@@ -95,15 +94,6 @@ public class DatalayerTestUtils {
     detectionStatusDTO.setDateToCheckInSDF(dateToCheckInSDF);
     detectionStatusDTO.setDetectionRun(detectionRun);
     return detectionStatusDTO;
-  }
-
-  public static OnboardDatasetMetricDTO getTestOnboardConfig(String datasetName, String metricName,
-      String dataSource) {
-    OnboardDatasetMetricDTO dto = new OnboardDatasetMetricDTO();
-    dto.setDatasetName(datasetName);
-    dto.setMetricName(metricName);
-    dto.setDataSource(dataSource);
-    return dto;
   }
 
   public static OverrideConfigDTO getTestOverrideConfigForTimeSeries(DateTime now) {

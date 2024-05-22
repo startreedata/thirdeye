@@ -13,7 +13,6 @@
  */
 package ai.startree.thirdeye.scheduler;
 
-import ai.startree.thirdeye.scheduler.autoonboard.AutoOnboardConfiguration;
 import ai.startree.thirdeye.scheduler.events.HolidayEventsLoaderConfiguration;
 import ai.startree.thirdeye.scheduler.taskcleanup.TaskCleanUpConfiguration;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -38,9 +37,6 @@ public class ThirdEyeSchedulerConfiguration {
 
   @JsonProperty("holidayEvents")
   private HolidayEventsLoaderConfiguration holidayEventsLoaderConfiguration = new HolidayEventsLoaderConfiguration();
-
-  @JsonProperty("autoOnboard")
-  private AutoOnboardConfiguration autoOnboardConfiguration = new AutoOnboardConfiguration();
 
   // TODO CYRIL not used anymore - can be removed 
   private Map<String, Object> monitorConfiguration = new HashMap<>();
@@ -137,16 +133,6 @@ public class ThirdEyeSchedulerConfiguration {
   public ThirdEyeSchedulerConfiguration setMonitorConfiguration(
       final Map<String, Object> monitorConfiguration) {
     this.monitorConfiguration = monitorConfiguration;
-    return this;
-  }
-
-  public AutoOnboardConfiguration getAutoOnboardConfiguration() {
-    return autoOnboardConfiguration;
-  }
-
-  public ThirdEyeSchedulerConfiguration setAutoOnboardConfiguration(
-      final AutoOnboardConfiguration autoOnboardConfiguration) {
-    this.autoOnboardConfiguration = autoOnboardConfiguration;
     return this;
   }
 }

@@ -13,8 +13,6 @@
  */
 package ai.startree.thirdeye.scheduler;
 
-import ai.startree.thirdeye.scheduler.autoonboard.AutoOnboardConfiguration;
-import ai.startree.thirdeye.scheduler.autoonboard.AutoOnboardService;
 import ai.startree.thirdeye.scheduler.events.HolidayEventsLoader;
 import ai.startree.thirdeye.scheduler.events.HolidayEventsLoaderConfiguration;
 import ai.startree.thirdeye.scheduler.taskcleanup.TaskCleanUpConfiguration;
@@ -40,9 +38,7 @@ public class SchedulerService implements Managed {
 
   private final ThirdEyeSchedulerConfiguration config;
   private final HolidayEventsLoaderConfiguration holidayEventsLoaderConfiguration;
-  private final AutoOnboardConfiguration autoOnboardConfiguration;
   private final TaskDriverConfiguration taskDriverConfiguration;
-  private final AutoOnboardService autoOnboardService;
   private final HolidayEventsLoader holidayEventsLoader;
   private final DetectionCronScheduler detectionScheduler;
   private final SubscriptionCronScheduler subscriptionScheduler;
@@ -53,18 +49,14 @@ public class SchedulerService implements Managed {
   @Inject
   public SchedulerService(final ThirdEyeSchedulerConfiguration config,
       final HolidayEventsLoaderConfiguration holidayEventsLoaderConfiguration,
-      final AutoOnboardConfiguration autoOnboardConfiguration,
       final TaskDriverConfiguration taskDriverConfiguration,
-      final AutoOnboardService autoOnboardService,
       final HolidayEventsLoader holidayEventsLoader,
       final DetectionCronScheduler detectionScheduler,
       final SubscriptionCronScheduler subscriptionScheduler,
       final TaskManager taskManager) {
     this.config = config;
     this.holidayEventsLoaderConfiguration = holidayEventsLoaderConfiguration;
-    this.autoOnboardConfiguration = autoOnboardConfiguration;
     this.taskDriverConfiguration = taskDriverConfiguration;
-    this.autoOnboardService = autoOnboardService;
     this.holidayEventsLoader = holidayEventsLoader;
     this.detectionScheduler = detectionScheduler;
     this.subscriptionScheduler = subscriptionScheduler;
@@ -76,10 +68,6 @@ public class SchedulerService implements Managed {
 
   @Override
   public void start() throws Exception {
-    if (autoOnboardConfiguration.isEnabled()) {
-      autoOnboardService.start();
-    }
-
     if (holidayEventsLoaderConfiguration.isEnabled()) {
       holidayEventsLoader.start();
     }
@@ -139,9 +127,6 @@ public class SchedulerService implements Managed {
     executorService.shutdown();
     if (holidayEventsLoaderConfiguration.isEnabled()) {
       holidayEventsLoader.shutdown();
-    }
-    if (autoOnboardConfiguration.isEnabled()) {
-      autoOnboardService.shutdown();
     }
     if (detectionScheduler != null) {
       detectionScheduler.shutdown();

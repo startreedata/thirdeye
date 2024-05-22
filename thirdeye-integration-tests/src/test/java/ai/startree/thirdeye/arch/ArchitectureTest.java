@@ -61,7 +61,6 @@ import ai.startree.thirdeye.scheduler.DetectionCronScheduler;
 import ai.startree.thirdeye.scheduler.JobSchedulerService;
 import ai.startree.thirdeye.scheduler.SchedulerService;
 import ai.startree.thirdeye.scheduler.SubscriptionCronScheduler;
-import ai.startree.thirdeye.scheduler.autoonboard.AutoOnboardService;
 import ai.startree.thirdeye.scheduler.events.HolidayEventsLoader;
 import ai.startree.thirdeye.scheduler.events.MockEventsLoader;
 import ai.startree.thirdeye.scheduler.job.DetectionPipelineJob;
@@ -173,7 +172,6 @@ public class ArchitectureTest {
         DetectionPipelineJob.class,
         MockEventsLoader.class,
         HolidayEventsLoader.class,
-        AutoOnboardService.class,
         SubscriptionCronScheduler.class,
         SchedulerService.class,
         JobSchedulerService.class,

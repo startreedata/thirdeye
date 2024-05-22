@@ -13,7 +13,6 @@
  */
 package ai.startree.thirdeye.scheduler;
 
-import ai.startree.thirdeye.scheduler.autoonboard.AutoOnboardConfiguration;
 import ai.startree.thirdeye.scheduler.events.HolidayEventsLoaderConfiguration;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
@@ -38,13 +37,6 @@ public class ThirdEyeSchedulerModule extends AbstractModule {
   public HolidayEventsLoaderConfiguration getHolidayEventsLoaderConfiguration(
       ThirdEyeSchedulerConfiguration configuration) {
     return configuration.getHolidayEventsLoaderConfiguration();
-  }
-
-  @Singleton
-  @Provides
-  public AutoOnboardConfiguration getAutoOnboardConfiguration(
-      ThirdEyeSchedulerConfiguration configuration) {
-    return configuration.getAutoOnboardConfiguration();
   }
 
   @Singleton

@@ -17,7 +17,6 @@ import java.time.Duration;
 
 public class AutoOnboardConfiguration {
 
-  private boolean enabled = false;
   private Duration frequency = Duration.ofMinutes(5);
 
   public Duration getFrequency() {
@@ -30,11 +29,6 @@ public class AutoOnboardConfiguration {
   }
 
   public boolean isEnabled() {
-    return enabled;
-  }
-
-  public AutoOnboardConfiguration setEnabled(final boolean enabled) {
-    this.enabled = enabled;
-    return this;
+    return false;
   }
 }

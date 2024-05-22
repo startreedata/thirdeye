@@ -58,7 +58,7 @@ public class TaskService extends CrudService<TaskApi, TaskDTO> {
   }
 
   public void purge(final ThirdEyeServerPrincipal principal, final int nDaysToDelete, final int limit) {
-    // fixme cyril add authz
+    authorizationManager.ensureHasRootAccess(principal);
     taskManager.purge(Duration.ofDays(nDaysToDelete), limit);
   }
 }

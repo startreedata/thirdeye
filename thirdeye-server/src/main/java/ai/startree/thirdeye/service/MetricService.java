@@ -52,7 +52,6 @@ public class MetricService extends CrudService<MetricApi, MetricConfigDTO> {
     super.validate(principal, api, existing);
 
     ensureExists(api.getDataset(), "dataset");
-    // fixme cyril authz - filter by namespace
     final List<DatasetConfigDTO> sameName = datasetConfigManager.findByName(api.getDataset().getName());
     final List<DatasetConfigDTO> sameNameSameNamespace = authorizationManager.filterByNamespace(principal,
         optional(api.getAuth()).map(AuthorizationConfigurationApi::getNamespace).orElse(null), 
@@ -63,13 +62,15 @@ public class MetricService extends CrudService<MetricApi, MetricConfigDTO> {
 
     // For new Metric or existing metric with different name
     if (existing == null || !existing.getName().equals(api.getName())) {
-      final long nMetricsSameNameAndDataset = dtoManager.findByName(api.getName())
+      final List<MetricConfigDTO> metricsWithSameNameSameDataset = dtoManager.findByName(api.getName())
           .stream()
           // TODO CYRIL authz introduce proper method in MetricManager instead of doing filtering here
           .filter(m -> Objects.equals(api.getDataset().getName(), m.getDataset()))
           .filter(m -> Objects.equals(datasetDto.namespace(), m.namespace()))
-          .count();
-      ensure(nMetricsSameNameAndDataset <= 0,
+          .toList();
+      final List<MetricConfigDTO> metricsWithSameNameSameDatasetSameNamespace = authorizationManager.filterByNamespace(principal,
+          optional(api.getAuth()).map(AuthorizationConfigurationApi::getNamespace).orElse(null), metricsWithSameNameSameDataset);
+      ensure(metricsWithSameNameSameDatasetSameNamespace.isEmpty(),
           ERR_DUPLICATE_ENTITY,
           String.format("Metric with name: %s and dataset: %s already exists.",
               api.getName(),

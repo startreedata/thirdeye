@@ -28,7 +28,6 @@ import ai.startree.thirdeye.spi.task.TaskInfo;
 import ai.startree.thirdeye.spi.task.TaskStatus;
 import ai.startree.thirdeye.spi.task.TaskType;
 import com.codahale.metrics.MetricRegistry;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.inject.Injector;
 import java.sql.Timestamp;
 import java.util.List;
@@ -107,7 +106,7 @@ public class TestTaskManager {
   }
 
   @Test
-  public void testRefId() throws JsonProcessingException {
+  public void testRefId() throws Exception {
     final long refId = 4321L;
     final TaskDTO taskDto = taskManager.createTaskDto(
         new TaskInfo() {

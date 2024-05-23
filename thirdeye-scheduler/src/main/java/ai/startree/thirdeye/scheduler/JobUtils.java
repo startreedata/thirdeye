@@ -33,6 +33,15 @@ public class JobUtils {
 
   private static final Logger LOG = LoggerFactory.getLogger(JobUtils.class);
 
+  // TODO cyril add to grafana dashboard
+  // count the number of times the *creation* of a task failed. Should always be zero.  
+  public static final Map<TaskType, Counter> FAILED_TASK_CREATION_COUNTERS =
+      Arrays.stream(TaskType.values()).collect(Collectors.toMap(
+          t -> t,
+          t -> Metrics.counter("thirdeye_failed_task_creation_total", "task_type",
+              t.toString())));
+
+  // count the number of times a task is not created because the same task is already WAITING or RUNNING. 
   public static final Map<TaskType, Counter> BACKPRESSURE_COUNTERS =
       Arrays.stream(TaskType.values()).collect(Collectors.toMap(
           t -> t,

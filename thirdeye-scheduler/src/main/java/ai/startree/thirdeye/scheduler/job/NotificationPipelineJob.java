@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.scheduler.job;
 
 import static ai.startree.thirdeye.scheduler.JobUtils.BACKPRESSURE_COUNTERS;
+import static ai.startree.thirdeye.scheduler.JobUtils.FAILED_TASK_CREATION_COUNTERS;
 import static ai.startree.thirdeye.scheduler.JobUtils.getIdFromJobKey;
 import static ai.startree.thirdeye.spi.task.TaskType.NOTIFICATION;
 
@@ -23,7 +24,6 @@ import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.worker.task.DetectionAlertTaskInfo;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobKey;
@@ -60,18 +60,11 @@ public class NotificationPipelineJob implements Job {
         BACKPRESSURE_COUNTERS.get(NOTIFICATION).increment();
         return;
       }
-      try {
-        final TaskDTO t = taskManager.createTaskDto(taskInfo, NOTIFICATION, subscriptionGroup.getAuth());
-        LOG.info("Created {} task {}. taskInfo: {}", NOTIFICATION, t.getId(), t);
-      } catch (final JsonProcessingException e) {
-        LOG.error("Exception in Json Serialization in taskInfo for subscription group: {}",
-            subscriptionGroupId,
-            e);
-      }
+      final TaskDTO t = taskManager.createTaskDto(taskInfo, NOTIFICATION, subscriptionGroup.getAuth());
+      LOG.info("Created {} task {}. taskInfo: {}", NOTIFICATION, t.getId(), t);
     } catch (Exception e) {
-      // Catch all exception to avoid job being stuck in the scheduler.
-      // todo cyril - not sure if it is really necessary to catch here - a job failing 
       LOG.error("Exception running notification pipeline job {}. Notification task will not be scheduled.",  ctx.getJobDetail().getKey().getName(), e);
+      FAILED_TASK_CREATION_COUNTERS.get(NOTIFICATION).increment();
     }
   }
 }

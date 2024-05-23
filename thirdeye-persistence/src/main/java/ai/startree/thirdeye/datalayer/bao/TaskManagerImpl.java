@@ -74,9 +74,13 @@ public class TaskManagerImpl implements TaskManager {
 
   @Override
   public TaskDTO createTaskDto(final TaskInfo taskInfo, final TaskType taskType, final
-  AuthorizationConfigurationDTO auth)
-      throws JsonProcessingException {
-    final String taskInfoJson = OBJECT_MAPPER.writeValueAsString(taskInfo);
+  AuthorizationConfigurationDTO auth) {
+    final String taskInfoJson;
+    try {
+      taskInfoJson = OBJECT_MAPPER.writeValueAsString(taskInfo);
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException("Error while serializing task info: " + taskInfo, e);
+    }
 
     final TaskDTO task = new TaskDTO()
         .setTaskType(taskType)
@@ -105,9 +109,11 @@ public class TaskManagerImpl implements TaskManager {
   public Long save(final TaskDTO entity) {
     if (entity.getId() != null) {
       //TODO: throw exception and force the caller to call update instead
+      // fixme asap cyril should throw if the update returns 0, because the entity was not saved
       update(entity);
       return entity.getId();
     }
+    // fixme asap cyril should throw if the put returns null, because the entity was not saved
     final Long id = dao.put(entity);
     entity.setId(id);
     return id;

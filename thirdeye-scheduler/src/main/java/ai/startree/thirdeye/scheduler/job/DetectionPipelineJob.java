@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.scheduler.job;
 
 import static ai.startree.thirdeye.scheduler.JobUtils.BACKPRESSURE_COUNTERS;
+import static ai.startree.thirdeye.scheduler.JobUtils.FAILED_TASK_CREATION_COUNTERS;
 import static ai.startree.thirdeye.scheduler.JobUtils.getIdFromJobKey;
 import static ai.startree.thirdeye.spi.Constants.DEFAULT_CHRONOLOGY;
 import static ai.startree.thirdeye.spi.task.TaskType.DETECTION;
@@ -32,7 +33,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.DetectionPipelineTaskInfo;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskType;
 import ai.startree.thirdeye.spi.util.TimeUtils;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -53,40 +53,44 @@ public class DetectionPipelineJob implements Job {
 
   @Override
   public void execute(JobExecutionContext ctx) {
-    final JobKey jobKey = ctx.getJobDetail().getKey();
-    final Long alertId = getIdFromJobKey(jobKey);
-    final AlertManager alertManager = JobUtils.getInstance(ctx, AlertManager.class);
-    final AlertDTO alert = alertManager.findById(alertId);
-    if (alert == null) {
-      // possible if the alert was deleted - no need to run the task
-      LOG.warn("Alert with id {} not found. Alert was deleted? Skipping detection job scheduling.", alertId);
-      return;
-    }
-    final long endTime = ctx.getScheduledFireTime().getTime();
-    final long start = computeTaskStart(ctx, alert, endTime);
-    final DetectionPipelineTaskInfo taskInfo = new DetectionPipelineTaskInfo(alert.getId(), start, endTime);
-
-    // if a task is pending and not time out yet, don't schedule more
-    final String jobName = jobKey.getName();
-    final TaskManager taskManager = JobUtils.getInstance(ctx, TaskManager.class);
-    if (taskManager.isAlreadyRunning(jobName)) {
-      LOG.warn(
-          "Skipped scheduling detection task for {} with start time {} and end time {}. A task for the same entity is already in the queue.",
-          jobName,
-          taskInfo.getStart(),
-          taskInfo.getEnd());
-      BACKPRESSURE_COUNTERS.get(DETECTION).increment();
-      return;
-    }
-
     try {
+      final JobKey jobKey = ctx.getJobDetail().getKey();
+      final Long alertId = getIdFromJobKey(jobKey);
+      final AlertManager alertManager = JobUtils.getInstance(ctx, AlertManager.class);
+      final AlertDTO alert = alertManager.findById(alertId);
+      if (alert == null) {
+        // possible if the alert was deleted - no need to run the task
+        LOG.warn(
+            "Alert with id {} not found. Alert was deleted? Skipping detection job scheduling.",
+            alertId);
+        return;
+      }
+      final long endTime = ctx.getScheduledFireTime().getTime();
+      final long start = computeTaskStart(ctx, alert, endTime);
+      final DetectionPipelineTaskInfo taskInfo = new DetectionPipelineTaskInfo(alert.getId(), start,
+          endTime);
+
+      // if a task is pending and not time out yet, don't schedule more
+      final String jobName = jobKey.getName();
+      final TaskManager taskManager = JobUtils.getInstance(ctx, TaskManager.class);
+      if (taskManager.isAlreadyRunning(jobName)) {
+        LOG.warn(
+            "Skipped scheduling detection task for {} with start time {} and end time {}. A task for the same entity is already in the queue.",
+            jobName,
+            taskInfo.getStart(),
+            taskInfo.getEnd());
+        BACKPRESSURE_COUNTERS.get(DETECTION).increment();
+        return;
+      }
       final TaskDTO taskDTO = taskManager.createTaskDto(taskInfo, TaskType.DETECTION,
           alert.getAuth());
-      LOG.info("Created {} task {} with settings {}", TaskType.DETECTION, taskDTO.getId(), taskDTO);
-    } catch (JsonProcessingException e) {
-      LOG.error("Exception when converting DetectionPipelineTaskInfo {} to jsonString",
-          taskInfo,
-          e);
+      LOG.info("Created {} task {} with settings {}", TaskType.DETECTION, taskDTO.getId(),
+          taskDTO);
+    } catch (Exception e) {
+      LOG.error(
+          "Exception running detection pipeline job {}. Detection task will not be scheduled.",
+          ctx.getJobDetail().getKey().getName(), e);
+      FAILED_TASK_CREATION_COUNTERS.get(DETECTION).increment();
     }
   }
 

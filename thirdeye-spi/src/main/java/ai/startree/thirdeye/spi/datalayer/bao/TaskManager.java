@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.spi.datalayer.bao;
 
+import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskInfo;
 import ai.startree.thirdeye.spi.task.TaskStatus;
@@ -24,19 +25,17 @@ import java.util.List;
 
 public interface TaskManager extends AbstractManager<TaskDTO> {
 
-  TaskDTO createTaskDto(final long refId, final TaskInfo taskInfo, final TaskType taskType)
+  TaskDTO createTaskDto(final TaskInfo taskInfo, final TaskType taskType, final
+  AuthorizationConfigurationDTO auth)
       throws JsonProcessingException;
 
-  List<TaskDTO> findByJobIdStatusNotIn(Long jobId, TaskStatus status);
-
-  List<TaskDTO> findByStatusWithinDays(TaskStatus status, int days);
-
-  List<TaskDTO> findTimeoutTasksWithinDays(int days, long maxTaskTime);
-
   TaskDTO findNextTaskToRun();
+
+  boolean isAlreadyRunning(final String taskName);
   
   boolean acquireTaskToRun(TaskDTO taskDTO, final long workerId);
 
+  // fixme authz required ?
   List<TaskDTO> findByStatusAndWorkerId(Long workerId, TaskStatus status);
 
   void updateStatusAndTaskEndTime(Long id, TaskStatus oldStatus, TaskStatus newStatus,
@@ -46,11 +45,10 @@ public interface TaskManager extends AbstractManager<TaskDTO> {
 
   void updateLastActive(Long id);
 
-  int deleteRecordsOlderThanDaysWithStatus(int days, TaskStatus status);
-
   void purge(Duration expiryDuration, Integer limitOptional);
 
   void orphanTaskCleanUp(Timestamp activeThreshold);
 
+  // fixme authz required ?
   long countByStatus(final TaskStatus status);
 }

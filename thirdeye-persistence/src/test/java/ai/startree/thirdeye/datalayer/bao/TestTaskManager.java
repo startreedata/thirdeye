@@ -22,6 +22,7 @@ import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.datalayer.dao.TaskDao;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskInfo;
 import ai.startree.thirdeye.spi.task.TaskStatus;
@@ -108,16 +109,16 @@ public class TestTaskManager {
   @Test
   public void testRefId() throws JsonProcessingException {
     final long refId = 4321L;
-    final TaskDTO taskDto = taskManager.createTaskDto(refId,
+    final TaskDTO taskDto = taskManager.createTaskDto(
         new TaskInfo() {
           @SuppressWarnings("unused")
           public final int dummyVariable = 0; // required for jackson json serialization
           @Override
-          public Long getRefId() {
+          public long getRefId() {
             return refId;
           }
         },
-        TaskType.NOTIFICATION);
+        TaskType.NOTIFICATION, new AuthorizationConfigurationDTO());
     assertThat(taskDto.getRefId()).isEqualTo(refId);
 
     final TaskDTO byId = taskManager.findById(taskDto.getId());

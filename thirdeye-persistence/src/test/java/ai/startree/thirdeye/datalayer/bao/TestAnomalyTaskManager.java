@@ -134,13 +134,6 @@ public class TestAnomalyTaskManager {
     Assert.assertEquals(anomalyTask.getMessage(), "testMessage");
   }
 
-  @Test(dependsOnMethods = {"testUpdateStatusAndTaskEndTime"})
-  public void testFindByJobIdStatusNotIn() throws InterruptedException {
-    TaskStatus status = TaskStatus.COMPLETED;
-    List<TaskDTO> anomalyTaskSpecs = taskDAO.findByJobIdStatusNotIn(anomalyJobId, status);
-    Assert.assertEquals(anomalyTaskSpecs.size(), 1);
-  }
-
   @Test(dependsOnMethods = {"testCreate"})
   public void testUpdateTaskStartTime() {
     CLOCK.tick(50);
@@ -148,43 +141,6 @@ public class TestAnomalyTaskManager {
     taskDAO.updateTaskStartTime(anomalyTaskId1, taskStartTime);
     TaskDTO anomalyTask = taskDAO.findById(anomalyTaskId1);
     Assert.assertEquals(anomalyTask.getStartTime(), taskStartTime);
-  }
-
-  @Test(dependsOnMethods = {"testFindByJobIdStatusNotIn"})
-  public void testDeleteRecordOlderThanDaysWithStatus() {
-    TaskStatus status = TaskStatus.COMPLETED;
-    int numRecordsDeleted = taskDAO.deleteRecordsOlderThanDaysWithStatus(0, status);
-    Assert.assertEquals(numRecordsDeleted, 1);
-  }
-
-  @Test(dependsOnMethods = {"testDeleteRecordOlderThanDaysWithStatus"})
-  public void testFindByStatusWithinDays() throws JsonProcessingException {
-    JobDTO testAnomalyJobSpec = DatalayerTestUtils.getTestJobSpec();
-    anomalyJobId = jobDAO.save(testAnomalyJobSpec);
-    anomalyTaskId1 = taskDAO.save(getTestTaskSpec(testAnomalyJobSpec, 1));
-    Assert.assertNotNull(anomalyTaskId1);
-    anomalyTaskId2 = taskDAO.save(getTestTaskSpec(testAnomalyJobSpec, 1));
-    Assert.assertNotNull(anomalyTaskId2);
-
-    CLOCK.tick(2); // To ensure every task has been created more than 1 ms ago
-
-    List<TaskDTO> tasksWithZeroDays = taskDAO.findByStatusWithinDays(TaskStatus.WAITING, 0);
-    Assert.assertEquals(tasksWithZeroDays.size(), 0);
-
-    List<TaskDTO> tasksWithOneDays = taskDAO.findByStatusWithinDays(TaskStatus.WAITING, 1);
-    Assert.assertTrue(tasksWithOneDays.size() > 0);
-  }
-
-  @Test(dependsOnMethods = {"testDeleteRecordOlderThanDaysWithStatus"})
-  public void testFindTimeoutTasksWithinDays()
-  {
-    TaskDTO task1 = taskDAO.findById(anomalyTaskId1);
-    task1.setStatus(TaskStatus.RUNNING);
-    taskDAO.update(task1);
-
-    CLOCK.tick(55); // To ensure every task has been updated more than 50 ms ago
-    List<TaskDTO> timeoutTasksWithinOneDays = taskDAO.findTimeoutTasksWithinDays(7, 50);
-    Assert.assertTrue(timeoutTasksWithinOneDays.size() > 0);
   }
 
   TaskDTO getTestTaskSpec(JobDTO anomalyJobSpec, final long refId) throws JsonProcessingException {
@@ -202,5 +158,10 @@ public class TestAnomalyTaskManager {
 
   public static class MockTaskInfo implements TaskInfo {
     public int property = 10;
+
+    @Override
+    public long getRefId() {
+      return 0;
+    }
   }
 }

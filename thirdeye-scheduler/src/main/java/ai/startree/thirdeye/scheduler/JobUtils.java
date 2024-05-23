@@ -11,21 +11,15 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.spi.task;
+package ai.startree.thirdeye.scheduler;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.quartz.JobKey;
 
-/**
- * Interface for task info of the various types of tasks
- */
-public interface TaskInfo {
+public class JobUtils {
 
-  /**
-   * refId is the id of the entity that the task is associated with.
-   * For example, if the task is to run a detection pipeline, the refId is the id of the alert. In
-   * case of a notification task, the refId is the id of the subscription group.
-   * @return the id of the reference entity
-   */
-  @JsonIgnore
-  long getRefId();
+  public static Long getIdFromJobKey(JobKey jobKey) {
+    final String[] tokens = jobKey.getName().split("_");
+    final String id = tokens[tokens.length - 1];
+    return Long.valueOf(id);
+  }
 }

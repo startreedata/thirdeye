@@ -46,7 +46,7 @@ public class TaskService extends CrudService<TaskApi, TaskDTO> {
     this.taskManager = taskManager;
   }
 
-  // Operation not supported to prevent create of tasks
+  // operation not supported to prevent creation of tasks via API
   @Override
   protected void prepareCreatedDto(final ThirdEyeServerPrincipal principal, final TaskDTO taskDTO) {
     throw new UnsupportedOperationException();
@@ -58,7 +58,7 @@ public class TaskService extends CrudService<TaskApi, TaskDTO> {
   }
 
   public void purge(final ThirdEyeServerPrincipal principal, final int nDaysToDelete, final int limit) {
-    // fixme cyril add authz
+    authorizationManager.ensureHasRootAccess(principal);
     taskManager.purge(Duration.ofDays(nDaysToDelete), limit);
   }
 }

@@ -58,13 +58,12 @@ import ai.startree.thirdeye.plugins.postprocessor.ColdStartPostProcessor;
 import ai.startree.thirdeye.rca.RcaInfoFetcher;
 import ai.startree.thirdeye.resources.CrudResource;
 import ai.startree.thirdeye.scheduler.DetectionCronScheduler;
-import ai.startree.thirdeye.scheduler.JobSchedulerService;
 import ai.startree.thirdeye.scheduler.SchedulerService;
 import ai.startree.thirdeye.scheduler.SubscriptionCronScheduler;
 import ai.startree.thirdeye.scheduler.events.HolidayEventsLoader;
 import ai.startree.thirdeye.scheduler.events.MockEventsLoader;
 import ai.startree.thirdeye.scheduler.job.DetectionPipelineJob;
-import ai.startree.thirdeye.scheduler.job.NotificationPipelineTaskCreator;
+import ai.startree.thirdeye.scheduler.job.NotificationPipelineJob;
 import ai.startree.thirdeye.service.CrudService;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer.ThirdEyeAuthorizerFactory;
@@ -163,18 +162,17 @@ public class ArchitectureTest {
     // FIXME CYRIL  apart from services - these are the class allowed to use non secured db layers
     // review, and enforce namespace isolation where necessary
     //  or all methods should require an identity
-    final Class[] NON_SECURED_DB_LAYER_USERS_WHITELIST = {NotificationTaskRunner.class,
+    final Class<?>[] NON_SECURED_DB_LAYER_USERS_WHITELIST = {NotificationTaskRunner.class,
         DetectionPipelineTaskRunner.class,
         TaskDriverRunnable.class,
         TaskDriver.class,
         DetectionHealth.class,
-        NotificationPipelineTaskCreator.class,
         DetectionPipelineJob.class,
+        NotificationPipelineJob.class,
         MockEventsLoader.class,
         HolidayEventsLoader.class,
         SubscriptionCronScheduler.class,
         SchedulerService.class,
-        JobSchedulerService.class,
         DetectionCronScheduler.class,
         RcaInfoFetcher.class,
         ColdStartPostProcessor.class,

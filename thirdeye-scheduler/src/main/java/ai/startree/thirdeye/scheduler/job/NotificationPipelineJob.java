@@ -13,9 +13,17 @@
  */
 package ai.startree.thirdeye.scheduler.job;
 
-import static ai.startree.thirdeye.scheduler.JobSchedulerService.getIdFromJobKey;
+import static ai.startree.thirdeye.scheduler.JobUtils.getIdFromJobKey;
+import static ai.startree.thirdeye.spi.task.TaskType.NOTIFICATION;
 
+import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
+import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
+import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
+import ai.startree.thirdeye.worker.task.DetectionAlertTaskInfo;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.quartz.JobExecutionContext;
+import org.quartz.JobKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,16 +37,38 @@ public class NotificationPipelineJob extends ThirdEyeAbstractJob {
 
   @Override
   public void execute(final JobExecutionContext ctx) {
-    String jobKey = "unknown";
     try {
-      jobKey = ctx.getJobDetail().getKey().getName();
-      final var instance = getInstance(ctx, NotificationPipelineTaskCreator.class);
-
+      final JobKey jobKey = ctx.getJobDetail().getKey();
       final long subscriptionGroupId = getIdFromJobKey(jobKey);
-      instance.createTask(subscriptionGroupId);
+      final SubscriptionGroupManager subscriptionGroupManager = getInstance(ctx, SubscriptionGroupManager.class);
+      final SubscriptionGroupDTO subscriptionGroup = subscriptionGroupManager.findById(subscriptionGroupId);
+      if (subscriptionGroup == null) {
+        // possible if the subscription group was deleted - no need to run the task
+        LOG.warn("Subscription group with id {} not found. Subscription group was deleted? Skipping notification job scheduling.", subscriptionGroupId);
+        return;
+      }
+      final DetectionAlertTaskInfo taskInfo = new DetectionAlertTaskInfo(subscriptionGroupId);
+      
+      final String jobName = jobKey.getName();
+      final TaskManager taskManager = getInstance(ctx, TaskManager.class);
+      if (taskManager.isAlreadyRunning(jobName)) {
+        LOG.warn("Skipped scheduling notification task for {}. A task for the same entity is already in the queue.",
+            jobName);
+        BACKPRESSURE_COUNTERS.get(NOTIFICATION).increment();
+        return;
+      }
+      try {
+        final TaskDTO t = taskManager.createTaskDto(taskInfo, NOTIFICATION, subscriptionGroup.getAuth());
+        LOG.info("Created {} task {}. taskInfo: {}", NOTIFICATION, t.getId(), t);
+      } catch (final JsonProcessingException e) {
+        LOG.error("Exception in Json Serialization in taskInfo for subscription group: {}",
+            subscriptionGroupId,
+            e);
+      }
     } catch (Exception e) {
       // Catch all exception to avoid job being stuck in the scheduler.
-      LOG.error("Exception running job key:" + jobKey, e);
+      // todo cyril - not sure if it is really necessary to catch here - a job failing 
+      LOG.error("Exception running notification pipeline job {}. Notification task will not be scheduled.",  ctx.getJobDetail().getKey().getName(), e);
     }
   }
 }

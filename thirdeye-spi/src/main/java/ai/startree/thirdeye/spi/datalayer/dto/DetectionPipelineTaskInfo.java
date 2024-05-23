@@ -59,7 +59,7 @@ public class DetectionPipelineTaskInfo implements TaskInfo {
   }
 
   @Override
-  public Long getRefId() {
+  public long getRefId() {
     return getConfigId();
   }
 }

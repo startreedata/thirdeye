@@ -94,15 +94,21 @@ public class TaskManagerImpl implements TaskManager {
   }
 
   @Override
-  public boolean isAlreadyRunning(final String taskName) {
-    final List<TaskDTO> scheduledTasks = findByPredicate(Predicate.AND(
+  public boolean isAlreadyInQueue(final String taskName) {
+    final List<TaskDTO> tasksInQueue = findByPredicate(Predicate.AND(
         Predicate.EQ("name", taskName),
         Predicate.OR(
             Predicate.EQ("status", TaskStatus.RUNNING.toString()),
             Predicate.EQ("status", TaskStatus.WAITING.toString())
         ))
     );
-    return !scheduledTasks.isEmpty();
+    
+    // debugging logs TODO cyril remove 
+    if (!tasksInQueue.isEmpty()) {
+      LOG.warn("Task {} is already running or waiting in the queue. Found the tasks {}: ", taskName, tasksInQueue);
+    }
+    
+    return !tasksInQueue.isEmpty();
   }
 
   @Override

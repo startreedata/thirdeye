@@ -61,7 +61,7 @@ public class NotificationPipelineJob implements Job {
       final DetectionAlertTaskInfo taskInfo = new DetectionAlertTaskInfo(subscriptionGroupId);
       
       final String jobName = jobKey.getName();
-      if (taskManager.isAlreadyRunning(jobName)) {
+      if (taskManager.isAlreadyInQueue(jobName)) {
         LOG.warn("Skipped scheduling notification task for {}. A task for the same entity is already in the queue.",
             jobName);
         BACKPRESSURE_COUNTERS.get(NOTIFICATION).increment();

@@ -35,7 +35,8 @@ public interface TaskManager extends AbstractManager<TaskDTO> {
 
   TaskDTO findNextTaskToRun();
 
-  boolean isAlreadyRunning(final String taskName);
+  // true if a task with the same name and status WAITING or RUNNING exists 
+  boolean isAlreadyInQueue(final String taskName);
 
   boolean acquireTaskToRun(TaskDTO taskDTO, final long workerId);
 

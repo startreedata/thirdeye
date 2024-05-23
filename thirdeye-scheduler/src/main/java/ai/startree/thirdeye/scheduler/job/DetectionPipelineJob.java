@@ -82,7 +82,7 @@ public class DetectionPipelineJob implements Job {
 
       // if a task is pending and not time out yet, don't schedule more
       final String jobName = jobKey.getName();
-      if (taskManager.isAlreadyRunning(jobName)) {
+      if (taskManager.isAlreadyInQueue(jobName)) {
         LOG.warn(
             "Skipped scheduling detection task for {} with start time {} and end time {}. A task for the same entity is already in the queue.",
             jobName,

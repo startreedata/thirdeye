@@ -14,6 +14,7 @@
  */
 import { AnomalyFeedbackType } from "./anomaly.interfaces";
 import { DetectionEvaluation } from "./detection.interfaces";
+import { AnalysisRunInfo } from "./rca.interfaces";
 import { User } from "./user.interfaces";
 
 export type PropertyConfigValueTypes =
@@ -63,6 +64,7 @@ export interface EvaluatedTemplateMetadata {
 }
 
 export interface AlertInsight {
+    analysisRunInfo: AnalysisRunInfo;
     datasetStartTime: number;
     datasetEndTime: number;
     defaultStartTime: number;

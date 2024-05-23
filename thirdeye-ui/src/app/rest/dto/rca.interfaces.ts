@@ -72,6 +72,10 @@ export interface AnomalyDimensionAnalysisMetricRow {
     cost: number;
 }
 
+export interface AnalysisRunInfo {
+    success: boolean;
+    message: string;
+}
 export interface AnomalyDimensionAnalysisData {
     metric: {
         name: string;
@@ -92,10 +96,7 @@ export interface AnomalyDimensionAnalysisData {
         name: string;
         cost: number;
     }[];
-    analysisRunInfo: {
-        success: boolean;
-        message: string;
-    };
+    analysisRunInfo: AnalysisRunInfo;
 }
 
 /**

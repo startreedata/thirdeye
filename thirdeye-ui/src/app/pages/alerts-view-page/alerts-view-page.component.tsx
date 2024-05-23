@@ -52,7 +52,10 @@ import {
     useNotificationProviderV1,
 } from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
-import { useResetAlert } from "../../rest/alerts/alerts.actions";
+import {
+    useGetAlertInsight,
+    useResetAlert,
+} from "../../rest/alerts/alerts.actions";
 import {
     getAlert,
     getAlertStats,
@@ -85,6 +88,7 @@ export const AlertsViewPage: FunctionComponent = () => {
         useState<NotificationV1 | null>(null);
     const [resetStatusNotification, setResetStatusNotification] =
         useState<NotificationV1 | null>(null);
+    const { alertInsight, getAlertInsight } = useGetAlertInsight();
 
     const [searchParams, setSearchParams] = useSearchParams();
 
@@ -146,6 +150,26 @@ export const AlertsViewPage: FunctionComponent = () => {
         ],
         [searchParams]
     );
+
+    useEffect(() => {
+        getAlertInsight({ alertId: Number(alertId) });
+    }, []);
+
+    useEffect(() => {
+        if (
+            !alertInsight?.analysisRunInfo?.success &&
+            alertInsight?.analysisRunInfo?.message
+        ) {
+            notifyIfErrors(
+                ActionStatus.Error,
+                [alertInsight.analysisRunInfo.message],
+                notify,
+                t("message.error-while-fetching", {
+                    entity: t("label.alert-insight"),
+                })
+            );
+        }
+    }, [alertInsight?.analysisRunInfo]);
 
     const fetchStats = (): void => {
         getAlertStats({

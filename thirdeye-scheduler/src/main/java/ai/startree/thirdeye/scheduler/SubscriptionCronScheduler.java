@@ -68,8 +68,17 @@ public class SubscriptionCronScheduler implements Runnable {
 
   @Inject
   public SubscriptionCronScheduler(final SubscriptionGroupManager subscriptionGroupManager,
-      ThirdEyeSchedulerConfiguration configuration) {
-    this(subscriptionGroupManager, createScheduler(), configuration);
+      final ThirdEyeSchedulerConfiguration configuration,
+      final GuiceJobFactory guiceJobFactory) {
+    try {
+      scheduler = StdSchedulerFactory.getDefaultScheduler();
+      scheduler.setJobFactory(guiceJobFactory);
+    } catch (final SchedulerException e) {
+      throw new RuntimeException("Failed to initialize the scheduler", e);
+    }
+    this.subscriptionGroupManager = subscriptionGroupManager;
+    this.configuration = configuration;
+    executorService = createExecutorService();
   }
 
   @VisibleForTesting
@@ -86,14 +95,6 @@ public class SubscriptionCronScheduler implements Runnable {
     return Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder()
         .setNameFormat("subscription-scheduler-%d")
         .build());
-  }
-
-  private static Scheduler createScheduler() {
-    try {
-      return StdSchedulerFactory.getDefaultScheduler();
-    } catch (final SchedulerException e) {
-      throw new RuntimeException("Failed to initialize the scheduler", e);
-    }
   }
 
   private static JobDetail buildJobDetail(final JobKey jobKey) {
@@ -119,14 +120,6 @@ public class SubscriptionCronScheduler implements Runnable {
   @VisibleForTesting
   static JobKey jobKey(final Long id) {
     return new JobKey(String.format("%s_%d", TaskType.NOTIFICATION, id), Q_JOB_GROUP);
-  }
-
-  public void addToContext(final String identifier, final Object instance) {
-    try {
-      scheduler.getContext().put(identifier, instance);
-    } catch (final SchedulerException e) {
-      throw new RuntimeException("Failed to add to scheduler context", e);
-    }
   }
 
   public void start() throws SchedulerException {
@@ -163,7 +156,7 @@ public class SubscriptionCronScheduler implements Runnable {
   }
 
   @VisibleForTesting
-  void processSubscriptionGroup(final SubscriptionGroupDTO sg,
+  protected void processSubscriptionGroup(final SubscriptionGroupDTO sg,
       final Set<JobKey> scheduledJobs) {
     try {
       final Long id = sg.getId();

@@ -18,12 +18,12 @@ import static ai.startree.thirdeye.scheduler.JobUtils.FAILED_TASK_CREATION_COUNT
 import static ai.startree.thirdeye.scheduler.JobUtils.getIdFromJobKey;
 import static ai.startree.thirdeye.spi.task.TaskType.NOTIFICATION;
 
-import ai.startree.thirdeye.scheduler.JobUtils;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.worker.task.DetectionAlertTaskInfo;
+import com.google.inject.Inject;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobKey;
@@ -37,13 +37,21 @@ import org.slf4j.LoggerFactory;
 public class NotificationPipelineJob implements Job {
 
   private static final Logger LOG = LoggerFactory.getLogger(NotificationPipelineJob.class);
+  private final SubscriptionGroupManager subscriptionGroupManager;
+  private final TaskManager taskManager;
+
+  @Inject
+  public NotificationPipelineJob(final SubscriptionGroupManager subscriptionGroupManager, 
+      final TaskManager taskManager) {
+    this.subscriptionGroupManager = subscriptionGroupManager;
+    this.taskManager = taskManager;
+  }
 
   @Override
   public void execute(final JobExecutionContext ctx) {
     try {
       final JobKey jobKey = ctx.getJobDetail().getKey();
       final long subscriptionGroupId = getIdFromJobKey(jobKey);
-      final SubscriptionGroupManager subscriptionGroupManager = JobUtils.getInstance(ctx, SubscriptionGroupManager.class);
       final SubscriptionGroupDTO subscriptionGroup = subscriptionGroupManager.findById(subscriptionGroupId);
       if (subscriptionGroup == null) {
         // possible if the subscription group was deleted - no need to run the task
@@ -53,7 +61,6 @@ public class NotificationPipelineJob implements Job {
       final DetectionAlertTaskInfo taskInfo = new DetectionAlertTaskInfo(subscriptionGroupId);
       
       final String jobName = jobKey.getName();
-      final TaskManager taskManager = JobUtils.getInstance(ctx, TaskManager.class);
       if (taskManager.isAlreadyRunning(jobName)) {
         LOG.warn("Skipped scheduling notification task for {}. A task for the same entity is already in the queue.",
             jobName);

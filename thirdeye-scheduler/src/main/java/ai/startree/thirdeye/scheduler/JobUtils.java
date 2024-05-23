@@ -13,26 +13,15 @@
  */
 package ai.startree.thirdeye.scheduler;
 
-import static ai.startree.thirdeye.spi.Constants.CTX_INJECTOR;
-import static java.util.Objects.requireNonNull;
-
 import ai.startree.thirdeye.spi.task.TaskType;
-import com.google.inject.Injector;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.quartz.JobExecutionContext;
 import org.quartz.JobKey;
-import org.quartz.SchedulerException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class JobUtils {
-
-  private static final Logger LOG = LoggerFactory.getLogger(JobUtils.class);
-
   // TODO cyril add to grafana dashboard
   // count the number of times the *creation* of a task failed. Should always be zero.  
   public static final Map<TaskType, Counter> FAILED_TASK_CREATION_COUNTERS =
@@ -52,21 +41,5 @@ public class JobUtils {
     final String[] tokens = jobKey.getName().split("_");
     final String id = tokens[tokens.length - 1];
     return Long.valueOf(id);
-  }
-
-  // FIXME CYRIL implement a custom JobFactory instead of getting the instance at execution time 
-  public static <T> T getInstance(final JobExecutionContext context, Class<T> clazz) {
-    final Injector injector = (Injector) getObjectFromContext(context, CTX_INJECTOR);
-    return injector.getInstance(clazz);
-  }
-
-  private static Object getObjectFromContext(final JobExecutionContext context, final String key) {
-    try {
-      return requireNonNull(context.getScheduler().getContext().get(key));
-    } catch (SchedulerException e) {
-      final String message = String.format("Scheduler error. No key: %s", key);
-      LOG.error(message, e);
-      throw new RuntimeException(message, e);
-    }
   }
 }

@@ -62,7 +62,9 @@ public class DetectionCronScheduler implements Runnable {
   private final int alertDelay;
 
   @Inject
-  public DetectionCronScheduler(final ThirdEyeSchedulerConfiguration thirdEyeSchedulerConfiguration,
+  public DetectionCronScheduler(
+      final ThirdEyeSchedulerConfiguration thirdEyeSchedulerConfiguration,
+      final GuiceJobFactory guiceJobFactory,
       final AlertManager alertManager) {
     this.alertManager = alertManager;
     alertDelay = thirdEyeSchedulerConfiguration.getAlertUpdateDelay();
@@ -70,14 +72,7 @@ public class DetectionCronScheduler implements Runnable {
         new ThreadFactoryBuilder().setNameFormat("detection-cron-%d").build());
     try {
       scheduler = StdSchedulerFactory.getDefaultScheduler();
-    } catch (final SchedulerException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  public void addToContext(final String identifier, final Object instance) {
-    try {
-      scheduler.getContext().put(identifier, instance);
+      scheduler.setJobFactory(guiceJobFactory);
     } catch (final SchedulerException e) {
       throw new RuntimeException(e);
     }

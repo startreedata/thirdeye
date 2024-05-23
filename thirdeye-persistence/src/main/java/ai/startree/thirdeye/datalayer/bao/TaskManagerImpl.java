@@ -59,7 +59,7 @@ public class TaskManagerImpl implements TaskManager {
   private final TaskDao dao;
 
   private static final Logger LOG = LoggerFactory.getLogger(TaskManagerImpl.class);
-  
+
   private final Meter orphanTasksCount;
   private final MetricRegistry metricRegistry;
 

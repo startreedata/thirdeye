@@ -13,13 +13,50 @@
  */
 package ai.startree.thirdeye.scheduler;
 
+import static ai.startree.thirdeye.spi.Constants.CTX_INJECTOR;
+import static java.util.Objects.requireNonNull;
+
+import ai.startree.thirdeye.spi.task.TaskType;
+import com.google.inject.Injector;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.Metrics;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.stream.Collectors;
+import org.quartz.JobExecutionContext;
 import org.quartz.JobKey;
+import org.quartz.SchedulerException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JobUtils {
+
+  private static final Logger LOG = LoggerFactory.getLogger(JobUtils.class);
+
+  public static final Map<TaskType, Counter> BACKPRESSURE_COUNTERS =
+      Arrays.stream(TaskType.values()).collect(Collectors.toMap(
+          t -> t,
+          t -> Metrics.counter("thirdeye_scheduler_backpressure_total", "task_type",
+              t.toString())));
 
   public static Long getIdFromJobKey(JobKey jobKey) {
     final String[] tokens = jobKey.getName().split("_");
     final String id = tokens[tokens.length - 1];
     return Long.valueOf(id);
+  }
+
+  public static <T> T getInstance(final JobExecutionContext context, Class<T> clazz) {
+    final Injector injector = (Injector) getObjectFromContext(context, CTX_INJECTOR);
+    return injector.getInstance(clazz);
+  }
+
+  private static Object getObjectFromContext(final JobExecutionContext context, final String key) {
+    try {
+      return requireNonNull(context.getScheduler().getContext().get(key));
+    } catch (SchedulerException e) {
+      final String message = String.format("Scheduler error. No key: %s", key);
+      LOG.error(message, e);
+      throw new RuntimeException(message, e);
+    }
   }
 }

@@ -13,15 +13,18 @@
  */
 package ai.startree.thirdeye.scheduler.job;
 
+import static ai.startree.thirdeye.scheduler.JobUtils.BACKPRESSURE_COUNTERS;
 import static ai.startree.thirdeye.scheduler.JobUtils.getIdFromJobKey;
 import static ai.startree.thirdeye.spi.task.TaskType.NOTIFICATION;
 
+import ai.startree.thirdeye.scheduler.JobUtils;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.worker.task.DetectionAlertTaskInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobKey;
 import org.slf4j.Logger;
@@ -31,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * The Detection alert job that run by the cron scheduler.
  * This job put notification task into database which can be picked up by works later.
  */
-public class NotificationPipelineJob extends ThirdEyeAbstractJob {
+public class NotificationPipelineJob implements Job {
 
   private static final Logger LOG = LoggerFactory.getLogger(NotificationPipelineJob.class);
 
@@ -40,7 +43,7 @@ public class NotificationPipelineJob extends ThirdEyeAbstractJob {
     try {
       final JobKey jobKey = ctx.getJobDetail().getKey();
       final long subscriptionGroupId = getIdFromJobKey(jobKey);
-      final SubscriptionGroupManager subscriptionGroupManager = getInstance(ctx, SubscriptionGroupManager.class);
+      final SubscriptionGroupManager subscriptionGroupManager = JobUtils.getInstance(ctx, SubscriptionGroupManager.class);
       final SubscriptionGroupDTO subscriptionGroup = subscriptionGroupManager.findById(subscriptionGroupId);
       if (subscriptionGroup == null) {
         // possible if the subscription group was deleted - no need to run the task
@@ -50,7 +53,7 @@ public class NotificationPipelineJob extends ThirdEyeAbstractJob {
       final DetectionAlertTaskInfo taskInfo = new DetectionAlertTaskInfo(subscriptionGroupId);
       
       final String jobName = jobKey.getName();
-      final TaskManager taskManager = getInstance(ctx, TaskManager.class);
+      final TaskManager taskManager = JobUtils.getInstance(ctx, TaskManager.class);
       if (taskManager.isAlreadyRunning(jobName)) {
         LOG.warn("Skipped scheduling notification task for {}. A task for the same entity is already in the queue.",
             jobName);

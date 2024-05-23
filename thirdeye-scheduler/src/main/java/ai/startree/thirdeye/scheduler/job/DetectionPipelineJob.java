@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.scheduler.job;
 
+import static ai.startree.thirdeye.scheduler.JobUtils.BACKPRESSURE_COUNTERS;
 import static ai.startree.thirdeye.scheduler.JobUtils.getIdFromJobKey;
 import static ai.startree.thirdeye.spi.Constants.DEFAULT_CHRONOLOGY;
 import static ai.startree.thirdeye.spi.task.TaskType.DETECTION;
@@ -20,6 +21,7 @@ import static ai.startree.thirdeye.spi.util.AlertMetadataUtils.getDateTimeZone;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
+import ai.startree.thirdeye.scheduler.JobUtils;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
@@ -38,12 +40,13 @@ import org.joda.time.Chronology;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.Period;
+import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DetectionPipelineJob extends ThirdEyeAbstractJob {
+public class DetectionPipelineJob implements Job {
 
   private static final Interval UNUSED_DETECTION_INTERVAL = new Interval(0, 0, DEFAULT_CHRONOLOGY);
   private static final Logger LOG = LoggerFactory.getLogger(DetectionPipelineJob.class);
@@ -52,7 +55,7 @@ public class DetectionPipelineJob extends ThirdEyeAbstractJob {
   public void execute(JobExecutionContext ctx) {
     final JobKey jobKey = ctx.getJobDetail().getKey();
     final Long alertId = getIdFromJobKey(jobKey);
-    final AlertManager alertManager = getInstance(ctx, AlertManager.class);
+    final AlertManager alertManager = JobUtils.getInstance(ctx, AlertManager.class);
     final AlertDTO alert = alertManager.findById(alertId);
     if (alert == null) {
       // possible if the alert was deleted - no need to run the task
@@ -65,7 +68,7 @@ public class DetectionPipelineJob extends ThirdEyeAbstractJob {
 
     // if a task is pending and not time out yet, don't schedule more
     final String jobName = jobKey.getName();
-    final TaskManager taskManager = getInstance(ctx, TaskManager.class);
+    final TaskManager taskManager = JobUtils.getInstance(ctx, TaskManager.class);
     if (taskManager.isAlreadyRunning(jobName)) {
       LOG.warn(
           "Skipped scheduling detection task for {} with start time {} and end time {}. A task for the same entity is already in the queue.",
@@ -91,7 +94,7 @@ public class DetectionPipelineJob extends ThirdEyeAbstractJob {
   protected long computeTaskStart(final JobExecutionContext ctx, final AlertDTO alert,
       final long endTime) {
     try {
-      final AlertTemplateRenderer alertTemplateRenderer = getInstance(ctx,
+      final AlertTemplateRenderer alertTemplateRenderer = JobUtils.getInstance(ctx,
           AlertTemplateRenderer.class);
       final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alert,
           UNUSED_DETECTION_INTERVAL);

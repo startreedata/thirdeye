@@ -17,6 +17,7 @@ import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.TaskApi;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import com.google.common.collect.ImmutableMap;
@@ -48,7 +49,7 @@ public class TaskService extends CrudService<TaskApi, TaskDTO> {
 
   // operation not supported to prevent creation of tasks via API
   @Override
-  protected void prepareCreatedDto(final ThirdEyeServerPrincipal principal, final TaskDTO taskDTO) {
+  protected void prepareCreatedDto(final ThirdEyePrincipal principal, final TaskDTO taskDTO) {
     throw new UnsupportedOperationException();
   }
 

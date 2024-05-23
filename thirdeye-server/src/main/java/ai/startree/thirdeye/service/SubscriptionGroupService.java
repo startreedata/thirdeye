@@ -120,7 +120,7 @@ public class SubscriptionGroupService extends
   }
 
   @Override
-  protected void prepareCreatedDto(final ThirdEyeServerPrincipal principal,
+  protected void prepareCreatedDto(final ThirdEyePrincipal principal,
       final SubscriptionGroupDTO dto) {
     final Timestamp createTime = requireNonNull(dto.getCreateTime(), "created");
     optional(dto.getAlertAssociations())

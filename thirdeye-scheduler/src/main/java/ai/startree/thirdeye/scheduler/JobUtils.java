@@ -54,6 +54,7 @@ public class JobUtils {
     return Long.valueOf(id);
   }
 
+  // FIXME CYRIL implement a custom JobFactory instead of getting the instance at execution time 
   public static <T> T getInstance(final JobExecutionContext context, Class<T> clazz) {
     final Injector injector = (Injector) getObjectFromContext(context, CTX_INJECTOR);
     return injector.getInstance(clazz);

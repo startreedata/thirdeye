@@ -73,7 +73,7 @@ public class DetectionPipelineJobTest {
             new AlertMetadataDTO().setDataset(
                 new DatasetConfigDTO().setMutabilityPeriod(mutabilityPeriod))))
         .setLastTimestamp(lastTimestamp);
-    final var output = detectionPipelineJob.computeTaskStart(alert, endTime);
+    final long output = detectionPipelineJob.computeTaskStart(alert, endTime);
     assertThat(output).isEqualTo(expectedStartTime);
   }
 }

@@ -125,7 +125,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
   }
 
   @Override
-  protected void prepareCreatedDto(final ThirdEyeServerPrincipal principal, final AlertDTO dto) {
+  protected void prepareCreatedDto(final ThirdEyePrincipal principal, final AlertDTO dto) {
     if (dto.getLastTimestamp() < minimumOnboardingStartTime) {
       dto.setLastTimestamp(minimumLastTimestamp(principal, dto));
     }

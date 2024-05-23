@@ -132,7 +132,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
   }
 
   @NonNull
-  public List<ApiT> createMultiple(final ThirdEyeServerPrincipal principal,
+  public List<ApiT> createMultiple(final ThirdEyePrincipal principal,
       final List<ApiT> list) {
     final RequestCache cache = createRequestCache();
     final List<ApiT> result = list.stream()
@@ -209,7 +209,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
    * Override this method to set default values to a dto being created.
    * You can also throw in this method to prevent the creation of dto.
    */
-  protected void prepareCreatedDto(final ThirdEyeServerPrincipal principal, final DtoT dto) {
+  protected void prepareCreatedDto(final ThirdEyePrincipal principal, final DtoT dto) {
     // By default, do nothing.
   }
 
@@ -301,7 +301,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
     }
   }
 
-  private DtoT setSystemFields(final ThirdEyeServerPrincipal principal, final DtoT dto) {
+  private DtoT setSystemFields(final ThirdEyePrincipal principal, final DtoT dto) {
     final Timestamp currentTime = new Timestamp(new Date().getTime());
     dto
         .setCreatedBy(principal.getName())

@@ -18,24 +18,27 @@ import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskInfo;
 import ai.startree.thirdeye.spi.task.TaskStatus;
 import ai.startree.thirdeye.spi.task.TaskType;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.util.List;
 
+/**
+ * Note:
+ * Almost all operations are performed across all namespaces.
+ * Only {@link TaskManager#createTaskDto} needs a namespace context, so it is put in the method
+ * argument.
+ */
 public interface TaskManager extends AbstractManager<TaskDTO> {
 
-  TaskDTO createTaskDto(final TaskInfo taskInfo, final TaskType taskType, final
-  AuthorizationConfigurationDTO auth)
-      throws JsonProcessingException;
+  TaskDTO createTaskDto(final TaskInfo taskInfo, final TaskType taskType,
+      final AuthorizationConfigurationDTO auth) throws Exception;
 
   TaskDTO findNextTaskToRun();
 
   boolean isAlreadyRunning(final String taskName);
-  
+
   boolean acquireTaskToRun(TaskDTO taskDTO, final long workerId);
 
-  // fixme authz required ?
   List<TaskDTO> findByStatusAndWorkerId(Long workerId, TaskStatus status);
 
   void updateStatusAndTaskEndTime(Long id, TaskStatus oldStatus, TaskStatus newStatus,
@@ -49,6 +52,5 @@ public interface TaskManager extends AbstractManager<TaskDTO> {
 
   void orphanTaskCleanUp(Timestamp activeThreshold);
 
-  // fixme authz required ?
   long countByStatus(final TaskStatus status);
 }

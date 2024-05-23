@@ -25,7 +25,6 @@ package ai.startree.thirdeye.scheduler.job;/*
  * the License.
  */
 
-import static ai.startree.thirdeye.spi.Constants.CTX_INJECTOR;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -36,39 +35,22 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import com.google.inject.Injector;
 import java.io.IOException;
 import org.joda.time.Period;
-import org.quartz.JobExecutionContext;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerContext;
-import org.quartz.SchedulerException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class DetectionPipelineJobTest {
   
-  private DetectionPipelineJob detectionPipelineJob = new DetectionPipelineJob();
-  private JobExecutionContext ctx;
+  private DetectionPipelineJob detectionPipelineJob;
 
   @BeforeMethod
-  public void setUp() throws IOException, ClassNotFoundException, SchedulerException {
+  public void setUp() throws IOException, ClassNotFoundException {
     final AlertTemplateRenderer alertTemplateRenderer = mock(AlertTemplateRenderer.class);
     when(alertTemplateRenderer.renderAlert(any(AlertDTO.class), any())).then(
         i -> ((AlertDTO) i.getArguments()[0]).getTemplate());
-
-    final Scheduler scheduler = mock(Scheduler.class);
-    final Injector injector = mock(Injector.class);
-    when(injector.getInstance(AlertTemplateRenderer.class)).thenReturn(alertTemplateRenderer);
-    final SchedulerContext schedulerContext = new SchedulerContext();
-    schedulerContext.put(CTX_INJECTOR, injector);
-    when(scheduler.getContext()).thenReturn(schedulerContext);
-    ctx = mock(JobExecutionContext.class);
-    // context.getScheduler().getContext().get(key)
-    when(ctx.getScheduler()).thenReturn(scheduler);
-    // detectionPipelineJob.buildTaskInfo();
-    //jobSchedulerService = new JobSchedulerService(null, alertTemplateRenderer);
+    detectionPipelineJob = new DetectionPipelineJob(null, null,alertTemplateRenderer);
   }
 
   @DataProvider(name = "computeTaskStartTestCases")
@@ -91,7 +73,7 @@ public class DetectionPipelineJobTest {
             new AlertMetadataDTO().setDataset(
                 new DatasetConfigDTO().setMutabilityPeriod(mutabilityPeriod))))
         .setLastTimestamp(lastTimestamp);
-    final var output = detectionPipelineJob.computeTaskStart(ctx, alert, endTime);
+    final long output = detectionPipelineJob.computeTaskStart(alert, endTime);
     assertThat(output).isEqualTo(expectedStartTime);
   }
 }

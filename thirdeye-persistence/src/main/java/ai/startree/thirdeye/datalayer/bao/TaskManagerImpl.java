@@ -59,7 +59,7 @@ public class TaskManagerImpl implements TaskManager {
   private final TaskDao dao;
 
   private static final Logger LOG = LoggerFactory.getLogger(TaskManagerImpl.class);
-  
+
   private final Meter orphanTasksCount;
   private final MetricRegistry metricRegistry;
 
@@ -72,12 +72,15 @@ public class TaskManagerImpl implements TaskManager {
     registerMetrics();
   }
 
-  // FIXME CYRIL authz this method or consumers can inherit the namespace of the refId instead of inheriting at read time with NamespaceResolver
   @Override
   public TaskDTO createTaskDto(final TaskInfo taskInfo, final TaskType taskType, final
-  AuthorizationConfigurationDTO auth)
-      throws JsonProcessingException {
-    final String taskInfoJson = OBJECT_MAPPER.writeValueAsString(taskInfo);
+  AuthorizationConfigurationDTO auth) {
+    final String taskInfoJson;
+    try {
+      taskInfoJson = OBJECT_MAPPER.writeValueAsString(taskInfo);
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException("Error while serializing task info: " + taskInfo, e);
+    }
 
     final TaskDTO task = new TaskDTO()
         .setTaskType(taskType)
@@ -106,9 +109,11 @@ public class TaskManagerImpl implements TaskManager {
   public Long save(final TaskDTO entity) {
     if (entity.getId() != null) {
       //TODO: throw exception and force the caller to call update instead
+      // fixme asap cyril should throw if the update returns 0, because the entity was not saved
       update(entity);
       return entity.getId();
     }
+    // fixme asap cyril should throw if the put returns null, because the entity was not saved
     final Long id = dao.put(entity);
     entity.setId(id);
     return id;

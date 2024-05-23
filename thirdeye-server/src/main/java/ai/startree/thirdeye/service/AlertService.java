@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.service;
 
 import static ai.startree.thirdeye.mapper.ApiBeanMapper.toEnumerationItemDTO;
+import static ai.startree.thirdeye.scheduler.JobUtils.FAILED_TASK_CREATION_COUNTERS;
 import static ai.startree.thirdeye.service.alert.AlertInsightsProvider.currentMaximumPossibleEndTime;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_CRON_FREQUENCY_TOO_HIGH;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_CRON_INVALID;
@@ -54,7 +55,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DetectionPipelineTaskInfo;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -424,10 +424,9 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     try {
       final TaskDTO t = taskManager.createTaskDto(info, DETECTION, alertDto.getAuth());
       LOG.info("Created {} task {} with settings {}", DETECTION, t.getId(), t);
-    } catch (final JsonProcessingException e) {
-      throw new RuntimeException(String.format("Error while serializing %s: %s",
-          DetectionPipelineTaskInfo.class.getSimpleName(),
-          info), e);
+    } catch (final Exception e) {
+      FAILED_TASK_CREATION_COUNTERS.get(DETECTION).increment();
+      throw new RuntimeException(e);
     }
   }
 }

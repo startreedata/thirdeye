@@ -33,9 +33,6 @@ public interface Constants {
   String OAUTH_ISSUER = "issuer";
   String OAUTH_JWKS_URI = "jwks_uri";
 
-  // Used in Quartz Scheduler context
-  String CTX_INJECTOR = "CTX_INJECTOR";
-
   // Data Source Related Constants
   int DEFAULT_HEAP_PERCENTAGE_FOR_RESULTSETGROUP_CACHE = 25;
   int DEFAULT_LOWER_BOUND_OF_RESULTSETGROUP_CACHE_SIZE_IN_MB = 100;

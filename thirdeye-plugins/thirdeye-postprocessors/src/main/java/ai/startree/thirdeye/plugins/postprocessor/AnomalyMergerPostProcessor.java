@@ -35,6 +35,7 @@ import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -198,8 +199,9 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     mergeAnomalyProperties(parent.getProperties(), child.getProperties());
 
     // merge the anomaly labels
-    final List<AnomalyLabelDTO> mergedAnomalyLabels = mergeAnomalyLabels(parent.getAnomalyLabels(),
-        child.getAnomalyLabels());
+    final List<AnomalyLabelDTO> mergedAnomalyLabels = mergeAnomalyLabels(
+        // use Arrays.asList because List.of does not allow null values 
+        Arrays.asList(child.getAnomalyLabels(), parent.getAnomalyLabels()));
     parent.setAnomalyLabels(mergedAnomalyLabels);
 
     // merge the anomaly severity
@@ -274,22 +276,19 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     return clone;
   }
 
-  private static @Nullable List<AnomalyLabelDTO> mergeAnomalyLabels(
-      final @Nullable List<AnomalyLabelDTO> parentLabels,
-      @Nullable final List<AnomalyLabelDTO> childLabels) {
-    if (parentLabels == null && childLabels == null) {
-      return null;
-    } else if (parentLabels == null) {
-      return childLabels;
-    } else if (childLabels == null) {
-      return parentLabels;
-    }
-
+  private static @Nullable List<AnomalyLabelDTO> mergeAnomalyLabels(final List<List<AnomalyLabelDTO>> labelsList) {
     // simple merging logic based on hash - can be enhanced later
-    final Set<AnomalyLabelDTO> labels = new HashSet<>(childLabels);
-    labels.addAll(parentLabels);
-
-    return new ArrayList<>(labels);
+    final HashSet<AnomalyLabelDTO> mergedLabels = new HashSet<>();
+    for (final List<AnomalyLabelDTO> e: labelsList) {
+      if (e != null) {
+        mergedLabels.addAll(e); 
+      }
+    }
+    if (mergedLabels.isEmpty()) {
+      return null;
+    }
+    
+    return new ArrayList<>(mergedLabels);
   }
 
   @Override
@@ -407,6 +406,9 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
               sortedNotOutdatedChildren.size() - 1);
           existingAnomaly.setStartTime(firstChildren.getStartTime());
           updateAnomalyWithNewValues(existingAnomaly, firstChildren);
+          final List<List<AnomalyLabelDTO>> notOutdatedLabels = sortedNotOutdatedChildren.stream()
+              .map(AnomalyDTO::getAnomalyLabels).toList();
+          existingAnomaly.setAnomalyLabels(mergeAnomalyLabels(notOutdatedLabels));
           existingAnomaly.setEndTime(lastChildren.getEndTime());
           // not vanished - can still be used for merging
         }
@@ -475,6 +477,8 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
           } else {
             // update the existing anomaly with minor changes - drop the new anomaly
             updateAnomalyWithNewValues(previousAnomaly, anomaly);
+            // labels depend on the values - so pick the latest labels
+            previousAnomaly.setAnomalyLabels(anomaly.getAnomalyLabels());
             anomaliesToUpdate.add(previousAnomaly);
             continue;
           }
@@ -518,6 +522,8 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
       }
     }
     // add last parent candidate
+    // todo cyril - anomaliesToUpdate is sorted. maintaining order at insertion for those 2 would make things easier to understand when debugging and testing 
+    //  need to make sure the operation is not expensive though - anomaliesToUpdate can be big 
     optional(parentCandidate).ifPresent(anomaliesToUpdate::add);
     optional(ignoredParentCandidate).ifPresent(anomaliesToUpdate::add);
 

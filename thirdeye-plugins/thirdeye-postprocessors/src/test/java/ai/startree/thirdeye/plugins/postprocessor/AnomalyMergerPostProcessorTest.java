@@ -57,6 +57,7 @@ public class AnomalyMergerPostProcessorTest {
   private static final long JANUARY_1_2021_04H = 1609473600_000L;
   private static final long JANUARY_1_2021_05H = 1609477200_000L;
   private static final long JANUARY_1_2021_06H = 1609480800_000L;
+  private static final long JANUARY_1_2021_07H = 1609484400_000L;
   private long anomalyId;
   private List<AnomalyDTO> existingAnomalies;
   private AnomalyManager anomalyManager;
@@ -645,7 +646,7 @@ public class AnomalyMergerPostProcessorTest {
     final AnomalyDTO e2 = existingAnomaly(JANUARY_1_2021_04H, JANUARY_1_2021_05H)
         .setAvgCurrentVal(10)
         .setAvgBaselineVal(12)
-        .setAnomalyLabels(List.of(new AnomalyLabelDTO().setName("EXISTING_LABEL")))
+        .setAnomalyLabels(listOf(new AnomalyLabelDTO().setName("EXISTING_LABEL")))
         .setScore(1);
     existingAnomalies = listOf(e1, e2);
     detectionSpec.setMergeMaxGap("PT2H");
@@ -655,7 +656,7 @@ public class AnomalyMergerPostProcessorTest {
     final AnomalyDTO n1 = newAnomaly(JANUARY_1_2021_04H, JANUARY_1_2021_05H)
         .setAvgCurrentVal(23)
         .setAvgBaselineVal(37)
-        .setAnomalyLabels(List.of(new AnomalyLabelDTO().setName("NEW_LABEL")))
+        .setAnomalyLabels(listOf(new AnomalyLabelDTO().setName("NEW_LABEL")))
         .setScore(0.5);
     // interval and mergeMax gap such as e1 is fetched but not part of the detection interval - only tests rule 2, does not test rule 4
     final Interval detectionInterval = new Interval(JANUARY_1_2021_03H, JANUARY_1_2021_05H, UTC);
@@ -668,6 +669,80 @@ public class AnomalyMergerPostProcessorTest {
     // labels are updated with the new ones - no outdated or new_after_replay label is created
     assertThat(e2.getAnomalyLabels().size()).isEqualTo(1);
     assertThat(e2.getAnomalyLabels().get(0).getName()).isEqualTo("NEW_LABEL");
+  }
+
+  @Test()
+  public void testReplayRule3BisBehaveLikeRule3WhenExistingAnomalyIsIgnoreTrueAndNewAnomalyIsIgnoreFalse() {
+    final AnomalyDTO e1 = existingAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H);
+    final AnomalyDTO e2 = existingAnomaly(JANUARY_1_2021_04H, JANUARY_1_2021_05H)
+        .setAvgCurrentVal(10)
+        .setAvgBaselineVal(12)
+        .setAnomalyLabels(listOf(new AnomalyLabelDTO().setName("EXISTING_LABEL").setIgnore(true)))
+        .setScore(1);
+    final AnomalyDTO e3 = existingAnomaly(JANUARY_1_2021_06H, JANUARY_1_2021_07H)
+        .setAvgCurrentVal(30)
+        .setAvgBaselineVal(10)
+        .setAnomalyLabels(listOf(new AnomalyLabelDTO().setName("EXISTING_LABEL").setIgnore(true)))
+        .setScore(1);
+    existingAnomalies = listOf(e1, e2, e3);
+    detectionSpec.setMergeMaxGap("PT2H");
+    detectionSpec.setReNotifyAbsoluteThreshold(-1.);
+    detectionSpec.setReNotifyPercentageThreshold(-1.);
+    detectionMerger = new AnomalyMergerPostProcessor(detectionSpec);
+    // match e2 but different ignore label
+    final AnomalyDTO n1 = newAnomaly(JANUARY_1_2021_04H, JANUARY_1_2021_05H)
+        .setAvgCurrentVal(23)
+        .setAvgBaselineVal(37)
+        .setAnomalyLabels(listOf(new AnomalyLabelDTO().setName("NEW_LABEL").setIgnore(false)))
+        .setScore(0.5);
+    // interval and mergeMax gap such as e1 is fetched but not part of the detection interval - only tests rule 2, does not test rule 4
+    final Interval detectionInterval = new Interval(JANUARY_1_2021_03H, JANUARY_1_2021_05H, UTC);
+    final Set<AnomalyDTO> output = detectionMerger.merge(listOf(n1), detectionInterval);
+
+    assertThat(output).isEqualTo(Set.of(e1, e2, n1, e3));
+    //assertThat(e2.getAvgCurrentVal()).isEqualTo(23);
+    //assertThat(e2.getAvgBaselineVal()).isEqualTo(37);
+    //assertThat(e2.getScore()).isEqualTo(0.5);
+    // labels are updated with the new ones - no outdated or new_after_replay label is created
+    //assertThat(e2.getAnomalyLabels().size()).isEqualTo(1);
+    //assertThat(e2.getAnomalyLabels().get(0).getName()).isEqualTo("NEW_LABEL");
+  }
+
+  @Test()
+  public void testReplayRule3BisBehaveLikeRule3WhenExistingAnomalyIsIgnoreFalseAndNewAnomalyIsIgnoreTrue() {
+    final AnomalyDTO e1 = existingAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H);
+    final AnomalyDTO e2 = existingAnomaly(JANUARY_1_2021_04H, JANUARY_1_2021_05H)
+        .setAvgCurrentVal(10)
+        .setAvgBaselineVal(12)
+        .setAnomalyLabels(listOf(new AnomalyLabelDTO().setName("EXISTING_LABEL").setIgnore(false)))
+        .setScore(1);
+    final AnomalyDTO e3 = existingAnomaly(JANUARY_1_2021_06H, JANUARY_1_2021_07H)
+        .setAvgCurrentVal(30)
+        .setAvgBaselineVal(10)
+        .setAnomalyLabels(listOf(new AnomalyLabelDTO().setName("EXISTING_LABEL").setIgnore(false)))
+        .setScore(1);
+    existingAnomalies = listOf(e1, e2, e3);
+    detectionSpec.setMergeMaxGap("PT2H");
+    detectionSpec.setReNotifyAbsoluteThreshold(-1.);
+    detectionSpec.setReNotifyPercentageThreshold(-1.);
+    detectionMerger = new AnomalyMergerPostProcessor(detectionSpec);
+    // match e2 but different ignore label
+    final AnomalyDTO n1 = newAnomaly(JANUARY_1_2021_04H, JANUARY_1_2021_05H)
+        .setAvgCurrentVal(23)
+        .setAvgBaselineVal(37)
+        .setAnomalyLabels(listOf(new AnomalyLabelDTO().setName("NEW_LABEL").setIgnore(true)))
+        .setScore(0.5);
+    // interval and mergeMax gap such as e1 is fetched but not part of the detection interval - only tests rule 2, does not test rule 4
+    final Interval detectionInterval = new Interval(JANUARY_1_2021_03H, JANUARY_1_2021_05H, UTC);
+    final Set<AnomalyDTO> output = detectionMerger.merge(listOf(n1), detectionInterval);
+
+    assertThat(output).isEqualTo(Set.of(e1, e2, n1, e3));
+    //assertThat(e2.getAvgCurrentVal()).isEqualTo(23);
+    //assertThat(e2.getAvgBaselineVal()).isEqualTo(37);
+    //assertThat(e2.getScore()).isEqualTo(0.5);
+    // labels are updated with the new ones - no outdated or new_after_replay label is created
+    //assertThat(e2.getAnomalyLabels().size()).isEqualTo(1);
+    //assertThat(e2.getAnomalyLabels().get(0).getName()).isEqualTo("NEW_LABEL");
   }
 
   @Test(dataProvider = "rule3bisSameAsRule3Cases")

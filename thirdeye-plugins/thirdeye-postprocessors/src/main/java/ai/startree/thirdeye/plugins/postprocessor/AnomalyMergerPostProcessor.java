@@ -562,7 +562,7 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     final boolean childIsIgnore = isIgnore(child);
     checkState(parentIsIgnore == childIsIgnore,
         "Implementation error. Parent and child should have the same value for "
-            + "isIgnore. Please reach out to support.");
+            + "isIgnore. Please reach out to support. Parent: %s. Child: %s", parent, child);
 
     final String parentPatternKey = patternKey(parent);
     final String childPatternKey = patternKey(child);

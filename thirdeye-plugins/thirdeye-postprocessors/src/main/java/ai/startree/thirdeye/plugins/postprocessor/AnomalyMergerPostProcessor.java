@@ -236,6 +236,7 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     to.setWeight(from.getWeight());
     to.setProperties(from.getProperties());
     to.setSeverityLabel(from.getSeverityLabel());
+    to.setAnomalyLabels(from.getAnomalyLabels());
     // FIXME CYRIL BEFORE MERGE NOT SURE IF THIS WORKS FINE ANYMORE
     optional(from.getEnumerationItem())
         .map(AnomalyMergerPostProcessor::cloneEnumerationRef)
@@ -464,7 +465,17 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
       if (previousAnomaly != null && previousAnomaly.getId() != null && anomaly.getId() == null) {
         // apply replay checks
         if (startEndEquals(previousAnomaly, anomaly)) {
-          if (currentValueHasChanged(previousAnomaly, anomaly)) {
+          if (isIgnore(previousAnomaly) != isIgnore(anomaly)) {
+            addReplayLabel(previousAnomaly, newOutdatedLabel());
+            anomaliesToUpdate.add(previousAnomaly);
+            addReplayLabel(anomaly, newAfterReplayLabel());
+            // prevent merging of the outdated previous anomaly with new anomalies - there is the new anomaly in between now
+            if (previousAnomaly == parentCandidate) {
+              parentCandidate = null;
+            } else if (previousAnomaly == ignoredParentCandidate) {
+              ignoredParentCandidate = null;
+            }
+          } else if (currentValueHasChanged(previousAnomaly, anomaly)) {
             addReplayLabel(previousAnomaly, newOutdatedLabel());
             anomaliesToUpdate.add(previousAnomaly);
             addReplayLabel(anomaly, newAfterReplayLabel());

@@ -13,15 +13,12 @@
  */
 package ai.startree.thirdeye.spi.datalayer.dto;
 
-import static ai.startree.thirdeye.spi.util.TimeUtils.fromEpoch;
-
 import ai.startree.thirdeye.spi.detection.AnomalyFeedback;
 import ai.startree.thirdeye.spi.detection.AnomalyResultSource;
 import ai.startree.thirdeye.spi.detection.AnomalySeverity;
 import ai.startree.thirdeye.spi.detection.dimension.DimensionMap;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.google.common.base.MoreObjects;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import java.io.Serializable;
@@ -429,15 +426,6 @@ public class AnomalyDTO extends AbstractDTO implements Comparable<AnomalyDTO>, S
       final EnumerationItemDTO enumerationItem) {
     this.enumerationItem = enumerationItem;
     return this;
-  }
-
-  @Override
-  public String toString() {
-    return MoreObjects.toStringHelper(this)
-        .add("id", getId())
-        .add("startTime", fromEpoch(startTime))
-        .add("endTime", fromEpoch(endTime))
-        .toString();
   }
 
   @Override

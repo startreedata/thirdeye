@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.scheduler;
 
-import ai.startree.thirdeye.scheduler.events.HolidayEventsLoader;
+import ai.startree.thirdeye.scheduler.events.HolidayEventsLoaderScheduler;
 import ai.startree.thirdeye.scheduler.events.HolidayEventsLoaderConfiguration;
 import ai.startree.thirdeye.scheduler.taskcleanup.TaskCleanUpConfiguration;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
@@ -39,7 +39,7 @@ public class SchedulerService implements Managed {
   private final ThirdEyeSchedulerConfiguration config;
   private final HolidayEventsLoaderConfiguration holidayEventsLoaderConfiguration;
   private final TaskDriverConfiguration taskDriverConfiguration;
-  private final HolidayEventsLoader holidayEventsLoader;
+  private final HolidayEventsLoaderScheduler holidayEventsLoader;
   private final DetectionCronScheduler detectionScheduler;
   private final SubscriptionCronScheduler subscriptionScheduler;
   private final TaskManager taskManager;
@@ -50,7 +50,7 @@ public class SchedulerService implements Managed {
   public SchedulerService(final ThirdEyeSchedulerConfiguration config,
       final HolidayEventsLoaderConfiguration holidayEventsLoaderConfiguration,
       final TaskDriverConfiguration taskDriverConfiguration,
-      final HolidayEventsLoader holidayEventsLoader,
+      final HolidayEventsLoaderScheduler holidayEventsLoader,
       final DetectionCronScheduler detectionScheduler,
       final SubscriptionCronScheduler subscriptionScheduler,
       final TaskManager taskManager) {

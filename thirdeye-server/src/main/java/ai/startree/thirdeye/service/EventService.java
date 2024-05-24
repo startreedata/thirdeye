@@ -67,7 +67,7 @@ public class EventService extends CrudService<EventApi, EventDTO> {
   }
 
   public void loadHolidays(final ThirdEyeServerPrincipal principal, final long startTime, final long endTime) {
-    // FIXME CYRIL add authz 
+    // FIXME CYRIL add authz
     holidayEventsLoader.loadHolidays(startTime, endTime);
   }
 

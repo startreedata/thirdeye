@@ -1,16 +1,3 @@
-/*
- * Copyright 2024 StarTree Inc
- *
- * Licensed under the StarTree Community License (the "License"); you may not use
- * this file except in compliance with the License. You may obtain a copy of the
- * License at http://www.startree.ai/legal/startree-community-license
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the
- * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
- * either express or implied.
- * See the License for the specific language governing permissions and limitations under
- * the License.
- */
 package ai.startree.thirdeye.scheduler.events;
 
 import static java.util.Collections.singleton;
@@ -28,7 +15,6 @@ import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.Event;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.ibm.icu.util.TimeZone;
@@ -40,20 +26,16 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * The type Holiday events loader, which loads the holiday events from Google Calendar periodically.
- */
+// everything here should be namespaced - or the events should be fetched externally via some namespace filter
 @Singleton
-public class HolidayEventsLoader implements Runnable {
+public class HolidayEventsLoader {
 
   private static final Logger LOG = LoggerFactory.getLogger(HolidayEventsLoader.class);
   private static final String NO_COUNTRY_CODE = "no country code";
+
   /**
    * Override the time zone code for a country
    */
@@ -76,38 +58,14 @@ public class HolidayEventsLoader implements Runnable {
    * Calendar Api private key path
    */
   private final String keyPath;
-  private final ScheduledExecutorService scheduledExecutorService;
   private final EventManager eventManager;
 
   @Inject
-  public HolidayEventsLoader(
-      final EventManager eventManager,
+  public HolidayEventsLoader(final EventManager eventManager,
       final HolidayEventsLoaderConfiguration config) {
     this.config = config;
     this.keyPath = config.getGoogleJsonKeyPath();
     this.eventManager = eventManager;
-    scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(
-        new ThreadFactoryBuilder().setNameFormat(
-            "holiday-events-loader-%d").build());
-  }
-
-  public void start() {
-    scheduledExecutorService
-        .scheduleAtFixedRate(this, 0, config.getRunFrequency(), TimeUnit.DAYS);
-  }
-
-  public void shutdown() {
-    scheduledExecutorService.shutdown();
-  }
-
-  /**
-   * Fetch holidays and save to ThirdEye database.
-   */
-  public void run() {
-    final long start = System.currentTimeMillis();
-    final long end = start + config.getHolidayLoadRange();
-
-    loadHolidays(start, end);
   }
 
   public void loadHolidays(long start, long end) {
@@ -126,13 +84,13 @@ public class HolidayEventsLoader implements Runnable {
         newHolidayEventToCountryCodes);
 
     // Get the existing holidays within the time range from the database
-    final List<EventDTO> existingEvents = eventManager
-        .findEventsBetweenTimeRange(start, end, EventType.HOLIDAY.toString());
+    final List<EventDTO> existingEvents = eventManager.findEventsBetweenTimeRange(start, end,
+        EventType.HOLIDAY.toString());
 
     mergeWithExistingHolidays(holidayNameToHolidayEvent, existingEvents);
   }
 
-  private Map<HolidayEvent, Set<String>> aggregateCountryCodesGroupByHolidays(
+  private static Map<HolidayEvent, Set<String>> aggregateCountryCodesGroupByHolidays(
       List<Event> newHolidays) {
     // A map from new holiday to a set of country codes that has the holiday
     final Map<HolidayEvent, Set<String>> newHolidayEventToCountryCodes = new HashMap<>();
@@ -141,10 +99,10 @@ public class HolidayEventsLoader implements Runnable {
     for (Event holiday : newHolidays) {
       final String countryCode = getCountryCode(holiday);
       final String timeZone = getTimeZoneForCountry(countryCode);
-      final HolidayEvent holidayEvent =
-          new HolidayEvent(holiday.getSummary(), EventType.HOLIDAY.toString(),
-              getUtcTimeStamp(holiday.getStart().getDate().getValue(), timeZone),
-              getUtcTimeStamp(holiday.getEnd().getDate().getValue(), timeZone));
+      final HolidayEvent holidayEvent = new HolidayEvent(holiday.getSummary(),
+          EventType.HOLIDAY.toString(),
+          getUtcTimeStamp(holiday.getStart().getDate().getValue(), timeZone),
+          getUtcTimeStamp(holiday.getEnd().getDate().getValue(), timeZone));
       if (!newHolidayEventToCountryCodes.containsKey(holidayEvent)) {
         newHolidayEventToCountryCodes.put(holidayEvent, new HashSet<>());
       }
@@ -152,17 +110,17 @@ public class HolidayEventsLoader implements Runnable {
         newHolidayEventToCountryCodes.get(holidayEvent).add(countryCode);
       }
       LOG.info("Get holiday event {} in country {} between {} and {} in timezone {} ",
-          holidayEvent.getName(),
-          countryCode, holidayEvent.getStartTime(), holidayEvent.getEndTime(), timeZone);
+          holidayEvent.getName(), countryCode, holidayEvent.getStartTime(),
+          holidayEvent.getEndTime(), timeZone);
     }
     return newHolidayEventToCountryCodes;
   }
 
-  private long getUtcTimeStamp(long timeStamp, String timeZone) {
+  private static long getUtcTimeStamp(long timeStamp, String timeZone) {
     return timeStamp - TimeZone.getTimeZone(timeZone).getOffset(timeStamp);
   }
 
-  private String getTimeZoneForCountry(String countryCode) {
+  private static String getTimeZoneForCountry(String countryCode) {
     // if time zone of a country is set explicitly
     if (COUNTRY_TO_TIMEZONE.containsKey(countryCode)) {
       return COUNTRY_TO_TIMEZONE.get(countryCode);
@@ -176,7 +134,7 @@ public class HolidayEventsLoader implements Runnable {
     return timeZone;
   }
 
-  public Map<String, List<EventDTO>> getHolidayNameToEventDtoMap(
+  public static Map<String, List<EventDTO>> getHolidayNameToEventDtoMap(
       Map<HolidayEvent, Set<String>> newHolidayEventToCountryCodes) {
     final Map<String, List<EventDTO>> holidayNameToHolidayEvent = new HashMap<>();
 
@@ -235,7 +193,7 @@ public class HolidayEventsLoader implements Runnable {
     }
   }
 
-  private String getCountryCode(Event holiday) {
+  private static String getCountryCode(final Event holiday) {
     final String calendarName = holiday.getCreator().getDisplayName();
     if (calendarName != null && calendarName.length() > 12) {
       String countryName = calendarName.substring(12);
@@ -267,14 +225,11 @@ public class HolidayEventsLoader implements Runnable {
   }
 
   private List<Event> getCalendarEvents(String Calendar_id, long start, long end) throws Exception {
-    final GoogleCredential credential = GoogleCredential
-        .fromStream(new FileInputStream(keyPath))
+    final GoogleCredential credential = GoogleCredential.fromStream(new FileInputStream(keyPath))
         .createScoped(singleton(CalendarScopes.CALENDAR_READONLY));
 
-    final Calendar calendar = new Calendar
-        .Builder(HTTP_TRANSPORT, JacksonFactory.getDefaultInstance(), credential)
-        .setApplicationName("thirdeye")
-        .build();
+    final Calendar calendar = new Calendar.Builder(HTTP_TRANSPORT,
+        JacksonFactory.getDefaultInstance(), credential).setApplicationName("thirdeye").build();
 
     return calendar.events()
         .list(Calendar_id)

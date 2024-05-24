@@ -107,8 +107,12 @@ public class AlertInsightsProvider {
           NOT_USED_INTERVAL);
       return buildInsights(templateWithProperties, namespace);
     } catch (final WebApplicationException e) {
+      // todo cyril for debug - can be removed later
+      LOG.error("An error happened when trying to get insights for alert {}", alertApi, e);
       throw e;
     } catch (final Exception e) {
+      // todo cyril for debug - can be removed later
+      LOG.error("An error happened when trying to get insights for alert {}", alertApi, e);
       // can do better exception handling if necessary - see handleAlertEvaluationException
       throw serverError(ERR_UNKNOWN, e);
     }

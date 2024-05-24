@@ -55,7 +55,7 @@ export const AlertFetchRedirectParams: FunctionComponent<AlertFetchRedirectParam
                 return;
             }
 
-            if (alertInsight) {
+            if (alertInsight && alertInsight?.analysisRunInfo?.success) {
                 searchParams.set(
                     TimeRangeQueryStringKey.TIME_RANGE,
                     TimeRange.CUSTOM

@@ -468,10 +468,10 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
             addReplayLabel(previousAnomaly, newOutdatedLabel());
             anomaliesToUpdate.add(previousAnomaly);
             addReplayLabel(anomaly, newAfterReplayLabel());
-            // prevent merging of the outdated previous anomaly with new stuff
-            if (parentCandidate == previousAnomaly) {
+            // prevent merging of the outdated previous anomaly with new anomalies - there is the new anomaly in between now
+            if (previousAnomaly == parentCandidate) {
               parentCandidate = null;
-            } else if (ignoredParentCandidate == previousAnomaly) {
+            } else if (previousAnomaly == ignoredParentCandidate) {
               ignoredParentCandidate = null;
             }
           } else if (currentValueHasChanged(previousAnomaly, anomaly)) {

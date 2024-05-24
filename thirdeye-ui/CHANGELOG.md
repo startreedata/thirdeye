@@ -1,3 +1,10 @@
+### [2.45.22](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.21...thirdeye-ui-2.45.22) (2024-05-24)
+
+
+### Bug Fixes
+
+* [TE-2312](https://cortexdata.atlassian.net/browse/TE-2312) fix crash on view alerts page ([a25051760](https://github.com/startreedata/thirdeye/commit/a25051760f362e74a73ca3c25062742857914569))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

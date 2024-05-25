@@ -189,6 +189,8 @@ spec:
           {{- end }}
           - name: nginx-conf
             mountPath: /home/thirdeye/nginx/templates
+        resources:
+          {{- toYaml .Values.ui.resources | nindent 12 }}
       volumes:
         - name: nginx-conf
           emptyDir: {}

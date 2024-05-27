@@ -137,7 +137,9 @@ export const AnomaliesViewV1Page: FunctionComponent = () => {
             anomaly.enumerationItem &&
             getEnumerationItem(anomaly.enumerationItem.id);
 
-        !!anomaly && getAlertInsight({ alertId: anomaly.alert.id });
+        !!anomaly &&
+            anomaly.alert?.id &&
+            getAlertInsight({ alertId: anomaly.alert.id });
     }, [anomaly]);
 
     useEffect(() => {

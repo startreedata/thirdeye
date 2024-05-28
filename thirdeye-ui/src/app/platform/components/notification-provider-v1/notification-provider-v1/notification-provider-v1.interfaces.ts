@@ -18,11 +18,16 @@ export interface NotificationProviderV1Props {
     children?: ReactNode;
 }
 
+export interface ErrorMessage {
+    message: string;
+    details?: string;
+}
 export interface NotificationProviderV1ContextProps {
     notifications: NotificationV1[];
     notify: (
         type: NotificationTypeV1,
         message: string,
+        details?: string,
         nonDismissible?: boolean,
         scope?: NotificationScopeV1,
         onDismiss?: () => void
@@ -38,6 +43,7 @@ export interface NotificationV1 {
     scope: NotificationScopeV1;
     onDismiss?: () => void;
     createdAt: number;
+    details?: string;
 }
 
 export enum NotificationTypeV1 {

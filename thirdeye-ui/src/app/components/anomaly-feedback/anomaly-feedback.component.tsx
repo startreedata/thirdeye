@@ -164,7 +164,11 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
                           })
                       )
                     : errMessages.map((err) =>
-                          notify(NotificationTypeV1.Error, err)
+                          notify(
+                              NotificationTypeV1.Error,
+                              err.message,
+                              err.details
+                          )
                       );
             });
     };

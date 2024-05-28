@@ -162,7 +162,7 @@ export const AlertsViewPage: FunctionComponent = () => {
         ) {
             notifyIfErrors(
                 ActionStatus.Error,
-                [alertInsight.analysisRunInfo.message],
+                [{ message: alertInsight.analysisRunInfo.message }],
                 notify,
                 t("message.error-while-fetching", {
                     entity: t("label.alert-insight"),

@@ -14,7 +14,7 @@
  */
 import { makeStyles } from "@material-ui/core";
 
-export const useNotificationDisplayV1Styles = makeStyles({
+export const useNotificationDisplayV1Styles = makeStyles((theme) => ({
     notificationActionVisible: {
         display: "flex",
     },
@@ -25,4 +25,13 @@ export const useNotificationDisplayV1Styles = makeStyles({
         maxWidth: "90vw",
         overflowWrap: "break-word",
     },
-});
+    switchContainer: {
+        marginTop: theme.spacing(2),
+    },
+    switchLabel: {
+        padding: theme.spacing(1),
+    },
+    switchLabelLabel: {
+        fontWeight: "bold",
+    },
+}));

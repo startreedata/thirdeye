@@ -12,11 +12,12 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Snackbar } from "@material-ui/core";
+import { Box, FormControlLabel, Snackbar, Switch } from "@material-ui/core";
 import { Alert } from "@material-ui/lab";
 import classNames from "classnames";
 import { delay, isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNotificationProviderV1 } from "../notification-provider-v1/notification-provider-v1.component";
 import { NotificationV1 } from "../notification-provider-v1/notification-provider-v1.interfaces";
 import { NotificationDisplayV1Props } from "./notification-display-v1.interfaces";
@@ -26,12 +27,14 @@ export const NotificationDisplayV1: FunctionComponent<NotificationDisplayV1Props
     ({ className, ...otherProps }) => {
         const displayAfter = 500; // milliseconds
         const hideAfter = 10_000; // milliseconds
+        const { t } = useTranslation();
 
         const notificationDisplayV1Classes = useNotificationDisplayV1Styles();
         const [notification, setNotification] = useState<NotificationV1 | null>(
             null
         );
         const { notifications, remove } = useNotificationProviderV1();
+        const [showDetails, setShowDetails] = useState(false);
 
         useEffect(() => {
             // Notifications updated, render latest with a visible delay
@@ -85,6 +88,32 @@ export const NotificationDisplayV1: FunctionComponent<NotificationDisplayV1Props
                             onClose={handleClose}
                         >
                             {notification.message}
+                            {notification.details ? (
+                                <Box
+                                    className={
+                                        notificationDisplayV1Classes.switchContainer
+                                    }
+                                >
+                                    <FormControlLabel
+                                        classes={{
+                                            root: notificationDisplayV1Classes.switchLabel,
+                                            label: notificationDisplayV1Classes.switchLabelLabel,
+                                        }}
+                                        control={
+                                            <Switch
+                                                checked={showDetails}
+                                                onChange={() =>
+                                                    setShowDetails((d) => !d)
+                                                }
+                                            />
+                                        }
+                                        label={t("label.show-exception")}
+                                    />
+                                    {showDetails && (
+                                        <Box>{notification.details}</Box>
+                                    )}
+                                </Box>
+                            ) : null}
                         </Alert>
                     </Snackbar>
                 )}

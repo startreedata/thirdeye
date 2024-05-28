@@ -170,7 +170,7 @@ export const getErrorMessages = (error: AxiosError): ErrorMessage[] => {
     const errorMessages: ErrorMessage[] = [];
 
     // Check if it's 403
-    if (error.response?.status === 403) {
+    if (error?.response?.status === 403) {
         const errorMessage = i18next.t("errors.authorization-error");
         errorMessages.push({
             message: errorMessage,

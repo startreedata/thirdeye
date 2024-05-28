@@ -57,7 +57,12 @@ describe("rest util", () => {
             getErrorMessages({
                 response: { data: { list: [{ code: "testCode" }] } },
             } as AxiosError)
-        ).toStrictEqual([]);
+        ).toStrictEqual([
+            {
+                details: undefined,
+                message: undefined,
+            },
+        ]);
     });
 
     it("should return errors from list of errors object", () => {
@@ -67,7 +72,12 @@ describe("rest util", () => {
                     data: { list: [{ code: "testCode", msg: "testMessage" }] },
                 },
             } as AxiosError)
-        ).toStrictEqual(["testMessage"]);
+        ).toStrictEqual([
+            {
+                details: "testMessage",
+                message: undefined,
+            },
+        ]);
     });
 
     it("should return errors from list of errors object even if code is missing", () => {
@@ -77,7 +87,12 @@ describe("rest util", () => {
                     data: { list: [{ msg: "testMessage" }] },
                 },
             } as AxiosError)
-        ).toStrictEqual(["testMessage"]);
+        ).toStrictEqual([
+            {
+                details: "testMessage",
+                message: undefined,
+            },
+        ]);
     });
 
     it("should return all the errors from list of errors object", () => {
@@ -93,6 +108,19 @@ describe("rest util", () => {
                     },
                 },
             } as AxiosError)
-        ).toStrictEqual(["testMessage1", "testMessage2", "testMessage3"]);
+        ).toStrictEqual([
+            {
+                details: "testMessage1",
+                message: undefined,
+            },
+            {
+                details: "testMessage2",
+                message: undefined,
+            },
+            {
+                details: "testMessage3",
+                message: undefined,
+            },
+        ]);
     });
 });

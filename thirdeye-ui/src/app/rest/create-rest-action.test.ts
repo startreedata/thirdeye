@@ -117,7 +117,12 @@ describe("Create Rest Action (useHTTPAction)", () => {
                 expect(result.current.data).toBeNull();
                 expect(result.current.makeRequest).toBeDefined();
                 expect(result.current.status).toEqual(ActionStatus.Error);
-                expect(result.current.errorMessages).toEqual(["testError"]);
+                expect(result.current.errorMessages).toEqual([
+                    {
+                        details: "testError",
+                        message: undefined,
+                    },
+                ]);
                 expect(result.current.resetData).toBeDefined();
             });
         });

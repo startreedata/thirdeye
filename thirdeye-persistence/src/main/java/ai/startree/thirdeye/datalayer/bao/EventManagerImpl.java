@@ -22,6 +22,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
+import java.util.Objects;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -36,46 +37,41 @@ public class EventManagerImpl extends AbstractManagerImpl<EventDTO> implements E
     super(EventDTO.class, genericPojoDao);
   }
 
-  public List<EventDTO> findByEventType(String eventType) {
-    Predicate predicate = Predicate.EQ("eventType", eventType);
-    return findByPredicate(predicate);
-  }
-
   @Override
-  public List<EventDTO> findEventsBetweenTimeRange(final long startTime, final long endTime) {
+  public List<EventDTO> findEventsBetweenTimeRangeInNamespace(final long startTime,
+      final long endTime,
+      final @Nullable String namespace) {
     Predicate predicate = Predicate
         .AND(Predicate.GT("endTime", startTime),
             Predicate.LT("startTime", endTime));
-    return findByPredicate(predicate);
+    final List<EventDTO> events = findByPredicate(predicate);
+    return events.stream()
+        .filter(e -> Objects.equals(namespace, e.namespace()))
+        .toList();
   }
 
   @Override
-  public List<EventDTO> findEventsBetweenTimeRange(final long startTime,
-      final long endTime, @Nullable final List<@NonNull String> eventTypes) {
+  public List<EventDTO> findEventsBetweenTimeRangeInNamespace(final long startTime,
+      final long endTime,
+      final @Nullable List<@NonNull String> eventTypes, final @Nullable String namespace) {
     if (eventTypes == null || eventTypes.isEmpty()) {
-      return findEventsBetweenTimeRange(startTime, endTime);
+      return findEventsBetweenTimeRangeInNamespace(startTime, endTime, namespace);
     }
     final Predicate predicate = Predicate
         .AND(Predicate.IN("eventType", eventTypes.toArray(new String[0])),
             Predicate.GT("endTime", startTime),
             Predicate.LT("startTime", endTime));
-    return findByPredicate(predicate);
+    final List<EventDTO> events = findByPredicate(predicate);
+    return events.stream()
+        .filter(e -> Objects.equals(namespace, e.namespace()))
+        .toList();
   }
 
   @Override
-  public List<EventDTO> findEventsBetweenTimeRange(final long startTime, final long endTime,
-      @Nullable final List<@NonNull String> eventTypes, @Nullable final String freeTextSqlFilter) {
-    final List<EventDTO> events = findEventsBetweenTimeRange(startTime, endTime, eventTypes);
-
+  public List<EventDTO> findEventsBetweenTimeRangeInNamespace(final long startTime,
+      final long endTime, final @Nullable List<@NonNull String> eventTypes,
+      final @Nullable String freeTextSqlFilter, final @Nullable String namespace) {
+    final List<EventDTO> events = findEventsBetweenTimeRangeInNamespace(startTime, endTime, eventTypes, namespace);
     return sqlFilterRunner.applyFilter(events, freeTextSqlFilter);
-  }
-
-  @Override
-  public List<EventDTO> findEventsBetweenTimeRangeByName(String eventType, String name, long start,
-      long end) {
-    Predicate predicate = Predicate
-        .AND(Predicate.EQ("eventType", eventType), Predicate.EQ("name", name),
-            Predicate.GT("endTime", start), Predicate.LT("startTime", end));
-    return findByPredicate(predicate);
   }
 }

@@ -32,10 +32,11 @@ public class HolidayEventProvider implements EventDataProvider<EventDTO> {
 
   @Override
   public List<EventDTO> getEvents(EventFilter eventFilter) {
-    List<EventDTO> allEventsBetweenTimeRange = eventDAO.findEventsBetweenTimeRange(
+    List<EventDTO> allEventsBetweenTimeRange = eventDAO.findEventsBetweenTimeRangeInNamespace(
         eventFilter.getStartTime(),
         eventFilter.getEndTime(),
-        eventFilter.getEventType());
+        eventFilter.getEventType(),
+        namespace);
 
     LOG.info("Fetched {} {} events between {} and {}", allEventsBetweenTimeRange.size(),
         eventFilter.getEventType(), eventFilter.getStartTime(), eventFilter.getEndTime());

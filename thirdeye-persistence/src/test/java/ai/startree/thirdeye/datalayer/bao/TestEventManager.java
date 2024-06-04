@@ -60,16 +60,12 @@ public class TestEventManager {
   public void testGetById() {
     EventDTO testEventDTO = eventDAO.findById(testEventId);
     Assert.assertEquals(testEventDTO.getId().longValue(), testEventId);
-    System.out.println(testEventDTO.getStartTime());
-    System.out.println(testEventDTO.getEndTime());
-    System.out.println(testEventDTO.getEventType());
-    List<EventDTO> results0 = eventDAO.findByEventType(EventType.DEPLOYMENT.name());
-    Assert.assertEquals(results0.size(), 1);
 
     List<EventDTO> results1 = eventDAO
-        .findEventsBetweenTimeRange(0,
+        .findEventsBetweenTimeRangeInNamespace(0,
             System.currentTimeMillis(),
-            EventType.DEPLOYMENT.name());
+            EventType.DEPLOYMENT.name(),
+            null);
     Assert.assertEquals(results1.size(), 1);
   }
 

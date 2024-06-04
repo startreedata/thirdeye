@@ -24,6 +24,7 @@ import java.util.List;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
+// todo authz - namespace filtering in child classes and this one is implemented in app. It should be performed in DB. Need to add a mapping and an index on namespace for all entities.
 public abstract class AbstractManagerImpl<E extends AbstractDTO> implements AbstractManager<E> {
 
   protected final GenericPojoDao genericPojoDao;

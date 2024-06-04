@@ -113,10 +113,11 @@ public class RcaRelatedService {
     final List<@NonNull String> types = optional(type).map(List::of)
         .orElse(optional(eventContext.getTypes()).map(Templatable::getValue).orElse(List.of()));
     // FIXME cyril add authz - filter by namespace
-    final List<EventDTO> events = eventDAO.findEventsBetweenTimeRange(startWithLookback,
+    final List<EventDTO> events = eventDAO.findEventsBetweenTimeRangeInNamespace(startWithLookback,
         endWithLookahead, types,
         // todo rca dimension filters can be set at call time?
-        eventContext.getSqlFilter());
+        eventContext.getSqlFilter(),
+        rcaInfo.alert().namespace());
 
     final Comparator<EventDTO> comparator = Comparator.comparingDouble(
         (ToDoubleFunction<EventDTO>) dto -> scoring.score(anomalyInterval,

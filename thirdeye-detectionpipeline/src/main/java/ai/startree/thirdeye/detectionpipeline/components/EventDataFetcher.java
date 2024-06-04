@@ -74,10 +74,11 @@ public class EventDataFetcher implements DataFetcher<EventFetcherSpec> {
         .plus(lookaround)
         .getMillis();
 
-    final List<EventDTO> events = eventDao.findEventsBetweenTimeRange(minTime,
+    final List<EventDTO> events = eventDao.findEventsBetweenTimeRangeInNamespace(minTime,
         maxTime,
         eventTypes,
-        freeTextSqlFilter
+        freeTextSqlFilter,
+        namespace
     );
 
     final DataFrame eventDf = toDataFrame(events);

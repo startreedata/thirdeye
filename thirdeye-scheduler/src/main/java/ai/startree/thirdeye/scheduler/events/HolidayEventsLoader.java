@@ -3,6 +3,7 @@ package ai.startree.thirdeye.scheduler.events;
 import static java.util.Collections.singleton;
 
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import ai.startree.thirdeye.spi.events.EventType;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
@@ -26,6 +27,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,7 +70,8 @@ public class HolidayEventsLoader {
     this.eventManager = eventManager;
   }
 
-  public void loadHolidays(long start, long end) {
+  // authorization to create/delete/edit events should be checked in consumers
+  public void loadHolidays(long start, long end, final @Nullable String namespace) {
     LOG.info("Loading holidays between {} and {}", start, end);
     final List<Event> newHolidays;
     try {
@@ -84,10 +87,10 @@ public class HolidayEventsLoader {
         newHolidayEventToCountryCodes);
 
     // Get the existing holidays within the time range from the database
-    final List<EventDTO> existingEvents = eventManager.findEventsBetweenTimeRange(start, end,
-        EventType.HOLIDAY.toString());
+    final List<EventDTO> existingEvents = eventManager.findEventsBetweenTimeRangeInNamespace(start, end,
+        EventType.HOLIDAY.toString(), namespace);
 
-    mergeWithExistingHolidays(holidayNameToHolidayEvent, existingEvents);
+    mergeWithExistingHolidays(holidayNameToHolidayEvent, existingEvents, namespace);
   }
 
   private static Map<HolidayEvent, Set<String>> aggregateCountryCodesGroupByHolidays(
@@ -163,7 +166,7 @@ public class HolidayEventsLoader {
   }
 
   private void mergeWithExistingHolidays(Map<String, List<EventDTO>> holidayNameToHolidayEvent,
-      List<EventDTO> existingEvents) {
+      List<EventDTO> existingEvents, final String namespace) {
     for (EventDTO existingEvent : existingEvents) {
       final String holidayName = existingEvent.getName();
       if (!holidayNameToHolidayEvent.containsKey(holidayName)) {
@@ -188,6 +191,7 @@ public class HolidayEventsLoader {
     // Add all remaining new events into the database
     for (List<EventDTO> eventDTOList : holidayNameToHolidayEvent.values()) {
       for (EventDTO eventDTO : eventDTOList) {
+        eventDTO.setAuth(new AuthorizationConfigurationDTO().setNamespace(namespace));
         eventManager.save(eventDTO);
       }
     }

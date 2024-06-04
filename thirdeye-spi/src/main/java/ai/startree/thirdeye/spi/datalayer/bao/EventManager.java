@@ -20,8 +20,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface EventManager extends AbstractManager<EventDTO> {
   
-  // FIXME CYRIL authz of events in detection pipeline
-  // FIXME CYRIL authz of events in RCA
+  // FIXME CYRIL authz of events in Notifications
   
   List<EventDTO> findEventsBetweenTimeRangeInNamespace(long startTime, long endTime, @Nullable final String namespace);
   

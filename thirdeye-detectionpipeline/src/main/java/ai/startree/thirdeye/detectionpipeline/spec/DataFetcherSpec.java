@@ -61,7 +61,6 @@ public class DataFetcherSpec extends AbstractSpec {
    * Expected to be set during DataFetcherOperator init.
    */
   private String namespace;
-  
 
   public String getDataSource() {
     return dataSource;

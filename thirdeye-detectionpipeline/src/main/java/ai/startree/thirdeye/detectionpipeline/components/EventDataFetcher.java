@@ -45,6 +45,7 @@ public class EventDataFetcher implements DataFetcher<EventFetcherSpec> {
   private @Nullable String freeTextSqlFilter;
 
   private EventManager eventDao;
+  private String namespace;
 
   @Override
   public void init(final EventFetcherSpec spec) {
@@ -55,6 +56,7 @@ public class EventDataFetcher implements DataFetcher<EventFetcherSpec> {
     freeTextSqlFilter = spec.getSqlFilter();
 
     eventDao = spec.getEventManager();
+    namespace = spec.getNamespace();
   }
 
   /**

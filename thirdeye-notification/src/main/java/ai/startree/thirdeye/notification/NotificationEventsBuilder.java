@@ -61,6 +61,9 @@ public class NotificationEventsBuilder {
     postEventCrawlOffset = defaultPeriod;
   }
 
+  /**
+   * TODO cyril - logic is duplicated (and not iso) with what RcaRelatedService#getRelatedEvents provides
+   */
   public List<EventApi> getRelatedEvents(final Collection<AnomalyDTO> anomalies) {
     DateTime windowStart = DateTime.now(dateTimeZone);
     DateTime windowEnd = new DateTime(0, dateTimeZone);
@@ -80,7 +83,7 @@ public class NotificationEventsBuilder {
     // holidays
     final DateTime eventStart = windowStart.minus(preEventCrawlOffset);
     final DateTime eventEnd = windowEnd.plus(postEventCrawlOffset);
-    
+
     final List<EventDTO> holidays = anomalies
         .stream()
         .map(anomaly -> anomaly.namespace())
@@ -106,7 +109,8 @@ public class NotificationEventsBuilder {
    *     time
    * @return a list of related events
    */
-  private List<EventDTO> getHolidayEvents(final DateTime start, final DateTime end, final @Nullable String namespace) {
+  private List<EventDTO> getHolidayEvents(final DateTime start, final DateTime end,
+      final @Nullable String namespace) {
     LOG.info("Fetching holidays with preEventCrawlOffset {} and postEventCrawlOffset {}",
         preEventCrawlOffset, postEventCrawlOffset);
     final long startTimeWithOffsetMillis = start.minus(preEventCrawlOffset).getMillis();

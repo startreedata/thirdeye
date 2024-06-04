@@ -57,11 +57,11 @@ public class HolidayEventsLoaderScheduler implements Runnable {
    * Fetch holidays and save to ThirdEye database.
    */
   public void run() {
-    // FIXME CYRIL IN THIS PR - for the moment disable if srtrict namespace separation is enabled
-    // TODO CYRIL authz - namespacing is not implemented for this feature  maintain a list or a map of namespaces that want events loading? - or this data should be stored in the database, not in the config - need rewrite  
     final long start = System.currentTimeMillis();
     final long end = start + config.getHolidayLoadRange();
-
+    // TODO CYRIL authz - namespacing is not implemented for this feature - events will be created in the unset namespace
+    //   if strict namespacing is enabled, these events will not be available to any workspace
+    //   a rewrite is required to make this feature compatible with namespaces - best would be to maintain a google account and a config in the db, not in the app configuration 
     holidayEventsLoader.loadHolidays(start, end, null);
   }
 }

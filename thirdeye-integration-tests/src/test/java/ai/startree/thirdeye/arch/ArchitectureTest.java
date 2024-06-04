@@ -48,7 +48,6 @@ import ai.startree.thirdeye.detectionpipeline.PlanExecutor;
 import ai.startree.thirdeye.detectionpipeline.components.EventDataFetcher;
 import ai.startree.thirdeye.detectionpipeline.components.GenericDataFetcher;
 import ai.startree.thirdeye.detectionpipeline.persistence.CachedDatasetConfigManager;
-import ai.startree.thirdeye.events.HolidayEventProvider;
 import ai.startree.thirdeye.healthcheck.DatabaseHealthCheck;
 import ai.startree.thirdeye.notification.NotificationReportBuilder;
 import ai.startree.thirdeye.notification.NotificationTaskFilter;
@@ -179,7 +178,6 @@ public class ArchitectureTest {
         NotificationTaskFilter.class,
         NotificationReportBuilder.class,
         DatabaseHealthCheck.class,
-        HolidayEventProvider.class,
         CachedDatasetConfigManager.class,
         GenericDataFetcher.class,
         EventDataFetcher.class,

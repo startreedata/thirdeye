@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Period;
@@ -79,10 +80,17 @@ public class NotificationEventsBuilder {
     // holidays
     final DateTime eventStart = windowStart.minus(preEventCrawlOffset);
     final DateTime eventEnd = windowEnd.plus(postEventCrawlOffset);
-    final List<EventDTO> holidays = getHolidayEvents(
-        eventStart,
-        eventEnd);
-    holidays.sort(Comparator.comparingLong(EventDTO::getStartTime));
+    
+    final List<EventDTO> holidays = anomalies
+        .stream()
+        .map(anomaly -> anomaly.namespace())
+        // when namespace is enforced, anomalies should all have the same namespace. 
+        // in legacy mode, events namespacing is not expected, so it's fine to fetch events from multiple namespaces
+        .distinct()
+        .map(namespace -> getHolidayEvents(eventStart, eventEnd, namespace))
+        .flatMap(List::stream)
+        .sorted(Comparator.comparingLong(EventDTO::getStartTime))
+        .toList();
 
     return holidays.stream()
         .map(ApiBeanMapper::toApi)
@@ -98,7 +106,7 @@ public class NotificationEventsBuilder {
    *     time
    * @return a list of related events
    */
-  private List<EventDTO> getHolidayEvents(final DateTime start, final DateTime end) {
+  private List<EventDTO> getHolidayEvents(final DateTime start, final DateTime end, final @Nullable String namespace) {
     LOG.info("Fetching holidays with preEventCrawlOffset {} and postEventCrawlOffset {}",
         preEventCrawlOffset, postEventCrawlOffset);
     final long startTimeWithOffsetMillis = start.minus(preEventCrawlOffset).getMillis();

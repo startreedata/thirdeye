@@ -45,7 +45,6 @@ public class HolidayEventsLoaderScheduler implements Runnable {
   }
 
   public void start() {
-    // FIXME CYRIL - for the moment disable if srtrict namespace separation is enabled
     scheduledExecutorService
         .scheduleAtFixedRate(this, 0, config.getRunFrequency(), TimeUnit.DAYS);
   }
@@ -58,7 +57,8 @@ public class HolidayEventsLoaderScheduler implements Runnable {
    * Fetch holidays and save to ThirdEye database.
    */
   public void run() {
-    // TODO CYRIL authz maintain a list or a map of namespaces that want events loading? - or this data should be stored in the database, not in the config - need rewrite  
+    // FIXME CYRIL IN THIS PR - for the moment disable if srtrict namespace separation is enabled
+    // TODO CYRIL authz - namespacing is not implemented for this feature  maintain a list or a map of namespaces that want events loading? - or this data should be stored in the database, not in the config - need rewrite  
     final long start = System.currentTimeMillis();
     final long end = start + config.getHolidayLoadRange();
 

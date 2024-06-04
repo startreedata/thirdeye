@@ -49,6 +49,7 @@ import ai.startree.thirdeye.detectionpipeline.components.EventDataFetcher;
 import ai.startree.thirdeye.detectionpipeline.components.GenericDataFetcher;
 import ai.startree.thirdeye.detectionpipeline.persistence.CachedDatasetConfigManager;
 import ai.startree.thirdeye.healthcheck.DatabaseHealthCheck;
+import ai.startree.thirdeye.notification.NotificationEventsBuilder;
 import ai.startree.thirdeye.notification.NotificationReportBuilder;
 import ai.startree.thirdeye.notification.NotificationTaskFilter;
 import ai.startree.thirdeye.notification.NotificationTaskPostProcessor;
@@ -59,6 +60,7 @@ import ai.startree.thirdeye.resources.CrudResource;
 import ai.startree.thirdeye.scheduler.DetectionCronScheduler;
 import ai.startree.thirdeye.scheduler.SchedulerService;
 import ai.startree.thirdeye.scheduler.SubscriptionCronScheduler;
+import ai.startree.thirdeye.scheduler.events.HolidayEventsLoader;
 import ai.startree.thirdeye.scheduler.events.MockEventsLoader;
 import ai.startree.thirdeye.scheduler.job.DetectionPipelineJob;
 import ai.startree.thirdeye.scheduler.job.NotificationPipelineJob;
@@ -168,6 +170,7 @@ public class ArchitectureTest {
         DetectionPipelineJob.class,
         NotificationPipelineJob.class,
         MockEventsLoader.class,
+        HolidayEventsLoader.class,
         SubscriptionCronScheduler.class,
         SchedulerService.class,
         DetectionCronScheduler.class,
@@ -177,6 +180,7 @@ public class ArchitectureTest {
         NotificationTaskPostProcessor.class,
         NotificationTaskFilter.class,
         NotificationReportBuilder.class,
+        NotificationEventsBuilder.class,
         DatabaseHealthCheck.class,
         CachedDatasetConfigManager.class,
         GenericDataFetcher.class,

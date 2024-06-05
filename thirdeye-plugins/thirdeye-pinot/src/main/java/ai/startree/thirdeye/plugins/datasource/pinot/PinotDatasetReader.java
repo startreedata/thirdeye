@@ -40,6 +40,7 @@ import org.apache.pinot.spi.data.Schema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+// fixme cyril authz - needs to re-read this - most likely some things could be improved - also reduce indirections
 @Singleton
 public class PinotDatasetReader {
 

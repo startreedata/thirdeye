@@ -69,7 +69,7 @@ public class EventService extends CrudService<EventApi, EventDTO> {
 
   public void loadHolidays(final ThirdEyeServerPrincipal principal, final long startTime, final long endTime) {
     final String namespace = authorizationManager.currentNamespace(principal);
-    // authorization checks on dummy entities - to refactor
+    // authorization checks on dummy entities - todo authz to refactor
     final EventDTO entity = (EventDTO) new EventDTO().setAuth(new AuthorizationConfigurationDTO().setNamespace(namespace));
     authorizationManager.ensureCanCreate(principal, entity);
     authorizationManager.ensureCanEdit(principal, entity, entity);

@@ -86,9 +86,10 @@ public class EventFetcherOperatorTest {
   @BeforeMethod
   public void setUp() {
     final EventManager eventDao = mock(EventManager.class);
-    when(eventDao.findEventsBetweenTimeRange(anyLong(),
+    when(eventDao.findEventsBetweenTimeRangeInNamespace(anyLong(),
         anyLong(),
         nullable(List.class),
+        nullable(String.class),
         nullable(String.class))).thenReturn(List.of(
         CHRISTMAS_EVENT,
         FR_ONLY_EVENT,

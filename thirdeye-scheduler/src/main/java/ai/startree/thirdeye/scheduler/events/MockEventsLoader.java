@@ -92,7 +92,8 @@ public class MockEventsLoader implements Runnable {
 
       List<EventDTO> generated = generateEvents(conf, cutoff);
       List<EventDTO> existing = this.eventDAO
-          .findEventsBetweenTimeRange(START_TIMESTAMP, cutoff, conf.getType());
+          // namespacing is not implemented for this feature - todo cyril authz - consider implementing namespace logic for this feature
+          .findEventsBetweenTimeRangeInNamespace(START_TIMESTAMP, cutoff, conf.getType(), null);
 
       Set<EventDTO> deduplicated = deduplicate(generated, existing);
       LOG.info("Generated '{}' events: {} generated, {} pre-existing, {} saved after deduplication",

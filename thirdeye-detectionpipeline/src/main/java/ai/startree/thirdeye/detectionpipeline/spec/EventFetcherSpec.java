@@ -59,6 +59,11 @@ public class EventFetcherSpec extends AbstractSpec {
    */
   private EventManager eventManager;
 
+  /**
+   * Expected to be set during DataFetcherOperator init.
+   */
+  private String namespace;
+
   public String getStartTimeLookback() {
     return startTimeLookback;
   }
@@ -112,6 +117,15 @@ public class EventFetcherSpec extends AbstractSpec {
 
   public EventFetcherSpec setSqlFilter(final String sqlFilter) {
     this.sqlFilter = sqlFilter;
+    return this;
+  }
+
+  public String getNamespace() {
+    return namespace;
+  }
+
+  public EventFetcherSpec setNamespace(final String namespace) {
+    this.namespace = namespace;
     return this;
   }
 }

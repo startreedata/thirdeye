@@ -16,8 +16,6 @@ package ai.startree.thirdeye.notification;
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 
 import ai.startree.thirdeye.config.TimeConfiguration;
-import ai.startree.thirdeye.events.EventFilter;
-import ai.startree.thirdeye.events.HolidayEventProvider;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.EventApi;
@@ -29,10 +27,9 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Period;
@@ -47,16 +44,16 @@ public class NotificationEventsBuilder {
 
   private static final Logger LOG = LoggerFactory.getLogger(NotificationEventsBuilder.class);
 
-  private final EventManager eventManager;
+  private final EventManager eventDao;
 
   private final DateTimeZone dateTimeZone;
   private final Period preEventCrawlOffset;
   private final Period postEventCrawlOffset;
 
   @Inject
-  public NotificationEventsBuilder(final EventManager eventManager,
+  public NotificationEventsBuilder(final EventManager eventDao,
       final TimeConfiguration timeConfiguration) {
-    this.eventManager = eventManager;
+    this.eventDao = eventDao;
     dateTimeZone = timeConfiguration.getTimezone();
 
     final Period defaultPeriod = isoPeriod(Constants.NOTIFICATIONS_DEFAULT_EVENT_CRAWL_OFFSET);
@@ -65,28 +62,8 @@ public class NotificationEventsBuilder {
   }
 
   /**
-   * Taking advantage of event data provider, extract the events around the given start and end time
-   *
-   * @param start the start time of the event, preEventCrawlOffset is added before the given
-   *     date time
-   * @param end the end time of the event, postEventCrawlOffset is added after the given date
-   *     time
-   * @param targetDimensions the affected dimensions
-   * @return a list of related events
+   * TODO cyril - logic is duplicated (and not iso) with what RcaRelatedService#getRelatedEvents provides
    */
-  private List<EventDTO> getHolidayEvents(final DateTime start, final DateTime end,
-      final Map<String, List<String>> targetDimensions) {
-    final EventFilter eventFilter = new EventFilter();
-    eventFilter.setEventType(EventType.HOLIDAY.name());
-    eventFilter.setStartTime(start.minus(preEventCrawlOffset).getMillis());
-    eventFilter.setEndTime(end.plus(postEventCrawlOffset).getMillis());
-    eventFilter.setTargetDimensionMap(targetDimensions);
-
-    LOG.info("Fetching holidays with preEventCrawlOffset {} and postEventCrawlOffset {}",
-        preEventCrawlOffset, postEventCrawlOffset);
-    return new HolidayEventProvider(eventManager).getEvents(eventFilter);
-  }
-
   public List<EventApi> getRelatedEvents(final Collection<AnomalyDTO> anomalies) {
     DateTime windowStart = DateTime.now(dateTimeZone);
     DateTime windowEnd = new DateTime(0, dateTimeZone);
@@ -106,14 +83,46 @@ public class NotificationEventsBuilder {
     // holidays
     final DateTime eventStart = windowStart.minus(preEventCrawlOffset);
     final DateTime eventEnd = windowEnd.plus(postEventCrawlOffset);
-    final List<EventDTO> holidays = getHolidayEvents(
-        eventStart,
-        eventEnd,
-        new HashMap<>());
-    holidays.sort(Comparator.comparingLong(EventDTO::getStartTime));
+
+    final List<EventDTO> holidays = anomalies
+        .stream()
+        .map(anomaly -> anomaly.namespace())
+        // when namespace is enforced, anomalies should all have the same namespace. 
+        // in legacy mode, events namespacing is not expected, so it's fine to fetch events from multiple namespaces
+        .distinct()
+        .map(namespace -> getHolidayEvents(eventStart, eventEnd, namespace))
+        .flatMap(List::stream)
+        .sorted(Comparator.comparingLong(EventDTO::getStartTime))
+        .toList();
 
     return holidays.stream()
         .map(ApiBeanMapper::toApi)
         .collect(Collectors.toList());
+  }
+
+  /**
+   * Fetch the events around a start and an end time
+   *
+   * @param start the start time of the event, preEventCrawlOffset is added before the given
+   *     date time
+   * @param end the end time of the event, postEventCrawlOffset is added after the given date
+   *     time
+   * @return a list of related events
+   */
+  private List<EventDTO> getHolidayEvents(final DateTime start, final DateTime end,
+      final @Nullable String namespace) {
+    LOG.info("Fetching holidays with preEventCrawlOffset {} and postEventCrawlOffset {}",
+        preEventCrawlOffset, postEventCrawlOffset);
+    final long startTimeWithOffsetMillis = start.minus(preEventCrawlOffset).getMillis();
+    final long endTimeWithOffsetMillis = end.plus(postEventCrawlOffset).getMillis();
+    final List<EventDTO> allEventsBetweenTimeRange = eventDao.findEventsBetweenTimeRangeInNamespace(
+        startTimeWithOffsetMillis,
+        endTimeWithOffsetMillis,
+        EventType.HOLIDAY.name(),
+        namespace);
+
+    LOG.info("Fetched {} {} events between {} and {}", allEventsBetweenTimeRange.size(),
+        EventType.HOLIDAY.name(), startTimeWithOffsetMillis, endTimeWithOffsetMillis);
+    return allEventsBetweenTimeRange;
   }
 }

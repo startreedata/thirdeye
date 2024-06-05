@@ -24,6 +24,7 @@ import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
@@ -67,8 +68,14 @@ public class EventService extends CrudService<EventApi, EventDTO> {
   }
 
   public void loadHolidays(final ThirdEyeServerPrincipal principal, final long startTime, final long endTime) {
-    // FIXME CYRIL add authz 
-    holidayEventsLoader.loadHolidays(startTime, endTime);
+    final String namespace = authorizationManager.currentNamespace(principal);
+    // authorization checks on dummy entities - todo authz to refactor
+    final EventDTO entity = (EventDTO) new EventDTO().setAuth(new AuthorizationConfigurationDTO().setNamespace(namespace));
+    authorizationManager.ensureCanCreate(principal, entity);
+    authorizationManager.ensureCanEdit(principal, entity, entity);
+    authorizationManager.ensureCanDelete(principal, entity);
+    
+    holidayEventsLoader.loadHolidays(startTime, endTime, namespace);
   }
 
   public EventApi createFromAnomaly(final ThirdEyePrincipal principal, long anomalyId) {

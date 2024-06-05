@@ -19,21 +19,16 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface EventManager extends AbstractManager<EventDTO> {
-
-  List<EventDTO> findByEventType(String eventType);
-
-  List<EventDTO> findEventsBetweenTimeRange(long startTime, long endTime);
-
-  default List<EventDTO> findEventsBetweenTimeRange(long startTime, long endTime, @Nullable String eventType) {
+  
+  List<EventDTO> findEventsBetweenTimeRangeInNamespace(long startTime, long endTime, @Nullable final String namespace);
+  
+  default List<EventDTO> findEventsBetweenTimeRangeInNamespace(long startTime, long endTime, @Nullable String eventType, @Nullable final String namespace) {
     List<String> eventTypes = eventType != null ? List.of(eventType) : List.of();
-    return findEventsBetweenTimeRange(startTime, endTime, eventTypes);
+    return findEventsBetweenTimeRangeInNamespace(startTime, endTime, eventTypes, namespace);
   }
+  
+  List<EventDTO> findEventsBetweenTimeRangeInNamespace(long startTime, long endTime, @Nullable final List<@NonNull String> eventTypes, @Nullable final String namespace);
 
-  List<EventDTO> findEventsBetweenTimeRange(long startTime, long endTime, @Nullable final List<@NonNull String> eventTypes);
-
-  List<EventDTO> findEventsBetweenTimeRange(final long startTime, final long endTime,
-      @Nullable final List<@NonNull String> eventTypes, @Nullable final String freeTextSqlFilter);
-
-  List<EventDTO> findEventsBetweenTimeRangeByName(String eventType, String name, long startTime,
-      long endTime);
+  List<EventDTO> findEventsBetweenTimeRangeInNamespace(final long startTime, final long endTime,
+      @Nullable final List<@NonNull String> eventTypes, @Nullable final String freeTextSqlFilter, @Nullable final String namespace);
 }

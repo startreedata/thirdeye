@@ -18,6 +18,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.detectionpipeline.OperatorContext;
+import ai.startree.thirdeye.detectionpipeline.PlanNodeContext;
 import ai.startree.thirdeye.detectionpipeline.components.EventDataFetcher;
 import ai.startree.thirdeye.detectionpipeline.spec.EventFetcherSpec;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
@@ -36,12 +37,9 @@ public class EventFetcherOperator extends DetectionPipelineOperator {
   @Override
   public void init(final OperatorContext context) {
     super.init(context);
-    final EventManager eventDao = requireNonNull(context.getPlanNodeContext()
-        .getApplicationContext()
-        .eventManager());
     final Map<String, Object> params = optional(planNode.getParams()).map(TemplatableMap::valueMap)
         .orElse(null);
-    this.eventFetcher = createEventFetcher(params, eventDao);
+    this.eventFetcher = createEventFetcher(params, context.getPlanNodeContext());
 
     checkArgument(inputMap == null || inputMap.size() == 0,
         OPERATOR_NAME + " must have exactly 0 input node.");
@@ -62,12 +60,15 @@ public class EventFetcherOperator extends DetectionPipelineOperator {
   }
 
   private DataFetcher<EventFetcherSpec> createEventFetcher(
-      final Map<String, Object> params, final EventManager eventDao) {
+      final Map<String, Object> params, final PlanNodeContext context) {
     final Map<String, Object> componentSpec = getComponentSpec(params);
     final EventFetcherSpec spec = requireNonNull(
         AbstractSpec.fromProperties(componentSpec, EventFetcherSpec.class),
         "Unable to construct EventFetcherSpec");
+    final EventManager eventDao = requireNonNull(context.getApplicationContext().eventManager());
     spec.setEventManager(eventDao);
+    final String namespace = context.getDetectionPipelineContext().getNamespace();
+    spec.setNamespace(namespace);
 
     final DataFetcher<EventFetcherSpec> eventFetcher = new EventDataFetcher();
     eventFetcher.init(spec);

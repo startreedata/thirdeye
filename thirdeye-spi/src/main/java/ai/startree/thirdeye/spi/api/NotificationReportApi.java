@@ -189,8 +189,7 @@ public class NotificationReportApi {
     return relatedEvents;
   }
 
-  public NotificationReportApi setRelatedEvents(
-      final List<EventApi> relatedEvents) {
+  public NotificationReportApi setRelatedEvents(final List<EventApi> relatedEvents) {
     this.relatedEvents = relatedEvents;
     return this;
   }

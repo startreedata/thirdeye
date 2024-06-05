@@ -17,7 +17,6 @@ import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
-import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
 import ai.startree.thirdeye.spi.api.RcaInvestigationApi;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
@@ -53,18 +52,15 @@ public class RcaInvestigationService extends CrudService<RcaInvestigationApi, Rc
 
   @Override
   protected RcaInvestigationApi toApi(final RcaInvestigationDTO dto) {
-    final var investigationApi = ApiBeanMapper.toApi(dto);
-    // FIXME CYRIL ASAP authz - IS INJECTING the namespace like this a good pattern - inject at creation time ?
-    investigationApi.setAuth(new AuthorizationConfigurationApi()
-        .setNamespace(authorizationManager.resourceId(dto).getNamespace()));
-    return investigationApi;
+    return ApiBeanMapper.toApi(dto);
   }
 
   @Override
   protected void validate(final ThirdEyePrincipal principal, final RcaInvestigationApi api, final RcaInvestigationDTO existing) {
     super.validate(principal, api, existing);
     ensureExists(api.getName(), "Name must be present");
-    // fixme cyril ensure anomaly id is set?
-    // fixme cyril authz ensure has access to anomaly 
+    ensureExists(api.getAnomaly(), "Anomaly field must be set");
+    ensureExists(api.getAnomaly().getId(), "Anomaly id field must be set");
+    // fixme cyril authz ensure has access to anomaly - in AuthorizationManager#relatedEntities 
   }
 }

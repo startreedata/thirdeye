@@ -24,7 +24,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
@@ -84,8 +83,6 @@ public class NamespaceResolver {
     Optional<String> namespace;
     if (dto instanceof AnomalyDTO anomalyDto) {
       namespace = resolveAnomalyNamespace(anomalyDto);
-    } else if (dto instanceof RcaInvestigationDTO rcaInvestigationDto) {
-      namespace = resolveRcaNamespace(rcaInvestigationDto);
     } else if (dto instanceof EnumerationItemDTO enumerationItemDto) {
       namespace = resolveEnumerationItemNamespace(enumerationItemDto);
     } else if (dto instanceof TaskDTO taskDto) {
@@ -95,7 +92,8 @@ public class NamespaceResolver {
     } else if (dto instanceof MetricConfigDTO metricConfigDTO) {
       namespace = resolveMetricConfigDtoNamespace(metricConfigDTO);
     } else if (dto instanceof DataSourceDTO || dto instanceof AlertTemplateDTO
-        || dto instanceof AlertDTO || dto instanceof SubscriptionGroupDTO || dto instanceof EventDTO) {
+        || dto instanceof AlertDTO || dto instanceof SubscriptionGroupDTO || dto instanceof EventDTO
+        || dto instanceof RcaInvestigationDTO) {
       namespace = getNamespaceFromAuth(dto);
     } else {
       // please define cases explicitly as above - keeping this codepath to prevent workspace leaks and find changes, but should not happen
@@ -103,7 +101,7 @@ public class NamespaceResolver {
           optional(dto).map(AbstractDTO::getClass).orElse(null));
       namespace = getNamespaceFromAuth(dto);
     }
-    
+
     // FIXME CYRIL if requireNamespace is set - WARN if there is SOMETHING in DEFAULT NAMESPACE
 
     return namespace.orElse(DEFAULT_NAMESPACE);
@@ -179,15 +177,6 @@ public class NamespaceResolver {
     return Optional.empty();
   }
 
-  private @NonNull Optional<String> resolveRcaNamespace(final @NonNull RcaInvestigationDTO dto) {
-    // fixme cyril authz when modifying rcaInvestigationService - change this - use the dto auth if it's set  
-    final Long anomalyId = optional(dto.getAnomaly()).map(AbstractDTO::getId).orElse(null);
-    if (anomalyId != null) {
-      return getAnomalyNamespaceById(anomalyId);
-    }
-    return Optional.empty();
-  }
-
   private @NonNull Optional<String> getEnumerationItemNamespaceById(final long id) {
     try {
       return namespaceCache.get(id,
@@ -222,6 +211,6 @@ public class NamespaceResolver {
   }
 
   private @NonNull Optional<String> getNamespaceFromAuth(final @Nullable AbstractDTO dto) {
-    return optional(dto).map(AbstractDTO::getAuth).map(AuthorizationConfigurationDTO::getNamespace);
+    return optional(dto).map(AbstractDTO::namespace);
   }
 }

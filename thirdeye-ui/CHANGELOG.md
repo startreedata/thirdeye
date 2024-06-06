@@ -1,3 +1,10 @@
+### [2.45.23](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.22...thirdeye-ui-2.45.23) (2024-06-06)
+
+
+### Bug Fixes
+
+* [TE-2056](https://cortexdata.atlassian.net/browse/TE-2056) improve clarity of error messages ([26f46b380](https://github.com/startreedata/thirdeye/commit/26f46b380bb554d0c594c23bb088450fb3034372))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

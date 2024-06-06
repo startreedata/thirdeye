@@ -102,7 +102,7 @@ public class NamespaceResolver {
       namespace = getNamespaceFromAuth(dto);
     }
 
-    // FIXME CYRIL if requireNamespace is set - WARN if there is SOMETHING in DEFAULT NAMESPACE
+    // FIXME CYRIL authz if requireNamespace is set - WARN if there is SOMETHING in DEFAULT NAMESPACE
 
     return namespace.orElse(DEFAULT_NAMESPACE);
   }

@@ -92,7 +92,7 @@ public class AnomalyService extends CrudService<AnomalyApi, AnomalyDTO> {
         .ifPresent(alertApi -> alertApi.setName(cache.getAlerts()
             .getUnchecked(alertApi.getId())
             .getName()));
-    // fixme cyril authz - remove in a few weeks - namespace is now set at write time
+    // fixme cyril authz - implement migration to written namespace - see how it's done in RcaInvestigationService
     anomalyApi.setAuth(new AuthorizationConfigurationApi().setNamespace(authorizationManager.resourceId(
         dto).getNamespace()));
     return anomalyApi;

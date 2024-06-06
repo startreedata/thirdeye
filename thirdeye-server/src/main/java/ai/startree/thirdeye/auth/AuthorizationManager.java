@@ -332,7 +332,7 @@ public class AuthorizationManager {
           .map(this::resourceId)
           .toList();
     } else if (entity instanceof RcaInvestigationDTO rcaInvestigationDTO) {
-      final Long anomalyId = rcaInvestigationDTO.getAnomaly().getId();
+      final @NonNull Long anomalyId = rcaInvestigationDTO.getAnomaly().getId(); 
       // same namespace is ensured via RcaInvestigationService#toDto 
       // putting again a check because it's migration code and some legacy entities may not have the property 
       final AnomalyDTO anomaly = anomalyDao.findById(anomalyId);

@@ -28,6 +28,7 @@ import ai.startree.thirdeye.spi.auth.ResourceIdentifier;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
+import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertAssociationDto;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
@@ -70,6 +71,7 @@ public class AuthorizationManager {
 
   private final AlertTemplateRenderer alertTemplateRenderer;
   private final AlertManager alertDao;
+  private final AnomalyManager anomalyDao;
   private final ThirdEyeAuthorizer thirdEyeAuthorizer;
   private final NamespaceResolver namespaceResolver;
   private final boolean requireNamespace;
@@ -85,11 +87,14 @@ public class AuthorizationManager {
   @Inject
   public AuthorizationManager(
       final AlertTemplateRenderer alertTemplateRenderer,
-      final AlertManager alertManager, final ThirdEyeAuthorizer thirdEyeAuthorizer,
+      final AlertManager alertManager, 
+      final AnomalyManager anomalyManager,
+      final ThirdEyeAuthorizer thirdEyeAuthorizer,
       final NamespaceResolver namespaceResolver,
       final AuthConfiguration authConfiguration) {
     this.alertTemplateRenderer = alertTemplateRenderer;
     this.alertDao = alertManager;
+    this.anomalyDao = anomalyManager;
     this.thirdEyeAuthorizer = thirdEyeAuthorizer;
     this.namespaceResolver = namespaceResolver;
 
@@ -174,7 +179,6 @@ public class AuthorizationManager {
   public <T extends AbstractDTO> void ensureCanCreate(final ThirdEyePrincipal principal,
       final T entity) {
     ensureHasAccess(principal, resourceId(entity), AccessType.WRITE);
-    // fixme cyril authz - related entities should be in the same namespace
     relatedEntities(entity).forEach(relatedId ->
         ensureHasAccess(principal, relatedId, AccessType.READ));
   }
@@ -200,8 +204,9 @@ public class AuthorizationManager {
     } else {
       // allow namespace editions to keep backward compatibility
     }
-    // fixme cyril authz - related entities should be in the same namespace
     relatedEntities(after).forEach(related ->
+        // fixme cyril authz design issue - it's not clear to me why the chain of dependency is not resolved
+        // eg: checking a read access on an alert does not check for read access on template - see also ensureCanRead 
         ensureHasAccess(principal, related, AccessType.READ));
   }
 
@@ -280,12 +285,27 @@ public class AuthorizationManager {
     return ResourceIdentifier.from(name, namespace, entityType);
   }
 
-  // for the moment this method is responsible for checking whether related entities are in the same namespace - todo cyril authz - don't think it's the right place - consider refactor after migration
+  /**
+   * for the moment this method is responsible for checking whether related entities are in the same
+   * namespace - todo cyril authz - don't think it's the right place - consider refactor after migration
+   *
+   * Note: there can be chains of dependencies
+   * eg a RcaInvestigationDto --> AnomalyDTO --> AlertDto --> DatasetDto --> DatasourceDto
+   *                                                      --> AlertTemplateDto
+   * This method should only return entities that are directly referenced by the entity (the
+   * references that can be changed when mutating the entity).
+   * For instance, for RcaInvestigationDto, only return AnomalyDTO
+   * For AnomalyDto, only return AlertDto.
+   * fixme authz the chaining resolution behavior is undefined for the moment - will need to get fixed 
+   **/
   private <T extends AbstractDTO> List<ResourceIdentifier> relatedEntities(T entity) {
     if (entity instanceof final AlertDTO alertDto) {
       // fixme cyril authz - related entities should be namespaced
       final AlertTemplateDTO alertTemplateDTO = alertTemplateRenderer.getTemplate(
           alertDto.getTemplate());
+      // fixme cyril authz design - add datasource/dataset 
+      //   nothing actually ensures an alert runs on a dataset/datasource for which the user has read access
+      //   dataset is historically provided by a string key so there is not explicit design for this
       return Collections.singletonList(resourceId(alertTemplateDTO));
     } else if (entity instanceof SubscriptionGroupDTO subscriptionGroupDto) {
       final List<AlertAssociationDto> alertAssociations = optional(
@@ -298,24 +318,32 @@ public class AuthorizationManager {
       // this should be done in some validate step but the current validate step does not have the namespace context FIXME design
       final List<AlertDTO> alertDtos = alertIds.stream()
           .map(alertDao::findById)
-          .filter(Objects::nonNull) // we ignore null here - deleting an alert should not break a subscription group here - it seems it is allowed in other places in the codebase
+          .filter(
+              Objects::nonNull) // we ignore null here - deleting an alert should not break a subscription group here - it seems it is allowed in other places in the codebase
           .toList();
       for (final AlertDTO alert : alertDtos) {
         // cannot print the alert id in the error message because it would potentially leak the namespace of an alert for which authz has not been performed yet
         checkArgument(Objects.equals(subscriptionGroupDto.namespace(), alert.namespace()),
-            "Subscription namespace %s and alert namespace do not match for alert id %s.", subscriptionGroupDto.namespace(), alert.getId());
+            "Subscription namespace %s and alert namespace do not match for alert id %s.",
+            subscriptionGroupDto.namespace(), alert.getId());
       }
       // end of hack
-      return alertDtos.stream() 
+      return alertDtos.stream()
           .map(this::resourceId)
           .toList();
     } else if (entity instanceof RcaInvestigationDTO rcaInvestigationDTO) {
-      // fixme cyril authz - IMPLEMENT RELATED ENTITIES OF RcaInvestigations
+      final Long anomalyId = rcaInvestigationDTO.getAnomaly().getId();
+      // same namespace is ensured via RcaInvestigationService#toDto 
+      // putting again a check because it's migration code and some legacy entities may not have the property 
+      final AnomalyDTO anomaly = anomalyDao.findById(anomalyId);
+      checkArgument(Objects.equals(rcaInvestigationDTO.namespace(), anomaly.namespace()), 
+          "RcaInvestigation namespace %s and anomaly namespace do not match for anomaly id %s.",
+          rcaInvestigationDTO.namespace(), anomaly.getId());
+      return List.of(resourceId(anomaly));
     } else if (entity instanceof AnomalyDTO anomalyDTO) {
       // fixme cyril authz - implement
     }
-    
-    
+
     return new ArrayList<>();
   }
 

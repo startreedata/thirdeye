@@ -13,25 +13,37 @@
  * the License.
  */
 import { NotificationTypeV1 } from "../../platform/components";
+import { ErrorMessage } from "../../platform/components/notification-provider-v1/notification-provider-v1/notification-provider-v1.interfaces";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { notifyIfErrors } from "./notifications.util";
 
 describe("Notifications Util", () => {
     it("notifyIfErrors should not call notify if request status is not Error", () => {
         const mockNotify = jest.fn();
-        notifyIfErrors(ActionStatus.Initial, ["bar"], mockNotify, "foo");
+        const errorMessages: ErrorMessage[] = [
+            {
+                message: "bar",
+            },
+        ];
+        notifyIfErrors(ActionStatus.Initial, errorMessages, mockNotify, "foo");
 
         expect(mockNotify).toHaveBeenCalledTimes(0);
     });
 
     it("notifyIfErrors should call notify if request status is Error and errorMessages is not empty", () => {
         const mockNotify = jest.fn();
-        notifyIfErrors(
-            ActionStatus.Error,
-            ["bar", "hello", "world"],
-            mockNotify,
-            "foo"
-        );
+        const errorMessages: ErrorMessage[] = [
+            {
+                message: "bar",
+            },
+            {
+                message: "hello",
+            },
+            {
+                message: "world",
+            },
+        ];
+        notifyIfErrors(ActionStatus.Error, errorMessages, mockNotify, "foo");
 
         expect(mockNotify).toHaveBeenCalledTimes(3);
     });

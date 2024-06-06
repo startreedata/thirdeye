@@ -66,7 +66,7 @@ describe("Alert Fetch Redirect Params", () => {
 
         expect(await screen.findByText("Hello world")).toBeInTheDocument();
         expect(mockNavigate).toHaveBeenLastCalledWith(
-            "path-to-redirect-to?timeRange=CUSTOM&startTime=10&endTime=11",
+            "path-to-redirect-to?timeRange=CUSTOM&startTime=1&endTime=2",
             { replace: false }
         );
     });

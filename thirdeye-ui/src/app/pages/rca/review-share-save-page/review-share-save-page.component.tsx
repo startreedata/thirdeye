@@ -120,6 +120,7 @@ export const ReviewShareSavePage: FunctionComponent = () => {
                             entity: t("label.investigation"),
                         }
                     ),
+                    "",
                     false,
                     NotificationScopeV1.Global
                 );

@@ -59,6 +59,7 @@ export const LoginPage: FunctionComponent = () => {
                             exceptionCode as AuthExceptionCodeV1
                         ],
                 }),
+                "",
                 true
             );
         }

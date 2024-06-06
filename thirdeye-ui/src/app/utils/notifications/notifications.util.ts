@@ -15,13 +15,18 @@
 import { isEmpty } from "lodash";
 import { SlackFormEntries } from "../../components/subscription-group-wizard/subscription-group-details/recipient-details/groups-editor/slack/slack.interfaces";
 import { NotificationTypeV1 } from "../../platform/components";
+import { ErrorMessage } from "../../platform/components/notification-provider-v1/notification-provider-v1/notification-provider-v1.interfaces";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { SlackSpec } from "../../rest/dto/subscription-group.interfaces";
 
 export const notifyIfErrors = (
     requestStatus: ActionStatus,
-    errorMessages: string[] | null | undefined,
-    notify: (msgType: NotificationTypeV1, msg: string) => void,
+    errorMessages: ErrorMessage[] | null | undefined,
+    notify: (
+        msgType: NotificationTypeV1,
+        msg: string,
+        details?: string
+    ) => void,
     fallbackMsg: string
 ): void => {
     if (requestStatus !== ActionStatus.Error) {
@@ -31,7 +36,9 @@ export const notifyIfErrors = (
     if (!isEmpty(errorMessages)) {
         errorMessages
             ?.reverse() // First in first shown
-            .map((msg) => notify(NotificationTypeV1.Error, msg));
+            .map((msg) =>
+                notify(NotificationTypeV1.Error, msg.message, msg.details)
+            );
     } else {
         notify(NotificationTypeV1.Error, fallbackMsg);
     }

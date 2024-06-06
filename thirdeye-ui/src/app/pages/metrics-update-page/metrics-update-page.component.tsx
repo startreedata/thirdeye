@@ -113,7 +113,11 @@ export const MetricsUpdatePage: FunctionComponent = () => {
                               })
                           )
                         : errMessages.map((err) =>
-                              notify(NotificationTypeV1.Error, err)
+                              notify(
+                                  NotificationTypeV1.Error,
+                                  err.message,
+                                  err.details
+                              )
                           );
                 }
 

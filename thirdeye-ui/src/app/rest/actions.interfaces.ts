@@ -1,3 +1,5 @@
+import { ErrorMessage } from "../platform/components/notification-provider-v1/notification-provider-v1/notification-provider-v1.interfaces";
+
 /*
  * Copyright 2023 StarTree Inc
  *
@@ -22,6 +24,6 @@ export enum ActionStatus {
 
 export interface ActionHook {
     status: ActionStatus;
-    errorMessages: string[];
+    errorMessages: ErrorMessage[];
     resetData: () => void;
 }

@@ -158,7 +158,7 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
                   })
               )
             : getAlertErrorMessages.map((err) =>
-                  notify(NotificationTypeV1.Error, err)
+                  notify(NotificationTypeV1.Error, err.message, err.details)
               );
     }, [getAlertErrorMessages, getAlertStatus]);
 
@@ -175,7 +175,7 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
                   })
               )
             : getSubscriptionGroupsErrorMessages.map((err) =>
-                  notify(NotificationTypeV1.Error, err)
+                  notify(NotificationTypeV1.Error, err.message, err.details)
               );
     }, [getSubscriptionGroupsErrorMessages, getSubscriptionGroupStatus]);
 

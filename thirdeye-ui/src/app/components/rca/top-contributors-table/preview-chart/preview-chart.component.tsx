@@ -225,7 +225,9 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                 <LoadingErrorStateSwitch
                     errorState={
                         <Box pb={20} pt={20}>
-                            <NoDataIndicator text={errorMessages?.[0]} />
+                            <NoDataIndicator
+                                text={errorMessages?.[0]?.message}
+                            />
                         </Box>
                     }
                     isError={getEvaluationRequestStatus === ActionStatus.Error}

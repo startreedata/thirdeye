@@ -68,6 +68,12 @@ describe("Slack", () => {
             type: "slack",
             params: {
                 webhookUrl: NEXT_URL,
+                notifyResolvedAnomalies: false,
+                sendOneMessagePerAnomaly: false,
+                textConfiguration: {
+                    mentionMemberIds: [],
+                    owner: "",
+                },
             },
         });
     });

@@ -84,6 +84,7 @@ describe("Login Page", () => {
         expect(mockNotify).toHaveBeenCalledWith(
             "error",
             "message.authentication-error",
+            "",
             true
         );
         expect(mockT).toHaveBeenCalledWith("message.authentication-error", {

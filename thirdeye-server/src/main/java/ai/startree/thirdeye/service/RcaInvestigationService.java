@@ -17,10 +17,13 @@ import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
+import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
 import ai.startree.thirdeye.spi.api.RcaInvestigationApi;
+import ai.startree.thirdeye.spi.auth.ResourceIdentifier;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.RcaInvestigationManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
@@ -47,12 +50,20 @@ public class RcaInvestigationService extends CrudService<RcaInvestigationApi, Rc
 
   @Override
   protected RcaInvestigationDTO toDto(final RcaInvestigationApi api) {
+    final RcaInvestigationDTO dto = ApiBeanMapper.toDto(api);
+    // todo authz - once namespace resolver is removed - simply inherit from the anomaly id
+    final ResourceIdentifier authId = authorizationManager.resourceId(dto);
+    dto.setAuth(new AuthorizationConfigurationDTO().setNamespace(authId.getNamespace()));
     return ApiBeanMapper.toDto(api);
   }
 
   @Override
   protected RcaInvestigationApi toApi(final RcaInvestigationDTO dto) {
-    return ApiBeanMapper.toApi(dto);
+    final RcaInvestigationApi api = ApiBeanMapper.toApi(dto);
+    // fixme cyril authz - remove in a few weeks - namespace is now set at write time
+    api.setAuth(new AuthorizationConfigurationApi().setNamespace(authorizationManager.resourceId(
+        dto).getNamespace()));
+    return api;
   }
 
   @Override

@@ -83,6 +83,8 @@ public class NamespaceResolver {
     Optional<String> namespace;
     if (dto instanceof AnomalyDTO anomalyDto) {
       namespace = resolveAnomalyNamespace(anomalyDto);
+    } else if (dto instanceof RcaInvestigationDTO rcaInvestigationDto) {
+      namespace = resolveRcaNamespace(rcaInvestigationDto);
     } else if (dto instanceof EnumerationItemDTO enumerationItemDto) {
       namespace = resolveEnumerationItemNamespace(enumerationItemDto);
     } else if (dto instanceof TaskDTO taskDto) {
@@ -92,8 +94,7 @@ public class NamespaceResolver {
     } else if (dto instanceof MetricConfigDTO metricConfigDTO) {
       namespace = resolveMetricConfigDtoNamespace(metricConfigDTO);
     } else if (dto instanceof DataSourceDTO || dto instanceof AlertTemplateDTO
-        || dto instanceof AlertDTO || dto instanceof SubscriptionGroupDTO || dto instanceof EventDTO
-        || dto instanceof RcaInvestigationDTO) {
+        || dto instanceof AlertDTO || dto instanceof SubscriptionGroupDTO || dto instanceof EventDTO) {
       namespace = getNamespaceFromAuth(dto);
     } else {
       // please define cases explicitly as above - keeping this codepath to prevent workspace leaks and find changes, but should not happen
@@ -173,6 +174,19 @@ public class NamespaceResolver {
     final Long detectionConfigId = dto.getDetectionConfigId();
     if (detectionConfigId != null) {
       return getAlertNamespaceById(detectionConfigId);
+    }
+    return Optional.empty();
+  }
+
+  private @NonNull Optional<String> resolveRcaNamespace(final @NonNull RcaInvestigationDTO dto) {
+    if (dto.namespace() != null) {
+      // namespace was set at write time
+      return optional(dto.namespace());
+    }
+    // deprecated legacy logic - namespace is resolved at read time. fixme authz remove this
+    final Long anomalyId = optional(dto.getAnomaly()).map(AbstractDTO::getId).orElse(null);
+    if (anomalyId != null) {
+      return getAnomalyNamespaceById(anomalyId);
     }
     return Optional.empty();
   }

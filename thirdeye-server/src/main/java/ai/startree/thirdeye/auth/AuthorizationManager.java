@@ -308,7 +308,7 @@ public class AuthorizationManager {
       return alertDtos.stream() 
           .map(this::resourceId)
           .toList();
-    }
+    } // fixme cyril - IMPLEMENT RELATED ENTITIES OF RcaInvestigations
     return new ArrayList<>();
   }
 

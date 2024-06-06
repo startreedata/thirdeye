@@ -32,7 +32,9 @@ import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertAssociationDto;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import com.google.inject.Inject;
@@ -243,7 +245,6 @@ public class AuthorizationManager {
     } else {
       return thirdEyeAuthorizer.authorize(principal, identifier, accessType);
     }
-    // TODO CYRIL ADD A case for a PUBLIC identifier for immutable READ ok, WRITE not ok shared resources (eg templates)
   }
 
   public void ensureHasRootAccess(final ThirdEyePrincipal principal) {
@@ -279,6 +280,7 @@ public class AuthorizationManager {
     return ResourceIdentifier.from(name, namespace, entityType);
   }
 
+  // for the moment this method is responsible for checking whether related entities are in the same namespace - todo cyril authz - don't think it's the right place - consider refactor after migration
   private <T extends AbstractDTO> List<ResourceIdentifier> relatedEntities(T entity) {
     if (entity instanceof final AlertDTO alertDto) {
       // fixme cyril authz - related entities should be namespaced
@@ -304,11 +306,16 @@ public class AuthorizationManager {
             "Subscription namespace %s and alert namespace do not match for alert id %s.", subscriptionGroupDto.namespace(), alert.getId());
       }
       // end of hack
-
       return alertDtos.stream() 
           .map(this::resourceId)
           .toList();
-    } // fixme cyril - IMPLEMENT RELATED ENTITIES OF RcaInvestigations
+    } else if (entity instanceof RcaInvestigationDTO rcaInvestigationDTO) {
+      // fixme cyril authz - IMPLEMENT RELATED ENTITIES OF RcaInvestigations
+    } else if (entity instanceof AnomalyDTO anomalyDTO) {
+      // fixme cyril authz - implement
+    }
+    
+    
     return new ArrayList<>();
   }
 

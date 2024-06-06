@@ -12,73 +12,51 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Grid, Tooltip, Typography } from "@material-ui/core";
-import InfoIconOutlined from "@material-ui/icons/InfoOutlined";
+import { Box, Grid, ThemeProvider, Typography } from "@material-ui/core";
+import DashboardIcon from "@material-ui/icons/Dashboard";
+import PersonAddIcon from "@material-ui/icons/PersonAdd";
+import PlaylistAddCheckIcon from "@material-ui/icons/PlaylistAddCheck";
+import ReportIcon from "@material-ui/icons/Report";
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { DateTime } from "luxon";
-import {
-    default as React,
-    FunctionComponent,
-    useEffect,
-    useState,
-} from "react";
+import { default as React, FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ReactComponent as SetupCompleteLogo } from "../../../assets/images/thirdeye-startree-setup-complete.svg";
-import { ActiveAlertsCount } from "../../components/home-page/active-alerts-count/active-alerts-count.component";
-import { AlertAccuracy } from "../../components/home-page/alert-accuracy/alert-accuracy.component";
-import { AnomaliesPendingFeedbackCount } from "../../components/home-page/anomalies-pending-feedback-count/anomalies-pending-feedback-count.component";
-import { AnomaliesReportedCount } from "../../components/home-page/anomalies-reported-count/anomalies-reported-count.component";
-import { AnomalyRangeDropdown } from "../../components/home-page/anomaly-range-dropdown/anomaly-range-dropdown.component";
-import { EntitySearch } from "../../components/home-page/entity-search/entity-search.component";
-import { RecentAnomalies } from "../../components/home-page/recent-anomalies/recent-anomalies.component";
-import { RecommendedDocumentation } from "../../components/home-page/recommended-documentation/recommended-documentation.component";
-import { TotalSubscriptionGroupCount } from "../../components/home-page/total-subscription-group-count/total-subscription-group-count.component";
-import { TrendingAnomalies } from "../../components/home-page/trending-anomalies/trending-anomalies.component";
+import { ActiveAlertsCountV2 } from "../../components/home-page/active-alerts-count-v2/active-alerts-count-v2.component";
+import { LatestActiveAlerts } from "../../components/home-page/latest-active-alerts/latest-active-alerts.component";
+import { LatestSubscriptionGroups } from "../../components/home-page/latest-subscription-groups/latest-subscription-groups.component";
+import { RecentAnomaliesV2 } from "../../components/home-page/recent-anomalies-v2/recent-anomalies-v2.component";
+import { RecommendedDocumentationV2 } from "../../components/home-page/recommended-documentation-v2/recommended-documentation-v2.component";
+import { TotalSubscriptionGroupCountV2 } from "../../components/home-page/total-subscription-group-count-v2/total-subscription-group-count-v2.component";
+import IconLink from "../../components/icon-link/icon-link.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
+import TitleCard from "../../components/title-card/title-card.component";
 import {
-    PageContentsCardV1,
     PageContentsGridV1,
-    PageHeaderActionsV1,
     PageV1,
     useDialogProviderV1,
 } from "../../platform/components";
 import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 import { getAllAlerts } from "../../rest/alerts/alerts.rest";
-import { getAnomalyStats } from "../../rest/anomalies/anomalies.rest";
-import { getAppAnalytics } from "../../rest/app-analytics/app-analytics.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
-import { AnomalyStats } from "../../rest/dto/anomaly.interfaces";
-import { AppAnalytics } from "../../rest/dto/app-analytics.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import { getAllSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.rest";
 import { QUERY_PARAM_KEYS } from "../../utils/constants/constants.util";
 import {
     AppRoute,
-    generateDateRangeDaysFromNow,
+    getAdminPath,
     getAlertsAllPath,
 } from "../../utils/routes/routes.util";
-import { useUserPreferences } from "../../utils/user-preferences/user-preferences";
-import { UserPreferencesKeys } from "../../utils/user-preferences/user-preferences.interfaces";
-import { useHomePageStyles } from "./home-page.styles";
+import { homePageTheme, useHomePageStyles } from "./home-page.styles";
 
 export const HomePage: FunctionComponent = () => {
-    const [anomalyStartTime, setAnomalyStartTime] = useState<number>(
-        generateDateRangeDaysFromNow(7)[0]
-    );
     const navigate = useNavigate();
     const { t } = useTranslation();
     const { showDialog } = useDialogProviderV1();
     const [searchParams, setSearchParams] = useSearchParams();
     const style = useHomePageStyles();
 
-    const getAppAnalyticsQuery = useQuery<AppAnalytics, AxiosError>({
-        queryKey: ["appAnalytics"],
-        queryFn: () => {
-            return getAppAnalytics();
-        },
-    });
     const getAlertsQuery = useQuery<Alert[], AxiosError>({
         queryKey: ["alerts"],
         queryFn: () => {
@@ -94,35 +72,12 @@ export const HomePage: FunctionComponent = () => {
             return getAllSubscriptionGroups();
         },
     });
-    const getAnomalyStatsQuery = useQuery<AnomalyStats, AxiosError>({
-        queryKey: ["anomalyStats"],
-        queryFn: () => {
-            return getAnomalyStats({
-                startTime: anomalyStartTime,
-                endTime: DateTime.local().endOf("hour").toMillis(),
-            });
-        },
-    });
-    const { setPreference, getPreference } = useUserPreferences();
-
-    const [shouldHideDocumentation, setShouldHideDocumentation] = useState(
-        getPreference(UserPreferencesKeys.SHOW_DOCUMENTATION_RESOURCES) ?? false
-    );
 
     useEffect(() => {
         if (getAlertsQuery.data && getAlertsQuery.data.length === 0) {
             navigate(AppRoute.WELCOME);
         }
     }, [getAlertsQuery.data]);
-
-    useEffect(() => {
-        getAnomalyStatsQuery.refetch();
-    }, [anomalyStartTime]);
-
-    const handleHideDocumentationClick = (): void => {
-        setShouldHideDocumentation(true);
-        setPreference(UserPreferencesKeys.SHOW_DOCUMENTATION_RESOURCES, true);
-    };
 
     useEffect(() => {
         if (
@@ -166,165 +121,161 @@ export const HomePage: FunctionComponent = () => {
     }, []);
 
     return (
-        <PageV1>
-            <PageHeader
-                transparentBackground
-                actionsGridContainProps={{ xs: 12, sm: 12, md: 12, lg: 3 }}
-                customActions={
-                    <PageHeaderActionsV1>
-                        <Box width="100%">
-                            <EntitySearch
-                                alerts={getAlertsQuery.data || []}
-                                subscriptionGroups={
-                                    getSubscriptionGroupsQuery.data || []
-                                }
-                            />
-                        </Box>
-                    </PageHeaderActionsV1>
-                }
-                headerGridContainerProps={{
-                    xs: 12,
-                    sm: 12,
-                    md: true,
-                    lg: true,
-                }}
-                subtitle={
-                    <Grid container alignItems="center">
-                        <Grid item>
-                            {t("message.effortless-alert-configuration")}
+        <ThemeProvider theme={homePageTheme}>
+            <PageV1 className={style.page}>
+                <PageHeader
+                    transparentBackground
+                    actionsGridContainProps={{ xs: 12, sm: 12, md: 12, lg: 3 }}
+                    headerGridContainerProps={{
+                        xs: 12,
+                        sm: 12,
+                        md: true,
+                        lg: true,
+                    }}
+                    subtitle={
+                        <Grid container alignItems="center">
+                            <Grid item>
+                                {t("message.effortless-alert-configuration")}
+                            </Grid>
                         </Grid>
-                        <Grid item>
-                            <Tooltip
-                                arrow
-                                interactive
-                                placement="top"
-                                title={
-                                    <Typography variant="caption">
-                                        {t(
-                                            "message.experience-streamlined-monitoring"
-                                        )}
-                                    </Typography>
-                                }
-                            >
-                                <InfoIconOutlined
-                                    color="secondary"
-                                    fontSize="small"
-                                />
-                            </Tooltip>
-                        </Grid>
-                    </Grid>
-                }
-                title={t(
-                    "message.automated-metrics-monitoring-and-anomaly-detection"
-                )}
-            />
-            <PageContentsGridV1>
-                <Grid item sm={12} xs={12}>
-                    <Grid container alignItems="stretch">
-                        <Grid item sm={4} xs={12}>
-                            <PageContentsCardV1 fullHeight>
-                                <ActiveAlertsCount
+                    }
+                    title={t(
+                        "message.automated-metrics-monitoring-and-anomaly-detection"
+                    )}
+                />
+                <PageContentsGridV1>
+                    <Grid item sm={4} xs={4}>
+                        <TitleCard
+                            content={
+                                <ActiveAlertsCountV2
                                     alertsQuery={getAlertsQuery}
                                 />
-                            </PageContentsCardV1>
-                        </Grid>
-                        <Grid item sm={4} xs={12}>
-                            <PageContentsCardV1 fullHeight>
-                                <AlertAccuracy
-                                    appAnalyticsQuery={getAppAnalyticsQuery}
-                                    classes={{
-                                        noDataIndicator: style.noDataIndicator,
-                                    }}
-                                />
-                            </PageContentsCardV1>
-                        </Grid>
-                        <Grid item sm={4} xs={12}>
-                            <PageContentsCardV1 fullHeight>
-                                <TotalSubscriptionGroupCount
-                                    classes={{
-                                        noDataIndicator: style.noDataIndicator,
-                                    }}
+                            }
+                            title={
+                                <Grid
+                                    container
+                                    alignItems="center"
+                                    direction="row"
+                                    xs={12}
+                                >
+                                    <Grid
+                                        item
+                                        alignItems="center"
+                                        classes={{
+                                            root: style.iconGridContainer,
+                                        }}
+                                        direction="row"
+                                    >
+                                        <ReportIcon
+                                            classes={{ root: style.icon }}
+                                        />
+                                    </Grid>
+                                    <Grid item>
+                                        <Typography variant="h6">
+                                            {t(
+                                                "label.monitor-and-detect-anomalies"
+                                            )}
+                                        </Typography>
+                                    </Grid>
+                                </Grid>
+                            }
+                        />
+                    </Grid>
+                    <Grid item sm={4} xs={4}>
+                        <TitleCard
+                            content={
+                                <TotalSubscriptionGroupCountV2
                                     subscriptionGroupsQuery={
                                         getSubscriptionGroupsQuery
                                     }
                                 />
-                            </PageContentsCardV1>
-                        </Grid>
+                            }
+                            title={
+                                <Grid
+                                    container
+                                    alignItems="center"
+                                    direction="row"
+                                    xs={12}
+                                >
+                                    <Grid
+                                        item
+                                        alignItems="center"
+                                        classes={{
+                                            root: style.iconGridContainer,
+                                        }}
+                                        direction="row"
+                                    >
+                                        <PlaylistAddCheckIcon
+                                            classes={{ root: style.icon }}
+                                        />
+                                    </Grid>
+                                    <Grid item>
+                                        <Typography variant="h6">
+                                            {t("label.subscribe-to-alerts")}
+                                        </Typography>
+                                    </Grid>
+                                </Grid>
+                            }
+                        />
                     </Grid>
-                </Grid>
+                    <Grid item sm={4} xs={4}>
+                        <TitleCard
+                            content={
+                                <IconLink
+                                    icon={<PersonAddIcon />}
+                                    label={t(
+                                        "label.view-detection-tasks-dashboard"
+                                    )}
+                                    route={getAdminPath()}
+                                />
+                            }
+                            title={
+                                <Grid
+                                    container
+                                    alignItems="center"
+                                    direction="row"
+                                    xs={12}
+                                >
+                                    <Grid
+                                        item
+                                        alignItems="center"
+                                        classes={{
+                                            root: style.iconGridContainer,
+                                        }}
+                                        direction="row"
+                                    >
+                                        <DashboardIcon
+                                            classes={{ root: style.icon }}
+                                        />
+                                    </Grid>
+                                    <Grid item>
+                                        <Typography variant="h6">
+                                            {t("label.dashboards")}
+                                        </Typography>
+                                    </Grid>
+                                </Grid>
+                            }
+                        />
+                    </Grid>
 
-                {!shouldHideDocumentation && (
+                    <Grid item className={style.gridSpace} sm={6}>
+                        <LatestActiveAlerts alertsQuery={getAlertsQuery} />
+                    </Grid>
+                    <Grid item className={style.gridSpace} sm={6}>
+                        <LatestSubscriptionGroups
+                            subscriptionGroupsQuery={getSubscriptionGroupsQuery}
+                        />
+                    </Grid>
+
+                    <Grid item className={style.gridSpace} xs={12}>
+                        <RecentAnomaliesV2 />
+                    </Grid>
+
                     <Grid item xs={12}>
-                        <PageContentsCardV1>
-                            <RecommendedDocumentation
-                                onHideDocumentationClick={
-                                    handleHideDocumentationClick
-                                }
-                            />
-                        </PageContentsCardV1>
+                        <RecommendedDocumentationV2 />
                     </Grid>
-                )}
-
-                <Grid item sm={12} xs={12}>
-                    <Grid container justifyContent="space-between">
-                        <Grid item sm={8} xs={12}>
-                            <Typography variant="h5">
-                                {t("label.recent-entity", {
-                                    entity: t("label.anomalies"),
-                                })}
-                            </Typography>
-                        </Grid>
-
-                        <Grid item sm={4} xs={12}>
-                            <AnomalyRangeDropdown
-                                anomalyStartTime={anomalyStartTime}
-                                setAnomalyStartTime={setAnomalyStartTime}
-                            />
-                        </Grid>
-                    </Grid>
-                </Grid>
-
-                <Grid item sm={8} xs={12}>
-                    <Grid container alignItems="stretch">
-                        <Grid item sm={12} xs={12}>
-                            <PageContentsCardV1 fullHeight>
-                                <TrendingAnomalies
-                                    startTime={anomalyStartTime}
-                                />
-                            </PageContentsCardV1>
-                        </Grid>
-                    </Grid>
-                </Grid>
-
-                <Grid item sm={4} xs={12}>
-                    <Grid container direction="column">
-                        <Grid item>
-                            <PageContentsCardV1 fullHeight>
-                                <AnomaliesReportedCount
-                                    anomalyStatsQuery={getAnomalyStatsQuery}
-                                    classes={{
-                                        noDataIndicator: style.noDataIndicator,
-                                    }}
-                                />
-                            </PageContentsCardV1>
-                        </Grid>
-                        <Grid item>
-                            <PageContentsCardV1 fullHeight>
-                                <AnomaliesPendingFeedbackCount
-                                    anomalyStatsQuery={getAnomalyStatsQuery}
-                                    classes={{
-                                        noDataIndicator: style.noDataIndicator,
-                                    }}
-                                />
-                            </PageContentsCardV1>
-                        </Grid>
-                    </Grid>
-                </Grid>
-
-                <Grid item xs={12}>
-                    <RecentAnomalies />
-                </Grid>
-            </PageContentsGridV1>
-        </PageV1>
+                </PageContentsGridV1>
+            </PageV1>
+        </ThemeProvider>
     );
 };

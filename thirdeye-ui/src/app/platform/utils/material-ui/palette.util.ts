@@ -21,6 +21,7 @@ export const PaletteV1 = {
     PrimaryColorMain: ColorV1.Blue2,
     SecondaryColorMain: ColorV1.Grey2,
     ActionColorLight: ColorV1.White1,
+    WhiteColor: ColorV1.White1,
     HoverOpacityLight: 0.06,
     HoverOverlayLight: alpha(ColorV1.White1, 0.06),
     FocusOpacityLight: 0.09,
@@ -43,7 +44,10 @@ export const PaletteV1 = {
     DataGridHeaderBackgroundColor: ColorV1.Grey6,
     PaperBackgroundColor: ColorV1.White1,
     BackgroundColorDefault: ColorV1.Grey4,
+    BackgroundColorLight: ColorV1.Grey7,
     BorderColorDefault: ColorV1.Grey5,
+    BorderColorGrey: ColorV1.Grey8,
+    LinkColorDark: ColorV1.Blue8,
 } as const;
 
 // Material UI theme color palette

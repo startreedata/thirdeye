@@ -174,45 +174,58 @@ public class AuthorizationManagerTest {
     testCases.add(testCase(testName, alertDto, null, null, null, anomalyDTO,
         ResourceIdentifier.from("3", "default", "ANOMALY")));
 
-    // rca investigation inherit from the anomaly
+    // rca investigation does not inherit from the anomaly anymore - TODO authz deprecated test - will be removed once namespaceResolver is fully removed
     testName = "RcaInvestigationDTO - Enum with resource, alert with resource.";
     alertDto = alertWithResource();
     enumItem = enumWithResource();
     anomalyDTO = anomalyWithEnum();
     RcaInvestigationDTO rcaDto = rcaOfAnomaly(anomalyDTO);
+    // the rca auth is now set at creation time, and cannot be modified when requireNamespace is true
+    rcaDto.setAuth(new AuthorizationConfigurationDTO().setNamespace("rca_namespace"));
     testCases.add(testCase(testName, alertDto, enumItem, anomalyDTO, null, rcaDto,
-        ResourceIdentifier.from("7", "enum_namespace", "RCA_INVESTIGATION")));
+        ResourceIdentifier.from("7", "rca_namespace", "RCA_INVESTIGATION")));
 
+    // rca investigation does not inherit from the anomaly anymore - TODO authz deprecated test - will be removed once namespaceResolver is fully removed
     testName = "RcaInvestigationDTO - Enum without resource, alert with resource.";
     alertDto = alertWithResource();
     enumItem = enumWithoutResource();
     anomalyDTO = anomalyWithEnum();
     rcaDto = rcaOfAnomaly(anomalyDTO);
+    // the rca auth is now set at creation time, and cannot be modified when requireNamespace is true
+    rcaDto.setAuth(new AuthorizationConfigurationDTO().setNamespace("rca_namespace"));
     testCases.add(testCase(testName, alertDto, enumItem, anomalyDTO, null, rcaDto,
-        ResourceIdentifier.from("7", "alert_namespace", "RCA_INVESTIGATION")));
+        ResourceIdentifier.from("7", "rca_namespace", "RCA_INVESTIGATION")));
 
+    // rca investigation does not inherit from the anomaly anymore - TODO authz deprecated test - will be removed once namespaceResolver is fully removed
     testName = "RcaInvestigationDTO - Enum with resource, alert without resource.";
     alertDto = alertWithoutResource();
     enumItem = enumWithResource();
     anomalyDTO = anomalyWithEnum();
     rcaDto = rcaOfAnomaly(anomalyDTO);
+    // the rca auth is now set at creation time, and cannot be modified when requireNamespace is true
+    rcaDto.setAuth(new AuthorizationConfigurationDTO().setNamespace("rca_namespace"));
     testCases.add(testCase(testName, alertDto, enumItem, anomalyDTO, null, rcaDto,
-        ResourceIdentifier.from("7", "enum_namespace", "RCA_INVESTIGATION")));
+        ResourceIdentifier.from("7", "rca_namespace", "RCA_INVESTIGATION")));
 
     testName = "RcaInvestigationDTO - Enum without resource, alert without resource.";
     alertDto = alertWithoutResource();
     enumItem = enumWithoutResource();
     anomalyDTO = anomalyWithEnum();
     rcaDto = rcaOfAnomaly(anomalyDTO);
+    // the rca auth is now set at creation time, and cannot be modified when requireNamespace is true
+    rcaDto.setAuth(new AuthorizationConfigurationDTO().setNamespace("rca_namespace"));
     testCases.add(testCase(testName, alertDto, enumItem, anomalyDTO, null, rcaDto,
-        ResourceIdentifier.from("7", "default", "RCA_INVESTIGATION")));
+        ResourceIdentifier.from("7", "rca_namespace", "RCA_INVESTIGATION")));
 
+    // rca investigation does not inherit from the anomaly anymore - TODO authz deprecated test - will be removed once namespaceResolver is fully removed
     testName = "RcaInvestigationDTO - No enum, alert with resource.";
     alertDto = alertWithResource();
     anomalyDTO = anomalyWithoutEnum();
     rcaDto = rcaOfAnomaly(anomalyDTO);
+    // the rca auth is now set at creation time, and cannot be modified when requireNamespace is true
+    rcaDto.setAuth(new AuthorizationConfigurationDTO().setNamespace("rca_namespace"));
     testCases.add(testCase(testName, alertDto, null, anomalyDTO, null, rcaDto,
-        ResourceIdentifier.from("7", "alert_namespace", "RCA_INVESTIGATION")));
+        ResourceIdentifier.from("7", "rca_namespace", "RCA_INVESTIGATION")));
 
     testName = "RcaInvestigationDTO - No enum, alert without resource.";
     alertDto = alertWithoutResource();

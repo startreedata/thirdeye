@@ -107,7 +107,7 @@ export const NotificationDisplayV1: FunctionComponent<NotificationDisplayV1Props
                                                 }
                                             />
                                         }
-                                        label={t("label.show-exception")}
+                                        label={t("label.show-details")}
                                     />
                                     {showDetails && (
                                         <Box>{notification.details}</Box>

@@ -24,7 +24,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
@@ -103,9 +102,8 @@ public class NamespaceResolver {
           optional(dto).map(AbstractDTO::getClass).orElse(null));
       namespace = getNamespaceFromAuth(dto);
     }
-    // FIXME CYRIL add authz do EventDTO and AlertTemplateDto - requires a shared read-only namespace
-    
-    // FIXME CYRIL if requireNamespace is set - WARN if there is SOMETHING in DEFAULT NAMESPACE
+
+    // FIXME CYRIL authz if requireNamespace is set - WARN if there is SOMETHING in DEFAULT NAMESPACE
 
     return namespace.orElse(DEFAULT_NAMESPACE);
   }
@@ -181,7 +179,11 @@ public class NamespaceResolver {
   }
 
   private @NonNull Optional<String> resolveRcaNamespace(final @NonNull RcaInvestigationDTO dto) {
-    // fixme cyril authz when modifying rcaInvestigationService - change this - use the dto auth if it's set  
+    if (dto.namespace() != null) {
+      // namespace was set at write time
+      return optional(dto.namespace());
+    }
+    // deprecated legacy logic - namespace is resolved at read time. fixme authz remove this
     final Long anomalyId = optional(dto.getAnomaly()).map(AbstractDTO::getId).orElse(null);
     if (anomalyId != null) {
       return getAnomalyNamespaceById(anomalyId);
@@ -223,6 +225,6 @@ public class NamespaceResolver {
   }
 
   private @NonNull Optional<String> getNamespaceFromAuth(final @Nullable AbstractDTO dto) {
-    return optional(dto).map(AbstractDTO::getAuth).map(AuthorizationConfigurationDTO::getNamespace);
+    return optional(dto).map(AbstractDTO::namespace);
   }
 }

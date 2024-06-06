@@ -172,6 +172,7 @@ public class AuthorizationManager {
   public <T extends AbstractDTO> void ensureCanCreate(final ThirdEyePrincipal principal,
       final T entity) {
     ensureHasAccess(principal, resourceId(entity), AccessType.WRITE);
+    // fixme cyril authz - related entities should be in the same namespace
     relatedEntities(entity).forEach(relatedId ->
         ensureHasAccess(principal, relatedId, AccessType.READ));
   }
@@ -197,9 +198,9 @@ public class AuthorizationManager {
     } else {
       // allow namespace editions to keep backward compatibility
     }
+    // fixme cyril authz - related entities should be in the same namespace
     relatedEntities(after).forEach(related ->
         ensureHasAccess(principal, related, AccessType.READ));
-    // fixme cyril authz - related entities should be in the same namespace
   }
 
   public <T extends AbstractDTO> void ensureCanRead(final ThirdEyePrincipal principal,

@@ -264,7 +264,7 @@ public class AuthorizationManagerTest {
         ResourceIdentifier.from("4", "default", "SUBSCRIPTION_GROUP")));
 
     // FIXME CYRIL authz do metricDTO
-    // FIXME CYRIL authz do Events - need shared namespace
+    // FIXME CYRIL authz do Events
 
     // spec:other DTOs always return the default namespace - https://dev.startree.ai/docs/get-started-with-thirdeye/access-control-in-thirdeye#namespaces-for-thirdeye-resources
     // --> it's not enforced in the Namespace resolver - so capturing this undefined behavior in this test to catch changes

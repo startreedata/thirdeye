@@ -78,6 +78,7 @@ public class AnomalyService extends CrudService<AnomalyApi, AnomalyDTO> {
   @Override
   protected AnomalyDTO toDto(final AnomalyApi api) {
     final AnomalyDTO dto = ApiBeanMapper.toDto(api);
+    // todo authz - once namespace resolver is removed - simply inherit from the alert id
     final ResourceIdentifier authId = authorizationManager.resourceId(dto);
     dto.setAuth(new AuthorizationConfigurationDTO().setNamespace(authId.getNamespace()));
     return dto;
@@ -91,6 +92,7 @@ public class AnomalyService extends CrudService<AnomalyApi, AnomalyDTO> {
         .ifPresent(alertApi -> alertApi.setName(cache.getAlerts()
             .getUnchecked(alertApi.getId())
             .getName()));
+    // fixme cyril authz - remove in a few weeks - namespace is now set at write time
     anomalyApi.setAuth(new AuthorizationConfigurationApi().setNamespace(authorizationManager.resourceId(
         dto).getNamespace()));
     return anomalyApi;
@@ -105,7 +107,7 @@ public class AnomalyService extends CrudService<AnomalyApi, AnomalyDTO> {
     feedbackDTO.setUpdatedBy(principal.getName());
     dto.setFeedback(feedbackDTO);
     anomalyManager.updateAnomalyFeedback(dto);
-
+ 
     if (dto.isChild()) {
       optional(anomalyManager.findParent(dto))
           .ifPresent(p -> {

@@ -28,7 +28,6 @@ import ai.startree.thirdeye.datalayer.bao.JobManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.MetricConfigManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.OnlineDetectionDataManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.RcaInvestigationManagerImpl;
-import ai.startree.thirdeye.datalayer.bao.RootcauseTemplateManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.SubscriptionGroupManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.TaskManagerImpl;
 import ai.startree.thirdeye.datalayer.entity.AbstractEntity;
@@ -47,7 +46,6 @@ import ai.startree.thirdeye.datalayer.entity.MergedAnomalyResultIndex;
 import ai.startree.thirdeye.datalayer.entity.MetricConfigIndex;
 import ai.startree.thirdeye.datalayer.entity.OnlineDetectionDataIndex;
 import ai.startree.thirdeye.datalayer.entity.RcaInvestigationIndex;
-import ai.startree.thirdeye.datalayer.entity.RootcauseTemplateIndex;
 import ai.startree.thirdeye.datalayer.entity.TaskEntity;
 import ai.startree.thirdeye.datalayer.util.EntityMappingHolder;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
@@ -62,7 +60,6 @@ import ai.startree.thirdeye.spi.datalayer.bao.JobManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.OnlineDetectionDataManager;
 import ai.startree.thirdeye.spi.datalayer.bao.RcaInvestigationManager;
-import ai.startree.thirdeye.spi.datalayer.bao.RootcauseTemplateManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import com.google.inject.AbstractModule;
@@ -95,7 +92,6 @@ public class ThirdEyePersistenceModule extends AbstractModule {
       MetricConfigIndex.class,
       OnlineDetectionDataIndex.class,
       RcaInvestigationIndex.class,
-      RootcauseTemplateIndex.class,
       TaskEntity.class
   );
 
@@ -124,8 +120,6 @@ public class ThirdEyePersistenceModule extends AbstractModule {
     bind(MetricConfigManager.class).to(MetricConfigManagerImpl.class).in(Scopes.SINGLETON);
     bind(EventManager.class).to(EventManagerImpl.class).in(Scopes.SINGLETON);
     bind(RcaInvestigationManager.class).to(RcaInvestigationManagerImpl.class).in(Scopes.SINGLETON);
-    bind(RootcauseTemplateManager.class).to(RootcauseTemplateManagerImpl.class)
-        .in(Scopes.SINGLETON);
     bind(AlertManager.class).to(AlertManagerImpl.class).in(Scopes.SINGLETON);
     bind(AlertTemplateManager.class).to(AlertTemplateManagerImpl.class).in(Scopes.SINGLETON);
     bind(SubscriptionGroupManager.class).to(SubscriptionGroupManagerImpl.class).in(

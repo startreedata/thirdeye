@@ -13,3 +13,4 @@
  */
 
 DROP TABLE IF EXISTS override_config_index;
+DROP TABLE IF EXISTS detection_status_index;

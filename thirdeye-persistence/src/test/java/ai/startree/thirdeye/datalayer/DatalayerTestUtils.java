@@ -20,7 +20,6 @@ import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.DetectionStatusDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.JobDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.metric.MetricType;
@@ -76,16 +75,5 @@ public class DatalayerTestUtils {
     jobSpec.setWindowEndTime(new DateTime(DateTimeZone.UTC).minusHours(10).getMillis());
     jobSpec.setConfigId(100);
     return jobSpec;
-  }
-
-  public static DetectionStatusDTO getTestDetectionStatus(String dataset, long dateToCheckInMS,
-      String dateToCheckInSDF, boolean detectionRun, long functionId) {
-    DetectionStatusDTO detectionStatusDTO = new DetectionStatusDTO();
-    detectionStatusDTO.setDataset(dataset);
-    detectionStatusDTO.setFunctionId(functionId);
-    detectionStatusDTO.setDateToCheckInMS(dateToCheckInMS);
-    detectionStatusDTO.setDateToCheckInSDF(dateToCheckInSDF);
-    detectionStatusDTO.setDetectionRun(detectionRun);
-    return detectionStatusDTO;
   }
 }

@@ -23,7 +23,6 @@ import ai.startree.thirdeye.datalayer.entity.DataSourceIndex;
 import ai.startree.thirdeye.datalayer.entity.DatasetConfigIndex;
 import ai.startree.thirdeye.datalayer.entity.DetectionAlertConfigIndex;
 import ai.startree.thirdeye.datalayer.entity.DetectionConfigIndex;
-import ai.startree.thirdeye.datalayer.entity.DetectionStatusIndex;
 import ai.startree.thirdeye.datalayer.entity.EntityToEntityMappingIndex;
 import ai.startree.thirdeye.datalayer.entity.EnumerationItemIndex;
 import ai.startree.thirdeye.datalayer.entity.EventIndex;
@@ -42,7 +41,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotificationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.DetectionStatusDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EntityToEntityMappingDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
@@ -76,7 +74,6 @@ public class SubEntities {
             AnomalySubscriptionGroupNotificationIndex.class)
         .put(DataSourceDTO.class, DataSourceIndex.class)
         .put(DatasetConfigDTO.class, DatasetConfigIndex.class)
-        .put(DetectionStatusDTO.class, DetectionStatusIndex.class)
         .put(EntityToEntityMappingDTO.class, EntityToEntityMappingIndex.class)
         .put(EnumerationItemDTO.class, EnumerationItemIndex.class)
         .put(EventDTO.class, EventIndex.class)
@@ -99,7 +96,6 @@ public class SubEntities {
             SubEntityType.ANOMALY_SUBSCRIPTION_GROUP_NOTIFICATION)
         .put(DataSourceDTO.class, SubEntityType.DATA_SOURCE)
         .put(DatasetConfigDTO.class, SubEntityType.DATASET)
-        .put(DetectionStatusDTO.class, SubEntityType.DETECTION_STATUS)
         .put(EntityToEntityMappingDTO.class, SubEntityType.ENTITY_TO_ENTITY_MAPPING)
         .put(EnumerationItemDTO.class, SubEntityType.ENUMERATION_ITEM)
         .put(EventDTO.class, SubEntityType.EVENT)

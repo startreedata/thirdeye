@@ -54,6 +54,8 @@ public interface SubscriptionGroupMapper {
   @Mapping(source = "type", target = "type", defaultValue = DEFAULT_ALERTER_PIPELINE)
   @Mapping(source = "active", target = "active", defaultValue = "true")
   @Mapping(source = "cron", target = "cronExpression")
+  @Mapping(source = "created", target = "createTime")
+  @Mapping(source = "updated", target = "updateTime")
   SubscriptionGroupDTO toDto(SubscriptionGroupApi api);
 
   @Mapping(target = "type", ignore = true)
@@ -61,6 +63,8 @@ public interface SubscriptionGroupMapper {
   @Mapping(source = "cronExpression", target = "cron")
   @Mapping(source = "properties", target = "alerts", qualifiedByName = "toAlerts")
   @Mapping(target = "alertSuppressors", ignore = true)
+  @Mapping(source = "createTime", target = "created")
+  @Mapping(source = "updateTime", target = "updated")
   SubscriptionGroupApi toApi(SubscriptionGroupDTO dto);
 
   @SuppressWarnings("unchecked")

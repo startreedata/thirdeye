@@ -27,7 +27,6 @@ import ai.startree.thirdeye.datalayer.entity.EnumerationItemIndex;
 import ai.startree.thirdeye.datalayer.entity.EventIndex;
 import ai.startree.thirdeye.datalayer.entity.MergedAnomalyResultIndex;
 import ai.startree.thirdeye.datalayer.entity.MetricConfigIndex;
-import ai.startree.thirdeye.datalayer.entity.OnlineDetectionDataIndex;
 import ai.startree.thirdeye.datalayer.entity.RcaInvestigationIndex;
 import ai.startree.thirdeye.datalayer.entity.SubEntityType;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
@@ -41,7 +40,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.OnlineDetectionDataDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import com.google.common.collect.ImmutableMap;
@@ -72,7 +70,6 @@ public class SubEntities {
         .put(EventDTO.class, EventIndex.class)
         .put(AnomalyDTO.class, MergedAnomalyResultIndex.class)
         .put(MetricConfigDTO.class, MetricConfigIndex.class)
-        .put(OnlineDetectionDataDTO.class, OnlineDetectionDataIndex.class)
         .put(RcaInvestigationDTO.class, RcaInvestigationIndex.class)
         .put(SubscriptionGroupDTO.class, DetectionAlertConfigIndex.class)
         .build();
@@ -91,7 +88,6 @@ public class SubEntities {
         .put(EventDTO.class, SubEntityType.EVENT)
         .put(AnomalyDTO.class, SubEntityType.ANOMALY)
         .put(MetricConfigDTO.class, SubEntityType.METRIC)
-        .put(OnlineDetectionDataDTO.class, SubEntityType.ONLINE_DETECTION_DATA)
         .put(RcaInvestigationDTO.class, SubEntityType.RCA_INVESTIGATION)
         .put(SubscriptionGroupDTO.class, SubEntityType.SUBSCRIPTION_GROUP)
         .build();

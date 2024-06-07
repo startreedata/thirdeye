@@ -24,7 +24,6 @@ import ai.startree.thirdeye.datalayer.bao.DataSourceManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.DatasetConfigManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.EnumerationItemManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.EventManagerImpl;
-import ai.startree.thirdeye.datalayer.bao.JobManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.MetricConfigManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.OnlineDetectionDataManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.RcaInvestigationManagerImpl;
@@ -41,7 +40,6 @@ import ai.startree.thirdeye.datalayer.entity.DetectionConfigIndex;
 import ai.startree.thirdeye.datalayer.entity.EnumerationItemIndex;
 import ai.startree.thirdeye.datalayer.entity.EventIndex;
 import ai.startree.thirdeye.datalayer.entity.GenericJsonEntity;
-import ai.startree.thirdeye.datalayer.entity.JobIndex;
 import ai.startree.thirdeye.datalayer.entity.MergedAnomalyResultIndex;
 import ai.startree.thirdeye.datalayer.entity.MetricConfigIndex;
 import ai.startree.thirdeye.datalayer.entity.OnlineDetectionDataIndex;
@@ -56,7 +54,6 @@ import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
-import ai.startree.thirdeye.spi.datalayer.bao.JobManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.OnlineDetectionDataManager;
 import ai.startree.thirdeye.spi.datalayer.bao.RcaInvestigationManager;
@@ -87,7 +84,6 @@ public class ThirdEyePersistenceModule extends AbstractModule {
       DetectionConfigIndex.class,
       EnumerationItemIndex.class,
       EventIndex.class,
-      JobIndex.class,
       MergedAnomalyResultIndex.class,
       MetricConfigIndex.class,
       OnlineDetectionDataIndex.class,
@@ -112,7 +108,6 @@ public class ThirdEyePersistenceModule extends AbstractModule {
 
     bind(AnomalyManager.class).to(AnomalyManagerImpl.class).in(
         Scopes.SINGLETON);
-    bind(JobManager.class).to(JobManagerImpl.class).in(Scopes.SINGLETON);
     bind(TaskManager.class).to(TaskManagerImpl.class).in(Scopes.SINGLETON);
     bind(DataSourceManager.class).to(DataSourceManagerImpl.class).in(Scopes.SINGLETON);
     bind(DatasetConfigManager.class).to(DatasetConfigManagerImpl.class).in(Scopes.SINGLETON);

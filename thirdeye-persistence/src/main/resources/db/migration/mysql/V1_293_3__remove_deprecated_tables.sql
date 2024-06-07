@@ -17,3 +17,6 @@ DROP TABLE IF EXISTS detection_status_index;
 DROP TABLE IF EXISTS entity_to_entity_mapping_index;
 DROP TABLE IF EXISTS evaluation_index;
 DROP TABLE IF EXISTS rootcause_template_index;
+DROP TABLE IF EXISTS autotune_config_index;
+DROP TABLE IF EXISTS application_index;
+DROP TABLE IF EXISTS job_index;

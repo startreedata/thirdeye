@@ -15,22 +15,17 @@ package ai.startree.thirdeye.datalayer;
 
 import static java.util.stream.Collectors.toSet;
 
-import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.JobDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.metric.MetricType;
-import ai.startree.thirdeye.spi.task.TaskType;
 import ai.startree.thirdeye.spi.util.SpiUtils;
 import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 
 public class DatalayerTestUtils {
 
@@ -63,17 +58,5 @@ public class DatalayerTestUtils {
         .setActive(true)
         .setDataSource("PinotThirdEyeDataSource")
         .setLastRefreshTime(System.currentTimeMillis());
-  }
-
-  public static JobDTO getTestJobSpec() {
-    JobDTO jobSpec = new JobDTO();
-    jobSpec.setJobName("Test_Anomaly_Job");
-    jobSpec.setStatus(Constants.JobStatus.SCHEDULED);
-    jobSpec.setTaskType(TaskType.DETECTION);
-    jobSpec.setScheduleStartTime(System.currentTimeMillis());
-    jobSpec.setWindowStartTime(new DateTime(DateTimeZone.UTC).minusHours(20).getMillis());
-    jobSpec.setWindowEndTime(new DateTime(DateTimeZone.UTC).minusHours(10).getMillis());
-    jobSpec.setConfigId(100);
-    return jobSpec;
   }
 }

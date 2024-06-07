@@ -25,7 +25,6 @@ import ai.startree.thirdeye.datalayer.entity.DetectionAlertConfigIndex;
 import ai.startree.thirdeye.datalayer.entity.DetectionConfigIndex;
 import ai.startree.thirdeye.datalayer.entity.EnumerationItemIndex;
 import ai.startree.thirdeye.datalayer.entity.EventIndex;
-import ai.startree.thirdeye.datalayer.entity.JobIndex;
 import ai.startree.thirdeye.datalayer.entity.MergedAnomalyResultIndex;
 import ai.startree.thirdeye.datalayer.entity.MetricConfigIndex;
 import ai.startree.thirdeye.datalayer.entity.OnlineDetectionDataIndex;
@@ -41,7 +40,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.JobDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.OnlineDetectionDataDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
@@ -72,7 +70,6 @@ public class SubEntities {
         .put(DatasetConfigDTO.class, DatasetConfigIndex.class)
         .put(EnumerationItemDTO.class, EnumerationItemIndex.class)
         .put(EventDTO.class, EventIndex.class)
-        .put(JobDTO.class, JobIndex.class)
         .put(AnomalyDTO.class, MergedAnomalyResultIndex.class)
         .put(MetricConfigDTO.class, MetricConfigIndex.class)
         .put(OnlineDetectionDataDTO.class, OnlineDetectionDataIndex.class)
@@ -92,7 +89,6 @@ public class SubEntities {
         .put(DatasetConfigDTO.class, SubEntityType.DATASET)
         .put(EnumerationItemDTO.class, SubEntityType.ENUMERATION_ITEM)
         .put(EventDTO.class, SubEntityType.EVENT)
-        .put(JobDTO.class, SubEntityType.JOB)
         .put(AnomalyDTO.class, SubEntityType.ANOMALY)
         .put(MetricConfigDTO.class, SubEntityType.METRIC)
         .put(OnlineDetectionDataDTO.class, SubEntityType.ONLINE_DETECTION_DATA)

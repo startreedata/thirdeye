@@ -23,7 +23,6 @@ public enum SubEntityType {
   DATA_SOURCE,
   ENUMERATION_ITEM,
   EVENT,
-  JOB,
   ANOMALY,
   METRIC,
   ONLINE_DETECTION_DATA,

@@ -19,7 +19,6 @@ import static com.google.common.base.CaseFormat.UPPER_CAMEL;
 import ai.startree.thirdeye.datalayer.bao.AlertManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.AlertTemplateManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.AnomalyManagerImpl;
-import ai.startree.thirdeye.datalayer.bao.AnomalySubscriptionGroupNotificationManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.DataSourceManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.DatasetConfigManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.EnumerationItemManagerImpl;
@@ -31,7 +30,6 @@ import ai.startree.thirdeye.datalayer.bao.TaskManagerImpl;
 import ai.startree.thirdeye.datalayer.entity.AbstractEntity;
 import ai.startree.thirdeye.datalayer.entity.AlertTemplateIndex;
 import ai.startree.thirdeye.datalayer.entity.AnomalyFeedbackIndex;
-import ai.startree.thirdeye.datalayer.entity.AnomalySubscriptionGroupNotificationIndex;
 import ai.startree.thirdeye.datalayer.entity.DataSourceIndex;
 import ai.startree.thirdeye.datalayer.entity.DatasetConfigIndex;
 import ai.startree.thirdeye.datalayer.entity.DetectionAlertConfigIndex;
@@ -47,7 +45,6 @@ import ai.startree.thirdeye.datalayer.util.EntityMappingHolder;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
-import ai.startree.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
@@ -74,7 +71,6 @@ public class ThirdEyePersistenceModule extends AbstractModule {
       // All index tables
       AlertTemplateIndex.class,
       AnomalyFeedbackIndex.class,
-      AnomalySubscriptionGroupNotificationIndex.class,
       DataSourceIndex.class,
       DatasetConfigIndex.class,
       DetectionAlertConfigIndex.class,
@@ -115,9 +111,6 @@ public class ThirdEyePersistenceModule extends AbstractModule {
     bind(AlertTemplateManager.class).to(AlertTemplateManagerImpl.class).in(Scopes.SINGLETON);
     bind(SubscriptionGroupManager.class).to(SubscriptionGroupManagerImpl.class).in(
         Scopes.SINGLETON);
-    bind(AnomalySubscriptionGroupNotificationManager.class)
-        .to(AnomalySubscriptionGroupNotificationManagerImpl.class)
-        .in(Scopes.SINGLETON);
   }
 
   @Singleton

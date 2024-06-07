@@ -18,7 +18,6 @@ import static java.util.Objects.requireNonNull;
 import ai.startree.thirdeye.datalayer.entity.AbstractIndexEntity;
 import ai.startree.thirdeye.datalayer.entity.AlertTemplateIndex;
 import ai.startree.thirdeye.datalayer.entity.AnomalyFeedbackIndex;
-import ai.startree.thirdeye.datalayer.entity.AnomalySubscriptionGroupNotificationIndex;
 import ai.startree.thirdeye.datalayer.entity.DataSourceIndex;
 import ai.startree.thirdeye.datalayer.entity.DatasetConfigIndex;
 import ai.startree.thirdeye.datalayer.entity.DetectionAlertConfigIndex;
@@ -34,7 +33,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.AnomalySubscriptionGroupNotificationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
@@ -62,8 +60,6 @@ public class SubEntities {
         .put(AlertDTO.class, DetectionConfigIndex.class)
         .put(AlertTemplateDTO.class, AlertTemplateIndex.class)
         .put(AnomalyFeedbackDTO.class, AnomalyFeedbackIndex.class)
-        .put(AnomalySubscriptionGroupNotificationDTO.class,
-            AnomalySubscriptionGroupNotificationIndex.class)
         .put(DataSourceDTO.class, DataSourceIndex.class)
         .put(DatasetConfigDTO.class, DatasetConfigIndex.class)
         .put(EnumerationItemDTO.class, EnumerationItemIndex.class)
@@ -80,8 +76,6 @@ public class SubEntities {
         .put(AlertDTO.class, SubEntityType.ALERT)
         .put(AlertTemplateDTO.class, SubEntityType.ALERT_TEMPLATE)
         .put(AnomalyFeedbackDTO.class, SubEntityType.ANOMALY_FEEDBACK)
-        .put(AnomalySubscriptionGroupNotificationDTO.class,
-            SubEntityType.ANOMALY_SUBSCRIPTION_GROUP_NOTIFICATION)
         .put(DataSourceDTO.class, SubEntityType.DATA_SOURCE)
         .put(DatasetConfigDTO.class, SubEntityType.DATASET)
         .put(EnumerationItemDTO.class, SubEntityType.ENUMERATION_ITEM)

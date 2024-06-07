@@ -9,3 +9,9 @@ TODO CYRIL authz best would be to have a constraint on (name, namespace) but nam
 for the moment we just remove the name unique constraints
 indexes should be revisited once the namespace migration is done
 
+## [V1_293_2__remove_name_dataset_unique_constraints_metrics.sql](V1_293_2__remove_name_dataset_unique_constraints_metrics.sql)
+TODO CYRIL authz best would be to have a constraint on (name, dataset, namespace) but namespace is not added to the index tables yet
+for the moment we just remove the name unique constraints
+indexes should be revisited once the namespace migration is done
+
+

@@ -31,7 +31,6 @@ import ai.startree.thirdeye.datalayer.entity.JobIndex;
 import ai.startree.thirdeye.datalayer.entity.MergedAnomalyResultIndex;
 import ai.startree.thirdeye.datalayer.entity.MetricConfigIndex;
 import ai.startree.thirdeye.datalayer.entity.OnlineDetectionDataIndex;
-import ai.startree.thirdeye.datalayer.entity.OverrideConfigIndex;
 import ai.startree.thirdeye.datalayer.entity.RcaInvestigationIndex;
 import ai.startree.thirdeye.datalayer.entity.RootcauseTemplateIndex;
 import ai.startree.thirdeye.datalayer.entity.SubEntityType;
@@ -50,7 +49,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.JobDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.OnlineDetectionDataDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.OverrideConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.RootcauseTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
@@ -86,7 +84,6 @@ public class SubEntities {
         .put(AnomalyDTO.class, MergedAnomalyResultIndex.class)
         .put(MetricConfigDTO.class, MetricConfigIndex.class)
         .put(OnlineDetectionDataDTO.class, OnlineDetectionDataIndex.class)
-        .put(OverrideConfigDTO.class, OverrideConfigIndex.class)
         .put(RcaInvestigationDTO.class, RcaInvestigationIndex.class)
         .put(RootcauseTemplateDTO.class, RootcauseTemplateIndex.class)
         .put(SubscriptionGroupDTO.class, DetectionAlertConfigIndex.class)
@@ -110,7 +107,6 @@ public class SubEntities {
         .put(AnomalyDTO.class, SubEntityType.ANOMALY)
         .put(MetricConfigDTO.class, SubEntityType.METRIC)
         .put(OnlineDetectionDataDTO.class, SubEntityType.ONLINE_DETECTION_DATA)
-        .put(OverrideConfigDTO.class, SubEntityType.OVERRIDE_CONFIG)
         .put(RcaInvestigationDTO.class, SubEntityType.RCA_INVESTIGATION)
         .put(RootcauseTemplateDTO.class, SubEntityType.ROOT_CAUSE_TEMPLATE)
         .put(SubscriptionGroupDTO.class, SubEntityType.SUBSCRIPTION_GROUP)

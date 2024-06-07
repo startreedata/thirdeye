@@ -13,28 +13,21 @@
  */
 package ai.startree.thirdeye.datalayer;
 
-import static ai.startree.thirdeye.spi.Constants.SCALING_FACTOR;
 import static java.util.stream.Collectors.toSet;
 
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
-import ai.startree.thirdeye.spi.datalayer.bao.OverrideConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DetectionStatusDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.JobDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.OverrideConfigDTO;
 import ai.startree.thirdeye.spi.metric.MetricType;
 import ai.startree.thirdeye.spi.task.TaskType;
 import ai.startree.thirdeye.spi.util.SpiUtils;
 import com.google.common.collect.Lists;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.joda.time.DateTime;
@@ -94,25 +87,5 @@ public class DatalayerTestUtils {
     detectionStatusDTO.setDateToCheckInSDF(dateToCheckInSDF);
     detectionStatusDTO.setDetectionRun(detectionRun);
     return detectionStatusDTO;
-  }
-
-  public static OverrideConfigDTO getTestOverrideConfigForTimeSeries(DateTime now) {
-    OverrideConfigDTO overrideConfigDTO = new OverrideConfigDTO();
-    overrideConfigDTO.setStartTime(now.minusHours(8).getMillis());
-    overrideConfigDTO.setEndTime(now.plusHours(8).getMillis());
-    overrideConfigDTO.setTargetEntity(OverrideConfigManager.ENTITY_TIME_SERIES);
-    overrideConfigDTO.setActive(true);
-
-    Map<String, String> overrideProperties = new HashMap<>();
-    overrideProperties.put(SCALING_FACTOR, "1.2");
-    overrideConfigDTO.setOverrideProperties(overrideProperties);
-
-    Map<String, List<String>> overrideTarget = new HashMap<>();
-    overrideTarget
-        .put(OverrideConfigManager.TARGET_COLLECTION, Arrays.asList("collection1", "collection2"));
-    overrideTarget.put(OverrideConfigManager.EXCLUDED_COLLECTION, Arrays.asList("collection3"));
-    overrideConfigDTO.setTargetLevel(overrideTarget);
-
-    return overrideConfigDTO;
   }
 }

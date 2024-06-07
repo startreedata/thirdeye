@@ -85,18 +85,11 @@ public class TestGenericPojoDao {
     assertThat(dao.get(id1, DataSourceDTO.class).getName()).isEqualTo(TEST_NAMES.get(0));
     assertThat(dao.get(id2, DataSourceDTO.class).getName()).isEqualTo(TEST_NAMES.get(1));
 
-    // On insertion of duplicate entry (same id), it should not be inserted
-    final DataSourceDTO dto3 = new DataSourceDTO()
-        .setName("something different")
-        .setType(dto1.getType());
-    dto3.setId(id1);
-    final Long id3 = dao.create(dto3);
-    // should return a null id
-    assertThat(id3).isNull();
+    // duplicate name is now allowed (see commit history)
+    // but todo authz duplicate (name, namespace) should not be allowed - constraint will be added once namespace is put in the index table
+    
     // generic table must also have only 2 entries
     assertThat(dao.getAll(DataSourceDTO.class).size()).isEqualTo(2);
-
-    // todo authz add unique constraint on name, namespace and add test similar to dto3
   }
 
   @Test(dependsOnMethods = "saveEntityTest", timeOut = 60000L)

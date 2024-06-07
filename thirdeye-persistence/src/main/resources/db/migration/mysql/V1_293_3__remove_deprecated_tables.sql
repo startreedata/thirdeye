@@ -21,4 +21,3 @@ DROP TABLE IF EXISTS autotune_config_index;
 DROP TABLE IF EXISTS application_index;
 DROP TABLE IF EXISTS job_index;
 DROP TABLE IF EXISTS online_detection_data_index;
-DROP TABLE IF EXISTS rootcause_template_index;

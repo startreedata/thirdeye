@@ -25,16 +25,28 @@ import java.util.List;
 import java.util.Objects;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public class EventManagerImpl extends AbstractManagerImpl<EventDTO> implements EventManager {
 
+  private static final Logger LOG = LoggerFactory.getLogger(EventManagerImpl.class);
+  
   private final SqlFilterRunner<EventDTO> sqlFilterRunner = new SqlFilterRunner<>(
       new EventToRelationAdapter());
+  private final boolean shareEventsInUnsetNamespace;
 
   @Inject
   public EventManagerImpl(GenericPojoDao genericPojoDao) {
     super(EventDTO.class, genericPojoDao);
+
+    shareEventsInUnsetNamespace = System.getenv("TE_SHARE_EVENTS_IN_UNSET_NAMESPACE") != null;
+    if (shareEventsInUnsetNamespace) {
+      LOG.warn("Events with a namespace not set are made available to all namespaces. " 
+          + "This configuration is not recommended. Please migrate your events to dedicated namespaces and disable " 
+          + "this feature by unsetting the environment variable TE_SHARE_EVENTS_IN_UNSET_NAMESPACE.");
+    }
   }
 
   @Override
@@ -45,9 +57,7 @@ public class EventManagerImpl extends AbstractManagerImpl<EventDTO> implements E
         .AND(Predicate.GT("endTime", startTime),
             Predicate.LT("startTime", endTime));
     final List<EventDTO> events = findByPredicate(predicate);
-    return events.stream()
-        .filter(e -> Objects.equals(namespace, e.namespace()))
-        .toList();
+    return filteredByNamespace(namespace, events);
   }
 
   @Override
@@ -62,9 +72,7 @@ public class EventManagerImpl extends AbstractManagerImpl<EventDTO> implements E
             Predicate.GT("endTime", startTime),
             Predicate.LT("startTime", endTime));
     final List<EventDTO> events = findByPredicate(predicate);
-    return events.stream()
-        .filter(e -> Objects.equals(namespace, e.namespace()))
-        .toList();
+    return filteredByNamespace(namespace, events);
   }
 
   @Override
@@ -73,5 +81,13 @@ public class EventManagerImpl extends AbstractManagerImpl<EventDTO> implements E
       final @Nullable String freeTextSqlFilter, final @Nullable String namespace) {
     final List<EventDTO> events = findEventsBetweenTimeRangeInNamespace(startTime, endTime, eventTypes, namespace);
     return sqlFilterRunner.applyFilter(events, freeTextSqlFilter);
+  }
+
+  @NonNull
+  private List<EventDTO> filteredByNamespace(final @Nullable String namespace,
+      final List<EventDTO> events) {
+    return events.stream()
+        .filter(e -> Objects.equals(namespace, e.namespace()) || (shareEventsInUnsetNamespace && Objects.equals(null, e.namespace())))
+        .toList();
   }
 }

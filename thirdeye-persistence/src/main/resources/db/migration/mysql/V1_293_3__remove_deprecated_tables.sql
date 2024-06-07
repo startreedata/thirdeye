@@ -14,3 +14,4 @@
 
 DROP TABLE IF EXISTS override_config_index;
 DROP TABLE IF EXISTS detection_status_index;
+DROP TABLE IF EXISTS entity_to_entity_mapping_index;

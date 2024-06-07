@@ -39,7 +39,6 @@ import ai.startree.thirdeye.datalayer.entity.DataSourceIndex;
 import ai.startree.thirdeye.datalayer.entity.DatasetConfigIndex;
 import ai.startree.thirdeye.datalayer.entity.DetectionAlertConfigIndex;
 import ai.startree.thirdeye.datalayer.entity.DetectionConfigIndex;
-import ai.startree.thirdeye.datalayer.entity.EntityToEntityMappingIndex;
 import ai.startree.thirdeye.datalayer.entity.EnumerationItemIndex;
 import ai.startree.thirdeye.datalayer.entity.EventIndex;
 import ai.startree.thirdeye.datalayer.entity.GenericJsonEntity;
@@ -89,7 +88,6 @@ public class ThirdEyePersistenceModule extends AbstractModule {
       DatasetConfigIndex.class,
       DetectionAlertConfigIndex.class,
       DetectionConfigIndex.class,
-      EntityToEntityMappingIndex.class,
       EnumerationItemIndex.class,
       EventIndex.class,
       JobIndex.class,

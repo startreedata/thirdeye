@@ -570,18 +570,6 @@ public class HappyPathTest {
     assertThat(createAnomalyResp.getStatus()).isEqualTo(400);
   }
 
-  @Test(dependsOnMethods = "testAnomalyCount")
-  public void testCreateInvestigationWithAuth() throws InterruptedException {
-    final var createInvestigationResp = request("api/rca/investigations").post(Entity.json(List.of(
-        new RcaInvestigationApi()
-            .setName("my-investigation")
-            .setAnomaly(new AnomalyApi().setId(anomalyId))
-            .setAuth(new AuthorizationConfigurationApi().setNamespace("anomaly-namespace"))
-    )));
-    // before investigations could not be created with a namespace but now it's possible - maybe this test is not relevant anymore
-    assertThat(createInvestigationResp.getStatus()).isEqualTo(200);
-  }
-
   @Test(timeOut = 60000, dependsOnMethods = "testAnomalyCount")
   public void testGetAnomalyAuth() throws InterruptedException {
     var alertId = mustCreateAlert(

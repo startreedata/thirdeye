@@ -65,7 +65,7 @@ describe("PagerDuty", () => {
 
         // Verify callback is called
         expect(mockCallback).toHaveBeenCalledWith({
-            type: "pager-duty",
+            type: "pagerduty",
             params: {
                 eventsIntegrationKey: NEXT_KEY,
             },

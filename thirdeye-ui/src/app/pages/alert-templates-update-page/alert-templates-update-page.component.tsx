@@ -97,7 +97,7 @@ export const AlertTemplatesUpdatePage: FunctionComponent = () => {
                       })
                   )
                 : alertTemplateErrors.map((msg) =>
-                      notify(NotificationTypeV1.Error, msg)
+                      notify(NotificationTypeV1.Error, msg.message, msg.details)
                   );
         }
     }, [alertTemplateRequestStatus, alertTemplateErrors]);

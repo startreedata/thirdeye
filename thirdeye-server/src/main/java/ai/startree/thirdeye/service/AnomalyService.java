@@ -127,4 +127,6 @@ public class AnomalyService extends CrudService<AnomalyApi, AnomalyDTO> {
         ? null : Predicate.AND(predicates.toArray(Predicate[]::new));
     return anomalyMetricsProvider.computeAnomalyStats(principal, predicate);
   }
+  
+  // fixme cyril authz implement validate and ensure alert id is set - anomalies can be created manually
 }

@@ -19,57 +19,38 @@ import static com.google.common.base.CaseFormat.UPPER_CAMEL;
 import ai.startree.thirdeye.datalayer.bao.AlertManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.AlertTemplateManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.AnomalyManagerImpl;
-import ai.startree.thirdeye.datalayer.bao.AnomalySubscriptionGroupNotificationManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.DataSourceManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.DatasetConfigManagerImpl;
-import ai.startree.thirdeye.datalayer.bao.DetectionStatusManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.EnumerationItemManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.EventManagerImpl;
-import ai.startree.thirdeye.datalayer.bao.JobManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.MetricConfigManagerImpl;
-import ai.startree.thirdeye.datalayer.bao.OnlineDetectionDataManagerImpl;
-import ai.startree.thirdeye.datalayer.bao.OverrideConfigManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.RcaInvestigationManagerImpl;
-import ai.startree.thirdeye.datalayer.bao.RootcauseTemplateManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.SubscriptionGroupManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.TaskManagerImpl;
 import ai.startree.thirdeye.datalayer.entity.AbstractEntity;
 import ai.startree.thirdeye.datalayer.entity.AlertTemplateIndex;
 import ai.startree.thirdeye.datalayer.entity.AnomalyFeedbackIndex;
-import ai.startree.thirdeye.datalayer.entity.AnomalySubscriptionGroupNotificationIndex;
 import ai.startree.thirdeye.datalayer.entity.DataSourceIndex;
 import ai.startree.thirdeye.datalayer.entity.DatasetConfigIndex;
 import ai.startree.thirdeye.datalayer.entity.DetectionAlertConfigIndex;
 import ai.startree.thirdeye.datalayer.entity.DetectionConfigIndex;
-import ai.startree.thirdeye.datalayer.entity.DetectionStatusIndex;
-import ai.startree.thirdeye.datalayer.entity.EntityToEntityMappingIndex;
 import ai.startree.thirdeye.datalayer.entity.EnumerationItemIndex;
 import ai.startree.thirdeye.datalayer.entity.EventIndex;
 import ai.startree.thirdeye.datalayer.entity.GenericJsonEntity;
-import ai.startree.thirdeye.datalayer.entity.JobIndex;
 import ai.startree.thirdeye.datalayer.entity.MergedAnomalyResultIndex;
 import ai.startree.thirdeye.datalayer.entity.MetricConfigIndex;
-import ai.startree.thirdeye.datalayer.entity.OnlineDetectionDataIndex;
-import ai.startree.thirdeye.datalayer.entity.OverrideConfigIndex;
 import ai.startree.thirdeye.datalayer.entity.RcaInvestigationIndex;
-import ai.startree.thirdeye.datalayer.entity.RootcauseTemplateIndex;
 import ai.startree.thirdeye.datalayer.entity.TaskEntity;
 import ai.startree.thirdeye.datalayer.util.EntityMappingHolder;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
-import ai.startree.thirdeye.spi.datalayer.bao.AnomalySubscriptionGroupNotificationManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
-import ai.startree.thirdeye.spi.datalayer.bao.DetectionStatusManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
-import ai.startree.thirdeye.spi.datalayer.bao.JobManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
-import ai.startree.thirdeye.spi.datalayer.bao.OnlineDetectionDataManager;
-import ai.startree.thirdeye.spi.datalayer.bao.OverrideConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.RcaInvestigationManager;
-import ai.startree.thirdeye.spi.datalayer.bao.RootcauseTemplateManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import com.google.inject.AbstractModule;
@@ -90,22 +71,15 @@ public class ThirdEyePersistenceModule extends AbstractModule {
       // All index tables
       AlertTemplateIndex.class,
       AnomalyFeedbackIndex.class,
-      AnomalySubscriptionGroupNotificationIndex.class,
       DataSourceIndex.class,
       DatasetConfigIndex.class,
       DetectionAlertConfigIndex.class,
       DetectionConfigIndex.class,
-      DetectionStatusIndex.class,
-      EntityToEntityMappingIndex.class,
       EnumerationItemIndex.class,
       EventIndex.class,
-      JobIndex.class,
       MergedAnomalyResultIndex.class,
       MetricConfigIndex.class,
-      OnlineDetectionDataIndex.class,
-      OverrideConfigIndex.class,
       RcaInvestigationIndex.class,
-      RootcauseTemplateIndex.class,
       TaskEntity.class
   );
 
@@ -126,27 +100,17 @@ public class ThirdEyePersistenceModule extends AbstractModule {
 
     bind(AnomalyManager.class).to(AnomalyManagerImpl.class).in(
         Scopes.SINGLETON);
-    bind(JobManager.class).to(JobManagerImpl.class).in(Scopes.SINGLETON);
     bind(TaskManager.class).to(TaskManagerImpl.class).in(Scopes.SINGLETON);
     bind(DataSourceManager.class).to(DataSourceManagerImpl.class).in(Scopes.SINGLETON);
     bind(DatasetConfigManager.class).to(DatasetConfigManagerImpl.class).in(Scopes.SINGLETON);
     bind(EnumerationItemManager.class).to(EnumerationItemManagerImpl.class).in(Scopes.SINGLETON);
     bind(MetricConfigManager.class).to(MetricConfigManagerImpl.class).in(Scopes.SINGLETON);
-    bind(OverrideConfigManager.class).to(OverrideConfigManagerImpl.class).in(Scopes.SINGLETON);
     bind(EventManager.class).to(EventManagerImpl.class).in(Scopes.SINGLETON);
-    bind(DetectionStatusManager.class).to(DetectionStatusManagerImpl.class).in(Scopes.SINGLETON);
     bind(RcaInvestigationManager.class).to(RcaInvestigationManagerImpl.class).in(Scopes.SINGLETON);
-    bind(RootcauseTemplateManager.class).to(RootcauseTemplateManagerImpl.class)
-        .in(Scopes.SINGLETON);
     bind(AlertManager.class).to(AlertManagerImpl.class).in(Scopes.SINGLETON);
     bind(AlertTemplateManager.class).to(AlertTemplateManagerImpl.class).in(Scopes.SINGLETON);
     bind(SubscriptionGroupManager.class).to(SubscriptionGroupManagerImpl.class).in(
         Scopes.SINGLETON);
-    bind(OnlineDetectionDataManager.class).to(OnlineDetectionDataManagerImpl.class).in(
-        Scopes.SINGLETON);
-    bind(AnomalySubscriptionGroupNotificationManager.class)
-        .to(AnomalySubscriptionGroupNotificationManagerImpl.class)
-        .in(Scopes.SINGLETON);
   }
 
   @Singleton

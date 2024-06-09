@@ -45,6 +45,7 @@ export const NotificationProviderV1: FunctionComponent<NotificationProviderV1Pro
         const addNotification = (
             type: NotificationTypeV1,
             message: string,
+            details?: string,
             nonDismissible?: boolean,
             scope?: NotificationScopeV1,
             onDismiss?: () => void
@@ -57,6 +58,7 @@ export const NotificationProviderV1: FunctionComponent<NotificationProviderV1Pro
                 scope: scope || NotificationScopeV1.Page,
                 onDismiss: onDismiss,
                 createdAt: Date.now(),
+                details,
             };
 
             setNotifications((draftNotifications) => {

@@ -109,7 +109,11 @@ export const AlgorithmRowExpanded: FunctionComponent<AlgorithmRowExpandedProps> 
                 if (getNonFilteredEvaluationStatus === ActionStatus.Error) {
                     !isEmpty(getNonFilteredEvaluationErrorMessages)
                         ? getNonFilteredEvaluationErrorMessages.map((msg) =>
-                              notify(NotificationTypeV1.Error, msg)
+                              notify(
+                                  NotificationTypeV1.Error,
+                                  msg.message,
+                                  msg.details
+                              )
                           )
                         : notify(
                               NotificationTypeV1.Error,
@@ -123,7 +127,11 @@ export const AlgorithmRowExpanded: FunctionComponent<AlgorithmRowExpandedProps> 
                 if (getFilteredEvaluationStatus === ActionStatus.Error) {
                     !isEmpty(getFilteredEvaluationErrorMessages)
                         ? getFilteredEvaluationErrorMessages.map((msg) =>
-                              notify(NotificationTypeV1.Error, msg)
+                              notify(
+                                  NotificationTypeV1.Error,
+                                  msg.message,
+                                  msg.details
+                              )
                           )
                         : notify(
                               NotificationTypeV1.Error,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -11,26 +11,14 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.datalayer.entity;
 
-public class AnomalySubscriptionGroupNotificationIndex extends AbstractIndexEntity {
-
-  long anomalyId;
-  long detectionConfigId;
-
-  public long getAnomalyId() {
-    return anomalyId;
-  }
-
-  public void setAnomalyId(long anomalyId) {
-    this.anomalyId = anomalyId;
-  }
-
-  public long getDetectionConfigId() {
-    return detectionConfigId;
-  }
-
-  public void setDetectionConfigId(long detectionConfigId) {
-    this.detectionConfigId = detectionConfigId;
-  }
-}
+DROP TABLE IF EXISTS override_config_index;
+DROP TABLE IF EXISTS detection_status_index;
+DROP TABLE IF EXISTS entity_to_entity_mapping_index;
+DROP TABLE IF EXISTS evaluation_index;
+DROP TABLE IF EXISTS rootcause_template_index;
+DROP TABLE IF EXISTS autotune_config_index;
+DROP TABLE IF EXISTS application_index;
+DROP TABLE IF EXISTS job_index;
+DROP TABLE IF EXISTS online_detection_data_index;
+DROP TABLE IF EXISTS anomaly_subscription_group_notification_index;

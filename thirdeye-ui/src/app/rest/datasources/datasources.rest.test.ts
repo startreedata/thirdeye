@@ -191,7 +191,7 @@ describe("Datasources REST", () => {
 
         expect(axios.post).toHaveBeenCalledWith(
             "/api/data-sources/onboard-all",
-            new URLSearchParams({ name: mockDatasourceRequest.name })
+            new URLSearchParams({ id: "1" })
         );
     });
 
@@ -231,7 +231,7 @@ describe("Datasources REST", () => {
         ).resolves.toEqual(mockStatusResponse);
 
         expect(axios.get).toHaveBeenCalledWith(
-            "/api/data-sources/validate?name=datasource-name"
+            "/api/data-sources/validate?id=datasource-name"
         );
     });
 
@@ -252,9 +252,7 @@ describe("Datasources REST", () => {
             getTablesForDatasource(mockDatasourceRequest.id)
         ).resolves.toEqual(mockStatusResponse);
 
-        expect(axios.get).toHaveBeenCalledWith(
-            "/api/data-sources/name/datasource-name/datasets"
-        );
+        expect(axios.get).toHaveBeenCalledWith("/api/data-sources/1/datasets");
     });
 
     it("getTablesForDatasource should throw encountered error", async () => {

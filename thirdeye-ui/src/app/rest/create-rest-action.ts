@@ -14,6 +14,7 @@
  */
 import { AxiosError } from "axios";
 import { useCallback, useEffect, useState } from "react";
+import { ErrorMessage } from "../platform/components/notification-provider-v1/notification-provider-v1/notification-provider-v1.interfaces";
 import { getErrorMessages } from "../utils/rest/rest.util";
 import { ActionStatus } from "./actions.interfaces";
 
@@ -26,7 +27,7 @@ export interface UseHTTPActionHook<DataResponseType> {
     data: DataResponseType | null;
     makeRequest: FetchFunction<DataResponseType | undefined>;
     status: ActionStatus;
-    errorMessages: string[];
+    errorMessages: ErrorMessage[];
     resetData: () => void;
 }
 
@@ -35,7 +36,7 @@ function useHTTPAction<DataResponseType>(
 ): UseHTTPActionHook<DataResponseType> {
     const [data, setData] = useState<DataResponseType | null>(null);
     const [status, setStatus] = useState<ActionStatus>(ActionStatus.Initial);
-    const [errorMessages, setErrorMessages] = useState<string[]>([]);
+    const [errorMessages, setErrorMessages] = useState<ErrorMessage[]>([]);
 
     let isMounted = true;
 

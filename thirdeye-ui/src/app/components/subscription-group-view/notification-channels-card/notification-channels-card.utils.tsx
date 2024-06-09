@@ -90,7 +90,7 @@ export const getCardProps = (
             cardProps.rows.push({
                 label: t("label.slack-member-ids"),
                 value:
-                    channel.params.textConfiguration?.mentionMemberIds.join(
+                    channel.params.textConfiguration?.mentionMemberIds?.join(
                         ", "
                     ) ?? "",
             });

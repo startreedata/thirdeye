@@ -70,7 +70,7 @@ export const EventsViewPage: FunctionComponent = () => {
                       })
                   )
                 : eventRequestErrors.map((msg) =>
-                      notify(NotificationTypeV1.Error, msg)
+                      notify(NotificationTypeV1.Error, msg.message, msg.details)
                   );
         }
     }, [eventRequestStatus, eventRequestErrors]);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -11,26 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.datalayer.entity;
 
-public class OnlineDetectionDataIndex extends AbstractIndexEntity {
-
-  String dataset;
-  String metric;
-
-  public String getDataset() {
-    return dataset;
-  }
-
-  public void setDataset(String dataset) {
-    this.dataset = dataset;
-  }
-
-  public String getMetric() {
-    return metric;
-  }
-
-  public void setMetric(String metric) {
-    this.metric = metric;
-  }
-}
+-- tables had legacy unique constraints on entity names. This is not compatible with namespacing. 
+-- See README.md in this folder for remaining todos
+DROP INDEX unique_metric_index ON metric_config_index;

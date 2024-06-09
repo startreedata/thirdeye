@@ -471,7 +471,7 @@ export const handleAlertPropertyChangeGenerator = (
 };
 
 export const handleCreateAlertClickGenerator = (
-    notify: (type: NotificationTypeV1, msg: string) => void,
+    notify: (type: NotificationTypeV1, msg: string, details?: string) => void,
     translation: TFunction,
     onSuccess: (alert: Alert) => void
 ) => {
@@ -539,7 +539,11 @@ export const handleCreateAlertClickGenerator = (
                           })
                       )
                     : errMessages.map((err) =>
-                          notify(NotificationTypeV1.Error, err)
+                          notify(
+                              NotificationTypeV1.Error,
+                              err.message,
+                              err.details
+                          )
                       );
             });
     };

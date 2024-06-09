@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 StarTree Inc
+ * Copyright 2023 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -11,12 +11,8 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.spi.datalayer.bao;
 
-import ai.startree.thirdeye.spi.datalayer.dto.OnlineDetectionDataDTO;
-import java.util.List;
-
-public interface OnlineDetectionDataManager extends AbstractManager<OnlineDetectionDataDTO> {
-
-  List<OnlineDetectionDataDTO> findByDatasetAndMetric(String dataset, String metric);
-}
+-- tables had legacy unique constraints on entity names. This is not compatible with namespacing. 
+-- See README.md in this folder for remaining todos
+DROP INDEX uc_datasource ON data_source_index;
+ALTER TABLE data_source_index ADD CONSTRAINT pk_base_id PRIMARY KEY (base_id);

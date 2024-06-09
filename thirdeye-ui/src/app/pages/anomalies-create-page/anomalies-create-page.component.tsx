@@ -15,6 +15,8 @@
 
 import { Icon } from "@iconify/react";
 import { Box, Button, Divider, Grid, Typography } from "@material-ui/core";
+import { useQuery } from "@tanstack/react-query";
+import { AxiosError } from "axios/index";
 import React, { FunctionComponent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
@@ -35,6 +37,7 @@ import {
     useNotificationProviderV1,
 } from "../../platform/components";
 import { ActionStatus } from "../../platform/rest/actions.interfaces";
+import { getAllAlerts } from "../../rest/alerts/alerts.rest";
 import { createAnomaly } from "../../rest/anomalies/anomalies.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { EditableAnomaly } from "../../rest/dto/anomaly.interfaces";
@@ -46,9 +49,6 @@ import {
     getAnomaliesCreatePath,
     getAnomaliesViewPath,
 } from "../../utils/routes/routes.util";
-import { useQuery } from "@tanstack/react-query";
-import { AxiosError } from "axios/index";
-import { getAllAlerts } from "../../rest/alerts/alerts.rest";
 
 export const AnomaliesCreatePage: FunctionComponent = () => {
     const { t } = useTranslation();
@@ -89,6 +89,7 @@ export const AnomaliesCreatePage: FunctionComponent = () => {
                 notify(
                     NotificationTypeV1.Success,
                     t("message.create-success", { entity: t("label.anomaly") }),
+                    "",
                     false,
                     NotificationScopeV1.Global
                 );

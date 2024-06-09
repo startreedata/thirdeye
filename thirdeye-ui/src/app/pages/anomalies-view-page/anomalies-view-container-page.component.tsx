@@ -130,6 +130,7 @@ export const AnomaliesViewContainerPage: FunctionComponent = () => {
                                                 isEmpty(anomalyRequestErrors)
                                                     ? ""
                                                     : anomalyRequestErrors[0]
+                                                          ?.message
                                             }
                                         />
                                     </Box>

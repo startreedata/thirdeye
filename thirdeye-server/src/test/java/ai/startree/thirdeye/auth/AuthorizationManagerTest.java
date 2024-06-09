@@ -310,7 +310,7 @@ public class AuthorizationManagerTest {
       when(subscriptionGroupManager.findById(subscriptionGroup.getId())).thenReturn(
           subscriptionGroup);
     }
-    final AuthorizationManager authorizationManager = new AuthorizationManager(null, null, null,
+    final AuthorizationManager authorizationManager = new AuthorizationManager(null, null, null, null,
         new NamespaceResolver(alertManager, enumManager, anomalyManager, subscriptionGroupManager),
         new AuthConfiguration());
     final ResourceIdentifier output = authorizationManager.resourceId(inputDto);

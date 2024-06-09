@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { ErrorMessage } from "../../platform/components/notification-provider-v1/notification-provider-v1/notification-provider-v1.interfaces";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
@@ -25,6 +26,6 @@ export type InvestigationContext = {
     enumerationItem: EnumerationItem | null;
     anomaly: Anomaly;
     getAnomalyRequestStatus: ActionStatus;
-    anomalyRequestErrors: string[];
+    anomalyRequestErrors: ErrorMessage[];
     alert: Alert | null;
 };

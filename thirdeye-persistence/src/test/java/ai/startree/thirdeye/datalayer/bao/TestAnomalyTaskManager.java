@@ -16,11 +16,8 @@ package ai.startree.thirdeye.datalayer.bao;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.aspect.TimeProvider;
-import ai.startree.thirdeye.datalayer.DatalayerTestUtils;
 import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
-import ai.startree.thirdeye.spi.datalayer.bao.JobManager;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
-import ai.startree.thirdeye.spi.datalayer.dto.JobDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskInfo;
 import ai.startree.thirdeye.spi.task.TaskStatus;
@@ -63,8 +60,6 @@ public class TestAnomalyTaskManager {
 
   private Long anomalyTaskId1;
   private Long anomalyTaskId2;
-  private Long anomalyJobId;
-  private JobManager jobDAO;
   private TaskManager taskDAO;
 
   @BeforeClass
@@ -72,24 +67,20 @@ public class TestAnomalyTaskManager {
     assertThat(CLOCK.isTimeMockWorking()).isTrue();
     CLOCK.useMockTime(JANUARY_1_2022);  // JANUARY 1 2022
     Injector injector = MySqlTestDatabase.sharedInjector();
-    jobDAO = injector.getInstance(JobManager.class);
     taskDAO = injector.getInstance(TaskManager.class);
   }
 
   @AfterClass(alwaysRun = true)
   public void afterClass() {
     CLOCK.useSystemTime();
-    jobDAO.findAll().forEach(jobDAO::delete);
     taskDAO.findAll().forEach(taskDAO::delete);
   }
 
   @Test
   public void testCreate() throws JsonProcessingException {
-    JobDTO testAnomalyJobSpec = DatalayerTestUtils.getTestJobSpec();
-    anomalyJobId = jobDAO.save(testAnomalyJobSpec);
-    anomalyTaskId1 = taskDAO.save(getTestTaskSpec(testAnomalyJobSpec, 1));
+    anomalyTaskId1 = taskDAO.save(getTestTaskSpec( 1));
     Assert.assertNotNull(anomalyTaskId1);
-    anomalyTaskId2 = taskDAO.save(getTestTaskSpec(testAnomalyJobSpec, 2));
+    anomalyTaskId2 = taskDAO.save(getTestTaskSpec( 2));
     Assert.assertNotNull(anomalyTaskId2);
   }
 
@@ -143,17 +134,16 @@ public class TestAnomalyTaskManager {
     Assert.assertEquals(anomalyTask.getStartTime(), taskStartTime);
   }
 
-  TaskDTO getTestTaskSpec(JobDTO anomalyJobSpec, final long refId) throws JsonProcessingException {
-    TaskDTO jobSpec = new TaskDTO();
-    jobSpec.setJobName("Test_Anomaly_Task");
-    jobSpec.setStatus(TaskStatus.WAITING);
-    jobSpec.setTaskType(TaskType.DETECTION);
-    jobSpec.setStartTime(new DateTime(DateTimeZone.UTC).minusDays(20).getMillis());
-    jobSpec.setEndTime(new DateTime(DateTimeZone.UTC).minusDays(10).getMillis());
-    jobSpec.setTaskInfo(new ObjectMapper().writeValueAsString(new MockTaskInfo()));
-    jobSpec.setJobId(anomalyJobSpec.getId());
-    jobSpec.setRefId(refId);
-    return jobSpec;
+  TaskDTO getTestTaskSpec(final long refId) throws JsonProcessingException {
+    TaskDTO taskSpec = new TaskDTO();
+    taskSpec.setJobName("Test_Anomaly_Task");
+    taskSpec.setStatus(TaskStatus.WAITING);
+    taskSpec.setTaskType(TaskType.DETECTION);
+    taskSpec.setStartTime(new DateTime(DateTimeZone.UTC).minusDays(20).getMillis());
+    taskSpec.setEndTime(new DateTime(DateTimeZone.UTC).minusDays(10).getMillis());
+    taskSpec.setTaskInfo(new ObjectMapper().writeValueAsString(new MockTaskInfo()));
+    taskSpec.setRefId(refId);
+    return taskSpec;
   }
 
   public static class MockTaskInfo implements TaskInfo {

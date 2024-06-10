@@ -230,6 +230,10 @@ export const getHomePath = (): string => {
     return AppRoute.HOME;
 };
 
+export const getAdminPath = (): string => {
+    return AppRoute.ADMIN;
+};
+
 export const getAlertsPath = (): string => {
     return createPathWithRecognizedQueryString(AppRoute.ALERTS);
 };

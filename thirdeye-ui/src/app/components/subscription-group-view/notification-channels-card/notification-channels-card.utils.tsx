@@ -137,7 +137,7 @@ export const getCardProps = (
                 },
                 {
                     label: t("label.to"),
-                    value: channel.params.emailRecipients.to?.join(",") ?? "",
+                    value: channel.params.emailRecipients?.to?.join(",") ?? "",
                 }
             );
 

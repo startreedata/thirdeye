@@ -174,6 +174,7 @@ public class AnomalyReportHelper {
     final DateTimeZone dateTimeZone = Objects.requireNonNull(dateTimeFormatter.getZone(),
         "The dateTimeFormatter passed to this method must have a defined timezone");
     TimeZone tz = TimeZone.getTimeZone(dateTimeZone.getID());
-    return tz.getDisplayName(true, 0);
+    // note - we don't show if the timezone is in a DST period at the time of the anomaly - always return in standard time
+    return tz.getDisplayName(false, 0);
   }
 }

@@ -466,7 +466,11 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
       if (previousAnomaly != null && previousAnomaly.getId() != null && anomaly.getId() == null) {
         // apply replay checks
         if (startEndEquals(previousAnomaly, anomaly)) {
-          if (isIgnore(previousAnomaly) != isIgnore(anomaly)) {
+          // possible cases:
+          // previousAnomaly:   |  isIgnored && isNotified                                     | !isIgnored && isNotified                                   | isIgnored && !isNotified        |  !isIgnored && !isNotified
+          // anomaly isIgnored  |  update Values, Labels + outdated label (to explain notif)   | update Values, Labels + outdated label (to explain notif)  |  updateInPlace                  |  updateInPlace 
+          // anomaly !isIgnored |  update Values, Labels + alreadyNotifiedLabel                | update Values, Labels                                      |  createNew                      |  updateInPlace
+          if (false) { // isIgnore(previousAnomaly) != isIgnore(anomaly)
             addReplayLabel(previousAnomaly, newOutdatedLabel());
             anomaliesToUpdate.add(previousAnomaly);
             addReplayLabel(anomaly, newAfterReplayLabel());

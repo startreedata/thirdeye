@@ -27,8 +27,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import javax.inject.Singleton;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -51,22 +49,6 @@ public class MaintenanceResource {
   @Inject
   public MaintenanceResource(final MaintenanceService maintenanceService) {
     this.maintenanceService = maintenanceService;
-  }
-
-  @POST
-  @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-  @Path("/enumeration-items/migrate")
-  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
-  @Produces(MediaType.APPLICATION_JSON)
-  @Operation(summary = "Update the ignored index based on anomaly labels for historical anomalies")
-  public Response migrateEnumerationItems(
-      @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
-      @FormParam("from") final long fromId,
-      @FormParam("to") final long toId
-
-  ) {
-    maintenanceService.migrateEnumerationItems(principal, fromId, toId);
-    return Response.ok().build();
   }
 
   @POST

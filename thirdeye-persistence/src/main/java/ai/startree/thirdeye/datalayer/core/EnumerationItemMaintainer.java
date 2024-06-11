@@ -34,7 +34,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
 import ai.startree.thirdeye.spi.util.ExceptionHandledRunnable;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
@@ -149,16 +148,6 @@ public class EnumerationItemMaintainer {
         .forEach(this::delete);
   }
 
-  @VisibleForTesting
-  protected EnumerationItemDTO findExistingOrCreate(final EnumerationItemDTO source,
-      final List<String> idKeys) {
-    final List<EnumerationItemDTO> enumerationItemsForAlert = enumerationItemManager.filter(
-        new EnumerationItemFilter().setAlertId(
-            source.getAlert().getId()));
-
-    return findExistingOrCreate(source, idKeys, enumerationItemsForAlert);
-  }
-
   private EnumerationItemDTO findExistingOrCreate(final EnumerationItemDTO source,
       final List<String> idKeys,
       final List<EnumerationItemDTO> existingEnumerationItems) {
@@ -215,13 +204,6 @@ public class EnumerationItemMaintainer {
     enumerationItemManager.save(source);
     requireNonNull(source.getId(), "expecting a generated ID");
 
-    /* Find enumeration item candidate which don't have an alert field set.
-     * These are legacy enumeration items which need to be migrated to the new alert field
-     **/
-    matching.stream()
-        .filter(ei -> ei.getAlert() == null)
-        .forEach(ei -> migrate(ei, source));
-
     return source;
   }
 
@@ -244,15 +226,6 @@ public class EnumerationItemMaintainer {
     }
   }
 
-  @VisibleForTesting
-  EnumerationItemDTO findUsingIdKeys(final EnumerationItemDTO source,
-      final List<String> idKeys) {
-    final List<EnumerationItemDTO> enumerationItemsForAlert = enumerationItemManager.filter(
-        new EnumerationItemFilter().setAlertId(
-            source.getAlert().getId()));
-    return findUsingIdKeys(source, idKeys, enumerationItemsForAlert);
-  }
-
   private EnumerationItemDTO findUsingIdKeys(final EnumerationItemDTO source,
       final List<String> idKeys,
       final List<EnumerationItemDTO> existingEnumerationItems) {
@@ -265,7 +238,6 @@ public class EnumerationItemMaintainer {
       LOG.warn("Found more than one EnumerationItem for: {} ids: {}. Attempting to fix..",
           source,
           filtered.stream().map(EnumerationItemDTO::getId).collect(toList()));
-
       return handleConflicts(source, filtered);
     }
     return filtered.stream().findFirst().orElse(null);
@@ -300,30 +272,6 @@ public class EnumerationItemMaintainer {
     return matching;
   }
 
-  private void migrate(final EnumerationItemDTO from, final EnumerationItemDTO to) {
-    requireNonNull(from.getId(), "expecting a generated ID");
-    requireNonNull(to.getId(), "expecting a generated ID");
-    requireNonNull(to.getAlert(), "expecting a valid alert");
-
-    final Long toId = to.getId();
-    final Long alertId = to.getAlert().getId();
-
-    LOG.info("Migrating enumeration item {} to {} for alert {}", from.getId(), toId, alertId);
-
-    /* Migrate anomalies */
-    final var filter = new AnomalyFilter()
-        .setEnumerationItemId(from.getId())
-        .setAlertId(alertId);
-
-    anomalyManager.filter(filter).stream()
-        .filter(Objects::nonNull)
-        .map(a -> a.setEnumerationItem(enumerationItemRef(toId)))
-        .forEach(anomalyManager::update);
-
-    /* Migrate subscription groups */
-    migrateSubscriptionGroups(from.getId(), toId, alertId);
-  }
-
   private void migrateSubscriptionGroups(final Long fromId, final Long toId, final Long alertId) {
     subscriptionGroupManager.findAll().stream()
         .filter(Objects::nonNull)
@@ -342,11 +290,6 @@ public class EnumerationItemMaintainer {
               .forEach(aa -> aa.setEnumerationItem(enumerationItemRef(toId)));
           subscriptionGroupManager.update(sg);
         });
-  }
-
-  public void migrateAndRemove(final EnumerationItemDTO from, final EnumerationItemDTO to) {
-    migrate(from, to);
-    this.delete(from);
   }
 
   public void close() throws Exception {

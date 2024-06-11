@@ -13,7 +13,6 @@
  */
 package ai.startree.thirdeye.notification;
 
-import static ai.startree.thirdeye.spi.util.AnomalyUtils.isIgnore;
 import static ai.startree.thirdeye.spi.util.SpiUtils.bool;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.stream.Collectors.toSet;
@@ -87,7 +86,6 @@ public class NotificationTaskFilter {
   private static boolean shouldFilter(final AnomalyDTO anomaly) {
     return anomaly != null
         && !hasFeedback(anomaly)
-        && !isIgnore(anomaly)
         && ANOMALY_RESULT_SOURCES.contains(anomaly.getAnomalyResultSource());
   }
 
@@ -197,6 +195,7 @@ public class NotificationTaskFilter {
     return new AnomalyFilter()
         .setIsChild(false)
         .setAlertId(alertId)
+        .setIsIgnored(false)
         .setEndTimeIsGte(watermark.getTime())
         .setEndTimeIsLt(endTimeIsLt);
   }
@@ -222,6 +221,7 @@ public class NotificationTaskFilter {
     final AnomalyFilter f = new AnomalyFilter()
         .setCreateTimeWindow(new Interval(createTimeStart + 1, createTimeEnd))
         .setIsChild(false) // Notify only parent anomalies
+        .setIsIgnored(false)
         .setAlertId(alertId);
 
     /*

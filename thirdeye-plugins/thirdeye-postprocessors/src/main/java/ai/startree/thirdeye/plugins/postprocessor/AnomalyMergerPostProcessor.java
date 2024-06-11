@@ -34,6 +34,7 @@ import ai.startree.thirdeye.spi.detection.postprocessing.PostProcessingContext;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -466,17 +467,7 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
       if (previousAnomaly != null && previousAnomaly.getId() != null && anomaly.getId() == null) {
         // apply replay checks
         if (startEndEquals(previousAnomaly, anomaly)) {
-          if (isIgnore(previousAnomaly) != isIgnore(anomaly)) {
-            addReplayLabel(previousAnomaly, newOutdatedLabel());
-            anomaliesToUpdate.add(previousAnomaly);
-            addReplayLabel(anomaly, newAfterReplayLabel());
-            // prevent merging of the outdated previous anomaly with new anomalies - there is the new anomaly in between now
-            if (previousAnomaly == parentCandidate) {
-              parentCandidate = null;
-            } else if (previousAnomaly == ignoredParentCandidate) {
-              ignoredParentCandidate = null;
-            }
-          } else if (currentValueHasChanged(previousAnomaly, anomaly)) {
+          if (currentValueHasChanged(previousAnomaly, anomaly)) {
             addReplayLabel(previousAnomaly, newOutdatedLabel());
             anomaliesToUpdate.add(previousAnomaly);
             addReplayLabel(anomaly, newAfterReplayLabel());
@@ -487,6 +478,12 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
               ignoredParentCandidate = previousAnomaly;
             }
           } else {
+            // if an anomaly is in ignore state and has never been notified, but is now changing to not ignore, then ensure it is notified 
+            // by hack on the createTime to ensure the notification logic finds this anomaly
+            // see spec decision table https://docs.google.com/document/d/1bSbv4XhTQsdGR1XVM_dYL1cK9Q6JlntvzNYmmMiXQRI/edit
+            if (isIgnore(previousAnomaly) && !previousAnomaly.isNotified() && !isIgnore(anomaly)) {
+              previousAnomaly.setCreateTime(new Timestamp(System.currentTimeMillis()));
+            }
             // update the existing anomaly with minor changes - drop the new anomaly
             updateAnomalyWithNewValues(previousAnomaly, anomaly);
             // labels depend on the values - so pick the latest labels

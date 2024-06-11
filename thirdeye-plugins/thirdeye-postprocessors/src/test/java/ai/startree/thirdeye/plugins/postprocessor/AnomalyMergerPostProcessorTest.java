@@ -14,7 +14,6 @@
 package ai.startree.thirdeye.plugins.postprocessor;
 
 import static ai.startree.thirdeye.plugins.postprocessor.AnomalyMergerPostProcessor.DEFAULT_MERGE_MAX_GAP;
-import static ai.startree.thirdeye.plugins.postprocessor.AnomalyMergerPostProcessor.NEW_AFTER_REPLAY_LABEL_NAME;
 import static ai.startree.thirdeye.plugins.postprocessor.AnomalyMergerPostProcessor.OUTDATED_AFTER_REPLAY_LABEL_NAME;
 import static ai.startree.thirdeye.plugins.postprocessor.AnomalyMergerPostProcessor.newAfterReplayLabel;
 import static ai.startree.thirdeye.plugins.postprocessor.AnomalyMergerPostProcessor.newOutdatedLabel;
@@ -32,6 +31,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.detection.DetectionPipelineUsage;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -672,27 +672,31 @@ public class AnomalyMergerPostProcessorTest {
     assertThat(e2.getAnomalyLabels().get(0).getName()).isEqualTo("NEW_LABEL");
   }
 
-  @DataProvider(name = "firstIgnoreCases")
-  public Object[][] firstIgnoreCases() {
+  @DataProvider
+  public static Object[][] edgeCases() {
     return new Object[][]{
-        {"false then true",false}, 
-        {"true then false",true}};
+        {"UC1", true, false, false, true},
+        {"UC2", true, true, false, false},
+    };
   }
   
-  @Test(dataProvider = "firstIgnoreCases")
-  public void testReplayRule3BisBehaveLikeRule3WhenExistingAnomalyAndNewAnomalyDontHaveSameIsIgnore(final String testName, final boolean firstIgnore) {
+  @Test(dataProvider = "edgeCases")
+  public void testReplayRule3BisUC2(final String name, 
+      final boolean existingIsIgnored,
+      final boolean existingIsNotified,
+      final boolean newIsIgnored,
+      final boolean createTimeUpdated
+      ) {
     final AnomalyDTO e1 = existingAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H);
     final AnomalyDTO e2 = existingAnomaly(JANUARY_1_2021_04H, JANUARY_1_2021_05H)
         .setAvgCurrentVal(10)
         .setAvgBaselineVal(12)
-        .setAnomalyLabels(listOf(new AnomalyLabelDTO().setName("EXISTING_LABEL").setIgnore(firstIgnore)))
-        .setScore(1);
-    final AnomalyDTO e3 = existingAnomaly(JANUARY_1_2021_06H, JANUARY_1_2021_07H)
-        .setAvgCurrentVal(30)
-        .setAvgBaselineVal(10)
-        .setAnomalyLabels(listOf(new AnomalyLabelDTO().setName("EXISTING_LABEL").setIgnore(firstIgnore)))
-        .setScore(1);
-    existingAnomalies = listOf(e1, e2, e3);
+        .setScore(1)
+        .setAnomalyLabels(listOf(new AnomalyLabelDTO().setName("EXISTING_LABEL")
+            .setIgnore(existingIsIgnored)))
+        .setNotified(existingIsNotified)
+        .setCreateTime(new Timestamp(0L));
+    existingAnomalies = listOf(e1, e2);
     detectionSpec.setMergeMaxGap("PT2H");
     detectionSpec.setReNotifyAbsoluteThreshold(-1.);
     detectionSpec.setReNotifyPercentageThreshold(-1.);
@@ -702,26 +706,26 @@ public class AnomalyMergerPostProcessorTest {
         .setAvgCurrentVal(23)
         .setAvgBaselineVal(37)
         // ignore changes in the new anomaly 
-        .setAnomalyLabels(listOf(new AnomalyLabelDTO().setName("NEW_LABEL").setIgnore(!firstIgnore)))
+        .setAnomalyLabels(listOf(new AnomalyLabelDTO().setName("NEW_LABEL").setIgnore(newIsIgnored)))
         .setScore(0.5);
     // interval and mergeMax gap such as e1 is fetched but not part of the detection interval - only tests rule 2, does not test rule 4
     final Interval detectionInterval = new Interval(JANUARY_1_2021_03H, JANUARY_1_2021_05H, UTC);
     final Set<AnomalyDTO> output = detectionMerger.merge(listOf(n1), detectionInterval);
 
-    assertThat(output).isEqualTo(Set.of(e1, e2, n1, e3));
-    // e1 labels unchanged
-    assertThat(e1.getAnomalyLabels()).isNull();
-    // e2 marked as outdated 
-    assertThat(e2.getAnomalyLabels().size()).isEqualTo(2);
-    assertThat(e2.getAnomalyLabels().get(0).getName()).isEqualTo("EXISTING_LABEL");
-    assertThat(e2.getAnomalyLabels().get(1).getName()).isEqualTo(OUTDATED_AFTER_REPLAY_LABEL_NAME);
-    // n1 labels are unchanged 
-    assertThat(n1.getAnomalyLabels().size()).isEqualTo(2);
-    assertThat(n1.getAnomalyLabels().get(0).getName()).isEqualTo("NEW_LABEL");
-    assertThat(n1.getAnomalyLabels().get(1).getName()).isEqualTo(NEW_AFTER_REPLAY_LABEL_NAME);
-    // e3 labels are unchanged 
-    assertThat(e3.getAnomalyLabels().size()).isEqualTo(1);
-    assertThat(e3.getAnomalyLabels().get(0).getName()).isEqualTo("EXISTING_LABEL");
+    assertThat(output).isEqualTo(Set.of(e1, e2));
+    assertThat(e2.getAvgCurrentVal()).isEqualTo(23);
+    assertThat(e2.getAvgBaselineVal()).isEqualTo(37);
+    assertThat(e2.getScore()).isEqualTo(0.5);
+    // labels are updated with the new ones - no outdated or new_after_replay label is created
+    assertThat(e2.getAnomalyLabels().size()).isEqualTo(1);
+    assertThat(e2.getAnomalyLabels().get(0).getName()).isEqualTo("NEW_LABEL");
+    if (createTimeUpdated) {
+      // create time is set to now()
+      assertThat(e2.getCreateTime().getTime()).isGreaterThan(0);
+    } else {
+      // create time is not changed
+      assertThat(e2.getCreateTime().getTime()).isEqualTo(0);
+    }
   }
 
   @Test(dataProvider = "rule3bisSameAsRule3Cases")

@@ -83,7 +83,6 @@ public class NotificationTaskFilter {
         && !anomaly.getFeedback().getFeedbackType().isUnresolved();
   }
 
-  // fixme cyril push this down to the database
   private static boolean shouldFilter(final AnomalyDTO anomaly) {
     return anomaly != null
         && !hasFeedback(anomaly)

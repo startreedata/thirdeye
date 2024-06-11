@@ -71,14 +71,14 @@ public class EnumerationItemMaintainer {
     this.enumerationItemDeleter = enumerationItemDeleter;
   }
 
-  public static boolean matches(final EnumerationItemDTO o1, final EnumerationItemDTO o2) {
+  private static boolean matches(final EnumerationItemDTO o1, final EnumerationItemDTO o2) {
     return Objects.equals(o1.getName(), o2.getName())
         && Objects.equals(o1.getParams(), o2.getParams());
   }
 
-  public static Map<String, Object> key(final EnumerationItemDTO source,
+  private static Map<String, Object> key(final EnumerationItemDTO source,
       final List<String> idKeys) {
-    final var p = source.getParams();
+    final Map<String, Object> p = source.getParams();
     return idKeys.stream()
         .filter(p::containsKey)
         .collect(toMap(Function.identity(), p::get));

@@ -29,12 +29,15 @@ import ai.startree.thirdeye.spi.datalayer.EnumerationItemFilter;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
 import ai.startree.thirdeye.spi.util.ExceptionHandledRunnable;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -54,7 +57,6 @@ public class EnumerationItemMaintainer {
   private final EnumerationItemManager enumerationItemManager;
   private final AnomalyManager anomalyManager;
   private final SubscriptionGroupManager subscriptionGroupManager;
-  private final EnumerationItemDeleter enumerationItemDeleter;
 
   /* To perform clean up operations */
   private final ExecutorService executorService = Executors.newSingleThreadExecutor(
@@ -63,12 +65,10 @@ public class EnumerationItemMaintainer {
   @Inject
   public EnumerationItemMaintainer(final EnumerationItemManager enumerationItemManager,
       final AnomalyManager anomalyManager,
-      final SubscriptionGroupManager subscriptionGroupManager,
-      final EnumerationItemDeleter enumerationItemDeleter) {
+      final SubscriptionGroupManager subscriptionGroupManager) {
     this.enumerationItemManager = enumerationItemManager;
     this.anomalyManager = anomalyManager;
     this.subscriptionGroupManager = subscriptionGroupManager;
-    this.enumerationItemDeleter = enumerationItemDeleter;
   }
 
   private static boolean matches(final EnumerationItemDTO o1, final EnumerationItemDTO o2) {
@@ -146,11 +146,11 @@ public class EnumerationItemMaintainer {
     existing.stream()
         .filter(ei -> !syncedEnumerationItemIds.contains(ei.getId()))
         .peek(EnumerationItemMaintainer::logDeleteOperation)
-        .forEach(enumerationItemDeleter::delete);
+        .forEach(this::delete);
   }
 
   @VisibleForTesting
-  EnumerationItemDTO findExistingOrCreate(final EnumerationItemDTO source,
+  protected EnumerationItemDTO findExistingOrCreate(final EnumerationItemDTO source,
       final List<String> idKeys) {
     final List<EnumerationItemDTO> enumerationItemsForAlert = enumerationItemManager.filter(
         new EnumerationItemFilter().setAlertId(
@@ -159,7 +159,7 @@ public class EnumerationItemMaintainer {
     return findExistingOrCreate(source, idKeys, enumerationItemsForAlert);
   }
 
-  public EnumerationItemDTO findExistingOrCreate(final EnumerationItemDTO source,
+  private EnumerationItemDTO findExistingOrCreate(final EnumerationItemDTO source,
       final List<String> idKeys,
       final List<EnumerationItemDTO> existingEnumerationItems) {
     requireNonNull(source.getName(), "enumeration item name does not exist!");
@@ -295,12 +295,12 @@ public class EnumerationItemMaintainer {
     eiList.stream()
         .filter(e -> !e.getId().equals(matching.getId()))
         .peek(EnumerationItemMaintainer::logDeleteOperation)
-        .forEach(enumerationItemDeleter::delete);
+        .forEach(this::delete);
 
     return matching;
   }
 
-  public void migrate(final EnumerationItemDTO from, final EnumerationItemDTO to) {
+  private void migrate(final EnumerationItemDTO from, final EnumerationItemDTO to) {
     requireNonNull(from.getId(), "expecting a generated ID");
     requireNonNull(to.getId(), "expecting a generated ID");
     requireNonNull(to.getAlert(), "expecting a valid alert");
@@ -346,10 +346,40 @@ public class EnumerationItemMaintainer {
 
   public void migrateAndRemove(final EnumerationItemDTO from, final EnumerationItemDTO to) {
     migrate(from, to);
-    enumerationItemDeleter.delete(from);
+    this.delete(from);
   }
 
   public void close() throws Exception {
     shutdownExecutionService(executorService);
+  }
+
+  public EnumerationItemDTO delete(final EnumerationItemDTO dto) {
+    requireNonNull(dto.getId(), "EnumerationItemDTO.id cannot be null for deletion");
+    disassociateFromSubscriptionGroups(dto.getId());
+    deleteAssociatedAnomalies(dto.getId());
+
+    enumerationItemManager.delete(dto);
+    return dto;
+  }
+
+  private void deleteAssociatedAnomalies(final Long enumerationItemId) {
+    final List<AnomalyDTO> anomalies = anomalyManager.filter(
+        new AnomalyFilter().setEnumerationItemId(enumerationItemId));
+    anomalies.forEach(anomalyManager::delete);
+  }
+
+  private void disassociateFromSubscriptionGroups(final Long enumerationItemId) {
+    final List<SubscriptionGroupDTO> allSubscriptionGroups = subscriptionGroupManager.findAll();
+
+    final List<SubscriptionGroupDTO> updated = new ArrayList<>();
+    for (final SubscriptionGroupDTO sg : allSubscriptionGroups) {
+      optional(sg.getAlertAssociations())
+          .map(aas -> aas.removeIf(aa ->
+              aa.getEnumerationItem() != null &&
+                  enumerationItemId.equals(aa.getEnumerationItem().getId())))
+          .filter(b -> b)
+          .ifPresent(b -> updated.add(sg));
+    }
+    subscriptionGroupManager.update(updated);
   }
 }

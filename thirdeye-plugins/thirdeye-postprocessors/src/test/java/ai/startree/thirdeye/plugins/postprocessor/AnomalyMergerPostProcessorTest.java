@@ -672,11 +672,6 @@ public class AnomalyMergerPostProcessorTest {
     assertThat(e2.getAnomalyLabels().get(0).getName()).isEqualTo("NEW_LABEL");
   }
 
-  
-  enum EdgeCase {
-    UC1, UC2
-  }
-
   @DataProvider
   public static Object[][] edgeCases() {
     return new Object[][]{

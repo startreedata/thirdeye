@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.spi.datalayer.dto;
 
+import com.google.common.base.Objects;
 import java.util.Map;
 import java.util.StringJoiner;
 
@@ -45,5 +46,23 @@ public class NotificationSpecDTO {
         .add("type='" + type + "'")
         .add("params=" + params)
         .toString();
+  }
+
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    final NotificationSpecDTO that = (NotificationSpecDTO) o;
+    return Objects.equal(type, that.type)
+        && Objects.equal(params, that.params);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(type, params);
   }
 }

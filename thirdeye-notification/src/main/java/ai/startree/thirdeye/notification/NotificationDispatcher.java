@@ -30,10 +30,15 @@ import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.Timer;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public class NotificationDispatcher {
+
+  private static final Logger LOG = LoggerFactory.getLogger(NotificationDispatcher.class);
 
   private final NotificationServiceRegistry notificationServiceRegistry;
   private final NotificationSchemesMigrator notificationSchemesMigrator;
@@ -84,19 +89,38 @@ public class NotificationDispatcher {
         .register(Metrics.globalRegistry);
   }
 
-  public void dispatch(final SubscriptionGroupDTO subscriptionGroup,
+  // todo cyril the map output is pretty bad - not doing more for the moment because NotificationDispatcher and NotificationTaskPostProcessor may be merged - see todo below
+  public Map<NotificationSpecDTO, Exception>  dispatch(final SubscriptionGroupDTO subscriptionGroup,
       final NotificationPayloadApi payload) {
-    optional(subscriptionGroup.getSpecs())
+    final List<NotificationSpecDTO> notificationSpecDTOs = optional(
+        subscriptionGroup.getSpecs())
         .orElseGet(() -> notificationSchemesMigrator.getSpecsFromNotificationSchemes(
             subscriptionGroup))
         .stream()
-        .map(this::substituteEnvironmentVariables)
-        .map(this::getNotificationService)
-        .forEach(service -> notifyService(service, payload));
+        .map(this::substituteEnvironmentVariables).toList();
+    
+    // TODO cyril - re-design managing errors and potential notification duplications - see TE-2339
+    final Map<NotificationSpecDTO, Exception> specToException = new HashMap<>(); 
+    for (final NotificationSpecDTO notificationSpec: notificationSpecDTOs) {
+      final NotificationService service = getNotificationService(notificationSpec);
+      try {
+        timedNotify(service, payload);
+        specToException.put(notificationSpec, null);
+      } catch (Exception e) {
+        LOG.error("Notification failed for channel of type {}.", notificationSpec.getType(), e);
+        specToException.put(notificationSpec, e);
+      }
+    }
+    
+    return specToException;
   }
 
-  private void notifyService(final NotificationService service,
-      final NotificationPayloadApi payload) {
+  /**
+   * 
+   * @throws Exception notification to external system can fail for many reason.
+   * */
+  private void timedNotify(final NotificationService service,
+      final NotificationPayloadApi payload) throws Exception {
     final Timer.Sample sample = Timer.start(Metrics.globalRegistry);
     try {
       final long tStart = System.currentTimeMillis();

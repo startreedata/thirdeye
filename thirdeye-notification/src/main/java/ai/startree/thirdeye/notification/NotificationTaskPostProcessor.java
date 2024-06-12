@@ -111,8 +111,11 @@ public class NotificationTaskPostProcessor {
       throw new RuntimeException(
           String.format(
               "Failed to notify anomalies for all channels: %s. All exceptions were logged. Throwing one of the exception encountered.",
-              specToException.keySet().stream().map(NotificationSpecDTO::getType).collect(Collectors.joining(",")))
-          , specToException.values().iterator().next());
+              specToException.keySet()
+                  .stream()
+                  .map(NotificationSpecDTO::getType)
+                  .collect(Collectors.joining(","))),
+          specToException.values().iterator().next());
     }
     // at least one notification channel notified successfully - update the watermarks
     /* Update anomalies */

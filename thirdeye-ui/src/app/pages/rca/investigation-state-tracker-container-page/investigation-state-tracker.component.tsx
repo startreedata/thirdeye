@@ -21,12 +21,13 @@ import {
     Grid,
     Typography,
 } from "@material-ui/core";
-import { cloneDeep, isEmpty } from "lodash";
+import { cloneDeep, isEmpty, isNull } from "lodash";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
     Outlet,
     useLocation,
+    useNavigate,
     useParams,
     useSearchParams,
 } from "react-router-dom";
@@ -39,6 +40,7 @@ import { PageHeader } from "../../../components/page-header/page-header.componen
 import { LoadingErrorStateSwitch } from "../../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import {
     AppLoadingIndicatorV1,
+    NotificationScopeV1,
     NotificationTypeV1,
     PageContentsGridV1,
     PageHeaderActionsV1,
@@ -61,6 +63,10 @@ import {
 import { useGetEnumerationItem } from "../../../rest/enumeration-items/enumeration-items.actions";
 import { useGetInvestigation } from "../../../rest/rca/rca.actions";
 import {
+    createInvestigation,
+    updateInvestigation,
+} from "../../../rest/rca/rca.rest";
+import {
     determineTimezoneFromAlertInEvaluation,
     shouldHideTimeInDatetimeFormat,
 } from "../../../utils/alerts/alerts.util";
@@ -70,18 +76,22 @@ import {
     determineInvestigationIDFromSearchParams,
     INVESTIGATION_ID_QUERY_PARAM,
 } from "../../../utils/investigation/investigation.util";
+import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
 import { QUERY_PARAM_KEY_FOR_EXPANDED } from "../../../utils/params/params.util";
 import {
     AppRouteRelative,
     getAlertsAlertPath,
     getAnomaliesAnomalyViewPathV2,
+    getRootCauseAnalysisForAnomalyInvestigatePath,
 } from "../../../utils/routes/routes.util";
 import { RootCauseAnalysisForAnomalyPageParams } from "../../root-cause-analysis-for-anomaly-page/root-cause-analysis-for-anomaly-page.interfaces";
+import { InvestigationStateTrackerStyles } from "./investigation-state-tracker.styles";
 
 export const InvestigationStateTracker: FunctionComponent = () => {
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
     const [searchParams, setSearchParams] = useSearchParams();
+    const navigate = useNavigate();
     const { id: anomalyId } =
         useParams<RootCauseAnalysisForAnomalyPageParams>();
     const { pathname } = useLocation();
@@ -111,6 +121,9 @@ export const InvestigationStateTracker: FunctionComponent = () => {
         useState<Investigation | null>(null);
     const [investigationFromServer, setInvestigationFromServer] =
         useState<Investigation | null>(null);
+    const classes = InvestigationStateTrackerStyles();
+
+    const [isSaving, setIsSaving] = useState(false);
 
     const pageTitle = useMemo(() => {
         let titleSoFar = localInvestigation?.name
@@ -123,6 +136,34 @@ export const InvestigationStateTracker: FunctionComponent = () => {
 
         return titleSoFar;
     }, [investigationId, localInvestigation]);
+
+    const saveButtonLabel = useMemo(() => {
+        if (!isSaving) {
+            if (localInvestigation?.id === undefined) {
+                return t("label.save-investigation");
+            } else {
+                return t("label.save-progress");
+            }
+        }
+
+        return t("label.saving");
+    }, [isSaving, localInvestigation]);
+
+    const serverRequestRestFunction = useMemo(() => {
+        if (localInvestigation?.id) {
+            return updateInvestigation;
+        }
+
+        return createInvestigation;
+    }, [localInvestigation]);
+
+    const errorGenericMsgIdentifier = useMemo(() => {
+        if (localInvestigation?.id) {
+            return "message.update-error";
+        }
+
+        return "message.create-error";
+    }, [localInvestigation]);
 
     const breadcrumbs = useMemo(() => {
         const crumbs: Crumb[] = [];
@@ -277,6 +318,63 @@ export const InvestigationStateTracker: FunctionComponent = () => {
         setLocalInvestigation(cloneDeep(updatedInvestigation));
     };
 
+    const handleSaveClick = (): void => {
+        if (!localInvestigation || !localInvestigation.name) {
+            notify(
+                NotificationTypeV1.Error,
+                "Please enter a name for the investigation in the investigation details section at the bottom of the page"
+            );
+
+            return;
+        }
+
+        setIsSaving(true);
+
+        serverRequestRestFunction(localInvestigation)
+            .then((investigationFromServer) => {
+                handleServerUpdatedInvestigation(investigationFromServer);
+
+                // `investigation.id` is only defined for existing data
+                const isExisting = !isNull(localInvestigation.id);
+
+                notify(
+                    NotificationTypeV1.Success,
+                    t(
+                        isExisting
+                            ? "message.update-success"
+                            : "message.create-success",
+                        {
+                            entity: t("label.investigation"),
+                        }
+                    ),
+                    "",
+                    false,
+                    NotificationScopeV1.Global
+                );
+
+                if (investigationFromServer.id) {
+                    navigate(
+                        getRootCauseAnalysisForAnomalyInvestigatePath(
+                            localInvestigation.anomaly?.id as number
+                        ) + `?investigationId=${investigationFromServer.id}`
+                    );
+                }
+            })
+            .catch((response) => {
+                notifyIfErrors(
+                    ActionStatus.Error,
+                    response?.data?.list,
+                    notify,
+                    t(errorGenericMsgIdentifier, {
+                        entity: t("label.investigation"),
+                    })
+                );
+            })
+            .finally(() => {
+                setIsSaving(false);
+            });
+    };
+
     return (
         <PageV1>
             <LoadingErrorStateSwitch
@@ -313,6 +411,7 @@ export const InvestigationStateTracker: FunctionComponent = () => {
                                 title={`${t("label.need-help")}?`}
                                 trigger={(handleOpen) => (
                                     <Button
+                                        className={classes.buttonRounded}
                                         color="primary"
                                         size="small"
                                         variant="outlined"
@@ -349,6 +448,7 @@ export const InvestigationStateTracker: FunctionComponent = () => {
                     <Grid item xs={12}>
                         <AnomalyCard
                             anomaly={anomaly}
+                            className={classes.roundedCard}
                             hideTime={shouldHideTimeInDatetimeFormat({
                                 metadata:
                                     alert?.templateProperties as EvaluatedTemplateMetadata,
@@ -363,7 +463,7 @@ export const InvestigationStateTracker: FunctionComponent = () => {
                             })}
                         />
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid item xs={6}>
                         <Typography variant="h4">
                             {t(
                                 pathname?.includes(
@@ -373,6 +473,18 @@ export const InvestigationStateTracker: FunctionComponent = () => {
                                     : "label.analysis-tools"
                             )}
                         </Typography>
+                    </Grid>
+                    <Grid item xs={6}>
+                        <PageHeaderActionsV1>
+                            <Button
+                                className={classes.buttonRounded}
+                                color="primary"
+                                disabled={isSaving}
+                                onClick={handleSaveClick}
+                            >
+                                <Box component="span">{saveButtonLabel}</Box>
+                            </Button>
+                        </PageHeaderActionsV1>
                     </Grid>
                     <Grid container>
                         <Outlet

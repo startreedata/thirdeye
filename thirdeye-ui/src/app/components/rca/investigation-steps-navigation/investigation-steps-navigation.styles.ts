@@ -16,10 +16,6 @@ import { makeStyles } from "@material-ui/core";
 import { ColorV1 } from "../../../platform/utils/material-ui/color.util";
 
 export const InvestigationStepsNavigationStyles = makeStyles((theme) => ({
-    /**
-     * Make the row on top of the one with expanded chart-content blend by removing
-     * the bottom border
-     */
     tabsMenu: {
         maxHeight: "fit-content",
         padding: theme.spacing(1),

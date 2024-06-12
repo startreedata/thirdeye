@@ -22,6 +22,7 @@ import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertAssociationDto;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.NotificationSpecDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
@@ -32,6 +33,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,7 +64,7 @@ public class NotificationTaskPostProcessor {
     this.alertDataRetriever = alertDataRetriever;
   }
 
-  public static Map<Long, Long> buildVectorClock(final Collection<AnomalyDTO> anomalies) {
+  private static Map<Long, Long> buildVectorClock(final Collection<AnomalyDTO> anomalies) {
     final Map<Long, Long> alertIdToAnomalyCreateTimeMax = new HashMap<>();
     for (final AnomalyDTO a : anomalies) {
       final Long alertId = a.getDetectionConfigId();
@@ -76,7 +79,7 @@ public class NotificationTaskPostProcessor {
     return alertIdToAnomalyCreateTimeMax;
   }
 
-  public static Map<Long, Long> mergeWatermarks(final Map<Long, Long> a,
+  private static Map<Long, Long> mergeWatermarks(final Map<Long, Long> a,
       final Map<Long, Long> b) {
     if (a == null) {
       return b;
@@ -101,15 +104,24 @@ public class NotificationTaskPostProcessor {
     return Math.max(initialWatermark, alert.getLastTimestamp());
   }
 
-  public void postProcess(final NotificationTaskFilterResult result) {
-    final SubscriptionGroupDTO sg = result.getSubscriptionGroup();
-
+  public void postProcess(final NotificationTaskFilterResult result,
+      final Map<NotificationSpecDTO, Exception> specToException) {
+    if (specToException.values().stream().allMatch(Objects::nonNull)) {
+      // all notification channels failed
+      throw new RuntimeException(
+          String.format(
+              "Failed to notify anomalies for all channels: %s. All exceptions were logged. Throwing one of the exception encountered.",
+              specToException.keySet().stream().map(NotificationSpecDTO::getType).collect(Collectors.joining(",")))
+          , specToException.values().iterator().next());
+    }
+    // at least one notification channel notified successfully - update the watermarks
     /* Update anomalies */
     for (final AnomalyDTO anomaly : result.getAnomalies()) {
       anomalyManager.update(anomaly.setNotified(true));
     }
 
     /* Record watermarks */
+    final SubscriptionGroupDTO sg = result.getSubscriptionGroup();
     updateWatermarks(sg, result.getAnomalies());
 
     /* Update completion watermarks */
@@ -134,7 +146,7 @@ public class NotificationTaskPostProcessor {
   }
 
   @VisibleForTesting
-  void updateWatermarks(final SubscriptionGroupDTO sg,
+  protected void updateWatermarks(final SubscriptionGroupDTO sg,
       final Collection<AnomalyDTO> anomalies) {
     if (anomalies.isEmpty()) {
       return;

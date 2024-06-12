@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Grid } from "@material-ui/core";
+import { Box, Grid } from "@material-ui/core";
 import React, { FunctionComponent, lazy, Suspense } from "react";
 import { Navigate, Route, Routes, useSearchParams } from "react-router-dom";
 import { InvestigationStepsNavigation } from "../../components/rca/investigation-steps-navigation/investigation-steps-navigation.component";
@@ -57,6 +57,12 @@ const WhatWherePage = lazy(() =>
     import(
         /* webpackChunkName: "what-where-page" */ "../../pages/rca/what-where-page/what-where-page.component"
     ).then((module) => ({ default: module.WhatWherePage }))
+);
+
+const HeatmapAndDimensions = lazy(() =>
+    import(
+        /* webpackChunkName: "heatmap" */ "../../pages/rca/heatmap-and-dimensions/heatmap-and-dimensions.component"
+    ).then((module) => ({ default: module.HeatmapAndDimensions }))
 );
 
 const EventsPage = lazy(() =>
@@ -133,8 +139,17 @@ export const RootCauseAnalysisRouter: FunctionComponent = () => {
                                 ]}
                                 to=".."
                             >
-                                <Grid item xs={12}>
-                                    <InvestigationStepsNavigation />
+                                <Grid item xs={3}>
+                                    <Box
+                                        sx={{
+                                            flexGrow: 1,
+                                            bgcolor: "background.paper",
+                                            display: "flex",
+                                            borderRadius: 8,
+                                        }}
+                                    >
+                                        <InvestigationStepsNavigation />
+                                    </Box>
                                 </Grid>
                             </RedirectValidation>
                         }
@@ -171,6 +186,10 @@ export const RootCauseAnalysisRouter: FunctionComponent = () => {
                         <Route
                             element={<EventsPage />}
                             path={AppRouteRelative.RCA_EVENTS}
+                        />
+                        <Route
+                            element={<HeatmapAndDimensions />}
+                            path={AppRouteRelative.RCA_HEATMAP}
                         />
                         <Route
                             element={<ReviewShareSavePage />}

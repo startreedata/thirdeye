@@ -12,10 +12,9 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Grid } from "@material-ui/core";
+import { Box } from "@material-ui/core";
 import { some } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import { Event } from "../../../rest/dto/event.interfaces";
 import { SavedStateKeys } from "../../../rest/dto/rca.interfaces";
@@ -23,8 +22,6 @@ import { getFromSavedInvestigationOrDefault } from "../../../utils/investigation
 import { serializeKeyValuePair } from "../../../utils/params/params.util";
 import { AnomalyFilterOption } from "../anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.interfaces";
 import { ChartSection } from "./chart-section/chart-section.component";
-import { DimensionsSummary } from "./dimensions-summary/dimensions-summary.component";
-import { Header } from "./header/header.component";
 import {
     ChartType,
     InvestigationPreviewProps,
@@ -38,10 +35,9 @@ export const InvestigationPreview: FunctionComponent<InvestigationPreviewProps> 
         anomaly,
         children,
         title,
-        onInvestigationChange,
+        // onInvestigationChange,
     }) => {
-        const { t } = useTranslation();
-        const [searchParams, setSearchParams] = useSearchParams();
+        const [searchParams] = useSearchParams();
 
         const [isInitialSetup, setIsInitialSetup] = useState(true);
 
@@ -128,106 +124,23 @@ export const InvestigationPreview: FunctionComponent<InvestigationPreviewProps> 
             }
         }, [investigation]);
 
-        const handleCheckBoxClick = (
-            dimensionCombination: AnomalyFilterOption[],
-            shouldAdd: boolean
-        ): void => {
-            const serializedStr = serializeKeyValuePair(dimensionCombination);
-
-            setSelectedDimensionCombinations((current) => {
-                if (shouldAdd) {
-                    current.add(serializedStr);
-                } else {
-                    current.delete(serializedStr);
-                }
-
-                return new Set(current);
-            });
-        };
-
-        const handleDeleteClick = (
-            dimensionCombination: AnomalyFilterOption[]
-        ): void => {
-            const serializedStr = serializeKeyValuePair(dimensionCombination);
-
-            setDimensionCombinationsToChart(
-                dimensionCombinationsToChart.filter(
-                    (existingDimensionCombination) => {
-                        return (
-                            serializeKeyValuePair(
-                                existingDimensionCombination
-                            ) !== serializedStr
-                        );
-                    }
-                )
-            );
-            setSelectedDimensionCombinations((current) => {
-                current.delete(serializedStr);
-
-                return new Set(current);
-            });
-
-            if (investigation) {
-                let currentSet = getFromSavedInvestigationOrDefault<
-                    AnomalyFilterOption[][]
-                >(investigation, SavedStateKeys.CHART_FILTER_SET, []);
-                currentSet = currentSet.filter((candidate) => {
-                    return serializeKeyValuePair(candidate) !== serializedStr;
-                });
-                investigation.uiMetadata[SavedStateKeys.CHART_FILTER_SET] =
-                    currentSet;
-                onInvestigationChange(investigation);
-            }
-        };
-
         return (
-            <Grid container>
-                <Grid item xs={12}>
-                    <Header
-                        selectedChartType={chartType}
-                        title={title || t("label.investigation-preview")}
-                        onOptionClick={(newChartType) => {
-                            setChartType(newChartType);
-
-                            searchParams.set(
-                                QUERY_PARAM_FOR_CHART_TYPE,
-                                newChartType
-                            );
-                            setSearchParams(searchParams);
-                        }}
-                    />
-                </Grid>
-                <Grid item xs={12}>
-                    <Grid container>
-                        <Grid item lg={4} md={4} sm={5} xs={12}>
-                            <DimensionsSummary
-                                availableDimensionCombinations={
-                                    dimensionCombinationsToChart
-                                }
-                                selectedDimensionCombinations={
-                                    selectedDimensionCombinations
-                                }
-                                onCheckBoxClick={handleCheckBoxClick}
-                                onDeleteClick={handleDeleteClick}
-                            />
-                        </Grid>
-                        <Grid item lg={8} md={8} sm={7} xs={12}>
-                            <ChartSection
-                                alertInsight={alertInsight}
-                                anomaly={anomaly}
-                                availableDimensionCombinations={
-                                    dimensionCombinationsToChart
-                                }
-                                chartType={chartType}
-                                events={events}
-                                selectedDimensionCombinations={
-                                    selectedDimensionCombinations
-                                }
-                            />
-                            {children}
-                        </Grid>
-                    </Grid>
-                </Grid>
-            </Grid>
+            <Box sx={{ pt: 2 }}>
+                <ChartSection
+                    alertInsight={alertInsight}
+                    anomaly={anomaly}
+                    availableDimensionCombinations={
+                        dimensionCombinationsToChart
+                    }
+                    chartType={chartType}
+                    events={events}
+                    selectedDimensionCombinations={
+                        selectedDimensionCombinations
+                    }
+                    setChartType={setChartType}
+                    title={title}
+                />
+                {children}
+            </Box>
         );
     };

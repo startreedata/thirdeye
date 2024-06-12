@@ -17,18 +17,22 @@ import React, { FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useOutletContext, useSearchParams } from "react-router-dom";
 import { BaselineOffsetSelection } from "../../../components/rca/analysis-tabs/baseline-offset-selection/baseline-offset-selection.component";
+import { HeatMapSection } from "../../../components/rca/heat-map-section/heat-map-section.component";
 import { InvestigationPreview } from "../../../components/rca/investigation-preview/investigation-preview.component";
-import { TopContributorsSection } from "../../../components/rca/top-contributors-section/top-contributors-section.component";
 import { PageContentsCardV1 } from "../../../platform/components";
 import { useGetAnomalyDimensionAnalysis } from "../../../rest/rca/rca.actions";
 import { InvestigationContext } from "../investigation-state-tracker-container-page/investigation-state-tracker.interfaces";
 
-export const WhatWherePage: FunctionComponent = () => {
+export const HeatmapAndDimensions: FunctionComponent = () => {
     const { t } = useTranslation();
     const [searchParams, setSearchParams] = useSearchParams();
     const context = useOutletContext<InvestigationContext>();
 
     const anomalyDimensionAnalysisFetch = useGetAnomalyDimensionAnalysis();
+
+    const dimensionsInOrder =
+        anomalyDimensionAnalysisFetch?.anomalyDimensionAnalysisData
+            ?.dimensions || [];
 
     const [comparisonOffset, setComparisonOffset] = useState(() => {
         return searchParams.get("baselineWeekOffset") ?? "P1W";
@@ -73,11 +77,9 @@ export const WhatWherePage: FunctionComponent = () => {
                             </Grid>
                         </Grid>
                         <Grid item xs={12}>
-                            <TopContributorsSection
-                                anomalyDimensionAnalysisFetch={
-                                    anomalyDimensionAnalysisFetch
-                                }
+                            <HeatMapSection
                                 comparisonOffset={comparisonOffset}
+                                dimensionsInOrder={dimensionsInOrder}
                             />
                         </Grid>
                     </Grid>

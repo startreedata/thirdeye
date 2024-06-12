@@ -12,15 +12,13 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Button, Step, StepLabel, Stepper } from "@material-ui/core";
-import AdjustIcon from "@material-ui/icons/Adjust";
-import FiberManualRecordIcon from "@material-ui/icons/FiberManualRecord";
-import FiberManualRecordOutlinedIcon from "@material-ui/icons/FiberManualRecordOutlined";
+import { Box, Tab, Tabs, Typography } from "@material-ui/core";
+import { ArrowForward } from "@material-ui/icons";
 import React, { FunctionComponent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
-    Link,
     useLocation,
+    useNavigate,
     useParams,
     useSearchParams,
 } from "react-router-dom";
@@ -29,51 +27,52 @@ import {
     getRootCauseAnalysisForAnomalyInvestigateV2StepsPath,
     RCAV2Steps,
 } from "../../../utils/routes/routes.util";
-
-const CircleIcon = ({
-    active,
-    completed,
-}: {
-    active: boolean;
-    completed: boolean;
-}): React.ReactNode => {
-    if (active) {
-        return <AdjustIcon color="primary" />;
-    }
-
-    return completed ? (
-        <FiberManualRecordIcon color="primary" />
-    ) : (
-        <FiberManualRecordOutlinedIcon color="primary" />
-    );
-};
+import { InvestigationStepsNavigationStyles } from "./investigation-steps-navigation.styles";
 
 export const InvestigationStepsNavigation: FunctionComponent = () => {
     const { t } = useTranslation();
     const location = useLocation();
+    const classes = InvestigationStepsNavigationStyles();
     const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
+
     const params = useParams<Record<"id", string>>();
 
     const anomalyId = Number(params.id);
+
+    const handleTabChange = (newValue: RCAV2Steps): void => {
+        navigate(
+            `${getRootCauseAnalysisForAnomalyInvestigateV2StepsPath(
+                anomalyId,
+                newValue
+            )}?${searchParams.toString()}`
+        );
+    };
 
     const stepItems = [
         {
             matcher: (path: string) =>
                 path.includes(AppRouteRelative.RCA_WHAT_WHERE),
             navLink: AppRouteRelative.RCA_WHAT_WHERE as RCAV2Steps,
-            text: t("label.what-went-wrong-and-where"),
+            text: t("label.top-contributors"),
+        },
+        {
+            matcher: (path: string) =>
+                path.endsWith(AppRouteRelative.RCA_HEATMAP),
+            navLink: AppRouteRelative.RCA_HEATMAP as RCAV2Steps,
+            text: t("label.heatmap-and-dimension"),
+        },
+        {
+            matcher: (path: string) =>
+                path.endsWith(AppRouteRelative.METRICS_DRILL_DOWN),
+            navLink: AppRouteRelative.METRICS_DRILL_DOWN as RCAV2Steps,
+            text: t("label.metrics-drill-down"),
         },
         {
             matcher: (path: string) =>
                 path.endsWith(AppRouteRelative.RCA_EVENTS),
             navLink: AppRouteRelative.RCA_EVENTS as RCAV2Steps,
-            text: t("label.an-event-could-have-caused-it"),
-        },
-        {
-            matcher: (path: string) =>
-                path.endsWith(AppRouteRelative.RCA_REVIEW_SHARE),
-            navLink: AppRouteRelative.RCA_REVIEW_SHARE as RCAV2Steps,
-            text: t("label.review-investigation-share"),
+            text: t("label.events"),
         },
     ];
 
@@ -83,29 +82,38 @@ export const InvestigationStepsNavigation: FunctionComponent = () => {
         });
     }, [location]);
 
+    const selectedTab = (text: string): React.ReactNode => (
+        <Box className={classes.selectedTabContainer}>
+            <Typography variant="subtitle1">{text}</Typography>
+            <ArrowForward />
+        </Box>
+    );
+
     return (
-        <Stepper activeStep={currentPageIdx}>
-            {stepItems.map((stepConfig) => {
+        <Tabs
+            className={classes.tabsMenu}
+            orientation="vertical"
+            value={currentPageIdx}
+        >
+            {stepItems.map((stepConfig, index) => {
                 return (
-                    <Step key={stepConfig.navLink}>
-                        <StepLabel
-                            StepIconComponent={CircleIcon as React.ElementType}
-                        >
-                            <Button
-                                color="default"
-                                component={Link}
-                                to={`${getRootCauseAnalysisForAnomalyInvestigateV2StepsPath(
-                                    anomalyId,
-                                    stepConfig.navLink
-                                )}?${searchParams.toString()}`}
-                                variant="text"
-                            >
-                                {stepConfig.text}
-                            </Button>
-                        </StepLabel>
-                    </Step>
+                    <Tab
+                        className={
+                            currentPageIdx === index
+                                ? classes.selectedTab
+                                : classes.tab
+                        }
+                        key={stepConfig.navLink}
+                        label={
+                            currentPageIdx === index
+                                ? selectedTab(stepConfig.text)
+                                : stepConfig.text
+                        }
+                        value={stepConfig.navLink}
+                        onClick={() => handleTabChange(stepConfig.navLink)}
+                    />
                 );
             })}
-        </Stepper>
+        </Tabs>
     );
 };

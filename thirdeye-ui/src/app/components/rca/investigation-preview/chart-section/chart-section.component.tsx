@@ -55,7 +55,11 @@ import {
     generateSeriesForAnomalies,
     generateSeriesForFilteredEvaluations,
 } from "../../anomaly-time-series-card/anomaly-time-series-card.utils";
-import { ChartType } from "../investigation-preview.interfaces";
+import { Header } from "../header/header.component";
+import {
+    ChartType,
+    QUERY_PARAM_FOR_CHART_TYPE,
+} from "../investigation-preview.interfaces";
 import { getColorForStr } from "../investigation-preview.utils";
 import { ChartSectionProps } from "./chart-section.interfaces";
 import { MultiChart } from "./multi-chart/multi-chart.component";
@@ -67,6 +71,8 @@ export const ChartSection: FunctionComponent<ChartSectionProps> = ({
     availableDimensionCombinations,
     selectedDimensionCombinations,
     chartType,
+    title,
+    setChartType,
 }) => {
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
@@ -75,7 +81,7 @@ export const ChartSection: FunctionComponent<ChartSectionProps> = ({
         delay: 200,
         threshold: 0,
     });
-    const [searchParams] = useSearchParams();
+    const [searchParams, setSearchParams] = useSearchParams();
 
     // Chart data for alert unfiltered
     const {
@@ -276,7 +282,22 @@ export const ChartSection: FunctionComponent<ChartSectionProps> = ({
     ]);
 
     return (
-        <Card innerRef={ref}>
+        <Card innerRef={ref} style={{ borderRadius: 8 }}>
+            <CardContent>
+                <Header
+                    selectedChartType={chartType}
+                    title={title || t("label.investigation-preview")}
+                    onOptionClick={(newChartType) => {
+                        setChartType(newChartType);
+
+                        searchParams.set(
+                            QUERY_PARAM_FOR_CHART_TYPE,
+                            newChartType
+                        );
+                        setSearchParams(searchParams);
+                    }}
+                />
+            </CardContent>
             <CardContent>
                 <Box textAlign="right">
                     <TimeRangeSelectorButtonWithSearchParamsContext

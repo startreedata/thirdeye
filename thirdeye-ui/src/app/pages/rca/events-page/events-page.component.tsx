@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Button, Divider, Grid, Typography } from "@material-ui/core";
+import { Box, Button, Divider, Grid } from "@material-ui/core";
 import { AxiosError } from "axios";
 import { clone, isEmpty, map } from "lodash";
 import React, {
@@ -24,13 +24,12 @@ import React, {
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import { useOutletContext, useSearchParams } from "react-router-dom";
+import { useOutletContext } from "react-router-dom";
 import { EventsWizardModal } from "../../../components/events-wizard-modal/event-wizard-modal.component";
 import { EmptyStateSwitch } from "../../../components/page-states/empty-state-switch/empty-state-switch.component";
 import { LoadingErrorStateSwitch } from "../../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { InvestigationPreview } from "../../../components/rca/investigation-preview/investigation-preview.component";
 import { PreviewChart } from "../../../components/rca/top-contributors-table/preview-chart/preview-chart.component";
-import { WizardBottomBar } from "../../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import {
     DataGridScrollV1,
     DataGridSelectionModelV1,
@@ -54,12 +53,10 @@ import { createEmptyEvent } from "../../../utils/events/events.util";
 import { getFromSavedInvestigationOrDefault } from "../../../utils/investigation/investigation.util";
 import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
 import { getErrorMessages } from "../../../utils/rest/rest.util";
-import { AppRouteRelative } from "../../../utils/routes/routes.util";
 import { InvestigationContext } from "../investigation-state-tracker-container-page/investigation-state-tracker.interfaces";
 
 export const EventsPage: FunctionComponent = () => {
     const { t } = useTranslation();
-    const [searchParams] = useSearchParams();
     const { notify } = useNotificationProviderV1();
     const { getEventsForAnomaly, errorMessages, status, events } =
         useGetEventsForAnomaly();
@@ -229,17 +226,8 @@ export const EventsPage: FunctionComponent = () => {
 
     return (
         <>
-            <Grid item xs={12}>
-                <Typography variant="h4">
-                    {t("label.an-event-could-have-caused-it")}
-                </Typography>
-                <Typography variant="body1">
-                    {t("message.events-allow-you-to-mark-special-dates-in-the")}
-                </Typography>
-            </Grid>
-
-            <Grid item xs={12}>
-                <PageContentsCardV1>
+            <Grid item xs={9}>
+                <PageContentsCardV1 style={{ borderRadius: 8 }}>
                     <Grid
                         container
                         alignItems="center"
@@ -345,25 +333,16 @@ export const EventsPage: FunctionComponent = () => {
                         </LoadingErrorStateSwitch>
                     </Box>
                 </PageContentsCardV1>
-            </Grid>
 
-            <Grid item xs={12}>
-                <InvestigationPreview
-                    alertInsight={alertInsight}
-                    anomaly={anomaly}
-                    investigation={investigation}
-                    onInvestigationChange={onInvestigationChange}
-                />
+                <Grid item xs={12}>
+                    <InvestigationPreview
+                        alertInsight={alertInsight}
+                        anomaly={anomaly}
+                        investigation={investigation}
+                        onInvestigationChange={onInvestigationChange}
+                    />
+                </Grid>
             </Grid>
-
-            <WizardBottomBar
-                backBtnLink={`../${
-                    AppRouteRelative.RCA_WHAT_WHERE
-                }?${searchParams.toString()}`}
-                nextBtnLink={`../${
-                    AppRouteRelative.RCA_REVIEW_SHARE
-                }?${searchParams.toString()}`}
-            />
         </>
     );
 };

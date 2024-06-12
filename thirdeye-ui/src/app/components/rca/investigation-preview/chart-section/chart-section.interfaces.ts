@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { Dispatch, SetStateAction } from "react";
 import { AlertInsight } from "../../../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../../../rest/dto/anomaly.interfaces";
 import { Event } from "../../../../rest/dto/event.interfaces";
@@ -25,4 +26,6 @@ export interface ChartSectionProps {
     alertInsight: AlertInsight | null;
     events: Event[];
     chartType: ChartType;
+    title: string | undefined;
+    setChartType: Dispatch<SetStateAction<ChartType>>;
 }

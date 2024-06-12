@@ -12,14 +12,9 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import Accordion from "@material-ui/core/Accordion";
-import AccordionDetails from "@material-ui/core/AccordionDetails";
-import AccordionSummary from "@material-ui/core/AccordionSummary";
 import Box from "@material-ui/core/Box";
 import Button from "@material-ui/core/Button";
 import Grid from "@material-ui/core/Grid";
-import Typography from "@material-ui/core/Typography";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import every from "lodash/every";
 import isEmpty from "lodash/isEmpty";
 import React, { FunctionComponent, useEffect, useState } from "react";
@@ -50,7 +45,6 @@ import { TopContributorsSectionProps } from "./top-contributors-section.interfac
 
 export const TopContributorsSection: FunctionComponent<TopContributorsSectionProps> =
     ({ comparisonOffset, anomalyDimensionAnalysisFetch }) => {
-        const [expanded, setExpanded] = useState(true);
         const { notify } = useNotificationProviderV1();
         const { t } = useTranslation();
         const { id: anomalyId } =
@@ -89,18 +83,6 @@ export const TopContributorsSection: FunctionComponent<TopContributorsSectionPro
                     entity: t("label.dimension-analysis-data"),
                 })
             );
-
-            // Collapse the accordion if there is an error OR there is no data to show
-            if (anomalyDimensionAnalysisReqStatus === ActionStatus.Error) {
-                setExpanded(false);
-            }
-
-            if (
-                anomalyDimensionAnalysisReqStatus === ActionStatus.Done &&
-                isEmpty(anomalyDimensionAnalysisData?.responseRows)
-            ) {
-                setExpanded(false);
-            }
         }, [anomalyDimensionAnalysisReqStatus]);
 
         const handleRemoveBtnClick = (idx: number): void => {
@@ -151,108 +133,83 @@ export const TopContributorsSection: FunctionComponent<TopContributorsSectionPro
         };
 
         return (
-            <Accordion
-                square
-                expanded={expanded}
-                variant="outlined"
-                onChange={(_e, val) => setExpanded(val)}
-            >
-                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                    <Typography variant="h5">
-                        {t("label.top-contributors")}
-                    </Typography>
-                </AccordionSummary>
-                <AccordionDetails>
-                    <Grid container>
-                        <Grid item xs={12}>
-                            <Typography variant="body2">
-                                {t(
-                                    "message.review-the-recommended-dimension-combinations"
-                                )}
-                            </Typography>
-                        </Grid>
-
-                        <Grid item xs={12}>
-                            <LoadingErrorStateSwitch
-                                isError={
-                                    anomalyDimensionAnalysisReqStatus ===
-                                    ActionStatus.Error
-                                }
-                                isLoading={
-                                    anomalyDimensionAnalysisReqStatus ===
-                                        ActionStatus.Initial ||
-                                    anomalyDimensionAnalysisReqStatus ===
-                                        ActionStatus.Working
-                                }
-                                loadingState={
-                                    <Box pb={2} pt={2}>
-                                        <SkeletonV1
-                                            animation="pulse"
-                                            height={300}
-                                            variant="rect"
-                                        />
-                                    </Box>
-                                }
-                            >
-                                <EmptyStateSwitch
-                                    emptyState={
-                                        <Box pb={20} pt={20}>
-                                            <NoDataIndicator
-                                                text={
-                                                    anomalyDimensionAnalysisData
-                                                        ?.analysisRunInfo
-                                                        ?.message || ""
-                                                }
-                                            />
-                                        </Box>
-                                    }
-                                    isEmpty={
-                                        !anomalyDimensionAnalysisData
-                                            ?.analysisRunInfo?.success
-                                    }
-                                >
-                                    <TopContributorsTable
-                                        alertInsight={alertInsight}
-                                        anomaly={anomaly}
-                                        anomalyDimensionAnalysisData={
-                                            anomalyDimensionAnalysisData as AnomalyDimensionAnalysisData
-                                        }
-                                        chartTimeSeriesFilterSet={
-                                            chartTimeSeriesFilterSet
-                                        }
-                                        comparisonOffset={comparisonOffset}
-                                        onCheckClick={
-                                            handleDimensionCombinationClick
+            <Grid container>
+                <Grid item xs={12}>
+                    <LoadingErrorStateSwitch
+                        isError={
+                            anomalyDimensionAnalysisReqStatus ===
+                            ActionStatus.Error
+                        }
+                        isLoading={
+                            anomalyDimensionAnalysisReqStatus ===
+                                ActionStatus.Initial ||
+                            anomalyDimensionAnalysisReqStatus ===
+                                ActionStatus.Working
+                        }
+                        loadingState={
+                            <Box pb={2} pt={2}>
+                                <SkeletonV1
+                                    animation="pulse"
+                                    height={300}
+                                    variant="rect"
+                                />
+                            </Box>
+                        }
+                    >
+                        <EmptyStateSwitch
+                            emptyState={
+                                <Box pb={20} pt={20}>
+                                    <NoDataIndicator
+                                        text={
+                                            anomalyDimensionAnalysisData
+                                                ?.analysisRunInfo?.message || ""
                                         }
                                     />
-                                    <Box pt={2}>
-                                        <PreviewChart
-                                            alertInsight={alertInsight}
-                                            anomaly={anomaly}
-                                            dimensionCombinations={
-                                                chartTimeSeriesFilterSet
-                                            }
-                                        >
-                                            <Button
-                                                color="primary"
-                                                disabled={isEmpty(
-                                                    chartTimeSeriesFilterSet
-                                                )}
-                                                onClick={
-                                                    handleAddDimensionsToInvestigationClick
-                                                }
-                                            >
-                                                {t(
-                                                    "label.add-dimensions-to-investigation"
-                                                )}
-                                            </Button>
-                                        </PreviewChart>
-                                    </Box>
-                                </EmptyStateSwitch>
-                            </LoadingErrorStateSwitch>
-                        </Grid>
-                    </Grid>
-                </AccordionDetails>
-            </Accordion>
+                                </Box>
+                            }
+                            isEmpty={
+                                !anomalyDimensionAnalysisData?.analysisRunInfo
+                                    ?.success
+                            }
+                        >
+                            <TopContributorsTable
+                                alertInsight={alertInsight}
+                                anomaly={anomaly}
+                                anomalyDimensionAnalysisData={
+                                    anomalyDimensionAnalysisData as AnomalyDimensionAnalysisData
+                                }
+                                chartTimeSeriesFilterSet={
+                                    chartTimeSeriesFilterSet
+                                }
+                                comparisonOffset={comparisonOffset}
+                                onCheckClick={handleDimensionCombinationClick}
+                            />
+                            <Box pt={2}>
+                                <PreviewChart
+                                    alertInsight={alertInsight}
+                                    anomaly={anomaly}
+                                    dimensionCombinations={
+                                        chartTimeSeriesFilterSet
+                                    }
+                                >
+                                    <Button
+                                        color="primary"
+                                        disabled={isEmpty(
+                                            chartTimeSeriesFilterSet
+                                        )}
+                                        onClick={
+                                            handleAddDimensionsToInvestigationClick
+                                        }
+                                    >
+                                        {t(
+                                            "label.add-dimensions-to-investigation"
+                                        )}
+                                    </Button>
+                                </PreviewChart>
+                            </Box>
+                        </EmptyStateSwitch>
+                    </LoadingErrorStateSwitch>
+                </Grid>
+            </Grid>
         );
     };

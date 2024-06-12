@@ -13,11 +13,23 @@
  * the License.
  */
 import { Icon } from "@iconify/react";
-import { Box, Button, Card, CardContent, Grid } from "@material-ui/core";
+import {
+    Box,
+    Button,
+    Card,
+    CardContent,
+    Grid,
+    Typography,
+} from "@material-ui/core";
 import { cloneDeep, isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Outlet, useParams, useSearchParams } from "react-router-dom";
+import {
+    Outlet,
+    useLocation,
+    useParams,
+    useSearchParams,
+} from "react-router-dom";
 import { MetricRenderer } from "../../../components/anomalies-view/metric-renderer/metric-renderer.component";
 import { Crumb } from "../../../components/breadcrumbs/breadcrumbs.interfaces";
 import { AnomalyCard } from "../../../components/entity-cards/anomaly-card/anomaly-card.component";
@@ -60,6 +72,7 @@ import {
 } from "../../../utils/investigation/investigation.util";
 import { QUERY_PARAM_KEY_FOR_EXPANDED } from "../../../utils/params/params.util";
 import {
+    AppRouteRelative,
     getAlertsAlertPath,
     getAnomaliesAnomalyViewPathV2,
 } from "../../../utils/routes/routes.util";
@@ -71,7 +84,7 @@ export const InvestigationStateTracker: FunctionComponent = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const { id: anomalyId } =
         useParams<RootCauseAnalysisForAnomalyPageParams>();
-
+    const { pathname } = useLocation();
     const {
         anomaly,
         getAnomaly,
@@ -350,21 +363,34 @@ export const InvestigationStateTracker: FunctionComponent = () => {
                             })}
                         />
                     </Grid>
-
-                    <Outlet
-                        context={{
-                            investigation: localInvestigation,
-                            onInvestigationChange: handleInvestigationChange,
-                            handleServerUpdatedInvestigation,
-                            getEnumerationItemRequest,
-                            enumerationItem,
-                            anomaly,
-                            getAnomalyRequestStatus: getAnomalyStatus,
-                            anomalyRequestErrors: errorMessages,
-                            alert,
-                            alertInsight,
-                        }}
-                    />
+                    <Grid item xs={12}>
+                        <Typography variant="h4">
+                            {t(
+                                pathname?.includes(
+                                    AppRouteRelative.RCA_WHAT_WHERE
+                                )
+                                    ? "message.what-went-wrong-and-where"
+                                    : "label.analysis-tools"
+                            )}
+                        </Typography>
+                    </Grid>
+                    <Grid container>
+                        <Outlet
+                            context={{
+                                investigation: localInvestigation,
+                                onInvestigationChange:
+                                    handleInvestigationChange,
+                                handleServerUpdatedInvestigation,
+                                getEnumerationItemRequest,
+                                enumerationItem,
+                                anomaly,
+                                getAnomalyRequestStatus: getAnomalyStatus,
+                                anomalyRequestErrors: errorMessages,
+                                alert,
+                                alertInsight,
+                            }}
+                        />
+                    </Grid>
                 </PageContentsGridV1>
             </LoadingErrorStateSwitch>
         </PageV1>

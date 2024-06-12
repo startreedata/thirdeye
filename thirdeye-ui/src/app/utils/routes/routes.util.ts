@@ -84,6 +84,7 @@ export const AppRouteRelative = {
     ALERT_TEMPLATES_ALERT_TEMPLATE_VIEW: "view",
     ALERT_TEMPLATES_ALERT_TEMPLATE_UPDATE: "update",
     METRICS: "metrics",
+    METRICS_DRILL_DOWN: "metrics-drill-down",
     METRICS_ALL: "all",
     METRICS_REPORT: "metrics-report",
     METRICS_VIEW: `view/id/${PLACEHOLDER_ROUTE_ID}`,

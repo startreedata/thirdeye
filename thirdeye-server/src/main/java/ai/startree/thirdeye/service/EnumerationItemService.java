@@ -18,7 +18,7 @@ import static ai.startree.thirdeye.util.ResourceUtils.badRequest;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
-import ai.startree.thirdeye.datalayer.core.EnumerationItemDeleter;
+import ai.startree.thirdeye.datalayer.core.EnumerationItemMaintainer;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.EnumerationItemApi;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
@@ -35,14 +35,14 @@ public class EnumerationItemService extends CrudService<EnumerationItemApi, Enum
       .put("alert.id", "alertId")
       .build();
 
-  private final EnumerationItemDeleter enumerationItemDeleter;
+  private final EnumerationItemMaintainer enumerationItemMaintainer;
 
   @Inject
   public EnumerationItemService(final AuthorizationManager authorizationManager,
       final EnumerationItemManager enumerationItemManager,
-      final EnumerationItemDeleter enumerationItemDeleter) {
+      final EnumerationItemMaintainer enumerationItemMaintainer) {
     super(authorizationManager, enumerationItemManager, API_TO_INDEX_FILTER_MAP);
-    this.enumerationItemDeleter = enumerationItemDeleter;
+    this.enumerationItemMaintainer = enumerationItemMaintainer;
   }
 
   @Override
@@ -71,6 +71,6 @@ public class EnumerationItemService extends CrudService<EnumerationItemApi, Enum
 
   @Override
   protected void deleteDto(final EnumerationItemDTO dto) {
-    enumerationItemDeleter.delete(dto);
+    enumerationItemMaintainer.delete(dto);
   }
 }

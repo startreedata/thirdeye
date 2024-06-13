@@ -24,7 +24,6 @@ import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.config.BackendSentryConfiguration;
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.datalayer.DataSourceBuilder;
-import ai.startree.thirdeye.datalayer.core.EnumerationItemMaintainer;
 import ai.startree.thirdeye.detectionpipeline.PlanExecutor;
 import ai.startree.thirdeye.healthcheck.DatabaseHealthCheck;
 import ai.startree.thirdeye.json.ThirdEyeJsonProcessingExceptionMapper;
@@ -243,9 +242,6 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
 
         /* Shutdown the Plan Executor threads */
         injector.getInstance(PlanExecutor.class).close();
-
-        /* Shutdown Enumeration Item Maintainer thread */
-        injector.getInstance(EnumerationItemMaintainer.class).close();
       }
     };
   }

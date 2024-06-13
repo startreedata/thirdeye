@@ -97,16 +97,25 @@ public class EnumerationItemMaintainer {
       final List<EnumerationItemDTO> enumerationItems,
       final List<String> idKeys,
       final Long alertId) {
-    final List<EnumerationItemDTO> existing = enumerationItemManager.filter(
+    // find existing enumerationItems
+    final List<EnumerationItemDTO> existingItems = enumerationItemManager.filter(
         new EnumerationItemFilter().setAlertId(alertId));
 
-    final List<EnumerationItemDTO> synced = enumerationItems.stream()
+    // update enumerationItems
+    final List<EnumerationItemDTO> syncedItems = enumerationItems.stream()
         .map(source -> source.setAlert(alertRef(alertId)))
-        .map(source -> findExistingOrCreate(source, idKeys, existing))
+        .map(source -> findExistingOrCreate(source, idKeys, existingItems))
         .collect(toList());
 
-    performCleanup(existing, synced);
-    return synced;
+    // delete existing enumerationItems that are not used anymore
+    final Set<Long> updatedItemIds = syncedItems.stream()
+        .map(EnumerationItemDTO::getId)
+        .collect(toSet());
+    existingItems.stream()
+        .filter(ei -> !updatedItemIds.contains(ei.getId()))
+        .forEach(this::delete);
+    
+    return syncedItems;
   }
 
 
@@ -132,17 +141,6 @@ public class EnumerationItemMaintainer {
       LOG.error("Failed to delete enumeration item {} json: {}", dto.getId(),
           eiString);
     }
-  }
-
-  private void performCleanup(final List<EnumerationItemDTO> existing,
-      final List<EnumerationItemDTO> syncedEnumerationItems) {
-    final Set<Long> syncedEnumerationItemIds = syncedEnumerationItems.stream()
-        .map(EnumerationItemDTO::getId)
-        .collect(toSet());
-
-    existing.stream()
-        .filter(ei -> !syncedEnumerationItemIds.contains(ei.getId()))
-        .forEach(this::delete);
   }
 
   private EnumerationItemDTO findExistingOrCreate(final EnumerationItemDTO source,

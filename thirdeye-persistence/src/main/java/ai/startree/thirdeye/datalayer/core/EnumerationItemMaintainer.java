@@ -44,8 +44,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-// fixme cyril - let's remove this maintainer and put this logic inside the Manager. 
-//  the manager is still exposed to consumers but using it can break consistency.
 @Singleton
 public class EnumerationItemMaintainer {
 

@@ -62,6 +62,7 @@ public class EnumerationItemMaintainer {
     this.subscriptionGroupManager = subscriptionGroupManager;
   }
 
+  // fixme cyril authz namespacing required
   public List<EnumerationItemDTO> sync(
       final List<EnumerationItemDTO> enumerationItems,
       final List<String> idKeys,
@@ -77,11 +78,11 @@ public class EnumerationItemMaintainer {
         .collect(toList());
 
     // delete existing enumerationItems that are not used anymore
-    final Set<Long> updatedItemIds = syncedItems.stream()
+    final Set<Long> syncedItemsIds = syncedItems.stream()
         .map(EnumerationItemDTO::getId)
         .collect(toSet());
     existingItems.stream()
-        .filter(ei -> !updatedItemIds.contains(ei.getId()))
+        .filter(ei -> !syncedItemsIds.contains(ei.getId()))
         .forEach(this::delete);
     
     return syncedItems;
@@ -256,11 +257,13 @@ public class EnumerationItemMaintainer {
   }
 
   private void deleteAssociatedAnomalies(final Long enumerationItemId) {
+    // todo cyril authz filter 
     final List<AnomalyDTO> anomalies = anomalyManager.filter(
         new AnomalyFilter().setEnumerationItemId(enumerationItemId));
     anomalies.forEach(anomalyManager::delete);
   }
 
+  // todo cyril authz filter
   private void disassociateFromSubscriptionGroups(final Long enumerationItemId) {
     final List<SubscriptionGroupDTO> allSubscriptionGroups = subscriptionGroupManager.findAll();
 

@@ -13,8 +13,6 @@
  */
 package ai.startree.thirdeye.datalayer.core;
 
-import static ai.startree.thirdeye.spi.util.ExecutorUtils.shutdownExecutionService;
-import static ai.startree.thirdeye.spi.util.ExecutorUtils.threadsNamed;
 import static ai.startree.thirdeye.spi.util.SpiUtils.alertRef;
 import static ai.startree.thirdeye.spi.util.SpiUtils.enumerationItemRef;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
@@ -33,7 +31,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
-import ai.startree.thirdeye.spi.util.ExceptionHandledRunnable;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
@@ -42,8 +39,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,10 +51,6 @@ public class EnumerationItemMaintainer {
   private final EnumerationItemManager enumerationItemManager;
   private final AnomalyManager anomalyManager;
   private final SubscriptionGroupManager subscriptionGroupManager;
-
-  /* To perform clean up operations */
-  private final ExecutorService executorService = Executors.newSingleThreadExecutor(
-      threadsNamed("ei-maintainer-%d"));
 
   @Inject
   public EnumerationItemMaintainer(final EnumerationItemManager enumerationItemManager,
@@ -81,20 +72,6 @@ public class EnumerationItemMaintainer {
     return idKeys.stream()
         .filter(p::containsKey)
         .collect(toMap(Function.identity(), p::get));
-  }
-
-  private static void logDeleteOperation(final EnumerationItemDTO ei) {
-    String eiString;
-    try {
-      eiString = ThirdEyeSerialization
-          .getObjectMapper()
-          .writeValueAsString(ei);
-    } catch (final Exception e) {
-      eiString = ei.toString();
-    }
-    LOG.warn("Deleting enumeration item(id: {}}) json: {}",
-        ei.getId(),
-        eiString);
   }
 
   private static EnumerationItemDTO findCandidate(final EnumerationItemDTO source,
@@ -128,12 +105,33 @@ public class EnumerationItemMaintainer {
         .map(source -> findExistingOrCreate(source, idKeys, existing))
         .collect(toList());
 
-    runAsync(() -> performCleanup(existing, synced));
+    performCleanup(existing, synced);
     return synced;
   }
 
-  private void runAsync(final Runnable runnable) {
-    executorService.submit(new ExceptionHandledRunnable(runnable));
+
+  public void delete(final EnumerationItemDTO dto) {
+    requireNonNull(dto.getId(), "EnumerationItemDTO.id cannot be null for deletion");
+    String eiString;
+    try {
+      eiString = ThirdEyeSerialization
+          .getObjectMapper()
+          .writeValueAsString(dto);
+    } catch (final Exception e) {
+      eiString = dto.toString();
+    }
+    LOG.warn("Deleting enumeration item {} json: {}",
+        dto.getId(),
+        eiString);
+
+    disassociateFromSubscriptionGroups(dto.getId());
+    deleteAssociatedAnomalies(dto.getId());
+
+    int success = enumerationItemManager.delete(dto);
+    if (success == 0) {
+      LOG.error("Failed to delete enumeration item {} json: {}", dto.getId(),
+          eiString);
+    }
   }
 
   private void performCleanup(final List<EnumerationItemDTO> existing,
@@ -144,7 +142,6 @@ public class EnumerationItemMaintainer {
 
     existing.stream()
         .filter(ei -> !syncedEnumerationItemIds.contains(ei.getId()))
-        .peek(EnumerationItemMaintainer::logDeleteOperation)
         .forEach(this::delete);
   }
 
@@ -180,13 +177,13 @@ public class EnumerationItemMaintainer {
     final List<EnumerationItemDTO> byName = enumerationItemManager.findByName(source.getName());
     final List<EnumerationItemDTO> matching = optional(byName).orElse(emptyList()).stream()
         .filter(e -> matches(source, e))
-        .collect(toList());
+        .toList();
 
     /* If there exists an EnumerationItem with a populated alert, return and no need to migrate */
     final List<EnumerationItemDTO> withAlert = matching.stream()
         .filter(ei -> ei.getAlert() != null)
         .filter(ei -> sourceAlertId.equals(ei.getAlert().getId()))
-        .collect(toList());
+        .toList();
 
     if (withAlert.size() > 0) {
       if (withAlert.size() > 1) {
@@ -266,7 +263,6 @@ public class EnumerationItemMaintainer {
     // remove the rest
     eiList.stream()
         .filter(e -> !e.getId().equals(matching.getId()))
-        .peek(EnumerationItemMaintainer::logDeleteOperation)
         .forEach(this::delete);
 
     return matching;
@@ -290,19 +286,6 @@ public class EnumerationItemMaintainer {
               .forEach(aa -> aa.setEnumerationItem(enumerationItemRef(toId)));
           subscriptionGroupManager.update(sg);
         });
-  }
-
-  public void close() throws Exception {
-    shutdownExecutionService(executorService);
-  }
-
-  public EnumerationItemDTO delete(final EnumerationItemDTO dto) {
-    requireNonNull(dto.getId(), "EnumerationItemDTO.id cannot be null for deletion");
-    disassociateFromSubscriptionGroups(dto.getId());
-    deleteAssociatedAnomalies(dto.getId());
-
-    enumerationItemManager.delete(dto);
-    return dto;
   }
 
   private void deleteAssociatedAnomalies(final Long enumerationItemId) {

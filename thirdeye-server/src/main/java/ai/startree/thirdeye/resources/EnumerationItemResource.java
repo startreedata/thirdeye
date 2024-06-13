@@ -44,4 +44,6 @@ public class EnumerationItemResource extends CrudResource<EnumerationItemApi, En
   public EnumerationItemResource(final EnumerationItemService enumerationItemService) {
     super(enumerationItemService);
   }
+  
+  // fixme cyril the delete operation can break the consistency of the system - don't allow deletes via api? the alert should be deleted or updated?
 }

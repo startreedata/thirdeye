@@ -61,38 +61,6 @@ public class EnumerationItemMaintainer {
     this.subscriptionGroupManager = subscriptionGroupManager;
   }
 
-  private static boolean matches(final EnumerationItemDTO o1, final EnumerationItemDTO o2) {
-    return Objects.equals(o1.getName(), o2.getName())
-        && Objects.equals(o1.getParams(), o2.getParams());
-  }
-
-  private static Map<String, Object> key(final EnumerationItemDTO source,
-      final List<String> idKeys) {
-    final Map<String, Object> p = source.getParams();
-    return idKeys.stream()
-        .filter(p::containsKey)
-        .collect(toMap(Function.identity(), p::get));
-  }
-
-  private static EnumerationItemDTO findCandidate(final EnumerationItemDTO source,
-      final List<EnumerationItemDTO> eiList) {
-    // Find exact match
-    Optional<EnumerationItemDTO> candidate = eiList.stream()
-        .filter(e -> matches(source, e))
-        .findFirst();
-    if (candidate.isPresent()) {
-      return candidate.get();
-    }
-
-    // find one with same params
-    candidate = eiList.stream()
-        .filter(e -> e.getParams().equals(source.getParams()))
-        .findFirst();
-
-    // Just return the first one
-    return candidate.orElse(eiList.get(0));
-  }
-
   public List<EnumerationItemDTO> sync(
       final List<EnumerationItemDTO> enumerationItems,
       final List<String> idKeys,
@@ -305,5 +273,37 @@ public class EnumerationItemMaintainer {
           .ifPresent(b -> updated.add(sg));
     }
     subscriptionGroupManager.update(updated);
+  }
+
+  private static boolean matches(final EnumerationItemDTO o1, final EnumerationItemDTO o2) {
+    return Objects.equals(o1.getName(), o2.getName())
+        && Objects.equals(o1.getParams(), o2.getParams());
+  }
+
+  private static Map<String, Object> key(final EnumerationItemDTO source,
+      final List<String> idKeys) {
+    final Map<String, Object> p = source.getParams();
+    return idKeys.stream()
+        .filter(p::containsKey)
+        .collect(toMap(Function.identity(), p::get));
+  }
+
+  private static EnumerationItemDTO findCandidate(final EnumerationItemDTO source,
+      final List<EnumerationItemDTO> eiList) {
+    // Find exact match
+    Optional<EnumerationItemDTO> candidate = eiList.stream()
+        .filter(e -> matches(source, e))
+        .findFirst();
+    if (candidate.isPresent()) {
+      return candidate.get();
+    }
+
+    // find one with same params
+    candidate = eiList.stream()
+        .filter(e -> e.getParams().equals(source.getParams()))
+        .findFirst();
+
+    // Just return the first one
+    return candidate.orElse(eiList.get(0));
   }
 }

@@ -13,9 +13,16 @@
  * the License.
  */
 import { makeStyles } from "@material-ui/core";
+import { ColorV1 } from "../../../platform/utils/material-ui/color.util";
 
 export const InvestigationStateTrackerStyles = makeStyles(() => ({
-    buttonRounded: {
+    buttonOutlinedRounded: {
+        color: ColorV1.Blue6,
+        borderColor: ColorV1.Blue6,
+        borderRadius: "16px",
+    },
+    roundedFilledButton: {
+        backgroundColor: ColorV1.Blue6,
         borderRadius: "16px",
     },
     roundedCard: {

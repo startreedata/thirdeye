@@ -14,7 +14,7 @@
  */
 import { Box, Button, ButtonGroup, Grid, TextField } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
-import React, { FunctionComponent, useMemo, useState } from "react";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
     OFFSET_REGEX_EXTRACT,
@@ -24,7 +24,13 @@ import { useAnomalyBreakdownComparisonHeatmapStyles } from "../../anomaly-breakd
 import { BaselineOffsetSelectionProps } from "./baseline-offset-selection.interfaces";
 
 export const BaselineOffsetSelection: FunctionComponent<BaselineOffsetSelectionProps> =
-    ({ baselineOffset, onBaselineOffsetChange, label }) => {
+    ({
+        baselineOffset,
+        onBaselineOffsetChange,
+        label,
+        inStart = false,
+        hasReloadButton = true,
+    }) => {
         const { t } = useTranslation();
         const classes = useAnomalyBreakdownComparisonHeatmapStyles();
 
@@ -68,11 +74,17 @@ export const BaselineOffsetSelection: FunctionComponent<BaselineOffsetSelectionP
             onBaselineOffsetChange(`P${offsetValue}${offsetUnit}`);
         };
 
+        useEffect(() => {
+            if (!hasReloadButton) {
+                handleSetClick();
+            }
+        }, [offsetUnit, offsetValue]);
+
         return (
             <Grid
                 container
                 alignItems="center"
-                justifyContent="flex-end"
+                justifyContent={inStart ? "flex-start" : "flex-end"}
                 spacing={0}
             >
                 <Grid item>
@@ -126,15 +138,17 @@ export const BaselineOffsetSelection: FunctionComponent<BaselineOffsetSelectionP
                                 selected && setOffsetUnit(selected.key)
                             }
                         />
-                        <Button
-                            color="primary"
-                            disabled={isSetButtonDisabled}
-                            size="small"
-                            variant="outlined"
-                            onClick={handleSetClick}
-                        >
-                            {t("label.reload")}
-                        </Button>
+                        {hasReloadButton && (
+                            <Button
+                                color="primary"
+                                disabled={isSetButtonDisabled}
+                                size="small"
+                                variant="outlined"
+                                onClick={handleSetClick}
+                            >
+                                {t("label.reload")}
+                            </Button>
+                        )}
                     </ButtonGroup>
                 </Grid>
             </Grid>

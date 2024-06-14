@@ -411,7 +411,9 @@ export const InvestigationStateTracker: FunctionComponent = () => {
                                 title={`${t("label.need-help")}?`}
                                 trigger={(handleOpen) => (
                                     <Button
-                                        className={classes.buttonRounded}
+                                        className={
+                                            classes.buttonOutlinedRounded
+                                        }
                                         color="primary"
                                         size="small"
                                         variant="outlined"
@@ -464,7 +466,7 @@ export const InvestigationStateTracker: FunctionComponent = () => {
                         />
                     </Grid>
                     <Grid item xs={6}>
-                        <Typography variant="h4">
+                        <Typography variant="h5">
                             {t(
                                 pathname?.includes(
                                     AppRouteRelative.RCA_WHAT_WHERE
@@ -477,7 +479,7 @@ export const InvestigationStateTracker: FunctionComponent = () => {
                     <Grid item xs={6}>
                         <PageHeaderActionsV1>
                             <Button
-                                className={classes.buttonRounded}
+                                className={classes.roundedFilledButton}
                                 color="primary"
                                 disabled={isSaving}
                                 onClick={handleSaveClick}

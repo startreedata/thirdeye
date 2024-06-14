@@ -17,4 +17,6 @@ export interface BaselineOffsetSelectionProps {
     baselineOffset: string;
     onBaselineOffsetChange: (newBaselineOffset: string) => void;
     label?: string;
+    hasReloadButton?: boolean;
+    inStart?: boolean;
 }

@@ -96,7 +96,7 @@ public class EnumerationItemMaintainerTest {
     String namespace;
 
     // Testing with no auth
-    synced = enumerationItemMaintainer.sync(items, idKeys, ALERT_ID);
+    synced = enumerationItemMaintainer.sync(items, idKeys, ALERT_ID, null);
     assertThat(synced.size()).isEqualTo(1);
     assertThat(synced.get(0).getId()).isNotNull();
     assertThat(synced.get(0).getParams()).isEqualTo(items.get(0).getParams());
@@ -106,7 +106,7 @@ public class EnumerationItemMaintainerTest {
     items = List.of(
         eiWithAuth("ei1", Map.of("key", 1), namespace)
     );
-    synced = enumerationItemMaintainer.sync(items, idKeys, ALERT_ID);
+    synced = enumerationItemMaintainer.sync(items, idKeys, ALERT_ID, null);
     assertThat(synced.size()).isEqualTo(1);
     assertThat(synced.get(0).getId()).isNotNull();
     assertThat(synced.get(0).getParams()).isEqualTo(items.get(0).getParams());
@@ -118,7 +118,7 @@ public class EnumerationItemMaintainerTest {
     items = List.of(
         eiWithAuth("ei1", Map.of("key", 1), namespace)
     );
-    synced = enumerationItemMaintainer.sync(items, idKeys, ALERT_ID);
+    synced = enumerationItemMaintainer.sync(items, idKeys, ALERT_ID, null);
     assertThat(synced.size()).isEqualTo(1);
     assertThat(synced.get(0).getId()).isNotNull();
     assertThat(synced.get(0).getParams()).isEqualTo(items.get(0).getParams());
@@ -129,7 +129,7 @@ public class EnumerationItemMaintainerTest {
     items = List.of(
         ei("ei1", Map.of("key", 1))
     );
-    synced = enumerationItemMaintainer.sync(items, idKeys, ALERT_ID);
+    synced = enumerationItemMaintainer.sync(items, idKeys, ALERT_ID, null);
     assertThat(synced.size()).isEqualTo(1);
     assertThat(synced.get(0).getId()).isNotNull();
     assertThat(synced.get(0).getParams()).isEqualTo(items.get(0).getParams());

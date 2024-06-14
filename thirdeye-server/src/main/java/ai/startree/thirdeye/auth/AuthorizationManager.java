@@ -192,7 +192,7 @@ public class AuthorizationManager {
       final T before, final T after) {
     ensureHasAccess(principal, resourceId(before), AccessType.WRITE);
     ensureHasAccess(principal, resourceId(after), AccessType.WRITE);
-    // prevent namespace change 
+    // prevent namespace change // fixme cyril authz - make sure this is preventing in all codepaths 
     if (requireNamespace) {
       // namespaces must be set and equal
       // THIS IS INCOMPATIBLE WITH ENUMERATION ITEM NAMESPACE EDITION - so not compatible with some users

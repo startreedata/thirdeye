@@ -17,7 +17,7 @@ public class TaskCleanUpConfiguration {
 
   private Integer intervalInMinutes = 5;
   private Integer retentionInDays = 30;
-  private Integer maxEntriesToDelete = 1000;
+  private Integer maxEntriesToDelete = 5000;
   private Integer orphanIntervalInSeconds = 30;
 
   public Integer getIntervalInMinutes() {

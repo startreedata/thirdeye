@@ -54,7 +54,7 @@ public interface Constants {
   String NOTIFICATIONS_PERCENTAGE_FORMAT = "%.2f %%";
 
   Duration TASK_EXPIRY_DURATION = Duration.ofDays(30);
-  int TASK_MAX_DELETES_PER_CLEANUP = 10000;
+  int TASK_MAX_DELETES_PER_CLEANUP = 5000;
 
   /*
    * Dataframe related constants

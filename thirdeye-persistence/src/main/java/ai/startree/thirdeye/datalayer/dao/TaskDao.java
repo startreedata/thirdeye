@@ -34,8 +34,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import org.apache.commons.collections4.CollectionUtils;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -205,24 +205,18 @@ public class TaskDao {
     requireNonNull(daoFilter.getPredicate(),
         "If the predicate is null, you can just do "
             + "getAll() which doesn't need to fetch IDs first");
-    return get(daoFilter.getPredicate());
-  }
-
-  public List<TaskDTO> get(final Map<String, Object> filterParams) {
-    final Predicate[] childPredicates = new Predicate[filterParams.size()];
-    int index = 0;
-    for (final Entry<String, Object> entry : filterParams.entrySet()) {
-      childPredicates[index] = Predicate.EQ(entry.getKey(), entry.getValue());
-      index = index + 1;
-    }
-    return get(Predicate.AND(childPredicates));
+    return get(daoFilter.getPredicate(), daoFilter.getLimit());
   }
 
   public List<TaskDTO> get(final Predicate predicate) {
+    return get(predicate, null);
+  }
+  
+  public List<TaskDTO> get(final Predicate predicate, @Nullable Long limit) {
     try {
       final List<TaskEntity> entities = databaseClient.executeTransaction(
           (connection) -> databaseOrm.findAll(
-              predicate, null, null, TaskEntity.class, connection),
+              predicate, limit, null, TaskEntity.class, connection),
           Collections.emptyList());
       return toDto(entities);
     } catch (final JsonProcessingException | SQLException e) {

@@ -49,6 +49,7 @@ import org.slf4j.LoggerFactory;
  * TODO CYRIL when requireNamespace = true is true, it is not possible to change the namespace of an entity
  *  and all entities should have a namespace directly - no need to inherit
  */
+@Deprecated // namespace will be resolved at write time 
 @Singleton
 public class NamespaceResolver {
 
@@ -110,60 +111,63 @@ public class NamespaceResolver {
 
   private @NonNull Optional<String> resolveMetricConfigDtoNamespace(
       final @Nullable MetricConfigDTO dto) {
-    // metric link to dataset by name - but name is not unique across workspaces - 
-    //   so cannot resolve workspace based on parent datasource so cannot inherit workspace from datasource
-    // FIXME - dataset should link to datasource by id, not by name - also editing the pointing datasource may cause leakage
-    // FIXME - best would be to ensure metrics are created with a namespace
-    // FIXME cyril authz - onboarding dataset will add a namespace 
     return getNamespaceFromAuth(dto);
   }
 
   private @NonNull Optional<String> resolveDatasetDtoNamespace(final DatasetConfigDTO dto) {
-    // dataset link to datasource by name - but name is not unique across workspaces - 
-    //   so cannot resolve workspace based on parent datasource so cannot inherit workspace from datasource
-    // FIXME - dataset should link to datasource by id, not by name - also editing the pointing datasource may cause leakage
-    // FIXME - best would be to ensure datasource are created with a namespace 
-    // FIXME cyril authz - onboarding dataset will add a namespace 
     return getNamespaceFromAuth(dto);
   }
 
-  private @NonNull Optional<String> resolveTaskDtoNamespace(final @Nullable TaskDTO taskDto) {
-    if (taskDto == null) {
+  private @NonNull Optional<String> resolveTaskDtoNamespace(final @Nullable TaskDTO dto) {
+    if (dto == null) {
       return Optional.empty();
     }
-    final Long refId = Objects.requireNonNull(taskDto.getRefId(),
-        String.format("TaskDto %s has no refId. This should never happen", taskDto.getId()));
-    return switch (taskDto.getTaskType()) {
+    if (dto.namespace() != null) {
+      // namespace was set at write time
+      return optional(dto.namespace());
+    }
+    final Long refId = Objects.requireNonNull(dto.getRefId(),
+        String.format("TaskDto %s has no refId. This should never happen", dto.getId()));
+    return switch (dto.getTaskType()) {
       case DETECTION -> getAlertNamespaceById(refId);
       case NOTIFICATION -> getSubscriptionGroupNamespaceById(refId);
     };
   }
 
   private @NonNull Optional<String> resolveEnumerationItemNamespace(
-      final @Nullable EnumerationItemDTO enumerationItemDTO) {
-    if (enumerationItemDTO == null) {
+      final @Nullable EnumerationItemDTO dto) {
+    if (dto == null) {
       return Optional.empty();
     }
-    final Long enumerationItemId = optional(enumerationItemDTO.getId()).orElse(null);
+    if (dto.namespace() != null) {
+      // namespace was set at write time
+      return optional(dto.namespace());
+    }
+    final Long enumerationItemId = optional(dto.getId()).orElse(null);
     if (enumerationItemId != null) {
       final Optional<String> enumNamespace = getEnumerationItemNamespaceById(enumerationItemId);
       if (enumNamespace.isPresent()) {
         return enumNamespace;
       }
     }
-    final Long detectionConfigId = optional(enumerationItemDTO.getAlert()).map(AbstractDTO::getId)
+    final Long detectionConfigId = optional(dto.getAlert()).map(AbstractDTO::getId)
         .orElse(null);
     if (detectionConfigId != null) {
       return getAlertNamespaceById(detectionConfigId);
     }
 
-    return getNamespaceFromAuth(enumerationItemDTO);
+    return getNamespaceFromAuth(dto);
   }
 
   private @NonNull Optional<String> resolveAnomalyNamespace(final @Nullable AnomalyDTO dto) {
     if (dto == null) {
       return Optional.empty();
     }
+    if (dto.namespace() != null) {
+      // namespace was set at write time
+      return optional(dto.namespace());
+    }
+    
     // anomaly inherits namespace from enum
     final Optional<String> enumNamespace = resolveEnumerationItemNamespace(
         dto.getEnumerationItem());

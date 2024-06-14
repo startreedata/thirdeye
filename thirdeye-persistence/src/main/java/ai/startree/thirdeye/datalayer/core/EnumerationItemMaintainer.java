@@ -62,18 +62,19 @@ public class EnumerationItemMaintainer {
     this.subscriptionGroupManager = subscriptionGroupManager;
   }
 
-  // fixme cyril authz namespacing required
   public List<EnumerationItemDTO> sync(
       final List<EnumerationItemDTO> enumerationItems,
       final List<String> idKeys,
       final Long alertId) {
     // find existing enumerationItems
+    // namespace filter is not necessary because we search by alert id - todo add namesapce to avoid future errors?
     final List<EnumerationItemDTO> existingItems = enumerationItemManager.filter(
         new EnumerationItemFilter().setAlertId(alertId));
 
     // update enumerationItems
     final List<EnumerationItemDTO> syncedItems = enumerationItems.stream()
         .map(source -> source.setAlert(alertRef(alertId)))
+        // fixme cyril add a namespace to all enumeration items here
         .map(source -> findExistingOrCreate(source, idKeys, existingItems))
         .collect(toList());
 
@@ -127,21 +128,23 @@ public class EnumerationItemMaintainer {
      * create. Either way, skip the rest of the logic including migration
      */
     if (idKeys != null && !idKeys.isEmpty()) {
+      // fixme cyril authz look by namespace
       final EnumerationItemDTO existing = findUsingIdKeys(source, idKeys, existingEnumerationItems);
       if (existing != null) {
         updateExistingIfReqd(existing, source);
         return existing;
+      } else {
+        /* Create new */
+        enumerationItemManager.save(source);
+        requireNonNull(source.getId(), "expecting a generated ID");
+        return source; 
       }
-
-      /* Create new */
-      enumerationItemManager.save(source);
-      requireNonNull(source.getId(), "expecting a generated ID");
-      return source;
     }
 
     /*
      * If there exists an EnumerationItem with the same name, check if it has the same params.
      */
+    // fixme cyril authz find by add namespace filter
     final List<EnumerationItemDTO> byName = enumerationItemManager.findByName(source.getName());
     final List<EnumerationItemDTO> matching = optional(byName).orElse(emptyList()).stream()
         .filter(e -> matches(source, e))
@@ -194,10 +197,10 @@ public class EnumerationItemMaintainer {
   private EnumerationItemDTO findUsingIdKeys(final EnumerationItemDTO source,
       final List<String> idKeys,
       final List<EnumerationItemDTO> existingEnumerationItems) {
-    final var sourceKey = key(source, idKeys);
+    final Map<String, Object> sourceKey = key(source, idKeys);
     final List<EnumerationItemDTO> filtered = existingEnumerationItems.stream()
         .filter(e -> sourceKey.equals(key(e, idKeys)))
-        .collect(toList());
+        .toList();
 
     if (filtered.size() > 1) {
       LOG.warn("Found more than one EnumerationItem for: {} ids: {}. Attempting to fix..",

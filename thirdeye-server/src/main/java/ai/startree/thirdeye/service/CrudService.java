@@ -86,7 +86,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
    * @param id id
    * @return dto
    */
-  // FIXME CYRIL - ENSURE AUTHORIZATION IN DOWNSTREAM CONSUMERS
+  // FIXME CYRIL authz - ENSURE AUTHORIZATION IN DOWNSTREAM CONSUMERS
   protected DtoT getDto(final Long id) {
     return ensureExists(dtoManager.findById(ensureExists(id, ERR_MISSING_ID)), "id");
   }

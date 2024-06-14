@@ -13,14 +13,12 @@
  */
 package ai.startree.thirdeye.datalayer.core;
 
-import static ai.startree.thirdeye.spi.util.SpiUtils.alertRef;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
-import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import com.google.inject.Injector;
@@ -37,37 +35,6 @@ public class EnumerationItemMaintainerTest {
   private SubscriptionGroupManager subscriptionGroupManager;
   private EnumerationItemMaintainer enumerationItemMaintainer;
   private EnumerationItemManager enumerationItemManager;
-
-  private static EnumerationItemDTO ei(final String name, final Map<String, Object> m) {
-    return new EnumerationItemDTO().setName(name).setParams(m);
-  }
-
-  private static EnumerationItemDTO eiWithAuth(final String name,
-      final Map<String, Object> params,
-      final String namespace) {
-    final EnumerationItemDTO ei = ei(name, params);
-    ei.setAuth(auth(namespace));
-    return ei;
-  }
-
-  private static EnumerationItemDTO sourceEi() {
-    return ei("ei1", Map.of("a", 1))
-        .setAlert(alertRef(ALERT_ID));
-  }
-
-  private static AnomalyDTO anomaly(final long startTime, final long endTime) {
-    return new AnomalyDTO()
-        .setStartTime(startTime)
-        .setEndTime(endTime);
-  }
-
-  private static AnomalyDTO anomaly() {
-    return anomaly(1000L, 2000L);
-  }
-
-  private static AuthorizationConfigurationDTO auth(final String namespace) {
-    return new AuthorizationConfigurationDTO().setNamespace(namespace);
-  }
 
   @BeforeClass
   void beforeClass() {
@@ -86,53 +53,34 @@ public class EnumerationItemMaintainerTest {
   }
 
   @Test
+  public void testSyncWithNoAuth() {
+    final List<String> idKeys = List.of("key");
+    final EnumerationItemDTO inputItem = (EnumerationItemDTO) new EnumerationItemDTO().setName("ei1")
+        .setParams(Map.of("key", 1))
+        .setAuth(new AuthorizationConfigurationDTO().setNamespace("NAMESPACE_OVERRIDEN_BY_SYNC"));
+    List<EnumerationItemDTO> items = List.of(inputItem);
+    // Testing with no auth
+    final String namespace = null;
+    List<EnumerationItemDTO> synced = enumerationItemMaintainer.sync(items, idKeys, ALERT_ID, namespace);
+    assertThat(synced.size()).isEqualTo(1);
+    assertThat(synced.get(0).getId()).isNotNull();
+    assertThat(synced.get(0).getParams()).isEqualTo(items.get(0).getParams());
+    assertThat(synced.get(0).namespace()).isNull();
+  }
+
+  @Test
   public void testSyncWithAuth() {
     final List<String> idKeys = List.of("key");
-    List<EnumerationItemDTO> items = List.of(
-        ei("ei1", Map.of("key", 1))
-    );
-
-    List<EnumerationItemDTO> synced;
-    String namespace;
-
+    final EnumerationItemDTO inputItem = (EnumerationItemDTO) new EnumerationItemDTO().setName("ei1")
+        .setParams(Map.of("key", 1))
+        .setAuth(new AuthorizationConfigurationDTO().setNamespace("NAMESPACE_OVERRIDEN_BY_SYNC"));
+    List<EnumerationItemDTO> items = List.of(inputItem);
     // Testing with no auth
-    synced = enumerationItemMaintainer.sync(items, idKeys, ALERT_ID, null);
+    final String namespace = "THE_NAMESPACE";
+    List<EnumerationItemDTO> synced = enumerationItemMaintainer.sync(items, idKeys, ALERT_ID, namespace);
     assertThat(synced.size()).isEqualTo(1);
     assertThat(synced.get(0).getId()).isNotNull();
     assertThat(synced.get(0).getParams()).isEqualTo(items.get(0).getParams());
-
-    // Testing with auth add
-    namespace = "ns1";
-    items = List.of(
-        eiWithAuth("ei1", Map.of("key", 1), namespace)
-    );
-    synced = enumerationItemMaintainer.sync(items, idKeys, ALERT_ID, null);
-    assertThat(synced.size()).isEqualTo(1);
-    assertThat(synced.get(0).getId()).isNotNull();
-    assertThat(synced.get(0).getParams()).isEqualTo(items.get(0).getParams());
-    assertThat(synced.get(0).getAuth()).isNotNull();
-    assertThat(synced.get(0).getAuth().getNamespace()).isEqualTo(namespace);
-
-    // Testing with auth modify
-    namespace = "ns2";
-    items = List.of(
-        eiWithAuth("ei1", Map.of("key", 1), namespace)
-    );
-    synced = enumerationItemMaintainer.sync(items, idKeys, ALERT_ID, null);
-    assertThat(synced.size()).isEqualTo(1);
-    assertThat(synced.get(0).getId()).isNotNull();
-    assertThat(synced.get(0).getParams()).isEqualTo(items.get(0).getParams());
-    assertThat(synced.get(0).getAuth()).isNotNull();
-    assertThat(synced.get(0).getAuth().getNamespace()).isEqualTo(namespace);
-
-    // Testing with auth remove
-    items = List.of(
-        ei("ei1", Map.of("key", 1))
-    );
-    synced = enumerationItemMaintainer.sync(items, idKeys, ALERT_ID, null);
-    assertThat(synced.size()).isEqualTo(1);
-    assertThat(synced.get(0).getId()).isNotNull();
-    assertThat(synced.get(0).getParams()).isEqualTo(items.get(0).getParams());
-    assertThat(synced.get(0).getAuth()).isNull();
+    assertThat(synced.get(0).namespace()).isEqualTo("THE_NAMESPACE");
   }
 }

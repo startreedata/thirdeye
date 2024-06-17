@@ -60,7 +60,7 @@ public class ResourcesBootstrapService {
 
   public void bootstrap(final ThirdEyeServerPrincipal principal) {
     // migrate enumeration items: write auth in database - todo authz - THROWABLE CODE - can be removed once migration is done
-    //   note: this migration may take some time - there can thousands of enumeration items - introduced a metric to ensure it's not too slow
+    //   note: this migration may take some time - there can be thousands of enumeration items - introduced a metric to ensure it's not too slow
     boolean enumerationItemMigrationSuccess = true;
     final Timer.Sample sample = Timer.start(Metrics.globalRegistry);
     try {

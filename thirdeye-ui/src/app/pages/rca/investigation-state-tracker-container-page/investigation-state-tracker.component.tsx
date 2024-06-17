@@ -19,6 +19,7 @@ import {
     Card,
     CardContent,
     Grid,
+    ThemeProvider,
     Typography,
 } from "@material-ui/core";
 import { cloneDeep, isEmpty, isNull } from "lodash";
@@ -85,7 +86,10 @@ import {
     getRootCauseAnalysisForAnomalyInvestigatePath,
 } from "../../../utils/routes/routes.util";
 import { RootCauseAnalysisForAnomalyPageParams } from "../../root-cause-analysis-for-anomaly-page/root-cause-analysis-for-anomaly-page.interfaces";
-import { InvestigationStateTrackerStyles } from "./investigation-state-tracker.styles";
+import {
+    InvestigationStateTrackerStyles,
+    InvestigationStateTrackerTheme,
+} from "./investigation-state-tracker.styles";
 
 export const InvestigationStateTracker: FunctionComponent = () => {
     const { t } = useTranslation();
@@ -377,136 +381,142 @@ export const InvestigationStateTracker: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <LoadingErrorStateSwitch
-                isError={false}
-                /**
-                 * Ensure localInvestigation is always so the children
-                 * views can access a valid object
-                 */
-                isLoading={
-                    localInvestigation === null ||
-                    getInvestigationRequestStatus === ActionStatus.Working
-                }
-                loadingState={
-                    <PageContentsGridV1>
-                        <Grid item xs={12}>
-                            <Card variant="outlined">
-                                <CardContent>
-                                    <Box padding={20}>
-                                        <AppLoadingIndicatorV1 />
-                                    </Box>
-                                </CardContent>
-                            </Card>
-                        </Grid>
-                    </PageContentsGridV1>
-                }
-            >
-                <PageHeader
-                    transparentBackground
-                    breadcrumbs={breadcrumbs}
-                    customActions={
-                        <PageHeaderActionsV1>
-                            <HelpDrawerV1
-                                cards={anomaliesInvestigateBasicHelpCards}
-                                title={`${t("label.need-help")}?`}
-                                trigger={(handleOpen) => (
-                                    <Button
-                                        className={
-                                            classes.buttonOutlinedRounded
-                                        }
-                                        color="primary"
-                                        size="small"
-                                        variant="outlined"
-                                        onClick={handleOpen}
-                                    >
-                                        <Box component="span" mr={1}>
-                                            {t("label.need-help")}
-                                        </Box>
-                                        <Box component="span" display="flex">
-                                            <Icon
-                                                fontSize={24}
-                                                icon="mdi:question-mark-circle-outline"
-                                            />
-                                        </Box>
-                                    </Button>
-                                )}
-                            />
-                        </PageHeaderActionsV1>
+            <ThemeProvider theme={InvestigationStateTrackerTheme}>
+                <LoadingErrorStateSwitch
+                    isError={false}
+                    /**
+                     * Ensure localInvestigation is always so the children
+                     * views can access a valid object
+                     */
+                    isLoading={
+                        localInvestigation === null ||
+                        getInvestigationRequestStatus === ActionStatus.Working
                     }
-                    subtitle={
-                        anomaly && (
-                            <MetricRenderer
-                                alertData={alert}
-                                anomaly={anomaly}
-                            />
-                        )
+                    loadingState={
+                        <PageContentsGridV1>
+                            <Grid item xs={12}>
+                                <Card variant="outlined">
+                                    <CardContent>
+                                        <Box padding={20}>
+                                            <AppLoadingIndicatorV1 />
+                                        </Box>
+                                    </CardContent>
+                                </Card>
+                            </Grid>
+                        </PageContentsGridV1>
                     }
                 >
-                    <PageHeaderTextV1>{pageTitle}</PageHeaderTextV1>
-                </PageHeader>
+                    <PageHeader
+                        transparentBackground
+                        breadcrumbs={breadcrumbs}
+                        customActions={
+                            <PageHeaderActionsV1>
+                                <HelpDrawerV1
+                                    cards={anomaliesInvestigateBasicHelpCards}
+                                    title={`${t("label.need-help")}?`}
+                                    trigger={(handleOpen) => (
+                                        <Button
+                                            color="primary"
+                                            size="small"
+                                            variant="outlined"
+                                            onClick={handleOpen}
+                                        >
+                                            <Box component="span" mr={1}>
+                                                {t("label.need-help")}
+                                            </Box>
+                                            <Box
+                                                component="span"
+                                                display="flex"
+                                            >
+                                                <Icon
+                                                    fontSize={24}
+                                                    icon="mdi:question-mark-circle-outline"
+                                                />
+                                            </Box>
+                                        </Button>
+                                    )}
+                                />
+                            </PageHeaderActionsV1>
+                        }
+                        subtitle={
+                            anomaly && (
+                                <MetricRenderer
+                                    alertData={alert}
+                                    anomaly={anomaly}
+                                />
+                            )
+                        }
+                    >
+                        <PageHeaderTextV1>{pageTitle}</PageHeaderTextV1>
+                    </PageHeader>
 
-                <PageContentsGridV1>
-                    {/* Anomaly Summary */}
-                    <Grid item xs={12}>
-                        <AnomalyCard
-                            anomaly={anomaly}
-                            className={classes.roundedCard}
-                            hideTime={shouldHideTimeInDatetimeFormat({
-                                metadata:
-                                    alert?.templateProperties as EvaluatedTemplateMetadata,
-                            })}
-                            isLoading={
-                                getAnomalyStatus === ActionStatus.Working ||
-                                getAnomalyStatus === ActionStatus.Initial
-                            }
-                            timezone={determineTimezoneFromAlertInEvaluation({
-                                metadata:
-                                    alert?.templateProperties as EvaluatedTemplateMetadata,
-                            })}
-                        />
-                    </Grid>
-                    <Grid item xs={6}>
-                        <Typography variant="h5">
-                            {t(
-                                pathname?.includes(
-                                    AppRouteRelative.RCA_WHAT_WHERE
-                                )
-                                    ? "message.what-went-wrong-and-where"
-                                    : "label.analysis-tools"
-                            )}
-                        </Typography>
-                    </Grid>
-                    <Grid item xs={6}>
-                        <PageHeaderActionsV1>
-                            <Button
-                                className={classes.roundedFilledButton}
-                                color="primary"
-                                disabled={isSaving}
-                                onClick={handleSaveClick}
-                            >
-                                <Box component="span">{saveButtonLabel}</Box>
-                            </Button>
-                        </PageHeaderActionsV1>
-                    </Grid>
-                    <Grid container>
-                        <Outlet
-                            context={{
-                                investigation: localInvestigation,
-                                onInvestigationChange:
-                                    handleInvestigationChange,
-                                handleServerUpdatedInvestigation,
-                                getEnumerationItemRequest,
-                                enumerationItem,
-                                anomaly,
-                                getAnomalyRequestStatus: getAnomalyStatus,
-                                anomalyRequestErrors: errorMessages,
-                                alert,
-                                alertInsight,
-                            }}
-                        />
-                    </Grid>
-                </PageContentsGridV1>
-            </LoadingErrorStateSwitch>
+                    <PageContentsGridV1>
+                        {/* Anomaly Summary */}
+                        <Grid item xs={12}>
+                            <AnomalyCard
+                                anomaly={anomaly}
+                                className={classes.roundedCard}
+                                hideTime={shouldHideTimeInDatetimeFormat({
+                                    metadata:
+                                        alert?.templateProperties as EvaluatedTemplateMetadata,
+                                })}
+                                isLoading={
+                                    getAnomalyStatus === ActionStatus.Working ||
+                                    getAnomalyStatus === ActionStatus.Initial
+                                }
+                                timezone={determineTimezoneFromAlertInEvaluation(
+                                    {
+                                        metadata:
+                                            alert?.templateProperties as EvaluatedTemplateMetadata,
+                                    }
+                                )}
+                            />
+                        </Grid>
+                        <Grid item xs={6}>
+                            <Typography variant="h5">
+                                {t(
+                                    pathname?.includes(
+                                        AppRouteRelative.RCA_WHAT_WHERE
+                                    )
+                                        ? "message.what-went-wrong-and-where"
+                                        : "label.analysis-tools"
+                                )}
+                            </Typography>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <PageHeaderActionsV1>
+                                <Button
+                                    color="primary"
+                                    disabled={isSaving}
+                                    variant="contained"
+                                    onClick={handleSaveClick}
+                                >
+                                    <Box component="span">
+                                        {saveButtonLabel}
+                                    </Box>
+                                </Button>
+                            </PageHeaderActionsV1>
+                        </Grid>
+                        <Grid container>
+                            <Outlet
+                                context={{
+                                    investigation: localInvestigation,
+                                    onInvestigationChange:
+                                        handleInvestigationChange,
+                                    handleServerUpdatedInvestigation,
+                                    getEnumerationItemRequest,
+                                    enumerationItem,
+                                    anomaly,
+                                    getAnomalyRequestStatus: getAnomalyStatus,
+                                    anomalyRequestErrors: errorMessages,
+                                    alert,
+                                    alertInsight,
+                                }}
+                            />
+                        </Grid>
+                    </PageContentsGridV1>
+                </LoadingErrorStateSwitch>
+            </ThemeProvider>
         </PageV1>
     );
 };

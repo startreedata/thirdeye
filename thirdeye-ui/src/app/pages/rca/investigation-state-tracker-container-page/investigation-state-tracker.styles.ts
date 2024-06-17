@@ -12,20 +12,32 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { makeStyles } from "@material-ui/core";
+import { createTheme, makeStyles } from "@material-ui/core";
+import { lightV1 } from "../../../platform/utils";
 import { ColorV1 } from "../../../platform/utils/material-ui/color.util";
 
 export const InvestigationStateTrackerStyles = makeStyles(() => ({
-    buttonOutlinedRounded: {
-        color: ColorV1.Blue6,
-        borderColor: ColorV1.Blue6,
-        borderRadius: "16px",
-    },
-    roundedFilledButton: {
-        backgroundColor: ColorV1.Blue6,
-        borderRadius: "16px",
-    },
     roundedCard: {
         borderRadius: "8px",
     },
 }));
+
+export const InvestigationStateTrackerTheme = createTheme({
+    ...lightV1,
+    palette: {
+        primary: {
+            main: ColorV1.Blue6,
+        },
+    },
+    overrides: {
+        ...lightV1.overrides,
+        MuiButton: {
+            contained: {
+                borderRadius: "16px",
+            },
+            outlined: {
+                borderRadius: "16px",
+            },
+        },
+    },
+});

@@ -91,6 +91,7 @@ public class ResourcesBootstrapService {
       } 
     } catch (Exception e) {
       enumerationItemMigrationSuccess = false; 
+      LOG.error("An error happened while trying to migrate enumeration items to the new namespacing system.", e);
     }
     sample.stop(enumerationItemMigrationTimer);
     if (!enumerationItemMigrationSuccess) {

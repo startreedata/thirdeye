@@ -30,7 +30,6 @@ import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedback;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedbackType;
-import com.codahale.metrics.CachedGauge;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -60,55 +59,24 @@ public class AnomalyMetricsProvider {
       final MetricRegistry metricRegistry) {
     this.anomalyManager = anomalyManager;
     this.authorizationManager = authorizationManager;
+    // fixme cyril authz - across namespace metrics should be defined in the DAO, not in the service  
     Gauge.builder("thirdeye_anomalies",
             memoizeWithExpiration(() -> countTotal(null), METRICS_CACHE_TIMEOUT.toMinutes(),
                 TimeUnit.MINUTES))
         .register(Metrics.globalRegistry);
-    // deprecated - use thirdeye_anomalies
-    metricRegistry.register("anomalyCountTotal",
-        new CachedGauge<Long>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
-          @Override
-          protected Long loadValue() {
-            return countTotal(null);
-          }
-        });
     Gauge.builder("thirdeye_anomaly_feedbacks",
             memoizeWithExpiration(() -> countFeedbacks(null), METRICS_CACHE_TIMEOUT.toMinutes(),
                 TimeUnit.MINUTES))
         .register(Metrics.globalRegistry);
-    // deprecated - use thirdeye_anomaly_feedbacks
-    metricRegistry.register("anomalyFeedbackCount",
-        new CachedGauge<Long>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
-          @Override
-          protected Long loadValue() {
-            return countFeedbacks(null);
-          }
-        });
     final Supplier<ConfusionMatrix> cachedConfusionMatrix = memoizeWithExpiration(
         this::computeConfusionMatrixForAnomalies, METRICS_CACHE_TIMEOUT.toMinutes(),
         TimeUnit.MINUTES);
     Gauge.builder("thirdeye_anomaly_precision",
             () -> cachedConfusionMatrix.get().getPrecision())
         .register(Metrics.globalRegistry);
-    // deprecated - use thirdeye_anomaly_precision
-    metricRegistry.register("anomalyPrecision",
-        new CachedGauge<Double>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
-          @Override
-          protected Double loadValue() {
-            return computeConfusionMatrixForAnomalies().getPrecision();
-          }
-        });
     Gauge.builder("thirdeye_anomaly_response_rate",
             () -> cachedConfusionMatrix.get().getResponseRate())
         .register(Metrics.globalRegistry);
-    // deprecated - use thirdeye_anomaly_response_rate
-    metricRegistry.register("anomalyResponseRate",
-        new CachedGauge<Double>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
-          @Override
-          protected Double loadValue() {
-            return computeConfusionMatrixForAnomalies().getResponseRate();
-          }
-        });
   }
 
   private static Predicate notIgnored() {

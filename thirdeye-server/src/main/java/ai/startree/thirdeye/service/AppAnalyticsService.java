@@ -54,7 +54,7 @@ public class AppAnalyticsService {
   private final AuthorizationManager authorizationManager;
 
   // FIXME CYRIL need to implement a cache with namespace key 
-  public Supplier<Set<MonitoredMetricWrapper>> uniqueMonitoredMetricsSupplier =
+  private final Supplier<Set<MonitoredMetricWrapper>> uniqueMonitoredMetricsSupplier =
       Suppliers.memoizeWithExpiration(this::getUniqueMonitoredMetrics,
           METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES)::get;
 
@@ -78,6 +78,19 @@ public class AppAnalyticsService {
     // this method does not require an identity for the moment - so the principal is not used 
     //  still enforcing principal as a parameter to respect architecture constraints 
     return AppAnalyticsService.class.getPackage().getImplementationVersion();
+  }
+
+  public AppAnalyticsApi getAppAnalytics(final ThirdEyePrincipal principal, final Long startTime, final Long endTime) {
+    final List<Predicate> predicates = new ArrayList<>();
+    optional(startTime).ifPresent(start -> predicates.add(Predicate.GE("startTime", startTime)));
+    optional(endTime).ifPresent(end -> predicates.add(Predicate.LE("endTime", endTime)));
+    final Predicate predicate = predicates.isEmpty()
+        ? null : Predicate.AND(predicates.toArray(Predicate[]::new));
+    return new AppAnalyticsApi()
+        .setVersion(appVersion(null))
+        // FIXME CYRIL need authz filter
+        .setnMonitoredMetrics(getUniqueMonitoredMetrics().size())
+        .setAnomalyStats(anomalyMetricsProvider.computeAnomalyStats(principal, predicate));
   }
 
   private Set<MonitoredMetricWrapper> getUniqueMonitoredMetrics() {
@@ -104,19 +117,6 @@ public class AppAnalyticsService {
   private MonitoredMetricWrapper wrapMonitoredMetric(final AlertMetadataDTO metadata) {
     return new MonitoredMetricWrapper(metadata.getDatasource().getName(),
         metadata.getDataset().getDataset(), metadata.getMetric().getName());
-  }
-
-  public AppAnalyticsApi getAppAnalytics(final ThirdEyePrincipal principal, final Long startTime, final Long endTime) {
-    final List<Predicate> predicates = new ArrayList<>();
-    optional(startTime).ifPresent(start -> predicates.add(Predicate.GE("startTime", startTime)));
-    optional(endTime).ifPresent(end -> predicates.add(Predicate.LE("endTime", endTime)));
-    final Predicate predicate = predicates.isEmpty()
-        ? null : Predicate.AND(predicates.toArray(Predicate[]::new));
-    return new AppAnalyticsApi()
-        .setVersion(appVersion(null))
-        // FIXME CYRIL need authz filter
-        .setnMonitoredMetrics(getUniqueMonitoredMetrics().size())
-        .setAnomalyStats(anomalyMetricsProvider.computeAnomalyStats(principal, predicate));
   }
 
   private record MonitoredMetricWrapper(String datasource, String dataset, String metric) {}

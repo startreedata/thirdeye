@@ -16,7 +16,7 @@ package ai.startree.thirdeye.datalayer.core;
 import static ai.startree.thirdeye.spi.util.SpiUtils.alertRef;
 import static ai.startree.thirdeye.spi.util.SpiUtils.enumerationItemRef;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
-import static java.util.Collections.emptyList;
+import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -28,6 +28,7 @@ import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
@@ -40,6 +41,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,18 +64,20 @@ public class EnumerationItemMaintainer {
     this.subscriptionGroupManager = subscriptionGroupManager;
   }
 
-  // fixme cyril authz namespacing required
   public List<EnumerationItemDTO> sync(
       final List<EnumerationItemDTO> enumerationItems,
       final List<String> idKeys,
-      final Long alertId) {
+      final Long alertId,
+      final @Nullable String namespace) {
     // find existing enumerationItems
+    // namespace filter is not necessary here because we search by alert id - so only enumeration items of the alert id namespace will be returned
     final List<EnumerationItemDTO> existingItems = enumerationItemManager.filter(
         new EnumerationItemFilter().setAlertId(alertId));
 
     // update enumerationItems
     final List<EnumerationItemDTO> syncedItems = enumerationItems.stream()
         .map(source -> source.setAlert(alertRef(alertId)))
+        .map(source -> (EnumerationItemDTO) source.setAuth(new AuthorizationConfigurationDTO().setNamespace(namespace)))
         .map(source -> findExistingOrCreate(source, idKeys, existingItems))
         .collect(toList());
 
@@ -118,6 +122,7 @@ public class EnumerationItemMaintainer {
       final List<EnumerationItemDTO> existingEnumerationItems) {
     requireNonNull(source.getName(), "enumeration item name does not exist!");
     requireNonNull(source.getAlert(), "enumeration item needs a source alert!");
+    checkState(source.getAuth() != null, "enumeration item auth should be set a this stage. Even if namespace is null.");
 
     final Long sourceAlertId = source.getAlert().getId();
     requireNonNull(sourceAlertId, "enumeration item needs a source alert with a valid id!");
@@ -131,52 +136,46 @@ public class EnumerationItemMaintainer {
       if (existing != null) {
         updateExistingIfReqd(existing, source);
         return existing;
+      } else {
+        /* Create new */
+        enumerationItemManager.save(source);
+        requireNonNull(source.getId(), "expecting a generated ID");
+        return source; 
       }
+    }
 
+    /*
+     * look for an existing EnumerationItem with the same name and the same param 
+     */
+    final List<EnumerationItemDTO> matching = existingEnumerationItems.stream()
+        .filter(e -> matches(source, e))
+        .toList();
+    if (matching.size() == 0) {
       /* Create new */
       enumerationItemManager.save(source);
       requireNonNull(source.getId(), "expecting a generated ID");
       return source;
+    } else if (matching.size() == 1) {
+      // already exists
+      return matching.get(0);
+    } else {
+      final List<Long> ids = matching.stream()
+          .map(EnumerationItemDTO::getId)
+          .collect(toList());
+      LOG.error("Found more than one EnumerationItem with alert for name: {} ids: {}",
+          source.getName(),
+          ids);
+      // returning the first item of the list 
+      // fixme cyril kept the existing behavior but we should throw an error - the system is in an inconsistent state
+      return matching.get(0);
     }
-
-    /*
-     * If there exists an EnumerationItem with the same name, check if it has the same params.
-     */
-    final List<EnumerationItemDTO> byName = enumerationItemManager.findByName(source.getName());
-    final List<EnumerationItemDTO> matching = optional(byName).orElse(emptyList()).stream()
-        .filter(e -> matches(source, e))
-        .toList();
-
-    /* If there exists an EnumerationItem with a populated alert, return and no need to migrate */
-    final List<EnumerationItemDTO> withAlert = matching.stream()
-        .filter(ei -> ei.getAlert() != null)
-        .filter(ei -> sourceAlertId.equals(ei.getAlert().getId()))
-        .toList();
-
-    if (withAlert.size() > 0) {
-      if (withAlert.size() > 1) {
-        final List<Long> ids = withAlert.stream()
-            .map(EnumerationItemDTO::getId)
-            .collect(toList());
-        LOG.error("Found more than one EnumerationItem with alert for name: {} ids: {}",
-            source.getName(),
-            ids);
-      }
-      return withAlert.get(0);
-    }
-
-    /* Create new */
-    enumerationItemManager.save(source);
-    requireNonNull(source.getId(), "expecting a generated ID");
-
-    return source;
   }
 
   private void updateExistingIfReqd(final EnumerationItemDTO existing,
       final EnumerationItemDTO source) {
     if (!existing.getParams().equals(source.getParams()) ||
         !existing.getName().equals(source.getName()) ||
-        !Objects.equals(existing.getAuth(), source.getAuth()) // auth can be null
+        !Objects.equals(existing.getAuth(), source.getAuth()) // should never happen in new namespace system - todo cyril authz remove later
     ) {
       /*
        * Overwrite existing params with new params for the same key. The alert is the
@@ -185,8 +184,8 @@ public class EnumerationItemMaintainer {
       final EnumerationItemDTO updated = existing
           .setParams(source.getParams())
           .setName(source.getName());
-
       updated.setAuth(source.getAuth());
+      
       enumerationItemManager.save(updated);
     }
   }
@@ -194,13 +193,14 @@ public class EnumerationItemMaintainer {
   private EnumerationItemDTO findUsingIdKeys(final EnumerationItemDTO source,
       final List<String> idKeys,
       final List<EnumerationItemDTO> existingEnumerationItems) {
-    final var sourceKey = key(source, idKeys);
+    final Map<String, Object> sourceKey = key(source, idKeys);
     final List<EnumerationItemDTO> filtered = existingEnumerationItems.stream()
         .filter(e -> sourceKey.equals(key(e, idKeys)))
-        .collect(toList());
+        .toList();
 
     if (filtered.size() > 1) {
-      LOG.warn("Found more than one EnumerationItem for: {} ids: {}. Attempting to fix..",
+      // cyril: putting this log to error to see in our observability tool if this is can still happen - todo cyril check if this can be reproduced easily by just setting 2 enumeration item with the same values in the alert config
+      LOG.error("Found more than one EnumerationItem for: {} ids: {}. Attempting to fix..",
           source,
           filtered.stream().map(EnumerationItemDTO::getId).collect(toList()));
       return handleConflicts(source, filtered);

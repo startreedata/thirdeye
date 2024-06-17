@@ -25,6 +25,7 @@ import ai.startree.thirdeye.notification.anomalyfilter.DummyAnomalyFilter;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.AnomalyReportApi;
 import ai.startree.thirdeye.spi.api.AnomalyReportDataApi;
+import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
 import ai.startree.thirdeye.spi.api.EnumerationItemApi;
 import ai.startree.thirdeye.spi.api.NotificationReportApi;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
@@ -180,6 +181,8 @@ public class NotificationReportBuilder {
         .ifPresent(dto -> anomalyApi.setEnumerationItem(new EnumerationItemApi()
             .setId(dto.getId())
             .setName(dto.getName())
+            // could be relevant for an admin that wants this info in notification ? not sure
+            .setAuth(new AuthorizationConfigurationApi().setNamespace(dto.namespace()))
         ));
 
     return anomalyApi;

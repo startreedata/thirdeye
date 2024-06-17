@@ -106,7 +106,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
     final DetectionPipelineUsage usage = requireNonNull(detectionPipelineContext.getUsage(),
         "Detection pipeline usage is not set");
     if (usage.equals(DetectionPipelineUsage.DETECTION)) {
-      return (EnumerationItemDTO) new EnumerationItemDTO().setId(enumerationItem.getId());
+      return new EnumerationItemDTO().setId(enumerationItem.getId());
     } else if (usage.equals(DetectionPipelineUsage.EVALUATION)) {
       // don't put enumerationItemInfo
       return null;

@@ -26,17 +26,16 @@ import ai.startree.thirdeye.spi.api.AnomalyStatsApi;
 import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
 import ai.startree.thirdeye.spi.auth.ResourceIdentifier;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
-import ai.startree.thirdeye.spi.datalayer.Predicate;
+import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import com.google.common.collect.ImmutableMap;
-import java.util.ArrayList;
-import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Singleton
 public class AnomalyService extends CrudService<AnomalyApi, AnomalyDTO> {
@@ -92,9 +91,10 @@ public class AnomalyService extends CrudService<AnomalyApi, AnomalyDTO> {
         .ifPresent(alertApi -> alertApi.setName(cache.getAlerts()
             .getUnchecked(alertApi.getId())
             .getName()));
-    // fixme cyril authz - implement migration to written namespace - see how it's done in RcaInvestigationService
-    anomalyApi.setAuth(new AuthorizationConfigurationApi().setNamespace(authorizationManager.resourceId(
-        dto).getNamespace()));
+    // fixme cyril authz - implement migration to written namespace - see how it's done for enumeration items - at bootstrap time
+    anomalyApi.setAuth(
+        new AuthorizationConfigurationApi().setNamespace(authorizationManager.resourceId(
+            dto).getNamespace()));
     return anomalyApi;
   }
 
@@ -107,7 +107,7 @@ public class AnomalyService extends CrudService<AnomalyApi, AnomalyDTO> {
     feedbackDTO.setUpdatedBy(principal.getName());
     dto.setFeedback(feedbackDTO);
     anomalyManager.updateAnomalyFeedback(dto);
- 
+
     if (dto.isChild()) {
       optional(anomalyManager.findParent(dto))
           .ifPresent(p -> {
@@ -117,16 +117,13 @@ public class AnomalyService extends CrudService<AnomalyApi, AnomalyDTO> {
     }
   }
 
-  public AnomalyStatsApi stats(final ThirdEyePrincipal principal, final Long startTime, final Long endTime) {
-    final List<Predicate> predicates = new ArrayList<>();
-    optional(startTime)
-        .ifPresent(start -> predicates.add(Predicate.GE("startTime", startTime)));
-    optional(endTime)
-        .ifPresent(end -> predicates.add(Predicate.LE("endTime", endTime)));
-    final Predicate predicate = predicates.isEmpty()
-        ? null : Predicate.AND(predicates.toArray(Predicate[]::new));
-    return anomalyMetricsProvider.computeAnomalyStats(principal, predicate);
+  public AnomalyStatsApi stats(final ThirdEyePrincipal principal, final @Nullable Long startTime,
+      final @Nullable Long endTime) {
+    final AnomalyFilter filter = new AnomalyFilter()
+        .setStartTimeIsGte(startTime)
+        .setEndTimeIsLte(endTime);
+    return anomalyMetricsProvider.computeAnomalyStats(principal, filter);
   }
-  
+
   // fixme cyril authz implement validate and ensure alert id is set - anomalies can be created manually
 }

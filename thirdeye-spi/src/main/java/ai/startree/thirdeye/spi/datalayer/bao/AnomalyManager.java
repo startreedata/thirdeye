@@ -14,9 +14,9 @@
 package ai.startree.thirdeye.spi.datalayer.bao;
 
 import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
-import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import java.util.List;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public interface AnomalyManager extends AbstractManager<AnomalyDTO> {
 
@@ -30,21 +30,7 @@ public interface AnomalyManager extends AbstractManager<AnomalyDTO> {
 
   List<AnomalyDTO> decorate(List<AnomalyDTO> anomalyDTOList);
 
-  /**
-   * Refactor to use {@link AnomalyFilter}
-   * Predicate should not be exposed at the interface level. This ensures column level internals
-   * are not exposed to the service layer.
-   */
-  @Deprecated
-  long countParentAnomalies(Predicate predicate);
+  long count(final @NonNull AnomalyFilter filter);
 
-  List<AnomalyDTO> filter(AnomalyFilter anomalyFilter);
-
-  /**
-   * Refactor to use {@link AnomalyFilter}
-   * Predicate should not be exposed at the interface level. This ensures column level internals
-   * are not exposed to the service layer.
-   */
-  @Deprecated
-  List<AnomalyDTO> findParentAnomaliesWithFeedback(Predicate filter);
+  List<AnomalyDTO> filter(@NonNull AnomalyFilter anomalyFilter);
 }

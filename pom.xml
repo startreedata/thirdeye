@@ -937,7 +937,7 @@
       <dependency>
         <groupId>io.dropwizard.metrics</groupId>
         <artifactId>metrics-core</artifactId>
-        <version>4.2.19</version>
+        <version>4.2.21</version>
       </dependency>
       <!-- new metrics system - core is a facade, registry is the implementation -->
       <dependency>
@@ -1044,7 +1044,7 @@
             <format>html</format>
             <format>xml</format>
           </formats>
-          <check />
+          <check/>
         </configuration>
       </plugin>
       <plugin>

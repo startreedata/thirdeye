@@ -21,8 +21,10 @@ import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
@@ -88,6 +90,7 @@ public class EventManagerImpl extends AbstractManagerImpl<EventDTO> implements E
       final List<EventDTO> events) {
     return events.stream()
         .filter(e -> Objects.equals(namespace, e.namespace()) || (shareEventsInUnsetNamespace && Objects.equals(null, e.namespace())))
-        .toList();
+        // return a mutable list - mutability is used by consumers
+        .collect(Collectors.toCollection(ArrayList::new));
   }
 }

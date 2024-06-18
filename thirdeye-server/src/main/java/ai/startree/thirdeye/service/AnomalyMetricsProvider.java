@@ -30,7 +30,6 @@ import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedback;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedbackType;
-import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.micrometer.core.instrument.Gauge;
@@ -55,8 +54,7 @@ public class AnomalyMetricsProvider {
 
   @Inject
   public AnomalyMetricsProvider(AnomalyManager anomalyManager,
-      final AuthorizationManager authorizationManager,
-      final MetricRegistry metricRegistry) {
+      final AuthorizationManager authorizationManager) {
     this.anomalyManager = anomalyManager;
     this.authorizationManager = authorizationManager;
     // fixme cyril authz - across namespace metrics should be defined in the DAO, not in the service  

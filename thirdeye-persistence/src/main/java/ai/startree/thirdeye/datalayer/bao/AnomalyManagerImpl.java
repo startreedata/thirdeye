@@ -453,6 +453,7 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
               break;
             case NO_FEEDBACK:
               addUnclassified(1);
+              break;
             default:
               throw new UnsupportedOperationException(
                   "Feedback type not implemented for stats: %s".formatted(feedback.getFeedbackType()));

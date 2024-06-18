@@ -43,6 +43,7 @@ import ai.startree.thirdeye.spi.api.DetectionEvaluationApi;
 import ai.startree.thirdeye.spi.api.UserApi;
 import ai.startree.thirdeye.spi.auth.AccessType;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
@@ -342,22 +343,17 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
       final Long startTime,
       final Long endTime
   ) {
-    final List<Predicate> predicates = new ArrayList<>();
-    predicates.add(Predicate.EQ("detectionConfigId", id));
     final AlertDTO dto = ensureExists(getDto(id));
     authorizationManager.ensureHasAccess(principal, dto, AccessType.READ);
-
-    // optional filters
     // no need to check authz for the enumerationItem - in the new workspace system, if the user has access to the alert then he has access to the enumerationItem
-    optional(enumerationId)
-        .ifPresent(enumId -> predicates.add(Predicate.EQ("enumerationItemId", enumerationId)));
-    optional(startTime)
-        .ifPresent(start -> predicates.add(Predicate.GE("startTime", startTime)));
-    optional(endTime)
-        .ifPresent(end -> predicates.add(Predicate.LE("endTime", endTime)));
-
-    return anomalyMetricsProvider.computeAnomalyStats(principal,
-        Predicate.AND(predicates.toArray(Predicate[]::new)));
+    // no explicit need for namespace filter given alert id is passed - todo cyril authz - still pass one
+    final AnomalyFilter filter = new AnomalyFilter()
+        .setAlertId(id)
+        .setEnumerationItemId(enumerationId)
+        .setStartTimeIsGte(startTime)
+        .setEndTimeIsLte(endTime)
+        ;
+    return anomalyMetricsProvider.computeAnomalyStats(principal, filter);
   }
 
   private void deleteAssociatedAnomalies(final Long alertId) {

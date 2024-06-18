@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.spi.datalayer;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.joda.time.Interval;
 
 public class AnomalyFilter {
@@ -33,6 +34,37 @@ public class AnomalyFilter {
    * TODO spyne refactor pattern
    */
   private Long endTimeIsLt;
+
+  // find anomalies whose start time is less than or equal to this value
+  private Long endTimeIsLte;
+
+  // find anomalies whose start time is greater than this value
+  private Long startTimeIsGte;
+
+  /**
+   * Note: copyOf is implemented manually. Make sure to maintain it.
+   * Also make sure AnomalyManagerImpl#toPredicate is implemented correctly.
+   * */
+  
+  public static AnomalyFilter copyOf(@NonNull AnomalyFilter filter) {
+    return new AnomalyFilter()
+        .setCreateTimeWindow(filter.createTimeWindow)
+        .setAlertId(filter.alertId)
+        .setEnumerationItemId(filter.enumerationItemId)
+        .setIsIgnored(filter.isIgnored)
+        .setHasFeedback(filter.hasFeedback)
+        .setIsChild(filter.isChild)
+        .setStartEndWindow(filter.startEndWindow)
+        .setEndTimeIsGte(filter.endTimeIsGte)
+        .setEndTimeIsLt(filter.endTimeIsLt)
+        .setEndTimeIsLte(filter.endTimeIsLte)
+        .setStartTimeIsGte(filter.startTimeIsGte)
+        ;
+  }
+  
+  public AnomalyFilter copy() {
+    return copyOf(this);
+  }
 
   public Interval getCreateTimeWindow() {
     return createTimeWindow;
@@ -112,6 +144,24 @@ public class AnomalyFilter {
 
   public AnomalyFilter setEndTimeIsLt(final Long endTimeIsLt) {
     this.endTimeIsLt = endTimeIsLt;
+    return this;
+  }
+
+  public Long getStartTimeIsGte() {
+    return startTimeIsGte;
+  }
+
+  public AnomalyFilter setStartTimeIsGte(final Long startTimeIsGte) {
+    this.startTimeIsGte = startTimeIsGte;
+    return this;
+  }
+
+  public Long getEndTimeIsLte() {
+    return endTimeIsLte;
+  }
+
+  public AnomalyFilter setEndTimeIsLte(final Long endTimeIsLte) {
+    this.endTimeIsLte = endTimeIsLte;
     return this;
   }
 }

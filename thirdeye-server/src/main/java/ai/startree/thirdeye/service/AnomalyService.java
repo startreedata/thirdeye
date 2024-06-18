@@ -54,18 +54,15 @@ public class AnomalyService extends CrudService<AnomalyApi, AnomalyDTO> {
 
   private final AnomalyManager anomalyManager;
   private final AlertManager alertManager;
-  private final AnomalyMetricsProvider anomalyMetricsProvider;
 
   @Inject
   public AnomalyService(
       final AnomalyManager anomalyManager,
       final AlertManager alertManager,
-      final AuthorizationManager authorizationManager,
-      final AnomalyMetricsProvider anomalyMetricsProvider) {
+      final AuthorizationManager authorizationManager) {
     super(authorizationManager, anomalyManager, API_TO_INDEX_FILTER_MAP);
     this.anomalyManager = anomalyManager;
     this.alertManager = alertManager;
-    this.anomalyMetricsProvider = anomalyMetricsProvider;
   }
 
   @Override
@@ -122,7 +119,10 @@ public class AnomalyService extends CrudService<AnomalyApi, AnomalyDTO> {
     final AnomalyFilter filter = new AnomalyFilter()
         .setStartTimeIsGte(startTime)
         .setEndTimeIsLte(endTime);
-    return anomalyMetricsProvider.computeAnomalyStats(principal, filter);
+    final @Nullable String namespace = authorizationManager.currentNamespace(principal);
+    // todo cyril usage of dummy entity for access check - avoid this
+    authorizationManager.ensureCanRead(principal, new AnomalyDTO().setAuth(new AuthorizationConfigurationDTO().setNamespace(namespace)));
+    return anomalyManager.anomalyStats(namespace, filter);
   }
 
   // fixme cyril authz implement validate and ensure alert id is set - anomalies can be created manually

@@ -19,8 +19,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import ai.startree.thirdeye.alert.AlertEvaluator;
-import ai.startree.thirdeye.service.alert.AlertInsightsProvider;
-import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.auth.AuthConfiguration;
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.NamespaceResolver;
@@ -30,7 +28,7 @@ import ai.startree.thirdeye.config.TimeConfiguration;
 import ai.startree.thirdeye.resources.testutils.SingleNamespaceAuthorizer;
 import ai.startree.thirdeye.resources.testutils.SingleResourceAuthorizer;
 import ai.startree.thirdeye.service.AlertService;
-import ai.startree.thirdeye.service.AnomalyMetricsProvider;
+import ai.startree.thirdeye.service.alert.AlertInsightsProvider;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
@@ -74,9 +72,9 @@ public class AlertResourceTest {
   }
 
   private static AlertResource newAlertResource(final AlertManager alertManager,
-      final AlertTemplateRenderer alertTemplateRenderer,
+      final AlertTemplateManager alertTemplateManager,
       final ThirdEyeAuthorizer thirdEyeAuthorizer) {
-    final AuthorizationManager authorizationManager = newAuthorizationManager(alertTemplateRenderer,
+    final AuthorizationManager authorizationManager = newAuthorizationManager(alertTemplateManager,
         thirdEyeAuthorizer);
     return new AlertResource(newAlertService(alertManager, authorizationManager));
   }
@@ -87,7 +85,6 @@ public class AlertResourceTest {
         alertManager,
         mock(AnomalyManager.class),
         mock(AlertEvaluator.class),
-        mock(AnomalyMetricsProvider.class),
         mock(AlertInsightsProvider.class),
         mock(SubscriptionGroupManager.class),
         mock(EnumerationItemManager.class),
@@ -98,9 +95,9 @@ public class AlertResourceTest {
   }
 
   private static AuthorizationManager newAuthorizationManager(
-      final AlertTemplateRenderer alertTemplateRenderer,
+      final AlertTemplateManager alertTemplateManager,
       final ThirdEyeAuthorizer thirdEyeAuthorizer) {
-    return new AuthorizationManager(alertTemplateRenderer,
+    return new AuthorizationManager(alertTemplateManager,
         mock(AlertManager.class), 
         mock(AnomalyManager.class),
         thirdEyeAuthorizer, new NamespaceResolver(null, null, null, null), new AuthConfiguration());
@@ -149,13 +146,11 @@ public class AlertResourceTest {
     final AlertTemplateManager alertTemplateManager = mock(AlertTemplateManager.class);
     when(alertTemplateManager.findById(2L))
         .thenReturn(((AlertTemplateDTO) new AlertTemplateDTO().setId(2L)).setName("template1"));
-    final AlertTemplateRenderer alertTemplateRenderer = new AlertTemplateRenderer(
-        mock(AlertManager.class), alertTemplateManager);
 
     final ThirdEyeAuthorizer thirdEyeAuthorizer = new SingleResourceAuthorizer("0");
 
     newAlertResource(mock(AlertManager.class),
-        alertTemplateRenderer,
+        mock(AlertTemplateManager.class),
         thirdEyeAuthorizer).createMultiple(
         nobody(),
         Collections.singletonList(
@@ -169,11 +164,9 @@ public class AlertResourceTest {
   public void testRunTask_withNoAccess() {
     final AlertManager alertManager = mock(AlertManager.class);
     when(alertManager.findById(1L)).thenReturn((AlertDTO) new AlertDTO().setId(1L));
-    final AlertTemplateRenderer alertTemplateRenderer = new AlertTemplateRenderer(alertManager,
-        mock(AlertTemplateManager.class));
 
     newAlertResource(alertManager,
-        alertTemplateRenderer,
+        mock(AlertTemplateManager.class),
         ThirdEyeAuthorizerProvider.ALWAYS_DENY).runTask(
         nobody(),
         1L,
@@ -184,7 +177,7 @@ public class AlertResourceTest {
   @Test(expectedExceptions = ForbiddenException.class)
   public void testValidate_withNoAccess() {
     newAlertResource(mock(AlertManager.class),
-        mock(AlertTemplateRenderer.class),
+        mock(AlertTemplateManager.class),
         ThirdEyeAuthorizerProvider.ALWAYS_DENY).validateMultiple(
         nobody(),
         Collections.singletonList(
@@ -201,13 +194,11 @@ public class AlertResourceTest {
     when(alertTemplateManager.findById(1L))
         .thenReturn(((AlertTemplateDTO) new AlertTemplateDTO().setId(1L)).setName("template1")
             .setCron(VALID_CRON));
-    final AlertTemplateRenderer alertTemplateRenderer = new AlertTemplateRenderer(
-        mock(AlertManager.class), alertTemplateManager);
 
     final ThirdEyeAuthorizer thirdEyeAuthorizer = new SingleResourceAuthorizer("alert1");
 
     newAlertResource(mock(AlertManager.class),
-        alertTemplateRenderer,
+        mock(AlertTemplateManager.class),
         thirdEyeAuthorizer).validateMultiple(
         nobody(),
         Collections.singletonList(
@@ -224,11 +215,9 @@ public class AlertResourceTest {
     when(alertTemplateManager.findById(1L)).thenReturn(
         (AlertTemplateDTO) new AlertTemplateDTO().setId(
             1L));
-    final AlertTemplateRenderer alertTemplateRenderer = new AlertTemplateRenderer(
-        mock(AlertManager.class), alertTemplateManager);
 
     newAlertResource(mock(AlertManager.class),
-        alertTemplateRenderer,
+        mock(AlertTemplateManager.class),
         ThirdEyeAuthorizerProvider.ALWAYS_DENY).evaluate(nobody(),
         new AlertEvaluationApi()
             .setAlert(new AlertApi().setTemplate(new AlertTemplateApi().setId(1L)))
@@ -240,8 +229,6 @@ public class AlertResourceTest {
   @Test(expectedExceptions = ForbiddenException.class)
   public void testEvaluate_withExistingAlertAndNoAccessToAlert() throws ExecutionException {
     final var alertTemplateManager = mock(AlertTemplateManager.class);
-    final var alertTemplateRenderer = new AlertTemplateRenderer(mock(AlertManager.class),
-        alertTemplateManager);
     final var alertEvaluator = mock(AlertEvaluator.class);
     final var alertManager = mock(AlertManager.class);
 
@@ -268,13 +255,12 @@ public class AlertResourceTest {
         alertManager,
         mock(AnomalyManager.class),
         alertEvaluator,
-        mock(AnomalyMetricsProvider.class),
         mock(AlertInsightsProvider.class),
         mock(SubscriptionGroupManager.class),
         mock(EnumerationItemManager.class),
         mock(TaskManager.class),
         new TimeConfiguration(),
-        newAuthorizationManager(alertTemplateRenderer,
+        newAuthorizationManager(mock(AlertTemplateManager.class),
             SingleNamespaceAuthorizer.of("allowedNamespace"))
     )).evaluate(nobody(), alertEvaluationApi);
   }
@@ -283,8 +269,6 @@ public class AlertResourceTest {
   public void testEvaluate_withExistingAlertAndReadAccessToAlertAndPartialAccessToEnums()
       throws ExecutionException {
     final var alertTemplateManager = mock(AlertTemplateManager.class);
-    final var alertTemplateRenderer = new AlertTemplateRenderer(mock(AlertManager.class),
-        alertTemplateManager);
     final var alertEvaluator = mock(AlertEvaluator.class);
     final var alertManager = mock(AlertManager.class);
 
@@ -322,13 +306,12 @@ public class AlertResourceTest {
         alertManager,
         mock(AnomalyManager.class),
         alertEvaluator,
-        mock(AnomalyMetricsProvider.class),
         mock(AlertInsightsProvider.class),
         mock(SubscriptionGroupManager.class),
         mock(EnumerationItemManager.class),
         mock(TaskManager.class),
         new TimeConfiguration(),
-        newAuthorizationManager(alertTemplateRenderer,
+        newAuthorizationManager(mock(AlertTemplateManager.class),
             SingleNamespaceAuthorizer.of("allowedNamespace", AccessType.READ)))
     );
 
@@ -344,8 +327,6 @@ public class AlertResourceTest {
   @Test(expectedExceptions = ForbiddenException.class)
   public void testEvaluate_withNewAlertAndNoWriteAccess() throws ExecutionException {
     final var alertTemplateManager = mock(AlertTemplateManager.class);
-    final var alertTemplateRenderer = new AlertTemplateRenderer(mock(AlertManager.class),
-        alertTemplateManager);
     final var alertEvaluator = mock(AlertEvaluator.class);
 
     final var alertTemplateDto = new AlertTemplateDTO();
@@ -369,13 +350,12 @@ public class AlertResourceTest {
         mock(AlertManager.class),
         mock(AnomalyManager.class),
         alertEvaluator,
-        mock(AnomalyMetricsProvider.class),
         mock(AlertInsightsProvider.class),
         mock(SubscriptionGroupManager.class),
         mock(EnumerationItemManager.class),
         mock(TaskManager.class),
         new TimeConfiguration(),
-        newAuthorizationManager(alertTemplateRenderer,
+        newAuthorizationManager(mock(AlertTemplateManager.class),
             SingleNamespaceAuthorizer.of("readonlyNamespace", AccessType.READ)))
     ).evaluate(nobody(), alertEvaluationApi);
   }
@@ -384,8 +364,6 @@ public class AlertResourceTest {
   public void testEvaluate_withNewAlertAndWriteAccessToAlertAndPartialAccessToEnums()
       throws ExecutionException {
     final var alertTemplateManager = mock(AlertTemplateManager.class);
-    final var alertTemplateRenderer = new AlertTemplateRenderer(mock(AlertManager.class),
-        alertTemplateManager);
     final var alertEvaluator = mock(AlertEvaluator.class);
 
     final var alertTemplateDto = new AlertTemplateDTO();
@@ -420,13 +398,12 @@ public class AlertResourceTest {
         mock(AlertManager.class),
         mock(AnomalyManager.class),
         alertEvaluator,
-        mock(AnomalyMetricsProvider.class),
         mock(AlertInsightsProvider.class),
         mock(SubscriptionGroupManager.class),
         mock(EnumerationItemManager.class),
         mock(TaskManager.class),
         new TimeConfiguration(),
-        newAuthorizationManager(alertTemplateRenderer,
+        newAuthorizationManager(mock(AlertTemplateManager.class),
             SingleNamespaceAuthorizer.of("allowedNamespace"))));
 
     try (final Response resp = resource.evaluate(nobody(), alertEvaluationApi)) {
@@ -442,11 +419,9 @@ public class AlertResourceTest {
   public void testReset_withNoAccess() {
     final AlertManager alertManager = mock(AlertManager.class);
     when(alertManager.findById(1L)).thenReturn((AlertDTO) new AlertDTO().setId(1L));
-    final AlertTemplateRenderer alertTemplateRenderer = new AlertTemplateRenderer(alertManager,
-        mock(AlertTemplateManager.class));
 
     newAlertResource(alertManager,
-        alertTemplateRenderer,
+        mock(AlertTemplateManager.class),
         ThirdEyeAuthorizerProvider.ALWAYS_DENY).reset(
         nobody(),
         1L);

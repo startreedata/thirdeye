@@ -82,7 +82,6 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
 
   private final TaskManager taskManager;
   private final AnomalyManager anomalyManager;
-  private final AnomalyMetricsProvider anomalyMetricsProvider;
   private final AlertEvaluator alertEvaluator;
   private final AlertInsightsProvider alertInsightsProvider;
   private final SubscriptionGroupManager subscriptionGroupManager;
@@ -95,7 +94,6 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
       final AlertManager alertManager,
       final AnomalyManager anomalyManager,
       final AlertEvaluator alertEvaluator,
-      final AnomalyMetricsProvider anomalyMetricsProvider,
       final AlertInsightsProvider alertInsightsProvider,
       final SubscriptionGroupManager subscriptionGroupManager,
       final EnumerationItemManager enumerationItemManager,
@@ -109,7 +107,6 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     this.subscriptionGroupManager = subscriptionGroupManager;
     this.enumerationItemManager = enumerationItemManager;
     this.taskManager = taskManager;
-    this.anomalyMetricsProvider = anomalyMetricsProvider;
 
     minimumOnboardingStartTime = timeConfiguration.getMinimumOnboardingStartTime();
   }
@@ -353,7 +350,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
         .setStartTimeIsGte(startTime)
         .setEndTimeIsLte(endTime)
         ;
-    return anomalyMetricsProvider.computeAnomalyStats(principal, filter);
+    return anomalyManager.anomalyStats(dto.namespace(), filter);
   }
 
   private void deleteAssociatedAnomalies(final Long alertId) {

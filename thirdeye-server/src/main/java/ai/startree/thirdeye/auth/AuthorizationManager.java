@@ -20,7 +20,6 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.ResourceUtils.authorize;
 import static com.google.common.base.Preconditions.checkArgument;
 
-import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.datalayer.entity.SubEntityType;
 import ai.startree.thirdeye.spi.auth.AccessType;
 import ai.startree.thirdeye.spi.auth.AuthenticationType;
@@ -28,6 +27,7 @@ import ai.startree.thirdeye.spi.auth.ResourceIdentifier;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
+import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertAssociationDto;
@@ -69,7 +69,7 @@ public class AuthorizationManager {
   private static final ThirdEyeServerPrincipal INTERNAL_VALID_PRINCIPAL = new ThirdEyeServerPrincipal(
       "thirdeye-internal", RandomStringUtils.random(1024, true, true), AuthenticationType.INTERNAL);
 
-  private final AlertTemplateRenderer alertTemplateRenderer;
+  private final AlertTemplateManager alertTemplateDao;
   private final AlertManager alertDao;
   private final AnomalyManager anomalyDao;
   private final ThirdEyeAuthorizer thirdEyeAuthorizer;
@@ -86,13 +86,13 @@ public class AuthorizationManager {
 
   @Inject
   public AuthorizationManager(
-      final AlertTemplateRenderer alertTemplateRenderer,
+      final AlertTemplateManager alertTemplateManager,
       final AlertManager alertManager, 
       final AnomalyManager anomalyManager,
       final ThirdEyeAuthorizer thirdEyeAuthorizer,
       final NamespaceResolver namespaceResolver,
       final AuthConfiguration authConfiguration) {
-    this.alertTemplateRenderer = alertTemplateRenderer;
+    this.alertTemplateDao = alertTemplateManager;
     this.alertDao = alertManager;
     this.anomalyDao = anomalyManager;
     this.thirdEyeAuthorizer = thirdEyeAuthorizer;
@@ -301,8 +301,7 @@ public class AuthorizationManager {
   private <T extends AbstractDTO> List<ResourceIdentifier> relatedEntities(T entity) {
     if (entity instanceof final AlertDTO alertDto) {
       // fixme cyril authz - related entities should be namespaced
-      final AlertTemplateDTO alertTemplateDTO = alertTemplateRenderer.getTemplate(
-          alertDto.getTemplate());
+      final AlertTemplateDTO alertTemplateDTO = alertTemplateDao.findMatch(alertDto.getTemplate());
       // fixme cyril authz design - add datasource/dataset 
       //   nothing actually ensures an alert runs on a dataset/datasource for which the user has read access
       //   dataset is historically provided by a string key so there is not explicit design for this

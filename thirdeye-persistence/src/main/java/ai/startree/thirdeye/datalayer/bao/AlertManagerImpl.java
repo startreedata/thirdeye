@@ -29,7 +29,9 @@ import com.google.inject.Singleton;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.Metrics;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Singleton
 public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
@@ -104,6 +106,12 @@ public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
   @Override
   public List<AlertDTO> findAllActive() {
     return findByPredicate(Predicate.EQ("active", true));
+  }
+
+  @Override
+  public List<AlertDTO> findAllActiveInNamespace(final @Nullable String namespace) {
+    // fixme cyril authz filter by namespace at the db level
+    return findAllActive().stream().filter(e -> Objects.equals(e.namespace(), namespace)).toList();
   }
 
   public Long countActive() {

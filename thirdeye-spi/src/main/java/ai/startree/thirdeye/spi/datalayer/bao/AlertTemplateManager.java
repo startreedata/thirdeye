@@ -16,4 +16,19 @@ package ai.startree.thirdeye.spi.datalayer.bao;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 
 public interface AlertTemplateManager extends AbstractManager<AlertTemplateDTO> {
+
+  /**
+   * Look for a template that matches the alertTemplateDto.
+   * If id is set:
+   * --> findById. 
+   * else if the name is set:
+   * --> findByName.
+   * If found: return
+   * If not found:
+   *    if alertTemplateDto nodes are set:
+   *      return the alertTemplateDto
+   *    else:
+   *      throw an error
+   */
+  AlertTemplateDTO findMatch(final AlertTemplateDTO alertTemplateDTO);
 }

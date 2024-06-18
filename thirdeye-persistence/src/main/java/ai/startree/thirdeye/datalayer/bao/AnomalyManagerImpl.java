@@ -422,7 +422,7 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
   private ConfusionMatrix computeConfusionMatrixForAnomalies() {
     final long withNoFeedbackCount = count(HAS_NO_FEEDBACK_FILTER);
     final List<AnomalyDTO> withFeedbacks = filter(HAS_FEEDBACK_FILTER);
-    // todo cyril - would be simpler to be able to count by feedback type - here we parse and load anomalies in memory
+    // todo cyril - would be simpler to be able to count by feedback type in the db directly - here we parse and load anomalies in memory
     
     return new ConfusionMatrix()
         .addUnclassified(withNoFeedbackCount)

@@ -49,7 +49,7 @@ public class AnomalyMetricsProvider {
   private final AnomalyManager anomalyManager;
   private final AuthorizationManager authorizationManager;
 
-  public Supplier<List<AnomalyFeedback>> anomalyFeedbacksSupplier =
+  private Supplier<List<AnomalyFeedback>> anomalyFeedbacksSupplier =
       memoizeWithExpiration(() -> getAnomalyFeedbacks(null),
           METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES);
 

@@ -89,10 +89,9 @@ public class AlertTemplateService extends CrudService<AlertTemplateApi, AlertTem
     final List<AlertTemplateApi> toCreateTemplates = new ArrayList<>();
     final List<AlertTemplateApi> toUpdateTemplates = new ArrayList<>();
     for (final AlertTemplateApi templateApi : alertTemplates) {
-      final AlertTemplateDTO existingTemplate = dtoManager.findByName(templateApi.getName())
-          .stream()
-          .findFirst()
-          .orElse(null);
+      // fixme cyril authz add namespace
+      final AlertTemplateDTO existingTemplate = dtoManager.findUniqueByNameAndNamespace(
+          templateApi.getName(), null);
       if (existingTemplate == null) {
         toCreateTemplates.add(templateApi);
       } else {

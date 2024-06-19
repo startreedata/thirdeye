@@ -35,22 +35,26 @@ public interface AbstractManager<E extends AbstractDTO> {
    * Find entity by name.
    * The name is intended to be unique, but it is not enforced by the database for all entities.
    * Therefore, this method returns a list of entities.
-   *
-   * @param name
-   * @return
    */
-  @Deprecated // FIXME CYRIL authz use findUniqueByNameAndNamespace or findByNameAndNamespace instead
+  @Deprecated
+  // FIXME CYRIL authz use findUniqueByNameAndNamespace or findByNameAndNamespace instead
   List<E> findByName(String name);
-  
-  // returns null if the entity is not found or not unique // TODO CYRIL differentiate behaviour when not unique 
-  default @Nullable E findUniqueByNameAndNamespace(final @NonNull String name, final @Nullable String namespace) {
-    final List<E> list =  findByName(name)
+
+  // returns null if the entity is not found or not unique 
+  default @Nullable E findUniqueByNameAndNamespace(final @NonNull String name,
+      final @Nullable String namespace) {
+    final List<E> list = findByName(name)
         // TODO CYRIL authz - filter in the sql read, not in app - remove findByName and don't provide a default
         .stream().filter(d -> Objects.equals(d.namespace(), namespace)).toList();
-    if (list.size() == 1) {
+    if (list.isEmpty()) {
+      return null;
+    } else if (list.size() == 1) {
       return list.iterator().next();
+    } else {
+      throw new IllegalStateException(String.format(
+          "Found multiple entities with name %s and namespace %s. This should not happen. Please reach out to support.",
+          name, namespace));
     }
-    return null;
   }
 
   List<E> findByIds(List<Long> id);

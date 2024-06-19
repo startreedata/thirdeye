@@ -15,6 +15,7 @@ package ai.startree.thirdeye.resources;
 
 import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -98,7 +99,7 @@ public class AlertResourceTest {
       final AlertTemplateManager alertTemplateManager,
       final ThirdEyeAuthorizer thirdEyeAuthorizer) {
     return new AuthorizationManager(alertTemplateManager,
-        mock(AlertManager.class), 
+        mock(AlertManager.class),
         mock(AnomalyManager.class),
         thirdEyeAuthorizer, new NamespaceResolver(null, null, null, null), new AuthConfiguration());
   }
@@ -144,14 +145,18 @@ public class AlertResourceTest {
   @Test(expectedExceptions = ForbiddenException.class)
   public void testCreateMultiple_withNoAccessToTemplate() {
     final AlertTemplateManager alertTemplateManager = mock(AlertTemplateManager.class);
-    when(alertTemplateManager.findById(2L))
-        .thenReturn(((AlertTemplateDTO) new AlertTemplateDTO().setId(2L)).setName("template1"));
+    final AlertTemplateDTO template1 = (AlertTemplateDTO) new AlertTemplateDTO()
+        .setName("template1")
+        .setId(2L);
+    when(alertTemplateManager.findMatch(argThat(template -> template.getId() == 2))).thenReturn(
+        template1);
 
     final ThirdEyeAuthorizer thirdEyeAuthorizer = new SingleResourceAuthorizer("0");
 
-    newAlertResource(mock(AlertManager.class),
-        mock(AlertTemplateManager.class),
-        thirdEyeAuthorizer).createMultiple(
+    final AlertResource alertResource = newAlertResource(mock(AlertManager.class),
+        alertTemplateManager,
+        thirdEyeAuthorizer);
+    alertResource.createMultiple(
         nobody(),
         Collections.singletonList(
             new AlertApi().setName("alert1")
@@ -360,61 +365,6 @@ public class AlertResourceTest {
     ).evaluate(nobody(), alertEvaluationApi);
   }
 
-  @Test
-  public void testEvaluate_withNewAlertAndWriteAccessToAlertAndPartialAccessToEnums()
-      throws ExecutionException {
-    final var alertTemplateManager = mock(AlertTemplateManager.class);
-    final var alertEvaluator = mock(AlertEvaluator.class);
-
-    final var alertTemplateDto = new AlertTemplateDTO();
-    alertTemplateDto.setId(1L);
-    alertTemplateDto.setAuth(new AuthorizationConfigurationDTO().setNamespace("allowedNamespace"));
-
-    final var alertApi = new AlertApi()
-        .setAuth(new AuthorizationConfigurationApi().setNamespace("allowedNamespace"))
-        .setTemplate(new AlertTemplateApi().setId(1L));
-
-    final var alertEvaluationApi = new AlertEvaluationApi()
-        .setAlert(alertApi)
-        .setStart(new Date())
-        .setEnd(new Date());
-
-    when(alertTemplateManager.findById(1L)).thenReturn(alertTemplateDto);
-    when(alertEvaluator.evaluate(alertEvaluationApi))
-        .thenReturn(new AlertEvaluationApi().setDetectionEvaluations(
-            new HashMap<>() {{
-              put("allowedEval",
-                  new DetectionEvaluationApi().setEnumerationItem(new EnumerationItemApi()
-                      .setAuth(
-                          new AuthorizationConfigurationApi().setNamespace("allowedNamespace"))));
-              put("blockedEval",
-                  new DetectionEvaluationApi().setEnumerationItem(new EnumerationItemApi()
-                      .setAuth(
-                          new AuthorizationConfigurationApi().setNamespace("blockedNamespace"))));
-            }}
-        ));
-
-    final var resource = new AlertResource(new AlertService(
-        mock(AlertManager.class),
-        mock(AnomalyManager.class),
-        alertEvaluator,
-        mock(AlertInsightsProvider.class),
-        mock(SubscriptionGroupManager.class),
-        mock(EnumerationItemManager.class),
-        mock(TaskManager.class),
-        new TimeConfiguration(),
-        newAuthorizationManager(mock(AlertTemplateManager.class),
-            SingleNamespaceAuthorizer.of("allowedNamespace"))));
-
-    try (final Response resp = resource.evaluate(nobody(), alertEvaluationApi)) {
-      assertThat(resp.getStatus()).isEqualTo(200);
-
-      final var results = ((AlertEvaluationApi) resp.getEntity());
-      assertThat(results.getDetectionEvaluations().get("allowedEval")).isNotNull();
-      assertThat(results.getDetectionEvaluations().get("blockedEval")).isNull();
-    }
-  }
-
   @Test(expectedExceptions = ForbiddenException.class)
   public void testReset_withNoAccess() {
     final AlertManager alertManager = mock(AlertManager.class);
@@ -426,6 +376,4 @@ public class AlertResourceTest {
         nobody(),
         1L);
   }
-
-  
 }

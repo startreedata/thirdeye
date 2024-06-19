@@ -300,8 +300,7 @@ public class AuthorizationManager {
    **/
   private <T extends AbstractDTO> List<ResourceIdentifier> relatedEntities(T entity) {
     if (entity instanceof final AlertDTO alertDto) {
-      // fixme cyril authz - related entities should be namespaced
-      final AlertTemplateDTO alertTemplateDTO = alertTemplateDao.findMatch(alertDto.getTemplate());
+      final AlertTemplateDTO alertTemplateDTO = alertTemplateDao.findMatch(alertDto.getTemplate(), alertDto.namespace());
       // fixme cyril authz design - add datasource/dataset 
       //   nothing actually ensures an alert runs on a dataset/datasource for which the user has read access
       //   dataset is historically provided by a string key so there is not explicit design for this

@@ -55,7 +55,7 @@ public class AlertTemplateRenderer {
    * @param alert the alert API
    * @return template populated with properties
    */
-  public AlertTemplateDTO renderAlert(AlertApi alert)
+  public AlertTemplateDTO renderAlert(final AlertApi alert, final @Nullable String namespace)
       throws IOException, ClassNotFoundException {
     ensureExists(alert, ERR_OBJECT_DOES_NOT_EXIST, "alert body is null");
 
@@ -69,7 +69,7 @@ public class AlertTemplateRenderer {
     final Map<String, Object> alertProperties = alert.getTemplateProperties();
 
     final AlertTemplateDTO alertTemplateDTO = ApiBeanMapper.toAlertTemplateDto(templateApi);
-    final AlertTemplateDTO fullTemplate = alertTemplateManager.findMatch(alertTemplateDTO);
+    final AlertTemplateDTO fullTemplate = alertTemplateManager.findMatch(alertTemplateDTO, namespace);
 
     return renderTemplate(fullTemplate, alertProperties, alert.getName());
   }
@@ -79,9 +79,11 @@ public class AlertTemplateRenderer {
    *
    * @param alert the alert DTO (persisted in db)
    * @return template populated with properties
+   * 
+   * WARNING: the DTO must exist in the DB - it is assumed the namespace of the alert is set correctly
    */
-  public AlertTemplateDTO renderAlert(AlertDTO alert) throws IOException, ClassNotFoundException {
-    final AlertTemplateDTO fullTemplate = alertTemplateManager.findMatch(alert.getTemplate());
+  public AlertTemplateDTO renderAlert(final AlertDTO alert) throws IOException, ClassNotFoundException {
+    final AlertTemplateDTO fullTemplate = alertTemplateManager.findMatch(alert.getTemplate(), alert.namespace());
     final Map<String, Object> alertProperties = alert.getTemplateProperties();
 
     return renderTemplate(fullTemplate, alertProperties, alert.getName());

@@ -34,6 +34,7 @@ public interface ThirdEyeAuthorizer {
       AccessType accessType
   );
   
+  // fixme cyril - return List(null) - then by default then we can enable requireNamespace for most envs   
   default @NonNull List<String> listNamespaces(final ThirdEyePrincipal principal) {
     throw new UnsupportedOperationException("listNamespaces is not implemented. Cannot enforce namespace in all entities.");
   }

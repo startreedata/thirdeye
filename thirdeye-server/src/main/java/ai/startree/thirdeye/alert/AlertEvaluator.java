@@ -39,7 +39,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import javax.ws.rs.WebApplicationException;
 import org.joda.time.Interval;
 import org.slf4j.Logger;
@@ -99,14 +98,16 @@ public class AlertEvaluator {
       throws Exception {
     final long startTime = request.getStart().getTime();
     final long endTime = request.getEnd().getTime();
+    final String namespace = optional(request.getAlert().getAuth()).map(
+        AuthorizationConfigurationApi::getNamespace).orElse(null);
     final Interval detectionInterval = alertDetectionIntervalCalculator.getCorrectedInterval(
         request.getAlert(),
         startTime,
-        endTime);
+        endTime,
+        namespace);
     final DetectionPipelineContext context = new DetectionPipelineContext()
         .setAlertId(request.getAlert().getId())
-        .setNamespace(optional(request.getAlert().getAuth()).map(
-            AuthorizationConfigurationApi::getNamespace).orElse(null))
+        .setNamespace(namespace)
         .setUsage(DetectionPipelineUsage.EVALUATION)
         .setDetectionInterval(detectionInterval);
 
@@ -115,7 +116,8 @@ public class AlertEvaluator {
     evaluationContextProcessor.process(context, evaluationContext);
 
     // apply template properties
-    final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(request.getAlert());
+    final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(
+        request.getAlert(), namespace);
 
     if (bool(request.isDryRun())) {
       return new AlertEvaluationApi()
@@ -147,7 +149,7 @@ public class AlertEvaluator {
     final List<String> enumeratorNodeNames = nodes.stream()
         .filter(n -> ENUMERATOR_NODE_TYPE.equals(n.getType()))
         .map(PlanNodeBean::getName)
-        .collect(Collectors.toList());
+        .toList();
     ensure(enumeratorNodeNames.size() == 1,
         String.format("Expecting exactly 1 enumeration item in the template. Found: %d",
             enumeratorNodeNames.size()));

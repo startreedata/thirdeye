@@ -23,9 +23,9 @@ import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
-import org.joda.time.Interval;
 import org.joda.time.Period;
 
+// fixme cyril - make this static let the consumer use alertTemplateRenderer
 @Singleton
 public class AlertDataRetriever {
 

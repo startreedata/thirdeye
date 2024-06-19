@@ -79,7 +79,7 @@ public class AlertTemplateService extends CrudService<AlertTemplateApi, AlertTem
     return loadRecommendedTemplates(principal, updateExisting, namespace);
   }
 
-  // protected to be available to other services that may want to inject namespace manually
+  // protected to be available to other services that need to inject the namespace manually
   @NonNull
   protected List<AlertTemplateApi> loadRecommendedTemplates(final ThirdEyeServerPrincipal principal,
       final boolean updateExisting, final String explicitNamespace) {

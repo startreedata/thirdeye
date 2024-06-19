@@ -21,6 +21,7 @@ import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +37,7 @@ public class AlertTemplateManagerImpl extends AbstractManagerImpl<AlertTemplateD
   }
 
   @Override
-  public AlertTemplateDTO findMatch(final AlertTemplateDTO alertTemplateDTO) {
+  public AlertTemplateDTO findMatch(final @NonNull AlertTemplateDTO alertTemplateDTO) {
     AlertTemplateDTO match = null;
     final Long id = alertTemplateDTO.getId();
     final String name = alertTemplateDTO.getName();

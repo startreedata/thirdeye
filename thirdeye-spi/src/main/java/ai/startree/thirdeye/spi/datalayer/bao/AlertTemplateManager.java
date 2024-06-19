@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.spi.datalayer.bao;
 
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public interface AlertTemplateManager extends AbstractManager<AlertTemplateDTO> {
 
@@ -30,5 +31,5 @@ public interface AlertTemplateManager extends AbstractManager<AlertTemplateDTO> 
    *    else:
    *      throw an error
    */
-  AlertTemplateDTO findMatch(final AlertTemplateDTO alertTemplateDTO);
+  AlertTemplateDTO findMatch(final @NonNull AlertTemplateDTO alertTemplateDTO);
 }

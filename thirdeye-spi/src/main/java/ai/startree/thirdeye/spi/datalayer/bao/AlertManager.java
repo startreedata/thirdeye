@@ -19,11 +19,11 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface AlertManager extends AbstractManager<AlertDTO> {
 
-  // fixme cyril add same with namespace
+  // should be internal only
   List<AlertDTO> findAllActive();
   
   List<AlertDTO> findAllActiveInNamespace(final @Nullable String namespace);
 
-  // fixme cyril add same with namespace
+  // should be used internaly only. Introduce countActiveInNamespace if you want to expose to users 
   Long countActive();
 }

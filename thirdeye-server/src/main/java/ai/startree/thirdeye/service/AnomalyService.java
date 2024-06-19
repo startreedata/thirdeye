@@ -120,7 +120,7 @@ public class AnomalyService extends CrudService<AnomalyApi, AnomalyDTO> {
         .setStartTimeIsGte(startTime)
         .setEndTimeIsLte(endTime);
     final @Nullable String namespace = authorizationManager.currentNamespace(principal);
-    // todo cyril usage of dummy entity for access check - avoid this
+    // todo cyril authz usage of dummy entity for access check - avoid this
     authorizationManager.ensureCanRead(principal, new AnomalyDTO().setAuth(new AuthorizationConfigurationDTO().setNamespace(namespace)));
     return anomalyManager.anomalyStats(namespace, filter);
   }

@@ -54,7 +54,7 @@ public class AlertTemplateManagerImpl extends AbstractManagerImpl<AlertTemplateD
     } else {
       // todo cyril authz add namespace info
       throw new ThirdEyeException(ERR_OBJECT_DOES_NOT_EXIST,
-          "Template not found. Name: %s. Id: %s. ".formatted(name, id));
+          "Template not found. Name: %s. Namespace: %s. Id: %s. ".formatted(name, null, id));
     }
   }
 }

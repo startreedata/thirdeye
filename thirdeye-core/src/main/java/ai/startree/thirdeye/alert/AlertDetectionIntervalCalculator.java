@@ -28,7 +28,6 @@ import java.io.IOException;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.joda.time.Chronology;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.slf4j.Logger;
@@ -46,7 +45,6 @@ import org.slf4j.LoggerFactory;
 public class AlertDetectionIntervalCalculator {
 
   private static final Logger LOG = LoggerFactory.getLogger(AlertDetectionIntervalCalculator.class);
-  private static final Interval DUMMY_INTERVAL = new Interval(0L, 0L, DateTimeZone.UTC);
   private final AlertTemplateRenderer alertTemplateRenderer;
 
   @Inject
@@ -56,8 +54,7 @@ public class AlertDetectionIntervalCalculator {
 
   public Interval getCorrectedInterval(final AlertApi alertApi, final long taskStartMillis,
       final long taskEndMillis) throws IOException, ClassNotFoundException {
-    final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertApi,
-        DUMMY_INTERVAL);
+    final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertApi);
     // alertApi does not have an idea if it's new alert tested in the create alert flow
     final long alertId = alertApi.getId() != null ? alertApi.getId() : -1;
 
@@ -76,8 +73,7 @@ public class AlertDetectionIntervalCalculator {
   public Interval getCorrectedInterval(final AlertDTO alertDTO, final long taskStartMillis,
       final long taskEndMillis) throws IOException, ClassNotFoundException {
     // render properties - startTime/endTime not important - objective is to get metadata
-    final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertDTO,
-        DUMMY_INTERVAL);
+    final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertDTO);
 
     return getCorrectedInterval(alertDTO.getId(),
         taskStartMillis,

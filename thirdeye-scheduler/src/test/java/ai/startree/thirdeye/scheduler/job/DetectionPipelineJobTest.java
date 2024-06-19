@@ -48,7 +48,7 @@ public class DetectionPipelineJobTest {
   @BeforeMethod
   public void setUp() throws IOException, ClassNotFoundException {
     final AlertTemplateRenderer alertTemplateRenderer = mock(AlertTemplateRenderer.class);
-    when(alertTemplateRenderer.renderAlert(any(AlertDTO.class), any())).then(
+    when(alertTemplateRenderer.renderAlert(any(AlertDTO.class))).then(
         i -> ((AlertDTO) i.getArguments()[0]).getTemplate());
     detectionPipelineJob = new DetectionPipelineJob(null, null,alertTemplateRenderer);
   }

@@ -109,7 +109,7 @@ public class AppAnalyticsService {
   private AlertMetadataDTO getMetadata(final AlertDTO alertDTO) {
     try {
       // Interval does not have significance in this case, just a placeholder.
-      return renderer.renderAlert(alertDTO, new Interval(1L, 2L)).getMetadata();
+      return renderer.renderAlert(alertDTO).getMetadata();
     } catch (final IOException | ClassNotFoundException | BadRequestException e) {
       log.warn(String.format("Trouble while rendering alert, %s. id : %d", alertDTO.getName(),
           alertDTO.getId()), e);

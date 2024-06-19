@@ -48,7 +48,6 @@ import org.slf4j.LoggerFactory;
 
 public class DetectionPipelineJob implements Job {
 
-  private static final Interval UNUSED_DETECTION_INTERVAL = new Interval(0, 0, DEFAULT_CHRONOLOGY);
   private static final Logger LOG = LoggerFactory.getLogger(DetectionPipelineJob.class);
   private final AlertManager alertManager;
   private final TaskManager taskManager;
@@ -106,8 +105,7 @@ public class DetectionPipelineJob implements Job {
   @VisibleForTesting
   protected long computeTaskStart(final AlertDTO alert, final long endTime) {
     try {
-      final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alert,
-          UNUSED_DETECTION_INTERVAL);
+      final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alert);
       final Chronology chronology = getDateTimeZone(templateWithProperties.getMetadata());
       final DateTime defaultStartTime = new DateTime(alert.getLastTimestamp(), chronology);
       final DateTime endDateTime = new DateTime(endTime, chronology);

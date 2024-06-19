@@ -25,7 +25,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
-import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
@@ -48,8 +47,6 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.Chronology;
-import org.joda.time.DateTimeZone;
-import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,10 +57,8 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class RcaInfoFetcher {
 
-  private static final Interval UNUSED_DETECTION_INTERVAL = new Interval(0L, 0L, DateTimeZone.UTC);
   private static final Logger LOG = LoggerFactory.getLogger(RcaInfoFetcher.class);
   private static final EventContextDto EMPTY_CONTEXT_DTO = new EventContextDto();
-  private final AnomalyManager mergedAnomalyDAO;
   private final AlertManager alertDAO;
   private final DatasetConfigManager datasetDAO;
   private final MetricConfigManager metricDAO;
@@ -72,14 +67,13 @@ public class RcaInfoFetcher {
   private final DataSourceManager dataSourceManager;
 
   @Inject
-  public RcaInfoFetcher(final AnomalyManager mergedAnomalyDAO,
+  public RcaInfoFetcher(
       final AlertManager alertDAO,
       final DatasetConfigManager datasetDAO,
       final MetricConfigManager metricDAO,
       final AlertTemplateRenderer alertTemplateRenderer,
       final EnumerationItemManager enumerationItemManager,
       final DataSourceManager dataSourceManager) {
-    this.mergedAnomalyDAO = mergedAnomalyDAO;
     this.alertDAO = alertDAO;
     this.datasetDAO = datasetDAO;
     this.metricDAO = metricDAO;
@@ -115,7 +109,6 @@ public class RcaInfoFetcher {
         .orElse(null);
 
     final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertDTO,
-        UNUSED_DETECTION_INTERVAL,
         enumerationItemDTO);
 
     final AlertMetadataDTO alertMetadataDto = ensureExists(templateWithProperties.getMetadata(),

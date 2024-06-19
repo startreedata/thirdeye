@@ -103,11 +103,6 @@ public class AlertEvaluator {
         request.getAlert(),
         startTime,
         endTime);
-
-    // apply template properties
-    final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(request.getAlert(),
-        detectionInterval);
-
     final DetectionPipelineContext context = new DetectionPipelineContext()
         .setAlertId(request.getAlert().getId())
         .setNamespace(optional(request.getAlert().getAuth()).map(
@@ -118,6 +113,9 @@ public class AlertEvaluator {
     // inject custom evaluation context
     final EvaluationContextApi evaluationContext = request.getEvaluationContext();
     evaluationContextProcessor.process(context, evaluationContext);
+
+    // apply template properties
+    final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(request.getAlert());
 
     if (bool(request.isDryRun())) {
       return new AlertEvaluationApi()

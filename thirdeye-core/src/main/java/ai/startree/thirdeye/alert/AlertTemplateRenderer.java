@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Map;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.joda.time.Interval;
 
 @Singleton
 public class AlertTemplateRenderer {
@@ -44,8 +43,7 @@ public class AlertTemplateRenderer {
   private final AlertTemplateManager alertTemplateManager;
 
   @Inject
-  public AlertTemplateRenderer(
-      final AlertManager alertManager,
+  public AlertTemplateRenderer(final AlertManager alertManager,
       final AlertTemplateManager alertTemplateManager) {
     this.alertManager = alertManager;
     this.alertTemplateManager = alertTemplateManager;
@@ -55,16 +53,15 @@ public class AlertTemplateRenderer {
    * Render the alert template API for /evaluate
    *
    * @param alert the alert API
-   * @param detectionInterval interval of detection
    * @return template populated with properties
    */
-  public AlertTemplateDTO renderAlert(AlertApi alert, final Interval detectionInterval)
+  public AlertTemplateDTO renderAlert(AlertApi alert)
       throws IOException, ClassNotFoundException {
     ensureExists(alert, ERR_OBJECT_DOES_NOT_EXIST, "alert body is null");
 
     if (alert.getId() != null) {
       final AlertDTO alertDto = ensureExists(alertManager.findById(alert.getId()));
-      return renderAlert(alertDto, detectionInterval);
+      return renderAlert(alertDto);
     }
 
     final AlertTemplateApi templateApi = alert.getTemplate();
@@ -74,22 +71,20 @@ public class AlertTemplateRenderer {
     final AlertTemplateDTO alertTemplateDTO = ApiBeanMapper.toAlertTemplateDto(templateApi);
     final AlertTemplateDTO fullTemplate = alertTemplateManager.findMatch(alertTemplateDTO);
 
-    return renderTemplate(fullTemplate, alertProperties, detectionInterval, alert.getName());
+    return renderTemplate(fullTemplate, alertProperties, alert.getName());
   }
 
   /**
    * Render the alert template for Alert task execution
    *
    * @param alert the alert DTO (persisted in db)
-   * @param detectionInterval interval of detection
    * @return template populated with properties
    */
-  public AlertTemplateDTO renderAlert(AlertDTO alert, final Interval detectionInterval)
-      throws IOException, ClassNotFoundException {
+  public AlertTemplateDTO renderAlert(AlertDTO alert) throws IOException, ClassNotFoundException {
     final AlertTemplateDTO fullTemplate = alertTemplateManager.findMatch(alert.getTemplate());
     final Map<String, Object> alertProperties = alert.getTemplateProperties();
 
-    return renderTemplate(fullTemplate, alertProperties, detectionInterval, alert.getName());
+    return renderTemplate(fullTemplate, alertProperties, alert.getName());
   }
 
   /**
@@ -97,10 +92,10 @@ public class AlertTemplateRenderer {
    *
    * Render the template properties, then render the enumeration item properties.
    */
-  public AlertTemplateDTO renderAlert(final AlertDTO alert, final Interval detectionInterval,
+  public AlertTemplateDTO renderAlert(final AlertDTO alert,
       @Nullable final EnumerationItemDTO enumerationItemDTO)
       throws IOException, ClassNotFoundException {
-    final AlertTemplateDTO templateWithAlertProperties = renderAlert(alert, detectionInterval);
+    final AlertTemplateDTO templateWithAlertProperties = renderAlert(alert);
 
     if (enumerationItemDTO == null || enumerationItemDTO.getParams() == null
         || enumerationItemDTO.getParams().isEmpty()) {
@@ -115,28 +110,24 @@ public class AlertTemplateRenderer {
     templateWithAlertProperties.setName(null);
     final AlertDTO alertWithEnumProperties = new AlertDTO().setTemplate(templateWithAlertProperties)
         .setTemplateProperties(enumerationItemDTO.getParams());
-    final AlertTemplateDTO templateWithEnumProperties = renderAlert(alertWithEnumProperties,
-        detectionInterval);
+    final AlertTemplateDTO templateWithEnumProperties = renderAlert(alertWithEnumProperties);
     templateWithEnumProperties.setId(templateId);
     templateWithEnumProperties.setName(templateName);
     return templateWithEnumProperties;
   }
 
   private static AlertTemplateDTO renderTemplate(final @NonNull AlertTemplateDTO template,
-      final @Nullable Map<String, Object> properties,
-      final @NonNull Interval detectionInterval,
-      final String alertName) throws IOException, ClassNotFoundException {
+      final @Nullable Map<String, Object> properties, final String alertName)
+      throws IOException, ClassNotFoundException {
     final Map<String, Object> defaultProperties = defaultProperties(template.getProperties());
     final Map<String, Object> allProperties = new HashMap<>(defaultProperties);
     if (properties != null) {
       allProperties.putAll(properties);
     }
-
-    allProperties.put("startTime", detectionInterval.getStartMillis());
-    allProperties.put("endTime", detectionInterval.getEndMillis());
     // add source metadata to each node
     if (template.getNodes() != null) {
-      template.getNodes().stream()
+      template.getNodes()
+          .stream()
           // TODO spyne remove magic string. This was done to remove dependency of AnomalyDetector.TYPE on the renderer
           .filter(node -> node.getType().equals("AnomalyDetector"))
           .forEach(node -> node.getParams()

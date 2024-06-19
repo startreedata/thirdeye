@@ -13,7 +13,6 @@
  */
 package ai.startree.thirdeye.service;
 
-import static ai.startree.thirdeye.spi.Constants.METRICS_TIMER_PERCENTILES;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
@@ -28,6 +27,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.Timer;
+import java.util.HashSet;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +41,7 @@ public class ResourcesBootstrapService {
   private final EnumerationItemManager enumerationItemDao;
   private final AlertManager alertDao;
   private final Timer enumerationItemMigrationTimer;
+  private final Timer recommendedTemplatesLoadingTimer;
 
   @Inject
   public ResourcesBootstrapService(final AlertTemplateService alertTemplateService,
@@ -53,8 +55,9 @@ public class ResourcesBootstrapService {
 
     this.enumerationItemMigrationTimer = Timer.builder("thirdeye_enumeration_item_migration")
         .description("Time to migrate enumeration item at startup of the scheduler.")
-        .publishPercentiles(METRICS_TIMER_PERCENTILES)
-        .tag("exception", "false")
+        .register(Metrics.globalRegistry);
+    this.recommendedTemplatesLoadingTimer = Timer.builder("thirdeye_recommended_templates_loading")
+        .description("Time to load recommended templates in all namespaces.")
         .register(Metrics.globalRegistry);
   }
 
@@ -95,14 +98,26 @@ public class ResourcesBootstrapService {
     }
     sample.stop(enumerationItemMigrationTimer);
     if (!enumerationItemMigrationSuccess) {
-      LOG.error("Enumeration item migration to new namespacing system failed. Please store the log of this process and reach out to StarTree support.");
+      LOG.error(
+          "Enumeration item migration to new namespacing system failed. Please store the log of this process and reach out to StarTree support.");
     }
-    
-    
+
+    // loading templates may take some time - putting a timer to see if this should be optimized - see comment below
+    final Timer.Sample templateLoadSample = Timer.start(Metrics.globalRegistry);
     authorizationManager.ensureHasRootAccess(principal);
-    // FIXME CYRIL authz - load in multiple namespaces? - as of today we only load in the unset namespace
-    //  best would be to get a list of all namespaces and perform the update operation for all namespace
-    //  will require some error management just in case.
-    alertTemplateService.loadRecommendedTemplates(principal, true);
+    // install templates in all known namespaces 
+    // hack get distinct namespaces by looking at alerts - fixme cyril authz - get list of namespaces from the ThirdEye authorizer
+    final HashSet<String> distinctNamespaces = alertDao.findAll()
+        .stream()
+        .map(e -> e.namespace())
+        .collect(Collectors.toCollection(HashSet::new));
+    // continue to install in the unset namespace for the moment
+    distinctNamespaces.add(null);
+    // todo cyril - this may be slow because the loadRecommendedTemplates load templates from disk, performs some template generation, then write them - only the write part should be in the loop
+    //  check timer - it's not trivial to implement (input template api are mutated in loadRecommendedTemplates)
+    for (final String namespace: distinctNamespaces) {
+      alertTemplateService.loadRecommendedTemplates(principal, true, namespace); 
+    }
+    templateLoadSample.stop(recommendedTemplatesLoadingTimer);
   }
 }

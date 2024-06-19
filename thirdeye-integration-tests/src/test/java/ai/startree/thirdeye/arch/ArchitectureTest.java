@@ -68,7 +68,6 @@ import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer.ThirdEyeAuthorizerFactory;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.bao.AbstractManager;
-import ai.startree.thirdeye.spi.detection.health.DetectionHealth;
 import ai.startree.thirdeye.worker.task.TaskDriver;
 import ai.startree.thirdeye.worker.task.TaskDriverRunnable;
 import ai.startree.thirdeye.worker.task.runner.DetectionPipelineTaskRunner;
@@ -165,7 +164,6 @@ public class ArchitectureTest {
         DetectionPipelineTaskRunner.class,
         TaskDriverRunnable.class,
         TaskDriver.class,
-        DetectionHealth.class,
         DetectionPipelineJob.class,
         NotificationPipelineJob.class,
         MockEventsLoader.class,

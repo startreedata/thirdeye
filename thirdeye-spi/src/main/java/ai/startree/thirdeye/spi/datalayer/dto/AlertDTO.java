@@ -14,7 +14,6 @@
 package ai.startree.thirdeye.spi.datalayer.dto;
 
 import ai.startree.thirdeye.spi.detection.BaseComponent;
-import ai.startree.thirdeye.spi.detection.health.DetectionHealth;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.sql.Timestamp;
@@ -35,7 +34,6 @@ public class AlertDTO extends AbstractDTO {
   private long taskTriggerFallBackTimeInSec;
   private List<String> owners;
   private Map<String, Object> properties;
-  private DetectionHealth health;
 
   // The alert template
   private AlertTemplateDTO template;
@@ -121,15 +119,6 @@ public class AlertDTO extends AbstractDTO {
 
   public void setTaskTriggerFallBackTimeInSec(long taskTriggerFallBackTimeInSec) {
     this.taskTriggerFallBackTimeInSec = taskTriggerFallBackTimeInSec;
-  }
-
-  public DetectionHealth getHealth() {
-    return health;
-  }
-
-  public AlertDTO setHealth(final DetectionHealth health) {
-    this.health = health;
-    return this;
   }
 
   public AlertTemplateDTO getTemplate() {

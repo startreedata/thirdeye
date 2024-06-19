@@ -22,8 +22,12 @@ export const InvestigationDetailsForm: FunctionComponent<InvestigationDetailsFor
     ({ onCommentChange, onNameChange, investigation }) => {
         const { t } = useTranslation();
 
-        const [name, setName] = useState<string>(investigation.name);
-        const [comment, setComment] = useState<string>(investigation.text);
+        const [name, setName] = useState<string | undefined>(
+            investigation?.name
+        );
+        const [comment, setComment] = useState<string | undefined>(
+            investigation?.text
+        );
 
         return (
             <Grid container>

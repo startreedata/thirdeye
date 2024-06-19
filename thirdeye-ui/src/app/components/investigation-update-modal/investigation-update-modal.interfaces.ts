@@ -13,10 +13,12 @@
  * the License.
  */
 
-import { Investigation } from "../../../rest/dto/rca.interfaces";
+import { Dispatch, SetStateAction } from "react";
+import { Investigation } from "../../rest/dto/rca.interfaces";
 
-export interface InvestigationDetailsFormProps {
+export interface InvestigationUpdateModalProps {
+    onUpdateClick: () => void;
+    onClose: () => void;
     investigation: Investigation | null;
-    onCommentChange: (value: string) => void;
-    onNameChange: (value: string) => void;
+    setInvestigation: Dispatch<SetStateAction<Investigation | null>>;
 }

@@ -37,6 +37,7 @@ import { Crumb } from "../../../components/breadcrumbs/breadcrumbs.interfaces";
 import { AnomalyCard } from "../../../components/entity-cards/anomaly-card/anomaly-card.component";
 import { anomaliesInvestigateBasicHelpCards } from "../../../components/help-drawer-v1/help-drawer-card-contents.utils";
 import { HelpDrawerV1 } from "../../../components/help-drawer-v1/help-drawer-v1.component";
+import { InvestigationUpdateModal } from "../../../components/investigation-update-modal/investigation-update-modal.component";
 import { PageHeader } from "../../../components/page-header/page-header.component";
 import { LoadingErrorStateSwitch } from "../../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import {
@@ -95,6 +96,7 @@ export const InvestigationStateTracker: FunctionComponent = () => {
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
     const [searchParams, setSearchParams] = useSearchParams();
+    const [openUpdateModal, setOpenUpdateModal] = useState(false);
     const navigate = useNavigate();
     const { id: anomalyId } =
         useParams<RootCauseAnalysisForAnomalyPageParams>();
@@ -489,7 +491,7 @@ export const InvestigationStateTracker: FunctionComponent = () => {
                                     color="primary"
                                     disabled={isSaving}
                                     variant="contained"
-                                    onClick={handleSaveClick}
+                                    onClick={() => setOpenUpdateModal(true)}
                                 >
                                     <Box component="span">
                                         {saveButtonLabel}
@@ -516,6 +518,14 @@ export const InvestigationStateTracker: FunctionComponent = () => {
                         </Grid>
                     </PageContentsGridV1>
                 </LoadingErrorStateSwitch>
+                {openUpdateModal && (
+                    <InvestigationUpdateModal
+                        investigation={localInvestigation}
+                        setInvestigation={setLocalInvestigation}
+                        onClose={() => setOpenUpdateModal(false)}
+                        onUpdateClick={handleSaveClick}
+                    />
+                )}
             </ThemeProvider>
         </PageV1>
     );

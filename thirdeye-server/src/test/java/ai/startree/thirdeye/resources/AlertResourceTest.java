@@ -149,7 +149,7 @@ public class AlertResourceTest {
     final AlertTemplateDTO template1 = (AlertTemplateDTO) new AlertTemplateDTO()
         .setName("template1")
         .setId(2L);
-    when(alertTemplateManager.findMatch(argThat(template -> template.getId() == 2), any())).thenReturn(
+    when(alertTemplateManager.findMatchInNamespaceOrUnsetNamespace(argThat(template -> template.getId() == 2), any())).thenReturn(
         template1);
 
     final ThirdEyeAuthorizer thirdEyeAuthorizer = new SingleResourceAuthorizer("0");

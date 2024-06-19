@@ -69,7 +69,7 @@ public class AlertTemplateRenderer {
     final Map<String, Object> alertProperties = alert.getTemplateProperties();
 
     final AlertTemplateDTO alertTemplateDTO = ApiBeanMapper.toAlertTemplateDto(templateApi);
-    final AlertTemplateDTO fullTemplate = alertTemplateManager.findMatch(alertTemplateDTO, namespace);
+    final AlertTemplateDTO fullTemplate = alertTemplateManager.findMatchInNamespaceOrUnsetNamespace(alertTemplateDTO, namespace);
 
     return renderTemplate(fullTemplate, alertProperties, alert.getName());
   }
@@ -83,7 +83,7 @@ public class AlertTemplateRenderer {
    * WARNING: the DTO must exist in the DB - it is assumed the namespace of the alert is set correctly
    */
   public AlertTemplateDTO renderAlert(final AlertDTO alert) throws IOException, ClassNotFoundException {
-    final AlertTemplateDTO fullTemplate = alertTemplateManager.findMatch(alert.getTemplate(), alert.namespace());
+    final AlertTemplateDTO fullTemplate = alertTemplateManager.findMatchInNamespaceOrUnsetNamespace(alert.getTemplate(), alert.namespace());
     final Map<String, Object> alertProperties = alert.getTemplateProperties();
 
     return renderTemplate(fullTemplate, alertProperties, alert.getName());

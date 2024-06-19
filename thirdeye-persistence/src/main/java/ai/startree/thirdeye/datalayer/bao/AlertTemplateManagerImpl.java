@@ -39,16 +39,28 @@ public class AlertTemplateManagerImpl extends AbstractManagerImpl<AlertTemplateD
     super(AlertTemplateDTO.class, genericPojoDao);
   }
 
+  //todo cyril authz - deprecate the unset namespace fallback logic once envs are migrated
   @Override
-  public AlertTemplateDTO findMatch(final @NonNull AlertTemplateDTO alertTemplateDTO, final @Nullable String namespace) {
+  public AlertTemplateDTO findMatchInNamespaceOrUnsetNamespace(final @NonNull AlertTemplateDTO alertTemplateDTO, final @Nullable String namespace) {
     AlertTemplateDTO match = null;
     final Long id = alertTemplateDTO.getId();
     final String name = alertTemplateDTO.getName();
     if (id != null) {
       match = findById(id);
-      checkState(Objects.equals(match.namespace(), namespace), "Could not find template with id  %s in namespace %s", id, namespace); // fixme cyril - can leak existence of entities of other namespaces? 
+      if (namespace != null) { // todo cyril authz - this if condition will be always true once unset namespace backward compatibility logic is removed
+        checkState(Objects.equals(match.namespace(), namespace), "Could not find template with id  %s in namespace %s", id, namespace); // fixme cyril - can leak existence of entities of other namespaces? 
+      }
     } else if (name != null) {
       match = findUniqueByNameAndNamespace(name, namespace);
+      if (match == null && namespace != null) { // todo cyril authz - this if condition will be removed once unset namespace backward compatibility logic is removed
+        match = findUniqueByNameAndNamespace(name, null);
+        if (match != null) {
+          LOG.warn( // fixme cyril authz - make it error level once we start migrating
+              "Could not find template with name {} in namespace {}, but found a template with this name with an unset namespace. "
+                  + "Using this template. This behaviour will change. Please migrate your templates to a namespace.",
+              name, namespace);
+        }
+      }
     }
     if (match != null) {
       return match;

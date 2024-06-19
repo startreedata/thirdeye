@@ -122,9 +122,9 @@ public class AlertTemplateRenderer {
     return templateWithEnumProperties;
   }
 
-  private static AlertTemplateDTO renderTemplate(final AlertTemplateDTO template,
-      final Map<String, Object> properties,
-      final Interval detectionInterval,
+  private static AlertTemplateDTO renderTemplate(final @NonNull AlertTemplateDTO template,
+      final @Nullable Map<String, Object> properties,
+      final @NonNull Interval detectionInterval,
       final String alertName) throws IOException, ClassNotFoundException {
     final Map<String, Object> defaultProperties = defaultProperties(template.getProperties());
     final Map<String, Object> allProperties = new HashMap<>(defaultProperties);

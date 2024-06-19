@@ -35,7 +35,8 @@ import org.joda.time.Interval;
 
 /**
  * The detection health metric and status
- */
+ */ 
+@Deprecated // todo cyril remove this
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DetectionHealth {
 

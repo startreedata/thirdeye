@@ -70,7 +70,7 @@ public class AlertDataRetriever {
 
   private AlertTemplateDTO getRenderedTemplate(final AlertDTO alert) {
     try {
-      return alertTemplateRenderer.renderAlert(alert, new Interval(0, 0));
+      return alertTemplateRenderer.renderAlert(alert);
     } catch (final IOException | ClassNotFoundException e) {
       throw new RuntimeException("Error rendering alert: " + alert.getId(), e);
     }

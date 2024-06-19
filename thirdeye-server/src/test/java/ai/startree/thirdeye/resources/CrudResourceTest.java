@@ -19,7 +19,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.auth.AuthConfiguration;
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.NamespaceResolver;
@@ -34,6 +33,7 @@ import ai.startree.thirdeye.spi.auth.AuthenticationType;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
 import ai.startree.thirdeye.spi.datalayer.bao.AbstractManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
+import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import com.google.common.collect.ImmutableMap;
@@ -381,7 +381,7 @@ class DummyResource extends CrudResource<DummyApi, DummyDto> {
       final ImmutableMap<String, String> apiToBeanMap,
       final ThirdEyeAuthorizer thirdEyeAuthorizer) {
     super(new DummyService(
-        new AuthorizationManager(mock(AlertTemplateRenderer.class),
+        new AuthorizationManager(mock(AlertTemplateManager.class),
             mock(AlertManager.class),
             mock(AnomalyManager.class),
             thirdEyeAuthorizer, new NamespaceResolver(null, null, null, null),

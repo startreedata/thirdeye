@@ -74,7 +74,6 @@ public class AlertInsightsProvider {
   private static final DateTime TIME_ORIGIN_FOR_TZ_DIFF_3 = new DateTime(2023, 9, 12, 0, 0, 0,
       ISOChronology.getInstanceUTC());
 
-  private static final Interval NOT_USED_INTERVAL = new Interval(0L, 0L, DateTimeZone.UTC);
   // computer clock difference is usually order of seconds - but here taking 1 hour is safe and does not impact the logic
   private static final long COMPUTER_CLOCK_MARGIN_MILLIS = 3600_000;
   private static final long FETCH_TIMEOUT_MILLIS = 30_000;
@@ -103,8 +102,7 @@ public class AlertInsightsProvider {
     final AlertApi alertApi = request.getAlert();
     final String namespace = authorizationManager.currentNamespace(principal);
     try {
-      final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertApi,
-          NOT_USED_INTERVAL);
+      final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertApi);
       return buildInsights(templateWithProperties, namespace);
     } catch (final WebApplicationException e) {
       // todo cyril for debug - can be removed later
@@ -125,8 +123,7 @@ public class AlertInsightsProvider {
     // fixme cyril add authz on template, dataset, datasource, etc  - next PR - requires redesign
     authorizationManager.enrichNamespace(principal, alertDTO);
     try {
-      final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertDTO,
-          NOT_USED_INTERVAL);
+      final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertDTO);
       return buildInsights(templateWithProperties, alertDTO.namespace());
     } catch (final WebApplicationException e) {
       throw e;

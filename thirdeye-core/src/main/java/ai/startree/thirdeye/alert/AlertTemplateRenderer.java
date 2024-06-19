@@ -15,7 +15,6 @@ package ai.startree.thirdeye.alert;
 
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
-import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
@@ -36,7 +35,6 @@ import java.util.List;
 import java.util.Map;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.joda.time.Interval;
 
 @Singleton
 public class AlertTemplateRenderer {
@@ -45,8 +43,7 @@ public class AlertTemplateRenderer {
   private final AlertTemplateManager alertTemplateManager;
 
   @Inject
-  public AlertTemplateRenderer(
-      final AlertManager alertManager,
+  public AlertTemplateRenderer(final AlertManager alertManager,
       final AlertTemplateManager alertTemplateManager) {
     this.alertManager = alertManager;
     this.alertTemplateManager = alertTemplateManager;
@@ -56,43 +53,38 @@ public class AlertTemplateRenderer {
    * Render the alert template API for /evaluate
    *
    * @param alert the alert API
-   * @param detectionInterval interval of detection
    * @return template populated with properties
    */
-  public AlertTemplateDTO renderAlert(AlertApi alert, final Interval detectionInterval)
+  public AlertTemplateDTO renderAlert(AlertApi alert)
       throws IOException, ClassNotFoundException {
     ensureExists(alert, ERR_OBJECT_DOES_NOT_EXIST, "alert body is null");
 
     if (alert.getId() != null) {
       final AlertDTO alertDto = ensureExists(alertManager.findById(alert.getId()));
-      return renderAlert(alertDto, detectionInterval);
+      return renderAlert(alertDto);
     }
 
     final AlertTemplateApi templateApi = alert.getTemplate();
     ensureExists(templateApi, ERR_OBJECT_DOES_NOT_EXIST, "alert template body is null");
-    final Map<String, Object> templateProperties = alert.getTemplateProperties();
+    final Map<String, Object> alertProperties = alert.getTemplateProperties();
 
     final AlertTemplateDTO alertTemplateDTO = ApiBeanMapper.toAlertTemplateDto(templateApi);
-    return renderAlertInternal(alertTemplateDTO,
-        templateProperties,
-        detectionInterval,
-        alert.getName());
+    final AlertTemplateDTO fullTemplate = alertTemplateManager.findMatch(alertTemplateDTO);
+
+    return renderTemplate(fullTemplate, alertProperties, alert.getName());
   }
 
   /**
    * Render the alert template for Alert task execution
    *
    * @param alert the alert DTO (persisted in db)
-   * @param detectionInterval interval of detection
    * @return template populated with properties
    */
-  public AlertTemplateDTO renderAlert(AlertDTO alert, final Interval detectionInterval)
-      throws IOException, ClassNotFoundException {
-    return renderAlertInternal(
-        alert.getTemplate(),
-        alert.getTemplateProperties(),
-        detectionInterval,
-        alert.getName());
+  public AlertTemplateDTO renderAlert(AlertDTO alert) throws IOException, ClassNotFoundException {
+    final AlertTemplateDTO fullTemplate = alertTemplateManager.findMatch(alert.getTemplate());
+    final Map<String, Object> alertProperties = alert.getTemplateProperties();
+
+    return renderTemplate(fullTemplate, alertProperties, alert.getName());
   }
 
   /**
@@ -100,10 +92,10 @@ public class AlertTemplateRenderer {
    *
    * Render the template properties, then render the enumeration item properties.
    */
-  public AlertTemplateDTO renderAlert(final AlertDTO alert, final Interval detectionInterval,
+  public AlertTemplateDTO renderAlert(final AlertDTO alert,
       @Nullable final EnumerationItemDTO enumerationItemDTO)
       throws IOException, ClassNotFoundException {
-    final AlertTemplateDTO templateWithAlertProperties = renderAlert(alert, detectionInterval);
+    final AlertTemplateDTO templateWithAlertProperties = renderAlert(alert);
 
     if (enumerationItemDTO == null || enumerationItemDTO.getParams() == null
         || enumerationItemDTO.getParams().isEmpty()) {
@@ -118,82 +110,34 @@ public class AlertTemplateRenderer {
     templateWithAlertProperties.setName(null);
     final AlertDTO alertWithEnumProperties = new AlertDTO().setTemplate(templateWithAlertProperties)
         .setTemplateProperties(enumerationItemDTO.getParams());
-    final AlertTemplateDTO templateWithEnumProperties = renderAlert(alertWithEnumProperties,
-        detectionInterval);
+    final AlertTemplateDTO templateWithEnumProperties = renderAlert(alertWithEnumProperties);
     templateWithEnumProperties.setId(templateId);
     templateWithEnumProperties.setName(templateName);
     return templateWithEnumProperties;
   }
 
-  private AlertTemplateDTO renderAlertInternal(final AlertTemplateDTO alertTemplateInsideAlertDto,
-      final Map<String, Object> templateProperties,
-      final Interval detectionInterval,
-      final String alertName)
+  private static AlertTemplateDTO renderTemplate(final @NonNull AlertTemplateDTO template,
+      final @Nullable Map<String, Object> properties, final String alertName)
       throws IOException, ClassNotFoundException {
-    final AlertTemplateDTO template = getTemplate(alertTemplateInsideAlertDto);
-    validate(template);
-
-    return applyContext(template,
-        templateProperties,
-        detectionInterval,
-        alertName);
-  }
-
-  private static void validate(final AlertTemplateDTO template) {
-    final long count = template.getNodes()
-        .stream()
-        .filter(p -> "Enumerator".equals(p.getType())) // TODO spyne - use enumerator node type
-        .count();
-    ensure(count <= 1, "Max 1 enumerator node supported at this time. found: " + count);
-  }
-
-  public AlertTemplateDTO getTemplate(final AlertTemplateDTO alertTemplateDTO) {
-    final Long id = alertTemplateDTO.getId();
-    if (id != null) {
-      return alertTemplateManager.findById(id);
-    }
-
-    final String name = alertTemplateDTO.getName();
-    if (name != null) {
-      final List<AlertTemplateDTO> byName = alertTemplateManager.findByName(name);
-      ensure(byName.size() == 1, ERR_OBJECT_DOES_NOT_EXIST, "template not found: " + name);
-      return byName.get(0);
-    }
-
-    return alertTemplateDTO;
-  }
-
-  private AlertTemplateDTO applyContext(final AlertTemplateDTO template,
-      final Map<String, Object> templateProperties,
-      final Interval detectionInterval,
-      final String alertName) throws IOException, ClassNotFoundException {
-    final Map<String, Object> properties = new HashMap<>();
-    // legacy properties can be removed once all users have migrated their template to the new propertiesMetadata
-    final Map<String, Object> legacyDefaultProperties = optional(
-        template.getDefaultProperties()).orElse(new HashMap<>());
-    properties.putAll(legacyDefaultProperties);
     final Map<String, Object> defaultProperties = defaultProperties(template.getProperties());
-    properties.putAll(defaultProperties);
-
-    if (templateProperties != null) {
-      properties.putAll(templateProperties);
+    final Map<String, Object> allProperties = new HashMap<>(defaultProperties);
+    if (properties != null) {
+      allProperties.putAll(properties);
     }
-
-    properties.put("startTime", detectionInterval.getStartMillis());
-    properties.put("endTime", detectionInterval.getEndMillis());
     // add source metadata to each node
     if (template.getNodes() != null) {
-      template.getNodes().stream()
+      template.getNodes()
+          .stream()
           // TODO spyne remove magic string. This was done to remove dependency of AnomalyDetector.TYPE on the renderer
           .filter(node -> node.getType().equals("AnomalyDetector"))
           .forEach(node -> node.getParams()
               .putValue("anomaly.source", String.format("%s/%s", alertName, node.getName())));
     }
 
-    return StringTemplateUtils.applyContext(template, properties);
+    return StringTemplateUtils.applyContext(template, allProperties);
   }
 
-  private @NonNull Map<String, Object> defaultProperties(
+  private static @NonNull Map<String, Object> defaultProperties(
       final @Nullable List<TemplatePropertyMetadata> propertiesMetadata) {
     final HashMap<String, Object> res = new HashMap<>();
     if (propertiesMetadata == null) {

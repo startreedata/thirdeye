@@ -13,11 +13,14 @@
  */
 package ai.startree.thirdeye.service;
 
+import static ai.startree.thirdeye.util.ResourceUtils.ensure;
+
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.core.BootstrapResourcesRegistry;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import com.google.common.collect.ImmutableMap;
@@ -26,6 +29,7 @@ import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +46,17 @@ public class AlertTemplateService extends CrudService<AlertTemplateApi, AlertTem
       final BootstrapResourcesRegistry bootstrapResourcesRegistry) {
     super(authorizationManager, alertTemplateManager, ImmutableMap.of());
     this.bootstrapResourcesRegistry = bootstrapResourcesRegistry;
+  }
+
+  @Override
+  protected void validate(final ThirdEyePrincipal principal, final AlertTemplateApi api,
+      @Nullable final AlertTemplateDTO existing) {
+    super.validate(principal, api, existing);
+    final long count = api.getNodes()
+        .stream()
+        .filter(p -> "Enumerator".equals(p.getType())) // TODO spyne - use enumerator node type
+        .count();
+    ensure(count <= 1, "Max 1 enumerator node supported at this time. found: " + count);
   }
 
   @Override

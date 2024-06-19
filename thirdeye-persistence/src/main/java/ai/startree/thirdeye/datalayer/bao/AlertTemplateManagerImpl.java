@@ -13,18 +13,48 @@
  */
 package ai.startree.thirdeye.datalayer.bao;
 
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST;
+
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
+import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public class AlertTemplateManagerImpl extends AbstractManagerImpl<AlertTemplateDTO>
     implements AlertTemplateManager {
 
+  private static final Logger LOG = LoggerFactory.getLogger(AlertTemplateManagerImpl.class);
+
   @Inject
   public AlertTemplateManagerImpl(GenericPojoDao genericPojoDao) {
     super(AlertTemplateDTO.class, genericPojoDao);
+  }
+
+  @Override
+  public AlertTemplateDTO findMatch(final @NonNull AlertTemplateDTO alertTemplateDTO) {
+    AlertTemplateDTO match = null;
+    final Long id = alertTemplateDTO.getId();
+    final String name = alertTemplateDTO.getName();
+    if (id != null) {
+      match = findById(id);
+    } else if (name != null) {
+      // fixme cyril authz pass namespace 
+      match = findUniqueByNameAndNamespace(name, null);
+    }
+    if (match != null) {
+      return match;
+    } else if (alertTemplateDTO.getNodes() != null) {
+      return alertTemplateDTO;
+    } else {
+      // todo cyril authz add namespace info
+      throw new ThirdEyeException(ERR_OBJECT_DOES_NOT_EXIST,
+          "Template not found. Name: %s. Id: %s. ".formatted(name, id));
+    }
   }
 }

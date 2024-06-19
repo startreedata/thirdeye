@@ -182,8 +182,7 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
     LOG.info(String.format("Running detection pipeline for alert: %d, start: %s, end: %s",
         alert.getId(), detectionInterval.getStart(), detectionInterval.getEnd()));
 
-    final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alert,
-        detectionInterval);
+    final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alert);
 
     final DetectionPipelineContext context = new DetectionPipelineContext()
         .setAlertId(alert.getId())

@@ -13,13 +13,12 @@
  */
 package ai.startree.thirdeye.worker.task.runner;
 
-import static ai.startree.thirdeye.util.DetectionIntervalUtils.computeCorrectedInterval;
 import static ai.startree.thirdeye.spi.Constants.METRICS_TIMER_PERCENTILES;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static ai.startree.thirdeye.util.DetectionIntervalUtils.computeCorrectedInterval;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.util.DetectionIntervalUtils;
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.detectionpipeline.DetectionPipelineContext;
 import ai.startree.thirdeye.detectionpipeline.PlanExecutor;
@@ -56,7 +55,6 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
   private final Logger LOG = LoggerFactory.getLogger(DetectionPipelineTaskRunner.class);
 
   private final AlertManager alertManager;
-  private final DetectionIntervalUtils alertDetectionIntervalCalculator;
   private final AnomalyManager anomalyManager;
   private final PlanExecutor planExecutor;
   private final AlertTemplateRenderer alertTemplateRenderer;
@@ -75,12 +73,10 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
   @Inject
   public DetectionPipelineTaskRunner(final AlertManager alertManager,
       final MetricRegistry metricRegistry,
-      final DetectionIntervalUtils alertDetectionIntervalCalculator,
       final AnomalyManager anomalyManager,
       final PlanExecutor planExecutor,
       final AlertTemplateRenderer alertTemplateRenderer) {
     this.alertManager = alertManager;
-    this.alertDetectionIntervalCalculator = alertDetectionIntervalCalculator;
     this.anomalyManager = anomalyManager;
     this.planExecutor = planExecutor;
     this.alertTemplateRenderer = alertTemplateRenderer;

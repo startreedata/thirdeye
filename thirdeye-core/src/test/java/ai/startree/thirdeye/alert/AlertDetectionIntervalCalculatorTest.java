@@ -13,8 +13,8 @@
  */
 package ai.startree.thirdeye.alert;
 
-import static ai.startree.thirdeye.util.DetectionIntervalUtils.computeCorrectedInterval;
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
+import static ai.startree.thirdeye.util.DetectionIntervalUtils.computeCorrectedInterval;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 

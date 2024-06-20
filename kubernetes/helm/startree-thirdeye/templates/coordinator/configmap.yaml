@@ -199,7 +199,3 @@ data:
         {{- end }}
         holidayLoadRange: 2592000000
         runFrequency: 1  # in Days
-
-    cache:
-      useInMemoryCache: true
-      useCentralizedCache: false

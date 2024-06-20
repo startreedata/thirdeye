@@ -13,7 +13,6 @@
  */
 package ai.startree.thirdeye;
 
-import ai.startree.thirdeye.config.CacheConfig;
 import ai.startree.thirdeye.config.TimeConfiguration;
 import ai.startree.thirdeye.config.UiConfiguration;
 import ai.startree.thirdeye.datalayer.ThirdEyePersistenceModule;
@@ -29,19 +28,16 @@ import org.apache.tomcat.jdbc.pool.DataSource;
 public class ThirdEyeCoreModule extends AbstractModule {
 
   private final DataSource dataSource;
-  private final CacheConfig cacheConfig;
   private final RcaConfiguration rcaConfiguration;
   private final UiConfiguration uiConfiguration;
   private final TimeConfiguration timeConfiguration;
 
   public ThirdEyeCoreModule(final DataSource dataSource,
-      final CacheConfig cacheConfig,
       final RcaConfiguration rcaConfiguration,
       final UiConfiguration uiConfiguration,
       final TimeConfiguration timeConfiguration) {
     this.dataSource = dataSource;
 
-    this.cacheConfig = cacheConfig;
     this.rcaConfiguration = rcaConfiguration;
     this.uiConfiguration = uiConfiguration;
     this.timeConfiguration = timeConfiguration;
@@ -54,7 +50,6 @@ public class ThirdEyeCoreModule extends AbstractModule {
     bind(AggregationLoader.class).to(DefaultAggregationLoader.class).in(Scopes.SINGLETON);
     bind(MinMaxTimeLoader.class).to(DefaultMinMaxTimeLoader.class).in(Scopes.SINGLETON);
 
-    bind(CacheConfig.class).toInstance(cacheConfig);
     bind(RcaConfiguration.class).toInstance(rcaConfiguration);
     bind(UiConfiguration.class).toInstance(uiConfiguration);
     bind(TimeConfiguration.class).toInstance(timeConfiguration);

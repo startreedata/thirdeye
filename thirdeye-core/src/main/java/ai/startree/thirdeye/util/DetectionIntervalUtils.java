@@ -11,19 +11,15 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.alert;
+package ai.startree.thirdeye.util;
 
 import static ai.startree.thirdeye.spi.util.AlertMetadataUtils.getDateTimeZone;
 import static ai.startree.thirdeye.spi.util.AlertMetadataUtils.getDelay;
 import static ai.startree.thirdeye.spi.util.AlertMetadataUtils.getGranularity;
 
-import ai.startree.thirdeye.spi.api.AlertApi;
-import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.util.TimeUtils;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.Chronology;
@@ -41,29 +37,9 @@ import org.slf4j.LoggerFactory;
  * For detections/evaluations, this is the entrypoint that changes long startTime and endTimes into
  * an Interval detectionInterval with a timeZone.
  */
-// fixme cyril - make this static - let the consumer perform the alertTEmplateRender call 
-@Singleton
-public class AlertDetectionIntervalCalculator {
+public class DetectionIntervalUtils {
 
-  private static final Logger LOG = LoggerFactory.getLogger(AlertDetectionIntervalCalculator.class);
-  private final AlertTemplateRenderer alertTemplateRenderer;
-
-  @Inject
-  public AlertDetectionIntervalCalculator(final AlertTemplateRenderer alertTemplateRenderer) {
-    this.alertTemplateRenderer = alertTemplateRenderer;
-  }
-
-  public Interval getCorrectedInterval(final AlertApi alertApi, final long taskStartMillis,
-      final long taskEndMillis, final @Nullable String namespace) {
-    final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertApi, namespace);
-    // alertApi does not have an idea if it's new alert tested in the create alert flow
-    final long alertId = alertApi.getId() != null ? alertApi.getId() : -1;
-
-    return getCorrectedInterval(alertId,
-        taskStartMillis,
-        taskEndMillis,
-        templateWithProperties.getMetadata());
-  }
+  private static final Logger LOG = LoggerFactory.getLogger(DetectionIntervalUtils.class);
 
   /**
    * Applies delay and granularity flooring to the task start and end.
@@ -71,20 +47,10 @@ public class AlertDetectionIntervalCalculator {
    * Assumes that the caller of this method is setting the corrected endTime as the alert
    * lastTimestamp once the alert pipeline has run successfully.
    */
-  public Interval getCorrectedInterval(final AlertDTO alertDTO, final long taskStartMillis,
-      final long taskEndMillis) {
-    // render properties - startTime/endTime not important - objective is to get metadata
-    final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertDTO);
-
-    return getCorrectedInterval(alertDTO.getId(),
-        taskStartMillis,
-        taskEndMillis,
-        templateWithProperties.getMetadata());
-  }
-
   @NonNull
-  private static Interval getCorrectedInterval(final long alertId, final long taskStartMillis,
-      final long taskEndMillis, final AlertMetadataDTO metadata) {
+  public static Interval computeCorrectedInterval(final @Nullable Long alertId, final long taskStartMillis,
+      final long taskEndMillis, final AlertTemplateDTO renderedTemplate) {
+    final AlertMetadataDTO metadata = renderedTemplate.getMetadata();
     final Chronology chronology = getDateTimeZone(metadata);
     final DateTime taskStart = new DateTime(taskStartMillis, chronology);
     final DateTime taskEnd = new DateTime(taskEndMillis, chronology);

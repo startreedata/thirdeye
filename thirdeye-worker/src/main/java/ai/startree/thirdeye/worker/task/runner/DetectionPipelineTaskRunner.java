@@ -13,12 +13,13 @@
  */
 package ai.startree.thirdeye.worker.task.runner;
 
+import static ai.startree.thirdeye.util.DetectionIntervalUtils.computeCorrectedInterval;
 import static ai.startree.thirdeye.spi.Constants.METRICS_TIMER_PERCENTILES;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.alert.AlertDetectionIntervalCalculator;
+import ai.startree.thirdeye.util.DetectionIntervalUtils;
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.detectionpipeline.DetectionPipelineContext;
 import ai.startree.thirdeye.detectionpipeline.PlanExecutor;
@@ -42,6 +43,7 @@ import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.Timer;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
@@ -54,7 +56,7 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
   private final Logger LOG = LoggerFactory.getLogger(DetectionPipelineTaskRunner.class);
 
   private final AlertManager alertManager;
-  private final AlertDetectionIntervalCalculator alertDetectionIntervalCalculator;
+  private final DetectionIntervalUtils alertDetectionIntervalCalculator;
   private final AnomalyManager anomalyManager;
   private final PlanExecutor planExecutor;
   private final AlertTemplateRenderer alertTemplateRenderer;
@@ -73,7 +75,7 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
   @Inject
   public DetectionPipelineTaskRunner(final AlertManager alertManager,
       final MetricRegistry metricRegistry,
-      final AlertDetectionIntervalCalculator alertDetectionIntervalCalculator,
+      final DetectionIntervalUtils alertDetectionIntervalCalculator,
       final AnomalyManager anomalyManager,
       final PlanExecutor planExecutor,
       final AlertTemplateRenderer alertTemplateRenderer) {
@@ -134,11 +136,13 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
     final AlertDTO alert = requireNonNull(alertManager.findById(info.getConfigId()),
         String.format("Could not resolve config id %d", info.getConfigId()));
 
-    final Interval detectionInterval = alertDetectionIntervalCalculator.getCorrectedInterval(
-        alert,
-        info.getStart(), info.getEnd());
+    final AlertTemplateDTO renderedTemplate = alertTemplateRenderer.renderAlert(alert);
+    final Interval detectionInterval = computeCorrectedInterval(
+        alert.getId(),
+        info.getStart(), info.getEnd(), 
+        renderedTemplate);
 
-    final OperatorResult result = run(alert, detectionInterval);
+    final OperatorResult result = run(alert, detectionInterval, renderedTemplate);
 
     if (result.getLastTimestamp() < 0) {
       // notice lastTimestamp is not updated
@@ -177,20 +181,18 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
     return Collections.emptyList();
   }
 
-  public OperatorResult run(final AlertDTO alert, final Interval detectionInterval)
+  private OperatorResult run(final AlertDTO alert, final Interval detectionInterval,
+      final AlertTemplateDTO renderedTemplate)
       throws Exception {
     LOG.info(String.format("Running detection pipeline for alert: %d, start: %s, end: %s",
         alert.getId(), detectionInterval.getStart(), detectionInterval.getEnd()));
-
-    final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alert);
-
     final DetectionPipelineContext context = new DetectionPipelineContext()
         .setAlertId(alert.getId())
         .setNamespace(alert.namespace())
         .setUsage(DetectionPipelineUsage.DETECTION)
         .setDetectionInterval(detectionInterval);
-    final var detectionPipelineResultMap = planExecutor.runAndGetRootOutputs(
-        templateWithProperties.getNodes(),
+    final Map<String, OperatorResult> detectionPipelineResultMap = planExecutor.runAndGetRootOutputs(
+        renderedTemplate.getNodes(),
         context);
     checkState(detectionPipelineResultMap.size() == 1,
         "Only a single output from the pipeline is supported at the moment.");

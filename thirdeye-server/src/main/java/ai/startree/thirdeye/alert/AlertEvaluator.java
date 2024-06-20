@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.alert;
 
+import static ai.startree.thirdeye.util.DetectionIntervalUtils.computeCorrectedInterval;
 import static ai.startree.thirdeye.alert.AlertEvaluatorResponseMapper.toAlertEvaluationApi;
 import static ai.startree.thirdeye.core.ExceptionHandler.handleAlertEvaluationException;
 import static ai.startree.thirdeye.mapper.ApiBeanMapper.toAlertTemplateApi;
@@ -59,18 +60,15 @@ public class AlertEvaluator {
   private final AlertTemplateRenderer alertTemplateRenderer;
   private final ExecutorService executorService;
   private final PlanExecutor planExecutor;
-  private final AlertDetectionIntervalCalculator alertDetectionIntervalCalculator;
   private final EvaluationContextProcessor evaluationContextProcessor;
 
   @Inject
   public AlertEvaluator(
       final AlertTemplateRenderer alertTemplateRenderer,
       final PlanExecutor planExecutor,
-      final AlertDetectionIntervalCalculator alertDetectionIntervalCalculator,
       final EvaluationContextProcessor evaluationContextProcessor) {
     this.alertTemplateRenderer = alertTemplateRenderer;
     this.planExecutor = planExecutor;
-    this.alertDetectionIntervalCalculator = alertDetectionIntervalCalculator;
     this.evaluationContextProcessor = evaluationContextProcessor;
 
     executorService = Executors.newFixedThreadPool(PARALLELISM,
@@ -100,11 +98,10 @@ public class AlertEvaluator {
     final long endTime = request.getEnd().getTime();
     final String namespace = optional(request.getAlert().getAuth()).map(
         AuthorizationConfigurationApi::getNamespace).orElse(null);
-    final Interval detectionInterval = alertDetectionIntervalCalculator.getCorrectedInterval(
-        request.getAlert(),
-        startTime,
-        endTime,
+    final AlertTemplateDTO renderedTemplate = alertTemplateRenderer.renderAlert(request.getAlert(),
         namespace);
+    final Interval detectionInterval = computeCorrectedInterval(
+        request.getAlert().getId(), startTime, endTime, renderedTemplate);
     final DetectionPipelineContext context = new DetectionPipelineContext()
         .setAlertId(request.getAlert().getId())
         .setNamespace(namespace)
@@ -115,25 +112,21 @@ public class AlertEvaluator {
     final EvaluationContextApi evaluationContext = request.getEvaluationContext();
     evaluationContextProcessor.process(context, evaluationContext);
 
-    // apply template properties
-    final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(
-        request.getAlert(), namespace);
-
     if (bool(request.isDryRun())) {
       return new AlertEvaluationApi()
           .setDryRun(true)
           .setAlert(new AlertApi()
-              .setTemplate(toAlertTemplateApi(templateWithProperties)));
+              .setTemplate(toAlertTemplateApi(renderedTemplate)));
     }
 
     final String rootNodeName = optional(evaluationContext)
         .map(EvaluationContextApi::getListEnumerationItemsOnly)
         .filter(b -> b)
-        .map(b -> findEnumeratorNodeName(templateWithProperties.getNodes()))
+        .map(b -> findEnumeratorNodeName(renderedTemplate.getNodes()))
         .orElse(PlanExecutor.ROOT_NODE_NAME);
 
     final Map<String, OperatorResult> result = executorService
-        .submit(() -> planExecutor.runAndGetOutputs(templateWithProperties.getNodes(),
+        .submit(() -> planExecutor.runAndGetOutputs(renderedTemplate.getNodes(),
             context,
             rootNodeName))
         .get(TIMEOUT, TimeUnit.MILLISECONDS);
@@ -142,7 +135,7 @@ public class AlertEvaluator {
         .process(result, request);
 
     return toAlertEvaluationApi(processed)
-        .setAlert(new AlertApi().setTemplate(toAlertTemplateApi(templateWithProperties)));
+        .setAlert(new AlertApi().setTemplate(toAlertTemplateApi(renderedTemplate)));
   }
 
   private String findEnumeratorNodeName(final List<PlanNodeBean> nodes) {

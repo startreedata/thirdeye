@@ -15,13 +15,14 @@ package ai.startree.thirdeye.notification;
 
 import static org.mockito.Mockito.mock;
 
-import ai.startree.thirdeye.alert.AlertDataRetriever;
+import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import org.joda.time.Interval;
 import org.testng.annotations.Test;
 
+// fixme cyril wtf this does nothing - nothing is tested and the mock of AnomalyManager returns an empty list anyway
 public class NotificationTaskFilterTest {
 
   @Test
@@ -29,7 +30,7 @@ public class NotificationTaskFilterTest {
     final NotificationTaskFilter instance = new NotificationTaskFilter(
         mock(AnomalyManager.class),
         mock(AlertManager.class),
-        mock(AlertDataRetriever.class)
+        mock(AlertTemplateRenderer.class)
     );
     instance.filterAnomalies(new AnomalyFilter()
         .setAlertId(123L)

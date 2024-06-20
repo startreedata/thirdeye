@@ -22,7 +22,8 @@ import static ai.startree.thirdeye.ThirdEyeTestClient.ALERT_LIST_TYPE;
 import static ai.startree.thirdeye.ThirdEyeTestClient.SUBSCRIPTION_GROUP_LIST_TYPE;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import ai.startree.thirdeye.alert.AlertDataRetriever;
+import ai.startree.thirdeye.notification.AlertUtils;
+import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.aspect.TimeProvider;
 import ai.startree.thirdeye.notification.NotificationServiceRegistry;
 import ai.startree.thirdeye.spi.api.AlertApi;
@@ -33,6 +34,7 @@ import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import com.google.inject.Injector;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -83,7 +85,7 @@ public class AnomalyResolutionTest {
   private Long subscriptionGroupId;
   private DataSourceApi pinotDataSourceApi;
   private TestNotificationServiceFactory nsf;
-  private AlertDataRetriever alertDataRetriever;
+  private AlertTemplateRenderer alertTemplateRenderer;
   private AlertManager alertManager;
 
   private static long epoch(final String dateTime) {
@@ -115,7 +117,7 @@ public class AnomalyResolutionTest {
     Injector injector = support.getInjector();
     pinotDataSourceApi = support.getPinotDataSourceApi();
 
-    alertDataRetriever = injector.getInstance(AlertDataRetriever.class);
+    alertTemplateRenderer = injector.getInstance(AlertTemplateRenderer.class);
     alertManager = injector.getInstance(AlertManager.class);
 
     nsf = new TestNotificationServiceFactory();
@@ -161,7 +163,8 @@ public class AnomalyResolutionTest {
     alertId = alerts.get(0).getId();
 
     final AlertDTO alert = alertManager.findById(alertId);
-    final Period mergeMaxGap = alertDataRetriever.getMergeMaxGap(alert);
+    final AlertTemplateDTO renderedTemplate = alertTemplateRenderer.renderAlert(alert);
+    final Period mergeMaxGap = AlertUtils.getMergeMaxGap(renderedTemplate);
     assertThat(mergeMaxGap).isEqualTo(Period.days(3));
 
     // time advancing should not impact lastTimestamp

@@ -15,12 +15,13 @@ package ai.startree.thirdeye.notification;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
-import ai.startree.thirdeye.alert.AlertDataRetriever;
+import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertAssociationDto;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.NotificationSpecDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
@@ -51,18 +52,18 @@ public class NotificationTaskPostProcessor {
   private final SubscriptionGroupManager subscriptionGroupManager;
   private final AlertManager alertManager;
   private final AnomalyManager anomalyManager;
-  private final AlertDataRetriever alertDataRetriever;
+  private final AlertTemplateRenderer alertTemplateRenderer;
 
   @Inject
   public NotificationTaskPostProcessor(
       final SubscriptionGroupManager subscriptionGroupManager,
       final AlertManager alertManager,
       final AnomalyManager anomalyManager,
-      final AlertDataRetriever alertDataRetriever) {
+      final AlertTemplateRenderer alertTemplateRenderer) {
     this.subscriptionGroupManager = subscriptionGroupManager;
     this.alertManager = alertManager;
     this.anomalyManager = anomalyManager;
-    this.alertDataRetriever = alertDataRetriever;
+    this.alertTemplateRenderer = alertTemplateRenderer;
   }
 
   private static Map<Long, Long> buildVectorClock(final Collection<AnomalyDTO> anomalies) {
@@ -131,7 +132,8 @@ public class NotificationTaskPostProcessor {
     /* Update completion watermarks */
     for (final AlertAssociationDto aa : optional(sg.getAlertAssociations()).orElse(List.of())) {
       final AlertDTO alert = alertManager.findById(aa.getAlert().getId());
-      final Period mergeMaxGap = alertDataRetriever.getMergeMaxGap(alert);
+      final AlertTemplateDTO renderedTemplate = alertTemplateRenderer.renderAlert(alert);
+      final Period mergeMaxGap = AlertUtils.getMergeMaxGap(renderedTemplate);
       final long mergeMaxGapMillis = mergeMaxGap.toStandardDuration().getMillis();
       if (mergeMaxGapMillis <= 0) {
         LOG.warn("Alert {} has invalid mergeMaxGap: {}", alert.getId(), mergeMaxGapMillis);

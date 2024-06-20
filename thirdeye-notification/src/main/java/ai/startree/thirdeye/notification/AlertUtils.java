@@ -11,38 +11,21 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.alert;
+package ai.startree.thirdeye.notification;
 
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
-import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.joda.time.Period;
 
-@Singleton
-public class AlertDataRetriever {
+public class AlertUtils {
 
   public static final String NODE_TYPE_POST_PROCESSOR = "PostProcessor";
   public static final String NODE_SUB_TYPE_ANOMALY_MERGER = "ANOMALY_MERGER";
-  private final AlertTemplateRenderer alertTemplateRenderer;
-
-  @Inject
-  public AlertDataRetriever(final AlertTemplateRenderer alertTemplateRenderer) {
-    this.alertTemplateRenderer = alertTemplateRenderer;
-  }
-
-  // fixme cyril - make this static let the consumer use alertTemplateRenderer
-  public Period getMergeMaxGap(final AlertDTO alert) {
-    final AlertTemplateDTO t = alertTemplateRenderer.renderAlert(alert);
-
-    return getMergeMaxGap(t);
-  }
 
   /**
    * Get the merge max gap from the alert
@@ -54,7 +37,7 @@ public class AlertDataRetriever {
    * @return the merge max gap
    */
   @NonNull
-  private static Period getMergeMaxGap(final AlertTemplateDTO renderedTemplate) {
+  public static Period getMergeMaxGap(final AlertTemplateDTO renderedTemplate) {
     for (final PlanNodeBean n : renderedTemplate.getNodes()) {
       final TemplatableMap<String, Object> params = n.getParams();
       if (NODE_TYPE_POST_PROCESSOR.equals(n.getType())

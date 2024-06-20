@@ -237,7 +237,3 @@ scheduler:
     holidayLoadRange: 2592000000
     runFrequency: 7 # in Days
 
-cache:
-  useInMemoryCache: true
-  useCentralizedCache: false
-

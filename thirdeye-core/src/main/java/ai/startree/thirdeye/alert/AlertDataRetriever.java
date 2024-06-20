@@ -22,10 +22,9 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.io.IOException;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.joda.time.Period;
 
-// fixme cyril - make this static let the consumer use alertTemplateRenderer
 @Singleton
 public class AlertDataRetriever {
 
@@ -38,19 +37,25 @@ public class AlertDataRetriever {
     this.alertTemplateRenderer = alertTemplateRenderer;
   }
 
+  // fixme cyril - make this static let the consumer use alertTemplateRenderer
+  public Period getMergeMaxGap(final AlertDTO alert) {
+    final AlertTemplateDTO t = alertTemplateRenderer.renderAlert(alert);
+
+    return getMergeMaxGap(t);
+  }
+
   /**
    * Get the merge max gap from the alert
    * --------------------------------------------
    * The alert needs to be rendered with the template. The merge max gap is a property of the
    * anomaly merger post processor. By default, it is 1 second.
    *
-   * @param alert the alert
+   * @param renderedTemplate the alert template rendered 
    * @return the merge max gap
    */
-  public Period getMergeMaxGap(final AlertDTO alert) {
-    final AlertTemplateDTO t = getRenderedTemplate(alert);
-
-    for (final PlanNodeBean n : t.getNodes()) {
+  @NonNull
+  private static Period getMergeMaxGap(final AlertTemplateDTO renderedTemplate) {
+    for (final PlanNodeBean n : renderedTemplate.getNodes()) {
       final TemplatableMap<String, Object> params = n.getParams();
       if (NODE_TYPE_POST_PROCESSOR.equals(n.getType())
           && params.containsKey("type")
@@ -66,13 +71,5 @@ public class AlertDataRetriever {
       }
     }
     return Period.seconds(1);
-  }
-
-  private AlertTemplateDTO getRenderedTemplate(final AlertDTO alert) {
-    try {
-      return alertTemplateRenderer.renderAlert(alert);
-    } catch (final IOException | ClassNotFoundException e) {
-      throw new RuntimeException("Error rendering alert: " + alert.getId(), e);
-    }
   }
 }

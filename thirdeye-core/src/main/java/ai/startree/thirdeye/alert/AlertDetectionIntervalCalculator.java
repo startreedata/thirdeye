@@ -24,7 +24,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.util.TimeUtils;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.io.IOException;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.Chronology;
@@ -55,7 +54,7 @@ public class AlertDetectionIntervalCalculator {
   }
 
   public Interval getCorrectedInterval(final AlertApi alertApi, final long taskStartMillis,
-      final long taskEndMillis, final @Nullable String namespace) throws IOException, ClassNotFoundException {
+      final long taskEndMillis, final @Nullable String namespace) {
     final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertApi, namespace);
     // alertApi does not have an idea if it's new alert tested in the create alert flow
     final long alertId = alertApi.getId() != null ? alertApi.getId() : -1;
@@ -73,7 +72,7 @@ public class AlertDetectionIntervalCalculator {
    * lastTimestamp once the alert pipeline has run successfully.
    */
   public Interval getCorrectedInterval(final AlertDTO alertDTO, final long taskStartMillis,
-      final long taskEndMillis) throws IOException, ClassNotFoundException {
+      final long taskEndMillis) {
     // render properties - startTime/endTime not important - objective is to get metadata
     final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertDTO);
 

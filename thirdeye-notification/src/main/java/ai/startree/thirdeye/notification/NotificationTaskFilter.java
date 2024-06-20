@@ -42,6 +42,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.joda.time.Interval;
+import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,10 +100,6 @@ public class NotificationTaskFilter {
     return DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
         .withZone(ZoneId.systemDefault())
         .format(Instant.ofEpochMilli(ts));
-  }
-
-  private long getMaxMergeGap(final AlertDTO alert) {
-    return alertDataRetriever.getMergeMaxGap(alert).toStandardDuration().getMillis();
   }
 
   /**
@@ -190,7 +187,8 @@ public class NotificationTaskFilter {
 
     final long alertId = aa.getAlert().getId();
     final AlertDTO alert = alertManager.findById(alertId);
-    final long endTimeIsLt = alert.getLastTimestamp() - getMaxMergeGap(alert);
+    final Period mergeMaxGap = alertDataRetriever.getMergeMaxGap(alert);
+    final long endTimeIsLt = alert.getLastTimestamp() - mergeMaxGap.toStandardDuration().getMillis();
 
     return new AnomalyFilter()
         .setIsChild(false)

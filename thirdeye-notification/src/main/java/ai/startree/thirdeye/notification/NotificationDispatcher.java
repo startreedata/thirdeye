@@ -155,7 +155,7 @@ public class NotificationDispatcher {
     final Map<String, Object> values = new HashMap<>(System.getenv());
     try {
       return StringTemplateUtils.applyContext(spec, values);
-    } catch (IOException | ClassNotFoundException e) {
+    } catch (IOException e) {
       throw new RuntimeException("Error while replacing env variables in notification spec. spec: " + spec);
     }
   }

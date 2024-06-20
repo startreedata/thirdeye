@@ -46,7 +46,7 @@ public class AlertDetectionIntervalCalculatorTest {
   private AlertDetectionIntervalCalculator intervalCalculator;
 
   @BeforeMethod
-  public void setUp() throws IOException, ClassNotFoundException {
+  public void setUp() {
     final AlertTemplateRenderer alertTemplateRenderer = mock(AlertTemplateRenderer.class);
     when(alertTemplateRenderer.renderAlert(any(AlertDTO.class))).then(
         i -> ((AlertDTO) i.getArguments()[0]).getTemplate());

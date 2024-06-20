@@ -55,8 +55,7 @@ public class AlertTemplateRenderer {
    * @param alert the alert API
    * @return template populated with properties
    */
-  public AlertTemplateDTO renderAlert(final AlertApi alert, final @Nullable String namespace)
-      throws IOException, ClassNotFoundException {
+  public AlertTemplateDTO renderAlert(final AlertApi alert, final @Nullable String namespace) {
     ensureExists(alert, ERR_OBJECT_DOES_NOT_EXIST, "alert body is null");
 
     if (alert.getId() != null) {
@@ -69,9 +68,16 @@ public class AlertTemplateRenderer {
     final Map<String, Object> alertProperties = alert.getTemplateProperties();
 
     final AlertTemplateDTO alertTemplateDTO = ApiBeanMapper.toAlertTemplateDto(templateApi);
-    final AlertTemplateDTO fullTemplate = alertTemplateManager.findMatchInNamespaceOrUnsetNamespace(alertTemplateDTO, namespace);
+    final AlertTemplateDTO fullTemplate = alertTemplateManager.findMatchInNamespaceOrUnsetNamespace(
+        alertTemplateDTO, namespace);
 
-    return renderTemplate(fullTemplate, alertProperties, alert.getName());
+    try {
+      return renderTemplate(fullTemplate, alertProperties, alert.getName());
+    } catch (IOException e) {
+      // todo cyril - create a dedicated exception type for this - see below
+      throw new RuntimeException(String.format("Error rendering alert. Name: %s. Template name: %s. ",
+          alert.getName(), fullTemplate.getName()), e);
+    }
   }
 
   /**
@@ -79,14 +85,22 @@ public class AlertTemplateRenderer {
    *
    * @param alert the alert DTO (persisted in db)
    * @return template populated with properties
-   * 
-   * WARNING: the DTO must exist in the DB - it is assumed the namespace of the alert is set correctly
+   *
+   *     WARNING: the DTO must exist in the DB - it is assumed the namespace of the alert is set
+   *     correctly
    */
-  public AlertTemplateDTO renderAlert(final AlertDTO alert) throws IOException, ClassNotFoundException {
-    final AlertTemplateDTO fullTemplate = alertTemplateManager.findMatchInNamespaceOrUnsetNamespace(alert.getTemplate(), alert.namespace());
+  public AlertTemplateDTO renderAlert(final AlertDTO alert) {
+    final AlertTemplateDTO fullTemplate = alertTemplateManager.findMatchInNamespaceOrUnsetNamespace(
+        alert.getTemplate(), alert.namespace());
     final Map<String, Object> alertProperties = alert.getTemplateProperties();
 
-    return renderTemplate(fullTemplate, alertProperties, alert.getName());
+    try {
+      return renderTemplate(fullTemplate, alertProperties, alert.getName());
+    } catch (IOException e) {
+      // todo cyril - create a dedicated exception type for this - see ThirdEyeStatus
+      throw new RuntimeException(String.format("Error rendering alert. Id: %s. Name: %s. Template name: %s. ",
+          alert.getId(), alert.getName(), fullTemplate.getName()), e);
+    }
   }
 
   /**
@@ -96,7 +110,7 @@ public class AlertTemplateRenderer {
    */
   public AlertTemplateDTO renderAlert(final AlertDTO alert,
       @Nullable final EnumerationItemDTO enumerationItemDTO)
-      throws IOException, ClassNotFoundException {
+      throws IOException {
     final AlertTemplateDTO templateWithAlertProperties = renderAlert(alert);
 
     if (enumerationItemDTO == null || enumerationItemDTO.getParams() == null
@@ -120,7 +134,7 @@ public class AlertTemplateRenderer {
 
   private static AlertTemplateDTO renderTemplate(final @NonNull AlertTemplateDTO template,
       final @Nullable Map<String, Object> properties, final String alertName)
-      throws IOException, ClassNotFoundException {
+      throws IOException {
     final Map<String, Object> defaultProperties = defaultProperties(template.getProperties());
     final Map<String, Object> allProperties = new HashMap<>(defaultProperties);
     if (properties != null) {

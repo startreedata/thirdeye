@@ -31,12 +31,9 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.Metrics;
-import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
-import javax.ws.rs.BadRequestException;
-import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,7 +87,7 @@ public class AppAnalyticsService {
   private int getUniqueMonitoredMetricsInNamespace(final @Nullable String namespace) {
     return Math.toIntExact(alertManager.findAllActiveInNamespace(namespace)
         .stream()
-        .map(this::getMetadata)
+        .map(alertDTO -> renderer.renderAlert(alertDTO).getMetadata())
         .filter(Objects::nonNull)
         .map(MonitoredMetricKey::fromMetadata)
         .distinct().count());
@@ -100,21 +97,10 @@ public class AppAnalyticsService {
   private int getUniqueMonitoredMetrics() {
     return Math.toIntExact(alertManager.findAllActive()
         .stream()
-        .map(this::getMetadata)
+        .map(alertDTO -> renderer.renderAlert(alertDTO).getMetadata())
         .filter(Objects::nonNull)
         .map(MonitoredMetricKey::fromMetadata)
         .distinct().count());
-  }
-
-  private AlertMetadataDTO getMetadata(final AlertDTO alertDTO) {
-    try {
-      // Interval does not have significance in this case, just a placeholder.
-      return renderer.renderAlert(alertDTO).getMetadata();
-    } catch (final IOException | ClassNotFoundException | BadRequestException e) {
-      log.warn(String.format("Trouble while rendering alert, %s. id : %d", alertDTO.getName(),
-          alertDTO.getId()), e);
-      return null;
-    }
   }
 
   private record MonitoredMetricKey(String datasource, String dataset, String metric) {

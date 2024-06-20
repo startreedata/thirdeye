@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -130,22 +131,19 @@ public class NotificationTaskPostProcessor {
     /* Update completion watermarks */
     for (final AlertAssociationDto aa : optional(sg.getAlertAssociations()).orElse(List.of())) {
       final AlertDTO alert = alertManager.findById(aa.getAlert().getId());
-      final long mergeMaxGap = getMergeMaxGap(alert);
-      if (mergeMaxGap <= 0) {
-        LOG.warn("Alert {} has invalid mergeMaxGap: {}", alert.getId(), mergeMaxGap);
+      final Period mergeMaxGap = alertDataRetriever.getMergeMaxGap(alert);
+      final long mergeMaxGapMillis = mergeMaxGap.toStandardDuration().getMillis();
+      if (mergeMaxGapMillis <= 0) {
+        LOG.warn("Alert {} has invalid mergeMaxGap: {}", alert.getId(), mergeMaxGapMillis);
         continue;
       }
       final Date w = aa.getAnomalyCompletionWatermark();
       final long w_next = w != null
-          ? Math.max(w.getTime(), alert.getLastTimestamp() - mergeMaxGap)
+          ? Math.max(w.getTime(), alert.getLastTimestamp() - mergeMaxGapMillis)
           : initialWatermark(aa, alert, sg);
       aa.setAnomalyCompletionWatermark(new Timestamp(w_next));
     }
     subscriptionGroupManager.save(sg);
-  }
-
-  private long getMergeMaxGap(final AlertDTO alert) {
-    return alertDataRetriever.getMergeMaxGap(alert).toStandardDuration().getMillis();
   }
 
   @VisibleForTesting

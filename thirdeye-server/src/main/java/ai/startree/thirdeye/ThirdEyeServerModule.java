@@ -56,7 +56,6 @@ public class ThirdEyeServerModule extends AbstractModule {
     install(new ThirdEyeAuthModule(configuration.getAuthConfiguration()));
 
     install(new ThirdEyeCoreModule(dataSource,
-        configuration.getCacheConfig(),
         configuration.getRcaConfiguration(),
         configuration.getUiConfiguration(),
         configuration.getTimeConfiguration()));

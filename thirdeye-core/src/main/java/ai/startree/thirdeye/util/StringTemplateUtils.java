@@ -25,7 +25,7 @@ public class StringTemplateUtils {
   @SuppressWarnings("unchecked")
   public static <T> T applyContext(final T template,
       final Map<String, Object> valuesMap)
-      throws IOException, ClassNotFoundException {
+      throws IOException {
     final Module module = new SimpleModule()
         .addSerializer(Templatable.class, new TemplateEngineTemplatableSerializer(valuesMap))
         .addSerializer(String.class, new TemplateEngineStringSerializer(valuesMap));

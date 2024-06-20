@@ -157,9 +157,8 @@ public class ArchitectureTest {
 
   @Test
   public void testNoUnknownUserOfNonSecuredDbLayerClasses() {
-    // FIXME CYRIL  apart from services - these are the class allowed to use non secured db layers
-    // review, and enforce namespace isolation where necessary
-    //  or all methods should require an identity
+    // TODO CYRIL authz  apart from services - these are the class allowed to use non secured db layers
+    //  review, and enforce namespace isolation where necessary
     final Class<?>[] NON_SECURED_DB_LAYER_USERS_WHITELIST = {NotificationTaskRunner.class,
         DetectionPipelineTaskRunner.class,
         TaskDriverRunnable.class,

@@ -41,6 +41,7 @@ public class DtoIndexMapper {
     }
     abstractIndexEntity.setBaseId(pojo.getId());
     abstractIndexEntity.setUpdateTime(pojo.getUpdateTime());
+    // todo cyril add namespace here and add namespace to all index tables + maybe add to generic main table?
 
     return abstractIndexEntity;
   }

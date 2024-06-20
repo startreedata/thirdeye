@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.datalayer.bao;
 
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST;
+import static com.google.common.base.Preconditions.checkState;
 
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.spi.ThirdEyeException;
@@ -21,7 +22,9 @@ import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.Objects;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,25 +39,36 @@ public class AlertTemplateManagerImpl extends AbstractManagerImpl<AlertTemplateD
     super(AlertTemplateDTO.class, genericPojoDao);
   }
 
+  //todo cyril authz - deprecate the unset namespace fallback logic once envs are migrated
   @Override
-  public AlertTemplateDTO findMatch(final @NonNull AlertTemplateDTO alertTemplateDTO) {
+  public AlertTemplateDTO findMatchInNamespaceOrUnsetNamespace(final @NonNull AlertTemplateDTO alertTemplateDTO, final @Nullable String namespace) {
     AlertTemplateDTO match = null;
     final Long id = alertTemplateDTO.getId();
     final String name = alertTemplateDTO.getName();
     if (id != null) {
       match = findById(id);
+      if (namespace != null) { // todo cyril authz - this if condition will be always true once unset namespace backward compatibility logic is removed
+        checkState(Objects.equals(match.namespace(), namespace), "Could not find template with id  %s in namespace %s", id, namespace); // fixme cyril - can leak existence of entities of other namespaces? 
+      }
     } else if (name != null) {
-      // fixme cyril authz pass namespace 
-      match = findUniqueByNameAndNamespace(name, null);
+      match = findUniqueByNameAndNamespace(name, namespace);
+      if (match == null && namespace != null) { // todo cyril authz - this if condition will be removed once unset namespace backward compatibility logic is removed
+        match = findUniqueByNameAndNamespace(name, null);
+        if (match != null) {
+          LOG.warn( // fixme cyril authz - make it error level once we start migrating
+              "Could not find template with name {} in namespace {}, but found a template with this name with an unset namespace. "
+                  + "Using this template. This behaviour will change. Please migrate your templates to a namespace.",
+              name, namespace);
+        }
+      }
     }
     if (match != null) {
       return match;
     } else if (alertTemplateDTO.getNodes() != null) {
       return alertTemplateDTO;
     } else {
-      // todo cyril authz add namespace info
       throw new ThirdEyeException(ERR_OBJECT_DOES_NOT_EXIST,
-          "Template not found. Name: %s. Id: %s. ".formatted(name, id));
+          "Template not found. Name: %s. Namespace: %s. Id: %s. ".formatted(name, namespace, id));
     }
   }
 }

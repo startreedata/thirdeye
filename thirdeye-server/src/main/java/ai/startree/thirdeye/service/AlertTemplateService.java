@@ -20,6 +20,7 @@ import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.core.BootstrapResourcesRegistry;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
+import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
@@ -29,6 +30,7 @@ import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,11 +75,22 @@ public class AlertTemplateService extends CrudService<AlertTemplateApi, AlertTem
 
   public List<AlertTemplateApi> loadRecommendedTemplates(final ThirdEyeServerPrincipal principal,
       final boolean updateExisting) {
+    final String namespace = authorizationManager.currentNamespace(principal);
+    return loadRecommendedTemplates(principal, updateExisting, namespace);
+  }
+
+  // protected to be available to other services that need to inject the namespace manually
+  @NonNull
+  protected List<AlertTemplateApi> loadRecommendedTemplates(final ThirdEyeServerPrincipal principal,
+      final boolean updateExisting, final String explicitNamespace) {
     LOG.info("Loading recommended templates: START.");
     final List<AlertTemplateApi> alertTemplates = bootstrapResourcesRegistry.getAlertTemplates();
     LOG.info("Loading recommended templates: templates to load: {}",
         alertTemplates.stream().map(AlertTemplateApi::getName).collect(Collectors.toList()));
-    final List<AlertTemplateApi> loadedTemplates = loadTemplates(principal, alertTemplates, updateExisting);
+    // inject namespace in entities to create/update
+    alertTemplates.forEach(e -> e.setAuth(new AuthorizationConfigurationApi().setNamespace(explicitNamespace)));
+    final List<AlertTemplateApi> loadedTemplates = loadTemplates(principal, alertTemplates,
+        updateExisting);
     LOG.info("Loading recommended templates: SUCCESS. Templates loaded: {}",
         loadedTemplates.stream().map(AlertTemplateApi::getName).collect(Collectors.toList()));
 
@@ -89,10 +102,8 @@ public class AlertTemplateService extends CrudService<AlertTemplateApi, AlertTem
     final List<AlertTemplateApi> toCreateTemplates = new ArrayList<>();
     final List<AlertTemplateApi> toUpdateTemplates = new ArrayList<>();
     for (final AlertTemplateApi templateApi : alertTemplates) {
-      final AlertTemplateDTO existingTemplate = dtoManager.findByName(templateApi.getName())
-          .stream()
-          .findFirst()
-          .orElse(null);
+      final AlertTemplateDTO existingTemplate = dtoManager.findUniqueByNameAndNamespace(
+          templateApi.getName(), templateApi.getAuth().getNamespace());
       if (existingTemplate == null) {
         toCreateTemplates.add(templateApi);
       } else {

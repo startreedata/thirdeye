@@ -15,6 +15,7 @@ package ai.startree.thirdeye.resources;
 
 import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -148,7 +149,7 @@ public class AlertResourceTest {
     final AlertTemplateDTO template1 = (AlertTemplateDTO) new AlertTemplateDTO()
         .setName("template1")
         .setId(2L);
-    when(alertTemplateManager.findMatch(argThat(template -> template.getId() == 2))).thenReturn(
+    when(alertTemplateManager.findMatchInNamespaceOrUnsetNamespace(argThat(template -> template.getId() == 2), any())).thenReturn(
         template1);
 
     final ThirdEyeAuthorizer thirdEyeAuthorizer = new SingleResourceAuthorizer("0");

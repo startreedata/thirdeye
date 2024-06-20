@@ -100,7 +100,7 @@ public class RcaInfoFetcher {
    * Consumer of this method should ensure authz on the anomaly entity.
    */
   public RcaInfo getRcaInfo(final AnomalyDTO anomalyDTO)
-      throws IOException, ClassNotFoundException {
+      throws IOException {
     final long detectionConfigId = anomalyDTO.getDetectionConfigId();
     final AlertDTO alertDTO = alertDAO.findById(detectionConfigId);
     final EnumerationItemDTO enumerationItemDTO = optional(anomalyDTO.getEnumerationItem())

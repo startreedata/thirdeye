@@ -41,7 +41,7 @@ public class DataSourceManagerImpl extends AbstractManagerImpl<DataSourceDTO>
       // look in the unset namespace
       dataSourceDTO = findUniqueByNameAndNamespace(name, null);
       if (dataSourceDTO != null) {
-        LOG.warn(
+        LOG.warn( // fixme cyril authz - make it error level once we start migrating
             "Could not find datasource {} in namespace {}, but found a datasource with this name with an unset namespace. "
                 + "Using this datasource. This behaviour will change. Please migrate your datasource to a namespace.",
             name, namespace);

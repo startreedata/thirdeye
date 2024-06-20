@@ -102,7 +102,7 @@ public class AlertInsightsProvider {
     final AlertApi alertApi = request.getAlert();
     final String namespace = authorizationManager.currentNamespace(principal);
     try {
-      final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertApi);
+      final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertApi, namespace);
       return buildInsights(templateWithProperties, namespace);
     } catch (final WebApplicationException e) {
       // todo cyril for debug - can be removed later
@@ -120,8 +120,7 @@ public class AlertInsightsProvider {
    * This method is not responsible for checking authz of the alertDto
    */
   public AlertInsightsApi getInsights(final ThirdEyePrincipal principal, final AlertDTO alertDTO) {
-    // fixme cyril add authz on template, dataset, datasource, etc  - next PR - requires redesign
-    authorizationManager.enrichNamespace(principal, alertDTO);
+    // principal not used on purpose - kept because enforced by Architecture tests
     try {
       final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertDTO);
       return buildInsights(templateWithProperties, alertDTO.namespace());

@@ -11,32 +11,21 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.alert;
+package ai.startree.thirdeye.notification;
 
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
-import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import java.io.IOException;
-import org.joda.time.Interval;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.joda.time.Period;
 
-@Singleton
-public class AlertDataRetriever {
+public class AlertUtils {
 
   public static final String NODE_TYPE_POST_PROCESSOR = "PostProcessor";
   public static final String NODE_SUB_TYPE_ANOMALY_MERGER = "ANOMALY_MERGER";
-  private final AlertTemplateRenderer alertTemplateRenderer;
-
-  @Inject
-  public AlertDataRetriever(final AlertTemplateRenderer alertTemplateRenderer) {
-    this.alertTemplateRenderer = alertTemplateRenderer;
-  }
 
   /**
    * Get the merge max gap from the alert
@@ -44,13 +33,12 @@ public class AlertDataRetriever {
    * The alert needs to be rendered with the template. The merge max gap is a property of the
    * anomaly merger post processor. By default, it is 1 second.
    *
-   * @param alert the alert
+   * @param renderedTemplate the alert template rendered 
    * @return the merge max gap
    */
-  public Period getMergeMaxGap(final AlertDTO alert) {
-    final AlertTemplateDTO t = getRenderedTemplate(alert);
-
-    for (final PlanNodeBean n : t.getNodes()) {
+  @NonNull
+  public static Period getMergeMaxGap(final AlertTemplateDTO renderedTemplate) {
+    for (final PlanNodeBean n : renderedTemplate.getNodes()) {
       final TemplatableMap<String, Object> params = n.getParams();
       if (NODE_TYPE_POST_PROCESSOR.equals(n.getType())
           && params.containsKey("type")
@@ -66,13 +54,5 @@ public class AlertDataRetriever {
       }
     }
     return Period.seconds(1);
-  }
-
-  private AlertTemplateDTO getRenderedTemplate(final AlertDTO alert) {
-    try {
-      return alertTemplateRenderer.renderAlert(alert);
-    } catch (final IOException | ClassNotFoundException e) {
-      throw new RuntimeException("Error rendering alert: " + alert.getId(), e);
-    }
   }
 }

@@ -80,7 +80,7 @@ public class DataSourcesLoader {
       final DataSourceDTO dataSourceWithEnvVarResolved = StringTemplateUtils.applyContext(
           dataSource, values);
       return new ThirdEyeDataSourceContext().setDataSourceDTO(dataSourceWithEnvVarResolved);
-    } catch (IOException | ClassNotFoundException e) {
+    } catch (IOException e) {
       throw new RuntimeException(
           "Error while replacing env variables in datasource spec. spec: " + dataSource);
     }

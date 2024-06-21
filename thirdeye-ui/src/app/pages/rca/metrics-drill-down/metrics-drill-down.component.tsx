@@ -31,7 +31,7 @@ import { InputSection } from "../../../components/form-basics/input-section/inpu
 import { LoadingErrorStateSwitch } from "../../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { BaselineOffsetSelection } from "../../../components/rca/analysis-tabs/baseline-offset-selection/baseline-offset-selection.component";
 import { InvestigationPreview } from "../../../components/rca/investigation-preview/investigation-preview.component";
-import { PageContentsCardV1 } from "../../../platform/components";
+import { JSONEditorV1, PageContentsCardV1 } from "../../../platform/components";
 import { formatDateV1 } from "../../../platform/utils";
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { useGetAlertInsight } from "../../../rest/alerts/alerts.actions";
@@ -56,10 +56,31 @@ import {
 } from "../../../utils/storage/use-session-storage";
 import { InvestigationContext } from "../investigation-state-tracker-container-page/investigation-state-tracker.interfaces";
 
+function createQuery(
+    dimensions: string[],
+    metric: string,
+    dataset: DatasetInfo,
+    aggregationFunction: MetricAggFunction,
+    queryFilter: string,
+    current: number,
+    baseline: number,
+    timestamp: string
+): string {
+    return `SELECT ${dimensions.join(
+        ","
+    )}, ${aggregationFunction}(${metric}) from ${dataset.dataset.name}
+    WHERE ${
+        queryFilter && queryFilter + " AND"
+    } ${timestamp} < ${current} AND ${timestamp} > ${baseline} GROUP BY ${dimensions.join(
+        ","
+    )}, ${timestamp}`;
+}
+
 export const MetricsDrillDown: FunctionComponent = () => {
     const { t } = useTranslation();
     const [searchParams, setSearchParams] = useSearchParams();
     const context = useOutletContext<InvestigationContext>();
+    const [query, setQuery] = useState("");
     const {
         datasources,
         getDatasources,
@@ -80,6 +101,9 @@ export const MetricsDrillDown: FunctionComponent = () => {
     const [datasetsInfo, setDatasetsInfo] = useState<DatasetInfo[] | null>(
         null
     );
+    const [comparisonOffset, setComparisonOffset] = useState(() => {
+        return searchParams.get("baselineWeekOffset") ?? "P1W";
+    });
     const [queryValue, setQueryValue] = useState("");
     const [shouldFetchInsight, setShouldFetchInsight] = useState(true);
     const [isPinotInfraLoading, setIsPinotInfraLoading] = useState(true);
@@ -172,6 +196,32 @@ export const MetricsDrillDown: FunctionComponent = () => {
     }, [metrics, datasets, datasources]);
 
     useEffect(() => {
+        if (selectedMetric && selectedTable) {
+            setQuery(
+                createQuery(
+                    selectedDimensions,
+                    selectedMetric,
+                    selectedTable,
+                    selectedAggregationFunction,
+                    queryValue,
+                    context?.anomaly.endTime,
+                    context?.anomaly.startTime - Number(comparisonOffset),
+                    "timestamp"
+                )
+            );
+        }
+    }, [
+        selectedTable,
+        datasets,
+        selectedMetric,
+        datasources,
+        selectedAggregationFunction,
+        selectedDimensions,
+        queryValue,
+        comparisonOffset,
+        context?.anomaly,
+    ]);
+    useEffect(() => {
         if (shouldFetchInsight) {
             if (selectedTable && selectedMetric) {
                 getAlertInsight({
@@ -196,10 +246,6 @@ export const MetricsDrillDown: FunctionComponent = () => {
             }
         }
     }, [selectedTable, selectedMetric]);
-
-    const [comparisonOffset, setComparisonOffset] = useState(() => {
-        return searchParams.get("baselineWeekOffset") ?? "P1W";
-    });
 
     const handleBaselineChange = (newValue: string): void => {
         setComparisonOffset(newValue);
@@ -613,7 +659,13 @@ export const MetricsDrillDown: FunctionComponent = () => {
                                         {t("label.write-a-query")}
                                     </Typography>
                                 </Box>
-                                <TextField fullWidth multiline rows={4} />
+                                <Grid item sm={12}>
+                                    <JSONEditorV1
+                                        disableValidation
+                                        readOnly
+                                        value={query}
+                                    />
+                                </Grid>
                                 <Box sx={{ my: 2 }}>
                                     <Typography variant="body2">
                                         {t(

@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, FormControlLabel, Snackbar, Switch } from "@material-ui/core";
+import { Box, Button, Snackbar } from "@material-ui/core";
 import { Alert } from "@material-ui/lab";
 import classNames from "classnames";
 import { delay, isEmpty } from "lodash";
@@ -72,7 +72,6 @@ export const NotificationDisplayV1: FunctionComponent<NotificationDisplayV1Props
                         open
                         anchorOrigin={{ vertical: "top", horizontal: "center" }}
                         autoHideDuration={hideAfter}
-                        onClose={handleClose}
                     >
                         <Alert
                             className="notification-display-v1-notification"
@@ -85,35 +84,49 @@ export const NotificationDisplayV1: FunctionComponent<NotificationDisplayV1Props
                             }}
                             severity={notification.type}
                             variant="standard"
-                            onClose={handleClose}
                         >
                             {notification.message}
-                            {notification.details ? (
+                            <Box
+                                className={
+                                    notificationDisplayV1Classes.container
+                                }
+                            >
                                 <Box
                                     className={
-                                        notificationDisplayV1Classes.switchContainer
+                                        notificationDisplayV1Classes.buttonContainer
                                     }
                                 >
-                                    <FormControlLabel
-                                        classes={{
-                                            root: notificationDisplayV1Classes.switchLabel,
-                                            label: notificationDisplayV1Classes.switchLabelLabel,
-                                        }}
-                                        control={
-                                            <Switch
-                                                checked={showDetails}
-                                                onChange={() =>
-                                                    setShowDetails((d) => !d)
-                                                }
-                                            />
-                                        }
-                                        label={t("label.show-details")}
-                                    />
-                                    {showDetails && (
-                                        <Box>{notification.details}</Box>
-                                    )}
+                                    {notification.details ? (
+                                        <Button
+                                            color="primary"
+                                            onClick={() =>
+                                                setShowDetails((d) => !d)
+                                            }
+                                        >
+                                            {t("label.show-more")}
+                                        </Button>
+                                    ) : null}
+
+                                    <Button
+                                        color="primary"
+                                        onClick={handleClose}
+                                    >
+                                        {t("label.close")}
+                                    </Button>
                                 </Box>
-                            ) : null}
+                            </Box>
+
+                            {notification.details
+                                ? showDetails && (
+                                      <Box
+                                          className={
+                                              notificationDisplayV1Classes.container
+                                          }
+                                      >
+                                          {notification.details}
+                                      </Box>
+                                  )
+                                : null}
                         </Alert>
                     </Snackbar>
                 )}

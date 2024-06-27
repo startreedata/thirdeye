@@ -34,3 +34,16 @@ export const baselineOffsetToMilliseconds = (offsetString: string): number => {
 
     return result;
 };
+
+export const convertTimeColumnFormat = (format: string): string => {
+    const parts = format.split("|");
+    if (parts.length !== 3) {
+        throw new Error(
+            'Invalid format. Expected format is "EPOCH|SECONDS|1".'
+        );
+    }
+
+    const [epoch, unit, granularity] = parts;
+
+    return `${granularity}:${unit}:${epoch}`;
+};

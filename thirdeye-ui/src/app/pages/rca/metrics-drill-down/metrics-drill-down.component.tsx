@@ -37,11 +37,13 @@ import { ActionStatus } from "../../../rest/actions.interfaces";
 import { useGetAlertInsight } from "../../../rest/alerts/alerts.actions";
 import { useGetDatasets } from "../../../rest/datasets/datasets.actions";
 import { useGetDatasources } from "../../../rest/datasources/datasources.actions";
+import { TimeColumn } from "../../../rest/dto/dataset.interfaces";
 import { MetricAggFunction } from "../../../rest/dto/metric.interfaces";
 import { useGetMetrics } from "../../../rest/metrics/metrics.actions";
 import {
     baselineOffsetToMilliseconds,
     comparisonOffsetReadableValue,
+    convertTimeColumnFormat,
 } from "../../../utils/anomaly-breakdown/anomaly-breakdown.util";
 import { createAlertConfigForInsights } from "../../../utils/cohort-detector/cohort-detector.util";
 import {
@@ -64,16 +66,18 @@ function createQuery(
     queryFilter: string,
     current: number,
     baseline: number,
-    timestamp: string
+    timestamp: TimeColumn
 ): string {
     return `SELECT ${dimensions.join(
         ","
     )}, ${aggregationFunction}(${metric}) from ${dataset.dataset.name}
-    WHERE ${
-        queryFilter && queryFilter + " AND"
-    } ${timestamp} < ${current} AND ${timestamp} > ${baseline} GROUP BY ${dimensions.join(
-        ","
-    )}, ${timestamp}`;
+    WHERE ${queryFilter && queryFilter + " AND"} ${
+        timestamp.name
+    } < ${current} AND ${timestamp.name} > ${baseline} 
+    WHERE DATETIMECONVERT('${timestamp.name}', '${convertTimeColumnFormat(
+        timestamp.format
+    )}', '1:MILLISECONDS:EPOCH', '1:MILLISECONDS') BETWEEN ${current} AND ${baseline}
+    GROUP BY ${dimensions.join(",")}, ${timestamp.name}`;
 }
 
 export const MetricsDrillDown: FunctionComponent = () => {
@@ -81,6 +85,7 @@ export const MetricsDrillDown: FunctionComponent = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const context = useOutletContext<InvestigationContext>();
     const [query, setQuery] = useState("");
+    const [timestamp, setTimestamp] = useState<TimeColumn | null>(null);
     const {
         datasources,
         getDatasources,
@@ -196,7 +201,7 @@ export const MetricsDrillDown: FunctionComponent = () => {
     }, [metrics, datasets, datasources]);
 
     useEffect(() => {
-        if (selectedMetric && selectedTable) {
+        if (selectedMetric && selectedTable && timestamp) {
             setQuery(
                 createQuery(
                     selectedDimensions,
@@ -205,8 +210,9 @@ export const MetricsDrillDown: FunctionComponent = () => {
                     selectedAggregationFunction,
                     queryValue,
                     context?.anomaly.endTime,
-                    context?.anomaly.startTime - Number(comparisonOffset),
-                    "timestamp"
+                    context?.anomaly.startTime -
+                        baselineOffsetToMilliseconds(comparisonOffset),
+                    timestamp
                 )
             );
         }
@@ -221,6 +227,7 @@ export const MetricsDrillDown: FunctionComponent = () => {
         comparisonOffset,
         context?.anomaly,
     ]);
+
     useEffect(() => {
         if (shouldFetchInsight) {
             if (selectedTable && selectedMetric) {
@@ -349,6 +356,11 @@ export const MetricsDrillDown: FunctionComponent = () => {
                                                         ) {
                                                             return;
                                                         }
+                                                        setTimestamp(
+                                                            selectedTableInfo
+                                                                .dataset
+                                                                .timeColumn
+                                                        );
 
                                                         setSelectedDimensions(
                                                             []

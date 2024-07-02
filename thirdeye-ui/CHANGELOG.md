@@ -1,3 +1,12 @@
+### [2.45.21](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.20...thirdeye-ui-2.45.21) (2024-05-22)
+
+
+### Bug Fixes
+
+* [TE-2278](https://cortexdata.atlassian.net/browse/TE-2278) add a column and sort by percent change in the top contributors table ([52b38ecd2](https://github.com/startreedata/thirdeye/commit/52b38ecd2586734eeb414061399933ac5e53646b))
+* [TE-2281](https://cortexdata.atlassian.net/browse/TE-2281) fix datasource name on datasets selection page of onboarding ([f16a7df50](https://github.com/startreedata/thirdeye/commit/f16a7df50475558c1acbe1fcc1c629841c1c68aa))
+* [TE-2284](https://cortexdata.atlassian.net/browse/TE-2284) section headers for template properties ([efafcbf54](https://github.com/startreedata/thirdeye/commit/efafcbf5490314e9afc513a06195e5321bb8f31e))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

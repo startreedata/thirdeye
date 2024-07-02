@@ -1,3 +1,10 @@
+### [2.45.24](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.23...thirdeye-ui-2.45.24) (2024-06-07)
+
+
+### Bug Fixes
+
+* [TE-0](https://cortexdata.atlassian.net/browse/TE-0) fix subscription group view null safety of mentionMemberIds ([22bb0c978](https://github.com/startreedata/thirdeye/commit/22bb0c978fa699cce1d6aabe8b00135c138e5c36))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

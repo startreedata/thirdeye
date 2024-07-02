@@ -19,3 +19,8 @@ import { SubscriptionGroup } from "../../../rest/dto/subscription-group.interfac
 export interface LatestSubscriptionGroupsProps {
     subscriptionGroupsQuery: UseQueryResult<SubscriptionGroup[], AxiosError>;
 }
+
+export enum LatestSubscriptionChangeCreatedSort {
+    ASC = "asc",
+    DESC = "desc",
+}

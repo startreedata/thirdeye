@@ -40,7 +40,7 @@ import {
     isValidChangePercentage,
 } from "./top-contributors-table.utils";
 
-const SortableTableHeader = withStyles(() => ({
+export const SortableTableHeader = withStyles(() => ({
     root: {
         cursor: "pointer",
         display: "flex",

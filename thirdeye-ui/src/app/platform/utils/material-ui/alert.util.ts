@@ -20,6 +20,11 @@ export const alertClassesV1 = {
     root: {
         borderRadius: DimensionV1.CardBorderRadius,
     },
+    standardError: {
+        backgroundColor: "white",
+        border: "1px solid #DBDEE7",
+        color: "black",
+    },
 };
 
 // Material UI theme property overrides for Alert

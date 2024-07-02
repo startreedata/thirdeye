@@ -1,3 +1,10 @@
+## [2.46.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.24...thirdeye-ui-2.46.0) (2024-06-12)
+
+
+### Features
+
+* [TE-2299](https://cortexdata.atlassian.net/browse/TE-2299) new landing page for ThirdEye ([ed6167d55](https://github.com/startreedata/thirdeye/commit/ed6167d55808538441e64023ab9445c461425065))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

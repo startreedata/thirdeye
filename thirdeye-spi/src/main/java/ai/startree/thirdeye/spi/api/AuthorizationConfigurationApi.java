@@ -13,15 +13,17 @@
  */
 package ai.startree.thirdeye.spi.api;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 public class AuthorizationConfigurationApi {
 
-  private String namespace;
+  private @Nullable String namespace;
 
   public String getNamespace() {
     return namespace;
   }
 
-  public AuthorizationConfigurationApi setNamespace(final String namespace) {
+  public AuthorizationConfigurationApi setNamespace(final @Nullable String namespace) {
     this.namespace = namespace;
     return this;
   }

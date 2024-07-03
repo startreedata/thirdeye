@@ -23,5 +23,4 @@ ALTER TABLE event_index ADD COLUMN namespace varchar(1024) DEFAULT NULL;
 ALTER TABLE merged_anomaly_result_index ADD COLUMN namespace varchar(1024) DEFAULT NULL;
 ALTER TABLE metric_config_index ADD COLUMN namespace varchar(1024) DEFAULT NULL;
 ALTER TABLE rca_investigation_index ADD COLUMN namespace varchar(1024) DEFAULT NULL;
-
--- todo task_entity
+ALTER TABLE task_entity ADD COLUMN namespace varchar(1024) DEFAULT NULL;

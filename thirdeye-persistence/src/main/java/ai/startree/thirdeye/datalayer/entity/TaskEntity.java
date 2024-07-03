@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.datalayer.entity;
 
 import java.sql.Timestamp;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class TaskEntity extends AbstractEntity implements HasJsonVal<TaskEntity> {
 
@@ -28,6 +29,7 @@ public class TaskEntity extends AbstractEntity implements HasJsonVal<TaskEntity>
   private String jsonVal;
 
   private Long refId;
+  private @Nullable String namespace; 
 
   @Override
   public String getJsonVal() {
@@ -118,6 +120,15 @@ public class TaskEntity extends AbstractEntity implements HasJsonVal<TaskEntity>
 
   public TaskEntity setRefId(final Long refId) {
     this.refId = refId;
+    return this;
+  }
+
+  public @Nullable String getNamespace() {
+    return namespace;
+  }
+
+  public TaskEntity setNamespace(final @Nullable String namespace) {
+    this.namespace = namespace;
     return this;
   }
 }

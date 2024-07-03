@@ -12,44 +12,44 @@
  * the License.
  */
 
-ALTER TABLE alert_template_index ADD COLUMN namespace varchar(1024) DEFAULT NULL;
+ALTER TABLE alert_template_index ADD COLUMN namespace varchar(255) DEFAULT NULL;
 CREATE INDEX namespace_idx ON alert_template_index (namespace);
 ALTER TABLE alert_template_index ADD UNIQUE unique_name_namespace (`name`, namespace);
 
-ALTER TABLE anomaly_feedback_index ADD COLUMN namespace varchar(1024) DEFAULT NULL;
+ALTER TABLE anomaly_feedback_index ADD COLUMN namespace varchar(255) DEFAULT NULL;
 CREATE INDEX namespace_idx ON anomaly_feedback_index (namespace);
 
-ALTER TABLE data_source_index ADD COLUMN namespace varchar(1024) DEFAULT NULL;
+ALTER TABLE data_source_index ADD COLUMN namespace varchar(255) DEFAULT NULL;
 CREATE INDEX namespace_idx ON data_source_index (namespace);
 ALTER TABLE data_source_index ADD UNIQUE unique_name_namespace (`name`, namespace);
 
-ALTER TABLE dataset_config_index ADD COLUMN namespace varchar(1024) DEFAULT NULL;
+ALTER TABLE dataset_config_index ADD COLUMN namespace varchar(255) DEFAULT NULL;
 CREATE INDEX namespace_idx ON dataset_config_index (namespace);
 ALTER TABLE dataset_config_index ADD UNIQUE unique_name_namespace (dataset, namespace);
 
-ALTER TABLE detection_alert_config_index ADD COLUMN namespace varchar(1024) DEFAULT NULL;
+ALTER TABLE detection_alert_config_index ADD COLUMN namespace varchar(255) DEFAULT NULL;
 CREATE INDEX namespace_idx ON detection_alert_config_index (namespace);
 ALTER TABLE detection_alert_config_index ADD UNIQUE unique_name_namespace (`name`, namespace);
 
-ALTER TABLE detection_config_index ADD COLUMN namespace varchar(1024) DEFAULT NULL;
+ALTER TABLE detection_config_index ADD COLUMN namespace varchar(255) DEFAULT NULL;
 CREATE INDEX namespace_idx ON detection_config_index (namespace);
 ALTER TABLE detection_config_index ADD UNIQUE unique_name_namespace (`name`, namespace);
 
-ALTER TABLE enumeration_item_index ADD COLUMN namespace varchar(1024) DEFAULT NULL;
+ALTER TABLE enumeration_item_index ADD COLUMN namespace varchar(255) DEFAULT NULL;
 CREATE INDEX namespace_idx ON enumeration_item_index (namespace);
 
-ALTER TABLE event_index ADD COLUMN namespace varchar(1024) DEFAULT NULL;
+ALTER TABLE event_index ADD COLUMN namespace varchar(255) DEFAULT NULL;
 CREATE INDEX namespace_idx ON event_index (namespace);
 
-ALTER TABLE merged_anomaly_result_index ADD COLUMN namespace varchar(1024) DEFAULT NULL;
+ALTER TABLE merged_anomaly_result_index ADD COLUMN namespace varchar(255) DEFAULT NULL;
 CREATE INDEX namespace_idx ON merged_anomaly_result_index (namespace);
 
-ALTER TABLE metric_config_index ADD COLUMN namespace varchar(1024) DEFAULT NULL;
+ALTER TABLE metric_config_index ADD COLUMN namespace varchar(255) DEFAULT NULL;
 CREATE INDEX namespace_idx ON metric_config_index (namespace);
 ALTER TABLE metric_config_index ADD UNIQUE unique_name_dataset_namespace (`name`, dataset, namespace);
 
-ALTER TABLE rca_investigation_index ADD COLUMN namespace varchar(1024) DEFAULT NULL;
+ALTER TABLE rca_investigation_index ADD COLUMN namespace varchar(255) DEFAULT NULL;
 CREATE INDEX namespace_idx ON rca_investigation_index (namespace);
 
-ALTER TABLE task_entity ADD COLUMN namespace varchar(1024) DEFAULT NULL;
+ALTER TABLE task_entity ADD COLUMN namespace varchar(255) DEFAULT NULL;
 CREATE INDEX namespace_idx ON task_entity (namespace);

@@ -46,7 +46,7 @@
         "unknown-rca-algorithm": "Unknown error running the RCA algorithm."
     },
     "info": {
-        "notifyHistoricalAnomalies": "By default, notifications are only sent for anomalies detected on times greater than the alert creation/update time. If enabled, notifications will also be sent for anomalies detected on times less than the alert creation/update time."
+        "notifyHistoricalAnomalies": "By default, notifications are only sent for anomalies detected on times greater than the alert creation time. If enabled, notifications will also be sent for anomalies detected on times less than the alert creation time."
     },
     "label": {
         "1-minute": "1 Minute",

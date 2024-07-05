@@ -26,6 +26,7 @@ import { useTranslation } from "react-i18next";
 import { CronEditor } from "../../../cron-editor-v1/cron-editor-v1.component";
 import { InputSection } from "../../../form-basics/input-section/input-section.component";
 import { PropertiesFormProps } from "./properties-form.interfaces";
+import { InfoLabel } from "../../../info-label/info-label.component";
 
 // Refer: SubscriptionGroupPropertiesForm
 export const PropertiesForm: FunctionComponent<PropertiesFormProps> = ({
@@ -95,7 +96,14 @@ export const PropertiesForm: FunctionComponent<PropertiesFormProps> = ({
                                 }}
                             />
                         }
-                        label={t("label.notifyHistoricalAnomalies")}
+                        labelComponent={
+                            <InfoLabel
+                                label={t("label.notifyHistoricalAnomalies")}
+                                tooltipText={t(
+                                    "info.notifyHistoricalAnomalies"
+                                )}
+                            />
+                        }
                     />
                 </CardContent>
             </Card>

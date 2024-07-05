@@ -23,6 +23,8 @@ export const SubscriptionGroupDetails: FunctionComponent<SubscriptionGroupDetail
         const propertiesFormValues = {
             cron: subscriptionGroup.cron,
             name: subscriptionGroup.name,
+            notifyHistoricalAnomalies:
+                !!subscriptionGroup.notifyHistoricalAnomalies,
         };
 
         return (

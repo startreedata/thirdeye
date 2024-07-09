@@ -26,5 +26,6 @@ public interface TaskEntityMapper {
   @Mapping(source = "jobName", target = "name")
   @Mapping(source = "taskType", target = "type")
   @Mapping(target = "jsonVal", ignore = true)
+  @Mapping(source = "auth.namespace", target = "namespace")
   TaskEntity toTaskEntity(TaskDTO dto);
 }

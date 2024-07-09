@@ -13,15 +13,29 @@
  */
 package ai.startree.thirdeye.datalayer.entity;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 public abstract class AbstractIndexEntity extends AbstractEntity {
 
   protected Long baseId;
+  
+  protected String namespace;
 
   public Long getBaseId() {
     return baseId;
   }
 
-  public void setBaseId(Long baseId) {
+  public AbstractIndexEntity setBaseId(final Long baseId) {
     this.baseId = baseId;
+    return this;
+  }
+  
+  public String getNamespace() {
+    return namespace;
+  }
+  
+  public AbstractIndexEntity setNamespace(final @Nullable String namespace) {
+    this.namespace = namespace;
+    return this;
   }
 }

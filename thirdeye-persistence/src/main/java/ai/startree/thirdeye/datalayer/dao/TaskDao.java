@@ -19,10 +19,10 @@ import ai.startree.thirdeye.datalayer.DatabaseClient;
 import ai.startree.thirdeye.datalayer.DatabaseOrm;
 import ai.startree.thirdeye.datalayer.entity.TaskEntity;
 import ai.startree.thirdeye.datalayer.mapper.TaskEntityMapper;
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
-import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
@@ -44,7 +44,7 @@ public class TaskDao {
 
   private static final Logger LOG = LoggerFactory.getLogger(TaskDao.class);
   private static final boolean IS_DEBUG = LOG.isDebugEnabled();
-  private static final ObjectMapper OBJECT_MAPPER = ThirdEyeSerialization.getObjectMapper();
+  private static final ObjectMapper OBJECT_MAPPER = Constants.TEMPLATABLE_OBJECT_MAPPER;
 
   private final DatabaseOrm databaseOrm;
   private final DatabaseClient databaseClient;

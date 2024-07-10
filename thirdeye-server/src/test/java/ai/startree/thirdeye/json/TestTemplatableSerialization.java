@@ -16,8 +16,8 @@ package ai.startree.thirdeye.json;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
-import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,7 +27,7 @@ import org.testng.annotations.Test;
 
 public class TestTemplatableSerialization {
 
-  private static final ObjectMapper OBJECT_MAPPER = ThirdEyeSerialization.getObjectMapper();
+  private static final ObjectMapper OBJECT_MAPPER = Constants.TEMPLATABLE_OBJECT_MAPPER;
   private static final String DOUBLE_QUOTE = "\"";
 
   @Test

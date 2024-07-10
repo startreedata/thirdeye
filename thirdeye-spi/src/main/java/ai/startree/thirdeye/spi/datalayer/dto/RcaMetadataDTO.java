@@ -13,10 +13,11 @@
  */
 package ai.startree.thirdeye.spi.datalayer.dto;
 
+import static ai.startree.thirdeye.spi.Constants.VANILLA_OBJECT_MAPPER;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 
 /**
@@ -112,7 +113,7 @@ public class RcaMetadataDTO {
   @Override
   public String toString() {
     try {
-      return new ObjectMapper().writeValueAsString(this);
+      return VANILLA_OBJECT_MAPPER.writeValueAsString(this);
     } catch (JsonProcessingException e) {
       return this.toString();
     }

@@ -15,8 +15,8 @@ package ai.startree.thirdeye.spi.detection;
 
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_INVALID_PARAMS_COMPONENTS;
 
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.ThirdEyeException;
-import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,7 +32,7 @@ public abstract class AbstractSpec implements Serializable {
 
   public static final String DEFAULT_TIMESTAMP = "timestamp";
   public static final String DEFAULT_METRIC = "value";
-  public static final ObjectMapper TE_OBJECT_MAPPER = ThirdEyeSerialization.getObjectMapper();
+  public static final ObjectMapper TE_OBJECT_MAPPER = Constants.TEMPLATABLE_OBJECT_MAPPER;
 
   private String timestamp = DEFAULT_TIMESTAMP;
   private String metric = DEFAULT_METRIC;

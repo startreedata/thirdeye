@@ -13,6 +13,8 @@
  */
 package ai.startree.thirdeye.spi.detection.dimension;
 
+import static ai.startree.thirdeye.spi.Constants.VANILLA_OBJECT_MAPPER;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
@@ -46,9 +48,6 @@ import org.slf4j.LoggerFactory;
 public class DimensionMap implements SortedMap<String, String>, Comparable<DimensionMap>,
     Serializable {
 
-  private static final Logger LOG = LoggerFactory.getLogger(DimensionMap.class);
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
   // Dimension name to dimension value pairs, which are sorted by dimension names
   private SortedMap<String, String> sortedDimensionMap = new TreeMap<>();
 
@@ -69,7 +68,7 @@ public class DimensionMap implements SortedMap<String, String>, Comparable<Dimen
     Preconditions.checkNotNull(value); // We do not allow null pointers flying around the code.
     if (!Strings.isNullOrEmpty(value)) { // Empty string produces empty dimension map.
       try {
-        sortedDimensionMap = OBJECT_MAPPER.readValue(value, TreeMap.class);
+        sortedDimensionMap = VANILLA_OBJECT_MAPPER.readValue(value, TreeMap.class);
       } catch (IOException e) {
         try { // Fall back to Java's map string, which is {key=value} (including curly brackets).
           value = value.substring(1, value.length() - 1); // Remove curly brackets

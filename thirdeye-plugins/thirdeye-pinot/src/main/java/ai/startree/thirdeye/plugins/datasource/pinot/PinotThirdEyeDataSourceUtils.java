@@ -13,19 +13,20 @@
  */
 package ai.startree.thirdeye.plugins.datasource.pinot;
 
+import static ai.startree.thirdeye.spi.Constants.VANILLA_OBJECT_MAPPER;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import java.util.Set;
 
 public class PinotThirdEyeDataSourceUtils {
+  
 
   public static PinotThirdEyeDataSourceConfig buildConfig(
       final Map<String, Object> properties) {
-    final PinotThirdEyeDataSourceConfig config = new ObjectMapper()
+    final PinotThirdEyeDataSourceConfig config = VANILLA_OBJECT_MAPPER
         .convertValue(properties, PinotThirdEyeDataSourceConfig.class);
 
     requireNonNull(config.getControllerHost(), "Controller Host is not set.");
@@ -40,7 +41,7 @@ public class PinotThirdEyeDataSourceUtils {
 
   public static PinotThirdEyeDataSourceConfig cloneConfig(
       final PinotThirdEyeDataSourceConfig config) {
-    final Map<String, Object> map = new ObjectMapper()
+    final Map<String, Object> map = VANILLA_OBJECT_MAPPER
         .convertValue(config, new TypeReference<>() {});
     return buildConfig(map);
   }

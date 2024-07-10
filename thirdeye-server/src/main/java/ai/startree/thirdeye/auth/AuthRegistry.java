@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.auth;
 
+import static ai.startree.thirdeye.spi.Constants.VANILLA_OBJECT_MAPPER;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
@@ -21,7 +22,6 @@ import ai.startree.thirdeye.spi.auth.AuthenticationType;
 import ai.startree.thirdeye.spi.auth.OpenIdConfigurationProvider;
 import ai.startree.thirdeye.spi.auth.OpenIdConfigurationProvider.Factory;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthenticator.OauthThirdEyeAuthenticatorFactory;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Singleton;
 import io.dropwizard.auth.Authenticator;
 import java.util.HashMap;
@@ -32,14 +32,13 @@ public class AuthRegistry {
 
   public static final String OAUTH_DEFAULT = "oauth-default";
   public static final String OPENID_DEFAULT = "openid-default";
-  public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private final Map<String, OauthThirdEyeAuthenticatorFactory> oauthFactories = new HashMap<>();
   private final Map<String, OpenIdConfigurationProvider.Factory> openIdConfigurationFactories = new HashMap<>();
 
   @SuppressWarnings("unchecked")
   private static Map<String, Object> toMap(final OAuthConfiguration oauthConfig) {
     // TODO spyne: oauthConfig should be moved to a plugin style config
-    return OBJECT_MAPPER.convertValue(oauthConfig, Map.class);
+    return VANILLA_OBJECT_MAPPER.convertValue(oauthConfig, Map.class);
   }
 
   public void registerOAuthFactory(OauthThirdEyeAuthenticatorFactory f) {

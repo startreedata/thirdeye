@@ -13,6 +13,8 @@
  */
 package ai.startree.thirdeye.resources;
 
+import static ai.startree.thirdeye.spi.Constants.VANILLA_OBJECT_MAPPER;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.annotation.Timed;
@@ -35,7 +37,7 @@ public class HttpDetectorResource {
   @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
   public Response post(Object o) throws JsonProcessingException {
-    System.out.println("payload:" + new ObjectMapper().writeValueAsString(o));
+    System.out.println("payload:" + VANILLA_OBJECT_MAPPER.writeValueAsString(o));
     return Response.ok(o).build();
   }
 }

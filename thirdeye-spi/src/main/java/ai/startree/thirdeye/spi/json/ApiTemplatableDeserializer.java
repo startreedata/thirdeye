@@ -41,7 +41,7 @@ import java.io.IOException;
  * For wrapped generic type inference at runtime,
  * see https://stackoverflow.com/questions/36159677/how-to-create-a-custom-deserializer-in-jackson-for-a-generic-type
  */
-class ApiTemplatableDeserializer extends JsonDeserializer<Templatable<?>>
+public class ApiTemplatableDeserializer extends JsonDeserializer<Templatable<?>>
     implements ContextualDeserializer {
 
   private JavaType valueType;

@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.service;
 
 import static ai.startree.thirdeye.rca.RcaDimensionFilterHelper.getRcaDimensions;
+import static ai.startree.thirdeye.spi.Constants.VANILLA_OBJECT_MAPPER;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
@@ -50,8 +51,6 @@ public class RcaDimensionAnalysisService {
   private static final DecimalFormat PERCENTAGE_FORMAT = new DecimalFormat("#.##");
   private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#.###");
 
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
   private final ContributorsFinderRunner contributorsFinderRunner;
   private final RcaInfoFetcher rcaInfoFetcher;
   private final AnomalyManager anomalyDao;
@@ -69,7 +68,7 @@ public class RcaDimensionAnalysisService {
 
   private static List<List<String>> parseHierarchiesPayload(final String hierarchiesPayload)
       throws JsonProcessingException {
-    return OBJECT_MAPPER.readValue(hierarchiesPayload, new TypeReference<>() {});
+    return VANILLA_OBJECT_MAPPER.readValue(hierarchiesPayload, new TypeReference<>() {});
   }
 
   public DimensionAnalysisResultApi dataCubeSummary(final ThirdEyePrincipal principal, final long anomalyId,

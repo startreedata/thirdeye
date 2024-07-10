@@ -22,6 +22,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
 import ai.startree.thirdeye.spi.datalayer.EnumerationItemFilter;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
@@ -31,7 +32,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
-import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
@@ -97,8 +97,7 @@ public class EnumerationItemMaintainer {
     requireNonNull(dto.getId(), "EnumerationItemDTO.id cannot be null for deletion");
     String eiString;
     try {
-      eiString = ThirdEyeSerialization
-          .getObjectMapper()
+      eiString = Constants.TEMPLATABLE_OBJECT_MAPPER
           .writeValueAsString(dto);
     } catch (final Exception e) {
       eiString = dto.toString();

@@ -18,9 +18,9 @@ import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
 
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.datalayer.util.DatabaseConfiguration;
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
-import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.client.JerseyClientConfiguration;
@@ -35,7 +35,7 @@ import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 
 public class DropwizardTestUtils {
 
-  private static final ObjectMapper OBJECT_MAPPER = ThirdEyeSerialization.getObjectMapper();
+  private static final ObjectMapper OBJECT_MAPPER = Constants.TEMPLATABLE_OBJECT_MAPPER;
 
   public static DropwizardTestSupport<ThirdEyeServerConfiguration> buildSupport(
       final DatabaseConfiguration dbConfiguration,

@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.worker.task;
 
+import static ai.startree.thirdeye.spi.Constants.VANILLA_OBJECT_MAPPER;
 import static ai.startree.thirdeye.spi.task.TaskType.DETECTION;
 import static ai.startree.thirdeye.spi.task.TaskType.NOTIFICATION;
 import static java.util.Objects.requireNonNull;
@@ -32,9 +33,6 @@ import org.slf4j.LoggerFactory;
  */
 public class TaskInfoFactory {
 
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-  private static final Logger LOG = LoggerFactory.getLogger(TaskInfoFactory.class);
-
   private static final ImmutableMap<TaskType, Class<? extends TaskInfo>> TASK_TYPE_POJO_MAP =
       ImmutableMap.<TaskType, Class<? extends TaskInfo>>builder()
           .put(DETECTION, DetectionPipelineTaskInfo.class)
@@ -46,6 +44,6 @@ public class TaskInfoFactory {
     requireNonNull(clazz,
         String.format("Invalid TaskType. Allowed: %s", TASK_TYPE_POJO_MAP.keySet()));
 
-    return OBJECT_MAPPER.readValue(jsonPayload, clazz);
+    return VANILLA_OBJECT_MAPPER.readValue(jsonPayload, clazz);
   }
 }

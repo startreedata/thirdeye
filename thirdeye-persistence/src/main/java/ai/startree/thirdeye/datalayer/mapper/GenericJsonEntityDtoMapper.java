@@ -15,14 +15,14 @@ package ai.startree.thirdeye.datalayer.mapper;
 
 import ai.startree.thirdeye.datalayer.dao.SubEntities;
 import ai.startree.thirdeye.datalayer.entity.GenericJsonEntity;
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
-import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class GenericJsonEntityDtoMapper {
 
-  public static final ObjectMapper OBJECT_MAPPER = ThirdEyeSerialization.getObjectMapper();
+  public static final ObjectMapper OBJECT_MAPPER = Constants.TEMPLATABLE_OBJECT_MAPPER;
 
   public static <E extends AbstractDTO> String toJsonString(final E pojo)
       throws JsonProcessingException {

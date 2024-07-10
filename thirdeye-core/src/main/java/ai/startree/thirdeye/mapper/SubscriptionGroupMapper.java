@@ -13,13 +13,13 @@
  */
 package ai.startree.thirdeye.mapper;
 
+import static ai.startree.thirdeye.spi.Constants.VANILLA_OBJECT_MAPPER;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import ai.startree.thirdeye.spi.api.TimeWindowSuppressorApi;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -72,7 +72,7 @@ public interface SubscriptionGroupMapper {
   default Map<String, Object> mapAlertSuppressors(final TimeWindowSuppressorApi value) {
     Map<String, Object> alertSuppressors = new HashMap<>();
     if (value != null) {
-      alertSuppressors = new ObjectMapper().convertValue(value, Map.class);
+      alertSuppressors = VANILLA_OBJECT_MAPPER.convertValue(value, Map.class);
     }
     return alertSuppressors;
   }

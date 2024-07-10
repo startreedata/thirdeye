@@ -213,6 +213,7 @@ public class TaskDriverRunnable implements Runnable {
           taskWaitTimer.record(waitTime, TimeUnit.MILLISECONDS);
           return nextTask;
         } else {
+          // fixme cyril add metric for this
           LOG.debug("Failed to acquire task {} referencing {} from worker id {}. Task was locked, or edited by another transaction.)", nextTask.getId(),
               nextTask.getRefId(), workerId);
           // don't sleep - look for a next task

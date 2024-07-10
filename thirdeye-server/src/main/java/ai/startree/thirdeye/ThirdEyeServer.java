@@ -31,7 +31,7 @@ import ai.startree.thirdeye.resources.root.RootResource;
 import ai.startree.thirdeye.scheduler.SchedulerService;
 import ai.startree.thirdeye.scheduler.events.MockEventsLoader;
 import ai.startree.thirdeye.service.ResourcesBootstrapService;
-import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.worker.task.TaskDriver;
 import ch.qos.logback.classic.Level;
 import com.google.inject.Guice;
@@ -109,7 +109,7 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
         return configuration.getSwaggerBundleConfiguration();
       }
     });
-    bootstrap.getObjectMapper().registerModule(ThirdEyeSerialization.TEMPLATABLE);
+    bootstrap.getObjectMapper().registerModule(Constants.TEMPLATABLE);
   }
 
   @Override

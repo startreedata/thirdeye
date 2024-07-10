@@ -15,24 +15,16 @@ package ai.startree.thirdeye.datalayer.mapper;
 
 import ai.startree.thirdeye.datalayer.dao.SubEntities;
 import ai.startree.thirdeye.datalayer.entity.GenericJsonEntity;
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
-import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class GenericJsonEntityDtoMapper {
-
-  public static final ObjectMapper OBJECT_MAPPER = ThirdEyeSerialization.getObjectMapper();
-
-  public static <E extends AbstractDTO> String toJsonString(final E pojo)
-      throws JsonProcessingException {
-    return OBJECT_MAPPER.writeValueAsString(pojo);
-  }
 
   public static <E extends AbstractDTO> GenericJsonEntity toGenericJsonEntity(final E pojo)
       throws JsonProcessingException {
     final int version = pojo.getVersion() == 0 ? 1 : pojo.getVersion();
-    final String jsonVal = toJsonString(pojo);
+    final String jsonVal = Constants.TEMPLATABLE_OBJECT_MAPPER.writeValueAsString(pojo);
 
     final GenericJsonEntity entity = new GenericJsonEntity()
         .setType(SubEntities.getType(pojo.getClass()))
@@ -50,7 +42,7 @@ public class GenericJsonEntityDtoMapper {
   public static <DtoT extends AbstractDTO> DtoT toDto(final GenericJsonEntity entity,
       final Class<DtoT> beanClass)
       throws JsonProcessingException {
-    DtoT dto = OBJECT_MAPPER.readValue(entity.getJsonVal(), beanClass);
+    DtoT dto = Constants.TEMPLATABLE_OBJECT_MAPPER.readValue(entity.getJsonVal(), beanClass);
     dto
         .setId(entity.getId())
         .setVersion(entity.getVersion())

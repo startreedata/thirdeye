@@ -31,6 +31,7 @@ import ai.startree.thirdeye.resources.testutils.SingleNamespaceAuthorizer;
 import ai.startree.thirdeye.resources.testutils.SingleResourceAuthorizer;
 import ai.startree.thirdeye.service.AlertService;
 import ai.startree.thirdeye.service.alert.AlertInsightsProvider;
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
@@ -50,7 +51,6 @@ import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
-import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
 import ai.startree.thirdeye.util.StringTemplateUtils;
 import java.io.IOException;
 import java.net.URL;
@@ -109,10 +109,10 @@ public class AlertResourceTest {
   public void testAlertEvaluationPlan() throws IOException, ClassNotFoundException {
     final ClassLoader classLoader = AlertResourceTest.class.getClassLoader();
     URL resource = requireNonNull(classLoader.getResource("alertEvaluation.json"));
-    final AlertEvaluationApi apiTemplate = ThirdEyeSerialization.getObjectMapper()
+    final AlertEvaluationApi apiTemplate = Constants.TEMPLATABLE_OBJECT_MAPPER
         .readValue(resource, AlertEvaluationApi.class);
     resource = classLoader.getResource("alertEvaluation-context.json");
-    final Map<String, Object> alertEvaluationPlanApiContext = ThirdEyeSerialization.getObjectMapper()
+    final Map<String, Object> alertEvaluationPlanApiContext = Constants.TEMPLATABLE_OBJECT_MAPPER
         .readValue(resource, Map.class);
 
     final AlertEvaluationApi api = StringTemplateUtils.applyContext(apiTemplate,

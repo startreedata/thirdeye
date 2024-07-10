@@ -16,6 +16,7 @@ package ai.startree.thirdeye.datalayer.bao;
 import static ai.startree.thirdeye.spi.Constants.METRICS_CACHE_TIMEOUT;
 import static ai.startree.thirdeye.spi.Constants.TASK_EXPIRY_DURATION;
 import static ai.startree.thirdeye.spi.Constants.TASK_MAX_DELETES_PER_CLEANUP;
+import static ai.startree.thirdeye.spi.Constants.VANILLA_OBJECT_MAPPER;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Suppliers.memoizeWithExpiration;
 
@@ -32,7 +33,6 @@ import com.codahale.metrics.CachedGauge;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.persist.Transactional;
@@ -54,8 +54,7 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public class TaskManagerImpl implements TaskManager {
-
-  private final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  
   private final TaskDao dao;
 
   private static final Logger LOG = LoggerFactory.getLogger(TaskManagerImpl.class);
@@ -77,7 +76,7 @@ public class TaskManagerImpl implements TaskManager {
   AuthorizationConfigurationDTO auth) {
     final String taskInfoJson;
     try {
-      taskInfoJson = OBJECT_MAPPER.writeValueAsString(taskInfo);
+      taskInfoJson = VANILLA_OBJECT_MAPPER.writeValueAsString(taskInfo);
     } catch (JsonProcessingException e) {
       throw new RuntimeException("Error while serializing task info: " + taskInfo, e);
     }
@@ -155,6 +154,7 @@ public class TaskManagerImpl implements TaskManager {
         Predicate.EQ("version", currentVersion),
         Predicate.EQ("status", TaskStatus.WAITING.toString())
     );
+    // fixme cyril add metric here
     return dao.update(task, predicate) == 1;
   }
 

@@ -18,10 +18,9 @@ import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
 
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.datalayer.util.DatabaseConfiguration;
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
-import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.testing.DropwizardTestSupport;
@@ -34,8 +33,6 @@ import javax.ws.rs.client.Client;
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 
 public class DropwizardTestUtils {
-
-  private static final ObjectMapper OBJECT_MAPPER = ThirdEyeSerialization.getObjectMapper();
 
   public static DropwizardTestSupport<ThirdEyeServerConfiguration> buildSupport(
       final DatabaseConfiguration dbConfiguration,
@@ -69,7 +66,7 @@ public class DropwizardTestUtils {
 
   public static <T> T loadApi(final String jsonPath, Class<T> clazz) throws IOException {
     String alertApiJson = IOUtils.resourceToString(jsonPath, StandardCharsets.UTF_8);
-    return OBJECT_MAPPER.readValue(alertApiJson, clazz);
+    return Constants.TEMPLATABLE_OBJECT_MAPPER.readValue(alertApiJson, clazz);
   }
 
   public static AlertEvaluationApi alertEvaluationApi(final AlertApi alertApi, final long startTime,

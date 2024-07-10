@@ -15,7 +15,7 @@ package ai.startree.thirdeye.spi.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
+import ai.startree.thirdeye.spi.Constants;
 import com.google.common.io.Resources;
 import java.io.IOException;
 import java.net.URL;
@@ -29,7 +29,7 @@ public class PlanNodeApiTest {
   @Test
   public void testInputNode() throws IOException {
     URL resource = PlanNodeApiTest.class.getClassLoader().getResource("inputNode.json");
-    final PlanNodeApi inputNode = ThirdEyeSerialization.getObjectMapper().readValue(
+    final PlanNodeApi inputNode = Constants.TEMPLATABLE_OBJECT_MAPPER.readValue(
         Resources.toString(resource, StandardCharsets.UTF_8),
         PlanNodeApi.class);
     Assert.assertEquals(inputNode.getName(), "baselineDataFetcher");
@@ -43,7 +43,7 @@ public class PlanNodeApiTest {
   @Test
   public void testDetectionNode() throws IOException {
     URL resource = PlanNodeApiTest.class.getClassLoader().getResource("detectionNode.json");
-    final PlanNodeApi inputNode = ThirdEyeSerialization.getObjectMapper().readValue(Resources.toString(resource,
+    final PlanNodeApi inputNode = Constants.TEMPLATABLE_OBJECT_MAPPER.readValue(Resources.toString(resource,
         StandardCharsets.UTF_8),
         PlanNodeApi.class);
     Assert.assertEquals(inputNode.getName(), "percentageChangeDetector");

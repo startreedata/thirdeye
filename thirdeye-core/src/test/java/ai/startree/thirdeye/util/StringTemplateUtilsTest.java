@@ -16,10 +16,10 @@ package ai.startree.thirdeye.util;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
@@ -220,7 +220,7 @@ public class StringTemplateUtilsTest {
       throws IOException, ClassNotFoundException {
     final String alertTemplateDtoString = IOUtils.resourceToString("/alertTemplateDto.json",
         StandardCharsets.UTF_8);
-    final AlertTemplateDTO template = ThirdEyeSerialization.getObjectMapper()
+    final AlertTemplateDTO template = Constants.TEMPLATABLE_OBJECT_MAPPER
         .readValue(alertTemplateDtoString, AlertTemplateDTO.class);
 
     final AlertTemplateDTO renderedTemplate = StringTemplateUtils.applyContext(template,
@@ -245,7 +245,7 @@ public class StringTemplateUtilsTest {
             .build());
 
     // transforming to string to perform an exact comparison
-    final String renderedTemplateString = ThirdEyeSerialization.getObjectMapper()
+    final String renderedTemplateString = Constants.TEMPLATABLE_OBJECT_MAPPER
         .writeValueAsString(renderedTemplate);
     final String expectedRenderedTemplateString = IOUtils.resourceToString(
         "/alertTemplateDtoRendered.json",

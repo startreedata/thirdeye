@@ -15,6 +15,7 @@ package ai.startree.thirdeye.plugins.postprocessor;
 
 import static ai.startree.thirdeye.spi.Constants.COL_CURRENT;
 import static ai.startree.thirdeye.spi.Constants.COL_TIME;
+import static ai.startree.thirdeye.spi.Constants.VANILLA_OBJECT_MAPPER;
 import static ai.startree.thirdeye.spi.detection.AbstractSpec.DEFAULT_METRIC;
 import static ai.startree.thirdeye.spi.detection.AbstractSpec.DEFAULT_TIMESTAMP;
 import static ai.startree.thirdeye.spi.detection.AnomalyDetector.KEY_CURRENT;
@@ -31,7 +32,6 @@ import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessorFac
 import ai.startree.thirdeye.spi.detection.postprocessing.PostProcessingContext;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.HashSet;
 import java.util.List;
@@ -213,7 +213,7 @@ public class ThresholdPostProcessor implements AnomalyPostProcessor {
     @Override
     public AnomalyPostProcessor build(final Map<String, Object> params,
         final PostProcessingContext context) {
-      final ThresholdPostProcessorSpec spec = new ObjectMapper().convertValue(params,
+      final ThresholdPostProcessorSpec spec = VANILLA_OBJECT_MAPPER.convertValue(params,
           ThresholdPostProcessorSpec.class);
       return new ThresholdPostProcessor(spec);
     }

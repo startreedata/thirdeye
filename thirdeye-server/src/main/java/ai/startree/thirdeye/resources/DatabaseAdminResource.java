@@ -53,6 +53,7 @@ public class DatabaseAdminResource {
     return Response.ok(databaseAdminService.getTables(principal)).build();
   }
 
+  @Deprecated // fixme cyril remove this
   @GET
   @Path("execute-query")
   public Response executeQuery(@Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,

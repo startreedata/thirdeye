@@ -13,11 +13,11 @@
  */
 package ai.startree.thirdeye.plugins.rca.contributors.simple;
 
+import static ai.startree.thirdeye.spi.Constants.VANILLA_OBJECT_MAPPER;
 
 import ai.startree.thirdeye.spi.rca.ContributorsFinder;
 import ai.startree.thirdeye.spi.rca.ContributorsFinderContext;
 import ai.startree.thirdeye.spi.rca.ContributorsFinderFactory;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class SimpleContributorsFinderPluginFactory implements ContributorsFinderFactory {
@@ -29,7 +29,7 @@ public class SimpleContributorsFinderPluginFactory implements ContributorsFinder
 
   @Override
   public @NonNull ContributorsFinder build(final ContributorsFinderContext context) {
-    final SimpleConfiguration configuration = new ObjectMapper().convertValue(context.getParams(), SimpleConfiguration.class);
+    final SimpleConfiguration configuration = VANILLA_OBJECT_MAPPER.convertValue(context.getParams(), SimpleConfiguration.class);
 
     return new SimpleContributorsFinder(
         context.getAggregationLoader(),

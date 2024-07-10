@@ -1,3 +1,10 @@
+## [2.47.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.46.0...thirdeye-ui-2.47.0) (2024-07-09)
+
+
+### Features
+
+* [TE-2334](https://cortexdata.atlassian.net/browse/TE-2334) fix type error on view subscription groups page ([b87705f0b](https://github.com/startreedata/thirdeye/commit/b87705f0bb15c0acae2451d5b1c743f8a405f315))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

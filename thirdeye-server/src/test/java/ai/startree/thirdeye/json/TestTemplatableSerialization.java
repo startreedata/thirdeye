@@ -20,14 +20,12 @@ import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Objects;
 import org.testng.annotations.Test;
 
 public class TestTemplatableSerialization {
 
-  private static final ObjectMapper OBJECT_MAPPER = Constants.TEMPLATABLE_OBJECT_MAPPER;
   private static final String DOUBLE_QUOTE = "\"";
 
   @Test
@@ -37,7 +35,7 @@ public class TestTemplatableSerialization {
         variableProperty);
     final ObjectWithTemplatable obj = new ObjectWithTemplatable().setListOfStrings(templatable);
 
-    final String output = OBJECT_MAPPER.writeValueAsString(obj);
+    final String output = Constants.TEMPLATABLE_OBJECT_MAPPER.writeValueAsString(obj);
     assertThat(output).isEqualTo(String.format("{\"listOfStrings\":\"%s\"}", variableProperty));
   }
 
@@ -46,7 +44,7 @@ public class TestTemplatableSerialization {
     final String variableProperty = "${list}";
     final String jsonString = String.format("{\"listOfStrings\":\"%s\"}", variableProperty);
 
-    final ObjectWithTemplatable output = OBJECT_MAPPER.readValue(jsonString,
+    final ObjectWithTemplatable output = Constants.TEMPLATABLE_OBJECT_MAPPER.readValue(jsonString,
         ObjectWithTemplatable.class);
 
     final Templatable<List<String>> templatable = new Templatable<List<String>>().setTemplatedValue(
@@ -61,7 +59,7 @@ public class TestTemplatableSerialization {
     final String variableProperty = "NOT_VALID${list}";
     final String jsonString = String.format("{\"listOfStrings\":\"%s\"}", variableProperty);
 
-    assertThatThrownBy(() -> OBJECT_MAPPER.readValue(jsonString,
+    assertThatThrownBy(() -> Constants.TEMPLATABLE_OBJECT_MAPPER.readValue(jsonString,
         ObjectWithTemplatable.class)).isInstanceOf(
         JsonMappingException.class);
   }
@@ -72,7 +70,7 @@ public class TestTemplatableSerialization {
     final String variableProperty = "${list}";
     final String jsonString = DOUBLE_QUOTE + variableProperty + DOUBLE_QUOTE;
 
-    assertThatThrownBy(() -> OBJECT_MAPPER.readValue(jsonString, Templatable.class)).isInstanceOf(
+    assertThatThrownBy(() -> Constants.TEMPLATABLE_OBJECT_MAPPER.readValue(jsonString, Templatable.class)).isInstanceOf(
         IllegalArgumentException.class);
   }
 
@@ -83,7 +81,7 @@ public class TestTemplatableSerialization {
     final Templatable<List<String>> templatable = Templatable.of(value);
     final ObjectWithTemplatable obj = new ObjectWithTemplatable().setListOfStrings(templatable);
 
-    final String output = OBJECT_MAPPER.writeValueAsString(obj);
+    final String output = Constants.TEMPLATABLE_OBJECT_MAPPER.writeValueAsString(obj);
     assertThat(output).isEqualTo(String.format("{\"listOfStrings\":[\"%s\"]}", listElement));
   }
 
@@ -93,7 +91,7 @@ public class TestTemplatableSerialization {
     final List<String> value = List.of(listElement);
     final String jsonString = String.format("{\"listOfStrings\":[\"%s\"]}", listElement);
 
-    final ObjectWithTemplatable output = OBJECT_MAPPER.readValue(jsonString,
+    final ObjectWithTemplatable output = Constants.TEMPLATABLE_OBJECT_MAPPER.readValue(jsonString,
         ObjectWithTemplatable.class);
 
     final Templatable<List<String>> templatable = Templatable.of(value);
@@ -112,7 +110,7 @@ public class TestTemplatableSerialization {
     objectWithNestedTemplatable
         .setTemplatableNested(Templatable.of(obj));
 
-    final String output = OBJECT_MAPPER.writeValueAsString(objectWithNestedTemplatable);
+    final String output = Constants.TEMPLATABLE_OBJECT_MAPPER.writeValueAsString(objectWithNestedTemplatable);
     assertThat(output).isEqualTo(String.format(
         "{\"templatableNested\":{\"listOfStrings\":[\"%s\"]}}",
         listElement));
@@ -124,7 +122,7 @@ public class TestTemplatableSerialization {
     final List<String> value = List.of(listElement);
     final String jsonString = String.format("{\"templatableNested\":{\"listOfStrings\":[\"%s\"]}}",
         listElement);
-    final ObjectWithNestedTemplatable output = OBJECT_MAPPER.readValue(jsonString,
+    final ObjectWithNestedTemplatable output = Constants.TEMPLATABLE_OBJECT_MAPPER.readValue(jsonString,
         ObjectWithNestedTemplatable.class);
 
     // build expected object
@@ -144,7 +142,7 @@ public class TestTemplatableSerialization {
     objectWithNestedTemplatable
         .setTemplatableNested(new Templatable<ObjectWithTemplatable>().setTemplatedValue("${var}"));
 
-    final String output = OBJECT_MAPPER.writeValueAsString(objectWithNestedTemplatable);
+    final String output = Constants.TEMPLATABLE_OBJECT_MAPPER.writeValueAsString(objectWithNestedTemplatable);
     assertThat(output).isEqualTo("{\"templatableNested\":\"${var}\"}");
   }
 
@@ -153,7 +151,7 @@ public class TestTemplatableSerialization {
       throws JsonProcessingException {
     final String templatedValue = "${var}";
     final String jsonString = String.format("{\"templatableNested\":\"%s\"}", templatedValue);
-    final ObjectWithNestedTemplatable output = OBJECT_MAPPER.readValue(jsonString,
+    final ObjectWithNestedTemplatable output = Constants.TEMPLATABLE_OBJECT_MAPPER.readValue(jsonString,
         ObjectWithNestedTemplatable.class);
 
     // build expected object
@@ -175,7 +173,7 @@ public class TestTemplatableSerialization {
     objectWithNestedTemplatable
         .setTemplatableNested(Templatable.of(obj));
 
-    final String output = OBJECT_MAPPER.writeValueAsString(objectWithNestedTemplatable);
+    final String output = Constants.TEMPLATABLE_OBJECT_MAPPER.writeValueAsString(objectWithNestedTemplatable);
     assertThat(output).isEqualTo(String.format("{\"templatableNested\":{\"listOfStrings\":\"%s\"}}",
         templatedValue));
   }
@@ -184,7 +182,7 @@ public class TestTemplatableSerialization {
   public void testDeSerializationOfNestedTemplatablesWithNestedTemplatableTemplated() throws JsonProcessingException {
     final String templatedValue = "${var}";
     final String jsonString = String.format("{\"templatableNested\":{\"listOfStrings\":\"%s\"}}", templatedValue);
-    final ObjectWithNestedTemplatable output = OBJECT_MAPPER.readValue(jsonString,
+    final ObjectWithNestedTemplatable output = Constants.TEMPLATABLE_OBJECT_MAPPER.readValue(jsonString,
         ObjectWithNestedTemplatable.class);
 
     // build expected object

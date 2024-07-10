@@ -24,7 +24,6 @@ import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -44,7 +43,6 @@ public class TaskDao {
 
   private static final Logger LOG = LoggerFactory.getLogger(TaskDao.class);
   private static final boolean IS_DEBUG = LOG.isDebugEnabled();
-  private static final ObjectMapper OBJECT_MAPPER = Constants.TEMPLATABLE_OBJECT_MAPPER;
 
   private final DatabaseOrm databaseOrm;
   private final DatabaseClient databaseClient;
@@ -69,7 +67,7 @@ public class TaskDao {
   }
 
   private TaskDTO toDto(final TaskEntity entity) throws JsonProcessingException {
-    TaskDTO dto = OBJECT_MAPPER.readValue(entity.getJsonVal(), TaskDTO.class);
+    TaskDTO dto = Constants.TEMPLATABLE_OBJECT_MAPPER.readValue(entity.getJsonVal(), TaskDTO.class);
     dto.setId(entity.getId());
     dto.setCreateTime(entity.getCreateTime());
     dto.setUpdateTime(entity.getUpdateTime());
@@ -89,7 +87,7 @@ public class TaskDao {
   }
 
   private String toJsonString(final TaskDTO dto) throws JsonProcessingException {
-    return OBJECT_MAPPER.writeValueAsString(dto);
+    return Constants.TEMPLATABLE_OBJECT_MAPPER.writeValueAsString(dto);
   }
 
   public Long put(final TaskDTO pojo) {

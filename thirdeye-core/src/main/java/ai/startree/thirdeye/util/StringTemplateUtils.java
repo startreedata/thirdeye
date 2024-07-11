@@ -22,16 +22,16 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class StringTemplateUtils {
 
   private static final Logger LOG = LoggerFactory.getLogger(StringTemplateUtils.class);
+  // see explanation of the design in thirdeye-benchmarks/benchmark_notes
   private static final LinkedBlockingDeque<TemplateMapper> MAPPER_QUEUE = new LinkedBlockingDeque<>();
   private static final int NUM_MAPPERS = 8;
-  private static final int MAPPER_POLL_TIMEOUT_MILLIS = 10;
+  private static final int NUM_MAPPERS_WARNING = 12;
 
   static {
     for (int i = 0; i < NUM_MAPPERS; i++) {
@@ -42,34 +42,38 @@ public class StringTemplateUtils {
   @SuppressWarnings("unchecked")
   public static <T> T applyContext(final T template, final Map<String, Object> valuesMap)
       throws IOException {
-    // should never block - if this blocks, the number of templatableMapper should be made bigger
-    // check size, if zero an num instance created is small  
     TemplateMapper templateMapper = null;
     try {
-      templateMapper = MAPPER_QUEUE.pollLast(MAPPER_POLL_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
+      templateMapper = MAPPER_QUEUE.pollLast();
       if (templateMapper == null) {
-        // if this error happens to often it will create new objects infinitely (memory leak)
-        LOG.error(
-            "Failed to obtain a template mapper instance in less than {} milliseconds. Falling back to a slow code path. Please reach out to support.",
-            MAPPER_POLL_TIMEOUT_MILLIS);
-        // extremely slow code path - the template mapper will have no ser/deser cache
+        // the template mapper will have to build its ser/deser cache, so it will be slow at the beginning
         templateMapper = new TemplateMapper();
+        if (TemplateMapper.instanceNumber > NUM_MAPPERS_WARNING) {
+          // if this happens to often, there is a memory leak
+          LOG.error(
+              "Failed to obtain a template mapper instance. Current number of mapper instance: {}. Instantiating a new instance. Please reach out to support if the number of instance keeps growing.",
+              TemplateMapper.instanceNumber);
+        }
       }
       templateMapper.setValuesMap(valuesMap);
       // serialize as json - properties are applied during the serialization
       final String jsonString = templateMapper.writeValueAsString(template);
       return (T) templateMapper.readValue(jsonString, template.getClass());
-    } catch (InterruptedException e) {
-      throw new RuntimeException(e);
     } finally {
       if (templateMapper != null) {
-        MAPPER_QUEUE.add(templateMapper);
+        MAPPER_QUEUE.addLast(templateMapper);
       }
     }
   }
 
-  // not thread safe - should only be accessed by one thread at a time ! 
+  /**
+   * Delegate pattern on objectMapper with an additional method setValuesMap to update the values
+   * to inject when rendering templates.
+   * Not thread safe - should only be accessed by one thread at a time !
+   */
   private static class TemplateMapper {
+
+    private static int instanceNumber = 0;
 
     private final ObjectMapper objectMapper;
     private final TemplateEngineTemplatableSerializer templatableSerializer;
@@ -81,6 +85,7 @@ public class StringTemplateUtils {
       final Module module = new SimpleModule().addSerializer(Templatable.class,
           templatableSerializer).addSerializer(String.class, stringSerializer);
       objectMapper = new ObjectMapper().registerModule(module);
+      instanceNumber++;
     }
 
     private TemplateMapper setValuesMap(final Map<String, Object> valuesMap) {

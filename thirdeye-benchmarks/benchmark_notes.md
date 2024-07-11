@@ -1,3 +1,17 @@
+## How to run
+Build 
+```
+./mvnw clean install -DskipTests
+./mvnw clean verify -pl 'thirdeye-benchmarks'
+```
+
+Run benchmark
+```
+java -jar thirdeye-benchmarks/target/benchmarks.jar
+# or with a regex filter on ClassName.methodName
+java -jar thirdeye-benchmarks/target/benchmarks.jar applyContext 
+```
+
 ## Speed-Optimizations
 ### 1 - StringTemplateUtils - Template properties
 Problem: StringTemplateUtils#applyContext - the method to apply properties to template - was extremely slow.

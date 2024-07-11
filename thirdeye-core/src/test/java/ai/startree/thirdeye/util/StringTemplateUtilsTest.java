@@ -217,7 +217,7 @@ public class StringTemplateUtilsTest {
 
   @Test
   public void testTemplateRenderingWithRecursiveVariablesForApacheCommons()
-      throws IOException, ClassNotFoundException {
+      throws IOException {
     final String alertTemplateDtoString = IOUtils.resourceToString("/alertTemplateDto.json",
         StandardCharsets.UTF_8);
     final AlertTemplateDTO template = Constants.TEMPLATABLE_OBJECT_MAPPER

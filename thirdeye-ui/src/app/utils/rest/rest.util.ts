@@ -67,15 +67,15 @@ export const getErrorMessages = (error: AxiosError): ErrorMessage[] => {
             "errors.authentication-failed"
         ),
         [ErrorCode.ERR_ALERT_PIPELINE_EXECUTION]: i18next.t(
-            "errors.pipeline-execution-failed"
+            "errors.anomaly-detection-execution-failed"
         ),
         [ErrorCode.ERR_AUTH_SERVER_NOT_RESPONDING]: i18next.t(
             "errors.auth-server-not-responding"
         ),
         [ErrorCode.ERR_CONFIG]: i18next.t("errors.configuration-error"),
-        [ErrorCode.ERR_CRON_INVALID]: i18next.t("errors.cron-invalid"),
+        [ErrorCode.ERR_CRON_INVALID]: i18next.t("errors.monitoring-invalid"),
         [ErrorCode.ERR_CRON_FREQUENCY_TOO_HIGH]: i18next.t(
-            "errors.cron-frequency-too-high"
+            "errors.monitoring-frequency-too-high"
         ),
         [ErrorCode.ERR_DATASET_NOT_FOUND]: i18next.t(
             "errors.dataset-not-found"

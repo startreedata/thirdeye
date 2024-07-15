@@ -15,6 +15,14 @@
 import { makeStyles } from "@material-ui/core";
 
 export const useNotificationDisplayV1Styles = makeStyles((theme) => ({
+    buttonContainer: {
+        display: "flex",
+        width: "50%",
+        justifyContent: "space-evenly",
+        "& button": {
+            backgroundColor: "#0c5394",
+        },
+    },
     notificationActionVisible: {
         display: "flex",
     },
@@ -23,15 +31,16 @@ export const useNotificationDisplayV1Styles = makeStyles((theme) => ({
     },
     snackBarContainer: {
         maxWidth: "90vw",
+        minWidth: "500px",
         overflowWrap: "break-word",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
     },
-    switchContainer: {
+    container: {
         marginTop: theme.spacing(2),
-    },
-    switchLabel: {
-        padding: theme.spacing(1),
-    },
-    switchLabelLabel: {
-        fontWeight: "bold",
+        justifyContent: "center",
+        display: "flex",
+        width: "100%",
     },
 }));

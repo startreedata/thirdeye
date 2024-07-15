@@ -105,6 +105,7 @@ public class SelectQueryTranslatorTest {
     final SelectQueryTranslator request = builder.build();
     final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
 
+    // the * should not be quoted 
     final String expected = String.format("SELECT COUNT(*) FROM \"%s\".\"%s\"",
         DATABASE,
         TABLE);

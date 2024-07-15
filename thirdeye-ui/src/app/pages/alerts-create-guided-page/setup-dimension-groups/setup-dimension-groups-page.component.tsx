@@ -23,7 +23,6 @@ import {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useOutletContext } from "react-router-dom";
-import { generateTemplateProperties } from "../../../components/alert-wizard-v3/threshold-setup/threshold-setup.utils";
 import { CohortsTable } from "../../../components/cohort-detector/cohorts-table/cohorts-table.component";
 import { CohortTableRowData } from "../../../components/cohort-detector/cohorts-table/cohorts-table.interfaces";
 import {
@@ -207,22 +206,22 @@ export const SetupDimensionGroupsPage: FunctionComponent = () => {
                             "message.automatically-detects-dimensions-based-on-your-selection"
                         )}
                         title={t("label.dimensions-recommender")}
-                        onMetricSelect={(
-                            metric,
-                            dataset,
-                            aggregationFunction
-                        ) => {
-                            onAlertPropertyChange({
-                                templateProperties: {
-                                    ...alert.templateProperties,
-                                    ...generateTemplateProperties(
-                                        metric,
-                                        dataset,
-                                        aggregationFunction
-                                    ),
-                                },
-                            });
-                        }}
+                        // onMetricSelect={(
+                        //     metric,
+                        //     dataset,
+                        //     aggregationFunction
+                        // ) => {
+                        //     onAlertPropertyChange({
+                        //         templateProperties: {
+                        //             ...alert.templateProperties,
+                        //             ...generateTemplateProperties(
+                        //                 metric,
+                        //                 dataset,
+                        //                 aggregationFunction
+                        //             ),
+                        //         },
+                        //     });
+                        // }}
                         onSearchButtonClick={handleSearchButtonClick}
                     />
                 </Grid>
@@ -231,10 +230,10 @@ export const SetupDimensionGroupsPage: FunctionComponent = () => {
                         cohortsData={cohortsResponse}
                         getCohortsRequestStatus={status}
                         initiallySelectedCohorts={initiallySelectedCohorts}
-                        subtitle={t(
-                            "message.select-the-dimensions-and-create-a-multi-dimension-alert"
-                        )}
-                        title={t("label.dimensions-and-outliers-results")}
+                        // subtitle={t(
+                        //     "message.select-the-dimensions-and-create-a-multi-dimension-alert"
+                        // )}
+                        // title={t("label.dimensions-and-outliers-results")}
                         onSelectionChange={handleCohortsSelectionChange}
                     >
                         <Box textAlign="right">

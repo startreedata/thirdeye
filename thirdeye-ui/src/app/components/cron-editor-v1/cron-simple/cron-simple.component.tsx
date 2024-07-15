@@ -37,6 +37,7 @@ import {
 export const CronSimple: FunctionComponent<CronSimpleProps> = ({
     value,
     onChange,
+    fullWidth = false,
 }) => {
     const { t } = useTranslation();
 
@@ -121,6 +122,7 @@ export const CronSimple: FunctionComponent<CronSimpleProps> = ({
     return (
         <>
             <InputSection
+                fullWidth={fullWidth}
                 inputComponent={
                     <>
                         {DAY_STRING_TO_IDX.map((dayString, idx) => {
@@ -147,6 +149,7 @@ export const CronSimple: FunctionComponent<CronSimpleProps> = ({
             />
 
             <InputSection
+                fullWidth={fullWidth}
                 inputComponent={
                     <Grid container>
                         <Grid item xs={4}>

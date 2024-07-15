@@ -15,7 +15,6 @@
 import {
     Box,
     Button,
-    Divider,
     FormHelperText,
     Grid,
     TextField,
@@ -25,27 +24,23 @@ import { Autocomplete } from "@material-ui/lab";
 import { sortBy } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { PageContentsCardV1 } from "../../../platform/components";
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { useGetAlertInsight } from "../../../rest/alerts/alerts.actions";
 import { useGetDatasets } from "../../../rest/datasets/datasets.actions";
 import { useGetDatasources } from "../../../rest/datasources/datasources.actions";
-import { Dataset } from "../../../rest/dto/dataset.interfaces";
 import { MetricAggFunction } from "../../../rest/dto/metric.interfaces";
 import { useGetMetrics } from "../../../rest/metrics/metrics.actions";
 import { createAlertConfigForInsights } from "../../../utils/cohort-detector/cohort-detector.util";
 import {
     buildPinotDatasourcesTree,
     DatasetInfo,
-    STAR_COLUMN,
 } from "../../../utils/datasources/datasources.util";
 import { generateDateRangeMonthsFromNow } from "../../../utils/routes/routes.util";
 import {
     SessionStorageKeys,
     useSessionStorage,
 } from "../../../utils/storage/use-session-storage";
-import { useAlertWizardV2Styles } from "../../alert-wizard-v2/alert-wizard-v2.styles";
-import { InputSection } from "../../form-basics/input-section/input-section.component";
+import { InputSectionV2 } from "../../form-basics/input-section-v2/input-section-v2.component";
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { TimeRangeSelectorButton } from "../../time-range/v2/time-range-selector-button/time-range-selector-button.component";
 import { DatasetDetailsProps } from "./dataset-details.interfaces";
@@ -55,8 +50,6 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
     subtitle,
     submitButtonLabel,
     onSearchButtonClick,
-    onMetricSelect,
-    onAggregationFunctionSelect,
     initialSelectedMetric,
     initialSelectedDataset,
     initialSelectedDatasource,
@@ -81,7 +74,6 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
     } = useGetAlertInsight();
     const { metrics, getMetrics, status: getMetricsStatus } = useGetMetrics();
     const { t } = useTranslation();
-    const classes = useAlertWizardV2Styles();
 
     const [datasetsInfo, setDatasetsInfo] = useState<DatasetInfo[] | null>(
         null
@@ -232,7 +224,7 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
     };
 
     return (
-        <PageContentsCardV1>
+        <>
             <LoadingErrorStateSwitch
                 isError={
                     getDatasourcesStatus === ActionStatus.Error ||
@@ -244,7 +236,7 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
                 <Grid container>
                     <Grid item xs={12}>
                         <Box marginBottom={2}>
-                            <Typography variant="h5">{title}</Typography>
+                            <Typography variant="h6">{title}</Typography>
                             {subtitle && (
                                 <Typography variant="body2">
                                     {subtitle}
@@ -252,248 +244,62 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
                             )}
                         </Box>
                     </Grid>
-
-                    <InputSection
-                        inputComponent={
-                            <Autocomplete<DatasetInfo>
-                                fullWidth
-                                getOptionLabel={(option) =>
-                                    option.dataset.name as string
-                                }
-                                noOptionsText={t(
-                                    "message.no-options-available-entity",
-                                    {
-                                        entity: t("label.dataset"),
-                                    }
-                                )}
-                                options={datasetsInfo || []}
-                                renderInput={(params) => (
-                                    <TextField
-                                        {...params}
-                                        InputProps={{
-                                            ...params.InputProps,
-                                            // Override class name so the size of input is smaller
-                                            className:
-                                                classes.autoCompleteInput,
-                                        }}
-                                        placeholder={t(
-                                            "message.select-dataset"
-                                        )}
-                                        variant="outlined"
-                                    />
-                                )}
-                                renderOption={(
-                                    option: DatasetInfo
-                                ): JSX.Element => {
-                                    return (
-                                        <li>
-                                            <Typography variant="h6">
-                                                {option.dataset.name}
-                                            </Typography>
-                                            <Typography variant="caption">
-                                                From{" "}
-                                                <strong>
-                                                    {option.datasource}
-                                                </strong>{" "}
-                                                datasource with{" "}
-                                                <strong>
-                                                    {option.metrics.length}
-                                                </strong>{" "}
-                                                metrics
-                                            </Typography>
-                                        </li>
-                                    );
-                                }}
-                                value={selectedTable}
-                                onChange={(_, selectedTableInfo) => {
-                                    if (!selectedTableInfo) {
-                                        return;
-                                    }
-
-                                    setSelectedDimensions([]);
-                                    setSelectedMetric(null);
-                                    setSelectedTable(selectedTableInfo);
-                                    setShouldFetchInsight(true);
-                                }}
-                            />
-                        }
-                        label={t("label.dataset")}
-                    />
-
-                    <InputSection
-                        inputComponent={
-                            <Autocomplete<string>
-                                fullWidth
-                                disabled={!selectedTable}
-                                noOptionsText={t(
-                                    "message.no-options-available-entity",
-                                    {
-                                        entity: t("label.metric"),
-                                    }
-                                )}
-                                options={
-                                    selectedTable
-                                        ? selectedTable.metrics.map(
-                                              (m) => m.name
-                                          )
-                                        : []
-                                }
-                                renderInput={(params) => (
-                                    <TextField
-                                        {...params}
-                                        InputProps={{
-                                            ...params.InputProps,
-                                            // Override class name so the size of input is smaller
-                                            className:
-                                                classes.autoCompleteInput,
-                                        }}
-                                        placeholder={
-                                            !selectedTable
-                                                ? t(
-                                                      "message.select-dataset-first"
-                                                  )
-                                                : t("message.select-metric")
+                    <Grid item xs={6}>
+                        <InputSectionV2
+                            inputComponent={
+                                <Autocomplete
+                                    fullWidth
+                                    multiple
+                                    disabled={!selectedTable}
+                                    noOptionsText={t(
+                                        "message.no-options-available-entity",
+                                        {
+                                            entity: t("label.dimensions"),
                                         }
-                                        variant="outlined"
-                                    />
-                                )}
-                                value={selectedMetric}
-                                onChange={(_, metric) => {
-                                    if (metric) {
-                                        const isStartColumn =
-                                            metric === STAR_COLUMN;
-
-                                        setSelectedMetric(metric);
-
-                                        if (isStartColumn) {
-                                            setSelectedAggregationFunction(
-                                                MetricAggFunction.COUNT
-                                            );
-                                        }
-
-                                        onMetricSelect?.(
-                                            metric,
-                                            selectedTable?.dataset as Dataset,
-                                            isStartColumn
-                                                ? MetricAggFunction.COUNT
-                                                : selectedAggregationFunction
-                                        );
+                                    )}
+                                    options={
+                                        selectedTable
+                                            ? selectedTable.dimensions
+                                            : []
                                     }
-                                }}
-                            />
-                        }
-                        label={t("label.metric")}
-                    />
+                                    renderInput={(params) => (
+                                        <TextField
+                                            error={
+                                                !!selectedTable &&
+                                                !!selectedMetric &&
+                                                selectedDimensions.length === 0
+                                            }
+                                            {...params}
+                                            InputProps={{
+                                                ...params.InputProps,
+                                            }}
+                                            placeholder={
+                                                !selectedTable
+                                                    ? t(
+                                                          "message.select-dataset-first"
+                                                      )
+                                                    : t(
+                                                          "message.select-dimensions"
+                                                      )
+                                            }
+                                            variant="outlined"
+                                        />
+                                    )}
+                                    value={selectedDimensions}
+                                    onChange={(_, dimensions) => {
+                                        setSelectedDimensions(dimensions || []);
 
-                    <InputSection
-                        inputComponent={
-                            <Autocomplete
-                                disableClearable
-                                fullWidth
-                                disabled={selectedMetric === STAR_COLUMN}
-                                options={
-                                    selectedMetric === STAR_COLUMN
-                                        ? [MetricAggFunction.COUNT]
-                                        : [
-                                              MetricAggFunction.SUM,
-                                              MetricAggFunction.COUNT,
-                                          ]
-                                }
-                                renderInput={(params) => (
-                                    <TextField
-                                        {...params}
-                                        InputProps={{
-                                            ...params.InputProps,
-                                            // Override class name so the size of input is smaller
-                                            className:
-                                                classes.autoCompleteInput,
-                                        }}
-                                        placeholder={t(
-                                            "message.select-aggregation-function"
-                                        )}
-                                        variant="outlined"
-                                    />
-                                )}
-                                value={selectedAggregationFunction}
-                                onChange={(_, aggregationFunction) => {
-                                    if (aggregationFunction) {
-                                        setSelectedAggregationFunction(
-                                            aggregationFunction as MetricAggFunction
-                                        );
-                                        onAggregationFunctionSelect?.(
-                                            aggregationFunction as MetricAggFunction
-                                        );
-                                    }
-                                }}
-                            />
-                        }
-                        label={`${t("label.aggregation-function")}`}
-                    />
-
-                    <Grid item xs={12}>
-                        <Divider />
+                                        // Update selection in storage as well in case the
+                                        // user returns to this page in the same flow
+                                        setStoredDimensions(dimensions || []);
+                                    }}
+                                />
+                            }
+                            label={`${t("label.dimensions")}`}
+                        />
                     </Grid>
-
-                    <InputSection
-                        inputComponent={
-                            <Autocomplete
-                                fullWidth
-                                multiple
-                                disabled={!selectedTable}
-                                noOptionsText={t(
-                                    "message.no-options-available-entity",
-                                    {
-                                        entity: t("label.dimensions"),
-                                    }
-                                )}
-                                options={
-                                    selectedTable
-                                        ? selectedTable.dimensions
-                                        : []
-                                }
-                                renderInput={(params) => (
-                                    <TextField
-                                        error={
-                                            !!selectedTable &&
-                                            !!selectedMetric &&
-                                            selectedDimensions.length === 0
-                                        }
-                                        {...params}
-                                        InputProps={{
-                                            ...params.InputProps,
-                                        }}
-                                        placeholder={
-                                            !selectedTable
-                                                ? t(
-                                                      "message.select-dataset-first"
-                                                  )
-                                                : t("message.select-dimensions")
-                                        }
-                                        variant="outlined"
-                                    />
-                                )}
-                                value={selectedDimensions}
-                                onChange={(_, dimensions) => {
-                                    setSelectedDimensions(dimensions || []);
-
-                                    // Update selection in storage as well in case the
-                                    // user returns to this page in the same flow
-                                    setStoredDimensions(dimensions || []);
-                                }}
-                            />
-                        }
-                        label={`${t("label.dimensions")}`}
-                    />
-
-                    <Grid item xs={12}>
-                        <Divider />
-                    </Grid>
-
-                    <Grid item xs={12}>
-                        <InputSection
-                            helperLabel={t(
-                                "message.select-a-date-range-to-filter-data-by"
-                            )}
+                    <Grid item xs={6}>
+                        <InputSectionV2
                             inputComponent={
                                 <TimeRangeSelectorButton
                                     fullWidth
@@ -523,57 +329,52 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
                             label={t("label.date-range")}
                         />
                     </Grid>
-
-                    <Grid item xs={12}>
-                        <Divider />
+                    <Grid item xs={6}>
+                        <InputSectionV2
+                            helperLabel={`(${t("label.optional")})`}
+                            inputComponent={
+                                <>
+                                    <TextField
+                                        fullWidth
+                                        type="text"
+                                        value={queryValue}
+                                        onChange={(e) => {
+                                            setQueryValue(
+                                                e.currentTarget.value
+                                            );
+                                        }}
+                                    />
+                                    <FormHelperText>
+                                        {t("message.query-example")}
+                                    </FormHelperText>
+                                </>
+                            }
+                            label={`${t("label.query-filter")}`}
+                        />
                     </Grid>
-
-                    <InputSection
-                        helperLabel={`(${t("label.optional")})`}
-                        inputComponent={
-                            <>
-                                <TextField
-                                    fullWidth
-                                    type="text"
-                                    value={queryValue}
-                                    onChange={(e) => {
-                                        setQueryValue(e.currentTarget.value);
-                                    }}
-                                />
-                                <FormHelperText>
-                                    {t("message.query-example")}
-                                </FormHelperText>
-                            </>
-                        }
-                        label={`${t("label.query-filter")}`}
-                    />
-
-                    <Grid item xs={12}>
-                        <Divider />
+                    <Grid item xs={6}>
+                        <InputSectionV2
+                            helperLabel={t("message.find-dimensions-that-are")}
+                            inputComponent={
+                                <>
+                                    <TextField
+                                        fullWidth
+                                        type="number"
+                                        value={selectedPercentageFilter}
+                                        onChange={(e) => {
+                                            setSelectedPercentageFilter(
+                                                Number(e.currentTarget.value)
+                                            );
+                                        }}
+                                    />
+                                </>
+                            }
+                            label={`${t(
+                                "label.contribution-percentage-for-the-selected-metrics"
+                            )}`}
+                        />
                     </Grid>
-
-                    <InputSection
-                        helperLabel={t("message.find-dimensions-that-are")}
-                        inputComponent={
-                            <>
-                                <TextField
-                                    fullWidth
-                                    type="number"
-                                    value={selectedPercentageFilter}
-                                    onChange={(e) => {
-                                        setSelectedPercentageFilter(
-                                            Number(e.currentTarget.value)
-                                        );
-                                    }}
-                                />
-                            </>
-                        }
-                        label={`${t(
-                            "label.contribution-percentage-for-the-selected-metrics"
-                        )}`}
-                    />
-
-                    <InputSection
+                    <InputSectionV2
                         inputComponent={
                             <Box>
                                 <Button
@@ -592,6 +393,6 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
                     />
                 </Grid>
             </LoadingErrorStateSwitch>
-        </PageContentsCardV1>
+        </>
     );
 };

@@ -29,6 +29,7 @@ export const PreviewChartHeader: FunctionComponent<PreviewChartHeaderProps> = ({
     onReloadClick,
     onStartEndChange,
     showConfigurationNotReflective,
+    showTimeRange = true,
 }) => {
     const { t } = useTranslation();
 
@@ -60,16 +61,18 @@ export const PreviewChartHeader: FunctionComponent<PreviewChartHeaderProps> = ({
                             </Grid>
                         )}
                     <Grid item>
-                        <TimeRangeButtonWithContext
-                            hideQuickExtend
-                            btnGroupColor="primary"
-                            maxDate={alertInsight?.datasetEndTime}
-                            minDate={alertInsight?.datasetStartTime}
-                            timezone={determineTimezoneFromAlertInEvaluation(
-                                alertInsight?.templateWithProperties
-                            )}
-                            onTimeRangeChange={onStartEndChange}
-                        />
+                        {showTimeRange && (
+                            <TimeRangeButtonWithContext
+                                hideQuickExtend
+                                btnGroupColor="primary"
+                                maxDate={alertInsight?.datasetEndTime}
+                                minDate={alertInsight?.datasetStartTime}
+                                timezone={determineTimezoneFromAlertInEvaluation(
+                                    alertInsight?.templateWithProperties
+                                )}
+                                onTimeRangeChange={onStartEndChange}
+                            />
+                        )}
                     </Grid>
                 </Grid>
             )}

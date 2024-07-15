@@ -93,6 +93,18 @@ const AlertsCreateGuidedRouter = lazy(() =>
     ).then((module) => ({ default: module.AlertsCreateGuidedRouter }))
 );
 
+const AlertsCreateEasyPage = lazy(() =>
+    import(
+        /* webpackChunkName: "alerts-create-advanced-page" */ "../../pages/alerts-create-page/alerts-create-easy-page/alerts-create-easy-page.component"
+    ).then((module) => ({ default: module.AlertsCreateEasyPage }))
+);
+
+const CreateAlertGuidedPage = lazy(() =>
+    import(
+        /* webpackChunkName: "create-alert-guided-page" */ "../../pages/alerts-create-guided-page/alerts-create-guided-page.component"
+    ).then((module) => ({ default: module.CreateAlertGuidedPage }))
+);
+
 export const AlertsRouter: FunctionComponent = () => {
     const { t } = useTranslation();
 
@@ -275,6 +287,15 @@ export const AlertsRouter: FunctionComponent = () => {
                         element={<AlertsUpdateBasePage />}
                         path={AppRouteRelative.ALERTS_UPDATE}
                     >
+                        <Route
+                            element={<CreateAlertGuidedPage />}
+                            path={AppRouteRelative.ALERTS_UPDATE_SIMPLE}
+                        >
+                            <Route
+                                element={<AlertsCreateEasyPage />}
+                                path={AppRouteRelative.ALERTS_CREATE_EASY_ALERT}
+                            />
+                        </Route>
                         <Route
                             index
                             element={

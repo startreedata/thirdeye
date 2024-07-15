@@ -1,0 +1,1134 @@
+/*
+ * Copyright 2023 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ *
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
+import {
+    Box,
+    Button,
+    Divider,
+    Grid,
+    TextField,
+    Typography,
+} from "@material-ui/core";
+import { Alert, AlertTitle, Autocomplete } from "@material-ui/lab";
+import DoneAllIcon from "@material-ui/icons/DoneAll";
+import { toLower } from "lodash";
+import { DateTime, Duration } from "luxon";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import {
+    useNavigate,
+    useOutletContext,
+    useSearchParams,
+} from "react-router-dom";
+import { createNewStartingAlert } from "../../../components/alert-wizard-v2/alert-template/alert-template.utils";
+import { AvailableAlgorithmOption } from "../../../components/alert-wizard-v3/alert-type-selection/alert-type-selection.interfaces";
+import { generateAvailableAlgorithmOptions } from "../../../components/alert-wizard-v3/alert-type-selection/alert-type-selection.utils";
+import {
+    generateTemplateProperties,
+    GranularityValue,
+    GRANULARITY_OPTIONS,
+} from "../../../components/alert-wizard-v3/select-metric/select-metric.utils";
+import { ThresholdSetup } from "../../../components/alert-wizard-v3/threshold-setup/threshold-setup.component";
+import { InputSectionV2 } from "../../../components/form-basics/input-section-v2/input-section-v2.component";
+import { RadioSection } from "../../../components/form-basics/radio-section/radio-section.component";
+import { RadioSectionOptions } from "../../../components/form-basics/radio-section/radio-section.interfaces";
+import { TimeRangeButtonWithContext } from "../../../components/time-range/time-range-button-with-context/time-range-button.component";
+import { TimeRangeQueryStringKey } from "../../../components/time-range/time-range-provider/time-range-provider.interfaces";
+import {
+    PageContentsCardV1,
+    PageContentsGridV1,
+    PageHeaderActionsV1,
+} from "../../../platform/components";
+import { ColorV1 } from "../../../platform/utils/material-ui/color.util";
+import { useGetEvaluation } from "../../../rest/alerts/alerts.actions";
+import { AlertTemplate } from "../../../rest/dto/alert-template.interfaces";
+import {
+    EditableAlert,
+    TemplatePropertiesObject,
+} from "../../../rest/dto/alert.interfaces";
+import {
+    AnomalyDetectionOptions,
+    MetricAggFunction,
+} from "../../../rest/dto/metric.interfaces";
+import {
+    createAlertEvaluation,
+    determineTimezoneFromAlertInEvaluation,
+} from "../../../utils/alerts/alerts.util";
+import {
+    DatasetInfo,
+    STAR_COLUMN,
+} from "../../../utils/datasources/datasources.util";
+import { useGetDatasourcesTree } from "../../../utils/datasources/use-get-datasources-tree.util";
+import { AlertCreatedGuidedPageOutletContext } from "../../alerts-create-guided-page/alerts-create-guided-page.interfaces";
+import { AlertCompositeFiltersModal } from "../../../components/alert-composite-filters-modal/alert-composite-filters-modal.component";
+import { CreateAlertModal } from "../../../components/create-alert-modal/create-alert-modal.component";
+import { HelpDrawerV1 } from "../../../components/help-drawer-v1/help-drawer-v1.component";
+import { alertsBasicHelpCards } from "../../../components/help-drawer-v1/help-drawer-card-contents.utils";
+import { Icon } from "@iconify/react";
+import { getAlertsAllPath } from "../../../utils/routes/routes.util";
+const PROPERTIES_TO_COPY = [
+    "dataSource",
+    "dataset",
+    "aggregationColumn",
+    "aggregationFunction",
+    "monitoringGranularity",
+    "enumerationItems",
+    "queryFilters",
+];
+
+const ALERT_TEMPLATE_FOR_EVALUATE = "startree-threshold";
+const ALERT_TEMPLATE_FOR_EVALUATE_DX = "startree-threshold-dx";
+
+export const AlertsCreateEasyPage: FunctionComponent = () => {
+    const { t } = useTranslation();
+    const navigate = useNavigate();
+
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [startTime, endTime] = useMemo(
+        () => [
+            Number(searchParams.get(TimeRangeQueryStringKey.START_TIME)),
+            Number(searchParams.get(TimeRangeQueryStringKey.END_TIME)),
+        ],
+        [searchParams]
+    );
+
+    const {
+        onAlertPropertyChange,
+        alertTemplates,
+        isMultiDimensionAlert,
+        alertInsight,
+        alertRecommendations,
+        alert,
+    } = useOutletContext<AlertCreatedGuidedPageOutletContext>();
+    const { datasetsInfo } = useGetDatasourcesTree();
+
+    const [selectedTable, setSelectedTable] = useState<DatasetInfo | null>(
+        null
+    );
+    const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
+    const [aggregationFunction, setAggregationFunction] = useState<
+        string | null
+    >(null);
+    const [granularity, setGranularity] = useState<GranularityValue | null>(
+        null
+    );
+    const [anomalyDetection, setAnomalyDetection] = useState<string | null>(
+        null
+    );
+
+    const [algorithmOption, setAlgorithmOption] =
+        useState<AvailableAlgorithmOption | null>(null);
+
+    const [compositeFilters, setCompositeFilters] =
+        useState<TemplatePropertiesObject | null>(null);
+    const [openCompositeFilterModal, setOpenCompositeFilterModal] =
+        useState(false);
+    const [openCreateAlertModal, setOpenCreateAlertModal] = useState(false);
+
+    useEffect(() => {
+        if (alert.templateProperties?.dataset && datasetsInfo) {
+            const dataSource =
+                datasetsInfo.find(
+                    (item) =>
+                        alert.templateProperties?.dataset === item.dataset.name
+                ) || null;
+            if (dataSource) {
+                setSelectedTable(dataSource);
+                setSelectedMetric(
+                    dataSource.metrics.find(
+                        (item) =>
+                            item.name ===
+                            alert.templateProperties?.aggregationColumn
+                    )?.name || null
+                );
+                setAggregationFunction(
+                    alert.templateProperties.aggregationFunction as string
+                );
+                setGranularity(
+                    alert.templateProperties
+                        .monitoringGranularity as GranularityValue
+                );
+                setAlgorithmOption(
+                    recommendedAlertTemplateFirst.find((item) => {
+                        const name = isMultiDimensionAlert
+                            ? item.algorithmOption
+                                  .alertTemplateForMultidimension
+                            : item.algorithmOption.alertTemplate;
+
+                        return alert.template?.name === name;
+                    }) || null
+                );
+                setAnomalyDetection(
+                    alert.templateProperties.enumerationItems
+                        ? AnomalyDetectionOptions.COMPOSITE
+                        : AnomalyDetectionOptions.SINGLE
+                );
+                setCompositeFilters(alert.templateProperties);
+            }
+        }
+    }, [datasetsInfo]);
+
+    const isCreateButtonDisabled = useMemo(
+        () =>
+            !selectedTable ||
+            !selectedMetric ||
+            !aggregationFunction ||
+            !granularity ||
+            !anomalyDetection ||
+            !algorithmOption,
+        [
+            selectedTable,
+            selectedMetric,
+            aggregationFunction,
+            granularity,
+            anomalyDetection,
+            algorithmOption,
+        ]
+    );
+    const alertTemplateForEvaluate = useMemo(() => {
+        const alertTemplateToFind = isMultiDimensionAlert
+            ? ALERT_TEMPLATE_FOR_EVALUATE_DX
+            : ALERT_TEMPLATE_FOR_EVALUATE;
+
+        return alertTemplates.find((alertTemplateCandidate) => {
+            return alertTemplateCandidate.name === alertTemplateToFind;
+        });
+    }, [alertTemplates, alert, isMultiDimensionAlert]);
+
+    const handleGranularityChange = (item: GranularityValue): void => {
+        const prevGranularity = granularity;
+        setGranularity(item);
+        if (
+            prevGranularity &&
+            granularity &&
+            !Duration.fromISO(granularity).equals(
+                Duration.fromISO(prevGranularity)
+            )
+        ) {
+            const newStartTime = startTime;
+            let newEndTime = DateTime.fromMillis(newStartTime)
+                .plus({
+                    milliseconds: Duration.fromISO(granularity).toMillis() * 30,
+                })
+                .toMillis();
+
+            if (alertInsight?.datasetEndTime) {
+                newEndTime = Math.min(newEndTime, alertInsight?.datasetEndTime);
+            }
+
+            searchParams.set(
+                TimeRangeQueryStringKey.START_TIME,
+                newStartTime.toString()
+            );
+            searchParams.set(
+                TimeRangeQueryStringKey.END_TIME,
+                newEndTime.toString()
+            );
+
+            setSearchParams(searchParams);
+        }
+    };
+    const getGranularityOptions = (
+        values: {
+            label: string;
+            value: GranularityValue;
+        }[]
+    ): RadioSectionOptions[] => {
+        const options: RadioSectionOptions[] = [];
+        values.map((item) =>
+            options.push({
+                value: item.value,
+                label: item.label,
+                onClick: () => handleGranularityChange(item.value),
+                tooltipText: item.label,
+            })
+        );
+
+        return options.reverse();
+    };
+
+    const getAggregationOptions = (
+        values: Array<string>
+    ): RadioSectionOptions[] => {
+        const options: RadioSectionOptions[] = [];
+        values.map((item) =>
+            options.push({
+                value: item,
+                label: item,
+                onClick: () => setAggregationFunction(item),
+                tooltipText: item,
+            })
+        );
+
+        return options;
+    };
+
+    const handleAnomalyDetectionChange = (item: string): void => {
+        const copied = { ...alert };
+        delete copied.templateProperties?.queryFilters;
+        delete copied.templateProperties?.enumerationItems;
+        setAlertConfigForPreview(copied);
+        onAlertPropertyChange(copied);
+        setAnomalyDetection(item);
+    };
+
+    const getAnomalyDetectionOptions = (
+        values: Array<string>
+    ): RadioSectionOptions[] => {
+        const options: RadioSectionOptions[] = [];
+        values.map((item) =>
+            options.push({
+                value: item,
+                label: item,
+                onClick: () => handleAnomalyDetectionChange(item),
+                tooltipText: item,
+            })
+        );
+
+        return options;
+    };
+
+    const recommendedAlertTemplate = useMemo(() => {
+        if (alertRecommendations && alertRecommendations.length > 0) {
+            return alertRecommendations[0]?.alert.template?.name;
+        }
+
+        return undefined;
+    }, [alertRecommendations]);
+
+    const alertTemplateOptions = useMemo(() => {
+        return generateAvailableAlgorithmOptions(
+            alertTemplates.map((a: AlertTemplate) => a.name)
+        ).filter((option) =>
+            isMultiDimensionAlert
+                ? option.hasMultidimension
+                : option.hasAlertTemplate
+        );
+    }, [alertTemplates]);
+
+    const recommendedAlertTemplateFirst = useMemo(() => {
+        const cloned = alertTemplateOptions.filter((c) => {
+            return isMultiDimensionAlert
+                ? c.algorithmOption.alertTemplateForMultidimension !==
+                      recommendedAlertTemplate
+                : c.algorithmOption.alertTemplate !== recommendedAlertTemplate;
+        });
+
+        const recommendedAlertTemplateOption = alertTemplateOptions.find(
+            (c) => {
+                return isMultiDimensionAlert
+                    ? c.algorithmOption.alertTemplateForMultidimension ===
+                          recommendedAlertTemplate
+                    : c.algorithmOption.alertTemplate ===
+                          recommendedAlertTemplate;
+            }
+        );
+
+        if (recommendedAlertTemplateOption) {
+            cloned.unshift(recommendedAlertTemplateOption);
+        }
+
+        return cloned;
+    }, [alertTemplates, recommendedAlertTemplate]);
+
+    useEffect(() => {
+        if (
+            selectedMetric &&
+            selectedTable &&
+            granularity &&
+            aggregationFunction &&
+            algorithmOption
+        ) {
+            onAlertPropertyChange({
+                template: {
+                    name: isMultiDimensionAlert
+                        ? algorithmOption.algorithmOption
+                              .alertTemplateForMultidimension
+                        : algorithmOption.algorithmOption.alertTemplate,
+                },
+                templateProperties: {
+                    ...alert.templateProperties,
+                    ...generateTemplateProperties(
+                        selectedMetric,
+                        selectedTable?.dataset,
+                        aggregationFunction,
+                        granularity
+                    ),
+                },
+            });
+            handleReloadPreviewClick();
+        }
+    }, [
+        selectedMetric,
+        selectedTable,
+        granularity,
+        aggregationFunction,
+        algorithmOption,
+    ]);
+
+    const { getEvaluation } = useGetEvaluation();
+
+    const [alertConfigForPreview, setAlertConfigForPreview] =
+        useState<EditableAlert>(() => {
+            const workingAlert = createNewStartingAlert();
+
+            workingAlert.template = {
+                name: alertTemplateForEvaluate?.name,
+            };
+
+            PROPERTIES_TO_COPY.forEach((propKey) => {
+                if (alert.templateProperties[propKey]) {
+                    workingAlert.templateProperties[propKey] =
+                        alert.templateProperties[propKey];
+                }
+            });
+
+            workingAlert.templateProperties.min = 0;
+            workingAlert.templateProperties.max = 0;
+
+            return workingAlert;
+        });
+
+    const fetchAlertEvaluation = (start: number, end: number): void => {
+        const copiedAlert = { ...alertConfigForPreview };
+        delete copiedAlert.id;
+        getEvaluation(createAlertEvaluation(copiedAlert, start, end));
+    };
+    // Update the preview config if selections change
+    useEffect(() => {
+        if (
+            !selectedTable ||
+            !selectedMetric ||
+            !granularity ||
+            !aggregationFunction
+        ) {
+            return;
+        }
+
+        setAlertConfigForPreview((currentConfig) => {
+            const copied = {
+                ...currentConfig,
+                template: {
+                    name: alertTemplateForEvaluate?.name,
+                },
+            };
+
+            copied.templateProperties = {
+                ...copied.templateProperties,
+                ...generateTemplateProperties(
+                    selectedMetric,
+                    selectedTable?.dataset,
+                    aggregationFunction,
+                    granularity
+                ),
+            };
+
+            copied.templateProperties.min = 0;
+            copied.templateProperties.max = 0;
+
+            return copied;
+        });
+    }, [
+        selectedTable,
+        selectedMetric,
+        granularity,
+        aggregationFunction,
+        alertTemplateForEvaluate,
+    ]);
+
+    const handleReloadPreviewClick = (): void => {
+        if ((!startTime || !endTime) && alertInsight) {
+            // If start or end is missing and there exists an alert insight
+            fetchAlertEvaluation(
+                alertInsight.defaultStartTime,
+                alertInsight.defaultEndTime
+            );
+        } else {
+            fetchAlertEvaluation(startTime, endTime);
+        }
+    };
+    const recommendedAlertConfigMatchingTemplate = useMemo(() => {
+        if (alertRecommendations && alert.template?.name) {
+            return alertRecommendations.find(
+                (candidate) =>
+                    candidate.alert.template?.name === alert.template?.name
+            );
+        }
+
+        return undefined;
+    }, [alertRecommendations, alert]);
+
+    const doesAlertHaveRecommendedValues = useMemo(() => {
+        let hasValues = true;
+
+        if (!recommendedAlertConfigMatchingTemplate) {
+            return false;
+        }
+
+        Object.keys(
+            recommendedAlertConfigMatchingTemplate.alert.templateProperties
+        ).forEach((k) => {
+            hasValues =
+                hasValues &&
+                recommendedAlertConfigMatchingTemplate.alert.templateProperties[
+                    k
+                ] === alert.templateProperties[k];
+        });
+
+        return hasValues;
+    }, [recommendedAlertConfigMatchingTemplate, alert]);
+
+    const handleTuneAlertClick = (): void => {
+        if (!recommendedAlertConfigMatchingTemplate) {
+            return;
+        }
+        onAlertPropertyChange({
+            templateProperties: {
+                ...alert.templateProperties,
+                ...recommendedAlertConfigMatchingTemplate.alert
+                    .templateProperties,
+            },
+        });
+    };
+
+    const selectedAlertTemplate = useMemo(() => {
+        return alertTemplates.find((alertTemplateCandidate) => {
+            return alertTemplateCandidate.name === alert.template?.name;
+        });
+    }, [alertTemplates, alert]);
+
+    const onUpdateCompositeFiltersChange = (
+        template: TemplatePropertiesObject
+    ): void => {
+        setCompositeFilters(template);
+    };
+
+    return (
+        <>
+            <PageContentsGridV1>
+                <Grid item xs={12}>
+                    <PageContentsCardV1>
+                        <Grid container>
+                            <Grid item xs={12}>
+                                <Box marginBottom={2}>
+                                    <Grid
+                                        container
+                                        alignContent="center"
+                                        justifyContent="space-between"
+                                    >
+                                        <Grid item xs={12}>
+                                            <Box display="flex">
+                                                <Typography variant="h5">
+                                                    {t(
+                                                        "label.dataset-and-metric"
+                                                    )}
+                                                </Typography>
+                                                <PageHeaderActionsV1>
+                                                    <HelpDrawerV1
+                                                        cards={
+                                                            alertsBasicHelpCards
+                                                        }
+                                                        title={`${t(
+                                                            "label.need-help"
+                                                        )}?`}
+                                                        trigger={(
+                                                            handleOpen
+                                                        ) => (
+                                                            <Button
+                                                                color="primary"
+                                                                size="small"
+                                                                variant="outlined"
+                                                                onClick={
+                                                                    handleOpen
+                                                                }
+                                                            >
+                                                                <Box
+                                                                    component="span"
+                                                                    mr={1}
+                                                                >
+                                                                    {t(
+                                                                        "label.need-help"
+                                                                    )}
+                                                                </Box>
+                                                                <Box
+                                                                    component="span"
+                                                                    display="flex"
+                                                                >
+                                                                    <Icon
+                                                                        fontSize={
+                                                                            24
+                                                                        }
+                                                                        icon="mdi:question-mark-circle-outline"
+                                                                    />
+                                                                </Box>
+                                                            </Button>
+                                                        )}
+                                                    />
+                                                </PageHeaderActionsV1>
+                                            </Box>
+                                            <Box>
+                                                <Typography variant="caption">
+                                                    {t(
+                                                        "message.create-your-first-step-filling-fields"
+                                                    )}
+                                                </Typography>
+                                            </Box>
+                                        </Grid>
+
+                                        <Grid item xs={12}>
+                                            <Grid container>
+                                                <Grid item xs={4}>
+                                                    <InputSectionV2
+                                                        description={t(
+                                                            "message.select-dataset-to-monitor-and-detect-anomalies"
+                                                        )}
+                                                        inputComponent={
+                                                            <Autocomplete<DatasetInfo>
+                                                                fullWidth
+                                                                data-testId="datasource-select"
+                                                                getOptionLabel={(
+                                                                    option
+                                                                ) =>
+                                                                    option
+                                                                        .dataset
+                                                                        .name as string
+                                                                }
+                                                                noOptionsText={t(
+                                                                    "message.no-options-available-entity",
+                                                                    {
+                                                                        entity: t(
+                                                                            "label.dataset"
+                                                                        ),
+                                                                    }
+                                                                )}
+                                                                options={
+                                                                    datasetsInfo ||
+                                                                    []
+                                                                }
+                                                                renderInput={(
+                                                                    params
+                                                                ) => (
+                                                                    <TextField
+                                                                        {...params}
+                                                                        InputProps={{
+                                                                            ...params.InputProps,
+                                                                        }}
+                                                                        placeholder={t(
+                                                                            "message.select-dataset"
+                                                                        )}
+                                                                        variant="outlined"
+                                                                    />
+                                                                )}
+                                                                renderOption={(
+                                                                    option: DatasetInfo
+                                                                ): JSX.Element => {
+                                                                    return (
+                                                                        <Box
+                                                                            data-testId={`${toLower(
+                                                                                option
+                                                                                    .dataset
+                                                                                    .name
+                                                                            )}-datasource-option`}
+                                                                        >
+                                                                            <Typography variant="h6">
+                                                                                {
+                                                                                    option
+                                                                                        .dataset
+                                                                                        .name
+                                                                                }
+                                                                            </Typography>
+                                                                            <Typography variant="caption">
+                                                                                {t(
+                                                                                    "message.num-metrics",
+                                                                                    {
+                                                                                        num: option
+                                                                                            .metrics
+                                                                                            .length,
+                                                                                    }
+                                                                                )}
+                                                                            </Typography>
+                                                                        </Box>
+                                                                    );
+                                                                }}
+                                                                value={
+                                                                    selectedTable
+                                                                }
+                                                                onChange={(
+                                                                    _,
+                                                                    selectedTableInfo
+                                                                ) => {
+                                                                    if (
+                                                                        !selectedTableInfo
+                                                                    ) {
+                                                                        return;
+                                                                    }
+                                                                    setSelectedTable(
+                                                                        selectedTableInfo
+                                                                    );
+                                                                    setSelectedMetric(
+                                                                        null
+                                                                    );
+                                                                }}
+                                                            />
+                                                        }
+                                                        label={t(
+                                                            "label.dataset"
+                                                        )}
+                                                    />
+                                                </Grid>
+                                                <Grid item xs={4}>
+                                                    <InputSectionV2
+                                                        description={t(
+                                                            "message.select-metric-to-identify-unusual-changes-when-it-occurs"
+                                                        )}
+                                                        inputComponent={
+                                                            <Autocomplete<string>
+                                                                fullWidth
+                                                                data-testId="metric-select"
+                                                                disabled={
+                                                                    !selectedTable
+                                                                }
+                                                                noOptionsText={t(
+                                                                    "message.no-options-available-entity",
+                                                                    {
+                                                                        entity: t(
+                                                                            "label.metric"
+                                                                        ),
+                                                                    }
+                                                                )}
+                                                                options={
+                                                                    selectedTable
+                                                                        ? selectedTable.metrics.map(
+                                                                              (
+                                                                                  m
+                                                                              ) =>
+                                                                                  m.name
+                                                                          )
+                                                                        : []
+                                                                }
+                                                                renderInput={(
+                                                                    params
+                                                                ) => (
+                                                                    <TextField
+                                                                        {...params}
+                                                                        InputProps={{
+                                                                            ...params.InputProps,
+                                                                        }}
+                                                                        placeholder={
+                                                                            !selectedTable
+                                                                                ? t(
+                                                                                      "message.select-dataset-first"
+                                                                                  )
+                                                                                : t(
+                                                                                      "message.select-metric"
+                                                                                  )
+                                                                        }
+                                                                        variant="outlined"
+                                                                    />
+                                                                )}
+                                                                value={
+                                                                    selectedMetric
+                                                                }
+                                                                onChange={(
+                                                                    _,
+                                                                    metric
+                                                                ) => {
+                                                                    metric &&
+                                                                        setSelectedMetric(
+                                                                            metric
+                                                                        );
+                                                                }}
+                                                            />
+                                                        }
+                                                        label={t(
+                                                            "label.metric"
+                                                        )}
+                                                    />
+                                                </Grid>
+                                            </Grid>
+                                        </Grid>
+                                        {selectedMetric && (
+                                            <Grid item xs={12}>
+                                                <Grid container>
+                                                    <Grid item xs={12}>
+                                                        <RadioSection
+                                                            defaultValue={
+                                                                aggregationFunction ||
+                                                                undefined
+                                                            }
+                                                            label={t(
+                                                                "label.aggregation-function"
+                                                            )}
+                                                            options={
+                                                                selectedMetric ===
+                                                                STAR_COLUMN
+                                                                    ? getAggregationOptions(
+                                                                          [
+                                                                              MetricAggFunction.COUNT,
+                                                                          ]
+                                                                      )
+                                                                    : getAggregationOptions(
+                                                                          [
+                                                                              MetricAggFunction.SUM,
+                                                                              MetricAggFunction.AVG,
+                                                                              MetricAggFunction.COUNT,
+                                                                              MetricAggFunction.MIN,
+                                                                              MetricAggFunction.MAX,
+                                                                          ]
+                                                                      )
+                                                            }
+                                                            subText={t(
+                                                                "message.select-aggregation-function-to-combine-multiple-data-value-into-a-single-result"
+                                                            )}
+                                                        />
+                                                    </Grid>
+                                                    <Grid item xs={12}>
+                                                        <RadioSection
+                                                            defaultValue={
+                                                                granularity ||
+                                                                undefined
+                                                            }
+                                                            label={t(
+                                                                "label.granularity"
+                                                            )}
+                                                            options={getGranularityOptions(
+                                                                GRANULARITY_OPTIONS
+                                                            )}
+                                                            subText={t(
+                                                                "label.select-how-often-to-check-for-anomalies"
+                                                            )}
+                                                        />
+                                                    </Grid>
+                                                    <Grid item xs={12}>
+                                                        <RadioSection
+                                                            defaultValue={
+                                                                anomalyDetection ||
+                                                                undefined
+                                                            }
+                                                            label={t(
+                                                                "label.anomalies-detection-algorithms"
+                                                            )}
+                                                            options={getAnomalyDetectionOptions(
+                                                                [
+                                                                    AnomalyDetectionOptions.SINGLE,
+                                                                    AnomalyDetectionOptions.COMPOSITE,
+                                                                ]
+                                                            )}
+                                                            subText={t(
+                                                                "message.select-the-algorithm-that-best-matches-the-data-patterns"
+                                                            )}
+                                                        />
+                                                    </Grid>
+                                                    <Grid item xs={12}>
+                                                        <Grid
+                                                            container
+                                                            alignItems="center"
+                                                        >
+                                                            <Grid item xs={4}>
+                                                                <InputSectionV2
+                                                                    description={t(
+                                                                        "message.for-additional-algorithms-go-to",
+                                                                        {
+                                                                            entity: t(
+                                                                                "label.advanced-mode"
+                                                                            ),
+                                                                        }
+                                                                    )}
+                                                                    inputComponent={
+                                                                        <Autocomplete<AvailableAlgorithmOption>
+                                                                            fullWidth
+                                                                            data-testId="datasource-select"
+                                                                            getOptionLabel={(
+                                                                                option
+                                                                            ) =>
+                                                                                option
+                                                                                    .algorithmOption
+                                                                                    .title as string
+                                                                            }
+                                                                            noOptionsText={t(
+                                                                                "message.no-options-available-entity",
+                                                                                {
+                                                                                    entity: t(
+                                                                                        "label.dataset"
+                                                                                    ),
+                                                                                }
+                                                                            )}
+                                                                            options={
+                                                                                recommendedAlertTemplateFirst ||
+                                                                                []
+                                                                            }
+                                                                            renderInput={(
+                                                                                params
+                                                                            ) => (
+                                                                                <TextField
+                                                                                    {...params}
+                                                                                    InputProps={{
+                                                                                        ...params.InputProps,
+                                                                                    }}
+                                                                                    placeholder={t(
+                                                                                        "message.select-dataset"
+                                                                                    )}
+                                                                                    variant="outlined"
+                                                                                />
+                                                                            )}
+                                                                            renderOption={(
+                                                                                option: AvailableAlgorithmOption
+                                                                            ): JSX.Element => {
+                                                                                return (
+                                                                                    <Box
+                                                                                        data-testId={`${toLower(
+                                                                                            option
+                                                                                                .algorithmOption
+                                                                                                .title
+                                                                                        )}-datasource-option`}
+                                                                                    >
+                                                                                        <Typography variant="h6">
+                                                                                            {
+                                                                                                option
+                                                                                                    .algorithmOption
+                                                                                                    .title
+                                                                                            }
+                                                                                        </Typography>
+                                                                                    </Box>
+                                                                                );
+                                                                            }}
+                                                                            value={
+                                                                                algorithmOption
+                                                                            }
+                                                                            onChange={(
+                                                                                _,
+                                                                                value
+                                                                            ) => {
+                                                                                if (
+                                                                                    !value
+                                                                                ) {
+                                                                                    return;
+                                                                                }
+                                                                                setAlgorithmOption(
+                                                                                    value
+                                                                                );
+                                                                            }}
+                                                                        />
+                                                                    }
+                                                                    label={t(
+                                                                        "label.recommended-algorithm"
+                                                                    )}
+                                                                />
+                                                            </Grid>
+                                                            <Grid item xs={6}>
+                                                                <TimeRangeButtonWithContext
+                                                                    hideQuickExtend
+                                                                    btnGroupColor="primary"
+                                                                    maxDate={
+                                                                        alertInsight?.datasetEndTime
+                                                                    }
+                                                                    minDate={
+                                                                        alertInsight?.datasetStartTime
+                                                                    }
+                                                                    timezone={determineTimezoneFromAlertInEvaluation(
+                                                                        alertInsight?.templateWithProperties
+                                                                    )}
+                                                                    onTimeRangeChange={(
+                                                                        newStart,
+                                                                        newEnd
+                                                                    ) => {
+                                                                        fetchAlertEvaluation(
+                                                                            newStart,
+                                                                            newEnd
+                                                                        );
+                                                                    }}
+                                                                />
+                                                            </Grid>
+
+                                                            {recommendedAlertConfigMatchingTemplate && (
+                                                                <Grid
+                                                                    item
+                                                                    xs={12}
+                                                                >
+                                                                    <Alert
+                                                                        action={
+                                                                            <>
+                                                                                {doesAlertHaveRecommendedValues ? (
+                                                                                    <Box
+                                                                                        alignContent="center"
+                                                                                        position="flex"
+                                                                                        style={{
+                                                                                            color: ColorV1.Green2,
+                                                                                        }}
+                                                                                        textAlign="center"
+                                                                                    >
+                                                                                        <Box
+                                                                                            mr={
+                                                                                                1
+                                                                                            }
+                                                                                        >
+                                                                                            <DoneAllIcon />
+                                                                                        </Box>
+                                                                                        <Box
+                                                                                            pr={
+                                                                                                2
+                                                                                            }
+                                                                                        >
+                                                                                            Alert
+                                                                                            Tuned
+                                                                                        </Box>
+                                                                                    </Box>
+                                                                                ) : (
+                                                                                    <Button
+                                                                                        color="primary"
+                                                                                        onClick={
+                                                                                            handleTuneAlertClick
+                                                                                        }
+                                                                                    >
+                                                                                        {t(
+                                                                                            "label.tune-my-alert"
+                                                                                        )}
+                                                                                    </Button>
+                                                                                )}
+                                                                            </>
+                                                                        }
+                                                                        severity="info"
+                                                                        style={{
+                                                                            backgroundColor:
+                                                                                "#FFF",
+                                                                        }}
+                                                                        variant="outlined"
+                                                                    >
+                                                                        <AlertTitle>
+                                                                            {t(
+                                                                                "message.we-can-tune-the-alert-for-you"
+                                                                            )}
+                                                                        </AlertTitle>
+                                                                        {t(
+                                                                            "message.our-new-feature-sets-up-your-alert-with-the-parameters"
+                                                                        )}
+                                                                    </Alert>
+                                                                </Grid>
+                                                            )}
+
+                                                            {algorithmOption && (
+                                                                <Grid
+                                                                    item
+                                                                    xs={12}
+                                                                >
+                                                                    {anomalyDetection !==
+                                                                        AnomalyDetectionOptions.COMPOSITE ||
+                                                                    compositeFilters ? (
+                                                                        <ThresholdSetup
+                                                                            alert={
+                                                                                alert
+                                                                            }
+                                                                            alertTemplate={
+                                                                                selectedAlertTemplate
+                                                                            }
+                                                                            algorithmOptionConfig={
+                                                                                algorithmOption
+                                                                            }
+                                                                            onAlertPropertyChange={
+                                                                                onAlertPropertyChange
+                                                                            }
+                                                                        />
+                                                                    ) : (
+                                                                        <Button
+                                                                            color="primary"
+                                                                            onClick={() =>
+                                                                                setOpenCompositeFilterModal(
+                                                                                    true
+                                                                                )
+                                                                            }
+                                                                        >
+                                                                            {t(
+                                                                                "label.add-dimensions"
+                                                                            )}
+                                                                        </Button>
+                                                                    )}
+                                                                </Grid>
+                                                            )}
+                                                        </Grid>
+                                                        <Grid item xs={12}>
+                                                            <Box
+                                                                paddingBottom={
+                                                                    2
+                                                                }
+                                                                paddingTop={1}
+                                                            >
+                                                                <Divider />
+                                                            </Box>
+                                                        </Grid>
+                                                        <Grid item xs={12}>
+                                                            <Box
+                                                                display="flex"
+                                                                gridGap={10}
+                                                            >
+                                                                <Button
+                                                                    color="primary"
+                                                                    variant="outlined"
+                                                                    onClick={() => {
+                                                                        navigate(
+                                                                            getAlertsAllPath()
+                                                                        );
+                                                                    }}
+                                                                >
+                                                                    {t(
+                                                                        "label.cancel"
+                                                                    )}
+                                                                </Button>
+                                                                <Button
+                                                                    color="primary"
+                                                                    disabled={
+                                                                        isCreateButtonDisabled
+                                                                    }
+                                                                    onClick={() =>
+                                                                        setOpenCreateAlertModal(
+                                                                            true
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    {t(
+                                                                        alert.id
+                                                                            ? "label.update-alert"
+                                                                            : "label.create-alert"
+                                                                    )}
+                                                                </Button>
+                                                            </Box>
+                                                        </Grid>
+                                                    </Grid>
+                                                </Grid>
+                                            </Grid>
+                                        )}
+                                    </Grid>
+                                </Box>
+                            </Grid>
+                        </Grid>
+                        {openCompositeFilterModal && (
+                            <AlertCompositeFiltersModal
+                                onCancel={() =>
+                                    setOpenCompositeFilterModal(false)
+                                }
+                                onUpdateCompositeFiltersChange={
+                                    onUpdateCompositeFiltersChange
+                                }
+                            />
+                        )}
+                        {openCreateAlertModal && (
+                            <CreateAlertModal
+                                onCancel={() => setOpenCreateAlertModal(false)}
+                            />
+                        )}
+                    </PageContentsCardV1>
+                </Grid>
+            </PageContentsGridV1>
+        </>
+    );
+};

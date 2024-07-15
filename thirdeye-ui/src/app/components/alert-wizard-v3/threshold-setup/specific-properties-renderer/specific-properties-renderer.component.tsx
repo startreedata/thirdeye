@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Slider, TextField } from "@material-ui/core";
+import { Box, Slider, TextField, Typography } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { SliderAlgorithmOptionInputFieldConfig } from "../threshold-setup.interfaces";
@@ -42,32 +42,32 @@ export const SpecificPropertiesRenderer: FunctionComponent<SpecificPropertiesRen
                 (sliderFieldConfig.min + sliderFieldConfig.max) / 2;
 
             return (
-                <Slider
-                    marks={[
-                        {
-                            value: sliderFieldConfig.min as number,
-                            label: t("label.low"),
-                        },
-                        {
-                            value: middlePoint,
-                            label: t("label.medium"),
-                        },
-                        {
-                            value: sliderFieldConfig.max as number,
-                            label: t("label.high"),
-                        },
-                    ]}
-                    max={sliderFieldConfig.max}
-                    min={sliderFieldConfig.min}
-                    step={1}
-                    value={existingValue ? Number(existingValue) : middlePoint}
-                    onChange={(_, value) =>
-                        handlePropertyChange(
-                            sliderFieldConfig.templatePropertyName,
-                            value.toString()
-                        )
-                    }
-                />
+                <Box alignItems="center" display="flex" gridColumnGap="10px">
+                    <Typography variant="caption">
+                        {t("label.less-sensitivity")}
+                    </Typography>
+                    <Box display="inline-flex" width="80%">
+                        <Slider
+                            max={sliderFieldConfig.max}
+                            min={sliderFieldConfig.min}
+                            step={1}
+                            value={
+                                existingValue
+                                    ? Number(existingValue)
+                                    : middlePoint
+                            }
+                            onChange={(_, value) =>
+                                handlePropertyChange(
+                                    sliderFieldConfig.templatePropertyName,
+                                    value.toString()
+                                )
+                            }
+                        />
+                    </Box>
+                    <Typography variant="caption">
+                        {t("label.more-sensitivity")}
+                    </Typography>
+                </Box>
             );
         }
 

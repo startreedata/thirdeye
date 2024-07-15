@@ -14,12 +14,9 @@
  */
 import { Box, Divider, Grid, Typography } from "@material-ui/core";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { PageContentsCardV1 } from "../../../platform/components";
 import { TemplatePropertiesObject } from "../../../rest/dto/alert.interfaces";
-import { AlertJsonEditorModal } from "../../alert-json-editor-modal/alert-json-editor-modal.component";
 import { PreviewChart } from "../../alert-wizard-v2/alert-template/preview-chart/preview-chart.component";
-import { InputSection } from "../../form-basics/input-section/input-section.component";
+import { InputSectionV2 } from "../../form-basics/input-section-v2/input-section-v2.component";
 import { ParseMarkdown } from "../../parse-markdown/parse-markdown.component";
 import { SpecificPropertiesRenderer } from "./specific-properties-renderer/specific-properties-renderer.component";
 import { ThresholdSetupProps } from "./threshold-setup.interfaces";
@@ -29,10 +26,7 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
     onAlertPropertyChange,
     alert,
     alertTemplate,
-    algorithmOptionConfig,
 }) => {
-    const { t } = useTranslation();
-
     const [localAlertTemplateProperties, setLocalAlertTemplateProperties] =
         useState<TemplatePropertiesObject>(alert.templateProperties);
 
@@ -71,50 +65,23 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
     };
 
     return (
-        <PageContentsCardV1>
-            <Grid container alignItems="center" justifyContent="space-between">
-                <Grid item>
-                    <Typography variant="h5">
-                        {algorithmOptionConfig &&
-                            t("label.entity-setup", {
-                                entity: algorithmOptionConfig.algorithmOption
-                                    .title,
-                                multidimension:
-                                    algorithmOptionConfig.algorithmOption
-                                        .alertTemplateForMultidimension ===
-                                    alert.template?.name
-                                        ? `(${t("label.multidimension")})`
-                                        : "",
-                            })}
-                    </Typography>
-                    <Typography variant="body2">
-                        {t("message.threshold-setup-description")}
-                    </Typography>
-                </Grid>
-                <Grid item>
-                    <AlertJsonEditorModal
-                        alert={alert}
-                        onSubmitChanges={(newAlert, isTotalChange) => {
-                            onAlertPropertyChange(newAlert, isTotalChange);
+        <>
+            <PreviewChart
+                hideCallToActionPrompt
+                alert={alert}
+                showTimeRange={false}
+                onAlertPropertyChange={onAlertPropertyChange}
+            />
 
-                            setLocalAlertTemplateProperties({
-                                ...newAlert.templateProperties,
-                            });
-                        }}
-                    />
-                </Grid>
+            <Grid item xs={12}>
+                <Box marginBottom={2} marginTop={2} padding={1}>
+                    <Divider />
+                </Box>
             </Grid>
-
-            {inputFieldConfigs.length > 0 && (
-                <Grid item xs={12}>
-                    <Box padding={2} />
-                </Grid>
-            )}
-
             {inputFieldConfigs.length > 0 &&
                 inputFieldConfigs.map((config) => {
                     return (
-                        <InputSection
+                        <InputSectionV2
                             inputComponent={
                                 <>
                                     <SpecificPropertiesRenderer
@@ -135,23 +102,11 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
                                     )}
                                 </>
                             }
-                            key={config.templatePropertyName}
+                            key={config.label}
                             label={config.label}
                         />
                     );
                 })}
-
-            <Grid item xs={12}>
-                <Box marginBottom={2} marginTop={2} padding={1}>
-                    <Divider />
-                </Box>
-            </Grid>
-
-            <PreviewChart
-                hideCallToActionPrompt
-                alert={alert}
-                onAlertPropertyChange={onAlertPropertyChange}
-            />
-        </PageContentsCardV1>
+        </>
     );
 };

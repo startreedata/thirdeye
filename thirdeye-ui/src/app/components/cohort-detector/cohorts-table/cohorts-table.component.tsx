@@ -39,8 +39,6 @@ export const CohortsTable: FunctionComponent<CohortsTableProps> = ({
     cohortsData,
     onSelectionChange,
     children,
-    title,
-    subtitle,
 }) => {
     const { t } = useTranslation();
 
@@ -99,7 +97,7 @@ export const CohortsTable: FunctionComponent<CohortsTableProps> = ({
         {
             key: "name",
             dataKey: "name",
-            header: t("label.name"),
+            header: t("label.dimension"),
             minWidth: 100,
             flex: 1,
         },
@@ -136,32 +134,6 @@ export const CohortsTable: FunctionComponent<CohortsTableProps> = ({
     return (
         <PageContentsCardV1>
             <Grid container>
-                <Grid item xs={12}>
-                    <Grid
-                        container
-                        alignItems="center"
-                        justifyContent="space-between"
-                    >
-                        <Grid item>
-                            <Typography variant="h5">{title}</Typography>
-                            {subtitle && (
-                                <Typography variant="body2">
-                                    {subtitle}
-                                </Typography>
-                            )}
-                            {cohortsData &&
-                                tableRows.length !==
-                                    cohortsData.results.length && (
-                                    <Typography variant="caption">
-                                        {t("message.showing-top-100")}
-                                    </Typography>
-                                )}
-                        </Grid>
-                        <Grid item>
-                            {cohortsData && tableRows.length > 0 && children}
-                        </Grid>
-                    </Grid>
-                </Grid>
                 <Grid item xs={12}>
                     <LoadingErrorStateSwitch
                         isError={getCohortsRequestStatus === ActionStatus.Error}

@@ -53,6 +53,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
     onChartDataLoadSuccess,
     hideCallToActionPrompt,
     disableReload,
+    showTimeRange = true,
 }) => {
     const { t } = useTranslation();
     const [searchParams, setSearchParams] = useSearchParams();
@@ -231,6 +232,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                     !isEqual(alertForCurrentEvaluation, alert) &&
                     !!timeSeriesOptions
                 }
+                showTimeRange={showTimeRange}
                 onReloadClick={handleAutoRangeClick}
                 onStartEndChange={(newStart, newEnd) => {
                     fetchAlertEvaluation(newStart, newEnd);

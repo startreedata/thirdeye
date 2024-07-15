@@ -15,4 +15,5 @@
 export interface CronSimpleProps {
     value: string;
     onChange: (cron: string) => void;
+    fullWidth?: boolean;
 }

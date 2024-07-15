@@ -12,19 +12,16 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { ActionStatus } from "../../../rest/actions.interfaces";
-import {
-    CohortDetectionResponse,
-    CohortResult,
-} from "../../../rest/dto/rca.interfaces";
+import type { GridProps } from "@material-ui/core";
+import type { ReactElement, ReactNode } from "react";
 
-export interface CohortsTableProps {
-    getCohortsRequestStatus: ActionStatus;
-    cohortsData: CohortDetectionResponse | null;
-    onSelectionChange?: (cohorts: CohortResult[]) => void;
-    initiallySelectedCohorts: CohortTableRowData[];
-}
-
-export interface CohortTableRowData extends CohortResult {
-    name: string;
+export interface InputSectionV2Props {
+    label?: string;
+    helperLabel?: ReactNode;
+    labelComponent?: ReactElement;
+    inputComponent: ReactElement;
+    fullWidth?: boolean;
+    gridContainerProps?: GridProps;
+    description?: string;
+    isOptional?: boolean;
 }

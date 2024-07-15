@@ -12,19 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { ActionStatus } from "../../../rest/actions.interfaces";
-import {
-    CohortDetectionResponse,
-    CohortResult,
-} from "../../../rest/dto/rca.interfaces";
 
-export interface CohortsTableProps {
-    getCohortsRequestStatus: ActionStatus;
-    cohortsData: CohortDetectionResponse | null;
-    onSelectionChange?: (cohorts: CohortResult[]) => void;
-    initiallySelectedCohorts: CohortTableRowData[];
-}
-
-export interface CohortTableRowData extends CohortResult {
-    name: string;
+export interface CreateAlertModalModalProps {
+    onCancel: () => void;
 }

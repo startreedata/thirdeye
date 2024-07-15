@@ -41,9 +41,11 @@ export const AppRouteRelative = {
     ALERTS_CREATE_NEW: "new",
     ALERTS_CREATE_COPY: `copy/${PLACEHOLDER_ROUTE_ID}`,
     ALERTS_CREATE_ADVANCED: "advanced",
+    ALERTS_CREATE_EASY_ALERT: "easy-alert",
     ALERTS_CREATE_NEW_USER: "new-user",
     ALERTS_CREATE_JSON_EDITOR: "json-editor",
     ALERTS_UPDATE: "update",
+    ALERTS_UPDATE_SIMPLE: "simple",
     ALERTS_UPDATE_ADVANCED: "advanced",
     ALERTS_UPDATE_JSON_EDITOR: "json-editor",
     ANOMALIES: "anomalies",
@@ -134,6 +136,8 @@ export const AppRoute = {
     ALERTS: `/${AppRouteRelative.ALERTS}`,
     ALERTS_ALL: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_ALL}`,
     ALERTS_CREATE: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}`,
+    ALERTS_CREATE_EASY: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/${AppRouteRelative.ALERTS_CREATE_NEW}/${AppRouteRelative.ALERTS_CREATE_NEW_USER}
+        /${AppRouteRelative.ALERTS_CREATE_EASY_ALERT}/`,
     ALERTS_CREATE_NEW: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/${AppRouteRelative.ALERTS_CREATE_NEW}`,
     ALERTS_CREATE_EXISTING: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/${AppRouteRelative.ALERTS_CREATE_COPY}`,
     ALERTS_CREATE_NEW_ADVANCED: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/${AppRouteRelative.ALERTS_CREATE_NEW}/${AppRouteRelative.ALERTS_CREATE_ADVANCED}`,
@@ -277,6 +281,10 @@ export const getAlertsAlertAnomaliesPath = (
 
 export const getAlertsCreatePath = (): string => {
     return createPathWithRecognizedQueryString(AppRoute.ALERTS_CREATE);
+};
+
+export const getAlertsEasyCreatePath = (): string => {
+    return createPathWithRecognizedQueryString(AppRoute.ALERTS_CREATE_EASY);
 };
 
 export const getAlertsCreateNewSimplePath = (): string => {

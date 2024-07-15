@@ -12,19 +12,18 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { ActionStatus } from "../../../rest/actions.interfaces";
-import {
-    CohortDetectionResponse,
-    CohortResult,
-} from "../../../rest/dto/rca.interfaces";
 
-export interface CohortsTableProps {
-    getCohortsRequestStatus: ActionStatus;
-    cohortsData: CohortDetectionResponse | null;
-    onSelectionChange?: (cohorts: CohortResult[]) => void;
-    initiallySelectedCohorts: CohortTableRowData[];
+export interface RadioSectionOptions {
+    value: string;
+    disabled?: boolean;
+    label: string;
+    onClick: (value: any) => void;
+    tooltipText?: string;
 }
 
-export interface CohortTableRowData extends CohortResult {
-    name: string;
+export interface RadioSectionProps {
+    label: string;
+    options: RadioSectionOptions[];
+    subText?: string;
+    defaultValue?: string;
 }

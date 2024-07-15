@@ -12,55 +12,18 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Grid, Typography } from "@material-ui/core";
+import { Box } from "@material-ui/core";
 import { useMutation } from "@tanstack/react-query";
 import { default as React, FunctionComponent, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { Outlet, useLocation, useOutletContext } from "react-router-dom";
+import { Outlet, useOutletContext } from "react-router-dom";
 import { generateAvailableAlgorithmOptions } from "../../components/alert-wizard-v3/alert-type-selection/alert-type-selection.utils";
-import {
-    PageContentsCardV1,
-    PageContentsGridV1,
-    StepperV1,
-} from "../../platform/components";
 import { getAlertRecommendation } from "../../rest/alerts/alerts.rest";
 import { EditableAlert } from "../../rest/dto/alert.interfaces";
 import { generateGenericNameForAlert } from "../../utils/alerts/alerts.util";
-import { AppRouteRelative } from "../../utils/routes/routes.util";
 import { AlertsSimpleAdvancedJsonContainerPageOutletContextProps } from "../alerts-edit-create-common/alerts-edit-create-common-page.interfaces";
 import { useAlertsCreateGuidedPage } from "./alerts-create-guided-page.styles";
 
-const STEPS = [
-    {
-        subPath: AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_METRIC,
-        translationLabel: "select-metric",
-    },
-    {
-        subPath: AppRouteRelative.WELCOME_CREATE_ALERT_SELECT_TYPE,
-        translationLabel: "select-alert-type",
-    },
-    {
-        subPath: AppRouteRelative.WELCOME_CREATE_ALERT_TUNE_ALERT,
-        translationLabel: "tune-alert",
-    },
-    {
-        subPath: AppRouteRelative.WELCOME_CREATE_ALERT_ANOMALIES_FILTER,
-        translationLabel: "setup-anomaly-filters",
-    },
-    {
-        subPath: AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_DETAILS,
-        translationLabel: "setup-alert-details",
-    },
-];
-
-const MULTI_DIMENSION_SELECT_STEP = {
-    subPath: AppRouteRelative.WELCOME_CREATE_ALERT_SETUP_DIMENSION_EXPLORATION,
-    translationLabel: "multidimension-setup",
-};
-
 export const CreateAlertGuidedPage: FunctionComponent = () => {
-    const { t } = useTranslation();
-    const { pathname } = useLocation();
     const classes = useAlertsCreateGuidedPage();
 
     const {
@@ -89,8 +52,6 @@ export const CreateAlertGuidedPage: FunctionComponent = () => {
     } =
         useOutletContext<AlertsSimpleAdvancedJsonContainerPageOutletContextProps>();
 
-    const [shouldShowStepper, setShouldShowStepper] = useState(true);
-
     const [isMultiDimensionAlert, setIsMultiDimensionAlert] = useState(() => {
         return alert?.templateProperties.enumerationItems !== undefined;
     });
@@ -106,26 +67,6 @@ export const CreateAlertGuidedPage: FunctionComponent = () => {
 
         return generateAvailableAlgorithmOptions(availableTemplateNames);
     }, [alertTemplateOptions]);
-
-    const stepsToDisplay = useMemo(() => {
-        if (isMultiDimensionAlert) {
-            return [MULTI_DIMENSION_SELECT_STEP, ...STEPS];
-        }
-
-        return [...STEPS];
-    }, [isMultiDimensionAlert]);
-
-    const activeStep = useMemo(() => {
-        const activeStepDefinition = stepsToDisplay.find((candidate) =>
-            pathname.includes(candidate.subPath)
-        );
-
-        if (!activeStepDefinition) {
-            return "";
-        }
-
-        return activeStepDefinition.subPath;
-    }, [pathname, stepsToDisplay]);
 
     const selectedAlgorithmOption = useMemo(() => {
         return alertTypeOptions.find(
@@ -155,38 +96,6 @@ export const CreateAlertGuidedPage: FunctionComponent = () => {
         <>
             <Box display="flex">
                 <Box flex="1 2 auto">
-                    {shouldShowStepper && (
-                        <PageContentsGridV1>
-                            <Grid item xs={12}>
-                                <PageContentsCardV1>
-                                    <Typography variant="h6">
-                                        {t(
-                                            "message.complete-the-following-steps"
-                                        )}
-                                    </Typography>
-                                    <StepperV1
-                                        activeStep={activeStep}
-                                        stepLabelFn={(step: string): string => {
-                                            const stepDefinition =
-                                                stepsToDisplay.find(
-                                                    (candidate) =>
-                                                        candidate.subPath ===
-                                                        step
-                                                );
-
-                                            return t(
-                                                `message.${stepDefinition?.translationLabel}`
-                                            );
-                                        }}
-                                        steps={stepsToDisplay.map(
-                                            (item) => item.subPath
-                                        )}
-                                    />
-                                </PageContentsCardV1>
-                            </Grid>
-                        </PageContentsGridV1>
-                    )}
-
                     <Outlet
                         context={{
                             alert,
@@ -214,8 +123,6 @@ export const CreateAlertGuidedPage: FunctionComponent = () => {
                             alertInsight,
                             getAlertInsight,
                             getAlertInsightStatus,
-
-                            setShouldShowStepper,
 
                             isMultiDimensionAlert,
                             setIsMultiDimensionAlert,

@@ -136,8 +136,9 @@ export const AppRoute = {
     ALERTS: `/${AppRouteRelative.ALERTS}`,
     ALERTS_ALL: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_ALL}`,
     ALERTS_CREATE: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}`,
-    ALERTS_CREATE_EASY: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/${AppRouteRelative.ALERTS_CREATE_NEW}/${AppRouteRelative.ALERTS_CREATE_NEW_USER}
-        /${AppRouteRelative.ALERTS_CREATE_EASY_ALERT}/`,
+    ALERTS_CREATE_EASY:
+        `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/${AppRouteRelative.ALERTS_CREATE_NEW}/${AppRouteRelative.ALERTS_CREATE_NEW_USER}` +
+        `/${AppRouteRelative.ALERTS_CREATE_EASY_ALERT}/`,
     ALERTS_CREATE_NEW: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/${AppRouteRelative.ALERTS_CREATE_NEW}`,
     ALERTS_CREATE_EXISTING: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/${AppRouteRelative.ALERTS_CREATE_COPY}`,
     ALERTS_CREATE_NEW_ADVANCED: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/${AppRouteRelative.ALERTS_CREATE_NEW}/${AppRouteRelative.ALERTS_CREATE_ADVANCED}`,

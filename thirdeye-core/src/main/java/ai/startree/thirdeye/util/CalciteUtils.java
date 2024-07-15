@@ -16,11 +16,9 @@ package ai.startree.thirdeye.util;
 import static ai.startree.thirdeye.spi.Constants.DEFAULT_LOCALE;
 import static org.apache.calcite.sql.SqlOperator.MDX_PRECEDENCE;
 
-import ai.startree.thirdeye.detectionpipeline.sql.SqlLanguageTranslator;
 import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.datalayer.Predicate.OPER;
-import ai.startree.thirdeye.spi.datasource.macro.ThirdeyeSqlDialect;
 import java.util.List;
 import java.util.Map;
 import org.apache.calcite.sql.SqlAsOperator;
@@ -255,16 +253,5 @@ public class CalciteUtils {
       whereNodeWithPredicates = new SqlBasicCall(AND_OPERATOR, whereOperands, SqlParserPos.ZERO);
     }
     return whereNodeWithPredicates;
-  }
-
-  public static void main(String[] args) {
-    //SqlParser.create(sql, sqlParserConfig);
-    final SqlNode res = queryToNode("SELECT COUNT(*) from table1", SqlParser.config());
-    var dialect = SqlLanguageTranslator.translate(new ThirdeyeSqlDialect.Builder()
-        .withBaseDialect("AnsiSqlDialect")
-        .withIdentifierQuoteString("\"")
-        .build()); 
-    final var r = nodeToQuery(res, dialect, true);
-    String lol = "";
   }
 }

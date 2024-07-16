@@ -87,7 +87,7 @@ export const SetupAnomaliesFilterPage: FunctionComponent = () => {
 
     const {
         evaluation: evaluationWithoutFilters,
-        getEvaluation,
+        // getEvaluation,
         status: getEvaluationWithoutFilterChangesStatus,
     } = useGetEvaluation();
 
@@ -156,18 +156,15 @@ export const SetupAnomaliesFilterPage: FunctionComponent = () => {
                 ?.enumeratorQuery ||
             !!alertConfigurationBeforeFilterChanges.templateProperties
                 ?.enumerationItems;
-        getEvaluation(
-            createAlertEvaluation(copiedAlert, start, end, {
-                listEnumerationItemsOnly: hasEnumerationItems,
-            })
-        );
-        setEvaluationTimeRange({ startTime: start, endTime: end });
 
         const alertWithFilters = { ...alertConfigurationWithFilterChanges };
         delete alertWithFilters.id;
         getEvaluationWithFilterChanges(
-            createAlertEvaluation(alertWithFilters, start, end)
+            createAlertEvaluation(alertWithFilters, start, end, {
+                listEnumerationItemsOnly: hasEnumerationItems,
+            })
         );
+        setEvaluationTimeRange({ startTime: start, endTime: end });
     };
 
     useEffect(() => {

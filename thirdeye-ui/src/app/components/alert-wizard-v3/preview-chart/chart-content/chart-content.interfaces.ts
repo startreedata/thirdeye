@@ -16,6 +16,7 @@ import {
     AlertEvaluation,
     EditableAlert,
 } from "../../../../rest/dto/alert.interfaces";
+import { TimeRange } from "../../../../rest/dto/time-range.interfaces";
 
 export interface ChartContentProps {
     alertEvaluation: AlertEvaluation | null;
@@ -25,4 +26,5 @@ export interface ChartContentProps {
     hideCallToActionPrompt?: boolean;
     alert: EditableAlert;
     onAlertPropertyChange?: (contents: Partial<EditableAlert>) => void;
+    evaluationTimeRange: TimeRange;
 }

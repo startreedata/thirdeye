@@ -30,12 +30,9 @@ import {
     AlertEvaluation,
     EditableAlert,
 } from "../../../../rest/dto/alert.interfaces";
-import { DetectionEvaluation } from "../../../../rest/dto/detection.interfaces";
 import {
     createAlertEvaluation,
-    determineTimezoneFromAlertInEvaluation,
     extractDetectionEvaluation,
-    shouldHideTimeInDatetimeFormat,
 } from "../../../../utils/alerts/alerts.util";
 import { generateNameForDetectionResult } from "../../../../utils/enumeration-items/enumeration-items.util";
 import { notifyIfErrors } from "../../../../utils/notifications/notifications.util";
@@ -43,7 +40,6 @@ import { ChartContent } from "../../../alert-wizard-v3/preview-chart/chart-conte
 import { PreviewChartHeader } from "../../../alert-wizard-v3/preview-chart/header/preview-chart-header.component";
 import { NoDataIndicator } from "../../../no-data-indicator/no-data-indicator.component";
 import { LoadingErrorStateSwitch } from "../../../page-states/loading-error-state-switch/loading-error-state-switch.component";
-import { generateChartOptionsForAlert } from "../../../rca/anomaly-time-series-card/anomaly-time-series-card.utils";
 import { TimeRangeQueryStringKey } from "../../../time-range/time-range-provider/time-range-provider.interfaces";
 import { TimeSeriesChartProps } from "../../../visualizations/time-series-chart/time-series-chart.interfaces";
 import { PreviewChartProps } from "./preview-chart.interfaces";
@@ -64,15 +60,16 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
         [searchParams]
     );
     const { notify } = useNotificationProviderV1();
-    const [timeSeriesOptions, setTimeSeriesOptions] =
-        useState<TimeSeriesChartProps>();
-    const [detectionEvaluations, setDetectionEvaluations] =
-        useState<DetectionEvaluation[]>();
+    useState<TimeSeriesChartProps>();
+
     const [selectedEvaluationToDisplay, setSelectedEvaluationToDisplay] =
         useState<string>("");
     const [alertForCurrentEvaluation, setAlertForCurrentEvaluation] =
         useState<EditableAlert>();
-
+    const [evaluationTimeRange, setEvaluationTimeRange] = useState({
+        startTime: startTime,
+        endTime: endTime,
+    });
     const {
         evaluation,
         getEvaluation,
@@ -92,22 +89,31 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
     ): Promise<void> => {
         const copiedAlert = { ...alert };
         delete copiedAlert.id;
+        /* On the Preview Page we have to defer fetching the data for enumeration items till they
+        are in view.
+        We only fetch the list of enumeration items without data and anomalies
+        by passing {listEnumerationItemsOnly: true} as fetching all the data at once introduces
+        significant latency because of the request size.
+        Hence we first fetch the evaluations with enumeration items without anomalies and data.
+        And then enumerationRow component fetches anomalies and data progresivelly */
+        const hasEnumerationItems =
+            !!alert.templateProperties?.enumeratorQuery ||
+            !!alert.templateProperties?.enumerationItems;
         const fetchedAlertEvaluation = await getEvaluation(
-            createAlertEvaluation(copiedAlert, start, end)
+            createAlertEvaluation(copiedAlert, start, end, {
+                listEnumerationItemsOnly: hasEnumerationItems,
+            })
         );
 
         setAlertForCurrentEvaluation(alert);
-
+        setEvaluationTimeRange({ startTime: start, endTime: end });
         if (fetchedAlertEvaluation === undefined) {
-            setDetectionEvaluations(undefined);
-
             return;
         }
 
         const evaluations = extractDetectionEvaluation(
             fetchedAlertEvaluation as AlertEvaluation
         );
-
         // Call the callback function if its passed
         onChartDataLoadSuccess && onChartDataLoadSuccess();
 
@@ -129,8 +135,6 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                 );
             }
         }
-
-        setDetectionEvaluations(evaluations);
     };
 
     useEffect(() => {
@@ -143,41 +147,6 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
             })
         );
     }, [getEvaluationStatus]);
-
-    useEffect(() => {
-        if (detectionEvaluations) {
-            const detectionEvaluation = detectionEvaluations.find(
-                (evaluation) =>
-                    generateNameForDetectionResult(evaluation) ===
-                    selectedEvaluationToDisplay
-            );
-
-            if (!detectionEvaluation) {
-                return;
-            }
-
-            const timeseriesConfiguration = generateChartOptionsForAlert(
-                detectionEvaluation,
-                detectionEvaluation.anomalies,
-                t,
-                undefined,
-                determineTimezoneFromAlertInEvaluation(
-                    evaluation?.alert.template
-                ),
-                shouldHideTimeInDatetimeFormat(evaluation?.alert.template)
-            );
-
-            timeseriesConfiguration.brush = false;
-            timeseriesConfiguration.zoom = true;
-
-            setTimeSeriesOptions(timeseriesConfiguration);
-        }
-    }, [detectionEvaluations, selectedEvaluationToDisplay]);
-
-    useEffect(() => {
-        // If alert changes, reset the evaluation data
-        setDetectionEvaluations(undefined);
-    }, [alert]);
 
     const handleAutoRangeClick = (): void => {
         if (
@@ -228,8 +197,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                 disableReload={disableReload}
                 getEvaluationStatus={getEvaluationStatus}
                 showConfigurationNotReflective={
-                    !isEqual(alertForCurrentEvaluation, alert) &&
-                    !!timeSeriesOptions
+                    !isEqual(alertForCurrentEvaluation, alert)
                 }
                 onReloadClick={handleAutoRangeClick}
                 onStartEndChange={(newStart, newEnd) => {
@@ -266,6 +234,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                     showLoadButton
                     alert={alert}
                     alertEvaluation={evaluation}
+                    evaluationTimeRange={evaluationTimeRange}
                     hideCallToActionPrompt={hideCallToActionPrompt}
                     onReloadClick={handleAutoRangeClick}
                 />

@@ -14,6 +14,7 @@
  */
 import { Anomaly } from "../../../../../rest/dto/anomaly.interfaces";
 import { DetectionEvaluation } from "../../../../../rest/dto/detection.interfaces";
+import { TimeRange } from "../../../../../rest/dto/time-range.interfaces";
 
 export interface EnumerationItemRowProps {
     detectionEvaluation: DetectionEvaluation;
@@ -23,4 +24,6 @@ export interface EnumerationItemRowProps {
     hideTime: boolean;
     showOnlyActivity?: boolean;
     hideDelete?: boolean;
+    alert?: any;
+    evaluationTimeRange: TimeRange;
 }

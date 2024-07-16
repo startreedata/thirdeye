@@ -25,9 +25,9 @@ import IconButton from "@material-ui/core/IconButton";
 import { KeyboardArrowDown, KeyboardArrowUp } from "@material-ui/icons";
 import DeleteIcon from "@material-ui/icons/Delete";
 import { DateTime } from "luxon";
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { TooltipV1 } from "../../../../../platform/components";
+import { SkeletonV1, TooltipV1 } from "../../../../../platform/components";
 import { generateNameForDetectionResult } from "../../../../../utils/enumeration-items/enumeration-items.util";
 import {
     CHART_SIZE_OPTIONS,
@@ -36,16 +36,27 @@ import {
 } from "../../../../rca/anomaly-time-series-card/anomaly-time-series-card.utils";
 import { TimeSeriesChart } from "../../../../visualizations/time-series-chart/time-series-chart.component";
 import { EnumerationItemRowProps } from "./enumeration-item-row.interfaces";
+import { useInView } from "react-intersection-observer";
+import { useQuery } from "@tanstack/react-query";
+import { getAlertEvaluation } from "../../../../../rest/alerts/alerts.rest";
+import { LoadingErrorStateSwitch } from "../../../../page-states/loading-error-state-switch/loading-error-state-switch.component";
+import { NoDataIndicator } from "../../../../no-data-indicator/no-data-indicator.component";
 
 export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
     detectionEvaluation,
-    anomalies,
     onDeleteClick,
     timezone,
     hideTime,
     showOnlyActivity,
     hideDelete,
+    alert,
+    evaluationTimeRange,
 }) => {
+    const { ref, inView } = useInView({
+        triggerOnce: true,
+        delay: 250,
+        threshold: 1,
+    });
     const { t } = useTranslation();
     const [expandedChartHeight, setExpandedChartHeight] =
         useState(SMALL_CHART_SIZE);
@@ -53,43 +64,85 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
         generateNameForDetectionResult(detectionEvaluation);
     const [isExpanded, setIsExpanded] = useState(false);
 
-    const tsData = generateChartOptionsForAlert(
-        detectionEvaluation,
-        showOnlyActivity ? [] : anomalies,
-        t,
-        undefined,
-        timezone,
-        hideTime,
-        showOnlyActivity,
-        false,
-        showOnlyActivity
-    );
-    const tsDataForExpanded = {
-        ...tsData,
-    };
-    tsData.brush = false;
-    tsData.zoom = true;
-    tsData.legend = false;
-    tsData.yAxis = {
+    const [timeSeriesData, setTimeSeriesData] = useState<any>();
+    const [timeSeriesExpandedData, setTimeSeriesExpandedData] = useState<any>();
+
+    const getEvaluationQuery = useQuery({
         enabled: false,
-    };
-    tsData.margins = {
-        top: 0,
-        bottom: 10, // This needs to exist for the x axis
-        left: 0,
-        right: 0,
-    };
-    tsData.xAxis = {
-        ...tsData.xAxis,
-        tickFormatter: (d: string) => {
-            return DateTime.fromJSDate(new Date(d), {
-                zone: timezone,
-            }).toFormat("MMM dd");
+        queryKey: [
+            "evaluation",
+            alert,
+            detectionEvaluation.enumerationItem,
+            evaluationTimeRange?.startTime,
+            evaluationTimeRange?.endTime,
+        ],
+        queryFn: () => {
+            return getAlertEvaluation(
+                {
+                    alert,
+                    start: evaluationTimeRange?.startTime,
+                    end: evaluationTimeRange?.endTime,
+                },
+                undefined,
+                detectionEvaluation.enumerationItem
+            );
         },
-    };
+    });
+
+    useEffect(() => {
+        if (inView) {
+            getEvaluationQuery.refetch();
+        }
+    }, [inView]);
+
+    useEffect(() => {
+        if (!getEvaluationQuery.data) {
+            return;
+        }
+        const tsData = generateChartOptionsForAlert(
+            Object.values(getEvaluationQuery.data?.detectionEvaluations)[0],
+            showOnlyActivity
+                ? []
+                : Object.values(
+                      getEvaluationQuery.data?.detectionEvaluations
+                  )[0].anomalies,
+            t,
+            undefined,
+            timezone,
+            hideTime,
+            showOnlyActivity,
+            false,
+            showOnlyActivity
+        );
+        const tsDataForExpanded = {
+            ...tsData,
+        };
+        tsData.brush = false;
+        tsData.zoom = true;
+        tsData.legend = false;
+        tsData.yAxis = {
+            enabled: false,
+        };
+        tsData.margins = {
+            top: 0,
+            bottom: 10, // This needs to exist for the x axis
+            left: 0,
+            right: 0,
+        };
+        tsData.xAxis = {
+            ...tsData.xAxis,
+            tickFormatter: (d: string) => {
+                return DateTime.fromJSDate(new Date(d), {
+                    zone: timezone,
+                }).toFormat("MMM dd");
+            },
+        };
+        setTimeSeriesData(tsData);
+        setTimeSeriesExpandedData(tsDataForExpanded);
+    }, [getEvaluationQuery.data]);
 
     return (
-        <Grid item xs={12}>
+        <Grid item ref={ref} xs={12}>
             <Card variant="outlined">
                 <CardContent>
                     <Grid container alignItems="center">
@@ -105,7 +158,32 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
                         </Grid>
                         {!isExpanded && (
                             <Grid item sm={6} xs={12}>
-                                <TimeSeriesChart height={100} {...tsData} />
+                                <LoadingErrorStateSwitch
+                                    errorState={
+                                        <NoDataIndicator>
+                                            {t(
+                                                "message.experienced-an-issue-fetching-chart-data"
+                                            )}
+                                        </NoDataIndicator>
+                                    }
+                                    isError={getEvaluationQuery.isError}
+                                    isLoading={getEvaluationQuery.isFetching}
+                                    loadingState={
+                                        <SkeletonV1
+                                            animation="pulse"
+                                            height={100}
+                                            variant="rect"
+                                            width={400}
+                                        />
+                                    }
+                                >
+                                    {!!timeSeriesData && (
+                                        <TimeSeriesChart
+                                            height={100}
+                                            {...timeSeriesData}
+                                        />
+                                    )}
+                                </LoadingErrorStateSwitch>
                             </Grid>
                         )}
                         <Grid item sm={1} xs={6}>
@@ -185,10 +263,12 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
                             </Grid>
                         </Grid>
 
-                        <TimeSeriesChart
-                            height={expandedChartHeight}
-                            {...tsDataForExpanded}
-                        />
+                        {timeSeriesExpandedData && (
+                            <TimeSeriesChart
+                                height={expandedChartHeight}
+                                {...timeSeriesExpandedData}
+                            />
+                        )}
                     </CardContent>
                 )}
             </Card>

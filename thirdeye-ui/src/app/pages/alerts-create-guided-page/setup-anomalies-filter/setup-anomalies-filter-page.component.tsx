@@ -115,6 +115,10 @@ export const SetupAnomaliesFilterPage: FunctionComponent = () => {
         setAlertConfigurationWithFilterChanges,
     ] = useState(alertConfigurationBeforeFilterChanges);
     const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
+    const [evaluationTimeRange, setEvaluationTimeRange] = useState({
+        startTime: startTime,
+        endTime: endTime,
+    });
 
     const selectedAlertTemplate = useMemo(() => {
         return alertTemplates.find((alertTemplate) => {
@@ -140,7 +144,24 @@ export const SetupAnomaliesFilterPage: FunctionComponent = () => {
     const fetchAlertEvaluations = (start: number, end: number): void => {
         const copiedAlert = { ...alertConfigurationBeforeFilterChanges };
         delete copiedAlert.id;
-        getEvaluation(createAlertEvaluation(copiedAlert, start, end));
+        /* On the Preview Page we have to defer fetching the data for enumeration items till they
+        are in view.
+        We only fetch the list of enumeration items without data and anomalies
+        by passing {listEnumerationItemsOnly: true} as fetching all the data at once introduces
+        significant latency because of the request size.
+        Hence we first fetch the evaluations with enumeration items without anomalies and data.
+        And then enumerationRow component fetches anomalies and data progresivelly */
+        const hasEnumerationItems =
+            !!alertConfigurationBeforeFilterChanges.templateProperties
+                ?.enumeratorQuery ||
+            !!alertConfigurationBeforeFilterChanges.templateProperties
+                ?.enumerationItems;
+        getEvaluation(
+            createAlertEvaluation(copiedAlert, start, end, {
+                listEnumerationItemsOnly: hasEnumerationItems,
+            })
+        );
+        setEvaluationTimeRange({ startTime: start, endTime: end });
 
         const alertWithFilters = { ...alertConfigurationWithFilterChanges };
         delete alertWithFilters.id;
@@ -431,6 +452,9 @@ export const SetupAnomaliesFilterPage: FunctionComponent = () => {
                                                 }
                                                 alertEvaluation={
                                                     evaluationWithFilters
+                                                }
+                                                evaluationTimeRange={
+                                                    evaluationTimeRange
                                                 }
                                                 onAlertPropertyChange={
                                                     onAlertPropertyChange

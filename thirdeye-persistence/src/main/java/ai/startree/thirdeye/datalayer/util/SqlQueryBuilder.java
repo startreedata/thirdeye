@@ -303,10 +303,18 @@ public class SqlQueryBuilder {
         whereClause.append(")");
         break;
       case EQ:
+        if (predicate.getRhs() == null) {
+          whereClause.append(columnName).append(" IS NULL ");
+          break;
+        }
       case LIKE:
       case GT:
       case LT:
       case NEQ:
+        if (predicate.getRhs() == null) {
+          whereClause.append(columnName).append(" IS NOT NULL ");
+          break;
+        }
       case LE:
       case GE:
         whereClause.append(columnName).append(" ").append(predicate.getOper().toString())

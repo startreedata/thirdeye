@@ -278,7 +278,6 @@ public class SqlQueryBuilder {
     return preparedStatement;
   }
 
-  @SuppressWarnings("checkstyle:fallthrough") // the fall through 
   private void generateWhereClause(final BiMap<String, String> entityNameToDBNameMapping,
       final Predicate predicate, final List<Pair<String, Object>> parametersList, final StringBuilder whereClause) {
     String columnName = null;

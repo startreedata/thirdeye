@@ -14,7 +14,7 @@
 package ai.startree.thirdeye.resources;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -36,7 +36,6 @@ import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
-import java.util.List;
 import javax.ws.rs.core.Response;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -57,7 +56,7 @@ public class DataSourceResourceTest {
     dataSource = mock(ThirdEyeDataSource.class);
     dataSourceCache = mock(DataSourceCache.class);
     final DataSourceManager datasourceDao = mock(DataSourceManager.class);
-    when(datasourceDao.findByName(anyString())).thenReturn(List.of(dataSourceDTO));
+    when(datasourceDao.findById(anyLong())).thenReturn(dataSourceDTO);
     final DataSourceService dataSourceService = new DataSourceService(
         datasourceDao,
         dataSourceCache,
@@ -78,12 +77,14 @@ public class DataSourceResourceTest {
     when(dataSource.validate()).thenReturn(true);
     when(dataSourceCache.getDataSource(dataSourceDTO)).thenReturn(dataSource);
 
+    // deprecated
     final Response response = dataSourceResource.validate(principal, dataSourceName, null);
     assertThat(response.getStatus()).isEqualTo(200);
+    
     final Response response2 = dataSourceResource.validate(principal, null, dataSourceDTO.getId());
     assertThat(response2.getStatus()).isEqualTo(200);
 
-    final StatusApi entity = (StatusApi) response.getEntity();
+    final StatusApi entity = (StatusApi) response2.getEntity();
     assertThat(entity).isNotNull();
     assertThat(entity.getCode()).isEqualTo(ThirdEyeStatus.OK);
   }

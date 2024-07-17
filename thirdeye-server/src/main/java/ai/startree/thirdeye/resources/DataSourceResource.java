@@ -77,17 +77,6 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
 
   @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @GET
-  @Path("/name/{name}/datasets")
-  @Deprecated // use getDatasetsById
-  public Response getDatasets(
-      @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
-      @PathParam("name") String name) {
-    LOG.warn("Using deprecated endpoint /name/<name>/datasets. Prefer /<id>/datasets");
-    return respondOk(dataSourceService.getDatasets(principal, name));
-  }
-
-  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
-  @GET
   @Path("/{id}/datasets")
   public Response getDatasetsById(
       @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
@@ -112,8 +101,7 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
     final boolean idIsUsed = dataSourceName == null && dataSourceId != null;
     checkArgument(nameIsUsed || idIsUsed, "Either name or id parameters must be set.");
     if (nameIsUsed) {
-      LOG.warn("Using deprecated onboard-dataset with param 'dataSourceName'. Prefer id.");
-      return respondOk(dataSourceService.onboardDataset(principal, dataSourceName, datasetName));
+      throw new IllegalArgumentException("Using deprecated onboard-dataset with param 'dataSourceName'. This is not supported anymore. Please use id.");
     } else {
       return respondOk(dataSourceService.onboardDataset(principal, dataSourceId, datasetName));
     }
@@ -134,8 +122,7 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
     checkArgument(nameIsUsed || idIsUsed, "Either name or id parameters must be set.");
     final List<DatasetApi> onboarded;
     if (nameIsUsed) {
-      LOG.warn("Using deprecated onboard-all with param 'name'. Prefer id.");
-      onboarded = dataSourceService.onboardAll(principal, name);
+      throw new IllegalArgumentException("Using deprecated onboard-all with param 'name'. This is not supported anymore. Please use id.");
     } else {
       onboarded = dataSourceService.onboardAll(principal, id); 
     }
@@ -156,8 +143,7 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
     final boolean idIsUsed = name == null && id != null;
     checkArgument(nameIsUsed || idIsUsed, "Either name or id parameters must be set.");
     if (nameIsUsed) {
-      LOG.warn("Using deprecated offboard-all with param 'name'. Prefer id.");
-      return respondOk(dataSourceService.offboardAll(principal, name));  
+      throw new IllegalArgumentException("Using deprecated offboard-all with param 'name'. This is not supported anymore. Please use id.");
     } else {
       return respondOk(dataSourceService.offboardAll(principal, id));
     }
@@ -187,12 +173,7 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
     checkArgument(nameIsUsed || idIsUsed, "Either name or id parameters must be set.");
     try {
       if (nameIsUsed) {
-        LOG.warn("Using deprecated validate with param 'name'. Prefer id.");
-        // throws ThirdEyeException on datasource not found in DB
-        // returns null when not able to load datasource
-        if (dataSourceService.validate(principal, name)) {
-          return respondOk(new StatusApi().setCode(ThirdEyeStatus.OK));
-        }  
+        throw new IllegalArgumentException("Using deprecated validate with param 'name'. This is not supported anymore. Please use id.");
       } else {
         if (dataSourceService.validate(principal, id)) {
           return respondOk(new StatusApi().setCode(ThirdEyeStatus.OK));

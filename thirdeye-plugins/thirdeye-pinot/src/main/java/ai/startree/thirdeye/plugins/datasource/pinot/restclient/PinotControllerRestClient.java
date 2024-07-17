@@ -13,15 +13,12 @@
  */
 package ai.startree.thirdeye.plugins.datasource.pinot.restclient;
 
-import static ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSourceUtils.buildConfig;
 import static ai.startree.thirdeye.spi.Constants.VANILLA_OBJECT_MAPPER;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSourceConfig;
-import ai.startree.thirdeye.spi.datalayer.dto.DataSourceMetaBean;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
@@ -59,23 +56,6 @@ public class PinotControllerRestClient {
         config.getControllerPort(),
         config.getControllerConnectionScheme());
     this.pinotControllerRestClientSupplier = pinotControllerRestClientSupplier;
-  }
-
-  /**
-   * TODO shounak refactor constructor
-   */
-  @Deprecated
-  public PinotControllerRestClient(final DataSourceMetaBean dataSourceMeta,
-      final String dataSourceType) {
-    final Map<String, Object> properties = dataSourceMeta.getProperties();
-    Preconditions.checkArgument(dataSourceType.equals("pinot-sql"),
-        "This constructor is only called from pinot-sql connector");
-    final PinotThirdEyeDataSourceConfig config = buildConfig(properties);
-    pinotControllerHost = new HttpHost(config.getControllerHost(),
-        config.getControllerPort(),
-        config.getControllerConnectionScheme());
-
-    pinotControllerRestClientSupplier = null;
   }
 
   public List<String> getAllTablesFromPinot() throws IOException {

@@ -40,79 +40,22 @@ import org.apache.pinot.spi.data.Schema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// fixme cyril authz - needs to re-read this - most likely some things could be improved - also reduce indirections
+// todo cyril DI with a single dep is often an anti-pattern - merge PinotDatasetReader and PinotControllerRestClient together
+// also some things happening in PinotThirdEyeDataSource could be abstracted in the merge of the 2 classes above
 @Singleton
 public class PinotDatasetReader {
 
   public static final MetricAggFunction DEFAULT_AGG_FUNCTION = MetricAggFunction.SUM;
   public static final MetricAggFunction DEFAULT_TDIGEST_AGG_FUNCTION = MetricAggFunction.PCT90;
   private static final Logger LOG = LoggerFactory.getLogger(PinotDatasetReader.class);
-
-  /* Use "ROW_COUNT" as the special token for the count(*) metric for a pinot table */
+  
   private static final String BYTES_STRING = "BYTES";
-  private static final String NON_ADDITIVE = "non_additive";
-  private static final String PINOT_PRE_AGGREGATED_KEYWORD = "*";
 
   private final PinotControllerRestClient pinotControllerRestClient;
 
   @Inject
   public PinotDatasetReader(final PinotControllerRestClient pinotControllerRestClient) {
     this.pinotControllerRestClient = pinotControllerRestClient;
-  }
-
-  public static DatasetConfigDTO generateDatasetConfig(final String dataset, final Schema schema,
-      final String timeColumnName,
-      final Map<String, String> customConfigs, final String dataSourceName) {
-    final List<String> dimensions = schema.getDimensionNames();
-    final DateTimeFieldSpec dateTimeFieldSpec = schema.getSpecForTimeColumn(timeColumnName);
-    Preconditions.checkNotNull(dateTimeFieldSpec);
-    // Create DatasetConfig
-    final DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO()
-        .setDataset(dataset)
-        .setDimensions(Templatable.of(dimensions))
-        .setDataSource(dataSourceName)
-        .setProperties(customConfigs)
-        .setActive(Boolean.TRUE)
-        .setTimeColumn(dateTimeFieldSpec.getName())
-        .setTimeFormat(dateTimeFieldSpec.getFormat())
-        .setTimezone(DEFAULT_CHRONOLOGY.getZone().toString());
-    checkNonAdditive(datasetConfigDTO);
-    return datasetConfigDTO;
-  }
-
-  /**
-   * Check if the dataset is non-additive. If it is, set the additive flag to false and set the
-   * pre-aggregated keyword.
-   *
-   * @param dataset the dataset DTO to check
-   */
-  static void checkNonAdditive(final DatasetConfigDTO dataset) {
-    if (dataset.isAdditive() && dataset.getDataset().endsWith(NON_ADDITIVE)) {
-      dataset.setAdditive(false);
-      dataset.setPreAggregatedKeyword(PINOT_PRE_AGGREGATED_KEYWORD);
-    }
-  }
-
-  public static MetricConfigDTO generateMetricConfig(final MetricFieldSpec metricFieldSpec,
-      final String dataset) {
-    final MetricConfigDTO metricConfigDTO = new MetricConfigDTO();
-    final String metric = metricFieldSpec.getName();
-    metricConfigDTO.setName(metric);
-    metricConfigDTO.setAlias(SpiUtils.constructMetricAlias(dataset, metric));
-    metricConfigDTO.setDataset(dataset);
-    metricConfigDTO.setActive(Boolean.TRUE);
-
-    final String dataTypeStr = metricFieldSpec.getDataType().toString();
-    if (BYTES_STRING.equals(dataTypeStr)) {
-      // Assume if the column is BYTES type, use the default TDigest function and set the return data type to double
-      metricConfigDTO.setDefaultAggFunction(DEFAULT_TDIGEST_AGG_FUNCTION.toString());
-      metricConfigDTO.setDatatype(MetricType.DOUBLE);
-    } else {
-      metricConfigDTO.setDefaultAggFunction(DEFAULT_AGG_FUNCTION.toString());
-      metricConfigDTO.setDatatype(MetricType.valueOf(dataTypeStr));
-    }
-
-    return metricConfigDTO;
   }
 
   public List<String> getAllTableNames() throws IOException {
@@ -165,6 +108,10 @@ public class PinotDatasetReader {
         dataSourceName);
   }
 
+  public void close() {
+    pinotControllerRestClient.close();
+  }
+
   /**
    * Adds a new dataset to the thirdeye database
    */
@@ -191,7 +138,43 @@ public class PinotDatasetReader {
     return datasetConfigDTO;
   }
 
-  public void close() {
-    pinotControllerRestClient.close();
+  private static DatasetConfigDTO generateDatasetConfig(final String dataset, final Schema schema,
+      final String timeColumnName,
+      final Map<String, String> customConfigs, final String dataSourceName) {
+    final List<String> dimensions = schema.getDimensionNames();
+    final DateTimeFieldSpec dateTimeFieldSpec = schema.getSpecForTimeColumn(timeColumnName);
+    Preconditions.checkNotNull(dateTimeFieldSpec);
+    // Create DatasetConfig
+    return new DatasetConfigDTO()
+        .setDataset(dataset)
+        .setDimensions(Templatable.of(dimensions))
+        .setDataSource(dataSourceName)
+        .setProperties(customConfigs)
+        .setActive(Boolean.TRUE)
+        .setTimeColumn(dateTimeFieldSpec.getName())
+        .setTimeFormat(dateTimeFieldSpec.getFormat())
+        .setTimezone(DEFAULT_CHRONOLOGY.getZone().toString());
+  }
+
+  private static MetricConfigDTO generateMetricConfig(final MetricFieldSpec metricFieldSpec,
+      final String dataset) {
+    final MetricConfigDTO metricConfigDTO = new MetricConfigDTO();
+    final String metric = metricFieldSpec.getName();
+    metricConfigDTO.setName(metric);
+    metricConfigDTO.setAlias(SpiUtils.constructMetricAlias(dataset, metric));
+    metricConfigDTO.setDataset(dataset);
+    metricConfigDTO.setActive(Boolean.TRUE);
+
+    final String dataTypeStr = metricFieldSpec.getDataType().toString();
+    if (BYTES_STRING.equals(dataTypeStr)) {
+      // Assume if the column is BYTES type, use the default TDigest function and set the return data type to double
+      metricConfigDTO.setDefaultAggFunction(DEFAULT_TDIGEST_AGG_FUNCTION.toString());
+      metricConfigDTO.setDatatype(MetricType.DOUBLE);
+    } else {
+      metricConfigDTO.setDefaultAggFunction(DEFAULT_AGG_FUNCTION.toString());
+      metricConfigDTO.setDatatype(MetricType.valueOf(dataTypeStr));
+    }
+
+    return metricConfigDTO;
   }
 }

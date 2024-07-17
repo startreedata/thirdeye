@@ -198,6 +198,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
     return false;
   }
 
+  // todo cyril healthcheck should be abstracted by the controller
   private boolean validate0() throws IOException, ExecutionException {
     final PinotHealthCheckConfiguration healthCheck = config.getHealthCheck();
     if (healthCheck == null || !healthCheck.isEnabled()) {

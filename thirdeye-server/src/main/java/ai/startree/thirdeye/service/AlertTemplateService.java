@@ -83,15 +83,17 @@ public class AlertTemplateService extends CrudService<AlertTemplateApi, AlertTem
   @NonNull
   protected List<AlertTemplateApi> loadRecommendedTemplates(final ThirdEyeServerPrincipal principal,
       final boolean updateExisting, final String explicitNamespace) {
-    LOG.info("Loading recommended templates: START.");
+    LOG.info("Loading recommended templates in namespace {}: START.", explicitNamespace);
     final List<AlertTemplateApi> alertTemplates = bootstrapResourcesRegistry.getAlertTemplates();
-    LOG.info("Loading recommended templates: templates to load: {}",
+    LOG.info("Loading recommended templates in namespace {}: templates to load: {}",
+        explicitNamespace,
         alertTemplates.stream().map(AlertTemplateApi::getName).collect(Collectors.toList()));
     // inject namespace in entities to create/update
     alertTemplates.forEach(e -> e.setAuth(new AuthorizationConfigurationApi().setNamespace(explicitNamespace)));
     final List<AlertTemplateApi> loadedTemplates = loadTemplates(principal, alertTemplates,
         updateExisting);
-    LOG.info("Loading recommended templates: SUCCESS. Templates loaded: {}",
+    LOG.info("Loading recommended templates in namespace {}: SUCCESS. Templates loaded: {}",
+        explicitNamespace,
         loadedTemplates.stream().map(AlertTemplateApi::getName).collect(Collectors.toList()));
 
     return loadedTemplates;

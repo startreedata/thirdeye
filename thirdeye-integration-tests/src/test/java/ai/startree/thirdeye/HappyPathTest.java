@@ -27,6 +27,7 @@ import static ai.startree.thirdeye.PinotDataSourceManager.PINOT_DATASET_NAME;
 import static ai.startree.thirdeye.PinotDataSourceManager.PINOT_DATA_SOURCE_NAME;
 import static ai.startree.thirdeye.ThirdEyeTestClient.ALERT_LIST_TYPE;
 import static ai.startree.thirdeye.ThirdEyeTestClient.ANOMALIES_LIST_TYPE;
+import static ai.startree.thirdeye.ThirdEyeTestClient.DATASOURCE_LIST_TYPE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
@@ -160,12 +161,15 @@ public class HappyPathTest {
     final Response response = request("api/data-sources").post(Entity.json(List.of(
         pinotDataSourceApi)));
     assert200(response);
+    final DataSourceApi dataSourceInResponse = response.readEntity(DATASOURCE_LIST_TYPE).get(0);
+    pinotDataSourceApi.setId(dataSourceInResponse.getId());
+    
   }
 
   @Test(dependsOnMethods = "testCreatePinotDataSource", timeOut = 5000)
   public void testPinotDataSourceHealth() {
     final Response response = request(
-        "api/data-sources/validate?name=" + pinotDataSourceApi.getName()).get();
+        "api/data-sources/validate?id=" + pinotDataSourceApi.getId()).get();
     assert200(response);
   }
 
@@ -231,7 +235,7 @@ public class HappyPathTest {
   @Test(dependsOnMethods = "testPinotDataSourceHealth")
   public void testCreateDataset() {
     final MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
-    formData.add("dataSourceName", PINOT_DATA_SOURCE_NAME);
+    formData.add("dataSourceId", String.valueOf(pinotDataSourceApi.getId()));
     formData.add("datasetName", PINOT_DATASET_NAME);
 
     final Response response = request("api/data-sources/onboard-dataset/").post(

@@ -278,6 +278,7 @@ public class SqlQueryBuilder {
     return preparedStatement;
   }
 
+  @SuppressWarnings("checkstyle:fallthrough") // the fall through 
   private void generateWhereClause(final BiMap<String, String> entityNameToDBNameMapping,
       final Predicate predicate, final List<Pair<String, Object>> parametersList, final StringBuilder whereClause) {
     String columnName = null;
@@ -305,16 +306,25 @@ public class SqlQueryBuilder {
       case EQ:
         if (predicate.getRhs() == null) {
           whereClause.append(columnName).append(" IS NULL ");
-          break;
+        } else {
+          // duplicated code with NEQ and LIKE/GT/GE/... - ok for the moment, this needs to be migrated to JOOQ anyway
+          whereClause.append(columnName).append(" ").append(predicate.getOper().toString())
+              .append(" ?");
+          parametersList.add(ImmutablePair.of(columnName, predicate.getRhs()));
         }
-      case LIKE:
-      case GT:
-      case LT:
+        break;
       case NEQ:
         if (predicate.getRhs() == null) {
           whereClause.append(columnName).append(" IS NOT NULL ");
-          break;
+        } else {
+          whereClause.append(columnName).append(" ").append(predicate.getOper().toString())
+              .append(" ?");
+          parametersList.add(ImmutablePair.of(columnName, predicate.getRhs()));
         }
+        break;
+      case LIKE:
+      case GT:
+      case LT:
       case LE:
       case GE:
         whereClause.append(columnName).append(" ").append(predicate.getOper().toString())

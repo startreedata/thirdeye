@@ -40,7 +40,7 @@ public interface AbstractManager<E extends AbstractDTO> {
   // FIXME CYRIL authz use findUniqueByNameAndNamespace or findByNameAndNamespace instead
   List<E> findByName(String name);
 
-  // returns null if the entity is not found or not unique 
+  // returns null if the entity is not found 
   default @Nullable E findUniqueByNameAndNamespace(final @NonNull String name,
       final @Nullable String namespace) {
     final List<E> list = findByName(name)

@@ -45,8 +45,10 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
@@ -348,8 +350,30 @@ public class TaskManagerImpl implements TaskManager {
   }
 
   @Override
-  public List<TaskDTO> findByName(final String name) {
-    return findByPredicate(Predicate.EQ("name", name));
+  public TaskDTO findUniqueByNameAndNamespace(final @NonNull String name,
+      final @org.checkerframework.checker.nullness.qual.Nullable String namespace) {
+    final List<TaskDTO> list = findByPredicate(
+        Predicate.AND(
+            Predicate.EQ("name", name),
+            Predicate.OR(
+                Predicate.EQ("namespace", namespace),
+                // existing entities are not migrated automatically so they can have their namespace column to null in the index table, even if they do belong to a namespace 
+                //  todo cyril authz - prepare migration scripts - or some logic to ensure all entities are eventually migrated
+                Predicate.EQ("namespace", null)
+            )
+        )
+    )
+        // we still need to perform in-app filtering until all entities namespace are migrated in db - see above
+        .stream().filter(e -> Objects.equals(e.namespace(), namespace)).toList();
+    if (list.isEmpty()) {
+      return null;
+    } else if (list.size() == 1) {
+      return list.iterator().next();
+    } else {
+      throw new IllegalStateException(String.format(
+          "Found multiple entities with name %s and namespace %s. This should not happen. Please reach out to support.",
+          name, namespace));
+    }
   }
 
   @Override

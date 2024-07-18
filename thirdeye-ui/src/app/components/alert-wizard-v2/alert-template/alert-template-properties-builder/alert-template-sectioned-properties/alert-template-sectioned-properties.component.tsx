@@ -34,7 +34,7 @@ const StyledGrid = withStyles((theme) => ({
 export const AlertTemplateSectionedProperties: FunctionComponent<AlertTemplateSectionedPropertiesProps> =
     ({ groupedProperties, handlePropertyValueChange }) => {
         const { t } = useTranslation();
-        const ordeeredGroupedProperties: Record<
+        const orderedGroupedProperties: Record<
             string,
             Record<string, PropertyRenderConfig[]>
         > = {};
@@ -46,7 +46,7 @@ export const AlertTemplateSectionedProperties: FunctionComponent<AlertTemplateSe
         ALERT_PROPERTIES_DEFAULT_ORDER.forEach((alertProperty) => {
             if (alertProperty !== ALERT_PROPERTIES_DEFAULT_STEP.STEP) {
                 if (groupedProperties[alertProperty]) {
-                    ordeeredGroupedProperties[alertProperty] =
+                    orderedGroupedProperties[alertProperty] =
                         groupedProperties[alertProperty];
                 }
             }
@@ -56,17 +56,17 @@ export const AlertTemplateSectionedProperties: FunctionComponent<AlertTemplateSe
         );
         if (!isEmpty(keysNotInDefaultOrder)) {
             keysNotInDefaultOrder.forEach((key) => {
-                ordeeredGroupedProperties[key] = groupedProperties[key];
+                orderedGroupedProperties[key] = groupedProperties[key];
             });
         }
         if (groupedProperties[ALERT_PROPERTIES_DEFAULT_STEP.STEP]) {
-            ordeeredGroupedProperties[ALERT_PROPERTIES_DEFAULT_STEP.STEP] =
+            orderedGroupedProperties[ALERT_PROPERTIES_DEFAULT_STEP.STEP] =
                 groupedProperties[ALERT_PROPERTIES_DEFAULT_STEP.STEP];
         }
 
         return (
             <StyledGrid container>
-                {Object.keys(ordeeredGroupedProperties).map((step, stepIdx) => {
+                {Object.keys(orderedGroupedProperties).map((step, stepIdx) => {
                     const subStepMap = groupedProperties[step];
 
                     return (

@@ -71,7 +71,8 @@ public class AlertTemplateService extends CrudService<AlertTemplateApi, AlertTem
     return ApiBeanMapper.toAlertTemplateApi(dto);
   }
   
-  // fixme cyril authz related: override validate and prevent duplicate name?  
+  // todo cyril authz related: override validate and prevent duplicate name, namespace? 
+  //  for the moment this is done via the uniqueness constraint in the db so the error message returned can be confusing  
 
   public List<AlertTemplateApi> loadRecommendedTemplates(final ThirdEyeServerPrincipal principal,
       final boolean updateExisting) {

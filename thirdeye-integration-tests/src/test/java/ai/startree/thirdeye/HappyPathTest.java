@@ -602,7 +602,7 @@ public class HappyPathTest {
   }
 
   // TODO CYRIL authz - if requireNamespace=true, it should not be possible to change a namespace
-  // FIXME CYRIL authz add tests with requireNamespace=true
+  // TODO CYRIL authz add tests with requireNamespace=true
   @Test(timeOut = 60000, dependsOnMethods = "testAnomalyCount")
   @Deprecated // it will not be possible to change a namespace anymore 
   public void testUpdateAlertAuth() throws InterruptedException {

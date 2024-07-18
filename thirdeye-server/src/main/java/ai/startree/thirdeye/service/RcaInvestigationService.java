@@ -88,7 +88,6 @@ public class RcaInvestigationService extends CrudService<RcaInvestigationApi, Rc
     ensureExists(api.getName(), "Name must be present");
     ensureExists(api.getAnomaly(), "Anomaly field must be set");
     ensureExists(api.getAnomaly().getId(), "Anomaly id field must be set");
-    // fixme cyril ensure anomaly id exists in db 
-    // fixme cyril authz ensure has access to anomaly - in AuthorizationManager#relatedEntities 
+    // not checking here if the anomaly id is valid - it is checked at authz check time - consider redesign?
   }
 }

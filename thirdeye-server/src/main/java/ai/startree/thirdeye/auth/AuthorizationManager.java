@@ -334,9 +334,10 @@ public class AuthorizationManager {
       // same namespace is ensured via RcaInvestigationService#toDto 
       // putting again a check because it's migration code and some legacy entities may not have the property 
       final AnomalyDTO anomaly = anomalyDao.findById(anomalyId);
-      checkArgument(Objects.equals(rcaInvestigationDTO.namespace(), anomaly.namespace()), 
-          "RcaInvestigation namespace %s and anomaly namespace do not match for anomaly id %s.",
-          rcaInvestigationDTO.namespace(), anomaly.getId());
+      // the error message is the same whether the anomaly does not exist in db or the anomaly is in another namespace - this is to avoid leaking anomaly ids of other namespaces 
+      checkArgument(anomaly != null && Objects.equals(rcaInvestigationDTO.namespace(), anomaly.namespace()), 
+          "Invalid anomaly id or rcaInvestigation namespace %s and anomaly namespace do not match for anomaly id %s.",
+          rcaInvestigationDTO.namespace(), anomalyId);
       return List.of(resourceId(anomaly));
     } else if (entity instanceof AnomalyDTO anomalyDTO) {
       // fixme cyril authz - implement

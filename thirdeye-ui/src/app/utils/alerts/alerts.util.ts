@@ -16,7 +16,6 @@ import i18n from "i18next";
 import { cloneDeep, isEmpty, kebabCase, omit } from "lodash";
 import { PropertyRenderConfig } from "../../components/alert-wizard-v2/alert-template/alert-template-properties-builder/alert-template-properties-builder.interfaces";
 import { GetAlertEvaluationPayload } from "../../rest/alerts/alerts.interfaces";
-import { MetadataPropertyStep } from "../../rest/dto/alert-template.interfaces";
 import {
     Alert,
     AlertAnomalyDetectorNode,
@@ -460,48 +459,49 @@ export const shouldHideTimeInDatetimeFormat = (
     return false;
 };
 
-export const propertyStepNameMap: Record<MetadataPropertyStep, string> = {
-    [MetadataPropertyStep.DATA]: "Data",
-    [MetadataPropertyStep.PREPROCESS]: "Preprocessing",
-    [MetadataPropertyStep.DETECTION]: "Detection",
-    [MetadataPropertyStep.FILTER]: "Filtering",
-    [MetadataPropertyStep.POSTPROCESS]: "Postprocessing",
-    [MetadataPropertyStep.RCA]: "Root Cause Analysis",
-    [MetadataPropertyStep.OTHER]: "Other",
+export const extendablePropertyStepNameMap: Record<string, string> = {
+    DATA: "Data",
+    PREPROCESS: "Preprocessing",
+    DETECTION: "Detection",
+    DIMENSION_EXPLORATION: "Dimension Exploration",
+    FILTER: "Filtering",
+    POSTPROCESS: "Postprocessing",
+    RCA: "Root Cause Analysis",
+    OTHER: "Other",
 };
 
-export const existingPropertySteps: MetadataPropertyStep[] = [
-    MetadataPropertyStep.DATA,
-    MetadataPropertyStep.PREPROCESS,
-    MetadataPropertyStep.DETECTION,
-    MetadataPropertyStep.FILTER,
-    MetadataPropertyStep.POSTPROCESS,
-    MetadataPropertyStep.RCA,
-    MetadataPropertyStep.OTHER,
+export enum ALERT_PROPERTIES_DEFAULT_STEP {
+    STEP = "OTHER",
+    SUBSTEP = "DIRECT",
+}
+
+export const ALERT_PROPERTIES_DEFAULT_ORDER = [
+    "DATA",
+    "DIMENSION_EXPLORATION",
+    "PREPROCESS",
+    "DETECTION",
+    "FILTER",
+    "POSTPROCESS",
+    "RCA",
+    "OTHER",
 ];
 
 export const groupPropertyByStepAndSubStep = (
     properties: PropertyRenderConfig[]
-): Record<MetadataPropertyStep, Record<string, PropertyRenderConfig[]>> => {
+): Record<string, Record<string, PropertyRenderConfig[]>> => {
     const groupedProperties: Record<
-        MetadataPropertyStep,
+        string,
         Record<string, PropertyRenderConfig[]>
-    > = {
-        [MetadataPropertyStep.DATA]: {},
-        [MetadataPropertyStep.PREPROCESS]: {},
-        [MetadataPropertyStep.DETECTION]: {},
-        [MetadataPropertyStep.FILTER]: {},
-        [MetadataPropertyStep.POSTPROCESS]: {},
-        [MetadataPropertyStep.RCA]: {},
-        [MetadataPropertyStep.OTHER]: {},
-    };
+    > = {};
 
     for (const property of properties) {
-        const step = property.metadata.step || MetadataPropertyStep.OTHER;
+        const step =
+            property.metadata.step || ALERT_PROPERTIES_DEFAULT_STEP.STEP;
         if (!groupedProperties[step]) {
             groupedProperties[step] = {};
         }
-        const subStep = property.metadata.subStep || "DIRECT";
+        const subStep =
+            property.metadata.subStep || ALERT_PROPERTIES_DEFAULT_STEP.SUBSTEP;
         if (!groupedProperties?.[step]?.[subStep]) {
             groupedProperties[step][subStep] = [];
         }
@@ -510,20 +510,4 @@ export const groupPropertyByStepAndSubStep = (
     }
 
     return groupedProperties;
-};
-
-export const isStepEmpty = (
-    step: MetadataPropertyStep,
-    groupedProperties: Record<
-        MetadataPropertyStep,
-        Record<string, PropertyRenderConfig[]>
-    >
-): boolean => {
-    for (const subStep in groupedProperties[step]) {
-        if (groupedProperties[step][subStep].length > 0) {
-            return false;
-        }
-    }
-
-    return true;
 };

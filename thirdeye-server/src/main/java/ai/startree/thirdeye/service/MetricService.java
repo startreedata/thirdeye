@@ -29,7 +29,6 @@ import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import com.google.common.collect.ImmutableMap;
-import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -53,13 +52,11 @@ public class MetricService extends CrudService<MetricApi, MetricConfigDTO> {
     super.validate(principal, api, existing);
 
     ensureExists(api.getDataset(), "dataset");
-    final List<DatasetConfigDTO> sameName = datasetConfigManager.findByName(api.getDataset().getName());
-    final List<DatasetConfigDTO> sameNameSameNamespace = authorizationManager.filterByNamespace(principal,
-        optional(api.getAuth()).map(AuthorizationConfigurationApi::getNamespace).orElse(null), 
-        sameName);
-    ensure(!sameNameSameNamespace.isEmpty(), ERR_DATASET_NOT_FOUND, api.getDataset().getName());
-    ensure(sameNameSameNamespace.size() == 1, ERR_DUPLICATE_ENTITY, api.getDataset().getName());
-    final DatasetConfigDTO datasetDto = sameNameSameNamespace.get(0);
+    final DatasetConfigDTO datasetDto = datasetConfigManager.findUniqueByNameAndNamespace(api.getDataset().getName(),
+        optional(api.getAuth()).map(AuthorizationConfigurationApi::getNamespace)
+            .orElse(authorizationManager.currentNamespace(principal))
+    );
+    ensure(datasetDto != null, ERR_DATASET_NOT_FOUND, api.getDataset().getName());
 
     // For new Metric or existing metric with different name
     if (existing == null || !existing.getName().equals(api.getName())) {

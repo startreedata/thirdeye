@@ -149,10 +149,11 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
         ALERT_CRON_MAX_TRIGGERS_PER_MINUTE);
     /* new entity creation or name change in existing entity */
     if (existing == null || !existing.getName().equals(api.getName())) {
-      final List<AlertDTO> sameName = dtoManager.findByName(api.getName());
-      final List<AlertDTO> sameNameSameNamespace = authorizationManager.filterByNamespace(principal,
-          optional(api.getAuth()).map(AuthorizationConfigurationApi::getNamespace).orElse(null), sameName);
-      ensure(sameNameSameNamespace.isEmpty(), ERR_DUPLICATE_NAME, api.getName());
+      final AlertDTO sameNameSameNamespace = dtoManager.findUniqueByNameAndNamespace(api.getName(),
+          optional(api.getAuth()).map(AuthorizationConfigurationApi::getNamespace)
+              .orElse(authorizationManager.currentNamespace(principal))
+      );
+      ensure(sameNameSameNamespace == null, ERR_DUPLICATE_NAME, api.getName());
     }
   }
 

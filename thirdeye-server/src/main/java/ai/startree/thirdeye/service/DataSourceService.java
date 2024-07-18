@@ -60,10 +60,11 @@ public class DataSourceService extends CrudService<DataSourceApi, DataSourceDTO>
     super.validate(principal, api, existing);
     /* new entity creation or name change in existing entity */
     if (existing == null || !existing.getName().equals(api.getName())) {
-      final List<DataSourceDTO> sameName = dtoManager.findByName(api.getName());
-      final List<DataSourceDTO> sameNameSameNamespace = authorizationManager.filterByNamespace(principal,
-          optional(api.getAuth()).map(AuthorizationConfigurationApi::getNamespace).orElse(null), sameName);
-      ensure(sameNameSameNamespace.isEmpty(), ERR_DUPLICATE_NAME, api.getName());
+      final DataSourceDTO sameNameSameNamespace = dtoManager.findUniqueByNameAndNamespace(api.getName(),
+          optional(api.getAuth()).map(AuthorizationConfigurationApi::getNamespace)
+              .orElse(authorizationManager.currentNamespace(principal))
+      );
+      ensure(sameNameSameNamespace == null, ERR_DUPLICATE_NAME, api.getName());
     }
   }
 

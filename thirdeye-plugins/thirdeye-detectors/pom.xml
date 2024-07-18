@@ -58,6 +58,12 @@
       <artifactId>assertj-core</artifactId>
       <scope>test</scope>
     </dependency>
+    <!--thirdeye-spi is in scope provided - this makes test flaky when doing a multithreaded build (most likely a maven bug) - passing the spi manually -->
+    <dependency>
+      <groupId>ai.startree.thirdeye</groupId>
+      <artifactId>thirdeye-spi</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>

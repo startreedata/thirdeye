@@ -112,7 +112,6 @@ public class RcaRelatedService {
     // todo cyril make the type parameter a list - ask FrontEnd if it's ok first
     final List<@NonNull String> types = optional(type).map(List::of)
         .orElse(optional(eventContext.getTypes()).map(Templatable::getValue).orElse(List.of()));
-    // FIXME cyril add authz - filter by namespace
     final List<EventDTO> events = eventDAO.findEventsBetweenTimeRangeInNamespace(startWithLookback,
         endWithLookahead, types,
         // todo rca dimension filters can be set at call time?

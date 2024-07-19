@@ -264,10 +264,9 @@ public class RcaRelatedService {
     final long startWithLookback = anomalyInterval.getStart().minus(lookaround).getMillis();
     final long endWithLookahead = Math.max(anomalyInterval.getStart().plus(lookaround).getMillis(),
         anomalyInterval.getEnd().getMillis());
-    // FIXME CYRIL - authz filter by namespace
-    final List<AnomalyDTO> anomalies = anomalyDAO.filter(new AnomalyFilter()
+    final List<AnomalyDTO> anomalies = anomalyDAO.filterWithNamespace(new AnomalyFilter()
         .setStartEndWindow(new Interval(startWithLookback, endWithLookahead))
-        .setIsChild(false)
+        .setIsChild(false), rcaInfo.alert().namespace()
     );
 
     final Comparator<AnomalyDTO> comparator = Comparator.comparingDouble(

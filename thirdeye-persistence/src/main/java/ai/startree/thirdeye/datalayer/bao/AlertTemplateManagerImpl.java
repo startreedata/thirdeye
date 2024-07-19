@@ -55,7 +55,7 @@ public class AlertTemplateManagerImpl extends AbstractManagerImpl<AlertTemplateD
       if (match == null && namespace != null) { // todo cyril authz - this if condition will be removed once unset namespace backward compatibility logic is removed
         match = findUniqueByNameAndNamespace(name, null);
         if (match != null) {
-          LOG.warn( // fixme cyril authz - make it error level once we start migrating
+          LOG.warn( // todo cyril authz - make it error level once we start migrating
               "Could not find template with name {} in namespace {}, but found a template with this name with an unset namespace. "
                   + "Using this template. This behaviour will change. Please migrate your templates to a namespace.",
               name, namespace);

@@ -26,6 +26,7 @@ import static ai.startree.thirdeye.IntegrationTestUtils.forkJoinNode;
 import static ai.startree.thirdeye.PinotDataSourceManager.PINOT_DATASET_NAME;
 import static ai.startree.thirdeye.PinotDataSourceManager.PINOT_DATA_SOURCE_NAME;
 import static ai.startree.thirdeye.ThirdEyeTestClient.ALERT_LIST_TYPE;
+import static ai.startree.thirdeye.ThirdEyeTestClient.ALERT_TEMPLATE_LIST_TYPE;
 import static ai.startree.thirdeye.ThirdEyeTestClient.ANOMALIES_LIST_TYPE;
 import static ai.startree.thirdeye.ThirdEyeTestClient.DATASOURCE_LIST_TYPE;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -74,6 +75,7 @@ import javax.ws.rs.core.Response;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.TestException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -207,11 +209,12 @@ public class HappyPathTest {
 
   @Test(dependsOnMethods = "testPing")
   public void testCreateDxTemplate() {
-    final Response response = request("/api/alert-templates/name/" + THRESHOLD_TEMPLATE_NAME).get();
+    final Response response = request("/api/alert-templates").get();
     assert200(response);
-
-    final AlertTemplateApi template = response.readEntity(AlertTemplateApi.class);
-    final List<PlanNodeApi> nodes = template.getNodes();
+    final List<AlertTemplateApi> templates = response.readEntity(ALERT_TEMPLATE_LIST_TYPE);
+    final AlertTemplateApi thresholdTemplate = templates.stream().filter(t -> t.getName().equals(THRESHOLD_TEMPLATE_NAME)).findFirst()
+        .orElseThrow(() -> new TestException("Failed to fetch template " + THRESHOLD_TEMPLATE_NAME));
+    final List<PlanNodeApi> nodes = thresholdTemplate.getNodes();
     final List<PlanNodeApi> childRootNodes = nodes
         .stream()
         .filter(node -> NODE_NAME_ROOT.equals(node.getName()))
@@ -223,12 +226,12 @@ public class HappyPathTest {
     nodes.add(forkJoinNode());
     nodes.add(combinerNode());
 
-    template
-        .setName(template.getName() + "-dx")
+    thresholdTemplate
+        .setName(thresholdTemplate.getName() + "-dx")
         .setId(null);
 
     final Response updateResponse = request("/api/alert-templates")
-        .post(Entity.json(List.of(template)));
+        .post(Entity.json(List.of(thresholdTemplate)));
     assertThat(updateResponse.getStatus()).isEqualTo(200);
   }
 

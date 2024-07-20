@@ -15,14 +15,8 @@ package ai.startree.thirdeye.service;
 
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_ID_UNEXPECTED_AT_CREATION;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_ID;
-import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_NAME;
-import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST;
-import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_UNKNOWN;
-import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
-import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureNull;
-import static ai.startree.thirdeye.util.ResourceUtils.serverError;
 
 import ai.startree.thirdeye.DaoFilterBuilder;
 import ai.startree.thirdeye.RequestCache;
@@ -32,8 +26,6 @@ import ai.startree.thirdeye.spi.api.CountApi;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
 import ai.startree.thirdeye.spi.auth.AccessType;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
-import ai.startree.thirdeye.spi.datalayer.DaoFilter;
-import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AbstractManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import com.google.common.collect.ImmutableMap;
@@ -88,31 +80,6 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
    */
   protected DtoT getDto(final Long id) {
     return ensureExists(dtoManager.findById(ensureExists(id, ERR_MISSING_ID)), "id");
-  }
-
-   
-  @Deprecated
-  public ApiT findByName(
-      final ThirdEyeServerPrincipal principal,
-      final String name) {
-    final RequestCache cache = createRequestCache();
-    ensureExists(name, ERR_MISSING_NAME);
-
-    /* If name column is mapped, use the mapping, else use 'name' */
-    final String nameColumn = optional(apiToIndexMap.get("name")).orElse("name");
-    final List<DtoT> byName = dtoManager.filter(new DaoFilter()
-        .setPredicate(Predicate.EQ(nameColumn, name)));
-
-    // FIXME CYRIL authz - CANNOT BE RESOLVED CORRECTLY WITHOUT KNOWING THE CURRENT NAMESPACE 
-    //  cc Suvodeep for instance if a user has access to two namespaces and the two namespaces have a datasource called "pinot", then there is no way to know which one should be returned
-    //  best would be to remove this method
-    ensure(byName.size() > 0, ERR_OBJECT_DOES_NOT_EXIST, name);
-    if (byName.size() > 1) {
-      throw serverError(ERR_UNKNOWN, "Error. Multiple objects with name: " + name);
-    }
-    final DtoT dtoT = byName.iterator().next();
-    authorizationManager.ensureCanRead(principal, dtoT);
-    return toApi(dtoT, cache);
   }
 
   public Stream<ApiT> list(

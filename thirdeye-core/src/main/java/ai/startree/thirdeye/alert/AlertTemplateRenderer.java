@@ -52,6 +52,11 @@ public class AlertTemplateRenderer {
   /**
    * Render the alert template API for /evaluate
    *
+   * todo cyril refactor - this method is not great : 
+   *  not clear that passing an ID will in effect override changes made in the alert because - so the frontend has to be aware of this and remove the id
+   *  makes it strange for consumers because authz has to be checked upstream and authz is performed on DTOs not API
+   *  consumers should be responsible for transforming their alertApi in alertDto then we can remove this
+   * 
    * @param alert the alert API
    * @return template populated with properties
    */
@@ -65,12 +70,12 @@ public class AlertTemplateRenderer {
 
     final AlertTemplateApi templateApi = alert.getTemplate();
     ensureExists(templateApi, ERR_OBJECT_DOES_NOT_EXIST, "alert template body is null");
-    final Map<String, Object> alertProperties = alert.getTemplateProperties();
 
     final AlertTemplateDTO alertTemplateDTO = ApiBeanMapper.toAlertTemplateDto(templateApi);
     final AlertTemplateDTO fullTemplate = alertTemplateManager.findMatchInNamespaceOrUnsetNamespace(
         alertTemplateDTO, namespace);
 
+    final Map<String, Object> alertProperties = alert.getTemplateProperties();
     try {
       return renderTemplate(fullTemplate, alertProperties, alert.getName());
     } catch (IOException e) {

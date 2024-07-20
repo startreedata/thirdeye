@@ -112,7 +112,6 @@ public class RcaRelatedService {
     // todo cyril make the type parameter a list - ask FrontEnd if it's ok first
     final List<@NonNull String> types = optional(type).map(List::of)
         .orElse(optional(eventContext.getTypes()).map(Templatable::getValue).orElse(List.of()));
-    // FIXME cyril add authz - filter by namespace
     final List<EventDTO> events = eventDAO.findEventsBetweenTimeRangeInNamespace(startWithLookback,
         endWithLookahead, types,
         // todo rca dimension filters can be set at call time?
@@ -264,10 +263,9 @@ public class RcaRelatedService {
     final long startWithLookback = anomalyInterval.getStart().minus(lookaround).getMillis();
     final long endWithLookahead = Math.max(anomalyInterval.getStart().plus(lookaround).getMillis(),
         anomalyInterval.getEnd().getMillis());
-    // FIXME CYRIL - authz filter by namespace
-    final List<AnomalyDTO> anomalies = anomalyDAO.filter(new AnomalyFilter()
+    final List<AnomalyDTO> anomalies = anomalyDAO.filterWithNamespace(new AnomalyFilter()
         .setStartEndWindow(new Interval(startWithLookback, endWithLookahead))
-        .setIsChild(false)
+        .setIsChild(false), rcaInfo.alert().namespace()
     );
 
     final Comparator<AnomalyDTO> comparator = Comparator.comparingDouble(

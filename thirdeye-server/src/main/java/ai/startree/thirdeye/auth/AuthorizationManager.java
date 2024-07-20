@@ -145,37 +145,6 @@ public class AuthorizationManager {
     }
   }
 
-  // FIXME CYRIL I AM HERE - maybe will need a filterByNamespace with an existing dto --> will need to resolve namespace with the namespace resolver
-  // TODO CYRIL authz perf - in most cases places using this method should filter at fetch time on the namespace to avoid noisy neighbours effect / stressing the instance   
-  public <T extends AbstractDTO> List<T> filterByNamespace(final ThirdEyePrincipal principal,
-      final @Nullable String explicitNamespace, final List<T> entities) {
-    if (requireNamespace) {
-      @NonNull String filteringNamespace = optional(explicitNamespace).orElse(
-          Objects.requireNonNull(currentNamespace(principal)));
-      return entities.stream()
-          .filter(e -> filteringNamespace.equals(namespaceResolver.resolveNamespace(e))).toList();
-    } else {
-      List<T> filtered = entities
-          .stream()
-          .filter(e -> Objects.equals(explicitNamespace, e.namespace())).toList();
-      if (!entities.isEmpty() && filtered.isEmpty()) {
-        // to keep backward compatibility with different legacy namespace setups, if requireNamespace is not true 
-        // and the filter by namespace filters everything, then try to re-run a filtering on the null namespace 
-        // this may leak some entities but the legacy leak entities anyway - so better not to break existing setups
-        // if user wants correct namespacing they requireNamespace should be set to true
-        filtered = entities
-            .stream()
-            .filter(e -> e.namespace() == null).toList();
-        if (!filtered.isEmpty()) {
-          LOG.warn(
-              "No entities matching namespace {} in {}. Some entities have their namespace undefined. "
-                  + "Returning entities with an undefined namespace.", explicitNamespace, entities);
-        }
-      }
-      return filtered;
-    }
-  }
-
   public <T extends AbstractDTO> void ensureCanCreate(final ThirdEyePrincipal principal,
       final T entity) {
     ensureHasAccess(principal, resourceId(entity), AccessType.WRITE);
@@ -212,6 +181,7 @@ public class AuthorizationManager {
 
   public <T extends AbstractDTO> void ensureCanRead(final ThirdEyePrincipal principal,
       final T entity) {
+    // fixme cyril authz - ensure related entities
     ensureHasAccess(principal, resourceId(entity), AccessType.READ);
   }
 

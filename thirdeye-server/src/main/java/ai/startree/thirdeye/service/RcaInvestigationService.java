@@ -55,10 +55,10 @@ public class RcaInvestigationService extends CrudService<RcaInvestigationApi, Rc
   @Override
   protected RcaInvestigationDTO toDto(final RcaInvestigationApi api) {
     final RcaInvestigationDTO dto = ApiBeanMapper.toDto(api);
-    // todo authz - once namespace resolver is removed - simply inherit from the anomaly id
+    // fixme authz - once namespace resolver is removed - simply inherit from the anomaly id - or let enrich namespace do its work (this is better for update case)
     final ResourceIdentifier authId = authorizationManager.resourceId(dto);
     dto.setAuth(new AuthorizationConfigurationDTO().setNamespace(authId.getNamespace()));
-    return ApiBeanMapper.toDto(api);
+    return dto;
   }
 
   @Override

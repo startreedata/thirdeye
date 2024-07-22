@@ -589,6 +589,8 @@ public class HappyPathTest {
   }
 
   @Test(timeOut = 60000, dependsOnMethods = "testAnomalyCount")
+  // at write time the namespace is not resolved - either it is correct because passed explicitely, either it is correct because it is the principal active namespace, either the method should fail todo authz test implement these cases in the authz tests
+  @Deprecated 
   public void testGetRcaInvestigationAuth() throws InterruptedException {
     final long alertId = mustCreateAlert(
         newRunnableAlertApiWithAuth("TestGetRcaInvestigationAuth", "alert-namespace"));
@@ -597,6 +599,7 @@ public class HappyPathTest {
     final Long anomalyId = mustGetAnomaliesForAlert(alertId).get(0).getId();
     final long investigationId = mustCreateInvestigation(new RcaInvestigationApi()
         .setName("my-investigation")
+        .setAuth(new AuthorizationConfigurationApi().setNamespace("alert-namespace"))
         .setAnomaly(new AnomalyApi().setId(anomalyId)));
 
     final RcaInvestigationApi investigationApi = mustGetInvestigation(investigationId);

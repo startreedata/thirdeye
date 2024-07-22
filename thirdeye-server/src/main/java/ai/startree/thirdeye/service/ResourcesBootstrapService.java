@@ -106,10 +106,11 @@ public class ResourcesBootstrapService {
     final Timer.Sample templateLoadSample = Timer.start(Metrics.globalRegistry);
     authorizationManager.ensureHasRootAccess(principal);
     // install templates in all known namespaces 
-    // hack get distinct namespaces by looking at alerts - fixme cyril authz - get list of namespaces from the ThirdEye authorizer
+    // hack for migration - get distinct namespaces by looking at alerts - todo cyril authz - get list of namespaces from the distinct namespaces of templates - for new namespaces we will need to create templates manually or as part as the namespace creation - design yet to define
     final HashSet<String> distinctNamespaces = alertDao.findAll()
         .stream()
         .map(e -> e.namespace())
+        .distinct()
         .collect(Collectors.toCollection(HashSet::new));
     // continue to install in the unset namespace for the moment
     distinctNamespaces.add(null);

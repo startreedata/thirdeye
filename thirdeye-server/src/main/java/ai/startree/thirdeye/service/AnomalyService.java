@@ -24,7 +24,6 @@ import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.AnomalyFeedbackApi;
 import ai.startree.thirdeye.spi.api.AnomalyStatsApi;
-import ai.startree.thirdeye.spi.auth.ResourceIdentifier;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
@@ -63,13 +62,7 @@ public class AnomalyService extends CrudService<AnomalyApi, AnomalyDTO> {
 
   @Override
   protected AnomalyDTO toDto(final AnomalyApi api) {
-    final AnomalyDTO dto = ApiBeanMapper.toDto(api);
-    // as of today the 2 lines below are used for migration - any read/update will fix the namespace - can be removed later
-    // todo authz - once namespace resolver is removed - simply inherit from the alert id. alertManager.findById. set namespace
-    //  or let enrich namespace based on principal context (stricter because will enforce context being of the correct namespace)
-    final ResourceIdentifier authId = authorizationManager.resourceId(dto);
-    dto.setAuth(new AuthorizationConfigurationDTO().setNamespace(authId.getNamespace()));
-    return dto;
+    return ApiBeanMapper.toDto(api);
   }
 
   @Override

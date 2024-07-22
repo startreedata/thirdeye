@@ -19,7 +19,6 @@ import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
 import ai.startree.thirdeye.spi.api.RcaInvestigationApi;
-import ai.startree.thirdeye.spi.auth.ResourceIdentifier;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.RcaInvestigationManager;
@@ -54,11 +53,7 @@ public class RcaInvestigationService extends CrudService<RcaInvestigationApi, Rc
 
   @Override
   protected RcaInvestigationDTO toDto(final RcaInvestigationApi api) {
-    final RcaInvestigationDTO dto = ApiBeanMapper.toDto(api);
-    // fixme authz - once namespace resolver is removed - simply inherit from the anomaly id - or let enrich namespace do its work (this is better for update case)
-    final ResourceIdentifier authId = authorizationManager.resourceId(dto);
-    dto.setAuth(new AuthorizationConfigurationDTO().setNamespace(authId.getNamespace()));
-    return dto;
+    return ApiBeanMapper.toDto(api);
   }
 
   @Override

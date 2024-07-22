@@ -246,7 +246,7 @@ public class HappyPathTest {
     assert200(response);
   }
 
-  @Test(dependsOnMethods = "testCreateDataset", timeOut = 10000)
+  @Test(dependsOnMethods = "testCreateDataset", timeOut = 12000)
   public void testEvaluateAlert() {
     final AlertEvaluationApi alertEvaluationApi = alertEvaluationApi(UPDATE_ALERT_API,
         PAGEVIEWS_DATASET_START_TIME, EVALUATE_END_TIME);

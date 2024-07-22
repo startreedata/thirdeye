@@ -22,6 +22,7 @@ import ai.startree.thirdeye.spi.api.AlertMetadataApi;
 import ai.startree.thirdeye.spi.api.AlertNodeApi;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.AnomalyFeedbackApi;
+import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
 import ai.startree.thirdeye.spi.api.DatasetApi;
 import ai.startree.thirdeye.spi.api.MetricApi;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertNodeType;
@@ -108,6 +109,10 @@ public interface AnomalyMapper {
               .setName(dto.getMetric())
               .setDataset(datasetApi)
           );
+    }
+    
+    if (dto.getAuth() != null) {
+      anomalyApi.setAuth(new AuthorizationConfigurationApi().setNamespace(dto.getAuth().getNamespace()));
     }
 
     if (dto.getAnomalyLabels() != null) {

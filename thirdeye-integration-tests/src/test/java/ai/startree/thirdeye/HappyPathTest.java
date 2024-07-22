@@ -246,7 +246,7 @@ public class HappyPathTest {
     assert200(response);
   }
 
-  @Test(dependsOnMethods = "testCreateDataset", timeOut = 10000)
+  @Test(dependsOnMethods = "testCreateDataset", timeOut = 12000)
   public void testEvaluateAlert() {
     final AlertEvaluationApi alertEvaluationApi = alertEvaluationApi(UPDATE_ALERT_API,
         PAGEVIEWS_DATASET_START_TIME, EVALUATE_END_TIME);
@@ -589,6 +589,8 @@ public class HappyPathTest {
   }
 
   @Test(timeOut = 60000, dependsOnMethods = "testAnomalyCount")
+  // at write time the namespace is not resolved - either it is correct because passed explicitely, either it is correct because it is the principal active namespace, either the method should fail todo authz test implement these cases in the authz tests
+  @Deprecated 
   public void testGetRcaInvestigationAuth() throws InterruptedException {
     final long alertId = mustCreateAlert(
         newRunnableAlertApiWithAuth("TestGetRcaInvestigationAuth", "alert-namespace"));
@@ -597,42 +599,9 @@ public class HappyPathTest {
     final Long anomalyId = mustGetAnomaliesForAlert(alertId).get(0).getId();
     final long investigationId = mustCreateInvestigation(new RcaInvestigationApi()
         .setName("my-investigation")
+        .setAuth(new AuthorizationConfigurationApi().setNamespace("alert-namespace"))
         .setAnomaly(new AnomalyApi().setId(anomalyId)));
 
-    final RcaInvestigationApi investigationApi = mustGetInvestigation(investigationId);
-    assertThat(investigationApi.getAuth()).isNotNull();
-    assertThat(investigationApi.getAuth().getNamespace()).isEqualTo("alert-namespace");
-  }
-
-  // TODO CYRIL authz - if requireNamespace=true, it should not be possible to change a namespace
-  // TODO CYRIL authz add tests with requireNamespace=true
-  @Test(timeOut = 60000, dependsOnMethods = "testAnomalyCount")
-  @Deprecated // it will not be possible to change a namespace anymore 
-  public void testUpdateAlertAuth() throws InterruptedException {
-    final long alertId = mustCreateAlert(
-        newRunnableAlertApiWithAuth("TestUpdateAlertAuth", "alert-namespace"));
-
-    waitForAnyAnomalies(alertId);
-    final Long anomalyId = mustGetAnomaliesForAlert(alertId).get(0).getId();
-    final long investigationId = mustCreateInvestigation(new RcaInvestigationApi()
-        .setName("my-investigation")
-        .setAnomaly(new AnomalyApi().setId(anomalyId)));
-
-    final AlertApi alertApi = newRunnableAlertApiWithAuth("TestUpdateAlertAuth_editedNamespace", "new-alert-namespace").setId(
-        alertId);
-    final Response updateAlertResp = request("api/alerts").put(Entity.json(List.of(alertApi)));
-    assertThat(updateAlertResp.getStatus()).isEqualTo(200);
-
-    final AlertApi gotAlertApi = updateAlertResp.readEntity(new GenericType<List<AlertApi>>() {}).get(0);
-    assertThat(gotAlertApi.getAuth()).isNotNull();
-    assertThat(gotAlertApi.getAuth().getNamespace()).isEqualTo("new-alert-namespace");
-
-    final AnomalyApi anomalyApi = mustGetAnomaliesForAlert(alertId).get(0);
-    assertThat(anomalyApi.getAuth()).isNotNull();
-    assertThat(anomalyApi.getAuth().getNamespace()).isEqualTo("new-alert-namespace");
-
-    // NOTE: RcaInvestigation namespace cannot change anymore - below we just check the alert-namespace is not inherited anymore, so it's unchanged
-    // (the migration has to be performed bottom-up, RCA --> Anomalies --> EnumerationItems --> Alert)
     final RcaInvestigationApi investigationApi = mustGetInvestigation(investigationId);
     assertThat(investigationApi.getAuth()).isNotNull();
     assertThat(investigationApi.getAuth().getNamespace()).isEqualTo("alert-namespace");

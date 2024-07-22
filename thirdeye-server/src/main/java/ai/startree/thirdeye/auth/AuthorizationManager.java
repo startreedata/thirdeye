@@ -164,7 +164,6 @@ public class AuthorizationManager {
     // prevent namespace change // fixme cyril authz - make sure this is preventing in all codepaths 
     if (requireNamespace) {
       // namespaces must be set and equal
-      // THIS IS INCOMPATIBLE WITH ENUMERATION ITEM NAMESPACE EDITION - so not compatible with some users
       authorize(Objects.equals(before.getAuth(), after.getAuth()),
           String.format(
               "Entity namespace cannot change. Existing namespace: %s. New namespace: %s",
@@ -304,7 +303,7 @@ public class AuthorizationManager {
       // same namespace is ensured via RcaInvestigationService#toDto 
       // putting again a check because it's migration code and some legacy entities may not have the property 
       final AnomalyDTO anomaly = anomalyDao.findById(anomalyId);
-      // the error message is the same whether the anomaly does not exist in db or the anomaly is in another namespace - this is to avoid leaking anomaly ids of other namespaces 
+      // the error message is the same whether the anomaly does not exist in db or the anomaly is in another namespace - this is to avoid leaking anomaly ids of other namespaces
       checkArgument(anomaly != null && Objects.equals(rcaInvestigationDTO.namespace(), anomaly.namespace()), 
           "Invalid anomaly id or rcaInvestigation namespace %s and anomaly namespace do not match for anomaly id %s.",
           rcaInvestigationDTO.namespace(), anomalyId);

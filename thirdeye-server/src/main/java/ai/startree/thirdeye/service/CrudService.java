@@ -19,7 +19,6 @@ import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureNull;
 
 import ai.startree.thirdeye.DaoFilterBuilder;
-import ai.startree.thirdeye.RequestCache;
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.spi.api.CountApi;
@@ -67,8 +66,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
     final DtoT dto = getDto(id);
     authorizationManager.ensureCanRead(principal, dto);
 
-    final RequestCache cache = createRequestCache();
-    return toApi(dto, cache);
+    return toApi(dto);
   }
 
   /**
@@ -91,16 +89,14 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
         : dtoManager.findAll();
     // FIXME CYRIL ADD namespace in-app filter - then add query level filter
 
-    final RequestCache cache = createRequestCache();
     return results.stream()
         .filter(dto -> authorizationManager.hasAccess(principal, dto, AccessType.READ))
-        .map(dto -> toApi(dto, cache));
+        .map(this::toApi);
   }
 
   @NonNull
   public List<ApiT> createMultiple(final ThirdEyePrincipal principal,
       final List<ApiT> list) {
-    final RequestCache cache = createRequestCache();
     final List<ApiT> result = list.stream()
         .peek(api -> validate(principal, api, null))
         .map(this::toDto)
@@ -111,7 +107,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
         .peek(dtoManager::save)
         .peek(dto -> Objects.requireNonNull(dto.getId(), "DB update failed!"))
         .peek(this::postCreate)
-        .map(dto -> toApi(dto, cache))
+        .map(this::toApi)
         .collect(Collectors.toList());
     authorizationManager.invalidateCache();
     return result;
@@ -120,12 +116,11 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
   @NonNull
   public List<ApiT> editMultiple(final ThirdEyeServerPrincipal principal,
       final List<ApiT> list) {
-    final RequestCache cache = createRequestCache();
     final List<ApiT> result = list.stream()
         .map(o -> updateDto(principal, o))
         .peek(dtoManager::update)
         .peek(dto -> this.postUpdate(principal, dto))
-        .map(dto -> toApi(dto, cache))
+        .map(this::toApi)
         .collect(Collectors.toList());
     authorizationManager.invalidateCache();
     return result;
@@ -197,8 +192,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
       deleteDto(dto);
       LOG.warn(String.format("Deleted id: %d by principal: %s", id, principal.getName()));
 
-      final RequestCache cache = createRequestCache();
-      return toApi(dto, cache);
+      return toApi(dto);
     }
 
     return null;
@@ -224,31 +218,13 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
   }
 
   /**
-   * Initialize Request Cache
-   *
-   * @return cache container
-   */
-  protected RequestCache createRequestCache() {
-    return new RequestCache();
-  }
-
-  /**
-   * @param dto dto
-   * @param cache optional cache parameter
-   * @return convert to api object
-   */
-  protected ApiT toApi(final DtoT dto, final RequestCache cache) {
-    return toApi(dto);
-  }
-
-  /**
    * No cache implementation
    *
    * @param dto dto
    * @return convert to api object
    */
   protected ApiT toApi(final DtoT dto) {
-    throw new UnsupportedOperationException("Either of the 2 toApi variants must be implemented!");
+    throw new UnsupportedOperationException("toApi not implemented. Please reach out to support.");
   }
 
   protected DtoT toDto(final ApiT api) {

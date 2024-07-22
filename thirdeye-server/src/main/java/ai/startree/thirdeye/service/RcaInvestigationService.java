@@ -17,23 +17,17 @@ import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
-import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
 import ai.startree.thirdeye.spi.api.RcaInvestigationApi;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.RcaInvestigationManager;
-import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import javax.inject.Singleton;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 public class RcaInvestigationService extends CrudService<RcaInvestigationApi, RcaInvestigationDTO> {
-
-  private static final Logger LOG = LoggerFactory.getLogger(RcaInvestigationService.class);
 
   public static final ImmutableMap<String, String> API_TO_INDEX_FILTER_MAP = ImmutableMap.<String, String>builder()
       .put("anomaly.id", "anomalyId")
@@ -58,23 +52,7 @@ public class RcaInvestigationService extends CrudService<RcaInvestigationApi, Rc
 
   @Override
   protected RcaInvestigationApi toApi(final RcaInvestigationDTO dto) {
-    final RcaInvestigationApi api = ApiBeanMapper.toApi(dto);
-    if (api.getAuth() == null) {
-      LOG.warn("RcaInvestigation entity {} has a namespace resolved at read time. " 
-          + "Migrating to a namespace resolved at write time.", dto.getId());
-      // migrate entities
-      final String namespace = authorizationManager.resourceId(dto).getNamespace();
-      dto.setAuth(new AuthorizationConfigurationDTO().setNamespace(namespace));
-      final int success = dtoManager.update(dto);
-      if (success == 0) {
-        LOG.error("Failed to migrate namespace for RcaInvestigation entity {}. Please reach out to support.", dto.getId());
-        api.setAuth(new AuthorizationConfigurationApi().setNamespace(namespace));
-        return api;
-      } else {
-        return toApi(dto);
-      }
-    }
-    return api;
+    return ApiBeanMapper.toApi(dto);
   }
 
   @Override

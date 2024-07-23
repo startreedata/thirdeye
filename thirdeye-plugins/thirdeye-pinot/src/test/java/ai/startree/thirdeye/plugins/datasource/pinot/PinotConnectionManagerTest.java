@@ -15,6 +15,7 @@ package ai.startree.thirdeye.plugins.datasource.pinot;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
@@ -39,7 +40,7 @@ public class PinotConnectionManagerTest {
         pinotConnectionBuilder, config);
 
     final Connection connection = mock(Connection.class);
-    when(pinotConnectionBuilder.createConnection(any(PinotThirdEyeDataSourceConfig.class)))
+    when(pinotConnectionBuilder.createConnection(any(PinotThirdEyeDataSourceConfig.class), anyMap()))
         .thenReturn(connection);
 
     assertThat(pinotConnectionManager.get()).isEqualTo(connection);
@@ -49,7 +50,7 @@ public class PinotConnectionManagerTest {
 
     /* Create should be called once */
     verify(pinotConnectionBuilder, times(1))
-        .createConnection(any(PinotThirdEyeDataSourceConfig.class));
+        .createConnection(any(PinotThirdEyeDataSourceConfig.class), anyMap());
   }
 
   @Test
@@ -69,7 +70,7 @@ public class PinotConnectionManagerTest {
         pinotConnectionBuilder, config);
 
     final Connection connection = mock(Connection.class);
-    when(pinotConnectionBuilder.createConnection(any(PinotThirdEyeDataSourceConfig.class)))
+    when(pinotConnectionBuilder.createConnection(any(PinotThirdEyeDataSourceConfig.class), anyMap()))
         .thenReturn(connection);
 
     assertThat(pinotConnectionManager.get()).isEqualTo(connection);
@@ -79,14 +80,14 @@ public class PinotConnectionManagerTest {
 
     /* Create should be called once */
     verify(pinotConnectionBuilder, times(1))
-        .createConnection(any(PinotThirdEyeDataSourceConfig.class));
+        .createConnection(any(PinotThirdEyeDataSourceConfig.class), anyMap());
 
 
     writeToken(file, "newToken");
 
     final Connection newConnection = mock(Connection.class);
     assertThat(newConnection).isNotEqualTo(connection);
-    when(pinotConnectionBuilder.createConnection(any(PinotThirdEyeDataSourceConfig.class)))
+    when(pinotConnectionBuilder.createConnection(any(PinotThirdEyeDataSourceConfig.class), anyMap()))
         .thenReturn(newConnection);
 
     /* Call third time */
@@ -94,7 +95,7 @@ public class PinotConnectionManagerTest {
     assertThat(actual).isEqualTo(newConnection);
     /* Create should be called twice */
     verify(pinotConnectionBuilder, times(2))
-        .createConnection(any(PinotThirdEyeDataSourceConfig.class));
+        .createConnection(any(PinotThirdEyeDataSourceConfig.class), anyMap());
 
     verify(connection, timeout(1000)).close();
   }

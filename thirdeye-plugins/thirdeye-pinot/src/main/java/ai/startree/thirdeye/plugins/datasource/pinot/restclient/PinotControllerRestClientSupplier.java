@@ -87,7 +87,7 @@ public class PinotControllerRestClientSupplier {
       return true;
     }
 
-    if (tokenSupplier == null) {
+    if (config.getOauth() == null || !config.getOauth().isEnabled()) {
       /* no oauth. no connection update required */
       return false;
     }
@@ -95,7 +95,7 @@ public class PinotControllerRestClientSupplier {
       /* no prev token. */
       return true;
     }
-    final String newToken = requireNonNull(tokenSupplier.get(), "token supplied is null");
+    final String newToken = requireNonNull(PinotOauthTokenSupplier.getOauthToken(config.getOauth()), "token supplied is null");
     return !prevToken.equals(newToken);
   }
 

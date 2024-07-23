@@ -13,11 +13,10 @@
  */
 package ai.startree.thirdeye.plugins.datasource.pinot;
 
-import static ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSourceUtils.cloneConfig;
-import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Objects.requireNonNull;
 
-import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import javax.annotation.Nullable;
@@ -40,7 +39,7 @@ public class PinotConnectionManager {
   private final PinotThirdEyeDataSourceConfig config;
   private final PinotConnectionBuilder pinotConnectionBuilder;
   private Connection connection;
-  private String prevToken;
+  private String currentToken;
 
   @Inject
   public PinotConnectionManager(final PinotConnectionBuilder pinotConnectionBuilder,
@@ -49,50 +48,25 @@ public class PinotConnectionManager {
     this.pinotConnectionBuilder = pinotConnectionBuilder;
   }
 
-  private boolean isNewConnectionReqd() {
-    if (connection == null) {
-      return true;
-    }
-    if (config.getOauth() == null || !config.getOauth().isEnabled()) {
-      /* no oauth. no connection update required */
-      return false;
-    }
-
-    /* oauth case */
-    if (prevToken == null) {
-      /* no existing token to compare*/
-      return true;
-    }
-    final String newToken = requireNonNull(PinotOauthTokenSupplier.getOauthToken(config.getOauth()), "token supplied is null");
-    return !prevToken.equals(newToken);
-  }
-
   public Connection get() {
-    if (isNewConnectionReqd()) {
-      /* Closing old connection is a lower priority. do it async */
-      closeConnectionAsync(connection);
-
-      final PinotThirdEyeDataSourceConfig config = newConfigWithOauthHeader();
-      connection = pinotConnectionBuilder.createConnection(config);
-      prevToken = optional(config.getHeaders())
-          .map(headers -> headers.get(HttpHeaders.AUTHORIZATION))
-          .orElse(null);
+    if (config.isOAuthEnabled()) {
+      // fixme cyril every time this method is called and oAuth is enabled, getting the connection results in reading a file
+      final String newToken = requireNonNull(PinotOauthTokenSupplier.getOauthToken(config.getOauth()), "token supplied is null");
+      if (connection == null || !Objects.equals(currentToken, newToken)) {
+        // need to update the authorization token
+        /* Closing old connection is a lower priority. do it async */
+        closeConnectionAsync(connection);
+        
+        currentToken = newToken;
+        final Map<String, String> additionalHeaders = Map.of(HttpHeaders.AUTHORIZATION, currentToken);
+        connection = pinotConnectionBuilder.createConnection(config, additionalHeaders);
+      }
+    } else {
+      if (connection == null) {
+        connection = pinotConnectionBuilder.createConnection(config, Map.of());
+      }
     }
     return connection;
-  }
-
-  private PinotThirdEyeDataSourceConfig newConfigWithOauthHeader() {
-    final PinotThirdEyeDataSourceConfig newConfig = cloneConfig(config);
-
-    /* Inject the oauth header into headers */
-    final String newToken = PinotOauthTokenSupplier.getOauthToken(config.getOauth());
-    if (newConfig.getHeaders() == null) {
-      newConfig.setHeaders(new HashMap<>());
-    }
-    newConfig
-        .getHeaders()
-        .put(HttpHeaders.AUTHORIZATION, newToken);
-    return newConfig;
   }
 
   public void close() {

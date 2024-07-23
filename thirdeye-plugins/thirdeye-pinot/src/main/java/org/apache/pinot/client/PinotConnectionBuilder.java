@@ -20,8 +20,11 @@ import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSourceConfig;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.Map;
 import javax.inject.Singleton;
 import javax.net.ssl.SSLContext;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,9 +33,9 @@ public class PinotConnectionBuilder {
 
   private static final Logger LOG = LoggerFactory.getLogger(PinotConnectionBuilder.class);
 
-  public Connection createConnection(final PinotThirdEyeDataSourceConfig config) {
+  public Connection createConnection(final PinotThirdEyeDataSourceConfig config, final Map<String, String> additionalHeaders) {
     final String brokerUrl = config.getBrokerUrl();
-    final PinotClientTransport transport = buildTransport(config);
+    final PinotClientTransport transport = buildTransport(config, additionalHeaders);
 
     final Connection connection;
     if (brokerUrl != null && brokerUrl.trim().length() > 0) {
@@ -52,8 +55,8 @@ public class PinotConnectionBuilder {
     return connection;
   }
 
-  private PinotClientTransport buildTransport(
-      final PinotThirdEyeDataSourceConfig config) {
+  private static PinotClientTransport buildTransport(
+      final PinotThirdEyeDataSourceConfig config, final @NonNull Map<String, String> additionalHeaders) {
     final ThirdEyeJsonAsyncHttpPinotClientTransportFactory factory =
         new ThirdEyeJsonAsyncHttpPinotClientTransportFactory();
 
@@ -70,9 +73,10 @@ public class PinotConnectionBuilder {
         }
     );
 
-    optional(config.getHeaders())
-        .filter(headers -> !headers.isEmpty())
-        .ifPresent(factory::setHeaders);
+    final Map<String, String> mergedHeaders = new HashMap<>();
+    optional(config.getHeaders()).ifPresent(mergedHeaders::putAll);
+    mergedHeaders.putAll(additionalHeaders);
+    factory.setHeaders(mergedHeaders);
 
     optional(config.getReadTimeoutMs())
         .ifPresent(factory::setReadTimeoutMs);

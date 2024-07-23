@@ -17,6 +17,7 @@ import ai.startree.thirdeye.spi.auth.AccessType;
 import ai.startree.thirdeye.spi.auth.ResourceIdentifier;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
+import java.util.Collections;
 import java.util.List;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -51,6 +52,6 @@ public class SingleNamespaceAuthorizer implements ThirdEyeAuthorizer {
 
   @Override
   public @NonNull List<String> listNamespaces(final ThirdEyePrincipal principal) {
-    return List.of();
+    return Collections.singletonList(null);
   }
 }

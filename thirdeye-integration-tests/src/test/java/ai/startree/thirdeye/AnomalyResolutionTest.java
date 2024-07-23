@@ -47,15 +47,11 @@ import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import org.joda.time.Period;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class AnomalyResolutionTest {
-
-  private static final Logger log = LoggerFactory.getLogger(AnomalyResolutionTest.class);
 
   private static final ZoneOffset UTC = ZoneOffset.UTC;
   private static final long TEST_IMEOUT = 6000000L;

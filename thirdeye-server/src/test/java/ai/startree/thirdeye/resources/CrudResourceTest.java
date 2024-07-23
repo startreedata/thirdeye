@@ -19,7 +19,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import ai.startree.thirdeye.auth.AuthConfiguration;
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyeAuthorizerProvider;
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
@@ -394,8 +393,7 @@ class DummyResource extends CrudResource<DummyApi, DummyDto> {
         new AuthorizationManager(mock(AlertTemplateManager.class),
             mock(AlertManager.class),
             mock(AnomalyManager.class),
-            thirdEyeAuthorizer,
-            new AuthConfiguration()),
+            thirdEyeAuthorizer),
         dtoManager,
         apiToBeanMap));
   }

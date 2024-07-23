@@ -18,4 +18,8 @@ public interface ThirdEyeCrudApi<T extends ThirdEyeCrudApi<T>> extends ThirdEyeA
   Long getId();
 
   T setId(Long id);
+
+  AuthorizationConfigurationApi getAuth();
+
+  T setAuth(final AuthorizationConfigurationApi auth);
 }

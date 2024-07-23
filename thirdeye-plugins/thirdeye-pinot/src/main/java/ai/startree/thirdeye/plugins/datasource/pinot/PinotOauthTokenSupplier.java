@@ -20,26 +20,15 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.function.Supplier;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 @Singleton
 public class PinotOauthTokenSupplier {
-
-  private final PinotOauthConfiguration oauthConfiguration;
-
+  
   @Inject
-  public PinotOauthTokenSupplier(final PinotThirdEyeDataSourceConfig config) {
-    oauthConfiguration = config.getOauth();
-  }
-
-  public Supplier<String> getTokenSupplier() {
-    if (oauthConfiguration != null && oauthConfiguration.isEnabled()) {
-      return () -> getOauthToken(oauthConfiguration);
-    }
-    return null;
+  public PinotOauthTokenSupplier() {
   }
 
   public static String getOauthToken(final @NonNull PinotOauthConfiguration oauthConfiguration) {

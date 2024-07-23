@@ -60,7 +60,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   private final PinotDatasetReader datasetReader;
   private final LoadingCache<PinotQuery, ThirdEyeResultSetGroup> queryCache;
   private final PinotThirdEyeDataSourceConfig config;
-  private final PinotConnectionManager connectionManager;
+  private final Runnable queryExecutorCloser;
 
   /* Use case: Log Query Cache stats few min */
   private long queryCacheTs = 0;
@@ -69,7 +69,6 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   public PinotThirdEyeDataSource(
       final ThirdEyeDataSourceContext context,
       final PinotDatasetReader datasetReader,
-      final PinotConnectionManager connectionManager,
       final PinotQueryExecutor queryExecutor,
       final PinotThirdEyeDataSourceConfig config) {
     this.sqlExpressionBuilder = new PinotSqlExpressionBuilder();
@@ -78,11 +77,12 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
 
     this.dataSourceDTO = context.getDataSourceDTO();
     this.name = context.getDataSourceDTO().getName();
-    this.connectionManager = connectionManager;
 
     /* Uses LoadingCache to cache queries */
     this.queryCache = requireNonNull(buildQueryCache(queryExecutor),
         String.format("%s doesn't connect to Pinot or cache is not initialized.", getName()));
+    // keep reference to the queryExecutor to close it at the end
+    this.queryExecutorCloser = queryExecutor::close;
     this.config = config;
   }
 
@@ -252,7 +252,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
 
   @Override
   public void close() {
-    connectionManager.close();
+    queryExecutorCloser.run();
     datasetReader.close();
   }
 

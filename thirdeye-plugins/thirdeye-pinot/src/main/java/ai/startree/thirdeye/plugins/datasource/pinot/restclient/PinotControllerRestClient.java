@@ -46,11 +46,11 @@ public class PinotControllerRestClient {
   private static final String PINOT_TABLE_CONFIG_ENDPOINT_TEMPLATE = "/tables/%s/schema";
 
   private final HttpHost pinotControllerHost;
-  private final PinotControllerRestClientSupplier pinotControllerRestClientSupplier;
+  private final PinotControllerHttpClientSupplier pinotControllerRestClientSupplier;
 
   @Inject
   public PinotControllerRestClient(final PinotThirdEyeDataSourceConfig config,
-      final PinotControllerRestClientSupplier pinotControllerRestClientSupplier) {
+      final PinotControllerHttpClientSupplier pinotControllerRestClientSupplier) {
 
     pinotControllerHost = new HttpHost(config.getControllerHost(),
         config.getControllerPort(),
@@ -149,7 +149,7 @@ public class PinotControllerRestClient {
   /**
    * Returns the map of custom configs of the given dataset from the Pinot table config json.
    */
-  public Map<String, String> extractCustomConfigsFromPinotTable(final JsonNode tableConfigJson) {
+  public static Map<String, String> extractCustomConfigsFromPinotTable(final JsonNode tableConfigJson) {
 
     Map<String, String> customConfigs = Collections.emptyMap();
     try {

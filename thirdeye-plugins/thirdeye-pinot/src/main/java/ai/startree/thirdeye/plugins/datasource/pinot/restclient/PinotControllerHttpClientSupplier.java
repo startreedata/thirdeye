@@ -17,7 +17,7 @@ import static ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSou
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.plugins.datasource.pinot.PinotOauthTokenSupplier;
+import ai.startree.thirdeye.plugins.datasource.pinot.PinotOauthUtils;
 import ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSourceConfig;
 import java.io.IOException;
 import java.security.KeyManagementException;
@@ -28,9 +28,9 @@ import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -47,56 +47,46 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class PinotControllerRestClientSupplier {
+public class PinotControllerHttpClientSupplier {
 
-  private static final Logger LOG = LoggerFactory.getLogger(PinotControllerRestClientSupplier.class);
+  private static final Logger LOG = LoggerFactory.getLogger(PinotControllerHttpClientSupplier.class);
   private final ExecutorService executorService = Executors.newSingleThreadExecutor();
   private final PinotThirdEyeDataSourceConfig config;
-  private final Supplier<String> tokenSupplier;
 
   private CloseableHttpClient pinotControllerClient = null;
   private String prevToken = null;
 
   @Inject
-  public PinotControllerRestClientSupplier(final PinotThirdEyeDataSourceConfig config,
-      final PinotOauthTokenSupplier pinotOauthTokenSupplier) {
+  public PinotControllerHttpClientSupplier(final PinotThirdEyeDataSourceConfig config) {
     this.config = config;
-    tokenSupplier = pinotOauthTokenSupplier.getTokenSupplier();
   }
 
   public CloseableHttpClient get() {
-    if (isNewClientReqd()) {
-      if (pinotControllerClient != null) {
-        executorService.submit(this::closeClient);
+    if (config.isOAuthEnabled()) {
+      // fixme cyril - at every call this reads a file 
+      final String newToken = requireNonNull(PinotOauthUtils.getOauthToken(config.getOauth()), "token supplied is null");
+      if (pinotControllerClient == null || !Objects.equals(prevToken, newToken)) {
+        // close former client asynchronously
+        executorService.submit(() -> this.closeClient(pinotControllerClient));
+        pinotControllerClient = buildPinotControllerClient();
       }
-      pinotControllerClient = buildPinotControllerClient();
+    } else {
+      if (pinotControllerClient == null) {
+        pinotControllerClient = buildPinotControllerClient();
+      }
     }
+    
     return pinotControllerClient;
   }
 
-  private void closeClient() {
-    try {
-      pinotControllerClient.close();
-    } catch (IOException ignored) {
-
+  private void closeClient(final CloseableHttpClient client) {
+    if (client != null) {
+      try {
+        client.close();
+      } catch (IOException e) {
+        LOG.error("Failed to close pinot controller client", e);
+      }  
     }
-  }
-
-  private boolean isNewClientReqd() {
-    if (pinotControllerClient == null) {
-      return true;
-    }
-
-    if (tokenSupplier == null) {
-      /* no oauth. no connection update required */
-      return false;
-    }
-    if (prevToken == null) {
-      /* no prev token. */
-      return true;
-    }
-    final String newToken = requireNonNull(tokenSupplier.get(), "token supplied is null");
-    return !prevToken.equals(newToken);
   }
 
   private CloseableHttpClient buildPinotControllerClient() {
@@ -110,8 +100,8 @@ public class PinotControllerRestClientSupplier {
   private void configureHeaders(final HttpClientBuilder builder) {
     final Map<String, String> headers = new HashMap<>(
         optional(config.getHeaders()).orElse(Collections.emptyMap()));
-    if (tokenSupplier != null) {
-      final String value = tokenSupplier.get();
+    if (config.isOAuthEnabled()) {
+      final String value = PinotOauthUtils.getOauthToken(config.getOauth());
       headers.put(HttpHeaders.AUTHORIZATION, value);
       prevToken = value;
     }

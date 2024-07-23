@@ -13,7 +13,6 @@
  */
 package ai.startree.thirdeye.service;
 
-import static ai.startree.thirdeye.mapper.ApiBeanMapper.toEnumerationItemDTO;
 import static ai.startree.thirdeye.scheduler.JobUtils.FAILED_TASK_CREATION_COUNTERS;
 import static ai.startree.thirdeye.service.alert.AlertInsightsProvider.currentMaximumPossibleEndTime;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_CRON_FREQUENCY_TOO_HIGH;
@@ -39,7 +38,6 @@ import ai.startree.thirdeye.spi.api.AlertInsightsApi;
 import ai.startree.thirdeye.spi.api.AlertInsightsRequestApi;
 import ai.startree.thirdeye.spi.api.AnomalyStatsApi;
 import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
-import ai.startree.thirdeye.spi.api.DetectionEvaluationApi;
 import ai.startree.thirdeye.spi.api.UserApi;
 import ai.startree.thirdeye.spi.auth.AccessType;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
@@ -61,10 +59,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -276,30 +272,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
       // inject namespace in the request
       alertApi.setAuth(new AuthorizationConfigurationApi().setNamespace(alertDto.namespace()));
     }
-    final AlertEvaluationApi results = alertEvaluator.evaluate(request);
-    final Map<String, DetectionEvaluationApi> filtered = allowedEvaluations(principal,
-        results.getDetectionEvaluations());
-    return results.setDetectionEvaluations(filtered);
-  }
-
-  private Map<String, DetectionEvaluationApi> allowedEvaluations(
-      final ThirdEyeServerPrincipal principal, final Map<String, DetectionEvaluationApi> gotEvals) {
-    final Map<String, DetectionEvaluationApi> allowedEvals = new HashMap<>();
-
-    // Assume entries without an enumeration item are allowed because the evaluation was executed.
-    gotEvals.entrySet()
-        .stream()
-        .filter(entry -> entry.getValue().getEnumerationItem() == null)
-        .forEach(entry -> allowedEvals.put(entry.getKey(), entry.getValue()));
-
-    // Check read access for entries with an enumeration item.
-    gotEvals.entrySet()
-        .stream()
-        .filter(entry -> entry.getValue().getEnumerationItem() != null)
-        .filter(entry -> authorizationManager.canRead(principal,
-            toEnumerationItemDTO(entry.getValue().getEnumerationItem())))
-        .forEach(entry -> allowedEvals.put(entry.getKey(), entry.getValue()));
-    return allowedEvals;
+    return alertEvaluator.evaluate(request);
   }
 
   // note cyril: currently the reset is used after a call to update

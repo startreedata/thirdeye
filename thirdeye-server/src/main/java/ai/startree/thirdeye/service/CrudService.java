@@ -23,7 +23,6 @@ import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.spi.api.CountApi;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
-import ai.startree.thirdeye.spi.auth.AccessType;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.bao.AbstractManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
@@ -87,10 +86,10 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
     final List<DtoT> results = queryParameters.size() > 0
         ? dtoManager.filter(new DaoFilterBuilder(apiToIndexMap).buildFilter(queryParameters))
         : dtoManager.findAll();
-    // FIXME CYRIL ADD namespace in-app filter - then add query level filter
+    // FIXME CYRIL ADD authz namespace in-app filter - then add query level filter
 
     return results.stream()
-        .filter(dto -> authorizationManager.hasAccess(principal, dto, AccessType.READ))
+        .filter(dto -> authorizationManager.canRead(principal, dto))
         .map(this::toApi);
   }
 

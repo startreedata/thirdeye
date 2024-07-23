@@ -19,9 +19,11 @@ import org.apache.commons.lang3.StringUtils;
 
 public class ResourceIdentifier {
 
-  static public final String DEFAULT_NAME = "0";
-  static public final String DEFAULT_NAMESPACE = "default";
-  static public final String DEFAULT_ENTITY_TYPE = "RESOURCE";
+  public static final String DEFAULT_NAME = "0";
+  public static final String DEFAULT_NAMESPACE = "default";
+  public static final String DEFAULT_ENTITY_TYPE = "RESOURCE";
+
+  public static final ResourceIdentifier NULL_IDENTIFIER = ResourceIdentifier.from(DEFAULT_NAME, DEFAULT_NAMESPACE, DEFAULT_ENTITY_TYPE);
 
   private final String name;
   private final String namespace;

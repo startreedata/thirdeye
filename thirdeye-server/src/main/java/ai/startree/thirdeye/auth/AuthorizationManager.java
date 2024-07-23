@@ -236,17 +236,20 @@ public class AuthorizationManager {
   // Returns the resource identifier for a dto.
   // Null is ok and maps to a default resource id.
   public ResourceIdentifier resourceId(final AbstractDTO dto) {
-    final String name = optional(dto)
-        .map(AbstractDTO::getId)
+    if (dto == null) {
+      // todo cyril authz - add NonNull annotation to dto param and all upstream
+      return ResourceIdentifier.NULL_IDENTIFIER;
+    }
+    
+    final String name = optional(dto.getId())
         .map(Objects::toString)
         .orElse(DEFAULT_NAME);
 
     // should match with the doc https://dev.startree.ai/docs/get-started-with-thirdeye/access-control-in-thirdeye#namespaces-for-thirdeye-resources
     // fixme cyril authz - need to decide if we are ok with the null namespace - I think yes so default should be null - DEFAULT_NAMESPACE should not be used
-    final String namespace = optional(dto).map(AbstractDTO::namespace).orElse(DEFAULT_NAMESPACE);
+    final String namespace = optional(dto.namespace()).orElse(DEFAULT_NAMESPACE);
 
-    final String entityType = optional(dto)
-        .map(AbstractDTO::getClass)
+    final String entityType = optional(dto.getClass())
         .map(DTO_TO_ENTITY_TYPE::get)
         .map(Objects::toString)
         .orElse(DEFAULT_ENTITY_TYPE);

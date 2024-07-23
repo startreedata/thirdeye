@@ -59,7 +59,7 @@ public class PinotDatasetReader {
   }
 
   public List<String> getAllTableNames() throws IOException {
-    return List.copyOf(pinotControllerRestClient.getAllTablesFromPinot());
+    return pinotControllerRestClient.getAllTablesFromPinot();
   }
 
   public List<DatasetConfigDTO> getAll(final String dataSourceName) throws IOException {
@@ -98,7 +98,7 @@ public class PinotDatasetReader {
     checkArgument(schema.getSpecForTimeColumn(timeColumnName) != null,
         "Onboarding Error: unable to get time column spec in schema for pinot table: " + tableName);
 
-    final Map<String, String> pinotCustomProperties = pinotControllerRestClient
+    final Map<String, String> pinotCustomProperties = PinotControllerRestClient
         .extractCustomConfigsFromPinotTable(tableConfigJson);
 
     return toDatasetConfigDTO(tableName,

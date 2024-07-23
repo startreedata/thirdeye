@@ -149,7 +149,7 @@ public class PinotControllerRestClient {
   /**
    * Returns the map of custom configs of the given dataset from the Pinot table config json.
    */
-  public Map<String, String> extractCustomConfigsFromPinotTable(final JsonNode tableConfigJson) {
+  public static Map<String, String> extractCustomConfigsFromPinotTable(final JsonNode tableConfigJson) {
 
     Map<String, String> customConfigs = Collections.emptyMap();
     try {

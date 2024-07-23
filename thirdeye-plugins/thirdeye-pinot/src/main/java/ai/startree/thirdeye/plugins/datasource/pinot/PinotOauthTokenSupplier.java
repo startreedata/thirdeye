@@ -24,6 +24,7 @@ import java.util.function.Supplier;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.apache.http.HttpHeaders;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 @Singleton
 public class PinotOauthTokenSupplier {
@@ -44,12 +45,12 @@ public class PinotOauthTokenSupplier {
 
   public Supplier<String> getTokenSupplier() {
     if (oauthConfiguration != null && oauthConfiguration.isEnabled()) {
-      return this::getOauthToken;
+      return () -> getOauthToken(oauthConfiguration);
     }
     return null;
   }
 
-  private String getOauthToken() {
+  public static String getOauthToken(final @NonNull PinotOauthConfiguration oauthConfiguration) {
     final String tokenFilePath = requireNonNull(oauthConfiguration.getTokenFilePath(),
         "tokenFilePath is null");
 

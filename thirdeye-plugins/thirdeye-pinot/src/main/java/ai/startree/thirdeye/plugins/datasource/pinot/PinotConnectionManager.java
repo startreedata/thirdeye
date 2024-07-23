@@ -17,11 +17,9 @@ import static ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSou
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.spi.util.Pair;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -40,17 +38,14 @@ public class PinotConnectionManager {
   private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
   private final PinotThirdEyeDataSourceConfig config;
-  private final Supplier<String> tokenSupplier;
   private final PinotConnectionBuilder pinotConnectionBuilder;
   private Connection connection;
   private String prevToken;
 
   @Inject
   public PinotConnectionManager(final PinotConnectionBuilder pinotConnectionBuilder,
-      final PinotThirdEyeDataSourceConfig config,
-      final PinotOauthTokenSupplier pinotOauthTokenSupplier) {
+      final PinotThirdEyeDataSourceConfig config) {
     this.config = config;
-    tokenSupplier = pinotOauthTokenSupplier.getTokenSupplier();
     this.pinotConnectionBuilder = pinotConnectionBuilder;
   }
 
@@ -58,7 +53,7 @@ public class PinotConnectionManager {
     if (connection == null) {
       return true;
     }
-    if (tokenSupplier == null) {
+    if (config.getOauth() == null || !config.getOauth().isEnabled()) {
       /* no oauth. no connection update required */
       return false;
     }
@@ -68,7 +63,7 @@ public class PinotConnectionManager {
       /* no existing token to compare*/
       return true;
     }
-    final String newToken = requireNonNull(tokenSupplier.get(), "token supplied is null");
+    final String newToken = requireNonNull(PinotOauthTokenSupplier.getOauthToken(config.getOauth()), "token supplied is null");
     return !prevToken.equals(newToken);
   }
 
@@ -77,33 +72,20 @@ public class PinotConnectionManager {
       /* Closing old connection is a lower priority. do it async */
       closeConnectionAsync(connection);
 
-      final var p = createConnection();
-      connection = p.getSecond();
-      prevToken = optional(p.getFirst().getHeaders())
+      final PinotThirdEyeDataSourceConfig config = newConfigWithOauthHeader();
+      connection = pinotConnectionBuilder.createConnection(config);
+      prevToken = optional(config.getHeaders())
           .map(headers -> headers.get(HttpHeaders.AUTHORIZATION))
           .orElse(null);
     }
     return connection;
   }
 
-  private Pair<PinotThirdEyeDataSourceConfig, Connection> createConnection() {
-    final var c = newConfig();
-    return new Pair<>(c, pinotConnectionBuilder.createConnection(c));
-  }
-
-  private PinotThirdEyeDataSourceConfig newConfig() {
-    if (tokenSupplier == null) {
-      /* if oauth is disabled. no refresh of connections is needed */
-      return config;
-    }
-    return newConfigWithOauthHeader();
-  }
-
   private PinotThirdEyeDataSourceConfig newConfigWithOauthHeader() {
-    final var newConfig = cloneConfig(config);
+    final PinotThirdEyeDataSourceConfig newConfig = cloneConfig(config);
 
     /* Inject the oauth header into headers */
-    final String newToken = tokenSupplier.get();
+    final String newToken = PinotOauthTokenSupplier.getOauthToken(config.getOauth());
     if (newConfig.getHeaders() == null) {
       newConfig.setHeaders(new HashMap<>());
     }

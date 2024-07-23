@@ -16,7 +16,6 @@ package ai.startree.thirdeye.auth;
 import static ai.startree.thirdeye.datalayer.dao.SubEntities.BEAN_TYPE_MAP;
 import static ai.startree.thirdeye.spi.auth.ResourceIdentifier.DEFAULT_ENTITY_TYPE;
 import static ai.startree.thirdeye.spi.auth.ResourceIdentifier.DEFAULT_NAME;
-import static ai.startree.thirdeye.spi.auth.ResourceIdentifier.DEFAULT_NAMESPACE;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.ResourceUtils.authorize;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -235,7 +234,7 @@ public class AuthorizationManager {
 
   // Returns the resource identifier for a dto.
   // Null is ok and maps to a default resource id.
-  public ResourceIdentifier resourceId(final AbstractDTO dto) {
+  private ResourceIdentifier resourceId(final AbstractDTO dto) {
     if (dto == null) {
       // todo cyril authz - add NonNull annotation to dto param and all upstream
       return ResourceIdentifier.NULL_IDENTIFIER;
@@ -244,11 +243,7 @@ public class AuthorizationManager {
     final String name = optional(dto.getId())
         .map(Objects::toString)
         .orElse(DEFAULT_NAME);
-
-    // should match with the doc https://dev.startree.ai/docs/get-started-with-thirdeye/access-control-in-thirdeye#namespaces-for-thirdeye-resources
-    // fixme cyril authz - need to decide if we are ok with the null namespace - I think yes so default should be null - DEFAULT_NAMESPACE should not be used
-    final String namespace = optional(dto.namespace()).orElse(DEFAULT_NAMESPACE);
-
+    final String namespace = dto.namespace();
     final String entityType = optional(dto.getClass())
         .map(DTO_TO_ENTITY_TYPE::get)
         .map(Objects::toString)

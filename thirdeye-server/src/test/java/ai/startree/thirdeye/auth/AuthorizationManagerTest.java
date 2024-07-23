@@ -21,8 +21,6 @@ import static org.mockito.Mockito.when;
 
 import ai.startree.thirdeye.spi.auth.ResourceIdentifier;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
-import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
-import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
@@ -297,21 +295,13 @@ public class AuthorizationManagerTest {
     if (alert != null) {
       when(alertManager.findById(alert.getId())).thenReturn(alert);
     }
-    final EnumerationItemManager enumManager = mock(EnumerationItemManager.class);
-    if (enumItem != null) {
-      when(enumManager.findById(enumItem.getId())).thenReturn(enumItem);
-    }
-    final AnomalyManager anomalyManager = mock(AnomalyManager.class);
-    if (anomaly != null) {
-      when(anomalyManager.findById(anomaly.getId())).thenReturn(anomaly);
-    }
     final SubscriptionGroupManager subscriptionGroupManager = mock(SubscriptionGroupManager.class);
     if (subscriptionGroup != null) {
       when(subscriptionGroupManager.findById(subscriptionGroup.getId())).thenReturn(
           subscriptionGroup);
     }
     final AuthorizationManager authorizationManager = new AuthorizationManager(null, null, null, null,
-        new NamespaceResolver(alertManager, enumManager, anomalyManager, subscriptionGroupManager),
+        new NamespaceResolver(alertManager, subscriptionGroupManager),
         new AuthConfiguration());
     final ResourceIdentifier output = authorizationManager.resourceId(inputDto);
     // FIXME CYRIL write equals method

@@ -17,8 +17,6 @@ import static ai.startree.thirdeye.spi.auth.ResourceIdentifier.DEFAULT_NAMESPACE
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
-import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
-import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
@@ -56,8 +54,6 @@ public class NamespaceResolver {
   private static final Logger LOG = LoggerFactory.getLogger(NamespaceResolver.class);
 
   private final AlertManager alertManager;
-  private final EnumerationItemManager enumerationItemManager;
-  private final AnomalyManager anomalyManager;
   private final SubscriptionGroupManager subscriptionGroupDao;
 
   private final Cache<Long, @NonNull Optional<String>> namespaceCache = CacheBuilder.newBuilder()
@@ -67,11 +63,8 @@ public class NamespaceResolver {
 
   @Inject
   public NamespaceResolver(final AlertManager alertManager,
-      final EnumerationItemManager enumerationItemManager, final AnomalyManager anomalyManager,
       final SubscriptionGroupManager subscriptionGroupDao) {
     this.alertManager = alertManager;
-    this.enumerationItemManager = enumerationItemManager;
-    this.anomalyManager = anomalyManager;
     this.subscriptionGroupDao = subscriptionGroupDao;
   }
 
@@ -95,7 +88,8 @@ public class NamespaceResolver {
     } else if (dto instanceof MetricConfigDTO metricConfigDTO) {
       namespace = resolveMetricConfigDtoNamespace(metricConfigDTO);
     } else if (dto instanceof DataSourceDTO || dto instanceof AlertTemplateDTO
-        || dto instanceof AlertDTO || dto instanceof SubscriptionGroupDTO || dto instanceof EventDTO) {
+        || dto instanceof AlertDTO || dto instanceof SubscriptionGroupDTO
+        || dto instanceof EventDTO) {
       namespace = getNamespaceFromAuth(dto);
     } else {
       // please define cases explicitly as above - keeping this codepath to prevent workspace leaks and find changes, but should not happen
@@ -139,82 +133,23 @@ public class NamespaceResolver {
     if (dto == null) {
       return Optional.empty();
     }
-    if (dto.namespace() != null) {
-      // namespace was set at write time
-      return optional(dto.namespace());
-    }
-    final Long enumerationItemId = optional(dto.getId()).orElse(null);
-    if (enumerationItemId != null) {
-      final Optional<String> enumNamespace = getEnumerationItemNamespaceById(enumerationItemId);
-      if (enumNamespace.isPresent()) {
-        return enumNamespace;
-      }
-    }
-    final Long detectionConfigId = optional(dto.getAlert()).map(AbstractDTO::getId)
-        .orElse(null);
-    if (detectionConfigId != null) {
-      return getAlertNamespaceById(detectionConfigId);
-    }
-
-    return getNamespaceFromAuth(dto);
+    return optional(dto.namespace());
   }
 
   private @NonNull Optional<String> resolveAnomalyNamespace(final @Nullable AnomalyDTO dto) {
     if (dto == null) {
       return Optional.empty();
     }
-    if (dto.namespace() != null) {
-      // namespace was set at write time
-      return optional(dto.namespace());
-    }
-    
-    // anomaly inherits namespace from enum
-    final Optional<String> enumNamespace = resolveEnumerationItemNamespace(
-        dto.getEnumerationItem());
-    if (enumNamespace.isPresent()) {
-      return enumNamespace;
-    }
-    // if no enum or enum has no namespace, fallback to detection config namespace
-    final Long detectionConfigId = dto.getDetectionConfigId();
-    if (detectionConfigId != null) {
-      return getAlertNamespaceById(detectionConfigId);
-    }
-    return Optional.empty();
+    return optional(dto.namespace());
   }
 
   private @NonNull Optional<String> resolveRcaNamespace(final @NonNull RcaInvestigationDTO dto) {
-    if (dto.namespace() != null) {
-      // namespace was set at write time
-      return optional(dto.namespace());
-    }
-    // deprecated legacy logic - namespace is resolved at read time. fixme authz remove this
-    final Long anomalyId = optional(dto.getAnomaly()).map(AbstractDTO::getId).orElse(null);
-    if (anomalyId != null) {
-      return getAnomalyNamespaceById(anomalyId);
-    }
-    return Optional.empty();
-  }
-
-  private @NonNull Optional<String> getEnumerationItemNamespaceById(final long id) {
-    try {
-      return namespaceCache.get(id,
-          () -> getNamespaceFromAuth(enumerationItemManager.findById(id)));
-    } catch (ExecutionException e) {
-      throw new RuntimeException(e);
-    }
+    return optional(dto.namespace());
   }
 
   private @NonNull Optional<String> getAlertNamespaceById(final long id) {
     try {
       return namespaceCache.get(id, () -> getNamespaceFromAuth(alertManager.findById(id)));
-    } catch (ExecutionException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  private @NonNull Optional<String> getAnomalyNamespaceById(final long id) {
-    try {
-      return namespaceCache.get(id, () -> resolveAnomalyNamespace(anomalyManager.findById(id)));
     } catch (ExecutionException e) {
       throw new RuntimeException(e);
     }

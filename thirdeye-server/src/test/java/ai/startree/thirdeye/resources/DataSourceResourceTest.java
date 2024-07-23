@@ -66,7 +66,7 @@ public class DataSourceResourceTest {
             mock(AlertManager.class),
             mock(AnomalyManager.class),
             ThirdEyeAuthorizerProvider.ALWAYS_ALLOW,
-            new NamespaceResolver(null, null, null, null),
+            new NamespaceResolver(null, null),
             new AuthConfiguration()
         ));
     dataSourceResource = new DataSourceResource(dataSourceService);

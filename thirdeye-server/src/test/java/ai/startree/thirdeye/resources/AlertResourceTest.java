@@ -102,7 +102,7 @@ public class AlertResourceTest {
     return new AuthorizationManager(alertTemplateManager,
         mock(AlertManager.class),
         mock(AnomalyManager.class),
-        thirdEyeAuthorizer, new NamespaceResolver(null, null, null, null), new AuthConfiguration());
+        thirdEyeAuthorizer, new NamespaceResolver(null, null), new AuthConfiguration());
   }
 
   @Test

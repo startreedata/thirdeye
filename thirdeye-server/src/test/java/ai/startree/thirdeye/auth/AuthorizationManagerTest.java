@@ -301,7 +301,6 @@ public class AuthorizationManagerTest {
           subscriptionGroup);
     }
     final AuthorizationManager authorizationManager = new AuthorizationManager(null, null, null, null,
-        new NamespaceResolver(alertManager, subscriptionGroupManager),
         new AuthConfiguration());
     final ResourceIdentifier output = authorizationManager.resourceId(inputDto);
     // FIXME CYRIL write equals method

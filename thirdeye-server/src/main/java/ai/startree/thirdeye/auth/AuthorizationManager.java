@@ -16,6 +16,7 @@ package ai.startree.thirdeye.auth;
 import static ai.startree.thirdeye.datalayer.dao.SubEntities.BEAN_TYPE_MAP;
 import static ai.startree.thirdeye.spi.auth.ResourceIdentifier.DEFAULT_ENTITY_TYPE;
 import static ai.startree.thirdeye.spi.auth.ResourceIdentifier.DEFAULT_NAME;
+import static ai.startree.thirdeye.spi.auth.ResourceIdentifier.DEFAULT_NAMESPACE;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.ResourceUtils.authorize;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -73,7 +74,6 @@ public class AuthorizationManager {
   private final AlertManager alertDao;
   private final AnomalyManager anomalyDao;
   private final ThirdEyeAuthorizer thirdEyeAuthorizer;
-  private final NamespaceResolver namespaceResolver;
   private final boolean requireNamespace;
 
   private final static Map<Class<? extends AbstractDTO>, SubEntityType> DTO_TO_ENTITY_TYPE;
@@ -90,13 +90,11 @@ public class AuthorizationManager {
       final AlertManager alertManager, 
       final AnomalyManager anomalyManager,
       final ThirdEyeAuthorizer thirdEyeAuthorizer,
-      final NamespaceResolver namespaceResolver,
       final AuthConfiguration authConfiguration) {
     this.alertTemplateDao = alertTemplateManager;
     this.alertDao = alertManager;
     this.anomalyDao = anomalyManager;
     this.thirdEyeAuthorizer = thirdEyeAuthorizer;
-    this.namespaceResolver = namespaceResolver;
 
     this.requireNamespace =
         authConfiguration.isEnabled() && authConfiguration.getAuthorization().isRequireNamespace();
@@ -243,7 +241,9 @@ public class AuthorizationManager {
         .map(Objects::toString)
         .orElse(DEFAULT_NAME);
 
-    final String namespace = namespaceResolver.resolveNamespace(dto);
+    // should match with the doc https://dev.startree.ai/docs/get-started-with-thirdeye/access-control-in-thirdeye#namespaces-for-thirdeye-resources
+    // fixme cyril authz - need to decide if we are ok with the null namespace - I think yes so default should be null - DEFAULT_NAMESPACE should not be used
+    final String namespace = optional(dto).map(AbstractDTO::namespace).orElse(DEFAULT_NAMESPACE);
 
     final String entityType = optional(dto)
         .map(AbstractDTO::getClass)
@@ -330,10 +330,6 @@ public class AuthorizationManager {
 
   public static ThirdEyeServerPrincipal getInternalValidPrincipal() {
     return INTERNAL_VALID_PRINCIPAL;
-  }
-
-  public void invalidateCache() {
-    namespaceResolver.invalidateCache();
   }
 
   private static <T extends AbstractDTO> boolean namespaceIsSet(final T entity) {

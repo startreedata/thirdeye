@@ -30,7 +30,6 @@ import ai.startree.thirdeye.ThirdEyeServerModule;
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.alert.EvaluationContextProcessor;
 import ai.startree.thirdeye.auth.AuthorizationManager;
-import ai.startree.thirdeye.auth.NamespaceResolver;
 import ai.startree.thirdeye.datalayer.DataSourceBuilder;
 import ai.startree.thirdeye.datalayer.DatabaseClient;
 import ai.startree.thirdeye.datalayer.DatabaseOrm;
@@ -187,7 +186,6 @@ public class ArchitectureTest {
         TaskManagerImpl.class,
         AlertManagerImpl.class,
         DataSourceOnboarder.class, // OK - REVIEWED ON APRIL 12 2024
-        NamespaceResolver.class,
         EvaluationContextProcessor.class,
         AlertTemplateRenderer.class,
         AuthorizationManager.class // OK - REVIEW ON MAY 6 2024

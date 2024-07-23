@@ -20,15 +20,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-@Singleton
-public class PinotOauthTokenSupplier {
-  
-  @Inject
-  public PinotOauthTokenSupplier() {
+public class PinotOauthUtils {
+
+  private PinotOauthUtils() {
   }
 
   public static String getOauthToken(final @NonNull PinotOauthConfiguration oauthConfiguration) {

@@ -17,7 +17,7 @@ import static ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSou
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.plugins.datasource.pinot.PinotOauthTokenSupplier;
+import ai.startree.thirdeye.plugins.datasource.pinot.PinotOauthUtils;
 import ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSourceConfig;
 import java.io.IOException;
 import java.security.KeyManagementException;
@@ -64,7 +64,7 @@ public class PinotControllerRestClientSupplier {
   public CloseableHttpClient get() {
     if (config.isOAuthEnabled()) {
       // fixme cyril - at every call this reads a file 
-      final String newToken = requireNonNull(PinotOauthTokenSupplier.getOauthToken(config.getOauth()), "token supplied is null");
+      final String newToken = requireNonNull(PinotOauthUtils.getOauthToken(config.getOauth()), "token supplied is null");
       if (pinotControllerClient == null || !Objects.equals(prevToken, newToken)) {
         // close former client asynchronously
         executorService.submit(() -> this.closeClient(pinotControllerClient));
@@ -101,7 +101,7 @@ public class PinotControllerRestClientSupplier {
     final Map<String, String> headers = new HashMap<>(
         optional(config.getHeaders()).orElse(Collections.emptyMap()));
     if (config.isOAuthEnabled()) {
-      final String value = PinotOauthTokenSupplier.getOauthToken(config.getOauth());
+      final String value = PinotOauthUtils.getOauthToken(config.getOauth());
       headers.put(HttpHeaders.AUTHORIZATION, value);
       prevToken = value;
     }

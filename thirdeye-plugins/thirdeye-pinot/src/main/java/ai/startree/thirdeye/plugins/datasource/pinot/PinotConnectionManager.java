@@ -48,7 +48,7 @@ public class PinotConnectionManager {
   public Connection get() {
     if (config.isOAuthEnabled()) {
       // fixme cyril every time this method is called and oAuth is enabled, getting the connection results in reading a file
-      final String newToken = requireNonNull(PinotOauthTokenSupplier.getOauthToken(config.getOauth()), "token supplied is null");
+      final String newToken = requireNonNull(PinotOauthUtils.getOauthToken(config.getOauth()), "token supplied is null");
       if (connection == null || !Objects.equals(currentToken, newToken)) {
         // need to update the authorization token
         /* Closing old connection is a lower priority. do it async */

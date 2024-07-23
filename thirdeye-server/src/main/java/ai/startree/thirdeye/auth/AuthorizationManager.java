@@ -135,6 +135,8 @@ public class AuthorizationManager {
   public <T extends AbstractDTO> void ensureCanDelete(final ThirdEyePrincipal principal,
       final T entity) {
     ensureHasAccess(principal, resourceId(entity), AccessType.WRITE);
+    relatedEntities(entity).forEach(relatedId ->
+        ensureHasAccess(principal, relatedId, AccessType.READ));
   }
 
   public <T extends AbstractDTO> void ensureCanEdit(final ThirdEyePrincipal principal,

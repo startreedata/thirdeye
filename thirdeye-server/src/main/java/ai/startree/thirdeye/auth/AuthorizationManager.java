@@ -252,7 +252,9 @@ public class AuthorizationManager {
     if (entity instanceof final AlertDTO alertDto) {
       final AlertTemplateDTO alertTemplateDTO = alertTemplateDao.findMatchInNamespaceOrUnsetNamespace(
           alertDto.getTemplate(), alertDto.namespace());
-      // todo cyril authz design - add datasource/dataset 
+      // extremely big hack - look for dataset! 
+      // if alertTemplateDTO.getProperties().get("dataset")
+      // todo cyril authz design - add datasource/dataset -- render the alert?  
       //   nothing actually ensures an alert runs on a dataset/datasource for which the user has read access
       //   dataset is historically provided by a string key in properties so there is not explicit design for this
       //   one option could be to ensure read access on the alert template before resolving the template
@@ -269,8 +271,7 @@ public class AuthorizationManager {
       // this should be done in some validate step but the current validate step does not have the namespace context TODO authz re-design
       final List<AlertDTO> alertDtos = alertIds.stream()
           .map(alertDao::findById)
-          .filter(
-              Objects::nonNull) // we ignore null here - deleting an alert should not break a subscription group here - it seems it is allowed in other places in the codebase
+          .filter(Objects::nonNull) // we ignore null here - deleting an alert should not break a subscription group here - it seems it is allowed in other places in the codebase
           .toList();
       for (final AlertDTO alert : alertDtos) {
         // cannot print the alert id in the error message because it would potentially leak the namespace of an alert for which authz has not been performed yet

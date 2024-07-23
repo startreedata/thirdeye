@@ -18,8 +18,6 @@ import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
-import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
-import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import java.util.Map;
@@ -36,8 +34,6 @@ public class PinotThirdEyeDataSourceModule extends AbstractModule {
   @Override
   protected void configure() {
     bind(ThirdEyeDataSourceContext.class).toInstance(context);
-    bind(SqlExpressionBuilder.class).to(PinotSqlExpressionBuilder.class);
-    bind(SqlLanguage.class).to(PinotSqlLanguage.class);
   }
 
   @Singleton

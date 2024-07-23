@@ -68,22 +68,20 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   @Inject
   public PinotThirdEyeDataSource(
       final ThirdEyeDataSourceContext context,
-      final SqlExpressionBuilder sqlExpressionBuilder,
-      final PinotSqlLanguage sqlLanguage,
       final PinotDatasetReader datasetReader,
       final PinotConnectionManager connectionManager,
       final PinotQueryExecutor queryExecutor,
       final PinotThirdEyeDataSourceConfig config) {
-    this.sqlExpressionBuilder = sqlExpressionBuilder;
-    this.sqlLanguage = sqlLanguage;
+    this.sqlExpressionBuilder = new PinotSqlExpressionBuilder();
+    this.sqlLanguage = new PinotSqlLanguage();
     this.datasetReader = datasetReader;
 
     this.dataSourceDTO = context.getDataSourceDTO();
-    name = context.getDataSourceDTO().getName();
+    this.name = context.getDataSourceDTO().getName();
     this.connectionManager = connectionManager;
 
     /* Uses LoadingCache to cache queries */
-    queryCache = requireNonNull(buildQueryCache(queryExecutor),
+    this.queryCache = requireNonNull(buildQueryCache(queryExecutor),
         String.format("%s doesn't connect to Pinot or cache is not initialized.", getName()));
     this.config = config;
   }

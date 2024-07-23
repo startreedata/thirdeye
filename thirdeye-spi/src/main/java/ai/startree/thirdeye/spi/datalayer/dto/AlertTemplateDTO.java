@@ -14,7 +14,6 @@
 package ai.startree.thirdeye.spi.datalayer.dto;
 
 import ai.startree.thirdeye.spi.template.TemplatePropertyMetadata;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -29,9 +28,6 @@ public class AlertTemplateDTO extends AbstractDTO {
   private Date updated;
   private UserBean owner;
   private List<PlanNodeBean> nodes;
-  @Deprecated  // use AlertMetadataDTO
-  @JsonIgnore
-  private RcaMetadataDTO rca;
   private AlertMetadataDTO metadata;
   @Deprecated // use properties // todo cyril can be removed - do in other commit
   private Map<String, @Nullable Object> defaultProperties;
@@ -98,18 +94,6 @@ public class AlertTemplateDTO extends AbstractDTO {
   public AlertTemplateDTO setNodes(
       final List<PlanNodeBean> nodes) {
     this.nodes = nodes;
-    return this;
-  }
-
-  @Deprecated
-  public RcaMetadataDTO getRca() {
-    return rca;
-  }
-
-  @Deprecated
-  public AlertTemplateDTO setRca(
-      final RcaMetadataDTO rca) {
-    this.rca = rca;
     return this;
   }
 

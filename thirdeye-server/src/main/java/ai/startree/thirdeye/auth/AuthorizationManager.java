@@ -39,7 +39,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import com.google.inject.Inject;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -150,15 +149,14 @@ public class AuthorizationManager {
             after.getAuth()));
     
     relatedEntities(after).forEach(related ->
-        // fixme cyril authz design issue - it's not clear to me why the chain of dependency is not resolved
-        // eg: checking a read access on an alert does not check for read access on template - see also ensureCanRead 
         ensureHasAccess(principal, related, AccessType.READ));
   }
 
   public <T extends AbstractDTO> void ensureCanRead(final ThirdEyePrincipal principal,
       final T entity) {
-    // fixme cyril authz - ensure related entities
     ensureHasAccess(principal, resourceId(entity), AccessType.READ);
+    relatedEntities(entity).forEach(related ->
+        ensureHasAccess(principal, related, AccessType.READ));
   }
 
   public void ensureCanValidate(final ThirdEyePrincipal principal, final AlertDTO entity) {
@@ -233,10 +231,18 @@ public class AuthorizationManager {
   }
 
   /**
+   * FIXME CYRIL authz - the fetching of entities makes the system slow - introduce some caching on the DAOs? Like 30 seconds caching? 
+   *  Even 10 would help for anomalies
+   * 
+   * FIXME cyril authz design issue - it's not clear to me why the chain of dependency is not resolved when using relatedEntities
+   * eg: checking a read access on an alert does not check for read access on template - see also ensureCanRead
+   * should this be done inside relatedEntities recursively? 
+   * 
    * for the moment this method is responsible for checking whether related entities are in the
    * same
    * namespace - todo cyril authz - don't think it's the right place - consider refactor after
    * migration
+   *
    *
    * Note: there can be chains of dependencies
    * eg a RcaInvestigationDto --> AnomalyDTO --> AlertDto --> DatasetDto --> DatasourceDto
@@ -283,8 +289,6 @@ public class AuthorizationManager {
           .toList();
     } else if (entity instanceof RcaInvestigationDTO rcaInvestigationDTO) {
       final @NonNull Long anomalyId = rcaInvestigationDTO.getAnomaly().getId();
-      // same namespace is ensured via RcaInvestigationService#toDto 
-      // putting again a check because it's migration code and some legacy entities may not have the property 
       final AnomalyDTO anomaly = anomalyDao.findById(anomalyId);
       // the error message is the same whether the anomaly does not exist in db or the anomaly is in another namespace - this is to avoid leaking anomaly ids of other namespaces
       checkArgument(
@@ -296,7 +300,7 @@ public class AuthorizationManager {
       // fixme cyril authz - implement
     }
 
-    return new ArrayList<>();
+    return Collections.emptyList();
   }
 
   public ForbiddenException forbiddenExceptionFor(

@@ -19,7 +19,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
-@Mapper
+@Mapper(uses = {AuthorizationConfigurationMapper.class})
 public interface EventMapper {
 
   EventMapper INSTANCE = Mappers.getMapper(EventMapper.class);

@@ -23,7 +23,6 @@ import static org.mockito.Mockito.when;
 import ai.startree.thirdeye.alert.AlertEvaluator;
 import ai.startree.thirdeye.auth.AuthConfiguration;
 import ai.startree.thirdeye.auth.AuthorizationManager;
-import ai.startree.thirdeye.auth.NamespaceResolver;
 import ai.startree.thirdeye.auth.ThirdEyeAuthorizerProvider;
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.config.TimeConfiguration;
@@ -102,7 +101,7 @@ public class AlertResourceTest {
     return new AuthorizationManager(alertTemplateManager,
         mock(AlertManager.class),
         mock(AnomalyManager.class),
-        thirdEyeAuthorizer, new NamespaceResolver(null, null, null, null), new AuthConfiguration());
+        thirdEyeAuthorizer, new AuthConfiguration());
   }
 
   @Test

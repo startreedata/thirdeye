@@ -21,13 +21,13 @@ import static org.mockito.Mockito.when;
 
 import ai.startree.thirdeye.auth.AuthConfiguration;
 import ai.startree.thirdeye.auth.AuthorizationManager;
-import ai.startree.thirdeye.auth.NamespaceResolver;
 import ai.startree.thirdeye.auth.ThirdEyeAuthorizerProvider;
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.datalayer.bao.AbstractManagerImpl;
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.resources.testutils.SingleResourceAuthorizer;
 import ai.startree.thirdeye.service.CrudService;
+import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
 import ai.startree.thirdeye.spi.auth.AuthenticationType;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
@@ -307,6 +307,16 @@ class DummyApi implements ThirdEyeCrudApi<DummyApi> {
     return this;
   }
 
+  @Override
+  public AuthorizationConfigurationApi getAuth() {
+    return null;
+  }
+
+  @Override
+  public DummyApi setAuth(final AuthorizationConfigurationApi auth) {
+    return null;
+  }
+
   public Timestamp getCreateTime() {
     return createTime;
   }
@@ -384,7 +394,7 @@ class DummyResource extends CrudResource<DummyApi, DummyDto> {
         new AuthorizationManager(mock(AlertTemplateManager.class),
             mock(AlertManager.class),
             mock(AnomalyManager.class),
-            thirdEyeAuthorizer, new NamespaceResolver(null, null, null, null),
+            thirdEyeAuthorizer,
             new AuthConfiguration()),
         dtoManager,
         apiToBeanMap));

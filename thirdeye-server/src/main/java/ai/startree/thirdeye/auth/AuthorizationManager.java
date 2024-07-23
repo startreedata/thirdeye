@@ -102,7 +102,7 @@ public class AuthorizationManager {
    * {@link AuthorizationManager#ensureCanEdit}, {@link AuthorizationManager#ensureCanValidate}
    */
   public <T extends AbstractDTO> void enrichNamespace(final ThirdEyePrincipal principal,
-      final T entity) {
+      final @NonNull T entity) {
     if (!namespaceIsSet(entity)) {
       final String currentNamespace = currentNamespace(principal);
       entity.setAuth(new AuthorizationConfigurationDTO().setNamespace(currentNamespace));
@@ -315,7 +315,7 @@ public class AuthorizationManager {
     return INTERNAL_VALID_PRINCIPAL;
   }
 
-  private static <T extends AbstractDTO> boolean namespaceIsSet(final T entity) {
+  private static <T extends AbstractDTO> boolean namespaceIsSet(final @NonNull T entity) {
     return entity.getAuth() != null && entity.getAuth().getNamespace() != null;
   }
 }

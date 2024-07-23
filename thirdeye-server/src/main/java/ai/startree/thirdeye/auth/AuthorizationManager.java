@@ -98,8 +98,7 @@ public class AuthorizationManager {
    * Note: following the review, this logic is put outside
    * {@link AuthorizationManager#ensureCanCreate}
    * {@link AuthorizationManager#ensureCanCreate}.
-   * Should always be called before {@link AuthorizationManager#ensureCanCreate},
-   * {@link AuthorizationManager#ensureCanEdit}, {@link AuthorizationManager#ensureCanValidate}
+   * Should always be called before {@link AuthorizationManager#ensureCanCreate}.
    */
   public <T extends AbstractDTO> void enrichNamespace(final ThirdEyePrincipal principal,
       final @NonNull T entity) {
@@ -127,59 +126,53 @@ public class AuthorizationManager {
 
   public <T extends AbstractDTO> void ensureCanCreate(final ThirdEyePrincipal principal,
       final T entity) {
-    ensureHasAccess(principal, resourceId(entity), AccessType.WRITE);
+    ensureCanAccess(principal, resourceId(entity), AccessType.WRITE);
     relatedEntities(entity).forEach(relatedId ->
-        ensureHasAccess(principal, relatedId, AccessType.READ));
+        ensureCanAccess(principal, relatedId, AccessType.READ));
   }
 
-  public <T extends AbstractDTO> void ensureCanDelete(final ThirdEyePrincipal principal,
+  // used in CrudService
+  public <T extends AbstractDTO> boolean canRead(final ThirdEyePrincipal principal, final T entity) {
+    return canAccess(principal, resourceId(entity), AccessType.READ) &&
+        relatedEntities(entity).stream()
+            .allMatch(e -> canAccess(principal, e, AccessType.READ));
+  }
+
+  public <T extends AbstractDTO> void ensureCanRead(final ThirdEyePrincipal principal,
       final T entity) {
-    ensureHasAccess(principal, resourceId(entity), AccessType.WRITE);
+    if (!canRead(principal, entity)) {
+      throw forbiddenExceptionFor(principal, resourceId(entity), AccessType.READ);
+    }
   }
 
   public <T extends AbstractDTO> void ensureCanEdit(final ThirdEyePrincipal principal,
       final @NonNull T before, final @NonNull T after) {
-    ensureHasAccess(principal, resourceId(before), AccessType.WRITE);
-    ensureHasAccess(principal, resourceId(after), AccessType.WRITE);
+    ensureCanAccess(principal, resourceId(before), AccessType.WRITE);
+    ensureCanAccess(principal, resourceId(after), AccessType.WRITE);
     authorize(Objects.equals(before.namespace(), after.namespace()),
         String.format(
             "Entity namespace cannot change. Existing namespace: %s. New namespace: %s",
             before.getAuth(),
             after.getAuth()));
-    
     relatedEntities(after).forEach(related ->
-        ensureHasAccess(principal, related, AccessType.READ));
+        ensureCanAccess(principal, related, AccessType.READ));
   }
 
-  public <T extends AbstractDTO> void ensureCanRead(final ThirdEyePrincipal principal,
+  public <T extends AbstractDTO> void ensureCanDelete(final ThirdEyePrincipal principal,
       final T entity) {
-    ensureHasAccess(principal, resourceId(entity), AccessType.READ);
-    relatedEntities(entity).forEach(related ->
-        ensureHasAccess(principal, related, AccessType.READ));
+    ensureCanAccess(principal, resourceId(entity), AccessType.WRITE);
+    relatedEntities(entity).forEach(relatedId ->
+        ensureCanAccess(principal, relatedId, AccessType.READ));
   }
 
-  public void ensureCanValidate(final ThirdEyePrincipal principal, final AlertDTO entity) {
-    ensureCanCreate(principal, entity);
-  }
-
-  public <T extends AbstractDTO> void ensureHasAccess(final ThirdEyePrincipal principal,
-      final T entity, final AccessType accessType) {
-    ensureHasAccess(principal, resourceId(entity), accessType);
-  }
-
-  public void ensureHasAccess(final ThirdEyePrincipal principal,
+  private void ensureCanAccess(final ThirdEyePrincipal principal,
       final ResourceIdentifier identifier, final AccessType accessType) {
-    if (!hasAccess(principal, identifier, accessType)) {
+    if (!canAccess(principal, identifier, accessType)) {
       throw forbiddenExceptionFor(principal, identifier, accessType);
     }
   }
 
-  public <T extends AbstractDTO> boolean hasAccess(final ThirdEyePrincipal principal,
-      final T entity, final AccessType accessType) {
-    return hasAccess(principal, resourceId(entity), accessType);
-  }
-
-  public boolean hasAccess(final ThirdEyePrincipal principal,
+  private boolean canAccess(final ThirdEyePrincipal principal,
       final ResourceIdentifier identifier, final AccessType accessType) {
     if (INTERNAL_VALID_PRINCIPAL.equals(principal)) {
       return true;
@@ -206,7 +199,7 @@ public class AuthorizationManager {
 
   // Returns the resource identifier for a dto.
   // Null is ok and maps to a default resource id.
-  private ResourceIdentifier resourceId(final AbstractDTO dto) {
+  private static ResourceIdentifier resourceId(final AbstractDTO dto) {
     if (dto == null) {
       // todo cyril authz - add NonNull annotation to dto param and all upstream
       return ResourceIdentifier.NULL_IDENTIFIER;
@@ -280,7 +273,7 @@ public class AuthorizationManager {
       }
       // end of hack
       return alertDtos.stream()
-          .map(this::resourceId)
+          .map(AuthorizationManager::resourceId)
           .toList();
     } else if (entity instanceof RcaInvestigationDTO rcaInvestigationDTO) {
       final @NonNull Long anomalyId = rcaInvestigationDTO.getAnomaly().getId();
@@ -298,7 +291,7 @@ public class AuthorizationManager {
     return Collections.emptyList();
   }
 
-  public ForbiddenException forbiddenExceptionFor(
+  private static ForbiddenException forbiddenExceptionFor(
       final ThirdEyePrincipal principal,
       final ResourceIdentifier resourceIdentifier,
       final AccessType accessType

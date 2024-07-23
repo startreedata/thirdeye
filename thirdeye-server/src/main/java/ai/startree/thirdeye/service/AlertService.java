@@ -39,7 +39,6 @@ import ai.startree.thirdeye.spi.api.AlertInsightsRequestApi;
 import ai.startree.thirdeye.spi.api.AnomalyStatsApi;
 import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
 import ai.startree.thirdeye.spi.api.UserApi;
-import ai.startree.thirdeye.spi.auth.AccessType;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
@@ -215,7 +214,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     final AlertDTO dto = getDto(id);
     ensureExists(dto);
     ensureExists(startTime, "start");
-    authorizationManager.ensureHasAccess(principal, dto, AccessType.WRITE);
+    authorizationManager.ensureCanEdit(principal, dto, dto);
 
     createDetectionTask(dto, startTime, safeEndTime(endTime));
   }
@@ -245,7 +244,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
         alertDto = toDto(api);
         authorizationManager.enrichNamespace(principal, alertDto);
       }
-      authorizationManager.ensureCanValidate(principal, alertDto);
+      authorizationManager.ensureCanCreate(principal, alertDto);
       validate(principal, api, alertDto);
     }
   }
@@ -289,7 +288,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
       final ThirdEyeServerPrincipal principal,
       final Long id) {
     final AlertDTO dto = getDto(id);
-    authorizationManager.ensureHasAccess(principal, dto, AccessType.WRITE);
+    authorizationManager.ensureCanEdit(principal, dto, dto);
     LOG.warn(String.format("Resetting alert id: %d by principal: %s", id, principal.getName()));
 
     /*
@@ -315,7 +314,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
       final Long endTime
   ) {
     final AlertDTO dto = ensureExists(getDto(id));
-    authorizationManager.ensureHasAccess(principal, dto, AccessType.READ);
+    authorizationManager.ensureCanRead(principal, dto);
     // no need to check authz for the enumerationItem - in the new workspace system, if the user has access to the alert then he has access to the enumerationItem
     // no explicit need for namespace filter given alert id is passed - todo cyril authz - still pass one
     final AnomalyFilter filter = new AnomalyFilter()

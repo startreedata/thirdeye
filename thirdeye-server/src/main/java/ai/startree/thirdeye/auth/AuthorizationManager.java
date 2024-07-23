@@ -138,11 +138,10 @@ public class AuthorizationManager {
   }
 
   public <T extends AbstractDTO> void ensureCanEdit(final ThirdEyePrincipal principal,
-      final T before, final T after) {
+      final @NonNull T before, final @NonNull T after) {
     ensureHasAccess(principal, resourceId(before), AccessType.WRITE);
     ensureHasAccess(principal, resourceId(after), AccessType.WRITE);
-    // namespaces must be set and equal - it is not allowed to change the namespace of an entity
-    authorize(Objects.equals(before.getAuth(), after.getAuth()),
+    authorize(Objects.equals(before.namespace(), after.namespace()),
         String.format(
             "Entity namespace cannot change. Existing namespace: %s. New namespace: %s",
             before.getAuth(),

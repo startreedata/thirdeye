@@ -23,7 +23,6 @@ import java.nio.file.Paths;
 import java.util.function.Supplier;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import org.apache.http.HttpHeaders;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 @Singleton
@@ -34,13 +33,6 @@ public class PinotOauthTokenSupplier {
   @Inject
   public PinotOauthTokenSupplier(final PinotThirdEyeDataSourceConfig config) {
     oauthConfiguration = config.getOauth();
-
-    if (oauthConfiguration != null && oauthConfiguration.isEnabled()) {
-      /* Raise error if there is already an existing Authorization header configured */
-      checkArgument(config.getHeaders() == null
-              || !config.getHeaders().containsKey(HttpHeaders.AUTHORIZATION),
-          "'Authorization' header is already provided. Cannot proceed with oauth. Please remove 'Authorization' header from 'headers'");
-    }
   }
 
   public Supplier<String> getTokenSupplier() {

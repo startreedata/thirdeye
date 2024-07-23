@@ -17,9 +17,9 @@ import static ai.startree.thirdeye.spi.Constants.VANILLA_OBJECT_MAPPER;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import java.util.Map;
 import java.util.Set;
+import org.apache.http.HttpHeaders;
 
 public class PinotThirdEyeDataSourceUtils {
   
@@ -35,14 +35,13 @@ public class PinotThirdEyeDataSourceUtils {
     checkArgument(Set.of(PinotThirdEyeDataSource.HTTP_SCHEME, PinotThirdEyeDataSource.HTTPS_SCHEME)
             .contains(config.getControllerConnectionScheme()),
         "Controller scheme must be  either 'http' or 'https'");
+    if (config.isOAuthEnabled()) {
+      /* Raise error if there is already an existing Authorization header configured */
+      checkArgument(config.getHeaders() == null
+              || !config.getHeaders().containsKey(HttpHeaders.AUTHORIZATION),
+          "'Authorization' header is already provided. Cannot proceed with oauth. Please remove 'Authorization' header from 'headers'");
+    }
 
     return config;
-  }
-
-  public static PinotThirdEyeDataSourceConfig cloneConfig(
-      final PinotThirdEyeDataSourceConfig config) {
-    final Map<String, Object> map = VANILLA_OBJECT_MAPPER
-        .convertValue(config, new TypeReference<>() {});
-    return buildConfig(map);
   }
 }

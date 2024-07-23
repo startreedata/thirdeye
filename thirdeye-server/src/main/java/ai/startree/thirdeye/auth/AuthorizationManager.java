@@ -41,6 +41,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import com.google.inject.Inject;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -240,7 +241,14 @@ public class AuthorizationManager {
    * For AnomalyDto, only return AlertDto.
    * todo authz the chaining resolution behavior is undefined for the moment - will need to get fixed
    **/
-  private <T extends AbstractDTO> List<ResourceIdentifier> relatedEntities(T entity) {
+  private <T extends AbstractDTO> Set<ResourceIdentifier> relatedEntities(T entity) {
+    final Set<ResourceIdentifier> res = new HashSet<>();
+    addRelatedEntities(entity, res);
+    return res;
+  }
+  
+  // recursive
+  private <T extends AbstractDTO> void addRelatedEntities(final T entity, final Set<ResourceIdentifier> result) {
     if (entity instanceof final AlertDTO alertDto) {
       final AlertTemplateDTO alertTemplateDTO = alertTemplateDao.findMatchInNamespaceOrUnsetNamespace(
           alertDto.getTemplate(), alertDto.namespace());
@@ -250,8 +258,13 @@ public class AuthorizationManager {
       //   nothing actually ensures an alert runs on a dataset/datasource for which the user has read access
       //   dataset is historically provided by a string key in properties so there is not explicit design for this
       //   one option could be to ensure read access on the alert template before resolving the template
-      //   only todo level because it will not break namespace isolation : datasource/dataset will have to be in the same namespace   
-      return Collections.singletonList(resourceId(alertTemplateDTO));
+      //   only todo level because it will not break namespace isolation : datasource/dataset will have to be in the same namespace
+      final ResourceIdentifier resourceId = resourceId(alertTemplateDTO);
+      if (!result.contains(resourceId)) {
+        result.add(resourceId);
+        addRelatedEntities(alertTemplateDTO, result); 
+      }
+      
     } else if (entity instanceof SubscriptionGroupDTO subscriptionGroupDto) {
       final List<AlertAssociationDto> alertAssociations = optional(
           subscriptionGroupDto.getAlertAssociations()).orElse(Collections.emptyList());
@@ -272,9 +285,14 @@ public class AuthorizationManager {
             subscriptionGroupDto.namespace(), alert.getId());
       }
       // end of hack
-      return alertDtos.stream()
-          .map(AuthorizationManager::resourceId)
-          .toList();
+      for (final AlertDTO e: alertDtos) {
+        final ResourceIdentifier resourceId = resourceId(e);
+        if (!result.contains(resourceId)) {
+          result.add(resourceId);
+          addRelatedEntities(e, result); 
+        }
+      }
+      
     } else if (entity instanceof RcaInvestigationDTO rcaInvestigationDTO) {
       final @NonNull Long anomalyId = rcaInvestigationDTO.getAnomaly().getId();
       final AnomalyDTO anomaly = anomalyDao.findById(anomalyId);
@@ -283,13 +301,16 @@ public class AuthorizationManager {
           anomaly != null && Objects.equals(rcaInvestigationDTO.namespace(), anomaly.namespace()),
           "Invalid anomaly id or rcaInvestigation namespace %s and anomaly namespace do not match for anomaly id %s.",
           rcaInvestigationDTO.namespace(), anomalyId);
-      return List.of(resourceId(anomaly));
+      
+      final ResourceIdentifier resourceId = resourceId(anomaly);
+      if (!result.contains(resourceId)) {
+        result.add(resourceId);
+        addRelatedEntities(anomaly, result);
+      }
     } else if (entity instanceof AnomalyDTO anomalyDTO) {
       // fixme cyril authz - implement
     }
-
-    return Collections.emptyList();
-  }
+  } 
 
   private static ForbiddenException forbiddenExceptionFor(
       final ThirdEyePrincipal principal,

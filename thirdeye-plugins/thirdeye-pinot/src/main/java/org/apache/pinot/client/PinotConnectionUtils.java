@@ -22,18 +22,16 @@ import ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSourceConf
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
-import javax.inject.Singleton;
 import javax.net.ssl.SSLContext;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Singleton
-public class PinotConnectionBuilder {
+public class PinotConnectionUtils {
 
-  private static final Logger LOG = LoggerFactory.getLogger(PinotConnectionBuilder.class);
+  private static final Logger LOG = LoggerFactory.getLogger(PinotConnectionUtils.class);
 
-  public Connection createConnection(final PinotThirdEyeDataSourceConfig config, final Map<String, String> additionalHeaders) {
+  public static Connection createConnection(final PinotThirdEyeDataSourceConfig config, final Map<String, String> additionalHeaders) {
     final String brokerUrl = config.getBrokerUrl();
     final PinotClientTransport transport = buildTransport(config, additionalHeaders);
 

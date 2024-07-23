@@ -25,7 +25,7 @@ import javax.inject.Singleton;
 import org.apache.http.HttpHeaders;
 import org.apache.pinot.client.Connection;
 import org.apache.pinot.client.PinotClientException;
-import org.apache.pinot.client.PinotConnectionBuilder;
+import org.apache.pinot.client.PinotConnectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,15 +37,12 @@ public class PinotConnectionManager {
   private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
   private final PinotThirdEyeDataSourceConfig config;
-  private final PinotConnectionBuilder pinotConnectionBuilder;
   private Connection connection;
   private String currentToken;
 
   @Inject
-  public PinotConnectionManager(final PinotConnectionBuilder pinotConnectionBuilder,
-      final PinotThirdEyeDataSourceConfig config) {
+  public PinotConnectionManager(final PinotThirdEyeDataSourceConfig config) {
     this.config = config;
-    this.pinotConnectionBuilder = pinotConnectionBuilder;
   }
 
   public Connection get() {
@@ -59,11 +56,11 @@ public class PinotConnectionManager {
         
         currentToken = newToken;
         final Map<String, String> additionalHeaders = Map.of(HttpHeaders.AUTHORIZATION, currentToken);
-        connection = pinotConnectionBuilder.createConnection(config, additionalHeaders);
+        connection = PinotConnectionUtils.createConnection(config, additionalHeaders);
       }
     } else {
       if (connection == null) {
-        connection = pinotConnectionBuilder.createConnection(config, Map.of());
+        connection = PinotConnectionUtils.createConnection(config, Map.of());
       }
     }
     return connection;

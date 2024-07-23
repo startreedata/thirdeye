@@ -45,11 +45,11 @@ public class PinotQueryExecutor extends CacheLoader<PinotQuery, ThirdEyeResultSe
 
   private static final String SQL_QUERY_FORMAT = "sql";
   private static final String PQL_QUERY_FORMAT = "pql";
-  private final PinotConnectionManager pinotConnectionManager;
+  private final PinotConnectionProvider pinotConnectionProvider;
 
   @Inject
-  public PinotQueryExecutor(final PinotConnectionManager pinotConnectionManager) {
-    this.pinotConnectionManager = pinotConnectionManager;
+  public PinotQueryExecutor(final PinotConnectionProvider pinotConnectionProvider) {
+    this.pinotConnectionProvider = pinotConnectionProvider;
   }
 
   /**
@@ -202,7 +202,7 @@ public class PinotQueryExecutor extends CacheLoader<PinotQuery, ThirdEyeResultSe
   public ThirdEyeResultSetGroup load(final PinotQuery pinotQuery) {
     final String queryWithOptions = buildQueryWithOptions(pinotQuery);
     try {
-      final Connection connection = pinotConnectionManager.get();
+      final Connection connection = pinotConnectionProvider.get();
       final long start = System.nanoTime();
       final String queryFormat = pinotQuery.isUseSql() ? SQL_QUERY_FORMAT : PQL_QUERY_FORMAT;
       final ResultSetGroup resultSetGroup = connection.execute(
@@ -236,5 +236,9 @@ public class PinotQueryExecutor extends CacheLoader<PinotQuery, ThirdEyeResultSe
       optionsStatements.append(";");
     }
     return optionsStatements + pinotQuery.getQuery();
+  }
+
+  public void close() {
+    pinotConnectionProvider.close();
   }
 }

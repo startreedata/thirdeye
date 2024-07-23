@@ -30,9 +30,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class PinotConnectionManager {
+public class PinotConnectionProvider {
 
-  private static final Logger LOG = LoggerFactory.getLogger(PinotConnectionManager.class);
+  private static final Logger LOG = LoggerFactory.getLogger(PinotConnectionProvider.class);
 
   private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
@@ -41,7 +41,7 @@ public class PinotConnectionManager {
   private String currentToken;
 
   @Inject
-  public PinotConnectionManager(final PinotThirdEyeDataSourceConfig config) {
+  public PinotConnectionProvider(final PinotThirdEyeDataSourceConfig config) {
     this.config = config;
   }
 

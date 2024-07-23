@@ -47,9 +47,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class PinotControllerRestClientSupplier {
+public class PinotControllerHttpClientSupplier {
 
-  private static final Logger LOG = LoggerFactory.getLogger(PinotControllerRestClientSupplier.class);
+  private static final Logger LOG = LoggerFactory.getLogger(PinotControllerHttpClientSupplier.class);
   private final ExecutorService executorService = Executors.newSingleThreadExecutor();
   private final PinotThirdEyeDataSourceConfig config;
 
@@ -57,7 +57,7 @@ public class PinotControllerRestClientSupplier {
   private String prevToken = null;
 
   @Inject
-  public PinotControllerRestClientSupplier(final PinotThirdEyeDataSourceConfig config) {
+  public PinotControllerHttpClientSupplier(final PinotThirdEyeDataSourceConfig config) {
     this.config = config;
   }
 

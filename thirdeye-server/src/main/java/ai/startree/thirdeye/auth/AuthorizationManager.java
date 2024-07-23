@@ -73,7 +73,6 @@ public class AuthorizationManager {
   private final AlertManager alertDao;
   private final AnomalyManager anomalyDao;
   private final ThirdEyeAuthorizer thirdEyeAuthorizer;
-  private final boolean requireNamespace;
 
   private final static Map<Class<? extends AbstractDTO>, SubEntityType> DTO_TO_ENTITY_TYPE;
 
@@ -86,17 +85,13 @@ public class AuthorizationManager {
   @Inject
   public AuthorizationManager(
       final AlertTemplateManager alertTemplateManager,
-      final AlertManager alertManager, 
+      final AlertManager alertManager,
       final AnomalyManager anomalyManager,
-      final ThirdEyeAuthorizer thirdEyeAuthorizer,
-      final AuthConfiguration authConfiguration) {
+      final ThirdEyeAuthorizer thirdEyeAuthorizer) {
     this.alertTemplateDao = alertTemplateManager;
     this.alertDao = alertManager;
     this.anomalyDao = anomalyManager;
     this.thirdEyeAuthorizer = thirdEyeAuthorizer;
-
-    this.requireNamespace =
-        authConfiguration.isEnabled() && authConfiguration.getAuthorization().isRequireNamespace();
   }
 
   /**
@@ -109,36 +104,25 @@ public class AuthorizationManager {
    */
   public <T extends AbstractDTO> void enrichNamespace(final ThirdEyePrincipal principal,
       final T entity) {
-    // enrich with the namespace if it is not set and required
-    if (requireNamespace) {
-      if (!namespaceIsSet(entity)) {
-        final String currentNamespace = currentNamespace(principal);
-        entity.setAuth(new AuthorizationConfigurationDTO().setNamespace(currentNamespace));
-      } else {
-        // namespace is passed explicitly - don't modify it
-        return;
-      }
-    } else {
-      // requireNamespace is false - don't enrich
-    }
+    if (!namespaceIsSet(entity)) {
+      final String currentNamespace = currentNamespace(principal);
+      entity.setAuth(new AuthorizationConfigurationDTO().setNamespace(currentNamespace));
+    } 
+    // else namespace is passed explicitly - don't modify it
   }
 
   // TODO CYRIL authz should be moved down to ThirdEyeAuthorizer once we implement multi-namespace UI support?
-  // only returns null when requireNamespace is false - Nullable can be removed once migration is done
   public @Nullable String currentNamespace(final ThirdEyePrincipal principal) {
-    if (requireNamespace) {
-      final List<String> namespaces = thirdEyeAuthorizer.listNamespaces(principal);
-      if (namespaces.size() == 0) {
-        throw new ForbiddenException("Access Denied.");  // throw 403
-      } else if (namespaces.size() == 1) {
-        return namespaces.get(0);
-      } else {
-        throw new NotAuthorizedException(String.format(
-            "Namespace not cannot be resolved automatically. Please provide a namespace explicitly. Namespaces: %s",
-            namespaces));
-      }
+    final List<String> namespaces = thirdEyeAuthorizer.listNamespaces(principal);
+    if (namespaces.size() == 0) {
+      throw new ForbiddenException("Access Denied.");  // throw 403
+    } else if (namespaces.size() == 1) {
+      return namespaces.get(0);
     } else {
-      return null;
+      // todo cyril authz - resolve from principal
+      throw new NotAuthorizedException(String.format(
+          "Namespace not cannot be resolved automatically. Please provide a namespace explicitly. Namespaces: %s",
+          namespaces));
     }
   }
 
@@ -158,17 +142,13 @@ public class AuthorizationManager {
       final T before, final T after) {
     ensureHasAccess(principal, resourceId(before), AccessType.WRITE);
     ensureHasAccess(principal, resourceId(after), AccessType.WRITE);
-    // prevent namespace change // fixme cyril authz - make sure this is preventing in all codepaths 
-    if (requireNamespace) {
-      // namespaces must be set and equal
-      authorize(Objects.equals(before.getAuth(), after.getAuth()),
-          String.format(
-              "Entity namespace cannot change. Existing namespace: %s. New namespace: %s",
-              before.getAuth(),
-              after.getAuth()));
-    } else {
-      // allow namespace editions to keep backward compatibility
-    }
+    // namespaces must be set and equal - it is not allowed to change the namespace of an entity
+    authorize(Objects.equals(before.getAuth(), after.getAuth()),
+        String.format(
+            "Entity namespace cannot change. Existing namespace: %s. New namespace: %s",
+            before.getAuth(),
+            after.getAuth()));
+    
     relatedEntities(after).forEach(related ->
         // fixme cyril authz design issue - it's not clear to me why the chain of dependency is not resolved
         // eg: checking a read access on an alert does not check for read access on template - see also ensureCanRead 
@@ -239,7 +219,7 @@ public class AuthorizationManager {
       // todo cyril authz - add NonNull annotation to dto param and all upstream
       return ResourceIdentifier.NULL_IDENTIFIER;
     }
-    
+
     final String name = optional(dto.getId())
         .map(Objects::toString)
         .orElse(DEFAULT_NAME);
@@ -253,24 +233,29 @@ public class AuthorizationManager {
   }
 
   /**
-   * for the moment this method is responsible for checking whether related entities are in the same
-   * namespace - todo cyril authz - don't think it's the right place - consider refactor after migration
+   * for the moment this method is responsible for checking whether related entities are in the
+   * same
+   * namespace - todo cyril authz - don't think it's the right place - consider refactor after
+   * migration
    *
    * Note: there can be chains of dependencies
    * eg a RcaInvestigationDto --> AnomalyDTO --> AlertDto --> DatasetDto --> DatasourceDto
-   *                                                      --> AlertTemplateDto
+   * --> AlertTemplateDto
    * This method should only return entities that are directly referenced by the entity (the
    * references that can be changed when mutating the entity).
    * For instance, for RcaInvestigationDto, only return AnomalyDTO
    * For AnomalyDto, only return AlertDto.
-   * fixme authz the chaining resolution behavior is undefined for the moment - will need to get fixed 
+   * todo authz the chaining resolution behavior is undefined for the moment - will need to get fixed
    **/
   private <T extends AbstractDTO> List<ResourceIdentifier> relatedEntities(T entity) {
     if (entity instanceof final AlertDTO alertDto) {
-      final AlertTemplateDTO alertTemplateDTO = alertTemplateDao.findMatchInNamespaceOrUnsetNamespace(alertDto.getTemplate(), alertDto.namespace());
-      // fixme cyril authz design - add datasource/dataset 
+      final AlertTemplateDTO alertTemplateDTO = alertTemplateDao.findMatchInNamespaceOrUnsetNamespace(
+          alertDto.getTemplate(), alertDto.namespace());
+      // todo cyril authz design - add datasource/dataset 
       //   nothing actually ensures an alert runs on a dataset/datasource for which the user has read access
-      //   dataset is historically provided by a string key so there is not explicit design for this
+      //   dataset is historically provided by a string key in properties so there is not explicit design for this
+      //   one option could be to ensure read access on the alert template before resolving the template
+      //   only todo level because it will not break namespace isolation : datasource/dataset will have to be in the same namespace   
       return Collections.singletonList(resourceId(alertTemplateDTO));
     } else if (entity instanceof SubscriptionGroupDTO subscriptionGroupDto) {
       final List<AlertAssociationDto> alertAssociations = optional(
@@ -280,7 +265,7 @@ public class AuthorizationManager {
           .map(aa -> aa.getAlert().getId())
           .collect(Collectors.toSet());
       // hack we ensure alerts belong to the same namespace here 
-      // this should be done in some validate step but the current validate step does not have the namespace context FIXME design
+      // this should be done in some validate step but the current validate step does not have the namespace context TODO authz re-design
       final List<AlertDTO> alertDtos = alertIds.stream()
           .map(alertDao::findById)
           .filter(
@@ -297,12 +282,13 @@ public class AuthorizationManager {
           .map(this::resourceId)
           .toList();
     } else if (entity instanceof RcaInvestigationDTO rcaInvestigationDTO) {
-      final @NonNull Long anomalyId = rcaInvestigationDTO.getAnomaly().getId(); 
+      final @NonNull Long anomalyId = rcaInvestigationDTO.getAnomaly().getId();
       // same namespace is ensured via RcaInvestigationService#toDto 
       // putting again a check because it's migration code and some legacy entities may not have the property 
       final AnomalyDTO anomaly = anomalyDao.findById(anomalyId);
       // the error message is the same whether the anomaly does not exist in db or the anomaly is in another namespace - this is to avoid leaking anomaly ids of other namespaces
-      checkArgument(anomaly != null && Objects.equals(rcaInvestigationDTO.namespace(), anomaly.namespace()), 
+      checkArgument(
+          anomaly != null && Objects.equals(rcaInvestigationDTO.namespace(), anomaly.namespace()),
           "Invalid anomaly id or rcaInvestigation namespace %s and anomaly namespace do not match for anomaly id %s.",
           rcaInvestigationDTO.namespace(), anomalyId);
       return List.of(resourceId(anomaly));

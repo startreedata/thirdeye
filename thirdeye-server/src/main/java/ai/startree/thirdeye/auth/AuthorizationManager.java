@@ -221,6 +221,7 @@ public class AuthorizationManager {
         ROOT_RESOURCE_ID, AccessType.WRITE);
   }
 
+  // todo authz cyril - should be called in a fair amount of other places
   public void invalidateCache(final @Nullable String namespace, Class<?> clazz) {
     final LoadingCache<?, ?> c;
     if (clazz.equals(DatasetConfigDTO.class) || clazz.equals(DatasetApi.class)) {

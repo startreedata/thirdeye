@@ -247,23 +247,23 @@ public class AuthorizationManager {
     return res;
   }
   
-  // recursive
+  // recursive - caching on DAOs or even the related entities directly will be necessary?
   private <T extends AbstractDTO> void addRelatedEntities(final T entity, final Set<ResourceIdentifier> result) {
     if (entity instanceof final AlertDTO alertDto) {
       final AlertTemplateDTO alertTemplateDTO = alertTemplateDao.findMatchInNamespaceOrUnsetNamespace(
           alertDto.getTemplate(), alertDto.namespace());
-      // extremely big hack - look for dataset! 
-      // if alertTemplateDTO.getProperties().get("dataset")
-      // todo cyril authz design - add datasource/dataset -- render the alert?  
-      //   nothing actually ensures an alert runs on a dataset/datasource for which the user has read access
-      //   dataset is historically provided by a string key in properties so there is not explicit design for this
-      //   one option could be to ensure read access on the alert template before resolving the template
-      //   only todo level because it will not break namespace isolation : datasource/dataset will have to be in the same namespace
       final ResourceIdentifier resourceId = resourceId(alertTemplateDTO);
       if (!result.contains(resourceId)) {
         result.add(resourceId);
         addRelatedEntities(alertTemplateDTO, result); 
       }
+
+      // fixme cyril authz look for dataset - could be done with hack: if alertTemplateDTO.getProperties().get("dataset") or by rendering the alert template but this would be slower
+      // todo cyril authz design - add datasource/dataset -- render the alert?  
+      //   nothing actually ensures an alert runs on a dataset/datasource for which the user has read access
+      //   dataset is historically provided by a string key in properties so there is not explicit design for this
+      //   one option could be to ensure read access on the alert template before resolving the template
+      //   only todo level because it will not break namespace isolation : datasource/dataset will have to be in the same namespace
       
     } else if (entity instanceof SubscriptionGroupDTO subscriptionGroupDto) {
       final List<AlertAssociationDto> alertAssociations = optional(
@@ -292,6 +292,7 @@ public class AuthorizationManager {
           addRelatedEntities(e, result); 
         }
       }
+      // todo cyril authz in theory we should also do enumeration items
       
     } else if (entity instanceof RcaInvestigationDTO rcaInvestigationDTO) {
       final @NonNull Long anomalyId = rcaInvestigationDTO.getAnomaly().getId();
@@ -301,15 +302,27 @@ public class AuthorizationManager {
           anomaly != null && Objects.equals(rcaInvestigationDTO.namespace(), anomaly.namespace()),
           "Invalid anomaly id or rcaInvestigation namespace %s and anomaly namespace do not match for anomaly id %s.",
           rcaInvestigationDTO.namespace(), anomalyId);
-      
       final ResourceIdentifier resourceId = resourceId(anomaly);
       if (!result.contains(resourceId)) {
         result.add(resourceId);
         addRelatedEntities(anomaly, result);
       }
-    } else if (entity instanceof AnomalyDTO anomalyDTO) {
-      // fixme cyril authz - implement
+      
+    } else if (entity instanceof AnomalyDTO anomalyDto) {
+      final @NonNull Long alertId = anomalyDto.getDetectionConfigId();
+      final AlertDTO alertDto = alertDao.findById(alertId);
+      checkArgument(
+          alertDto != null && Objects.equals(anomalyDto.namespace(), alertDto.namespace()),
+          "Invalid alert id or anomaly namespace %s and alert namespace do not match for alert id %s.",
+          anomalyDto.namespace(), alertId);
+      final ResourceIdentifier resourceId = resourceId(alertDto);
+      if (!result.contains(resourceId)) {
+        result.add(resourceId);
+        addRelatedEntities(alertDto, result);
+      }
+      // todo cyril authz implement enumeration item related entity anomalyDto.getEnumerationItem
     }
+    // todo authz datasetDto, taskDto, metric dto,  
   } 
 
   private static ForbiddenException forbiddenExceptionFor(

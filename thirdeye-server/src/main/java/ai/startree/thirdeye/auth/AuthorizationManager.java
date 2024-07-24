@@ -29,12 +29,15 @@ import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
+import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
+import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertAssociationDto;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
@@ -70,6 +73,8 @@ public class AuthorizationManager {
   private static final ThirdEyeServerPrincipal INTERNAL_VALID_PRINCIPAL = new ThirdEyeServerPrincipal(
       "thirdeye-internal", RandomStringUtils.random(1024, true, true), AuthenticationType.INTERNAL);
 
+  private final DataSourceManager datasourceDao;
+  private final DatasetConfigManager datasetConfigDao;
   private final AlertTemplateManager alertTemplateDao;
   private final AlertManager alertDao;
   private final AnomalyManager anomalyDao;
@@ -85,10 +90,14 @@ public class AuthorizationManager {
 
   @Inject
   public AuthorizationManager(
+      final DataSourceManager datasourceDao,
+      final DatasetConfigManager datasetConfigDao,
       final AlertTemplateManager alertTemplateManager,
       final AlertManager alertManager,
       final AnomalyManager anomalyManager,
       final ThirdEyeAuthorizer thirdEyeAuthorizer) {
+    this.datasourceDao = datasourceDao;
+    this.datasetConfigDao = datasetConfigDao;
     this.alertTemplateDao = alertTemplateManager;
     this.alertDao = alertManager;
     this.anomalyDao = anomalyManager;
@@ -107,7 +116,7 @@ public class AuthorizationManager {
     if (!namespaceIsSet(entity)) {
       final String currentNamespace = currentNamespace(principal);
       entity.setAuth(new AuthorizationConfigurationDTO().setNamespace(currentNamespace));
-    } 
+    }
     // else namespace is passed explicitly - don't modify it
   }
 
@@ -134,7 +143,8 @@ public class AuthorizationManager {
   }
 
   // used in CrudService
-  public <T extends AbstractDTO> boolean canRead(final ThirdEyePrincipal principal, final T entity) {
+  public <T extends AbstractDTO> boolean canRead(final ThirdEyePrincipal principal,
+      final T entity) {
     return canAccess(principal, resourceId(entity), AccessType.READ) &&
         relatedEntities(entity).stream()
             .allMatch(e -> canAccess(principal, e, AccessType.READ));
@@ -221,37 +231,50 @@ public class AuthorizationManager {
 
   /**
    * FIXME CYRIL authz - the fetching of entities makes the system slow - introduce some caching on the DAOs? Like 30 seconds caching?
-   * 
+   *
    * For the moment this method is responsible for checking whether related entities are in the
    * same namespace - todo cyril authz - is this the right place ?
    *
-   * This method returns all related dependencies in a hierarchical fashion. 
-   * See hierarchy here https://app.excalidraw.com/s/6rIIm06x9LN/7HD6QC1KRzZ 
+   * This method returns all related dependencies in a hierarchical fashion.
+   * See hierarchy here https://app.excalidraw.com/s/6rIIm06x9LN/7HD6QC1KRzZ
    **/
   private <T extends AbstractDTO> Set<ResourceIdentifier> relatedEntities(T entity) {
     final Set<ResourceIdentifier> res = new HashSet<>();
     addRelatedEntities(entity, res);
     return res;
   }
-  
+
   // recursive - caching on DAOs or even the related entities directly will be necessary?
-  private <T extends AbstractDTO> void addRelatedEntities(final T entity, final Set<ResourceIdentifier> result) {
+  // todo authz replace checkArgument by specific http code error
+  private <T extends AbstractDTO> void addRelatedEntities(final T entity,
+      final Set<ResourceIdentifier> result) {
     if (entity instanceof final AlertDTO alertDto) {
       final AlertTemplateDTO alertTemplateDTO = alertTemplateDao.findMatchInNamespaceOrUnsetNamespace(
           alertDto.getTemplate(), alertDto.namespace());
       final ResourceIdentifier resourceId = resourceId(alertTemplateDTO);
       if (!result.contains(resourceId)) {
         result.add(resourceId);
-        addRelatedEntities(alertTemplateDTO, result); 
+        addRelatedEntities(alertTemplateDTO, result);
       }
-
-      // fixme cyril authz look for dataset - could be done with hack: if alertTemplateDTO.getProperties().get("dataset") or by rendering the alert template but this would be slower
-      // todo cyril authz design - add datasource/dataset -- render the alert?  
-      //   nothing actually ensures an alert runs on a dataset/datasource for which the user has read access
-      //   dataset is historically provided by a string key in properties so there is not explicit design for this
-      //   one option could be to ensure read access on the alert template before resolving the template
-      //   only todo level because it will not break namespace isolation : datasource/dataset will have to be in the same namespace
-      
+      // hack: find the related dataset by looking at the property value directly - assume the key is "dataset"
+      // TODO cyril authz - fix this consider rendering the template? but make sure it's not too slow - 
+      //  also it causes an issue because it means we need to use the template even if access to the template has not been checked yet
+      final @Nullable Object datasetName = optional(alertDto.getProperties()).map(
+          e -> e.get("dataset")).orElse(null);
+      if (datasetName instanceof String datasetNameStr) {
+        final DatasetConfigDTO datasetConfigDTO = datasetConfigDao.findUniqueByNameAndNamespace(
+            datasetNameStr, alertDto.namespace());
+        checkArgument(datasetConfigDTO != null,
+            "Invalid dataset name %s. Not found in alert namespace %s.",
+            datasetNameStr, alertDto.namespace());
+        final ResourceIdentifier resourceIdDataset = resourceId(datasetConfigDTO);
+        if (!result.contains(resourceIdDataset)) {
+          result.add(resourceIdDataset);
+          addRelatedEntities(datasetConfigDTO, result);
+        }
+      } else {
+        LOG.error("Could not find dataset in alert configuration {}", alertDto);
+      }
     } else if (entity instanceof SubscriptionGroupDTO subscriptionGroupDto) {
       final List<AlertAssociationDto> alertAssociations = optional(
           subscriptionGroupDto.getAlertAssociations()).orElse(Collections.emptyList());
@@ -263,7 +286,8 @@ public class AuthorizationManager {
       // this should be done in some validate step but the current validate step does not have the namespace context TODO authz re-design
       final List<AlertDTO> alertDtos = alertIds.stream()
           .map(alertDao::findById)
-          .filter(Objects::nonNull) // we ignore null here - deleting an alert should not break a subscription group here - it seems it is allowed in other places in the codebase
+          .filter(
+              Objects::nonNull) // we ignore null here - deleting an alert should not break a subscription group here - it seems it is allowed in other places in the codebase
           .toList();
       for (final AlertDTO alert : alertDtos) {
         // cannot print the alert id in the error message because it would potentially leak the namespace of an alert for which authz has not been performed yet
@@ -291,7 +315,6 @@ public class AuthorizationManager {
         result.add(resourceId);
         addRelatedEntities(anomaly, result);
       }
-      
     } else if (entity instanceof AnomalyDTO anomalyDto) {
       final @NonNull Long alertId = anomalyDto.getDetectionConfigId();
       final AlertDTO alertDto = alertDao.findById(alertId);
@@ -306,10 +329,21 @@ public class AuthorizationManager {
       }
       // todo cyril authz implement enumeration item related entity anomalyDto.getEnumerationItem
     } else if (entity instanceof DatasetConfigDTO datasetConfigDTO) {
-      // todo cyril implement - but before fixme authz: make dataset point to datasource by Id not name
+      // todo cyril authz - make dataset point to datasource by id not name
+      final String datasourceName = datasetConfigDTO.getDataSource();
+      final DataSourceDTO datasourceDto = datasourceDao.findUniqueByNameAndNamespace(datasourceName,
+          datasetConfigDTO.namespace());
+      checkArgument(datasourceDto != null,
+          "Invalid datasource name %s. Not found in dataset namespace %s.",
+          datasourceName, datasetConfigDTO.namespace());
+      final ResourceIdentifier resourceId = resourceId(datasourceDto);
+      if (!result.contains(resourceId)) {
+        result.add(resourceId);
+        addRelatedEntities(datasourceDto, result);
+      }
     }
     // todo authz taskDto, metricDto, etc...  
-  } 
+  }
 
   private static ForbiddenException forbiddenExceptionFor(
       final ThirdEyePrincipal principal,

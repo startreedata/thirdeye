@@ -32,6 +32,7 @@ import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
+import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import javax.ws.rs.core.Response;
@@ -60,6 +61,8 @@ public class DataSourceResourceTest {
         dataSourceCache,
         mock(DataSourceOnboarder.class),
         new AuthorizationManager(
+            datasourceDao, 
+            mock(DatasetConfigManager.class), 
             mock(AlertTemplateManager.class),
             mock(AlertManager.class),
             mock(AnomalyManager.class),

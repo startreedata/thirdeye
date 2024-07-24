@@ -66,7 +66,7 @@ public class AuthorizationManager {
   private static final Logger LOG = LoggerFactory.getLogger(AuthorizationManager.class);
 
   // A meta-resource to authorize thirdeye automation/maintenance.
-  static final ResourceIdentifier ROOT_RESOURCE_ID = ResourceIdentifier.from("thirdeye-root",
+  private static final ResourceIdentifier ROOT_RESOURCE_ID = ResourceIdentifier.from("thirdeye-root",
       "thirdeye-root",
       "thirdeye-root");
 

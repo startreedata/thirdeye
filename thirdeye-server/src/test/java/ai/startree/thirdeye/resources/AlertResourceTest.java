@@ -41,6 +41,8 @@ import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
+import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
+import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
@@ -94,14 +96,17 @@ public class AlertResourceTest {
   private static AuthorizationManager newAuthorizationManager(
       final AlertTemplateManager alertTemplateManager,
       final ThirdEyeAuthorizer thirdEyeAuthorizer) {
-    return new AuthorizationManager(alertTemplateManager,
+    return new AuthorizationManager(
+        mock(DataSourceManager.class), 
+        mock(DatasetConfigManager.class), 
+        alertTemplateManager,
         mock(AlertManager.class),
         mock(AnomalyManager.class),
         thirdEyeAuthorizer);
   }
 
   @Test
-  public void testAlertEvaluationPlan() throws IOException, ClassNotFoundException {
+  public void testAlertEvaluationPlan() throws IOException {
     final ClassLoader classLoader = AlertResourceTest.class.getClassLoader();
     URL resource = requireNonNull(classLoader.getResource("alertEvaluation.json"));
     final AlertEvaluationApi apiTemplate = Constants.TEMPLATABLE_OBJECT_MAPPER

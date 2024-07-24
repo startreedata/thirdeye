@@ -35,6 +35,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
@@ -269,17 +270,14 @@ public class AuthorizationManager {
         checkArgument(Objects.equals(subscriptionGroupDto.namespace(), alert.namespace()),
             "Subscription namespace %s and alert namespace do not match for alert id %s.",
             subscriptionGroupDto.namespace(), alert.getId());
-      }
-      // end of hack
-      for (final AlertDTO e: alertDtos) {
-        final ResourceIdentifier resourceId = resourceId(e);
+
+        final ResourceIdentifier resourceId = resourceId(alert);
         if (!result.contains(resourceId)) {
           result.add(resourceId);
-          addRelatedEntities(e, result); 
+          addRelatedEntities(alert, result);
         }
       }
       // todo cyril authz in theory we should also do enumeration items
-      
     } else if (entity instanceof RcaInvestigationDTO rcaInvestigationDTO) {
       final @NonNull Long anomalyId = rcaInvestigationDTO.getAnomaly().getId();
       final AnomalyDTO anomaly = anomalyDao.findById(anomalyId);
@@ -307,8 +305,10 @@ public class AuthorizationManager {
         addRelatedEntities(alertDto, result);
       }
       // todo cyril authz implement enumeration item related entity anomalyDto.getEnumerationItem
+    } else if (entity instanceof DatasetConfigDTO datasetConfigDTO) {
+      // todo cyril implement - but before fixme authz: make dataset point to datasource by Id not name
     }
-    // todo authz datasetDto, taskDto, metric dto,  
+    // todo authz taskDto, metricDto  
   } 
 
   private static ForbiddenException forbiddenExceptionFor(

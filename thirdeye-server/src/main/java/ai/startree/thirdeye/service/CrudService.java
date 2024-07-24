@@ -96,7 +96,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
   @NonNull
   public List<ApiT> createMultiple(final ThirdEyePrincipal principal,
       final List<ApiT> list) {
-    return list.stream()
+    final List<ApiT> result = list.stream()
         .peek(api -> validate(principal, api, null))
         .map(this::toDto)
         .peek(dto -> authorizationManager.enrichNamespace(principal, dto))
@@ -108,17 +108,25 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
         .peek(this::postCreate)
         .map(this::toApi)
         .collect(Collectors.toList());
+    if (!result.isEmpty()) {
+      authorizationManager.invalidateCache(result.get(0).namespace(), result.get(0).getClass());
+    }
+    return result;
   }
 
   @NonNull
   public List<ApiT> editMultiple(final ThirdEyeServerPrincipal principal,
       final List<ApiT> list) {
-    return list.stream()
+    final List<ApiT> result = list.stream()
         .map(o -> updateDto(principal, o))
         .peek(dtoManager::update)
         .peek(dto -> this.postUpdate(principal, dto))
         .map(this::toApi)
         .collect(Collectors.toList());
+    if (!result.isEmpty()) {
+      authorizationManager.invalidateCache(result.get(0).namespace(), result.get(0).getClass());
+    }
+    return result;
   }
 
   private DtoT updateDto(final ThirdEyeServerPrincipal principal, final ApiT api) {
@@ -186,6 +194,8 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
 
       deleteDto(dto);
       LOG.warn(String.format("Deleted id: %d by principal: %s", id, principal.getName()));
+      
+      authorizationManager.invalidateCache(dto.namespace(), dto.getClass());
 
       return toApi(dto);
     }
@@ -193,8 +203,9 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
     return null;
   }
 
-  // FIXME CYRIL AUTHZ ADD NAMESPACE FILTER   
+  // FIXME CYRIL AUTHZ ADD NAMESPACE FILTER and add do cache invalidation only once
   public void deleteAll(final ThirdEyeServerPrincipal principal) {
+    
     dtoManager.findAll()
         .stream()
         .peek(dto -> authorizationManager.ensureCanDelete(principal, dto))

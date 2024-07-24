@@ -14,7 +14,6 @@
 package ai.startree.thirdeye.plugins.datasource.pinot;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
-import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.plugins.datasource.pinot.resultset.ThirdEyeResultSet;
 import ai.startree.thirdeye.plugins.datasource.pinot.resultset.ThirdEyeResultSetGroup;
@@ -79,8 +78,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
     this.name = context.getDataSourceDTO().getName();
 
     /* Uses LoadingCache to cache queries */
-    this.queryCache = requireNonNull(buildQueryCache(queryExecutor),
-        String.format("%s doesn't connect to Pinot or cache is not initialized.", getName()));
+    this.queryCache = buildQueryCache(queryExecutor);
     // keep reference to the queryExecutor to close it at the end
     this.queryExecutorCloser = queryExecutor::close;
     this.config = config;

@@ -42,6 +42,9 @@ import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.inject.Inject;
 import java.util.Collections;
 import java.util.HashMap;
@@ -49,7 +52,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotAuthorizedException;
@@ -77,8 +82,9 @@ public class AuthorizationManager {
   private final DatasetConfigManager datasetConfigDao;
   private final AlertTemplateManager alertTemplateDao;
   private final AlertManager alertDao;
-  private final AnomalyManager anomalyDao;
   private final ThirdEyeAuthorizer thirdEyeAuthorizer;
+
+  private final LoadingCache<Long, Optional<AnomalyDTO>> anomalyCache;
 
   private final static Map<Class<? extends AbstractDTO>, SubEntityType> DTO_TO_ENTITY_TYPE;
 
@@ -94,14 +100,23 @@ public class AuthorizationManager {
       final DatasetConfigManager datasetConfigDao,
       final AlertTemplateManager alertTemplateManager,
       final AlertManager alertManager,
-      final AnomalyManager anomalyManager,
+      final AnomalyManager anomalyDao,
       final ThirdEyeAuthorizer thirdEyeAuthorizer) {
     this.datasourceDao = datasourceDao;
     this.datasetConfigDao = datasetConfigDao;
     this.alertTemplateDao = alertTemplateManager;
     this.alertDao = alertManager;
-    this.anomalyDao = anomalyManager;
     this.thirdEyeAuthorizer = thirdEyeAuthorizer;
+
+    anomalyCache = CacheBuilder.newBuilder()
+        .maximumSize(2048)
+        .expireAfterWrite(60, TimeUnit.SECONDS)
+        .build(new CacheLoader<>() {
+          @Override
+          public Optional<AnomalyDTO> load(final Long key) {
+            return optional(anomalyDao.findById(key));
+          }
+        });
   }
 
   /**
@@ -304,7 +319,7 @@ public class AuthorizationManager {
       // todo cyril authz in theory we should also do enumeration items
     } else if (entity instanceof RcaInvestigationDTO rcaInvestigationDTO) {
       final @NonNull Long anomalyId = rcaInvestigationDTO.getAnomaly().getId();
-      final AnomalyDTO anomaly = anomalyDao.findById(anomalyId);
+      final AnomalyDTO anomaly =  anomalyCache.getUnchecked(anomalyId).orElse(null);
       // the error message is the same whether the anomaly does not exist in db or the anomaly is in another namespace - this is to avoid leaking anomaly ids of other namespaces
       checkArgument(
           anomaly != null && Objects.equals(rcaInvestigationDTO.namespace(), anomaly.namespace()),
@@ -331,8 +346,7 @@ public class AuthorizationManager {
     } else if (entity instanceof DatasetConfigDTO datasetConfigDTO) {
       // todo cyril authz - make dataset point to datasource by id not name
       final String datasourceName = datasetConfigDTO.getDataSource();
-      final DataSourceDTO datasourceDto = datasourceDao.findUniqueByNameAndNamespace(datasourceName,
-          datasetConfigDTO.namespace());
+      final DataSourceDTO datasourceDto = datasourceDao.findUniqueByNameAndNamespace(datasourceName, datasetConfigDTO.namespace());
       checkArgument(datasourceDto != null,
           "Invalid datasource name %s. Not found in dataset namespace %s.",
           datasourceName, datasetConfigDTO.namespace());

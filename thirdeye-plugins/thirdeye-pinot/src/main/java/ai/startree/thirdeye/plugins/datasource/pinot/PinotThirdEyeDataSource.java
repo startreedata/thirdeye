@@ -31,6 +31,9 @@ import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.Tag;
+import io.micrometer.core.instrument.binder.cache.GuavaCacheMetrics;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.HashMap;
@@ -79,6 +82,10 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
 
     /* Uses LoadingCache to cache queries */
     this.queryCache = buildQueryCache(queryExecutor);
+    GuavaCacheMetrics.monitor(Metrics.globalRegistry, queryCache, "thirdeye_cache_pinot_query",
+        List.of(Tag.of("datasource_name", name),
+            Tag.of("namespace", optional(dataSourceDTO.namespace()).orElse("null"))));
+    
     // keep reference to the queryExecutor to close it at the end
     this.queryExecutorCloser = queryExecutor::close;
     this.config = config;

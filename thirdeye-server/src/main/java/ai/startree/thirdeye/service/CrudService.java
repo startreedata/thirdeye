@@ -58,7 +58,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
         .build();
   }
 
-  // FIXME SUVODEEP MAIN DESIGN QUESTION ON WHETHER ONLY IF namespace match AND or  if  
+  // FIXME CYRIL authz SUVODEEP MAIN DESIGN QUESTION ON WHETHER ONLY IF namespace match AND or  if  
   public ApiT get(
       final ThirdEyeServerPrincipal principal,
       final Long id) {
@@ -193,7 +193,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
     return null;
   }
 
-  // FIXME CYRIL ADD NAMESPACE FILTER   
+  // FIXME CYRIL AUTHZ ADD NAMESPACE FILTER   
   public void deleteAll(final ThirdEyeServerPrincipal principal) {
     dtoManager.findAll()
         .stream()
@@ -201,7 +201,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
         .forEach(this::deleteDto);
   }
 
-  // FIXME CYRIL ADD NAMESPACE FILTER  
+  // FIXME CYRIL AUTHZ ADD NAMESPACE FILTER  
   public CountApi count(final ThirdEyeServerPrincipal principal, final MultivaluedMap<String, String> queryParameters) {
     final CountApi api = new CountApi();
     final Long count = queryParameters.size() > 0

@@ -35,6 +35,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
@@ -219,27 +220,13 @@ public class AuthorizationManager {
   }
 
   /**
-   * FIXME CYRIL authz - the fetching of entities makes the system slow - introduce some caching on the DAOs? Like 30 seconds caching? 
-   *  Even 10 would help for anomalies
+   * FIXME CYRIL authz - the fetching of entities makes the system slow - introduce some caching on the DAOs? Like 30 seconds caching?
    * 
-   * FIXME cyril authz design issue - it's not clear to me why the chain of dependency is not resolved when using relatedEntities
-   * eg: checking a read access on an alert does not check for read access on template - see also ensureCanRead
-   * should this be done inside relatedEntities recursively? 
-   * 
-   * for the moment this method is responsible for checking whether related entities are in the
-   * same
-   * namespace - todo cyril authz - don't think it's the right place - consider refactor after
-   * migration
+   * For the moment this method is responsible for checking whether related entities are in the
+   * same namespace - todo cyril authz - is this the right place ?
    *
-   *
-   * Note: there can be chains of dependencies
-   * eg a RcaInvestigationDto --> AnomalyDTO --> AlertDto --> DatasetDto --> DatasourceDto
-   * --> AlertTemplateDto
-   * This method should only return entities that are directly referenced by the entity (the
-   * references that can be changed when mutating the entity).
-   * For instance, for RcaInvestigationDto, only return AnomalyDTO
-   * For AnomalyDto, only return AlertDto.
-   * todo authz the chaining resolution behavior is undefined for the moment - will need to get fixed
+   * This method returns all related dependencies in a hierarchical fashion. 
+   * See hierarchy here https://app.excalidraw.com/s/6rIIm06x9LN/7HD6QC1KRzZ 
    **/
   private <T extends AbstractDTO> Set<ResourceIdentifier> relatedEntities(T entity) {
     final Set<ResourceIdentifier> res = new HashSet<>();
@@ -247,23 +234,23 @@ public class AuthorizationManager {
     return res;
   }
   
-  // recursive
+  // recursive - caching on DAOs or even the related entities directly will be necessary?
   private <T extends AbstractDTO> void addRelatedEntities(final T entity, final Set<ResourceIdentifier> result) {
     if (entity instanceof final AlertDTO alertDto) {
       final AlertTemplateDTO alertTemplateDTO = alertTemplateDao.findMatchInNamespaceOrUnsetNamespace(
           alertDto.getTemplate(), alertDto.namespace());
-      // extremely big hack - look for dataset! 
-      // if alertTemplateDTO.getProperties().get("dataset")
-      // todo cyril authz design - add datasource/dataset -- render the alert?  
-      //   nothing actually ensures an alert runs on a dataset/datasource for which the user has read access
-      //   dataset is historically provided by a string key in properties so there is not explicit design for this
-      //   one option could be to ensure read access on the alert template before resolving the template
-      //   only todo level because it will not break namespace isolation : datasource/dataset will have to be in the same namespace
       final ResourceIdentifier resourceId = resourceId(alertTemplateDTO);
       if (!result.contains(resourceId)) {
         result.add(resourceId);
         addRelatedEntities(alertTemplateDTO, result); 
       }
+
+      // fixme cyril authz look for dataset - could be done with hack: if alertTemplateDTO.getProperties().get("dataset") or by rendering the alert template but this would be slower
+      // todo cyril authz design - add datasource/dataset -- render the alert?  
+      //   nothing actually ensures an alert runs on a dataset/datasource for which the user has read access
+      //   dataset is historically provided by a string key in properties so there is not explicit design for this
+      //   one option could be to ensure read access on the alert template before resolving the template
+      //   only todo level because it will not break namespace isolation : datasource/dataset will have to be in the same namespace
       
     } else if (entity instanceof SubscriptionGroupDTO subscriptionGroupDto) {
       final List<AlertAssociationDto> alertAssociations = optional(
@@ -283,16 +270,14 @@ public class AuthorizationManager {
         checkArgument(Objects.equals(subscriptionGroupDto.namespace(), alert.namespace()),
             "Subscription namespace %s and alert namespace do not match for alert id %s.",
             subscriptionGroupDto.namespace(), alert.getId());
-      }
-      // end of hack
-      for (final AlertDTO e: alertDtos) {
-        final ResourceIdentifier resourceId = resourceId(e);
+
+        final ResourceIdentifier resourceId = resourceId(alert);
         if (!result.contains(resourceId)) {
           result.add(resourceId);
-          addRelatedEntities(e, result); 
+          addRelatedEntities(alert, result);
         }
       }
-      
+      // todo cyril authz in theory we should also do enumeration items
     } else if (entity instanceof RcaInvestigationDTO rcaInvestigationDTO) {
       final @NonNull Long anomalyId = rcaInvestigationDTO.getAnomaly().getId();
       final AnomalyDTO anomaly = anomalyDao.findById(anomalyId);
@@ -301,15 +286,29 @@ public class AuthorizationManager {
           anomaly != null && Objects.equals(rcaInvestigationDTO.namespace(), anomaly.namespace()),
           "Invalid anomaly id or rcaInvestigation namespace %s and anomaly namespace do not match for anomaly id %s.",
           rcaInvestigationDTO.namespace(), anomalyId);
-      
       final ResourceIdentifier resourceId = resourceId(anomaly);
       if (!result.contains(resourceId)) {
         result.add(resourceId);
         addRelatedEntities(anomaly, result);
       }
-    } else if (entity instanceof AnomalyDTO anomalyDTO) {
-      // fixme cyril authz - implement
+      
+    } else if (entity instanceof AnomalyDTO anomalyDto) {
+      final @NonNull Long alertId = anomalyDto.getDetectionConfigId();
+      final AlertDTO alertDto = alertDao.findById(alertId);
+      checkArgument(
+          alertDto != null && Objects.equals(anomalyDto.namespace(), alertDto.namespace()),
+          "Invalid alert id or anomaly namespace %s and alert namespace do not match for alert id %s.",
+          anomalyDto.namespace(), alertId);
+      final ResourceIdentifier resourceId = resourceId(alertDto);
+      if (!result.contains(resourceId)) {
+        result.add(resourceId);
+        addRelatedEntities(alertDto, result);
+      }
+      // todo cyril authz implement enumeration item related entity anomalyDto.getEnumerationItem
+    } else if (entity instanceof DatasetConfigDTO datasetConfigDTO) {
+      // todo cyril implement - but before fixme authz: make dataset point to datasource by Id not name
     }
+    // todo authz taskDto, metricDto, etc...  
   } 
 
   private static ForbiddenException forbiddenExceptionFor(

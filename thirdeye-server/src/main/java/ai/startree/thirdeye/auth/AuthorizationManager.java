@@ -85,6 +85,9 @@ public class AuthorizationManager {
   private final ThirdEyeAuthorizer thirdEyeAuthorizer;
 
   private final LoadingCache<Long, Optional<AnomalyDTO>> anomalyCache;
+  private final LoadingCache<AlertTemplateNamespace, Optional<AlertTemplateDTO>> templateCache;
+  
+  private record AlertTemplateNamespace(AlertTemplateDTO alertTemplate, @Nullable String namespace){}
 
   private final static Map<Class<? extends AbstractDTO>, SubEntityType> DTO_TO_ENTITY_TYPE;
 
@@ -108,6 +111,7 @@ public class AuthorizationManager {
     this.alertDao = alertManager;
     this.thirdEyeAuthorizer = thirdEyeAuthorizer;
 
+    // very simple caching - todo cyril authz review details
     anomalyCache = CacheBuilder.newBuilder()
         .maximumSize(2048)
         .expireAfterWrite(60, TimeUnit.SECONDS)
@@ -115,6 +119,16 @@ public class AuthorizationManager {
           @Override
           public Optional<AnomalyDTO> load(final Long key) {
             return optional(anomalyDao.findById(key));
+          }
+        });
+    templateCache = CacheBuilder.newBuilder()
+        .maximumSize(2048)
+        .expireAfterWrite(60, TimeUnit.SECONDS)
+        .build(new CacheLoader<>() {
+          @Override
+          public Optional<AlertTemplateDTO> load(final AlertTemplateNamespace key) {
+            return optional(alertTemplateDao.findMatchInNamespaceOrUnsetNamespace(
+                key.alertTemplate(), key.namespace()));
           }
         });
   }
@@ -264,8 +278,11 @@ public class AuthorizationManager {
   private <T extends AbstractDTO> void addRelatedEntities(final T entity,
       final Set<ResourceIdentifier> result) {
     if (entity instanceof final AlertDTO alertDto) {
-      final AlertTemplateDTO alertTemplateDTO = alertTemplateDao.findMatchInNamespaceOrUnsetNamespace(
-          alertDto.getTemplate(), alertDto.namespace());
+      final AlertTemplateDTO alertTemplateDTO = templateCache.getUnchecked(new AlertTemplateNamespace(alertDto.getTemplate(), alertDto.namespace()))
+          .orElse(null);
+      checkArgument(alertTemplateDTO != null,
+          "Invalid template %s. Not found in alert namespace %s.",
+          alertDto.getTemplate(), alertDto.namespace()); 
       final ResourceIdentifier resourceId = resourceId(alertTemplateDTO);
       if (!result.contains(resourceId)) {
         result.add(resourceId);

@@ -219,27 +219,13 @@ public class AuthorizationManager {
   }
 
   /**
-   * FIXME CYRIL authz - the fetching of entities makes the system slow - introduce some caching on the DAOs? Like 30 seconds caching? 
-   *  Even 10 would help for anomalies
+   * FIXME CYRIL authz - the fetching of entities makes the system slow - introduce some caching on the DAOs? Like 30 seconds caching?
    * 
-   * FIXME cyril authz design issue - it's not clear to me why the chain of dependency is not resolved when using relatedEntities
-   * eg: checking a read access on an alert does not check for read access on template - see also ensureCanRead
-   * should this be done inside relatedEntities recursively? 
-   * 
-   * for the moment this method is responsible for checking whether related entities are in the
-   * same
-   * namespace - todo cyril authz - don't think it's the right place - consider refactor after
-   * migration
+   * For the moment this method is responsible for checking whether related entities are in the
+   * same namespace - todo cyril authz - is this the right place ?
    *
-   *
-   * Note: there can be chains of dependencies
-   * eg a RcaInvestigationDto --> AnomalyDTO --> AlertDto --> DatasetDto --> DatasourceDto
-   * --> AlertTemplateDto
-   * This method should only return entities that are directly referenced by the entity (the
-   * references that can be changed when mutating the entity).
-   * For instance, for RcaInvestigationDto, only return AnomalyDTO
-   * For AnomalyDto, only return AlertDto.
-   * todo authz the chaining resolution behavior is undefined for the moment - will need to get fixed
+   * This method returns all related dependencies in a hierarchical fashion. 
+   * See hierarchy here https://app.excalidraw.com/s/6rIIm06x9LN/7HD6QC1KRzZ 
    **/
   private <T extends AbstractDTO> Set<ResourceIdentifier> relatedEntities(T entity) {
     final Set<ResourceIdentifier> res = new HashSet<>();

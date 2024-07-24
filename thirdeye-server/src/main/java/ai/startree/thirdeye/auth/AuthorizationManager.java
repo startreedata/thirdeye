@@ -21,6 +21,11 @@ import static ai.startree.thirdeye.util.ResourceUtils.authorize;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.datalayer.entity.SubEntityType;
+import ai.startree.thirdeye.spi.api.AlertApi;
+import ai.startree.thirdeye.spi.api.AlertTemplateApi;
+import ai.startree.thirdeye.spi.api.AnomalyApi;
+import ai.startree.thirdeye.spi.api.DataSourceApi;
+import ai.startree.thirdeye.spi.api.DatasetApi;
 import ai.startree.thirdeye.spi.auth.AccessType;
 import ai.startree.thirdeye.spi.auth.AuthenticationType;
 import ai.startree.thirdeye.spi.auth.ResourceIdentifier;
@@ -216,6 +221,26 @@ public class AuthorizationManager {
         ROOT_RESOURCE_ID, AccessType.WRITE);
   }
 
+  public void invalidateCache(final @Nullable String namespace, Class<?> clazz) {
+    final LoadingCache<?, ?> c;
+    if (clazz.equals(DatasetConfigDTO.class) || clazz.equals(DatasetApi.class)) {
+      c = namespaceToDatasetCache.get(namespace);
+    } else if (clazz.equals(DataSourceDTO.class) || clazz.equals(DataSourceApi.class)) {
+      c = namespaceToDatasourceCache.get(namespace);
+    } else if (clazz.equals(AlertDTO.class) || clazz.equals(AlertApi.class)) {
+      c = namespaceToAlertCache.get(namespace);
+    } else if (clazz.equals(AnomalyDTO.class) || clazz.equals(AnomalyApi.class)) {
+      c = namespaceToAnomalyCache.get(namespace);
+    } else if (clazz.equals(AlertTemplateDTO.class) || clazz.equals(AlertTemplateApi.class)) {
+      c = namespaceToTemplateCache.get(namespace);
+    } else {
+      c = null;
+    }
+    if (c != null) {
+      c.invalidateAll();
+    }
+  }
+
   // Returns the resource identifier for a dto.
   // Null is ok and maps to a default resource id.
   private static ResourceIdentifier resourceId(final AbstractDTO dto) {
@@ -306,8 +331,9 @@ public class AuthorizationManager {
                 return optional(datasetConfigDao.findUniqueByNameAndNamespace(key, namespace));
               }
             }));
-    addRelatedEntities(entity, res, new Caches(anomalyCache, templateCache, datasourceCache, alertCache,
-        datasetCache));
+    addRelatedEntities(entity, res,
+        new Caches(anomalyCache, templateCache, datasourceCache, alertCache,
+            datasetCache));
     return res;
   }
 
@@ -317,7 +343,8 @@ public class AuthorizationManager {
       final Set<ResourceIdentifier> result,
       final Caches caches) {
     if (entity instanceof final AlertDTO alertDto) {
-      final AlertTemplateDTO alertTemplateDTO = caches.templateCache.getUnchecked(alertDto.getTemplate())
+      final AlertTemplateDTO alertTemplateDTO = caches.templateCache.getUnchecked(
+              alertDto.getTemplate())
           .orElse(null);
       checkArgument(alertTemplateDTO != null,
           "Invalid template %s. Not found in alert namespace %s.", alertDto.getTemplate(),
@@ -334,7 +361,8 @@ public class AuthorizationManager {
       final @Nullable Object datasetName = optional(alertDto.getProperties()).map(
           e -> e.get("dataset")).orElse(null);
       if (datasetName instanceof String datasetNameStr) {
-        final DatasetConfigDTO datasetConfigDTO = caches.datasetCache.getUnchecked(datasetNameStr).orElse(null);
+        final DatasetConfigDTO datasetConfigDTO = caches.datasetCache.getUnchecked(datasetNameStr)
+            .orElse(null);
         checkArgument(datasetConfigDTO != null,
             "Invalid dataset name %s. Not found in alert namespace %s.", datasetNameStr,
             alertDto.namespace());
@@ -401,7 +429,8 @@ public class AuthorizationManager {
       // todo cyril authz implement enumeration item related entity anomalyDto.getEnumerationItem
     } else if (entity instanceof DatasetConfigDTO datasetConfigDTO) {
       final String datasourceName = datasetConfigDTO.getDataSource();
-      final DataSourceDTO datasourceDto = caches.datasourceCache.getUnchecked(datasourceName).orElse(null);
+      final DataSourceDTO datasourceDto = caches.datasourceCache.getUnchecked(datasourceName)
+          .orElse(null);
       checkArgument(datasourceDto != null,
           "Invalid datasource name %s. Not found in dataset namespace %s.", datasourceName,
           datasetConfigDTO.namespace());

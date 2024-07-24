@@ -13,6 +13,8 @@
  */
 package ai.startree.thirdeye.spi.api;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 public interface ThirdEyeCrudApi<T extends ThirdEyeCrudApi<T>> extends ThirdEyeApi {
 
   Long getId();
@@ -22,4 +24,8 @@ public interface ThirdEyeCrudApi<T extends ThirdEyeCrudApi<T>> extends ThirdEyeA
   AuthorizationConfigurationApi getAuth();
 
   T setAuth(final AuthorizationConfigurationApi auth);
+
+  default @Nullable String namespace() {
+    return getAuth() != null ? getAuth().getNamespace() : null;
+  }
 }

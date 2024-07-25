@@ -288,7 +288,7 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
       try {
         outList.add(f.get(60, TimeUnit.SECONDS));
       } catch (final InterruptedException | TimeoutException | ExecutionException e) {
-        LOG.warn("Failed to convert MergedAnomalyResultDTO from bean: {}", e.toString());
+        LOG.warn("Failed to convert MergedAnomalyResultDTO from bean", e);
       }
     }
 

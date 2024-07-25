@@ -68,7 +68,7 @@ public class EmailSendgridNotificationService implements NotificationService {
     final SendGrid sg = new SendGrid(configuration.getApiKey());
     final Response response = sg.api(request);
 
-    LOG.info(String.format("Sendgrid status: %d", response.getStatusCode()));
+    LOG.info("Sendgrid status: " + response.getStatusCode());
     LOG.info(response.getBody());
     LOG.info(response.getHeaders().toString());
   }

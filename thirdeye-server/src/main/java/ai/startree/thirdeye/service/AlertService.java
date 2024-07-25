@@ -289,7 +289,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
       final Long id) {
     final AlertDTO dto = getDto(id);
     authorizationManager.ensureCanEdit(principal, dto, dto);
-    LOG.warn(String.format("Resetting alert id: %d by principal: %s", id, principal.getName()));
+    LOG.warn("Resetting alert id: {} by principal: {}", id, principal.getName());
 
     /*
      * We don't want to delete subscription groups associated with the alert. Therefore, we don't

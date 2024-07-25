@@ -193,7 +193,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
       authorizationManager.ensureCanDelete(principal, dto);
 
       deleteDto(dto);
-      LOG.warn(String.format("Deleted id: %d by principal: %s", id, principal.getName()));
+      LOG.warn("Deleted id: {} by principal: {}", id, principal.getName());
       
       authorizationManager.invalidateCache(dto.namespace(), dto.getClass());
 

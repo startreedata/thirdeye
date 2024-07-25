@@ -19,6 +19,8 @@ import ai.startree.thirdeye.spi.json.ApiTemplatableSerializer;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.time.Duration;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
@@ -107,6 +109,8 @@ public interface Constants {
   String TWO_DECIMALS_FORMAT = "#,###.##";
   String MAX_DECIMALS_FORMAT = "#,###.#####";
   String DECIMALS_FORMAT_TOKEN = "#";
+
+  DecimalFormat TWO_DIGITS_FORMATTER = new DecimalFormat("#.##", DecimalFormatSymbols.getInstance( Locale.ENGLISH ));
 
   enum JobStatus {
     SCHEDULED,

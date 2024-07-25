@@ -116,8 +116,7 @@ public class TaskDriverRunnable implements Runnable {
       // a task was acquired - try to finish executing it before termination
       taskRunningTimer.time(() -> runTask(taskDTO));
     }
-    LOG.info(String.format("TaskDriverRunnable safely quitting. name: %s",
-        Thread.currentThread().getName()));
+    LOG.info("TaskDriverRunnable safely quitting. name: " + Thread.currentThread().getName());
   }
 
   private boolean isShutdown() {
@@ -255,11 +254,11 @@ public class TaskDriverRunnable implements Runnable {
           message);
       LOG.info("Updated status to {}", newStatus);
     } catch (Exception e) {
-      LOG.error(String.format(
-          "Exception: updating task status. Request: taskId: %d, newStatus: %s, msg: %s",
+      LOG.error(
+          "Exception: updating task status. Request: taskId: {}, newStatus: {}, msg: {}",
           taskId,
           newStatus,
-          message), e);
+          message, e);
     }
   }
 }

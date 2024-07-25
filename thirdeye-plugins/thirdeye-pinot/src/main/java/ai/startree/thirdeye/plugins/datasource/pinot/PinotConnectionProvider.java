@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.plugins.datasource.pinot;
 
+import static ai.startree.thirdeye.spi.Constants.TWO_DIGITS_FORMATTER;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Map;
@@ -82,8 +83,8 @@ public class PinotConnectionProvider {
       final long start = System.nanoTime();
       if (connection != null) {
         connection.close();
-        LOG.info(String.format("Successfully closed pinot connection. took %.2fms",
-            ((System.nanoTime() - start) / 1e6)));
+        LOG.info("Successfully closed pinot connection. took {}ms",
+            TWO_DIGITS_FORMATTER.format((System.nanoTime() - start) / 1e6));
       }
     } catch (final PinotClientException e) {
       LOG.warn("Exception closing connection: {}", e.getMessage(), e);

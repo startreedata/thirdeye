@@ -16,6 +16,7 @@ package ai.startree.thirdeye.datalayer.bao;
 import static ai.startree.thirdeye.spi.Constants.METRICS_CACHE_TIMEOUT;
 import static ai.startree.thirdeye.spi.Constants.TASK_EXPIRY_DURATION;
 import static ai.startree.thirdeye.spi.Constants.TASK_MAX_DELETES_PER_CLEANUP;
+import static ai.startree.thirdeye.spi.Constants.TWO_DIGITS_FORMATTER;
 import static ai.startree.thirdeye.spi.Constants.VANILLA_OBJECT_MAPPER;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Suppliers.memoizeWithExpiration;
@@ -214,9 +215,9 @@ public class TaskManagerImpl implements TaskManager {
 
     final double totalTime = (System.nanoTime() - startTime) / 1e9;
 
-    LOG.info(String.format("Task cleanup complete. removed %d tasks. (time taken: %.2fs)",
+    LOG.info("Task cleanup complete. removed {} tasks. (time taken: {}s)",
         tasksToBeDeleted.size(),
-        totalTime));
+        TWO_DIGITS_FORMATTER.format(totalTime));
   }
 
   @Override

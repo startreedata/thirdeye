@@ -18,7 +18,7 @@ import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedback;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedbackType;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -65,7 +65,7 @@ public interface AnomalyManager extends AbstractManager<AnomalyDTO> {
 
   private static Map<AnomalyFeedbackType, Long> feedbackTypesCount(
       final List<AnomalyFeedback> feedbacks) {
-    final Map<AnomalyFeedbackType, Long> feedbackStats = new HashMap<>();
+    final Map<AnomalyFeedbackType, Long> feedbackStats = new EnumMap<>(AnomalyFeedbackType.class);
     for (final AnomalyFeedbackType type : AnomalyFeedbackType.values()) {
       feedbackStats.put(type, 0L);
     }

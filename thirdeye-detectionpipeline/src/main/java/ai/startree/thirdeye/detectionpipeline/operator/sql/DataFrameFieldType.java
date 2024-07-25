@@ -15,7 +15,7 @@ package ai.startree.thirdeye.detectionpipeline.operator.sql;
 
 import ai.startree.thirdeye.spi.dataframe.Series;
 import ai.startree.thirdeye.spi.dataframe.Series.SeriesType;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 import org.apache.calcite.adapter.java.JavaTypeFactory;
 import org.apache.calcite.linq4j.tree.Primitive;
@@ -32,7 +32,7 @@ public enum DataFrameFieldType {
   private final Class clazz;
   private final SeriesType seriesType;
 
-  private static final Map<SeriesType, DataFrameFieldType> MAP = new HashMap<>();
+  private static final Map<SeriesType, DataFrameFieldType> MAP = new EnumMap<>(SeriesType.class);
 
   static {
     for (DataFrameFieldType value : values()) {

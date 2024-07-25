@@ -29,6 +29,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean.InputBean;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.micrometer.core.instrument.Metrics;
@@ -208,7 +209,7 @@ public class PlanExecutor implements AutoCloseable {
   @VisibleForTesting
   Map<String, PlanNode> buildPlanNodeMap(final List<PlanNodeBean> planNodeBeans,
       final DetectionPipelineContext context) {
-    final Map<String, PlanNode> pipelinePlanNodes = new HashMap<>();
+    final Map<String, PlanNode> pipelinePlanNodes = Maps.newHashMapWithExpectedSize(planNodeBeans.size());
     for (final PlanNodeBean planNodeBean : planNodeBeans) {
       final PlanNode planNode = planNodeFactory.build(
           planNodeBean,

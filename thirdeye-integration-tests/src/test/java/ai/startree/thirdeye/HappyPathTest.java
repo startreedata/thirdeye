@@ -566,46 +566,49 @@ public class HappyPathTest {
     assert200(response);
   }
 
-  @Test(dependsOnMethods = "testAnomalyCount")
-  public void testCreateAnomalyWithAuth() {
-    final var createAnomalyResp = request("api/anomalies").put(Entity.json(List.of(
-        new AnomalyApi()
-            .setAlert(new AlertApi().setId(alertId))
-            .setAuth(new AuthorizationConfigurationApi().setNamespace("anomaly-namespace"))
-    )));
-    // Anomalies cannot be created with a namespace.
-    assertThat(createAnomalyResp.getStatus()).isEqualTo(400);
-  }
-
-  @Test(timeOut = 60000, dependsOnMethods = "testAnomalyCount")
-  public void testGetAnomalyAuth() throws InterruptedException {
-    var alertId = mustCreateAlert(
-        newRunnableAlertApiWithAuth("TestGetAnomalyAuth", "alert-namespace"));
-
-    waitForAnyAnomalies(alertId);
-    final var anomalyApi = mustGetAnomaliesForAlert(alertId).get(0);
-    assertThat(anomalyApi.getAuth()).isNotNull();
-    assertThat(anomalyApi.getAuth().getNamespace()).isEqualTo("alert-namespace");
-  }
-
-  @Test(timeOut = 60000, dependsOnMethods = "testAnomalyCount")
-  // at write time the namespace is not resolved - either it is correct because passed explicitely, either it is correct because it is the principal active namespace, either the method should fail todo authz test implement these cases in the authz tests
-  @Deprecated 
-  public void testGetRcaInvestigationAuth() throws InterruptedException {
-    final long alertId = mustCreateAlert(
-        newRunnableAlertApiWithAuth("TestGetRcaInvestigationAuth", "alert-namespace"));
-
-    waitForAnyAnomalies(alertId);
-    final Long anomalyId = mustGetAnomaliesForAlert(alertId).get(0).getId();
-    final long investigationId = mustCreateInvestigation(new RcaInvestigationApi()
-        .setName("my-investigation")
-        .setAuth(new AuthorizationConfigurationApi().setNamespace("alert-namespace"))
-        .setAnomaly(new AnomalyApi().setId(anomalyId)));
-
-    final RcaInvestigationApi investigationApi = mustGetInvestigation(investigationId);
-    assertThat(investigationApi.getAuth()).isNotNull();
-    assertThat(investigationApi.getAuth().getNamespace()).isEqualTo("alert-namespace");
-  }
+  // todo cyril authz move this to authz tests
+//  @Test(dependsOnMethods = "testAnomalyCount")
+//  @Deprecated
+//  public void testCreateAnomalyWithAuth() {
+//    final var createAnomalyResp = request("api/anomalies").put(Entity.json(List.of(
+//        new AnomalyApi()
+//            .setAlert(new AlertApi().setId(alertId))
+//            .setAuth(new AuthorizationConfigurationApi().setNamespace("anomaly-namespace"))
+//    )));
+//    // Anomalies cannot be created with a namespace.
+//    assertThat(createAnomalyResp.getStatus()).isEqualTo(400);
+//  }
+//
+//  @Test(timeOut = 60000, dependsOnMethods = "testAnomalyCount")
+//  @Deprecated
+//  public void testGetAnomalyAuth() throws InterruptedException {
+//    var alertId = mustCreateAlert(
+//        newRunnableAlertApiWithAuth("TestGetAnomalyAuth", "alert-namespace"));
+//
+//    waitForAnyAnomalies(alertId);
+//    final var anomalyApi = mustGetAnomaliesForAlert(alertId).get(0);
+//    assertThat(anomalyApi.getAuth()).isNotNull();
+//    assertThat(anomalyApi.getAuth().getNamespace()).isEqualTo("alert-namespace");
+//  }
+//
+//  @Test(timeOut = 60000, dependsOnMethods = "testAnomalyCount")
+//  // at write time the namespace is not resolved - either it is correct because passed explicitely, either it is correct because it is the principal active namespace, either the method should fail todo authz test implement these cases in the authz tests
+//  @Deprecated 
+//  public void testGetRcaInvestigationAuth() throws InterruptedException {
+//    final long alertId = mustCreateAlert(
+//        newRunnableAlertApiWithAuth("TestGetRcaInvestigationAuth", "alert-namespace"));
+//
+//    waitForAnyAnomalies(alertId);
+//    final Long anomalyId = mustGetAnomaliesForAlert(alertId).get(0).getId();
+//    final long investigationId = mustCreateInvestigation(new RcaInvestigationApi()
+//        .setName("my-investigation")
+//        .setAuth(new AuthorizationConfigurationApi().setNamespace("alert-namespace"))
+//        .setAnomaly(new AnomalyApi().setId(anomalyId)));
+//
+//    final RcaInvestigationApi investigationApi = mustGetInvestigation(investigationId);
+//    assertThat(investigationApi.getAuth()).isNotNull();
+//    assertThat(investigationApi.getAuth().getNamespace()).isEqualTo("alert-namespace");
+//  }
 
   @Test
   public void testCreateSubscriptionGroup() {

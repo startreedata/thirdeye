@@ -85,8 +85,18 @@ export function determinePropertyFieldConfiguration(
     const metadata: {
         [key: string]: AlertTemplatePropertyParsedMetadata;
     } = {};
-
-    // This is the old way of figuring out if a field is required or not
+    /* This is the old way of figuring out if a field is required or not.
+    We allow users to add placeholders of variale in the template without any entry
+    in the properties key. For eg they can just put this in template,
+    "dataSource: ${dataSource}".
+    We have to show this field for the user to add value into, even if its not defined
+    in the proerties key of the template.
+    Bottomline is we have to always show inout box for any variable mentioned in any of the
+    template properties. The properties key is to provide extra information about the variable,
+    based on which we categorise them under different steps. As of now if the key just exists
+    in the property section, even though we show an inpput box for it, it wont have any
+    impact as there is no mapping for this variable to any template property.
+    */
     determinePropertyFieldConfigurationFromDefaultFields(
         alertTemplate,
         alertTemplate.defaultProperties ?? {}

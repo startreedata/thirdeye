@@ -14,14 +14,10 @@
  */
 
 import { DebouncedFunc } from "lodash";
-import { MetadataPropertyStep } from "../../../../../rest/dto/alert-template.interfaces";
 import { PropertyRenderConfig } from "../alert-template-properties-builder.interfaces";
 
 export interface AlertTemplateSectionedPropertiesProps {
-    groupedProperties: Record<
-        MetadataPropertyStep,
-        Record<string, PropertyRenderConfig[]>
-    >;
+    groupedProperties: Record<string, Record<string, PropertyRenderConfig[]>>;
     handlePropertyValueChange: DebouncedFunc<
         (key: unknown, value: unknown) => void
     >;

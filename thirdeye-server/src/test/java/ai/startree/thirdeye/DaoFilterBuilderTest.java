@@ -19,6 +19,7 @@ import static ai.startree.thirdeye.spi.util.Pair.pair;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.Predicate.OPER;
 import java.util.Map;
@@ -38,7 +39,7 @@ public class DaoFilterBuilderTest {
   }
 
   private void assertBadRequestException(final MultivaluedMap<String, String> queryParams) {
-    assertThatThrownBy(() -> DaoFilterUtils.buildFilter(queryParams, Map.of(), namespace))
+    assertThatThrownBy(() -> DaoFilterUtils.buildFilter(queryParams, Map.of(), null))
         .isInstanceOf(BadRequestException.class);
   }
 
@@ -72,17 +73,17 @@ public class DaoFilterBuilderTest {
   @Test
   public void testValidLimitOffsetParams() {
     final long limit = 5;
-    final Long outputLimit = DaoFilterUtils
-        .buildFilter(queryParams("limit", String.valueOf(limit)), Map.of(), namespace)
-        .getLimit();
-    assertThat(outputLimit).isEqualTo(limit);
+    final DaoFilter outputDaoFilter = DaoFilterUtils
+        .buildFilter(queryParams("limit", String.valueOf(limit)), Map.of(), "some_namespace");
+    assertThat(outputDaoFilter.getLimit()).isEqualTo(limit);
+    assertThat(outputDaoFilter.getPredicate()).isEqualTo(Predicate.AND(Predicate.EQ("namespace", "some_namespace")));
 
     final long offset = 10;
-    final Long outputOffset = DaoFilterUtils.buildFilter(
-            queryParams("limit", String.valueOf(limit), "offset", String.valueOf(offset)), Map.of(),
-            namespace)
-        .getOffset();
-    assertThat(outputOffset).isEqualTo(offset);
+    final DaoFilter outputDaoFilter2 = DaoFilterUtils.buildFilter(
+        queryParams("limit", String.valueOf(limit), "offset", String.valueOf(offset)), Map.of(),
+        null);
+    assertThat(outputDaoFilter2.getOffset()).isEqualTo(offset);
+    assertThat(outputDaoFilter2.getPredicate()).isEqualTo(Predicate.AND(Predicate.EQ("namespace", null)));
   }
 
   @Test

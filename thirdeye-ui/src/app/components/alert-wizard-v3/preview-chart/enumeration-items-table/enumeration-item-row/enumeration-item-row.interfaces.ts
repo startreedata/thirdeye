@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { Alert } from "../../../../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../../../../rest/dto/anomaly.interfaces";
 import { DetectionEvaluation } from "../../../../../rest/dto/detection.interfaces";
 import { TimeRange } from "../../../../../rest/dto/time-range.interfaces";
@@ -24,6 +25,6 @@ export interface EnumerationItemRowProps {
     hideTime: boolean;
     showOnlyActivity?: boolean;
     hideDelete?: boolean;
-    alert?: any;
+    alert: Alert;
     evaluationTimeRange: TimeRange;
 }

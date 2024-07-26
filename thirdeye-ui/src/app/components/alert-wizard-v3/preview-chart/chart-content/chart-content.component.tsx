@@ -64,7 +64,6 @@ export const ChartContent: FunctionComponent<ChartContentProps> = ({
         as the rendering is taken care by table component and we dont need to
         evaluate for the case where we are just rendering for alerts with no enumeration items */
         if (
-            !workingDetectionEvaluations ||
             workingDetectionEvaluations.length === 0 ||
             workingDetectionEvaluations[0].enumerationItem
         ) {

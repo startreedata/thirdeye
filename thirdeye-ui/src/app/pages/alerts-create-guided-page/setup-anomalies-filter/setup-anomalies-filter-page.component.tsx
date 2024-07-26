@@ -87,7 +87,6 @@ export const SetupAnomaliesFilterPage: FunctionComponent = () => {
 
     const {
         evaluation: evaluationWithoutFilters,
-        // getEvaluation,
         status: getEvaluationWithoutFilterChangesStatus,
     } = useGetEvaluation();
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 StarTree Inc
+ * Copyright 2024 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -12,18 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
-import { Dispatch, ReactNode, SetStateAction } from "react";
-import { SubscriptionGroup } from "../../../../rest/dto/subscription-group.interfaces";
-
-interface FormValues {
-    name: string;
-    cron: string;
-    notifyHistoricalAnomalies?: boolean;
-}
-
-export interface PropertiesFormProps {
-    values: FormValues;
-    onChange: Dispatch<SetStateAction<SubscriptionGroup>>;
-    customHeader?: ReactNode;
+export interface InfoLabelProps {
+    label: string;
+    tooltipText?: string;
 }

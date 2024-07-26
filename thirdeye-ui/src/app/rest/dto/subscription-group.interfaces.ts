@@ -33,6 +33,7 @@ export interface SubscriptionGroup {
     owner: User;
     notificationSchemes?: NotificationSchemes;
     specs: NotificationSpec[];
+    notifyHistoricalAnomalies?: boolean; // optional as its only coming when this property is set
 }
 
 export enum SpecType {

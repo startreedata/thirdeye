@@ -18,6 +18,7 @@ import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.service.RcaMetricService;
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.HeatMapResponseApi;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -47,11 +48,14 @@ import org.slf4j.LoggerFactory;
  * by the
  * RCA frontend. It delivers metric timeseries, aggregates, and breakdowns (de-aggregations).</p>
  */
-@SecurityRequirement(name = "oauth")
+@SecurityRequirement(name="oauth")
+@SecurityRequirement(name = Constants.NAMESPACE_SECURITY)
 @OpenAPIDefinition(security = {
-    @SecurityRequirement(name = "oauth")
+    @SecurityRequirement(name = "oauth"),
+    @SecurityRequirement(name = Constants.NAMESPACE_SECURITY)
 })
 @SecurityScheme(name = "oauth", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER, paramName = HttpHeaders.AUTHORIZATION)
+@SecurityScheme(name = Constants.NAMESPACE_SECURITY, type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER, paramName = Constants.NAMESPACE_HTTP_HEADER)
 @Produces(MediaType.APPLICATION_JSON)
 @Singleton
 public class RcaMetricResource {

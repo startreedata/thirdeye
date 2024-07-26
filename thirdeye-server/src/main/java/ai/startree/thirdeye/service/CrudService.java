@@ -58,7 +58,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
         .build();
   }
 
-  // FIXME CYRIL authz SUVODEEP MAIN DESIGN QUESTION ON WHETHER ONLY IF namespace match AND or  if  
+  // FIXME CYRIL authz SUVODEEP MAIN DESIGN QUESTION ON WHETHER ONLY IF namespace match AND or if  
   public ApiT get(
       final ThirdEyeServerPrincipal principal,
       final Long id) {
@@ -83,6 +83,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
       final ThirdEyeServerPrincipal principal,
       final MultivaluedMap<String, String> queryParameters
   ) {
+    final String currentNamespace = authorizationManager.currentNamespace(principal);
     final List<DtoT> results = queryParameters.size() > 0
         ? dtoManager.filter(new DaoFilterBuilder(apiToIndexMap).buildFilter(queryParameters))
         : dtoManager.findAll();

@@ -28,6 +28,7 @@ import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.Predicate.OPER;
 import ai.startree.thirdeye.spi.util.Pair;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import java.util.ArrayList;
@@ -58,7 +59,8 @@ public class DaoFilterBuilder {
     this.apiToBeanMap = apiToBeanMap;
   }
 
-  static Pair<OPER, String> toPair(final Object o) {
+  @VisibleForTesting
+  protected static Pair<OPER, String> toPair(final Object o) {
     final String s = o.toString();
 
     final Matcher m = PATTERN.matcher(s);
@@ -72,7 +74,8 @@ public class DaoFilterBuilder {
     return pair(OPER.EQ, s);
   }
 
-  static Predicate toPredicate(final String columnName, final Object[] objects) {
+  @VisibleForTesting
+  protected static Predicate toPredicate(final String columnName, final Object[] objects) {
     final List<Predicate> predicates = Arrays.stream(objects)
         .map(DaoFilterBuilder::toPair)
         .map(p -> new Predicate(columnName, p.getFirst(), p.getSecond()))

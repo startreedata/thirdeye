@@ -266,7 +266,6 @@ public class AuthorizationManager {
                         LoadingCache<String, Optional<DatasetConfigDTO>> datasetCache) {}
 
   /**
-   * FIXME CYRIL authz - the fetching of entities makes the system slow - introduce some caching on the DAOs? Like 30 seconds caching?
    *
    * For the moment this method is responsible for checking whether related entities are in the
    * same namespace - todo cyril authz - is this the right place ?

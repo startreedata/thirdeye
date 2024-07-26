@@ -30,6 +30,7 @@ import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
 import ai.startree.thirdeye.spi.auth.AuthenticationType;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
+import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.bao.AbstractManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
@@ -154,7 +155,7 @@ public class CrudResourceTest {
     final DummyManager manager = mock(DummyManager.class);
     final UriInfo uriInfo = mock(UriInfo.class);
     when(uriInfo.getQueryParameters()).thenReturn(new MultivaluedHashMap<>());
-    when(manager.findAll()).thenReturn(Arrays.asList(
+    when(manager.filter(any(DaoFilter.class))).thenReturn(Arrays.asList(
         (DummyDto) new DummyDto().setId(1L),
         (DummyDto) new DummyDto().setId(2L),
         (DummyDto) new DummyDto().setId(3L)
@@ -194,7 +195,7 @@ public class CrudResourceTest {
   @Test(expectedExceptions = ForbiddenException.class)
   public void testDeleteAll_withNoAccess() {
     final DummyManager manager = mock(DummyManager.class);
-    when(manager.findAll()).thenReturn(Arrays.asList(
+    when(manager.filter(any(DaoFilter.class))).thenReturn(Arrays.asList(
         (DummyDto) new DummyDto().setId(1L),
         (DummyDto) new DummyDto().setId(2L),
         (DummyDto) new DummyDto().setId(3L)
@@ -212,7 +213,7 @@ public class CrudResourceTest {
         (DummyDto) new DummyDto().setId(2L),
         (DummyDto) new DummyDto().setId(3L)
     );
-    when(manager.findAll()).thenReturn(dtos);
+    when(manager.filter(any(DaoFilter.class))).thenReturn(dtos);
 
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
         new SingleResourceAuthorizer("2"));

@@ -1,3 +1,15 @@
+## [2.48.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.47.0...thirdeye-ui-2.48.0) (2024-07-26)
+
+
+### Features
+
+* [TE-2363](https://cortexdata.atlassian.net/browse/TE-2363) allow user to opt in to be notified for historical anomalies when creating a subscription ([718059b5f](https://github.com/startreedata/thirdeye/commit/718059b5f3d809faae27fb2c4da495ecef053431))
+
+
+### Bug Fixes
+
+* [TE-2373](https://cortexdata.atlassian.net/browse/TE-2373) display all properties while creating alert in advanced mode ([fc0dc9d40](https://github.com/startreedata/thirdeye/commit/fc0dc9d40f0b1c49103d601b6ffd541adf8d943c))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

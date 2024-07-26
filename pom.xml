@@ -86,7 +86,7 @@
     <quartz.version>2.3.2</quartz.version>
     <reflections.version>0.10.2</reflections.version>
     <retrofit2.version>2.9.0</retrofit2.version>
-    <sendgrid.version>4.0.1</sendgrid.version>
+    <sendgrid.version>4.4.3</sendgrid.version>
     <slack.version>1.29.2</slack.version>
     <slf4j-api.version>1.7.12</slf4j-api.version>
     <swagger.version>2.1.6-1</swagger.version>
@@ -1045,7 +1045,7 @@
             <format>html</format>
             <format>xml</format>
           </formats>
-          <check />
+          <check/>
         </configuration>
       </plugin>
       <plugin>

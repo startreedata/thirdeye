@@ -24,6 +24,12 @@ export const getDataset = async (id: number): Promise<Dataset> => {
     return response.data;
 };
 
+export const getDatasetByName = async (name: string): Promise<Dataset> => {
+    const response = await axios.get(`${BASE_URL_DATASETS}?name=${name}`);
+
+    return response.data[0];
+};
+
 export const getAllDatasets = async (): Promise<Dataset[]> => {
     const response = await axios.get(BASE_URL_DATASETS);
 

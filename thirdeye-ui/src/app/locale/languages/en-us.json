@@ -294,6 +294,7 @@
         "how-to-perform-root-cause-analysis-doc": "View documentation on how to perform root cause analysis",
         "id": "ID",
         "ignored": "ignored",
+        "impact-dashboard": "Impact dashboard",
         "impact-percentage": "Impact %",
         "impact-score": "Impact Score",
         "improve-alert-accuracy": "Improve alert accuracy",

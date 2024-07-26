@@ -58,6 +58,7 @@ export const AppRouteRelative = {
     ANOMALIES_CREATE: "create",
     ANOMALIES_ALERT_CREATE: `${PLACEHOLDER_ROUTE_ID}`,
     CONFIGURATION: "configuration",
+    IMPACT_DASHBOARD: "impact-dashboard",
     SUBSCRIPTION_GROUPS: "subscription-groups",
     SUBSCRIPTION_GROUPS_SUBSCRIPTION_GROUP: `${PLACEHOLDER_ROUTE_ID}`,
     SUBSCRIPTION_GROUPS_SUBSCRIPTION_GROUP_VIEW: `view`,
@@ -220,6 +221,7 @@ export const AppRoute = {
     WELCOME_CREATE_ALERT_TUNE_ALERT:
         `/${AppRouteRelative.WELCOME}/${AppRouteRelative.WELCOME_CREATE_ALERT}` +
         `/${AppRouteRelative.WELCOME_CREATE_ALERT_TUNE_ALERT}`,
+    IMPACT_DASHBOARD: `/${AppRouteRelative.IMPACT_DASHBOARD}`,
 } as const;
 
 export const getBasePath = (): string => {

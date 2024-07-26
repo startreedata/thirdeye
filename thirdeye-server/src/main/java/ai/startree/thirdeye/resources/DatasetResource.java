@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.resources;
 
 import ai.startree.thirdeye.service.DatasetService;
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.DatasetApi;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
@@ -31,10 +32,13 @@ import javax.ws.rs.core.MediaType;
 
 @Tag(name = "Dataset")
 @SecurityRequirement(name="oauth")
+@SecurityRequirement(name = Constants.NAMESPACE_SECURITY)
 @OpenAPIDefinition(security = {
-    @SecurityRequirement(name = "oauth")
+    @SecurityRequirement(name = "oauth"),
+    @SecurityRequirement(name = Constants.NAMESPACE_SECURITY)
 })
 @SecurityScheme(name = "oauth", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER, paramName = HttpHeaders.AUTHORIZATION)
+@SecurityScheme(name = Constants.NAMESPACE_SECURITY, type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER, paramName = Constants.NAMESPACE_HTTP_HEADER)
 @Singleton
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)

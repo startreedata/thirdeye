@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.resources;
 
+import ai.startree.thirdeye.spi.Constants;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
@@ -30,10 +31,13 @@ import org.slf4j.LoggerFactory;
 
 @Tag(name = "Root Cause Analysis")
 @SecurityRequirement(name="oauth")
+@SecurityRequirement(name = Constants.NAMESPACE_SECURITY)
 @OpenAPIDefinition(security = {
-    @SecurityRequirement(name = "oauth")
+    @SecurityRequirement(name = "oauth"),
+    @SecurityRequirement(name = Constants.NAMESPACE_SECURITY)
 })
 @SecurityScheme(name = "oauth", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER, paramName = HttpHeaders.AUTHORIZATION)
+@SecurityScheme(name = Constants.NAMESPACE_SECURITY, type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER, paramName = Constants.NAMESPACE_HTTP_HEADER)
 @Produces(MediaType.APPLICATION_JSON)
 @Singleton
 public class RcaResource {

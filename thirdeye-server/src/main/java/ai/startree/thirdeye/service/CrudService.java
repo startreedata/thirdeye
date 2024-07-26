@@ -18,12 +18,13 @@ import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_ID;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureNull;
 
-import ai.startree.thirdeye.DaoFilterBuilder;
+import ai.startree.thirdeye.DaoFilterUtils;
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.spi.api.CountApi;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.bao.AbstractManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import com.google.common.collect.ImmutableMap;
@@ -36,12 +37,14 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import javax.ws.rs.core.MultivaluedMap;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.glassfish.jersey.internal.util.collection.ImmutableMultivaluedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT extends AbstractDTO> {
 
   private static final Logger LOG = LoggerFactory.getLogger(CrudService.class);
+  public static final ImmutableMultivaluedMap<String, String> EMPTY_PARAMS = ImmutableMultivaluedMap.empty();
   protected final AuthorizationManager authorizationManager;
 
   protected final AbstractManager<DtoT> dtoManager;
@@ -58,7 +61,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
         .build();
   }
 
-  // FIXME CYRIL authz SUVODEEP MAIN DESIGN QUESTION ON WHETHER ONLY IF namespace match AND or  if  
+  // FIXME CYRIL authz SUVODEEP MAIN DESIGN QUESTION ON WHETHER ONLY IF namespace match AND or if  
   public ApiT get(
       final ThirdEyeServerPrincipal principal,
       final Long id) {
@@ -83,10 +86,10 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
       final ThirdEyeServerPrincipal principal,
       final MultivaluedMap<String, String> queryParameters
   ) {
-    final List<DtoT> results = queryParameters.size() > 0
-        ? dtoManager.filter(new DaoFilterBuilder(apiToIndexMap).buildFilter(queryParameters))
-        : dtoManager.findAll();
-    // FIXME CYRIL ADD authz namespace in-app filter - then add query level filter
+    final String namespace = authorizationManager.currentNamespace(principal);
+    final DaoFilter daoFilter = DaoFilterUtils.buildFilter(queryParameters, apiToIndexMap,
+        namespace);
+    final List<DtoT> results = dtoManager.filter(daoFilter);
 
     return results.stream()
         .filter(dto -> authorizationManager.canRead(principal, dto))
@@ -187,40 +190,45 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
     return updated;
   }
 
+  // FIXME CYRIL authz SUVODEEP MAIN DESIGN QUESTION ON WHETHER ONLY IF namespace match we apply
   public ApiT delete(final ThirdEyeServerPrincipal principal, final Long id) {
     final DtoT dto = dtoManager.findById(id);
     if (dto != null) {
+      // todo authz - this leaks ids of other namespaces
       authorizationManager.ensureCanDelete(principal, dto);
-
       deleteDto(dto);
       LOG.warn("Deleted id: {} by principal: {}", id, principal.getName());
-      
       authorizationManager.invalidateCache(dto.namespace(), dto.getClass());
-
       return toApi(dto);
     }
 
     return null;
   }
 
-  // FIXME CYRIL AUTHZ ADD NAMESPACE FILTER and add do cache invalidation only once
   public void deleteAll(final ThirdEyeServerPrincipal principal) {
-    
-    dtoManager.findAll()
-        .stream()
-        .peek(dto -> authorizationManager.ensureCanDelete(principal, dto))
-        .forEach(this::deleteDto);
+    final String namespace = authorizationManager.currentNamespace(principal);
+    final DaoFilter daoFilter = DaoFilterUtils.buildFilter(EMPTY_PARAMS, apiToIndexMap,
+        namespace);
+    final List<DtoT> entities = dtoManager.filter(daoFilter);
+    for (final DtoT dto : entities) {
+      // todo authz cyril - consider a filter rather than throwing - a user should be able to delete all entities she can access 
+      authorizationManager.ensureCanDelete(principal, dto);
+      // todo cyril - add a method to delete multiple entities at once - this loop is extremely slow
+      deleteDto(dto);
+      LOG.warn("Deleted id: {} by principal: {}", dto.getId(), principal.getName());
+    }
+    if (!entities.isEmpty()) {
+      authorizationManager.invalidateCache(namespace, entities.get(0).getClass());
+    }
   }
 
-  // FIXME CYRIL AUTHZ ADD NAMESPACE FILTER  
-  public CountApi count(final ThirdEyeServerPrincipal principal, final MultivaluedMap<String, String> queryParameters) {
-    final CountApi api = new CountApi();
-    final Long count = queryParameters.size() > 0
-        ? dtoManager.count(new DaoFilterBuilder(apiToIndexMap).buildFilter(queryParameters)
-        .getPredicate())
-        : dtoManager.count();
-    api.setCount(count);
-    return api;
+  public CountApi count(final ThirdEyeServerPrincipal principal,
+      final MultivaluedMap<String, String> queryParameters) {
+    final String namespace = authorizationManager.currentNamespace(principal);
+    final DaoFilter daoFilter = DaoFilterUtils.buildFilter(queryParameters, apiToIndexMap,
+        namespace);
+    final Long count = dtoManager.count(daoFilter.getPredicate());
+    return new CountApi().setCount(count);
   }
 
   /**

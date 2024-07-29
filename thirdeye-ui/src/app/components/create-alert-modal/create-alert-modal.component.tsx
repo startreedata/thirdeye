@@ -92,7 +92,6 @@ export const CreateAlertModal: FunctionComponent<CreateAlertModalModalProps> =
                     alert.id ? "label.update-alert" : "label.create-alert"
                 )}
                 title={t("label.alert-details")}
-                trigger={() => <></>}
                 onCancel={onCancel}
                 onSubmit={() => onCreateAlertClick()}
             >

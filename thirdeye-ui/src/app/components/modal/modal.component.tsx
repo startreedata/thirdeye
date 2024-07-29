@@ -59,10 +59,11 @@ export const Modal: FunctionComponent<ModalProps> = ({
 
     return (
         <>
-            {trigger(() => {
-                onOpen && onOpen();
-                setIsOpen(true);
-            })}
+            {trigger &&
+                trigger(() => {
+                    onOpen && onOpen();
+                    setIsOpen(true);
+                })}
 
             <Dialog
                 maxWidth={maxWidth}

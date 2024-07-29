@@ -178,7 +178,6 @@ export const AlertCompositeFiltersModal: FunctionComponent<AlertCompositeFilters
                 initiallyOpen
                 maxWidth="md"
                 title={t("label.add-dimensions")}
-                trigger={() => <></>}
                 onCancel={onCancel}
             >
                 <Grid item xs={12}>

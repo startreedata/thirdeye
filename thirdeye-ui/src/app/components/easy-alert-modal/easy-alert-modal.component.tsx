@@ -28,7 +28,6 @@ export const EasyAlertModal: FunctionComponent<EasyAlertModalProps> = ({
             initiallyOpen
             submitButtonLabel={t("label.got-it")}
             title={t("label.how-alert-algorithms-work")}
-            trigger={() => <></>}
             onCancel={() => onCancel()}
             onSubmit={() => onGotItClick()}
         >

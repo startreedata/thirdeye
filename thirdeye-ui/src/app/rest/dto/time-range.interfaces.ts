@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 StarTree Inc
+ * Copyright 2024 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -12,16 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { DetectionEvaluation } from "../../../../rest/dto/detection.interfaces";
-import { TimeRange } from "../../../../rest/dto/time-range.interfaces";
-
-export interface EnumerationItemsTableProps {
-    detectionEvaluations: DetectionEvaluation[];
-    onDeleteClick: (detectionEvaluation: DetectionEvaluation) => void;
-    timezone: string | undefined;
-    hideTime: boolean;
-    showOnlyActivity?: boolean;
-    hideDelete?: boolean;
-    alert?: any;
-    evaluationTimeRange: TimeRange;
+export interface TimeRange {
+    startTime: number;
+    endTime: number;
 }

@@ -157,13 +157,19 @@ export const createEmptyUiAlertSubscriptionGroup =
 export const createAlertEvaluation = (
     alert: Alert | EditableAlert | Pick<Alert, "id">,
     startTime: number,
-    endTime: number
+    endTime: number,
+    evaluationContext?: { listEnumerationItemsOnly: boolean }
 ): GetAlertEvaluationPayload => {
-    return {
+    const basePayload: GetAlertEvaluationPayload = {
         alert: alert,
         start: startTime,
         end: endTime,
     };
+    if (evaluationContext) {
+        basePayload["evaluationContext"] = evaluationContext;
+    }
+
+    return basePayload;
 };
 
 export const getUiAlert = (

@@ -16,7 +16,6 @@ package ai.startree.thirdeye.scheduler.job;
 import static ai.startree.thirdeye.scheduler.JobUtils.BACKPRESSURE_COUNTERS;
 import static ai.startree.thirdeye.scheduler.JobUtils.FAILED_TASK_CREATION_COUNTERS;
 import static ai.startree.thirdeye.scheduler.JobUtils.getIdFromJobKey;
-import static ai.startree.thirdeye.spi.Constants.DEFAULT_CHRONOLOGY;
 import static ai.startree.thirdeye.spi.task.TaskType.DETECTION;
 import static ai.startree.thirdeye.spi.util.AlertMetadataUtils.getDateTimeZone;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
@@ -34,11 +33,9 @@ import ai.startree.thirdeye.spi.task.TaskType;
 import ai.startree.thirdeye.spi.util.TimeUtils;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
-import java.io.IOException;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.joda.time.Chronology;
 import org.joda.time.DateTime;
-import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -48,7 +45,6 @@ import org.slf4j.LoggerFactory;
 
 public class DetectionPipelineJob implements Job {
 
-  private static final Interval UNUSED_DETECTION_INTERVAL = new Interval(0, 0, DEFAULT_CHRONOLOGY);
   private static final Logger LOG = LoggerFactory.getLogger(DetectionPipelineJob.class);
   private final AlertManager alertManager;
   private final TaskManager taskManager;
@@ -105,30 +101,25 @@ public class DetectionPipelineJob implements Job {
 
   @VisibleForTesting
   protected long computeTaskStart(final AlertDTO alert, final long endTime) {
-    try {
-      final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alert,
-          UNUSED_DETECTION_INTERVAL);
-      final Chronology chronology = getDateTimeZone(templateWithProperties.getMetadata());
-      final DateTime defaultStartTime = new DateTime(alert.getLastTimestamp(), chronology);
-      final DateTime endDateTime = new DateTime(endTime, chronology);
-      final Period mutabilityPeriod = getMutabilityPeriod(templateWithProperties);
-      final DateTime mutabilityStart = endDateTime.minus(mutabilityPeriod);
-      if (mutabilityStart.isBefore(defaultStartTime)) {
-        LOG.info(
-            "Applied mutability period of {} for alert id {} between {} and {}. Corrected task interval is between {} and {}",
-            mutabilityPeriod,
-            alert.getId(),
-            defaultStartTime,
-            endDateTime,
-            mutabilityStart,
-            endDateTime
-        );
-        return mutabilityStart.getMillis();
-      } else {
-        return defaultStartTime.getMillis();
-      }
-    } catch (IOException | ClassNotFoundException e) {
-      throw new RuntimeException(e);
+    final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alert);
+    final Chronology chronology = getDateTimeZone(templateWithProperties.getMetadata());
+    final DateTime defaultStartTime = new DateTime(alert.getLastTimestamp(), chronology);
+    final DateTime endDateTime = new DateTime(endTime, chronology);
+    final Period mutabilityPeriod = getMutabilityPeriod(templateWithProperties);
+    final DateTime mutabilityStart = endDateTime.minus(mutabilityPeriod);
+    if (mutabilityStart.isBefore(defaultStartTime)) {
+      LOG.info(
+          "Applied mutability period of {} for alert id {} between {} and {}. Corrected task interval is between {} and {}",
+          mutabilityPeriod,
+          alert.getId(),
+          defaultStartTime,
+          endDateTime,
+          mutabilityStart,
+          endDateTime
+      );
+      return mutabilityStart.getMillis();
+    } else {
+      return defaultStartTime.getMillis();
     }
   }
 

@@ -17,7 +17,6 @@ import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import java.util.List;
-import java.util.Objects;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -31,27 +30,9 @@ public interface AbstractManager<E extends AbstractDTO> {
 
   E findById(Long id);
 
-  /**
-   * Find entity by name.
-   * The name is intended to be unique, but it is not enforced by the database for all entities.
-   * Therefore, this method returns a list of entities.
-   *
-   * @param name
-   * @return
-   */
-  @Deprecated // FIXME CYRIL authz use findUniqueByNameAndNamespace or findByNameAndNamespace instead
-  List<E> findByName(String name);
-  
-  // returns null if the entity is not found or not unique // TODO CYRIL differentiate behaviour when not unique 
-  default @Nullable E findUniqueByNameAndNamespace(final @NonNull String name, final @Nullable String namespace) {
-    final List<E> list =  findByName(name)
-        // TODO CYRIL authz - filter in the sql read, not in app - remove findByName and don't provide a default
-        .stream().filter(d -> Objects.equals(d.namespace(), namespace)).toList();
-    if (list.size() == 1) {
-      return list.iterator().next();
-    }
-    return null;
-  }
+  // returns null if the entity is not found 
+  // intended for entities that enforce uniqueness of name, namespace 
+  @Nullable E findUniqueByNameAndNamespace(final @NonNull String name, final @Nullable String namespace);
 
   List<E> findByIds(List<Long> id);
 

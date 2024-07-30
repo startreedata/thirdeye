@@ -16,6 +16,8 @@ package ai.startree.thirdeye.datalayer.bao;
 import static ai.startree.thirdeye.spi.Constants.METRICS_CACHE_TIMEOUT;
 import static ai.startree.thirdeye.spi.Constants.TASK_EXPIRY_DURATION;
 import static ai.startree.thirdeye.spi.Constants.TASK_MAX_DELETES_PER_CLEANUP;
+import static ai.startree.thirdeye.spi.Constants.TWO_DIGITS_FORMATTER;
+import static ai.startree.thirdeye.spi.Constants.VANILLA_OBJECT_MAPPER;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Suppliers.memoizeWithExpiration;
 
@@ -32,7 +34,6 @@ import com.codahale.metrics.CachedGauge;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.persist.Transactional;
@@ -45,8 +46,10 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
@@ -54,8 +57,7 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public class TaskManagerImpl implements TaskManager {
-
-  private final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  
   private final TaskDao dao;
 
   private static final Logger LOG = LoggerFactory.getLogger(TaskManagerImpl.class);
@@ -77,7 +79,7 @@ public class TaskManagerImpl implements TaskManager {
   AuthorizationConfigurationDTO auth) {
     final String taskInfoJson;
     try {
-      taskInfoJson = OBJECT_MAPPER.writeValueAsString(taskInfo);
+      taskInfoJson = VANILLA_OBJECT_MAPPER.writeValueAsString(taskInfo);
     } catch (JsonProcessingException e) {
       throw new RuntimeException("Error while serializing task info: " + taskInfo, e);
     }
@@ -155,6 +157,7 @@ public class TaskManagerImpl implements TaskManager {
         Predicate.EQ("version", currentVersion),
         Predicate.EQ("status", TaskStatus.WAITING.toString())
     );
+    // fixme cyril add metric here
     return dao.update(task, predicate) == 1;
   }
 
@@ -212,9 +215,9 @@ public class TaskManagerImpl implements TaskManager {
 
     final double totalTime = (System.nanoTime() - startTime) / 1e9;
 
-    LOG.info(String.format("Task cleanup complete. removed %d tasks. (time taken: %.2fs)",
+    LOG.info("Task cleanup complete. removed {} tasks. (time taken: {}s)",
         tasksToBeDeleted.size(),
-        totalTime));
+        TWO_DIGITS_FORMATTER.format(totalTime));
   }
 
   @Override
@@ -348,8 +351,30 @@ public class TaskManagerImpl implements TaskManager {
   }
 
   @Override
-  public List<TaskDTO> findByName(final String name) {
-    return findByPredicate(Predicate.EQ("name", name));
+  public TaskDTO findUniqueByNameAndNamespace(final @NonNull String name,
+      final @org.checkerframework.checker.nullness.qual.Nullable String namespace) {
+    final List<TaskDTO> list = findByPredicate(
+        Predicate.AND(
+            Predicate.EQ("name", name),
+            Predicate.OR(
+                Predicate.EQ("namespace", namespace),
+                // existing entities are not migrated automatically so they can have their namespace column to null in the index table, even if they do belong to a namespace 
+                //  todo cyril authz - prepare migration scripts - or some logic to ensure all entities are eventually migrated
+                Predicate.EQ("namespace", null)
+            )
+        )
+    )
+        // we still need to perform in-app filtering until all entities namespace are migrated in db - see above
+        .stream().filter(e -> Objects.equals(e.namespace(), namespace)).toList();
+    if (list.isEmpty()) {
+      return null;
+    } else if (list.size() == 1) {
+      return list.iterator().next();
+    } else {
+      throw new IllegalStateException(String.format(
+          "Found multiple entities with name %s and namespace %s. This should not happen. Please reach out to support.",
+          name, namespace));
+    }
   }
 
   @Override

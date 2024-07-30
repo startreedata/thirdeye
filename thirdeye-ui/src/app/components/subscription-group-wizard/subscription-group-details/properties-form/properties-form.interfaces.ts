@@ -19,6 +19,7 @@ import { SubscriptionGroup } from "../../../../rest/dto/subscription-group.inter
 interface FormValues {
     name: string;
     cron: string;
+    notifyHistoricalAnomalies?: boolean;
 }
 
 export interface PropertiesFormProps {

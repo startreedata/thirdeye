@@ -17,7 +17,6 @@ import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DUPLICATE_NAME;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
@@ -61,10 +60,11 @@ public class DataSourceService extends CrudService<DataSourceApi, DataSourceDTO>
     super.validate(principal, api, existing);
     /* new entity creation or name change in existing entity */
     if (existing == null || !existing.getName().equals(api.getName())) {
-      final List<DataSourceDTO> sameName = dtoManager.findByName(api.getName());
-      final List<DataSourceDTO> sameNameSameNamespace = authorizationManager.filterByNamespace(principal,
-          optional(api.getAuth()).map(AuthorizationConfigurationApi::getNamespace).orElse(null), sameName);
-      ensure(sameNameSameNamespace.isEmpty(), ERR_DUPLICATE_NAME, api.getName());
+      final DataSourceDTO sameNameSameNamespace = dtoManager.findUniqueByNameAndNamespace(api.getName(),
+          optional(api.getAuth()).map(AuthorizationConfigurationApi::getNamespace)
+              .orElse(authorizationManager.currentNamespace(principal))
+      );
+      ensure(sameNameSameNamespace == null, ERR_DUPLICATE_NAME, api.getName());
     }
   }
 
@@ -92,18 +92,6 @@ public class DataSourceService extends CrudService<DataSourceApi, DataSourceDTO>
     dataSourceCache.removeDataSource(existing);
   }
 
-  @Deprecated // use getDatasets by id
-  public List<DatasetApi> getDatasets(final ThirdEyePrincipal principal, final String name) {
-    final DataSourceDTO dataSourceDto = getDatasourceByName(
-        principal, name);
-    authorizationManager.ensureCanRead(principal, dataSourceDto);
-    final ThirdEyeDataSource dataSource = dataSourceCache.getDataSource(dataSourceDto);
-    return dataSource.getDatasets().stream()
-        .filter(d -> authorizationManager.canRead(principal, d))
-        .map(ApiBeanMapper::toApi)
-        .collect(Collectors.toList());
-  }
-
   public List<DatasetApi> getDatasets(final ThirdEyePrincipal principal, final long id) {
     final DataSourceDTO dataSourceDto = dtoManager.findById(id);
     checkArgument(dataSourceDto != null, "Could not find datasource with id %s", id);
@@ -112,16 +100,6 @@ public class DataSourceService extends CrudService<DataSourceApi, DataSourceDTO>
     return dataSource.getDatasets().stream()
         .map(ApiBeanMapper::toApi)
         .collect(Collectors.toList());
-  }
-
-  @Deprecated // useOnboardDataset by datasourceId instead
-  public DatasetApi onboardDataset(final ThirdEyePrincipal principal, final String dataSourceName, final String datasetName) {
-    final DataSourceDTO dataSourceDto = getDatasourceByName(principal, dataSourceName);
-    authorizationManager.ensureCanCreate(principal, dataSourceDto);
-    final DatasetConfigDTO datasetConfigDTO = dataSourceOnboarder.onboardDataset(dataSourceDto,
-        datasetName);
-
-    return ApiBeanMapper.toApi(datasetConfigDTO);
   }
 
   public DatasetApi onboardDataset(final ThirdEyePrincipal principal, final long dataSourceId, final String datasetName) {
@@ -134,17 +112,6 @@ public class DataSourceService extends CrudService<DataSourceApi, DataSourceDTO>
     return ApiBeanMapper.toApi(datasetConfigDTO);
   }
 
-  @Deprecated // use onboardAll by Id instead
-  public List<DatasetApi> onboardAll(final ThirdEyePrincipal principal, final String name) {
-    final DataSourceDTO dataSourceDto = getDatasourceByName(principal, name);
-    authorizationManager.ensureCanCreate(principal, dataSourceDto);
-    final List<DatasetConfigDTO> datasets = dataSourceOnboarder.onboardAll(dataSourceDto);
-
-    return datasets.stream()
-        .map(ApiBeanMapper::toApi)
-        .collect(Collectors.toList());
-  }
-
   public List<DatasetApi> onboardAll(final ThirdEyePrincipal principal, final long id) {
     final DataSourceDTO dataSourceDto = dtoManager.findById(id);
     // TODO CYRIL authz - doing such check leaks ids of other namespaces because the error is not the same when an id exists in another namespace or not - also happens in other function - can be improved later - most DAO operation should be performed with a namespace or list of namespace filter 
@@ -152,17 +119,6 @@ public class DataSourceService extends CrudService<DataSourceApi, DataSourceDTO>
     // TODO CYRIL authz review - is "create" a good access level here? - rationale: if a user can create a datasource, then the user can onboard datasets   
     authorizationManager.ensureCanCreate(principal, dataSourceDto);
     final List<DatasetConfigDTO> datasets = dataSourceOnboarder.onboardAll(dataSourceDto);
-    return datasets.stream()
-        .map(ApiBeanMapper::toApi)
-        .collect(Collectors.toList());
-  }
-
-  @Deprecated // use offboardAll by id instead
-  public List<DatasetApi> offboardAll(final ThirdEyePrincipal principal, final String name) {
-    final DataSourceDTO dataSourceDto = getDatasourceByName(principal, name);
-    authorizationManager.ensureCanDelete(principal, dataSourceDto);
-    final List<DatasetConfigDTO> datasets = dataSourceOnboarder.offboardAll(dataSourceDto);
-
     return datasets.stream()
         .map(ApiBeanMapper::toApi)
         .collect(Collectors.toList());
@@ -184,27 +140,10 @@ public class DataSourceService extends CrudService<DataSourceApi, DataSourceDTO>
     dataSourceCache.clear();
   }
 
-  @Deprecated // use validate by id
-  public boolean validate(final ThirdEyePrincipal principal, final String name) {
-    final DataSourceDTO dataSourceDto = getDatasourceByName(principal, name);
-    authorizationManager.ensureCanRead(principal, dataSourceDto);
-    return dataSourceCache.getDataSource(dataSourceDto).validate();
-  }
-
   public boolean validate(final ThirdEyePrincipal principal, final long id) {
     final DataSourceDTO dataSourceDto = dtoManager.findById(id);
     checkArgument(dataSourceDto != null, "Could not find datasource with id %s", id);
     authorizationManager.ensureCanRead(principal, dataSourceDto);
     return dataSourceCache.getDataSource(dataSourceDto).validate();
-  }
-  
-  @Deprecated // in most cases and API we should get the datasource by id 
-  private DataSourceDTO getDatasourceByName(final ThirdEyePrincipal principal, final String name) {
-    final List<DataSourceDTO> sameName = dtoManager.findByName(name);
-    final List<DataSourceDTO> sameNameSameNamespace = authorizationManager
-        .filterByNamespace(principal, null, sameName);
-    checkArgument(!sameNameSameNamespace.isEmpty(), "Could not find datasource with name: %s", name);
-    checkState(sameNameSameNamespace.size() == 1, "Found multiple datasources with name: %s", name);
-    return sameNameSameNamespace.get(0);
   }
 }

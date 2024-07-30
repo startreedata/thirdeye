@@ -15,6 +15,7 @@ package ai.startree.thirdeye.resources;
 
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.service.DatabaseAdminService;
+import ai.startree.thirdeye.spi.Constants;
 import com.google.inject.Inject;
 import io.dropwizard.auth.Auth;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
@@ -33,9 +34,14 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-@SecurityRequirement(name = "oauth")
-@OpenAPIDefinition(security = {@SecurityRequirement(name = "oauth")})
+@SecurityRequirement(name="oauth")
+@SecurityRequirement(name = Constants.NAMESPACE_SECURITY)
+@OpenAPIDefinition(security = {
+    @SecurityRequirement(name = "oauth"),
+    @SecurityRequirement(name = Constants.NAMESPACE_SECURITY)
+})
 @SecurityScheme(name = "oauth", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER, paramName = HttpHeaders.AUTHORIZATION)
+@SecurityScheme(name = Constants.NAMESPACE_SECURITY, type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER, paramName = Constants.NAMESPACE_HTTP_HEADER)
 @Produces(MediaType.APPLICATION_JSON)
 public class DatabaseAdminResource {
 
@@ -53,6 +59,7 @@ public class DatabaseAdminResource {
     return Response.ok(databaseAdminService.getTables(principal)).build();
   }
 
+  @Deprecated // fixme cyril remove this
   @GET
   @Path("execute-query")
   public Response executeQuery(@Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,

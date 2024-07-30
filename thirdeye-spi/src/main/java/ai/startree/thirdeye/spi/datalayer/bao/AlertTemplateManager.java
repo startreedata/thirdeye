@@ -14,6 +14,24 @@
 package ai.startree.thirdeye.spi.datalayer.bao;
 
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface AlertTemplateManager extends AbstractManager<AlertTemplateDTO> {
+
+  /**
+   * Look for a template that matches the alertTemplateDto.
+   * If id is set:
+   * --> findById. 
+   * else if the name is set:
+   * --> findByName.
+   * If found: return
+   * If not found:
+   *    if alertTemplateDto nodes are set:
+   *      return the alertTemplateDto
+   *    else:
+   *      throw an error
+   */
+  // todo cyril authz - remove orUnsetNamespace once migration is done.
+  AlertTemplateDTO findMatchInNamespaceOrUnsetNamespace(final @NonNull AlertTemplateDTO alertTemplateDTO, final @Nullable String namespace);
 }

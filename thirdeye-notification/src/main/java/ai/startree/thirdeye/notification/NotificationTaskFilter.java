@@ -17,7 +17,7 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.bool;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.stream.Collectors.toSet;
 
-import ai.startree.thirdeye.alert.AlertDataRetriever;
+import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
@@ -25,6 +25,7 @@ import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertAssociationDto;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyResultSource;
@@ -42,6 +43,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.joda.time.Interval;
+import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,15 +63,15 @@ public class NotificationTaskFilter {
 
   private final AnomalyManager anomalyManager;
   private final AlertManager alertManager;
-  private final AlertDataRetriever alertDataRetriever;
+  private final AlertTemplateRenderer alertTemplateRenderer;
 
   @Inject
   public NotificationTaskFilter(final AnomalyManager anomalyManager,
       final AlertManager alertManager,
-      final AlertDataRetriever alertDataRetriever) {
+      final AlertTemplateRenderer alertTemplateRenderer) {
     this.anomalyManager = anomalyManager;
     this.alertManager = alertManager;
-    this.alertDataRetriever = alertDataRetriever;
+    this.alertTemplateRenderer = alertTemplateRenderer;
   }
 
   /**
@@ -99,10 +101,6 @@ public class NotificationTaskFilter {
     return DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
         .withZone(ZoneId.systemDefault())
         .format(Instant.ofEpochMilli(ts));
-  }
-
-  private long getMaxMergeGap(final AlertDTO alert) {
-    return alertDataRetriever.getMergeMaxGap(alert).toStandardDuration().getMillis();
   }
 
   /**
@@ -190,7 +188,9 @@ public class NotificationTaskFilter {
 
     final long alertId = aa.getAlert().getId();
     final AlertDTO alert = alertManager.findById(alertId);
-    final long endTimeIsLt = alert.getLastTimestamp() - getMaxMergeGap(alert);
+    final AlertTemplateDTO renderedTemplate = alertTemplateRenderer.renderAlert(alert);
+    final Period mergeMaxGap = AlertUtils.getMergeMaxGap(renderedTemplate);
+    final long endTimeIsLt = alert.getLastTimestamp() - mergeMaxGap.toStandardDuration().getMillis();
 
     return new AnomalyFilter()
         .setIsChild(false)
@@ -246,7 +246,7 @@ public class NotificationTaskFilter {
   }
 
   @VisibleForTesting
-  Set<AnomalyDTO> filterAnomalies(final AnomalyFilter f,
+  protected Set<AnomalyDTO> filterAnomalies(final AnomalyFilter f,
       final Long subscriptionGroupId,
       final String logContext) {
     final List<AnomalyDTO> candidates = anomalyManager.filter(f);

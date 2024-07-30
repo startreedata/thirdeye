@@ -18,6 +18,7 @@ import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.rootcause.events.IntervalSimilarityScoring;
 import ai.startree.thirdeye.service.RcaRelatedService;
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.EventApi;
 import ai.startree.thirdeye.spi.api.RelatedAnomaliesAnalysisApi;
@@ -45,9 +46,14 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-@SecurityRequirement(name = "oauth")
-@OpenAPIDefinition(security = {@SecurityRequirement(name = "oauth")})
+@SecurityRequirement(name="oauth")
+@SecurityRequirement(name = Constants.NAMESPACE_SECURITY)
+@OpenAPIDefinition(security = {
+    @SecurityRequirement(name = "oauth"),
+    @SecurityRequirement(name = Constants.NAMESPACE_SECURITY)
+})
 @SecurityScheme(name = "oauth", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER, paramName = HttpHeaders.AUTHORIZATION)
+@SecurityScheme(name = Constants.NAMESPACE_SECURITY, type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER, paramName = Constants.NAMESPACE_HTTP_HEADER)
 @Produces(MediaType.APPLICATION_JSON)
 @Singleton
 public class RcaRelatedResource {

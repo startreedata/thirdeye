@@ -13,11 +13,15 @@
  */
 package ai.startree.thirdeye.service;
 
+import static ai.startree.thirdeye.util.ResourceUtils.ensure;
+
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.core.BootstrapResourcesRegistry;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
+import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
+import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import com.google.common.collect.ImmutableMap;
@@ -26,6 +30,8 @@ import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +51,17 @@ public class AlertTemplateService extends CrudService<AlertTemplateApi, AlertTem
   }
 
   @Override
+  protected void validate(final ThirdEyePrincipal principal, final AlertTemplateApi api,
+      @Nullable final AlertTemplateDTO existing) {
+    super.validate(principal, api, existing);
+    final long count = api.getNodes()
+        .stream()
+        .filter(p -> "Enumerator".equals(p.getType())) // TODO spyne - use enumerator node type
+        .count();
+    ensure(count <= 1, "Max 1 enumerator node supported at this time. found: " + count);
+  }
+
+  @Override
   protected AlertTemplateDTO toDto(final AlertTemplateApi api) {
     return ApiBeanMapper.toAlertTemplateDto(api);
   }
@@ -54,16 +71,30 @@ public class AlertTemplateService extends CrudService<AlertTemplateApi, AlertTem
     return ApiBeanMapper.toAlertTemplateApi(dto);
   }
   
-  // fixme cyril authz related: override validate and prevent duplicate name?  
+  // todo cyril authz related: override validate and prevent duplicate name, namespace? 
+  //  for the moment this is done via the uniqueness constraint in the db so the error message returned can be confusing  
 
   public List<AlertTemplateApi> loadRecommendedTemplates(final ThirdEyeServerPrincipal principal,
       final boolean updateExisting) {
-    LOG.info("Loading recommended templates: START.");
+    final String namespace = authorizationManager.currentNamespace(principal);
+    return loadRecommendedTemplates(principal, updateExisting, namespace);
+  }
+
+  // protected to be available to other services that need to inject the namespace manually
+  @NonNull
+  protected List<AlertTemplateApi> loadRecommendedTemplates(final ThirdEyeServerPrincipal principal,
+      final boolean updateExisting, final String explicitNamespace) {
+    LOG.info("Loading recommended templates in namespace {}: START.", explicitNamespace);
     final List<AlertTemplateApi> alertTemplates = bootstrapResourcesRegistry.getAlertTemplates();
-    LOG.info("Loading recommended templates: templates to load: {}",
+    LOG.info("Loading recommended templates in namespace {}: templates to load: {}",
+        explicitNamespace,
         alertTemplates.stream().map(AlertTemplateApi::getName).collect(Collectors.toList()));
-    final List<AlertTemplateApi> loadedTemplates = loadTemplates(principal, alertTemplates, updateExisting);
-    LOG.info("Loading recommended templates: SUCCESS. Templates loaded: {}",
+    // inject namespace in entities to create/update
+    alertTemplates.forEach(e -> e.setAuth(new AuthorizationConfigurationApi().setNamespace(explicitNamespace)));
+    final List<AlertTemplateApi> loadedTemplates = loadTemplates(principal, alertTemplates,
+        updateExisting);
+    LOG.info("Loading recommended templates in namespace {}: SUCCESS. Templates loaded: {}",
+        explicitNamespace,
         loadedTemplates.stream().map(AlertTemplateApi::getName).collect(Collectors.toList()));
 
     return loadedTemplates;
@@ -74,10 +105,8 @@ public class AlertTemplateService extends CrudService<AlertTemplateApi, AlertTem
     final List<AlertTemplateApi> toCreateTemplates = new ArrayList<>();
     final List<AlertTemplateApi> toUpdateTemplates = new ArrayList<>();
     for (final AlertTemplateApi templateApi : alertTemplates) {
-      final AlertTemplateDTO existingTemplate = dtoManager.findByName(templateApi.getName())
-          .stream()
-          .findFirst()
-          .orElse(null);
+      final AlertTemplateDTO existingTemplate = dtoManager.findUniqueByNameAndNamespace(
+          templateApi.getName(), templateApi.getAuth().getNamespace());
       if (existingTemplate == null) {
         toCreateTemplates.add(templateApi);
       } else {

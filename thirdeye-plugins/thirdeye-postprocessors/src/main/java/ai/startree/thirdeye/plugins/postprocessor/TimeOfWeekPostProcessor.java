@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.plugins.postprocessor;
 
 import static ai.startree.thirdeye.spi.Constants.DEFAULT_LOCALE;
+import static ai.startree.thirdeye.spi.Constants.VANILLA_OBJECT_MAPPER;
 import static ai.startree.thirdeye.spi.util.AnomalyUtils.addLabel;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -24,10 +25,9 @@ import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessor;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessorFactory;
 import ai.startree.thirdeye.spi.detection.postprocessing.PostProcessingContext;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
-import java.util.HashMap;
+import com.google.common.collect.Maps;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -130,7 +130,7 @@ public class TimeOfWeekPostProcessor implements AnomalyPostProcessor {
     if (dayHoursOfWeek == null) {
       return DEFAULT_INT_DAY_HOURS_OF_WEEK;
     }
-    final Map<Integer, Set<Integer>> intDaysHoursOfWeek = new HashMap<>();
+    final Map<Integer, Set<Integer>> intDaysHoursOfWeek = Maps.newHashMapWithExpectedSize(dayHoursOfWeek.size());
     for (final Entry<String, List<Integer>> entry : dayHoursOfWeek.entrySet()) {
       final Integer intDay = dayStringToDayInt(entry.getKey());
       intDaysHoursOfWeek.put(intDay, parseHours(Objects.requireNonNull(entry.getValue())));
@@ -181,7 +181,7 @@ public class TimeOfWeekPostProcessor implements AnomalyPostProcessor {
 
     @Override
     public AnomalyPostProcessor build(final Map<String, Object> params, final PostProcessingContext context) {
-      final TimeOfWeekPostProcessorSpec spec = new ObjectMapper().convertValue(params,
+      final TimeOfWeekPostProcessorSpec spec = VANILLA_OBJECT_MAPPER.convertValue(params,
           TimeOfWeekPostProcessorSpec.class);
       return new TimeOfWeekPostProcessor(spec);
     }

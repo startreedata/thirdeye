@@ -13,8 +13,9 @@
  */
 package ai.startree.thirdeye.datalayer.util;
 
+import static ai.startree.thirdeye.spi.Constants.VANILLA_OBJECT_MAPPER;
+
 import ai.startree.thirdeye.datalayer.entity.AbstractEntity;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -51,12 +52,11 @@ public class GenericResultSetMapper {
         entityMappingHolder.columnInfoPerTable.get(tableName);
     final List<E> entityList = new ArrayList<>();
 
-    final ObjectMapper mapper = new ObjectMapper();
     while (rs.next()) {
       final AbstractEntity entityObj;
       final ResultSetMetaData resultSetMetaData = rs.getMetaData();
       final int numColumns = resultSetMetaData.getColumnCount();
-      final ObjectNode objectNode = mapper.createObjectNode();
+      final ObjectNode objectNode = VANILLA_OBJECT_MAPPER.createObjectNode();
       for (int i = 1; i <= numColumns; i++) {
         final String dbColumnName = resultSetMetaData.getColumnLabel(i).toLowerCase();
         final ColumnInfo columnInfo = columnInfoMap.get(dbColumnName);
@@ -77,7 +77,7 @@ public class GenericResultSetMapper {
           objectNode.put(field.getName(), val.toString());
         }
       }
-      entityObj = mapper.treeToValue(objectNode, entityClass);
+      entityObj = VANILLA_OBJECT_MAPPER.treeToValue(objectNode, entityClass);
       entityList.add((E) entityObj);
     }
 

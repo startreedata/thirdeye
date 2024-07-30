@@ -38,6 +38,14 @@ public class DataFetcherSpec extends AbstractSpec {
    * Optional - only necessary for AUTO mode of macros and better broker choice in pinot client.
    */
   private String tableName;
+  
+  /**
+   * Timeseries filter can be injected in the DataFetcher. 
+   * Sometimes this needs to be disabled. For instance, for DataFetcher 
+   * that are used for EnumeratorQuery.
+   * */
+  private boolean enableFilterInjection = true; 
+  
   /**
    * Expected to be set during DataFetcherOperator init
    */
@@ -132,6 +140,15 @@ public class DataFetcherSpec extends AbstractSpec {
   public DataFetcherSpec setDataSourceDao(
       final DataSourceManager dataSourceDao) {
     this.dataSourceDao = dataSourceDao;
+    return this;
+  }
+
+  public boolean isEnableFilterInjection() {
+    return enableFilterInjection;
+  }
+
+  public DataFetcherSpec setEnableFilterInjection(final boolean enableFilterInjection) {
+    this.enableFilterInjection = enableFilterInjection;
     return this;
   }
 }

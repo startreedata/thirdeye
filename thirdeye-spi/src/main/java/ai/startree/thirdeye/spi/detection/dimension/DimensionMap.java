@@ -13,8 +13,9 @@
  */
 package ai.startree.thirdeye.spi.detection.dimension;
 
+import static ai.startree.thirdeye.spi.Constants.VANILLA_OBJECT_MAPPER;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.io.IOException;
@@ -29,8 +30,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Stores key-value pairs of dimension name and value. The paris are sorted by their dimension names
@@ -45,9 +44,6 @@ import org.slf4j.LoggerFactory;
 @Deprecated
 public class DimensionMap implements SortedMap<String, String>, Comparable<DimensionMap>,
     Serializable {
-
-  private static final Logger LOG = LoggerFactory.getLogger(DimensionMap.class);
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   // Dimension name to dimension value pairs, which are sorted by dimension names
   private SortedMap<String, String> sortedDimensionMap = new TreeMap<>();
@@ -69,7 +65,7 @@ public class DimensionMap implements SortedMap<String, String>, Comparable<Dimen
     Preconditions.checkNotNull(value); // We do not allow null pointers flying around the code.
     if (!Strings.isNullOrEmpty(value)) { // Empty string produces empty dimension map.
       try {
-        sortedDimensionMap = OBJECT_MAPPER.readValue(value, TreeMap.class);
+        sortedDimensionMap = VANILLA_OBJECT_MAPPER.readValue(value, TreeMap.class);
       } catch (IOException e) {
         try { // Fall back to Java's map string, which is {key=value} (including curly brackets).
           value = value.substring(1, value.length() - 1); // Remove curly brackets
@@ -110,7 +106,7 @@ public class DimensionMap implements SortedMap<String, String>, Comparable<Dimen
    * @return Json string representation for Map class.
    */
   public String toJson() throws JsonProcessingException {
-    return OBJECT_MAPPER.writeValueAsString(this);
+    return VANILLA_OBJECT_MAPPER.writeValueAsString(this);
   }
 
   /**

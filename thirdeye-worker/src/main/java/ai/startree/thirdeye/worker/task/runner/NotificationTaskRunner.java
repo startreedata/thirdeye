@@ -24,6 +24,7 @@ import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
+import ai.startree.thirdeye.spi.datalayer.dto.NotificationSpecDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.task.TaskInfo;
 import ai.startree.thirdeye.worker.task.DetectionAlertTaskInfo;
@@ -39,6 +40,7 @@ import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.Timer;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,7 +110,7 @@ public class NotificationTaskRunner implements TaskRunner {
         "Cannot find subscription group: " + id);
 
     if (sg.getProperties() == null) {
-      LOG.warn(String.format("Detection alert %d contains no properties", id));
+      LOG.warn("Detection alert {} contains no properties", id);
     }
     return sg;
   }
@@ -152,9 +154,9 @@ public class NotificationTaskRunner implements TaskRunner {
     }
 
     /* fire notifications */
-    notificationDispatcher.dispatch(sg, payload);
+    final Map<NotificationSpecDTO, Exception> specToException = notificationDispatcher.dispatch(sg, payload);
 
     /* post process, Update watermarks, etc once notification is successfully sent */
-    notificationTaskPostProcessor.postProcess(result);
+    notificationTaskPostProcessor.postProcess(result, specToException);
   }
 }

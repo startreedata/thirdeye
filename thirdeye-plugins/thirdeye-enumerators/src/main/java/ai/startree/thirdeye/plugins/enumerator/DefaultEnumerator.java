@@ -13,16 +13,17 @@
  */
 package ai.startree.thirdeye.plugins.enumerator;
 
+import static ai.startree.thirdeye.spi.Constants.VANILLA_OBJECT_MAPPER;
+
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.detection.Enumerator;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 
 public class DefaultEnumerator implements Enumerator {
 
   @Override
   public List<EnumerationItemDTO> enumerate(final Context context) {
-    final var params = new ObjectMapper().convertValue(context.getParams(),
+    final var params = VANILLA_OBJECT_MAPPER.convertValue(context.getParams(),
         DefaultEnumeratorParams.class);
 
     return params.getItems();

@@ -13,8 +13,10 @@
  */
 package ai.startree.thirdeye.datalayer.bao;
 
+import static ai.startree.thirdeye.spi.Constants.METRICS_CACHE_TIMEOUT;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Suppliers.memoizeWithExpiration;
 
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
@@ -23,10 +25,13 @@ import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
+import ai.startree.thirdeye.spi.detection.AnomalyFeedback;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import io.micrometer.core.instrument.Gauge;
+import io.micrometer.core.instrument.Metrics;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,8 +47,11 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.base.AbstractInterval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +62,13 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
 
   private static final Logger LOG = LoggerFactory.getLogger(AnomalyManagerImpl.class);
 
+  private static final AnomalyFilter NOT_CHILD_NOT_IGNORED_FILTER = new AnomalyFilter()
+      .setIsChild(false).setIsIgnored(false);
+  private static final AnomalyFilter HAS_FEEDBACK_FILTER = NOT_CHILD_NOT_IGNORED_FILTER
+      .copy().setHasFeedback(true);
+  private static final AnomalyFilter HAS_NO_FEEDBACK_FILTER = NOT_CHILD_NOT_IGNORED_FILTER
+      .copy().setHasFeedback(false);
+
   // TODO inject as dependency
   private static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(10,
       new ThreadFactoryBuilder().setNameFormat("anomaly-manager-%d").build());
@@ -61,6 +76,26 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
   @Inject
   public AnomalyManagerImpl(final GenericPojoDao genericPojoDao) {
     super(AnomalyDTO.class, genericPojoDao);
+
+    Gauge.builder("thirdeye_anomalies",
+            memoizeWithExpiration(() -> count(NOT_CHILD_NOT_IGNORED_FILTER),
+                METRICS_CACHE_TIMEOUT.toMinutes(),
+                TimeUnit.MINUTES))
+        .register(Metrics.globalRegistry);
+    Gauge.builder("thirdeye_anomaly_feedbacks",
+            memoizeWithExpiration(() -> count(HAS_FEEDBACK_FILTER), METRICS_CACHE_TIMEOUT.toMinutes(),
+                TimeUnit.MINUTES))
+        .register(Metrics.globalRegistry);
+
+    final Supplier<ConfusionMatrix> cachedConfusionMatrix = memoizeWithExpiration(
+        this::computeConfusionMatrixForAnomalies, METRICS_CACHE_TIMEOUT.toMinutes(),
+        TimeUnit.MINUTES);
+    Gauge.builder("thirdeye_anomaly_precision",
+            () -> cachedConfusionMatrix.get().getPrecision())
+        .register(Metrics.globalRegistry);
+    Gauge.builder("thirdeye_anomaly_response_rate",
+            () -> cachedConfusionMatrix.get().getResponseRate())
+        .register(Metrics.globalRegistry);
   }
 
   @Override
@@ -246,14 +281,14 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
   public List<AnomalyDTO> decorate(final List<AnomalyDTO> l) {
     final List<Future<AnomalyDTO>> fList = l.stream()
         .map(anomalyDTO -> EXECUTOR_SERVICE.submit(() -> decorate(anomalyDTO, new HashSet<>())))
-        .collect(Collectors.toList());
+        .toList();
 
     final List<AnomalyDTO> outList = new ArrayList<>(l.size());
     for (final Future<AnomalyDTO> f : fList) {
       try {
         outList.add(f.get(60, TimeUnit.SECONDS));
       } catch (final InterruptedException | TimeoutException | ExecutionException e) {
-        LOG.warn("Failed to convert MergedAnomalyResultDTO from bean: {}", e.toString());
+        LOG.warn("Failed to convert MergedAnomalyResultDTO from bean", e);
       }
     }
 
@@ -314,31 +349,35 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
   }
 
   @Override
-  public List<AnomalyDTO> filter(final AnomalyFilter af) {
+  public List<AnomalyDTO> filter(final @NonNull AnomalyFilter af) {
     final Predicate predicate = toPredicate(af);
     final List<AnomalyDTO> list = filter(new DaoFilter().setPredicate(predicate));
     return decorate(list);
   }
 
   @Override
-  public long countParentAnomalies(final Predicate predicate) {
-    Predicate finalPredicate = toPredicate(new AnomalyFilter().setIsChild(false));
-    if (predicate != null) {
-      finalPredicate = Predicate.AND(finalPredicate, predicate);
-    }
-    return count(finalPredicate);
+  public List<AnomalyDTO> filterWithNamespace(final @NonNull AnomalyFilter anomalyFilter,
+      final @Nullable String namespace) {
+    final Predicate predicate = Predicate.AND(
+        toPredicate(anomalyFilter),
+        Predicate.OR(
+            Predicate.EQ("namespace", namespace),
+            // existing entities are not migrated automatically so they can have their namespace column to null in the index table, even if they do belong to a namespace 
+            //  todo cyril authz - prepare migration scripts - or some logic to ensure all entities are eventually migrated
+            Predicate.EQ("namespace", null)
+        )
+    );
+    final List<AnomalyDTO> list = filter(new DaoFilter().setPredicate(predicate))
+        .stream()
+        // we still need to perform in-app filtering until all entities namespace are migrated in db - see above
+        .filter(e -> Objects.equals(e.namespace(), namespace)).toList();
+    return decorate(list);
   }
 
   @Override
-  public List<AnomalyDTO> findParentAnomaliesWithFeedback(final Predicate predicate) {
-    Predicate finalPredicate = toPredicate(
-        new AnomalyFilter().setHasFeedback(true).setIsChild(false));
-    if (predicate != null) {
-      finalPredicate = Predicate.AND(finalPredicate, predicate);
-    }
-    return findByPredicate(finalPredicate).stream()
-        .map(anomaly -> decorate(anomaly, new HashSet<>()))
-        .collect(Collectors.toList());
+  public long count(final @NonNull AnomalyFilter filter) {
+    Predicate finalPredicate = toPredicate(filter);
+    return count(finalPredicate);
   }
 
   private Predicate toPredicate(final AnomalyFilter af) {
@@ -388,6 +427,140 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
         .map(endTime -> Predicate.LT("endTime", endTime))
         .ifPresent(predicates::add);
 
+    optional(af.getEndTimeIsLte())
+        .map(endTime -> Predicate.LE("endTime", endTime))
+        .ifPresent(predicates::add);
+
+    optional(af.getStartTimeIsGte())
+        .map(start -> Predicate.GE("startTime", start))
+        .ifPresent(predicates::add);
+
     return Predicate.AND(predicates.toArray(new Predicate[]{}));
+  }
+
+  private ConfusionMatrix computeConfusionMatrixForAnomalies() {
+    final long withNoFeedbackCount = count(HAS_NO_FEEDBACK_FILTER);
+    final List<AnomalyDTO> withFeedbacks = filter(HAS_FEEDBACK_FILTER);
+    // todo cyril - would be simpler to be able to count by feedback type in the db directly - here we parse and load anomalies in memory
+    
+    return new ConfusionMatrix()
+        .addUnclassified(withNoFeedbackCount)
+        .addFromAnomalies(withFeedbacks);
+  }
+
+  public static class ConfusionMatrix {
+    private long truePositive = 0;
+    private long falsePositive = 0;
+    private long trueNegative = 0;
+    private long falseNegative = 0;
+    private long unclassified = 0;
+
+    public ConfusionMatrix addFromAnomalies(final @NonNull List<AnomalyDTO> anomalies) {
+      for (final AnomalyDTO a: anomalies) {
+        final @Nullable AnomalyFeedback feedback = a.getFeedback();
+        if (feedback == null) {
+          addUnclassified(1);
+        } else {
+          switch (feedback.getFeedbackType()) {
+            case ANOMALY_EXPECTED:
+            case ANOMALY_NEW_TREND:
+            case ANOMALY:
+              addTruePositive(1);
+              break;
+            case NOT_ANOMALY:
+              addFalsePositive(1);
+              break;
+            case NO_FEEDBACK:
+              addUnclassified(1);
+              break;
+            default:
+              throw new UnsupportedOperationException(
+                  "Feedback type not implemented for stats: %s".formatted(feedback.getFeedbackType()));
+          }
+        }
+      }
+      return this;
+    }
+
+    public long getTruePositive() {
+      return truePositive;
+    }
+
+    public ConfusionMatrix addTruePositive(final long value) {
+      this.truePositive += value;
+      return this;
+    }
+
+    public long getFalsePositive() {
+      return falsePositive;
+    }
+
+    public ConfusionMatrix addFalsePositive(final long value) {
+      this.falsePositive += value;
+      return this;
+    }
+
+    public long getTrueNegative() {
+      return trueNegative;
+    }
+
+    public ConfusionMatrix addTrueNegative(final long value) {
+      this.trueNegative += value;
+      return this;
+    }
+
+    public long getFalseNegative() {
+      return falseNegative;
+    }
+
+    public ConfusionMatrix addFalseNegative(final long value) {
+      this.falseNegative += value;
+      return this;
+    }
+
+    public long getUnclassified() {
+      return unclassified;
+    }
+
+    public ConfusionMatrix addUnclassified(final long value) {
+      this.unclassified += value;
+      return this;
+    }
+
+    public void incTruePositive() {
+      this.truePositive++;
+    }
+
+    public void incTrueNegative() {
+      this.trueNegative++;
+    }
+
+    public void incFalsePositive() {
+      this.falsePositive++;
+    }
+
+    public void incFalseNegative() {
+      this.falseNegative++;
+    }
+
+    public void incUnclassified() {
+      this.unclassified++;
+    }
+
+    public double getPrecision() {
+      if(truePositive == 0) {
+        return 0;
+      } else {
+        return truePositive / (double) (truePositive + falsePositive);
+      }
+    }
+
+    public double getResponseRate() {
+      if(unclassified == 0) {
+        return 1;
+      } else {
+        return 1 - unclassified / (double) (truePositive + falsePositive + trueNegative + falseNegative + unclassified);
+      }
+    }
   }
 }

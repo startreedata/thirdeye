@@ -34,6 +34,7 @@ import ai.startree.thirdeye.spi.dataframe.LongSeries;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.TemplatableMap;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.detection.AbstractSpec;
 import ai.startree.thirdeye.spi.detection.AnomalyDetector;
@@ -51,6 +52,7 @@ import java.util.Map;
 import java.util.Optional;
 import org.apache.commons.collections4.MapUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
 
@@ -67,6 +69,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
   private Optional<String> anomalyMetric;
   private Optional<String> anomalyDataset;
   private Optional<String> anomalySource;
+  private @Nullable String namespace;
 
   public AnomalyDetectorOperator() {
     super();
@@ -95,6 +98,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
     anomalySource = optional(planNode.getParams().get("anomaly.source"))
         .map(Templatable::getValue)
         .map(Object::toString);
+    namespace = context.getPlanNodeContext().getDetectionPipelineContext().getNamespace();
   }
 
   private EnumerationItemDTO prepareEnumerationItemRef(
@@ -106,7 +110,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
     final DetectionPipelineUsage usage = requireNonNull(detectionPipelineContext.getUsage(),
         "Detection pipeline usage is not set");
     if (usage.equals(DetectionPipelineUsage.DETECTION)) {
-      return (EnumerationItemDTO) new EnumerationItemDTO().setId(enumerationItem.getId());
+      return new EnumerationItemDTO().setId(enumerationItem.getId());
     } else if (usage.equals(DetectionPipelineUsage.EVALUATION)) {
       // don't put enumerationItemInfo
       return null;
@@ -218,6 +222,7 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
   @NonNull
   private AnomalyDTO newAnomaly() {
     final AnomalyDTO anomaly = new AnomalyDTO();
+    anomaly.setAuth(new AuthorizationConfigurationDTO().setNamespace(namespace));
     anomaly.setCreateTime(new Timestamp(System.currentTimeMillis()));
     anomaly.setDetectionConfigId(alertId);
     anomaly.setEnumerationItem(enumerationItemRef);

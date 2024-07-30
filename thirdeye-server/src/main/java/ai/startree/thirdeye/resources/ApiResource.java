@@ -34,7 +34,6 @@ public class ApiResource {
   private final TaskResource taskResource;
   private final UiResource uiResource;
   private final EnumerationItemResource enumerationItemResource;
-  private final MaintenanceResource maintenanceResource;
 
   @Inject
   public ApiResource(final AppAnalyticsResource appAnalyticsResource,
@@ -52,8 +51,7 @@ public class ApiResource {
       final EventResource eventResource,
       final TaskResource taskResource,
       final UiResource uiResource,
-      final EnumerationItemResource enumerationItemResource,
-      final MaintenanceResource maintenanceResource) {
+      final EnumerationItemResource enumerationItemResource) {
     this.appAnalyticsResource = appAnalyticsResource;
     this.authResource = authResource;
     this.authInfoResource = authInfoResource;
@@ -70,7 +68,6 @@ public class ApiResource {
     this.taskResource = taskResource;
     this.uiResource = uiResource;
     this.enumerationItemResource = enumerationItemResource;
-    this.maintenanceResource = maintenanceResource;
   }
 
   @Path("app-analytics")
@@ -151,10 +148,5 @@ public class ApiResource {
   @Path("ui")
   public UiResource getUIResource() {
     return uiResource;
-  }
-
-  @Path("maintenance")
-  public MaintenanceResource getMaintenanceResource() {
-    return maintenanceResource;
   }
 }

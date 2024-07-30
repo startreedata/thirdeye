@@ -20,31 +20,45 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.ResourceUtils.authorize;
 import static com.google.common.base.Preconditions.checkArgument;
 
-import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.datalayer.entity.SubEntityType;
+import ai.startree.thirdeye.spi.api.AlertApi;
+import ai.startree.thirdeye.spi.api.AlertTemplateApi;
+import ai.startree.thirdeye.spi.api.AnomalyApi;
+import ai.startree.thirdeye.spi.api.DataSourceApi;
+import ai.startree.thirdeye.spi.api.DatasetApi;
 import ai.startree.thirdeye.spi.auth.AccessType;
 import ai.startree.thirdeye.spi.auth.AuthenticationType;
 import ai.startree.thirdeye.spi.auth.ResourceIdentifier;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
+import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
+import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
+import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertAssociationDto;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.inject.Inject;
-import java.util.ArrayList;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.ws.rs.ForbiddenException;
@@ -62,19 +76,33 @@ public class AuthorizationManager {
   private static final Logger LOG = LoggerFactory.getLogger(AuthorizationManager.class);
 
   // A meta-resource to authorize thirdeye automation/maintenance.
-  static final ResourceIdentifier ROOT_RESOURCE_ID = ResourceIdentifier.from("thirdeye-root",
-      "thirdeye-root",
-      "thirdeye-root");
+  private static final ResourceIdentifier ROOT_RESOURCE_ID = ResourceIdentifier.from(
+      "thirdeye-root", "thirdeye-root", "thirdeye-root");
 
   private static final ThirdEyeServerPrincipal INTERNAL_VALID_PRINCIPAL = new ThirdEyeServerPrincipal(
-      "thirdeye-internal", RandomStringUtils.random(1024, true, true), AuthenticationType.INTERNAL);
+      "thirdeye-internal", RandomStringUtils.random(1024, true, true), 
+      AuthenticationType.INTERNAL,
+      // a dedicated code path gives access to all namespaces to this internal valid principal
+      null);
 
-  private final AlertTemplateRenderer alertTemplateRenderer;
+  private final DatasetConfigManager datasetConfigDao;
   private final AlertManager alertDao;
   private final AnomalyManager anomalyDao;
+  private final AlertTemplateManager alertTemplateDao;
+  private final DataSourceManager datasourceDao;
+
   private final ThirdEyeAuthorizer thirdEyeAuthorizer;
-  private final NamespaceResolver namespaceResolver;
-  private final boolean requireNamespace;
+
+  // todo cyril authz - no eviction so can grow indefinitely with the number of namespace - it should be ok to begin with, the number of namespace will be small (<100)
+  // there is one cache per namespace so that the caching can be managed per namespace independently
+  // also, it limits potential security issues of DDOS by cache flooding
+  private final Map<String, LoadingCache<String, Optional<DataSourceDTO>>> namespaceToDatasourceCache = new HashMap<>();
+  private final Map<String, LoadingCache<String, Optional<DatasetConfigDTO>>> namespaceToDatasetCache = new HashMap<>();
+  private final Map<String, LoadingCache<AlertTemplateDTO, Optional<AlertTemplateDTO>>> namespaceToTemplateCache = new HashMap<>();
+  private final Map<String, LoadingCache<Long, Optional<AlertDTO>>> namespaceToAlertCache = new HashMap<>();
+  private final Map<String, LoadingCache<Long, Optional<AnomalyDTO>>> namespaceToAnomalyCache = new HashMap<>();
+
+  private record NameNamespace(String name, @Nullable String namespace) {}
 
   private final static Map<Class<? extends AbstractDTO>, SubEntityType> DTO_TO_ENTITY_TYPE;
 
@@ -85,21 +113,16 @@ public class AuthorizationManager {
   }
 
   @Inject
-  public AuthorizationManager(
-      final AlertTemplateRenderer alertTemplateRenderer,
-      final AlertManager alertManager, 
-      final AnomalyManager anomalyManager,
-      final ThirdEyeAuthorizer thirdEyeAuthorizer,
-      final NamespaceResolver namespaceResolver,
-      final AuthConfiguration authConfiguration) {
-    this.alertTemplateRenderer = alertTemplateRenderer;
+  public AuthorizationManager(final DataSourceManager datasourceDao,
+      final DatasetConfigManager datasetConfigDao, final AlertTemplateManager alertTemplateDao,
+      final AlertManager alertManager, final AnomalyManager anomalyDao,
+      final ThirdEyeAuthorizer thirdEyeAuthorizer) {
+    this.datasetConfigDao = datasetConfigDao;
     this.alertDao = alertManager;
-    this.anomalyDao = anomalyManager;
+    this.anomalyDao = anomalyDao;
+    this.alertTemplateDao = alertTemplateDao;
+    this.datasourceDao = datasourceDao;
     this.thirdEyeAuthorizer = thirdEyeAuthorizer;
-    this.namespaceResolver = namespaceResolver;
-
-    this.requireNamespace =
-        authConfiguration.isEnabled() && authConfiguration.getAuthorization().isRequireNamespace();
   }
 
   /**
@@ -107,142 +130,79 @@ public class AuthorizationManager {
    * Note: following the review, this logic is put outside
    * {@link AuthorizationManager#ensureCanCreate}
    * {@link AuthorizationManager#ensureCanCreate}.
-   * Should always be called before {@link AuthorizationManager#ensureCanCreate},
-   * {@link AuthorizationManager#ensureCanEdit}, {@link AuthorizationManager#ensureCanValidate}
+   * Should always be called before {@link AuthorizationManager#ensureCanCreate}.
    */
   public <T extends AbstractDTO> void enrichNamespace(final ThirdEyePrincipal principal,
-      final T entity) {
-    // enrich with the namespace if it is not set and required
-    if (requireNamespace) {
-      if (!namespaceIsSet(entity)) {
-        final String currentNamespace = currentNamespace(principal);
-        entity.setAuth(new AuthorizationConfigurationDTO().setNamespace(currentNamespace));
-      } else {
-        // namespace is passed explicitly - don't modify it
-        return;
-      }
-    } else {
-      // requireNamespace is false - don't enrich
+      final @NonNull T entity) {
+    if (!namespaceIsSet(entity)) {
+      final String currentNamespace = currentNamespace(principal);
+      entity.setAuth(new AuthorizationConfigurationDTO().setNamespace(currentNamespace));
     }
+    // else namespace is passed explicitly - don't modify it
   }
 
   // TODO CYRIL authz should be moved down to ThirdEyeAuthorizer once we implement multi-namespace UI support?
-  // only returns null when requireNamespace is false - Nullable can be removed once migration is done
   public @Nullable String currentNamespace(final ThirdEyePrincipal principal) {
-    if (requireNamespace) {
-      final List<String> namespaces = thirdEyeAuthorizer.listNamespaces(principal);
-      if (namespaces.size() == 0) {
-        throw new ForbiddenException("Access Denied.");  // throw 403
-      } else if (namespaces.size() == 1) {
-        return namespaces.get(0);
-      } else {
-        throw new NotAuthorizedException(String.format(
-            "Namespace not cannot be resolved automatically. Please provide a namespace explicitly. Namespaces: %s",
-            namespaces));
-      }
+    final List<String> namespaces = thirdEyeAuthorizer.listNamespaces(principal);
+    if (namespaces.size() == 0) {
+      throw new ForbiddenException("Access Denied.");  // throw 403
+    } else if (namespaces.size() == 1) {
+      return namespaces.get(0);
     } else {
-      return null;
-    }
-  }
-
-  // FIXME CYRIL I AM HERE - maybe will need a filterByNamespace with an existing dto --> will need to resolve namespace with the namespace resolver
-  // TODO CYRIL authz perf - in most cases places using this method should filter at fetch time on the namespace to avoid noisy neighbours effect / stressing the instance   
-  public <T extends AbstractDTO> List<T> filterByNamespace(final ThirdEyePrincipal principal,
-      final @Nullable String explicitNamespace, final List<T> entities) {
-    if (requireNamespace) {
-      @NonNull String filteringNamespace = optional(explicitNamespace).orElse(
-          Objects.requireNonNull(currentNamespace(principal)));
-      return entities.stream()
-          .filter(e -> filteringNamespace.equals(namespaceResolver.resolveNamespace(e))).toList();
-    } else {
-      List<T> filtered = entities
-          .stream()
-          .filter(e -> Objects.equals(explicitNamespace, e.namespace())).toList();
-      if (!entities.isEmpty() && filtered.isEmpty()) {
-        // to keep backward compatibility with different legacy namespace setups, if requireNamespace is not true 
-        // and the filter by namespace filters everything, then try to re-run a filtering on the null namespace 
-        // this may leak some entities but the legacy leak entities anyway - so better not to break existing setups
-        // if user wants correct namespacing they requireNamespace should be set to true
-        filtered = entities
-            .stream()
-            .filter(e -> e.namespace() == null).toList();
-        if (!filtered.isEmpty()) {
-          LOG.warn(
-              "No entities matching namespace {} in {}. Some entities have their namespace undefined. "
-                  + "Returning entities with an undefined namespace.", explicitNamespace, entities);
-        }
-      }
-      return filtered;
+      // todo cyril authz - resolve from principal
+      throw new NotAuthorizedException(String.format(
+          "Namespace not cannot be resolved automatically. Please provide a namespace explicitly. Namespaces: %s",
+          namespaces));
     }
   }
 
   public <T extends AbstractDTO> void ensureCanCreate(final ThirdEyePrincipal principal,
       final T entity) {
-    ensureHasAccess(principal, resourceId(entity), AccessType.WRITE);
-    relatedEntities(entity).forEach(relatedId ->
-        ensureHasAccess(principal, relatedId, AccessType.READ));
+    ensureCanAccess(principal, resourceId(entity), AccessType.WRITE);
+    relatedEntities(entity).forEach(
+        relatedId -> ensureCanAccess(principal, relatedId, AccessType.READ));
   }
 
-  public <T extends AbstractDTO> void ensureCanDelete(final ThirdEyePrincipal principal,
+  // used in CrudService
+  public <T extends AbstractDTO> boolean canRead(final ThirdEyePrincipal principal,
       final T entity) {
-    ensureHasAccess(principal, resourceId(entity), AccessType.WRITE);
-  }
-
-  public <T extends AbstractDTO> void ensureCanEdit(final ThirdEyePrincipal principal,
-      final T before, final T after) {
-    ensureHasAccess(principal, resourceId(before), AccessType.WRITE);
-    ensureHasAccess(principal, resourceId(after), AccessType.WRITE);
-    // prevent namespace change 
-    if (requireNamespace) {
-      // namespaces must be set and equal
-      // THIS IS INCOMPATIBLE WITH ENUMERATION ITEM NAMESPACE EDITION - so not compatible with some users
-      authorize(Objects.equals(before.getAuth(), after.getAuth()),
-          String.format(
-              "Entity namespace cannot change. Existing namespace: %s. New namespace: %s",
-              before.getAuth(),
-              after.getAuth()));
-    } else {
-      // allow namespace editions to keep backward compatibility
-    }
-    relatedEntities(after).forEach(related ->
-        // fixme cyril authz design issue - it's not clear to me why the chain of dependency is not resolved
-        // eg: checking a read access on an alert does not check for read access on template - see also ensureCanRead 
-        ensureHasAccess(principal, related, AccessType.READ));
+    return canAccess(principal, resourceId(entity), AccessType.READ) && relatedEntities(
+        entity).stream().allMatch(e -> canAccess(principal, e, AccessType.READ));
   }
 
   public <T extends AbstractDTO> void ensureCanRead(final ThirdEyePrincipal principal,
       final T entity) {
-    ensureHasAccess(principal, resourceId(entity), AccessType.READ);
+    if (!canRead(principal, entity)) {
+      throw forbiddenExceptionFor(principal, resourceId(entity), AccessType.READ);
+    }
   }
 
-  public void ensureCanValidate(final ThirdEyePrincipal principal, final AlertDTO entity) {
-    ensureCanCreate(principal, entity);
+  public <T extends AbstractDTO> void ensureCanEdit(final ThirdEyePrincipal principal,
+      final @NonNull T before, final @NonNull T after) {
+    ensureCanAccess(principal, resourceId(before), AccessType.WRITE);
+    ensureCanAccess(principal, resourceId(after), AccessType.WRITE);
+    authorize(Objects.equals(before.namespace(), after.namespace()),
+        String.format("Entity namespace cannot change. Existing namespace: %s. New namespace: %s",
+            before.getAuth(), after.getAuth()));
+    relatedEntities(after).forEach(related -> ensureCanAccess(principal, related, AccessType.READ));
   }
 
-  public <T extends AbstractDTO> void ensureHasAccess(final ThirdEyePrincipal principal,
-      final T entity, final AccessType accessType) {
-    ensureHasAccess(principal, resourceId(entity), accessType);
+  public <T extends AbstractDTO> void ensureCanDelete(final ThirdEyePrincipal principal,
+      final T entity) {
+    ensureCanAccess(principal, resourceId(entity), AccessType.WRITE);
+    relatedEntities(entity).forEach(
+        relatedId -> ensureCanAccess(principal, relatedId, AccessType.READ));
   }
 
-  public void ensureHasAccess(final ThirdEyePrincipal principal,
+  private void ensureCanAccess(final ThirdEyePrincipal principal,
       final ResourceIdentifier identifier, final AccessType accessType) {
-    if (!hasAccess(principal, identifier, accessType)) {
+    if (!canAccess(principal, identifier, accessType)) {
       throw forbiddenExceptionFor(principal, identifier, accessType);
     }
   }
 
-  public <T extends AbstractDTO> boolean canRead(final ThirdEyePrincipal principal,
-      final T entity) {
-    return hasAccess(principal, resourceId(entity), AccessType.READ);
-  }
-
-  public <T extends AbstractDTO> boolean hasAccess(final ThirdEyePrincipal principal,
-      final T entity, final AccessType accessType) {
-    return hasAccess(principal, resourceId(entity), accessType);
-  }
-
-  public boolean hasAccess(final ThirdEyePrincipal principal,
-      final ResourceIdentifier identifier, final AccessType accessType) {
+  private boolean canAccess(final ThirdEyePrincipal principal, final ResourceIdentifier identifier,
+      final AccessType accessType) {
     if (INTERNAL_VALID_PRINCIPAL.equals(principal)) {
       return true;
     } else if (principal.getAuthenticationType() == AuthenticationType.BASIC_AUTH) {
@@ -254,121 +214,250 @@ public class AuthorizationManager {
 
   public void ensureHasRootAccess(final ThirdEyePrincipal principal) {
     if (!hasRootAccess(principal)) {
-      throw new ForbiddenException(Response.status(
-          Status.FORBIDDEN.getStatusCode(),
-          String.format("root access denied to %s", principal.getName())
-      ).build());
+      throw new ForbiddenException(Response.status(Status.FORBIDDEN.getStatusCode(),
+          String.format("root access denied to %s", principal.getName())).build());
     }
   }
 
   public boolean hasRootAccess(final ThirdEyePrincipal principal) {
-    return INTERNAL_VALID_PRINCIPAL.equals(principal) ||
-        thirdEyeAuthorizer.authorize(principal, ROOT_RESOURCE_ID, AccessType.WRITE);
+    return INTERNAL_VALID_PRINCIPAL.equals(principal) || thirdEyeAuthorizer.authorize(principal,
+        ROOT_RESOURCE_ID, AccessType.WRITE);
+  }
+
+  // todo authz cyril - should be called in a fair amount of other places
+  public void invalidateCache(final @Nullable String namespace, Class<?> clazz) {
+    final LoadingCache<?, ?> c;
+    if (clazz.equals(DatasetConfigDTO.class) || clazz.equals(DatasetApi.class)) {
+      c = namespaceToDatasetCache.get(namespace);
+    } else if (clazz.equals(DataSourceDTO.class) || clazz.equals(DataSourceApi.class)) {
+      c = namespaceToDatasourceCache.get(namespace);
+    } else if (clazz.equals(AlertDTO.class) || clazz.equals(AlertApi.class)) {
+      c = namespaceToAlertCache.get(namespace);
+    } else if (clazz.equals(AnomalyDTO.class) || clazz.equals(AnomalyApi.class)) {
+      c = namespaceToAnomalyCache.get(namespace);
+    } else if (clazz.equals(AlertTemplateDTO.class) || clazz.equals(AlertTemplateApi.class)) {
+      c = namespaceToTemplateCache.get(namespace);
+    } else {
+      c = null;
+    }
+    if (c != null) {
+      c.invalidateAll();
+    }
   }
 
   // Returns the resource identifier for a dto.
   // Null is ok and maps to a default resource id.
-  public ResourceIdentifier resourceId(final AbstractDTO dto) {
-    final String name = optional(dto)
-        .map(AbstractDTO::getId)
-        .map(Objects::toString)
-        .orElse(DEFAULT_NAME);
+  private static ResourceIdentifier resourceId(final AbstractDTO dto) {
+    if (dto == null) {
+      // todo cyril authz - add NonNull annotation to dto param and all upstream
+      return ResourceIdentifier.NULL_IDENTIFIER;
+    }
 
-    final String namespace = namespaceResolver.resolveNamespace(dto);
-
-    final String entityType = optional(dto)
-        .map(AbstractDTO::getClass)
-        .map(DTO_TO_ENTITY_TYPE::get)
+    final String name = optional(dto.getId()).map(Objects::toString).orElse(DEFAULT_NAME);
+    final String namespace = dto.namespace();
+    final String entityType = optional(dto.getClass()).map(DTO_TO_ENTITY_TYPE::get)
         .map(Objects::toString)
         .orElse(DEFAULT_ENTITY_TYPE);
 
     return ResourceIdentifier.from(name, namespace, entityType);
   }
 
+  private record Caches(LoadingCache<Long, Optional<AnomalyDTO>> anomalyCache,
+                        LoadingCache<AlertTemplateDTO, Optional<AlertTemplateDTO>> templateCache,
+                        LoadingCache<String, Optional<DataSourceDTO>> datasourceCache,
+                        LoadingCache<Long, Optional<AlertDTO>> alertCache,
+                        LoadingCache<String, Optional<DatasetConfigDTO>> datasetCache) {}
+
   /**
-   * for the moment this method is responsible for checking whether related entities are in the same
-   * namespace - todo cyril authz - don't think it's the right place - consider refactor after migration
    *
-   * Note: there can be chains of dependencies
-   * eg a RcaInvestigationDto --> AnomalyDTO --> AlertDto --> DatasetDto --> DatasourceDto
-   *                                                      --> AlertTemplateDto
-   * This method should only return entities that are directly referenced by the entity (the
-   * references that can be changed when mutating the entity).
-   * For instance, for RcaInvestigationDto, only return AnomalyDTO
-   * For AnomalyDto, only return AlertDto.
-   * fixme authz the chaining resolution behavior is undefined for the moment - will need to get fixed 
+   * For the moment this method is responsible for checking whether related entities are in the
+   * same namespace - todo cyril authz - is this the right place ?
+   *
+   * This method returns all related dependencies in a hierarchical fashion.
+   * See hierarchy here https://app.excalidraw.com/s/6rIIm06x9LN/7HD6QC1KRzZ
    **/
-  private <T extends AbstractDTO> List<ResourceIdentifier> relatedEntities(T entity) {
+  private <T extends AbstractDTO> Set<ResourceIdentifier> relatedEntities(T entity) {
+    final Set<ResourceIdentifier> res = new HashSet<>();
+    // todo authz the caches config are naive - need tuning 
+    // id, namespace and type --> the three values passed for authz check should never change so it should be fine to have large values for cache
+    // the only reason to expire cache is for cache misses and avoiding memory usage - but in the context of hierarchically related entities this should never happen
+    // first way to make things faster would be to stop fetching the whole object just to check the class, id and namespace
+    final LoadingCache<Long, Optional<AnomalyDTO>> anomalyCache = namespaceToAnomalyCache.computeIfAbsent(
+        entity.namespace(), notUsed -> CacheBuilder.newBuilder()
+            .maximumSize(2048)
+            .expireAfterWrite(Duration.ofSeconds(60))
+            .build(new CacheLoader<>() {
+              @Override
+              public Optional<AnomalyDTO> load(final Long key) {
+                return optional(anomalyDao.findById(key));
+              }
+            }));
+    final LoadingCache<AlertTemplateDTO, Optional<AlertTemplateDTO>> templateCache = namespaceToTemplateCache.computeIfAbsent(
+        entity.namespace(), namespace -> CacheBuilder.newBuilder()
+            .maximumSize(200)
+            .expireAfterWrite(Duration.ofSeconds(60))
+            .build(new CacheLoader<>() {
+              @Override
+              public Optional<AlertTemplateDTO> load(final AlertTemplateDTO key) {
+                return optional(
+                    alertTemplateDao.findMatchInNamespaceOrUnsetNamespace(key, namespace));
+              }
+            }));
+    final LoadingCache<String, Optional<DataSourceDTO>> datasourceCache = namespaceToDatasourceCache.computeIfAbsent(
+        entity.namespace(), namespace -> CacheBuilder.newBuilder()
+            .maximumSize(30)
+            .expireAfterWrite(Duration.ofSeconds(60))
+            .build(new CacheLoader<>() {
+              @Override
+              public Optional<DataSourceDTO> load(final String key) {
+                // todo cyril authz - make dataset point to datasource by id not name then datasource can be fetched by Id not name/namespace
+                return optional(datasourceDao.findUniqueByNameAndNamespace(key, namespace));
+              }
+            }));
+    final LoadingCache<Long, Optional<AlertDTO>> alertCache = namespaceToAlertCache.computeIfAbsent(
+        entity.namespace(), notUsed -> CacheBuilder.newBuilder()
+            .maximumSize(500)
+            .expireAfterWrite(Duration.ofSeconds(60))
+            .build(new CacheLoader<>() {
+              @Override
+              public Optional<AlertDTO> load(final Long key) {
+                return optional(alertDao.findById(key));
+              }
+            }));
+    final LoadingCache<String, Optional<DatasetConfigDTO>> datasetCache = namespaceToDatasetCache.computeIfAbsent(
+        entity.namespace(), namespace -> CacheBuilder.newBuilder()
+            .maximumSize(200)
+            .expireAfterWrite(Duration.ofSeconds(60))
+            .build(new CacheLoader<>() {
+              @Override
+              public Optional<DatasetConfigDTO> load(final String key) {
+                return optional(datasetConfigDao.findUniqueByNameAndNamespace(key, namespace));
+              }
+            }));
+    addRelatedEntities(entity, res,
+        new Caches(anomalyCache, templateCache, datasourceCache, alertCache,
+            datasetCache));
+    return res;
+  }
+
+  // recursive - caching on DAOs or even the related entities directly will be necessary?
+  // todo authz replace checkArgument by specific http code error
+  private <T extends AbstractDTO> void addRelatedEntities(final T entity,
+      final Set<ResourceIdentifier> result,
+      final Caches caches) {
     if (entity instanceof final AlertDTO alertDto) {
-      // fixme cyril authz - related entities should be namespaced
-      final AlertTemplateDTO alertTemplateDTO = alertTemplateRenderer.getTemplate(
-          alertDto.getTemplate());
-      // fixme cyril authz design - add datasource/dataset 
-      //   nothing actually ensures an alert runs on a dataset/datasource for which the user has read access
-      //   dataset is historically provided by a string key so there is not explicit design for this
-      return Collections.singletonList(resourceId(alertTemplateDTO));
+      final AlertTemplateDTO alertTemplateDTO = caches.templateCache.getUnchecked(
+              alertDto.getTemplate())
+          .orElse(null);
+      checkArgument(alertTemplateDTO != null,
+          "Invalid template %s. Not found in alert namespace %s.", alertDto.getTemplate(),
+          alertDto.namespace());
+      final ResourceIdentifier resourceId = resourceId(alertTemplateDTO);
+      if (!result.contains(resourceId)) {
+        result.add(resourceId);
+        addRelatedEntities(alertTemplateDTO, result, caches);
+      }
+      // hack: find the related dataset by looking at the property value directly - assume the key is "dataset"
+      // TODO cyril authz - fix this consider rendering the template? but make sure it's not too slow - 
+      //  also slight security concern because it means we are rendering the template even if access to the template has not been checked yet
+      // in effect templates could do anything, accessing one or multiple dataset/datasource - so we don't attempt to perform a full check - the alert pipeline execution will fail if entities are not valid 
+      final @Nullable Object datasetName = optional(alertDto.getProperties()).map(
+          e -> e.get("dataset")).orElse(null);
+      if (datasetName instanceof String datasetNameStr) {
+        final DatasetConfigDTO datasetConfigDTO = caches.datasetCache.getUnchecked(datasetNameStr)
+            .orElse(null);
+        checkArgument(datasetConfigDTO != null,
+            "Invalid dataset name %s. Not found in alert namespace %s.", datasetNameStr,
+            alertDto.namespace());
+        final ResourceIdentifier resourceIdDataset = resourceId(datasetConfigDTO);
+        if (!result.contains(resourceIdDataset)) {
+          result.add(resourceIdDataset);
+          addRelatedEntities(datasetConfigDTO, result, caches);
+        }
+      } else {
+        LOG.error("Could not find dataset in alert configuration {}", alertDto);
+      }
     } else if (entity instanceof SubscriptionGroupDTO subscriptionGroupDto) {
       final List<AlertAssociationDto> alertAssociations = optional(
           subscriptionGroupDto.getAlertAssociations()).orElse(Collections.emptyList());
       final Set<Long> alertIds = alertAssociations.stream()
           // getAlert.getId is never null
-          .map(aa -> aa.getAlert().getId())
-          .collect(Collectors.toSet());
+          .map(aa -> aa.getAlert().getId()).collect(Collectors.toSet());
       // hack we ensure alerts belong to the same namespace here 
-      // this should be done in some validate step but the current validate step does not have the namespace context FIXME design
+      // this should be done in some validate step but the current validate step does not have the namespace context TODO authz re-design
       final List<AlertDTO> alertDtos = alertIds.stream()
-          .map(alertDao::findById)
-          .filter(
-              Objects::nonNull) // we ignore null here - deleting an alert should not break a subscription group here - it seems it is allowed in other places in the codebase
+          .map(caches.alertCache::getUnchecked)
+          .map(o -> o.orElse(null))
+          // we ignore null here - deleting an alert should not break a subscription group here - it seems it is allowed in other places in the codebase
+          .filter(Objects::nonNull)
           .toList();
       for (final AlertDTO alert : alertDtos) {
         // cannot print the alert id in the error message because it would potentially leak the namespace of an alert for which authz has not been performed yet
         checkArgument(Objects.equals(subscriptionGroupDto.namespace(), alert.namespace()),
             "Subscription namespace %s and alert namespace do not match for alert id %s.",
             subscriptionGroupDto.namespace(), alert.getId());
-      }
-      // end of hack
-      return alertDtos.stream()
-          .map(this::resourceId)
-          .toList();
-    } else if (entity instanceof RcaInvestigationDTO rcaInvestigationDTO) {
-      final @NonNull Long anomalyId = rcaInvestigationDTO.getAnomaly().getId(); 
-      // same namespace is ensured via RcaInvestigationService#toDto 
-      // putting again a check because it's migration code and some legacy entities may not have the property 
-      final AnomalyDTO anomaly = anomalyDao.findById(anomalyId);
-      checkArgument(Objects.equals(rcaInvestigationDTO.namespace(), anomaly.namespace()), 
-          "RcaInvestigation namespace %s and anomaly namespace do not match for anomaly id %s.",
-          rcaInvestigationDTO.namespace(), anomaly.getId());
-      return List.of(resourceId(anomaly));
-    } else if (entity instanceof AnomalyDTO anomalyDTO) {
-      // fixme cyril authz - implement
-    }
 
-    return new ArrayList<>();
+        final ResourceIdentifier resourceId = resourceId(alert);
+        if (!result.contains(resourceId)) {
+          result.add(resourceId);
+          addRelatedEntities(alert, result, caches);
+        }
+      }
+      // todo cyril authz in theory we should also do enumeration items
+    } else if (entity instanceof RcaInvestigationDTO rcaInvestigationDTO) {
+      final @NonNull Long anomalyId = rcaInvestigationDTO.getAnomaly().getId();
+      final AnomalyDTO anomaly = caches.anomalyCache.getUnchecked(anomalyId).orElse(null);
+      // the error message is the same whether the anomaly does not exist in db or the anomaly is in another namespace - this is to avoid leaking anomaly ids of other namespaces
+      checkArgument(
+          anomaly != null && Objects.equals(rcaInvestigationDTO.namespace(), anomaly.namespace()),
+          "Invalid anomaly id or rcaInvestigation namespace %s and anomaly namespace do not match for anomaly id %s.",
+          rcaInvestigationDTO.namespace(), anomalyId);
+      final ResourceIdentifier resourceId = resourceId(anomaly);
+      if (!result.contains(resourceId)) {
+        result.add(resourceId);
+        addRelatedEntities(anomaly, result, caches);
+      }
+    } else if (entity instanceof AnomalyDTO anomalyDto) {
+      final @NonNull Long alertId = anomalyDto.getDetectionConfigId();
+      final AlertDTO alertDto = caches.alertCache.getUnchecked(alertId).orElse(null);
+      checkArgument(
+          alertDto != null && Objects.equals(anomalyDto.namespace(), alertDto.namespace()),
+          "Invalid alert id or anomaly namespace %s and alert namespace do not match for alert id %s.",
+          anomalyDto.namespace(), alertId);
+      final ResourceIdentifier resourceId = resourceId(alertDto);
+      if (!result.contains(resourceId)) {
+        result.add(resourceId);
+        addRelatedEntities(alertDto, result, caches);
+      }
+      // todo cyril authz implement enumeration item related entity anomalyDto.getEnumerationItem
+    } else if (entity instanceof DatasetConfigDTO datasetConfigDTO) {
+      final String datasourceName = datasetConfigDTO.getDataSource();
+      final DataSourceDTO datasourceDto = caches.datasourceCache.getUnchecked(datasourceName)
+          .orElse(null);
+      checkArgument(datasourceDto != null,
+          "Invalid datasource name %s. Not found in dataset namespace %s.", datasourceName,
+          datasetConfigDTO.namespace());
+      final ResourceIdentifier resourceId = resourceId(datasourceDto);
+      if (!result.contains(resourceId)) {
+        result.add(resourceId);
+        addRelatedEntities(datasourceDto, result, caches);
+      }
+    }
+    // todo authz taskDto, metricDto, etc...  
   }
 
-  public ForbiddenException forbiddenExceptionFor(
-      final ThirdEyePrincipal principal,
-      final ResourceIdentifier resourceIdentifier,
-      final AccessType accessType
-  ) {
-    return new ForbiddenException(Response.status(
-        Status.FORBIDDEN.getStatusCode(),
-        String.format("%s access denied to %s for entity %s %s",
-            accessType, principal.getName(), resourceIdentifier.getEntityType(),
-            resourceIdentifier.getName())
-    ).build());
+  private static ForbiddenException forbiddenExceptionFor(final ThirdEyePrincipal principal,
+      final ResourceIdentifier resourceIdentifier, final AccessType accessType) {
+    return new ForbiddenException(Response.status(Status.FORBIDDEN.getStatusCode(),
+        String.format("%s access denied to %s for entity %s %s", accessType, principal.getName(),
+            resourceIdentifier.getEntityType(), resourceIdentifier.getName())).build());
   }
 
   public static ThirdEyeServerPrincipal getInternalValidPrincipal() {
     return INTERNAL_VALID_PRINCIPAL;
   }
 
-  public void invalidateCache() {
-    namespaceResolver.invalidateCache();
-  }
-
-  private static <T extends AbstractDTO> boolean namespaceIsSet(final T entity) {
+  private static <T extends AbstractDTO> boolean namespaceIsSet(final @NonNull T entity) {
     return entity.getAuth() != null && entity.getAuth().getNamespace() != null;
   }
 }

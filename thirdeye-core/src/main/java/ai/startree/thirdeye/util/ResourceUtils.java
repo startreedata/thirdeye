@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.util;
 
+import static ai.startree.thirdeye.spi.Constants.VANILLA_OBJECT_MAPPER;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_OBJECT_UNEXPECTED;
 
 import ai.startree.thirdeye.spi.ThirdEyeException;
@@ -21,7 +22,6 @@ import ai.startree.thirdeye.spi.api.StatusApi;
 import ai.startree.thirdeye.spi.api.StatusListApi;
 import ai.startree.thirdeye.spi.api.ThirdEyeApi;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -42,9 +42,7 @@ import javax.ws.rs.core.Response.Status;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class ResourceUtils {
-
-  private final static ObjectMapper J = new ObjectMapper();
-
+  
   public static Response respondOk(final ThirdEyeApi api) {
     return Response.ok(api).build();
   }
@@ -182,7 +180,7 @@ public class ResourceUtils {
   private static Object handleObject(final Object object) {
     if (object instanceof String) {
       try {
-        return J.readValue(object.toString(), Map.class);
+        return VANILLA_OBJECT_MAPPER.readValue(object.toString(), Map.class);
       } catch (final JsonProcessingException e) {
         return object;
       }

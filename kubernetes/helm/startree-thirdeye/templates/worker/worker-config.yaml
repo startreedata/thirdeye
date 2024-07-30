@@ -163,8 +163,4 @@ data:
 
     scheduler:
       enabled: false
-
-    cache:
-      useInMemoryCache: true
-      useCentralizedCache: false
 {{ end }}

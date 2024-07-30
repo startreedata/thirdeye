@@ -29,11 +29,9 @@ import ai.startree.thirdeye.datasource.DataSourcesLoader;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
-import com.codahale.metrics.CachedGauge;
-import com.codahale.metrics.Gauge;
-import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.Metrics;
 import java.sql.Timestamp;
 import java.util.HashMap;
@@ -62,7 +60,6 @@ public class DataSourceCache {
 
   private final DataSourceManager dataSourceManager;
   private final DataSourcesLoader dataSourcesLoader;
-  private final MetricRegistry metricRegistry;
 
   // fixme cyril - use a guava evicting cache based on time/usage
   private final Map<Long, CachedDataSourceEntry> cache = new HashMap<>();
@@ -76,27 +73,15 @@ public class DataSourceCache {
   @Inject
   public DataSourceCache(
       final DataSourceManager dataSourceManager,
-      final DataSourcesLoader dataSourcesLoader,
-      final MetricRegistry metricRegistry) {
+      final DataSourcesLoader dataSourcesLoader) {
     this.dataSourceManager = dataSourceManager;
     this.dataSourcesLoader = dataSourcesLoader;
-    this.metricRegistry = metricRegistry;
 
-    io.micrometer.core.instrument.Gauge.builder("thirdeye_healthy_datasources",
+    Gauge.builder("thirdeye_healthy_datasources",
             memoizeWithExpiration(this::getHealthyDatasourceCount, METRICS_CACHE_TIMEOUT.toMinutes(),
                 TimeUnit.MINUTES))
         .register(Metrics.globalRegistry);
-    // deprecated - use thirdeye_healthy_datasources
-    metricRegistry.register("healthyDatasourceCount",
-        new CachedGauge<Integer>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
-          @Override
-          protected Integer loadValue() {
-            return getHealthyDatasourceCount();
-          }
-        });
     Metrics.gaugeMapSize("thirdeye_cached_datasources", emptyList(), cache);
-    // deprecated - use thirdeye_cached_datasources
-    metricRegistry.register("cachedDatasourceCount", (Gauge<Integer>) cache::size);
   }
 
   // TODO CYRIL authz refacto - move this DataSourceCache should not have access to DataSourceManager - update architectureTest
@@ -140,13 +125,13 @@ public class DataSourceCache {
     final ThirdEyeDataSource dataSource = dataSourcesLoader.loadDataSource(dataSourceDto);
     checkState(dataSource != null,
         "Failed to construct a data source object for datasource %s", dataSourceDto);
-    final DataSourceWrapper wrapped = wrap(dataSource);
+    final MeteredDataSource meteredDataSource = new MeteredDataSource(dataSource);
 
     // remove outdated cached datasource
     removeDataSource(dataSourceDto);
     cache.put(Objects.requireNonNull(dataSourceDto.getId()),
-        new CachedDataSourceEntry(wrapped, dataSourceDto.getUpdateTime()));
-    return wrapped;
+        new CachedDataSourceEntry(meteredDataSource, dataSourceDto.getUpdateTime()));
+    return meteredDataSource;
   }
 
   public void removeDataSource(final DataSourceDTO dataSourceDTO) {
@@ -171,9 +156,5 @@ public class DataSourceCache {
     }
   }
 
-  private DataSourceWrapper wrap(final ThirdEyeDataSource thirdEyeDataSource) {
-    return new DataSourceWrapper(thirdEyeDataSource, metricRegistry);
-  }
-
-  private record CachedDataSourceEntry(DataSourceWrapper dataSource, Timestamp timestamp) {}
+  private record CachedDataSourceEntry(MeteredDataSource dataSource, Timestamp timestamp) {}
 }

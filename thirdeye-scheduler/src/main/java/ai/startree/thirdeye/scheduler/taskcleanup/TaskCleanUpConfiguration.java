@@ -13,11 +13,13 @@
  */
 package ai.startree.thirdeye.scheduler.taskcleanup;
 
+import static ai.startree.thirdeye.spi.Constants.TASK_MAX_DELETES_PER_CLEANUP;
+
 public class TaskCleanUpConfiguration {
 
   private Integer intervalInMinutes = 5;
   private Integer retentionInDays = 30;
-  private Integer maxEntriesToDelete = 1000;
+  private Integer maxEntriesToDelete = TASK_MAX_DELETES_PER_CLEANUP;
   private Integer orphanIntervalInSeconds = 30;
 
   public Integer getIntervalInMinutes() {

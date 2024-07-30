@@ -13,38 +13,38 @@
  */
 package ai.startree.thirdeye.datalayer.core;
 
-import static ai.startree.thirdeye.spi.util.ExecutorUtils.shutdownExecutionService;
-import static ai.startree.thirdeye.spi.util.ExecutorUtils.threadsNamed;
 import static ai.startree.thirdeye.spi.util.SpiUtils.alertRef;
 import static ai.startree.thirdeye.spi.util.SpiUtils.enumerationItemRef;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
-import static java.util.Collections.emptyList;
+import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
 import ai.startree.thirdeye.spi.datalayer.EnumerationItemFilter;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
-import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
-import ai.startree.thirdeye.spi.util.ExceptionHandledRunnable;
-import com.google.common.annotations.VisibleForTesting;
+import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.function.Function;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 @Singleton
 public class EnumerationItemMaintainer {
@@ -54,116 +54,74 @@ public class EnumerationItemMaintainer {
   private final EnumerationItemManager enumerationItemManager;
   private final AnomalyManager anomalyManager;
   private final SubscriptionGroupManager subscriptionGroupManager;
-  private final EnumerationItemDeleter enumerationItemDeleter;
-
-  /* To perform clean up operations */
-  private final ExecutorService executorService = Executors.newSingleThreadExecutor(
-      threadsNamed("ei-maintainer-%d"));
 
   @Inject
   public EnumerationItemMaintainer(final EnumerationItemManager enumerationItemManager,
       final AnomalyManager anomalyManager,
-      final SubscriptionGroupManager subscriptionGroupManager,
-      final EnumerationItemDeleter enumerationItemDeleter) {
+      final SubscriptionGroupManager subscriptionGroupManager) {
     this.enumerationItemManager = enumerationItemManager;
     this.anomalyManager = anomalyManager;
     this.subscriptionGroupManager = subscriptionGroupManager;
-    this.enumerationItemDeleter = enumerationItemDeleter;
-  }
-
-  public static boolean matches(final EnumerationItemDTO o1, final EnumerationItemDTO o2) {
-    return Objects.equals(o1.getName(), o2.getName())
-        && Objects.equals(o1.getParams(), o2.getParams());
-  }
-
-  public static Map<String, Object> key(final EnumerationItemDTO source,
-      final List<String> idKeys) {
-    final var p = source.getParams();
-    return idKeys.stream()
-        .filter(p::containsKey)
-        .collect(toMap(Function.identity(), p::get));
-  }
-
-  private static void logDeleteOperation(final EnumerationItemDTO ei) {
-    String eiString;
-    try {
-      eiString = ThirdEyeSerialization
-          .getObjectMapper()
-          .writeValueAsString(ei);
-    } catch (final Exception e) {
-      eiString = ei.toString();
-    }
-    LOG.warn("Deleting enumeration item(id: {}}) json: {}",
-        ei.getId(),
-        eiString);
-  }
-
-  private static EnumerationItemDTO findCandidate(final EnumerationItemDTO source,
-      final List<EnumerationItemDTO> eiList) {
-    // Find exact match
-    Optional<EnumerationItemDTO> candidate = eiList.stream()
-        .filter(e -> matches(source, e))
-        .findFirst();
-    if (candidate.isPresent()) {
-      return candidate.get();
-    }
-
-    // find one with same params
-    candidate = eiList.stream()
-        .filter(e -> e.getParams().equals(source.getParams()))
-        .findFirst();
-
-    // Just return the first one
-    return candidate.orElse(eiList.get(0));
   }
 
   public List<EnumerationItemDTO> sync(
       final List<EnumerationItemDTO> enumerationItems,
       final List<String> idKeys,
-      final Long alertId) {
-    final List<EnumerationItemDTO> existing = enumerationItemManager.filter(
+      final Long alertId,
+      final @Nullable String namespace) {
+    // find existing enumerationItems
+    // namespace filter is not necessary here because we search by alert id - so only enumeration items of the alert id namespace will be returned
+    final List<EnumerationItemDTO> existingItems = enumerationItemManager.filter(
         new EnumerationItemFilter().setAlertId(alertId));
 
-    final List<EnumerationItemDTO> synced = enumerationItems.stream()
+    // update enumerationItems
+    final List<EnumerationItemDTO> syncedItems = enumerationItems.stream()
         .map(source -> source.setAlert(alertRef(alertId)))
-        .map(source -> findExistingOrCreate(source, idKeys, existing))
+        .map(source -> (EnumerationItemDTO) source.setAuth(new AuthorizationConfigurationDTO().setNamespace(namespace)))
+        .map(source -> findExistingOrCreate(source, idKeys, existingItems))
         .collect(toList());
 
-    runAsync(() -> performCleanup(existing, synced));
-    return synced;
-  }
-
-  private void runAsync(final Runnable runnable) {
-    executorService.submit(new ExceptionHandledRunnable(runnable));
-  }
-
-  private void performCleanup(final List<EnumerationItemDTO> existing,
-      final List<EnumerationItemDTO> syncedEnumerationItems) {
-    final Set<Long> syncedEnumerationItemIds = syncedEnumerationItems.stream()
+    // delete existing enumerationItems that are not used anymore
+    final Set<Long> syncedItemsIds = syncedItems.stream()
         .map(EnumerationItemDTO::getId)
         .collect(toSet());
-
-    existing.stream()
-        .filter(ei -> !syncedEnumerationItemIds.contains(ei.getId()))
-        .peek(EnumerationItemMaintainer::logDeleteOperation)
-        .forEach(enumerationItemDeleter::delete);
+    existingItems.stream()
+        .filter(ei -> !syncedItemsIds.contains(ei.getId()))
+        .forEach(this::delete);
+    
+    return syncedItems;
   }
 
-  @VisibleForTesting
-  EnumerationItemDTO findExistingOrCreate(final EnumerationItemDTO source,
-      final List<String> idKeys) {
-    final List<EnumerationItemDTO> enumerationItemsForAlert = enumerationItemManager.filter(
-        new EnumerationItemFilter().setAlertId(
-            source.getAlert().getId()));
 
-    return findExistingOrCreate(source, idKeys, enumerationItemsForAlert);
+  public void delete(final EnumerationItemDTO dto) {
+    requireNonNull(dto.getId(), "EnumerationItemDTO.id cannot be null for deletion");
+    String eiString;
+    try {
+      eiString = Constants.TEMPLATABLE_OBJECT_MAPPER
+          .writeValueAsString(dto);
+    } catch (final Exception e) {
+      eiString = dto.toString();
+    }
+    LOG.warn("Deleting enumeration item {} json: {}",
+        dto.getId(),
+        eiString);
+
+    disassociateFromSubscriptionGroups(dto.getId());
+    deleteAssociatedAnomalies(dto.getId());
+
+    int success = enumerationItemManager.delete(dto);
+    if (success == 0) {
+      LOG.error("Failed to delete enumeration item {} json: {}", dto.getId(),
+          eiString);
+    }
   }
 
-  public EnumerationItemDTO findExistingOrCreate(final EnumerationItemDTO source,
+  private EnumerationItemDTO findExistingOrCreate(final EnumerationItemDTO source,
       final List<String> idKeys,
       final List<EnumerationItemDTO> existingEnumerationItems) {
     requireNonNull(source.getName(), "enumeration item name does not exist!");
     requireNonNull(source.getAlert(), "enumeration item needs a source alert!");
+    checkState(source.getAuth() != null, "enumeration item auth should be set a this stage. Even if namespace is null.");
 
     final Long sourceAlertId = source.getAlert().getId();
     requireNonNull(sourceAlertId, "enumeration item needs a source alert with a valid id!");
@@ -177,59 +135,46 @@ public class EnumerationItemMaintainer {
       if (existing != null) {
         updateExistingIfReqd(existing, source);
         return existing;
+      } else {
+        /* Create new */
+        enumerationItemManager.save(source);
+        requireNonNull(source.getId(), "expecting a generated ID");
+        return source; 
       }
+    }
 
+    /*
+     * look for an existing EnumerationItem with the same name and the same param 
+     */
+    final List<EnumerationItemDTO> matching = existingEnumerationItems.stream()
+        .filter(e -> matches(source, e))
+        .toList();
+    if (matching.size() == 0) {
       /* Create new */
       enumerationItemManager.save(source);
       requireNonNull(source.getId(), "expecting a generated ID");
       return source;
+    } else if (matching.size() == 1) {
+      // already exists
+      return matching.get(0);
+    } else {
+      final List<Long> ids = matching.stream()
+          .map(EnumerationItemDTO::getId)
+          .collect(toList());
+      LOG.error("Found more than one EnumerationItem with alert for name: {} ids: {}",
+          source.getName(),
+          ids);
+      // returning the first item of the list 
+      // fixme cyril kept the existing behavior but we should throw an error - the system is in an inconsistent state
+      return matching.get(0);
     }
-
-    /*
-     * If there exists an EnumerationItem with the same name, check if it has the same params.
-     */
-    final List<EnumerationItemDTO> byName = enumerationItemManager.findByName(source.getName());
-    final List<EnumerationItemDTO> matching = optional(byName).orElse(emptyList()).stream()
-        .filter(e -> matches(source, e))
-        .collect(toList());
-
-    /* If there exists an EnumerationItem with a populated alert, return and no need to migrate */
-    final List<EnumerationItemDTO> withAlert = matching.stream()
-        .filter(ei -> ei.getAlert() != null)
-        .filter(ei -> sourceAlertId.equals(ei.getAlert().getId()))
-        .collect(toList());
-
-    if (withAlert.size() > 0) {
-      if (withAlert.size() > 1) {
-        final List<Long> ids = withAlert.stream()
-            .map(EnumerationItemDTO::getId)
-            .collect(toList());
-        LOG.error("Found more than one EnumerationItem with alert for name: {} ids: {}",
-            source.getName(),
-            ids);
-      }
-      return withAlert.get(0);
-    }
-
-    /* Create new */
-    enumerationItemManager.save(source);
-    requireNonNull(source.getId(), "expecting a generated ID");
-
-    /* Find enumeration item candidate which don't have an alert field set.
-     * These are legacy enumeration items which need to be migrated to the new alert field
-     **/
-    matching.stream()
-        .filter(ei -> ei.getAlert() == null)
-        .forEach(ei -> migrate(ei, source));
-
-    return source;
   }
 
   private void updateExistingIfReqd(final EnumerationItemDTO existing,
       final EnumerationItemDTO source) {
     if (!existing.getParams().equals(source.getParams()) ||
         !existing.getName().equals(source.getName()) ||
-        !Objects.equals(existing.getAuth(), source.getAuth()) // auth can be null
+        !Objects.equals(existing.getAuth(), source.getAuth()) // should never happen in new namespace system - todo cyril authz remove later
     ) {
       /*
        * Overwrite existing params with new params for the same key. The alert is the
@@ -238,34 +183,25 @@ public class EnumerationItemMaintainer {
       final EnumerationItemDTO updated = existing
           .setParams(source.getParams())
           .setName(source.getName());
-
       updated.setAuth(source.getAuth());
+      
       enumerationItemManager.save(updated);
     }
-  }
-
-  @VisibleForTesting
-  EnumerationItemDTO findUsingIdKeys(final EnumerationItemDTO source,
-      final List<String> idKeys) {
-    final List<EnumerationItemDTO> enumerationItemsForAlert = enumerationItemManager.filter(
-        new EnumerationItemFilter().setAlertId(
-            source.getAlert().getId()));
-    return findUsingIdKeys(source, idKeys, enumerationItemsForAlert);
   }
 
   private EnumerationItemDTO findUsingIdKeys(final EnumerationItemDTO source,
       final List<String> idKeys,
       final List<EnumerationItemDTO> existingEnumerationItems) {
-    final var sourceKey = key(source, idKeys);
+    final Map<String, Object> sourceKey = key(source, idKeys);
     final List<EnumerationItemDTO> filtered = existingEnumerationItems.stream()
         .filter(e -> sourceKey.equals(key(e, idKeys)))
-        .collect(toList());
+        .toList();
 
     if (filtered.size() > 1) {
-      LOG.warn("Found more than one EnumerationItem for: {} ids: {}. Attempting to fix..",
+      // cyril: putting this log to error to see in our observability tool if this is can still happen - todo cyril check if this can be reproduced easily by just setting 2 enumeration item with the same values in the alert config
+      LOG.error("Found more than one EnumerationItem for: {} ids: {}. Attempting to fix..",
           source,
           filtered.stream().map(EnumerationItemDTO::getId).collect(toList()));
-
       return handleConflicts(source, filtered);
     }
     return filtered.stream().findFirst().orElse(null);
@@ -294,34 +230,9 @@ public class EnumerationItemMaintainer {
     // remove the rest
     eiList.stream()
         .filter(e -> !e.getId().equals(matching.getId()))
-        .peek(EnumerationItemMaintainer::logDeleteOperation)
-        .forEach(enumerationItemDeleter::delete);
+        .forEach(this::delete);
 
     return matching;
-  }
-
-  public void migrate(final EnumerationItemDTO from, final EnumerationItemDTO to) {
-    requireNonNull(from.getId(), "expecting a generated ID");
-    requireNonNull(to.getId(), "expecting a generated ID");
-    requireNonNull(to.getAlert(), "expecting a valid alert");
-
-    final Long toId = to.getId();
-    final Long alertId = to.getAlert().getId();
-
-    LOG.info("Migrating enumeration item {} to {} for alert {}", from.getId(), toId, alertId);
-
-    /* Migrate anomalies */
-    final var filter = new AnomalyFilter()
-        .setEnumerationItemId(from.getId())
-        .setAlertId(alertId);
-
-    anomalyManager.filter(filter).stream()
-        .filter(Objects::nonNull)
-        .map(a -> a.setEnumerationItem(enumerationItemRef(toId)))
-        .forEach(anomalyManager::update);
-
-    /* Migrate subscription groups */
-    migrateSubscriptionGroups(from.getId(), toId, alertId);
   }
 
   private void migrateSubscriptionGroups(final Long fromId, final Long toId, final Long alertId) {
@@ -344,12 +255,58 @@ public class EnumerationItemMaintainer {
         });
   }
 
-  public void migrateAndRemove(final EnumerationItemDTO from, final EnumerationItemDTO to) {
-    migrate(from, to);
-    enumerationItemDeleter.delete(from);
+  private void deleteAssociatedAnomalies(final Long enumerationItemId) {
+    // todo cyril authz filter 
+    final List<AnomalyDTO> anomalies = anomalyManager.filter(
+        new AnomalyFilter().setEnumerationItemId(enumerationItemId));
+    anomalies.forEach(anomalyManager::delete);
   }
 
-  public void close() throws Exception {
-    shutdownExecutionService(executorService);
+  // todo cyril authz filter
+  private void disassociateFromSubscriptionGroups(final Long enumerationItemId) {
+    final List<SubscriptionGroupDTO> allSubscriptionGroups = subscriptionGroupManager.findAll();
+
+    final List<SubscriptionGroupDTO> updated = new ArrayList<>();
+    for (final SubscriptionGroupDTO sg : allSubscriptionGroups) {
+      optional(sg.getAlertAssociations())
+          .map(aas -> aas.removeIf(aa ->
+              aa.getEnumerationItem() != null &&
+                  enumerationItemId.equals(aa.getEnumerationItem().getId())))
+          .filter(b -> b)
+          .ifPresent(b -> updated.add(sg));
+    }
+    subscriptionGroupManager.update(updated);
+  }
+
+  private static boolean matches(final EnumerationItemDTO o1, final EnumerationItemDTO o2) {
+    return Objects.equals(o1.getName(), o2.getName())
+        && Objects.equals(o1.getParams(), o2.getParams());
+  }
+
+  private static Map<String, Object> key(final EnumerationItemDTO source,
+      final List<String> idKeys) {
+    final Map<String, Object> p = source.getParams();
+    return idKeys.stream()
+        .filter(p::containsKey)
+        .collect(toMap(Function.identity(), p::get));
+  }
+
+  private static EnumerationItemDTO findCandidate(final EnumerationItemDTO source,
+      final List<EnumerationItemDTO> eiList) {
+    // Find exact match
+    Optional<EnumerationItemDTO> candidate = eiList.stream()
+        .filter(e -> matches(source, e))
+        .findFirst();
+    if (candidate.isPresent()) {
+      return candidate.get();
+    }
+
+    // find one with same params
+    candidate = eiList.stream()
+        .filter(e -> e.getParams().equals(source.getParams()))
+        .findFirst();
+
+    // Just return the first one
+    return candidate.orElse(eiList.get(0));
   }
 }

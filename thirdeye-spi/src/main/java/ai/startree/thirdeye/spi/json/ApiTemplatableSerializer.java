@@ -26,12 +26,14 @@ import java.io.IOException;
  * "field1": "${var}"  (templated form) or "field1": T_json with T_json the json representation of
  * T.
  *
- * You should not use this class directly. See {@link ThirdEyeSerialization}.
+ * You should not use this class directly. See 
+ * {@link ai.startree.thirdeye.spi.Constants#TEMPLATABLE_OBJECT_MAPPER} to get a shared object 
+ * mappers that uses this class.
  *
  * For wrapped generic type inference at runtime,
  * see https://stackoverflow.com/questions/36159677/how-to-create-a-custom-deserializer-in-jackson-for-a-generic-type
  */
-class ApiTemplatableSerializer extends JsonSerializer<Templatable> {
+public class ApiTemplatableSerializer extends JsonSerializer<Templatable> {
 
   @Override
   public void serialize(final Templatable templatable, final JsonGenerator jsonGenerator,

@@ -14,16 +14,17 @@
 package ai.startree.thirdeye.spi.datalayer.dto;
 
 import java.util.Objects;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class AuthorizationConfigurationDTO {
   
-  private String namespace;
+  private @Nullable String namespace;
 
   public String getNamespace() {
     return namespace;
   }
 
-  public AuthorizationConfigurationDTO setNamespace(final String namespace) {
+  public AuthorizationConfigurationDTO setNamespace(final @Nullable String namespace) {
     this.namespace = namespace;
     return this;
   }

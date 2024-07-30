@@ -127,9 +127,9 @@ public class EntityMappingHolder {
         }
       }
       if (!success) {
-        LOG.error(String.format("Unable to map [%s] to any field in table [%s] !!!",
+        LOG.error("Unable to map [{}] to any field in table [{}].",
             dbColumn,
-            entityClass.getSimpleName()));
+            entityClass.getSimpleName());
       }
     }
   }

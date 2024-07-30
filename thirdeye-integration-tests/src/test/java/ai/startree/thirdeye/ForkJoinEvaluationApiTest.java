@@ -16,11 +16,10 @@ package ai.startree.thirdeye;
 import static ai.startree.thirdeye.HappyPathTest.assert200;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.api.DetectionEvaluationApi;
-import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
 import com.codahale.metrics.MetricRegistry;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.client.JerseyClientConfiguration;
 import java.io.IOException;
@@ -39,7 +38,6 @@ import org.testng.annotations.Test;
 public class ForkJoinEvaluationApiTest {
 
   private static final String RESOURCES_PATH = "/forkJoinEvaluationApiTest";
-  private static final ObjectMapper OBJECT_MAPPER = ThirdEyeSerialization.getObjectMapper();
 
   private static AlertEvaluationApi getAlertEvaluationApi(final String filename) {
     final String path = String.format("%s/%s", RESOURCES_PATH, filename);
@@ -47,7 +45,7 @@ public class ForkJoinEvaluationApiTest {
     try {
       final String alertEvaluationApiJson = IOUtils.resourceToString(path,
           StandardCharsets.UTF_8);
-      alertEvaluationApi = OBJECT_MAPPER.readValue(alertEvaluationApiJson,
+      alertEvaluationApi = Constants.TEMPLATABLE_OBJECT_MAPPER.readValue(alertEvaluationApiJson,
           AlertEvaluationApi.class);
     } catch (final IOException e) {
       throw new RuntimeException(String.format("Could not load alert json: %s", e));
@@ -64,7 +62,7 @@ public class ForkJoinEvaluationApiTest {
 
     client = new JerseyClientBuilder(new MetricRegistry())
         .using(jerseyClientConfiguration)
-        .using(OBJECT_MAPPER)
+        .using(Constants.TEMPLATABLE_OBJECT_MAPPER)
         .using(Executors.newSingleThreadExecutor())
         .build("test client");
   }

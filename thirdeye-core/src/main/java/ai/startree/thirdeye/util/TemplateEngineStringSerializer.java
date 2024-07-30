@@ -22,10 +22,13 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import java.io.IOException;
 import java.util.Map;
 import org.apache.commons.text.StringSubstitutor;
+import org.apache.commons.text.lookup.StringLookupFactory;
 
 /**
  * This serializer can be used to apply template properties on String fields.
  * Do not use for API or persistence.
+ * 
+ * Not thread-safe if setValuesMap is used.
  */
 public class TemplateEngineStringSerializer extends JsonSerializer<String> {
 
@@ -48,5 +51,9 @@ public class TemplateEngineStringSerializer extends JsonSerializer<String> {
       throw new ThirdEyeException(ERR_TEMPLATE_MISSING_PROPERTY, message);
   }
     jsonGenerator.writeString(replace);
+  }
+
+  public void setValuesMap(final Map<String, Object> valuesMap) {
+    sub.setVariableResolver(StringLookupFactory.INSTANCE.mapStringLookup(valuesMap));
   }
 }

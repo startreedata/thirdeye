@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.plugins.postprocessor;
 
+import static ai.startree.thirdeye.spi.Constants.VANILLA_OBJECT_MAPPER;
 import static ai.startree.thirdeye.spi.rca.Stats.computeValueChangePercentage;
 import static ai.startree.thirdeye.spi.util.AnomalyUtils.isIgnore;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
@@ -32,7 +33,6 @@ import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessor;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessorFactory;
 import ai.startree.thirdeye.spi.detection.postprocessing.PostProcessingContext;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -481,6 +481,7 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
             // if an anomaly is in ignore state and has never been notified, but is now changing to not ignore, then ensure it is notified 
             // by hack on the createTime to ensure the notification logic finds this anomaly
             // see spec decision table https://docs.google.com/document/d/1bSbv4XhTQsdGR1XVM_dYL1cK9Q6JlntvzNYmmMiXQRI/edit
+            // FIXME CYRIL - something similar should also be done at the parent level 
             if (isIgnore(previousAnomaly) && !previousAnomaly.isNotified() && !isIgnore(anomaly)) {
               previousAnomaly.setCreateTime(new Timestamp(System.currentTimeMillis()));
             }
@@ -603,7 +604,7 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
     @Override
     public AnomalyPostProcessor build(final Map<String, Object> params,
         final PostProcessingContext context) {
-      final AnomalyMergerPostProcessorSpec spec = new ObjectMapper().convertValue(params,
+      final AnomalyMergerPostProcessorSpec spec = VANILLA_OBJECT_MAPPER.convertValue(params,
           AnomalyMergerPostProcessorSpec.class);
       spec.setAnomalyManager(context.getMergedAnomalyResultManager());
       spec.setAlertId(context.getAlertId());

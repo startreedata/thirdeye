@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.plugins.postprocessor;
 
+import static ai.startree.thirdeye.spi.Constants.VANILLA_OBJECT_MAPPER;
 import static ai.startree.thirdeye.spi.util.AnomalyUtils.addLabel;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
@@ -31,7 +32,6 @@ import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessor;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessorFactory;
 import ai.startree.thirdeye.spi.detection.postprocessing.PostProcessingContext;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.List;
 import java.util.Map;
@@ -140,7 +140,7 @@ public class ColdStartPostProcessor implements AnomalyPostProcessor {
     @Override
     public AnomalyPostProcessor build(final Map<String, Object> params,
         final PostProcessingContext context) {
-      final ColdStartPostProcessorSpec spec = new ObjectMapper().convertValue(params,
+      final ColdStartPostProcessorSpec spec = VANILLA_OBJECT_MAPPER.convertValue(params,
           ColdStartPostProcessorSpec.class);
       spec.setMinMaxTimeLoader(context.getMinMaxTimeLoader());
       spec.setDatasetConfigManager(context.getDatasetConfigManager());

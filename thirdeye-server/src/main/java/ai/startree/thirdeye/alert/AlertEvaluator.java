@@ -18,6 +18,7 @@ import static ai.startree.thirdeye.core.ExceptionHandler.handleAlertEvaluationEx
 import static ai.startree.thirdeye.mapper.ApiBeanMapper.toAlertTemplateApi;
 import static ai.startree.thirdeye.spi.util.SpiUtils.bool;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static ai.startree.thirdeye.util.DetectionIntervalUtils.computeCorrectedInterval;
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 
 import ai.startree.thirdeye.detectionpipeline.DetectionPipelineContext;
@@ -30,6 +31,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.PlanNodeBean;
 import ai.startree.thirdeye.spi.detection.DetectionPipelineUsage;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -39,7 +41,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import javax.ws.rs.WebApplicationException;
 import org.joda.time.Interval;
 import org.slf4j.Logger;
@@ -60,18 +61,15 @@ public class AlertEvaluator {
   private final AlertTemplateRenderer alertTemplateRenderer;
   private final ExecutorService executorService;
   private final PlanExecutor planExecutor;
-  private final AlertDetectionIntervalCalculator alertDetectionIntervalCalculator;
   private final EvaluationContextProcessor evaluationContextProcessor;
 
   @Inject
   public AlertEvaluator(
       final AlertTemplateRenderer alertTemplateRenderer,
       final PlanExecutor planExecutor,
-      final AlertDetectionIntervalCalculator alertDetectionIntervalCalculator,
       final EvaluationContextProcessor evaluationContextProcessor) {
     this.alertTemplateRenderer = alertTemplateRenderer;
     this.planExecutor = planExecutor;
-    this.alertDetectionIntervalCalculator = alertDetectionIntervalCalculator;
     this.evaluationContextProcessor = evaluationContextProcessor;
 
     executorService = Executors.newFixedThreadPool(PARALLELISM,
@@ -83,6 +81,7 @@ public class AlertEvaluator {
   }
 
   // does not resolve namespace - assumes namespace is set in the request by the consumer 
+  @VisibleForTesting
   public AlertEvaluationApi evaluate(final AlertEvaluationApi request)
       throws ExecutionException {
     try {
@@ -99,19 +98,15 @@ public class AlertEvaluator {
       throws Exception {
     final long startTime = request.getStart().getTime();
     final long endTime = request.getEnd().getTime();
-    final Interval detectionInterval = alertDetectionIntervalCalculator.getCorrectedInterval(
-        request.getAlert(),
-        startTime,
-        endTime);
-
-    // apply template properties
-    final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(request.getAlert(),
-        detectionInterval);
-
+    final String namespace = optional(request.getAlert().getAuth()).map(
+        AuthorizationConfigurationApi::getNamespace).orElse(null);
+    final AlertTemplateDTO renderedTemplate = alertTemplateRenderer.renderAlert(request.getAlert(),
+        namespace);
+    final Interval detectionInterval = computeCorrectedInterval(
+        request.getAlert().getId(), startTime, endTime, renderedTemplate);
     final DetectionPipelineContext context = new DetectionPipelineContext()
         .setAlertId(request.getAlert().getId())
-        .setNamespace(optional(request.getAlert().getAuth()).map(
-            AuthorizationConfigurationApi::getNamespace).orElse(null))
+        .setNamespace(namespace)
         .setUsage(DetectionPipelineUsage.EVALUATION)
         .setDetectionInterval(detectionInterval);
 
@@ -123,17 +118,17 @@ public class AlertEvaluator {
       return new AlertEvaluationApi()
           .setDryRun(true)
           .setAlert(new AlertApi()
-              .setTemplate(toAlertTemplateApi(templateWithProperties)));
+              .setTemplate(toAlertTemplateApi(renderedTemplate)));
     }
 
     final String rootNodeName = optional(evaluationContext)
         .map(EvaluationContextApi::getListEnumerationItemsOnly)
         .filter(b -> b)
-        .map(b -> findEnumeratorNodeName(templateWithProperties.getNodes()))
+        .map(b -> findEnumeratorNodeName(renderedTemplate.getNodes()))
         .orElse(PlanExecutor.ROOT_NODE_NAME);
 
     final Map<String, OperatorResult> result = executorService
-        .submit(() -> planExecutor.runAndGetOutputs(templateWithProperties.getNodes(),
+        .submit(() -> planExecutor.runAndGetOutputs(renderedTemplate.getNodes(),
             context,
             rootNodeName))
         .get(TIMEOUT, TimeUnit.MILLISECONDS);
@@ -142,14 +137,14 @@ public class AlertEvaluator {
         .process(result, request);
 
     return toAlertEvaluationApi(processed)
-        .setAlert(new AlertApi().setTemplate(toAlertTemplateApi(templateWithProperties)));
+        .setAlert(new AlertApi().setTemplate(toAlertTemplateApi(renderedTemplate)));
   }
 
   private String findEnumeratorNodeName(final List<PlanNodeBean> nodes) {
     final List<String> enumeratorNodeNames = nodes.stream()
         .filter(n -> ENUMERATOR_NODE_TYPE.equals(n.getType()))
         .map(PlanNodeBean::getName)
-        .collect(Collectors.toList());
+        .toList();
     ensure(enumeratorNodeNames.size() == 1,
         String.format("Expecting exactly 1 enumeration item in the template. Found: %d",
             enumeratorNodeNames.size()));

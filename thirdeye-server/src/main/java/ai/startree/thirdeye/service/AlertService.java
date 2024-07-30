@@ -13,7 +13,6 @@
  */
 package ai.startree.thirdeye.service;
 
-import static ai.startree.thirdeye.mapper.ApiBeanMapper.toEnumerationItemDTO;
 import static ai.startree.thirdeye.scheduler.JobUtils.FAILED_TASK_CREATION_COUNTERS;
 import static ai.startree.thirdeye.service.alert.AlertInsightsProvider.currentMaximumPossibleEndTime;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_CRON_FREQUENCY_TOO_HIGH;
@@ -39,10 +38,9 @@ import ai.startree.thirdeye.spi.api.AlertInsightsApi;
 import ai.startree.thirdeye.spi.api.AlertInsightsRequestApi;
 import ai.startree.thirdeye.spi.api.AnomalyStatsApi;
 import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
-import ai.startree.thirdeye.spi.api.DetectionEvaluationApi;
 import ai.startree.thirdeye.spi.api.UserApi;
-import ai.startree.thirdeye.spi.auth.AccessType;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
@@ -60,10 +58,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -81,7 +77,6 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
 
   private final TaskManager taskManager;
   private final AnomalyManager anomalyManager;
-  private final AnomalyMetricsProvider anomalyMetricsProvider;
   private final AlertEvaluator alertEvaluator;
   private final AlertInsightsProvider alertInsightsProvider;
   private final SubscriptionGroupManager subscriptionGroupManager;
@@ -94,7 +89,6 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
       final AlertManager alertManager,
       final AnomalyManager anomalyManager,
       final AlertEvaluator alertEvaluator,
-      final AnomalyMetricsProvider anomalyMetricsProvider,
       final AlertInsightsProvider alertInsightsProvider,
       final SubscriptionGroupManager subscriptionGroupManager,
       final EnumerationItemManager enumerationItemManager,
@@ -108,7 +102,6 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     this.subscriptionGroupManager = subscriptionGroupManager;
     this.enumerationItemManager = enumerationItemManager;
     this.taskManager = taskManager;
-    this.anomalyMetricsProvider = anomalyMetricsProvider;
 
     minimumOnboardingStartTime = timeConfiguration.getMinimumOnboardingStartTime();
   }
@@ -151,10 +144,11 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
         ALERT_CRON_MAX_TRIGGERS_PER_MINUTE);
     /* new entity creation or name change in existing entity */
     if (existing == null || !existing.getName().equals(api.getName())) {
-      final List<AlertDTO> sameName = dtoManager.findByName(api.getName());
-      final List<AlertDTO> sameNameSameNamespace = authorizationManager.filterByNamespace(principal,
-          optional(api.getAuth()).map(AuthorizationConfigurationApi::getNamespace).orElse(null), sameName);
-      ensure(sameNameSameNamespace.isEmpty(), ERR_DUPLICATE_NAME, api.getName());
+      final AlertDTO sameNameSameNamespace = dtoManager.findUniqueByNameAndNamespace(api.getName(),
+          optional(api.getAuth()).map(AuthorizationConfigurationApi::getNamespace)
+              .orElse(authorizationManager.currentNamespace(principal))
+      );
+      ensure(sameNameSameNamespace == null, ERR_DUPLICATE_NAME, api.getName());
     }
   }
 
@@ -220,7 +214,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     final AlertDTO dto = getDto(id);
     ensureExists(dto);
     ensureExists(startTime, "start");
-    authorizationManager.ensureHasAccess(principal, dto, AccessType.WRITE);
+    authorizationManager.ensureCanEdit(principal, dto, dto);
 
     createDetectionTask(dto, startTime, safeEndTime(endTime));
   }
@@ -250,7 +244,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
         alertDto = toDto(api);
         authorizationManager.enrichNamespace(principal, alertDto);
       }
-      authorizationManager.ensureCanValidate(principal, alertDto);
+      authorizationManager.ensureCanCreate(principal, alertDto);
       validate(principal, api, alertDto);
     }
   }
@@ -268,39 +262,16 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     if (alertApi.getId() != null) {
       final AlertDTO alertDto = ensureExists(dtoManager.findById(alertApi.getId()));
       authorizationManager.ensureCanRead(principal, alertDto);
-      // inject namespace in the request - looks hacky todo cyril consider rewrite 
+      // inject namespace in the request 
       alertApi.setAuth(new AuthorizationConfigurationApi().setNamespace(alertDto.namespace()));
     } else {
       final AlertDTO alertDto = toDto(alertApi);
       authorizationManager.enrichNamespace(principal, alertDto);
       authorizationManager.ensureCanCreate(principal, alertDto);
-      // inject namespace in the request - looks hacky todo cyril consider rewrite
+      // inject namespace in the request
       alertApi.setAuth(new AuthorizationConfigurationApi().setNamespace(alertDto.namespace()));
     }
-    final AlertEvaluationApi results = alertEvaluator.evaluate(request);
-    final Map<String, DetectionEvaluationApi> filtered = allowedEvaluations(principal,
-        results.getDetectionEvaluations());
-    return results.setDetectionEvaluations(filtered);
-  }
-
-  private Map<String, DetectionEvaluationApi> allowedEvaluations(
-      final ThirdEyeServerPrincipal principal, final Map<String, DetectionEvaluationApi> gotEvals) {
-    final Map<String, DetectionEvaluationApi> allowedEvals = new HashMap<>();
-
-    // Assume entries without an enumeration item are allowed because the evaluation was executed.
-    gotEvals.entrySet()
-        .stream()
-        .filter(entry -> entry.getValue().getEnumerationItem() == null)
-        .forEach(entry -> allowedEvals.put(entry.getKey(), entry.getValue()));
-
-    // Check read access for entries with an enumeration item.
-    gotEvals.entrySet()
-        .stream()
-        .filter(entry -> entry.getValue().getEnumerationItem() != null)
-        .filter(entry -> authorizationManager.canRead(principal,
-            toEnumerationItemDTO(entry.getValue().getEnumerationItem())))
-        .forEach(entry -> allowedEvals.put(entry.getKey(), entry.getValue()));
-    return allowedEvals;
+    return alertEvaluator.evaluate(request);
   }
 
   // note cyril: currently the reset is used after a call to update
@@ -317,8 +288,8 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
       final ThirdEyeServerPrincipal principal,
       final Long id) {
     final AlertDTO dto = getDto(id);
-    authorizationManager.ensureHasAccess(principal, dto, AccessType.WRITE);
-    LOG.warn(String.format("Resetting alert id: %d by principal: %s", id, principal.getName()));
+    authorizationManager.ensureCanEdit(principal, dto, dto);
+    LOG.warn("Resetting alert id: {} by principal: {}", id, principal.getName());
 
     /*
      * We don't want to delete subscription groups associated with the alert. Therefore, we don't
@@ -342,22 +313,17 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
       final Long startTime,
       final Long endTime
   ) {
-    final List<Predicate> predicates = new ArrayList<>();
-    predicates.add(Predicate.EQ("detectionConfigId", id));
     final AlertDTO dto = ensureExists(getDto(id));
-    authorizationManager.ensureHasAccess(principal, dto, AccessType.READ);
-
-    // optional filters
+    authorizationManager.ensureCanRead(principal, dto);
     // no need to check authz for the enumerationItem - in the new workspace system, if the user has access to the alert then he has access to the enumerationItem
-    optional(enumerationId)
-        .ifPresent(enumId -> predicates.add(Predicate.EQ("enumerationItemId", enumerationId)));
-    optional(startTime)
-        .ifPresent(start -> predicates.add(Predicate.GE("startTime", startTime)));
-    optional(endTime)
-        .ifPresent(end -> predicates.add(Predicate.LE("endTime", endTime)));
-
-    return anomalyMetricsProvider.computeAnomalyStats(principal,
-        Predicate.AND(predicates.toArray(Predicate[]::new)));
+    // no explicit need for namespace filter given alert id is passed - todo cyril authz - still pass one
+    final AnomalyFilter filter = new AnomalyFilter()
+        .setAlertId(id)
+        .setEnumerationItemId(enumerationId)
+        .setStartTimeIsGte(startTime)
+        .setEndTimeIsLte(endTime)
+        ;
+    return anomalyManager.anomalyStats(dto.namespace(), filter);
   }
 
   private void deleteAssociatedAnomalies(final Long alertId) {

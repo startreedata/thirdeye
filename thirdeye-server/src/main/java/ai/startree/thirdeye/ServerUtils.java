@@ -24,8 +24,8 @@ public class ServerUtils {
 
   public static void logJvmSettings() {
     final RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
-    log.info(String.format("JVM (%s) arguments: %s",
+    log.info("JVM ({}) arguments: {}",
         System.getProperty("java.version"),
-        runtimeMxBean.getInputArguments()));
+        runtimeMxBean.getInputArguments());
   }
 }

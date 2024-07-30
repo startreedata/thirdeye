@@ -35,7 +35,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import java.io.IOException;
 import org.joda.time.Period;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -46,9 +45,9 @@ public class DetectionPipelineJobTest {
   private DetectionPipelineJob detectionPipelineJob;
 
   @BeforeMethod
-  public void setUp() throws IOException, ClassNotFoundException {
+  public void setUp() {
     final AlertTemplateRenderer alertTemplateRenderer = mock(AlertTemplateRenderer.class);
-    when(alertTemplateRenderer.renderAlert(any(AlertDTO.class), any())).then(
+    when(alertTemplateRenderer.renderAlert(any(AlertDTO.class))).then(
         i -> ((AlertDTO) i.getArguments()[0]).getTemplate());
     detectionPipelineJob = new DetectionPipelineJob(null, null,alertTemplateRenderer);
   }

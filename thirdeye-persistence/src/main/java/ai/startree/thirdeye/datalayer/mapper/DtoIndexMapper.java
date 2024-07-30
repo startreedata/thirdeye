@@ -13,6 +13,8 @@
  */
 package ai.startree.thirdeye.datalayer.mapper;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import ai.startree.thirdeye.datalayer.entity.AbstractIndexEntity;
 import ai.startree.thirdeye.datalayer.entity.HasJsonVal;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
@@ -41,6 +43,10 @@ public class DtoIndexMapper {
     }
     abstractIndexEntity.setBaseId(pojo.getId());
     abstractIndexEntity.setUpdateTime(pojo.getUpdateTime());
+    // todo cyril authz - namespace not empty string should be tested sooner - it's not trivial because it can come from jackson by reflection, so doing a precondition check in the setter is not enough - also in new mode maybe we will want to prevent the null namespace  
+    //  for the moment we at least ensure it fails at db write time
+    checkArgument(pojo.namespace() == null || !pojo.namespace().isEmpty(), "Namespace cannot be an empty string. Null namespace is allowed");
+    abstractIndexEntity.setNamespace(pojo.namespace());
 
     return abstractIndexEntity;
   }

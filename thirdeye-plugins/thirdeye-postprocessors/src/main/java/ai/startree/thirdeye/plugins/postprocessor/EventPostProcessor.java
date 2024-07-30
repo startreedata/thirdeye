@@ -16,6 +16,7 @@ package ai.startree.thirdeye.plugins.postprocessor;
 import static ai.startree.thirdeye.spi.Constants.COL_EVENT_END;
 import static ai.startree.thirdeye.spi.Constants.COL_EVENT_NAME;
 import static ai.startree.thirdeye.spi.Constants.COL_EVENT_START;
+import static ai.startree.thirdeye.spi.Constants.VANILLA_OBJECT_MAPPER;
 import static ai.startree.thirdeye.spi.detection.AnomalyDetector.KEY_CURRENT_EVENTS;
 import static ai.startree.thirdeye.spi.util.AnomalyUtils.addLabel;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
@@ -32,7 +33,6 @@ import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessorFac
 import ai.startree.thirdeye.spi.detection.postprocessing.PostProcessingContext;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -146,7 +146,7 @@ public class EventPostProcessor implements AnomalyPostProcessor {
 
     @Override
     public AnomalyPostProcessor build(final Map<String, Object> params, final PostProcessingContext context) {
-      final EventPostProcessorSpec spec = new ObjectMapper()
+      final EventPostProcessorSpec spec = VANILLA_OBJECT_MAPPER
           .convertValue(params, EventPostProcessorSpec.class);
       return new EventPostProcessor(spec);
     }

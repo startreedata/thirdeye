@@ -22,6 +22,7 @@ import com.google.common.collect.ImmutableMap;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+// fixme deleting a dataset should delete related metrics - longer term I feel like this metrics entity does not help - could be kept inside datasets imo
 @Singleton
 public class DatasetService extends CrudService<DatasetApi, DatasetConfigDTO> {
 

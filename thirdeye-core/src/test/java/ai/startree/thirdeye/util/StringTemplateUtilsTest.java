@@ -16,10 +16,10 @@ package ai.startree.thirdeye.util;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
@@ -39,49 +39,43 @@ public class StringTemplateUtilsTest {
   }
 
   @Test
-  public void testStringReplacement() throws IOException, ClassNotFoundException {
+  public void testStringReplacement() throws IOException {
     final Map<String, Object> values = Map.of("k1", "v1", "k2", "v2");
     final Map<String, String> map1 = StringTemplateUtils.applyContext(
-        new HashMap<>(Map.of("k", "${k1}")),
-        values);
+        new HashMap<>(Map.of("k", "${k1}")), values);
     assertThat(map1).isEqualTo(Map.of("k", "v1"));
   }
 
   @Test
-  public void testStringReplacementWithBackSlash() throws IOException, ClassNotFoundException {
+  public void testStringReplacementWithBackSlash() throws IOException {
     final Map<String, Object> values = Map.of("k1", "v1", "k2", "v2");
     final Map<String, String> map1 = StringTemplateUtils.applyContext(
-        new HashMap<>(Map.of("k\\testBackslash", "\\withBackSlashes\\${k1}")),
-        values);
+        new HashMap<>(Map.of("k\\testBackslash", "\\withBackSlashes\\${k1}")), values);
     assertThat(map1).isEqualTo(Map.of("k\\testBackslash", "\\withBackSlashes\\v1"));
   }
 
   @Test
-  public void testStringReplacementWithJsonEscapeRequired() throws IOException, ClassNotFoundException {
-    final Map<String, Object> values = Map.of(
-        "k1", "\"double quotes\"",
-        "k2", "\\\"backslash and quote\""
-    );
+  public void testStringReplacementWithJsonEscapeRequired()
+      throws IOException {
+    final Map<String, Object> values = Map.of("k1", "\"double quotes\"", "k2",
+        "\\\"backslash and quote\"");
 
     final Map<String, Object> map1 = StringTemplateUtils.applyContext(
-        new HashMap<>(Map.of(
-            "stringKey", "value with ${k1} and ${k2}")),
-        values);
-    final Map<String, Object> expected = Map.of(
-        "stringKey", "value with \"double quotes\" and \\\"backslash and quote\"");
+        new HashMap<>(Map.of("stringKey", "value with ${k1} and ${k2}")), values);
+    final Map<String, Object> expected = Map.of("stringKey",
+        "value with \"double quotes\" and \\\"backslash and quote\"");
     assertThat(map1).isEqualTo(expected);
   }
 
   @Test
   public void testFailAtMissingValue() {
     final Map<String, Object> values = Map.of("k2", "v2");
-    assertThatThrownBy(() -> StringTemplateUtils.applyContext(
-        new HashMap<>(Map.of("k", "${k1}")),
+    assertThatThrownBy(() -> StringTemplateUtils.applyContext(new HashMap<>(Map.of("k", "${k1}")),
         values)).isInstanceOf(com.fasterxml.jackson.databind.JsonMappingException.class);
   }
 
   @Test
-  public void testTemplatableFieldReplacement() throws IOException, ClassNotFoundException {
+  public void testTemplatableFieldReplacement() throws IOException {
     // check that the replacement is done correctly with Templatable<T>, for different Ts
     final String datasetKey = "datasetDto";
     final String mapKey = "map";
@@ -98,14 +92,9 @@ public class StringTemplateUtilsTest {
     final DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO().setCompletenessDelay("P7D");
     final Map<String, String> map = Map.of("test", "test2");
     final List<String> list = List.of("test", "\"quotedValue\"");
-    final Map<String, Object> properties = Map.of(datasetKey,
-        datasetConfigDTO,
-        mapKey,
-        map,
+    final Map<String, Object> properties = Map.of(datasetKey, datasetConfigDTO, mapKey, map,
         listKey, list);
-    final ObjectWithTemplatableFields output = StringTemplateUtils.applyContext(
-        input,
-        properties);
+    final ObjectWithTemplatableFields output = StringTemplateUtils.applyContext(input, properties);
 
     assertThat(output.templatableDto.getValue()).isEqualTo(datasetConfigDTO);
     assertThat(output.templatableDto.getTemplatedValue()).isNull();
@@ -118,8 +107,7 @@ public class StringTemplateUtilsTest {
   }
 
   @Test
-  public void testTemplatableReplacementValueAlreadySet()
-      throws IOException, ClassNotFoundException {
+  public void testTemplatableReplacementValueAlreadySet() throws IOException {
     // check that the replacement does not break when a Templatable<T> has its value NOT templated
     final DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO().setCompletenessDelay("P7D");
 
@@ -127,9 +115,7 @@ public class StringTemplateUtilsTest {
     input.templatableDto = Templatable.of(datasetConfigDTO);
 
     final Map<String, Object> properties = Map.of();
-    final ObjectWithTemplatableFields output = StringTemplateUtils.applyContext(
-        input,
-        properties);
+    final ObjectWithTemplatableFields output = StringTemplateUtils.applyContext(input, properties);
 
     assertThat(output.templatableDto.getValue()).isEqualTo(datasetConfigDTO);
     assertThat(output.templatableDto.getTemplatedValue()).isNull();
@@ -140,8 +126,8 @@ public class StringTemplateUtilsTest {
     final String datasetKey = "datasetDto";
 
     final ObjectWithTemplatableFields input = new ObjectWithTemplatableFields();
-    input.templatableDto = new Templatable<DatasetConfigDTO>().setTemplatedValue(templateVariableOf(
-        datasetKey));
+    input.templatableDto = new Templatable<DatasetConfigDTO>().setTemplatedValue(
+        templateVariableOf(datasetKey));
 
     // datasetKey is missing
     final Map<String, Object> properties = Map.of();
@@ -151,8 +137,7 @@ public class StringTemplateUtilsTest {
   }
 
   @Test
-  public void testNestedTemplatableReplacementWithValuesAlreadySet()
-      throws IOException, ClassNotFoundException {
+  public void testNestedTemplatableReplacementWithValuesAlreadySet() throws IOException {
 
     final DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO().setCompletenessDelay("P7D");
 
@@ -164,27 +149,25 @@ public class StringTemplateUtilsTest {
 
     final Map<String, Object> properties = Map.of();
     final ObjectWithNestedTemplatable output = StringTemplateUtils.applyContext(
-        objectWithNestedTemplatable,
-        properties);
+        objectWithNestedTemplatable, properties);
 
     assertThat(output.templatableNested.getValue()).isEqualTo(objectWithTemplatableFields);
     assertThat(output.templatableNested.getTemplatedValue()).isNull();
   }
 
   @Test
-  public void testNestedTemplatableReplacementWithHigherTemplatableTemplated()
-      throws IOException, ClassNotFoundException {
+  public void testNestedTemplatableReplacementWithHigherTemplatableTemplated() throws IOException {
     final ObjectWithNestedTemplatable objectWithNestedTemplatable = new ObjectWithNestedTemplatable();
     final String templatedValueKey = "var";
-    objectWithNestedTemplatable.setTemplatableNested(new Templatable<ObjectWithTemplatableFields>().setTemplatedValue(
-        templateVariableOf(templatedValueKey)));
+    objectWithNestedTemplatable.setTemplatableNested(
+        new Templatable<ObjectWithTemplatableFields>().setTemplatedValue(
+            templateVariableOf(templatedValueKey)));
 
     final DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO().setCompletenessDelay("P7D");
     final Map<String, Object> properties = Map.of(templatedValueKey,
         Map.of("templatableDto", Templatable.of(datasetConfigDTO)));
     final ObjectWithNestedTemplatable output = StringTemplateUtils.applyContext(
-        objectWithNestedTemplatable,
-        properties);
+        objectWithNestedTemplatable, properties);
 
     //build expected object
     final ObjectWithTemplatableFields objectWithTemplatableFields = new ObjectWithTemplatableFields();
@@ -207,8 +190,7 @@ public class StringTemplateUtilsTest {
     final DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO().setCompletenessDelay("P7D");
     final Map<String, Object> properties = Map.of(templatedValueKey, datasetConfigDTO);
     final ObjectWithNestedTemplatable output = StringTemplateUtils.applyContext(
-        objectWithNestedTemplatable,
-        properties);
+        objectWithNestedTemplatable, properties);
 
     assertThat(output.templatableNested.getValue().templatableDto.getValue()).isEqualTo(
         datasetConfigDTO);
@@ -216,12 +198,11 @@ public class StringTemplateUtilsTest {
   }
 
   @Test
-  public void testTemplateRenderingWithRecursiveVariablesForApacheCommons()
-      throws IOException, ClassNotFoundException {
+  public void testTemplateRenderingWithRecursiveVariablesForApacheCommons() throws IOException {
     final String alertTemplateDtoString = IOUtils.resourceToString("/alertTemplateDto.json",
         StandardCharsets.UTF_8);
-    final AlertTemplateDTO template = ThirdEyeSerialization.getObjectMapper()
-        .readValue(alertTemplateDtoString, AlertTemplateDTO.class);
+    final AlertTemplateDTO template = Constants.TEMPLATABLE_OBJECT_MAPPER.readValue(
+        alertTemplateDtoString, AlertTemplateDTO.class);
 
     final AlertTemplateDTO renderedTemplate = StringTemplateUtils.applyContext(template,
         ImmutableMap.<String, Object>builder()
@@ -245,14 +226,14 @@ public class StringTemplateUtilsTest {
             .build());
 
     // transforming to string to perform an exact comparison
-    final String renderedTemplateString = ThirdEyeSerialization.getObjectMapper()
-        .writeValueAsString(renderedTemplate);
+    final String renderedTemplateString = Constants.TEMPLATABLE_OBJECT_MAPPER.writeValueAsString(
+        renderedTemplate);
     final String expectedRenderedTemplateString = IOUtils.resourceToString(
-        "/alertTemplateDtoRendered.json",
-        StandardCharsets.UTF_8);
+        "/alertTemplateDtoRendered.json", StandardCharsets.UTF_8);
 
-    final ObjectMapper mapper =  new ObjectMapper();
-    assertThat(mapper.readTree(renderedTemplateString)).isEqualTo(mapper.readTree(expectedRenderedTemplateString));
+    final ObjectMapper mapper = new ObjectMapper();
+    assertThat(mapper.readTree(renderedTemplateString)).isEqualTo(
+        mapper.readTree(expectedRenderedTemplateString));
   }
 
   private static class ObjectWithTemplatableFields {
@@ -301,10 +282,8 @@ public class StringTemplateUtilsTest {
         return false;
       }
       final ObjectWithTemplatableFields that = (ObjectWithTemplatableFields) o;
-      return Objects.equals(templatableList, that.templatableList)
-          && Objects.equals(templatableMap, that.templatableMap) && Objects.equals(
-          templatableDto,
-          that.templatableDto);
+      return Objects.equals(templatableList, that.templatableList) && Objects.equals(templatableMap,
+          that.templatableMap) && Objects.equals(templatableDto, that.templatableDto);
     }
 
     @Override

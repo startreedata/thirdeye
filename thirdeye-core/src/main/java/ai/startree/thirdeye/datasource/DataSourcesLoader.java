@@ -66,9 +66,9 @@ public class DataSourcesLoader {
           .build(buildContext(dataSource));
       return requireNonNull(thirdEyeDataSource, "thirdEyeDataSource is null");
     } catch (Exception e) {
-      LOG.error(String.format("Exception creating data source. name: %s, type: %s",
+      LOG.error("Exception creating data source. name: {}, type: {}",
               dataSource.getName(),
-              dataSource.getType()),
+              dataSource.getType(),
           e);
       throw e;
     }
@@ -80,7 +80,7 @@ public class DataSourcesLoader {
       final DataSourceDTO dataSourceWithEnvVarResolved = StringTemplateUtils.applyContext(
           dataSource, values);
       return new ThirdEyeDataSourceContext().setDataSourceDTO(dataSourceWithEnvVarResolved);
-    } catch (IOException | ClassNotFoundException e) {
+    } catch (IOException e) {
       throw new RuntimeException(
           "Error while replacing env variables in datasource spec. spec: " + dataSource);
     }

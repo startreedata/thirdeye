@@ -13,30 +13,27 @@
  */
 package ai.startree.thirdeye.service;
 
-import static ai.startree.thirdeye.RequestCache.buildCache;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static ai.startree.thirdeye.util.ResourceUtils.ensure;
+import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
+import static com.google.common.base.Preconditions.checkState;
 
-import ai.startree.thirdeye.RequestCache;
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.AnomalyFeedbackApi;
 import ai.startree.thirdeye.spi.api.AnomalyStatsApi;
-import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
-import ai.startree.thirdeye.spi.auth.ResourceIdentifier;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
-import ai.startree.thirdeye.spi.datalayer.Predicate;
-import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
+import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyFeedbackDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import com.google.common.collect.ImmutableMap;
-import java.util.ArrayList;
-import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Singleton
 public class AnomalyService extends CrudService<AnomalyApi, AnomalyDTO> {
@@ -54,48 +51,23 @@ public class AnomalyService extends CrudService<AnomalyApi, AnomalyDTO> {
       .build();
 
   private final AnomalyManager anomalyManager;
-  private final AlertManager alertManager;
-  private final AnomalyMetricsProvider anomalyMetricsProvider;
 
   @Inject
   public AnomalyService(
       final AnomalyManager anomalyManager,
-      final AlertManager alertManager,
-      final AuthorizationManager authorizationManager,
-      final AnomalyMetricsProvider anomalyMetricsProvider) {
+      final AuthorizationManager authorizationManager) {
     super(authorizationManager, anomalyManager, API_TO_INDEX_FILTER_MAP);
     this.anomalyManager = anomalyManager;
-    this.alertManager = alertManager;
-    this.anomalyMetricsProvider = anomalyMetricsProvider;
-  }
-
-  @Override
-  protected RequestCache createRequestCache() {
-    return super.createRequestCache()
-        .setAlerts(buildCache(alertManager::findById));
   }
 
   @Override
   protected AnomalyDTO toDto(final AnomalyApi api) {
-    final AnomalyDTO dto = ApiBeanMapper.toDto(api);
-    // todo authz - once namespace resolver is removed - simply inherit from the alert id
-    final ResourceIdentifier authId = authorizationManager.resourceId(dto);
-    dto.setAuth(new AuthorizationConfigurationDTO().setNamespace(authId.getNamespace()));
-    return dto;
+    return ApiBeanMapper.toDto(api);
   }
 
   @Override
-  protected AnomalyApi toApi(final AnomalyDTO dto, final RequestCache cache) {
-    final AnomalyApi anomalyApi = ApiBeanMapper.toApi(dto);
-    optional(anomalyApi.getAlert())
-        .filter(alertApi -> alertApi.getId() != null)
-        .ifPresent(alertApi -> alertApi.setName(cache.getAlerts()
-            .getUnchecked(alertApi.getId())
-            .getName()));
-    // fixme cyril authz - implement migration to written namespace - see how it's done in RcaInvestigationService
-    anomalyApi.setAuth(new AuthorizationConfigurationApi().setNamespace(authorizationManager.resourceId(
-        dto).getNamespace()));
-    return anomalyApi;
+  protected AnomalyApi toApi(final AnomalyDTO dto) {
+    return ApiBeanMapper.toApi(dto);
   }
 
   public void setFeedback(final ThirdEyeServerPrincipal principal, final Long id,
@@ -107,7 +79,7 @@ public class AnomalyService extends CrudService<AnomalyApi, AnomalyDTO> {
     feedbackDTO.setUpdatedBy(principal.getName());
     dto.setFeedback(feedbackDTO);
     anomalyManager.updateAnomalyFeedback(dto);
- 
+
     if (dto.isChild()) {
       optional(anomalyManager.findParent(dto))
           .ifPresent(p -> {
@@ -117,16 +89,29 @@ public class AnomalyService extends CrudService<AnomalyApi, AnomalyDTO> {
     }
   }
 
-  public AnomalyStatsApi stats(final ThirdEyePrincipal principal, final Long startTime, final Long endTime) {
-    final List<Predicate> predicates = new ArrayList<>();
-    optional(startTime)
-        .ifPresent(start -> predicates.add(Predicate.GE("startTime", startTime)));
-    optional(endTime)
-        .ifPresent(end -> predicates.add(Predicate.LE("endTime", endTime)));
-    final Predicate predicate = predicates.isEmpty()
-        ? null : Predicate.AND(predicates.toArray(Predicate[]::new));
-    return anomalyMetricsProvider.computeAnomalyStats(principal, predicate);
+  public AnomalyStatsApi stats(final ThirdEyePrincipal principal, final @Nullable Long startTime,
+      final @Nullable Long endTime) {
+    final AnomalyFilter filter = new AnomalyFilter()
+        .setStartTimeIsGte(startTime)
+        .setEndTimeIsLte(endTime);
+    final @Nullable String namespace = authorizationManager.currentNamespace(principal);
+    // todo cyril authz usage of dummy entity for access check - avoid this
+    authorizationManager.ensureCanRead(principal, new AnomalyDTO().setAuth(new AuthorizationConfigurationDTO().setNamespace(namespace)));
+    return anomalyManager.anomalyStats(namespace, filter);
   }
-  
-  // fixme cyril authz implement validate and ensure alert id is set - anomalies can be created manually
+
+  @Override
+  protected void validate(final ThirdEyePrincipal principal, final AnomalyApi api,
+      @Nullable final AnomalyDTO existing) {
+    super.validate(principal, api, existing);
+    ensureExists(api.getAlert(), "alert must be set");
+    final long alertId = ensureExists(api.getAlert().getId(), "alert id must be set");
+    
+    if (existing != null) {
+      final Long existingAlertId = existing.getDetectionConfigId();
+      checkState(existingAlertId != null, "alert id should be set in the existing anomaly");
+      ensure(alertId == existingAlertId, "Edited alert id and existing alert id should be the same");
+    }
+    // not validating that the alert id is a valid one - the authorization manager will take care of this 
+  }
 }

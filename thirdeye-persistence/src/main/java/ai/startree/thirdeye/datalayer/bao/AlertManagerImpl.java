@@ -29,7 +29,9 @@ import com.google.inject.Singleton;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.Metrics;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Singleton
 public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
@@ -104,6 +106,23 @@ public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
   @Override
   public List<AlertDTO> findAllActive() {
     return findByPredicate(Predicate.EQ("active", true));
+  }
+
+  @Override
+  public List<AlertDTO> findAllActiveInNamespace(final @Nullable String namespace) {
+    return
+        findByPredicate(
+            Predicate.AND(
+                Predicate.EQ("active", true),
+                Predicate.OR(
+                    Predicate.EQ("namespace", namespace),
+                    // existing entities are not migrated automatically so they can have their namespace column to null in the index table, even if they do belong to a namespace 
+                    //  todo cyril authz - prepare migration scripts - or some logic to ensure all entities are eventually migrated
+                    Predicate.EQ("namespace", null)
+                )
+            ))
+        // we still need to perform in-app filtering until all entities namespace are migrated in db - see above 
+        .stream().filter(e -> Objects.equals(e.namespace(), namespace)).toList();
   }
 
   public Long countActive() {

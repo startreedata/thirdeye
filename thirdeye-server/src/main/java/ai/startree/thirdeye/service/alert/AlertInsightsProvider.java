@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.service.alert;
 
+import static ai.startree.thirdeye.mapper.ApiBeanMapper.toAlertDto;
 import static ai.startree.thirdeye.mapper.ApiBeanMapper.toAlertTemplateApi;
 import static ai.startree.thirdeye.spi.Constants.UTC_TIMEZONE;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DATASET_NOT_FOUND_IN_NAMESPACE;
@@ -35,6 +36,7 @@ import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertInsightsApi;
 import ai.startree.thirdeye.spi.api.AlertInsightsRequestApi;
 import ai.startree.thirdeye.spi.api.AnalysisRunInfo;
+import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
@@ -74,7 +76,6 @@ public class AlertInsightsProvider {
   private static final DateTime TIME_ORIGIN_FOR_TZ_DIFF_3 = new DateTime(2023, 9, 12, 0, 0, 0,
       ISOChronology.getInstanceUTC());
 
-  private static final Interval NOT_USED_INTERVAL = new Interval(0L, 0L, DateTimeZone.UTC);
   // computer clock difference is usually order of seconds - but here taking 1 hour is safe and does not impact the logic
   private static final long COMPUTER_CLOCK_MARGIN_MILLIS = 3600_000;
   private static final long FETCH_TIMEOUT_MILLIS = 30_000;
@@ -99,12 +100,16 @@ public class AlertInsightsProvider {
 
   public AlertInsightsApi getInsights(final ThirdEyePrincipal principal,
       final AlertInsightsRequestApi request) {
-    // fixme cyril add authz on template, dataset, datasource, etc - next PR - requires redesign
     final AlertApi alertApi = request.getAlert();
-    final String namespace = authorizationManager.currentNamespace(principal);
+    // creating a dummy entity to check access then inject namespace - rewrite this - todo authz possible to redesign this?
+    final AlertDTO alertDto = toAlertDto(alertApi);
+    authorizationManager.enrichNamespace(principal, alertDto);
+    authorizationManager.ensureCanRead(principal, alertDto);
+    alertApi.setAuth(new AuthorizationConfigurationApi().setNamespace(alertDto.namespace()));
+    final String namespace = alertDto.namespace();
+    
     try {
-      final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertApi,
-          NOT_USED_INTERVAL);
+      final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertApi, namespace);
       return buildInsights(templateWithProperties, namespace);
     } catch (final WebApplicationException e) {
       // todo cyril for debug - can be removed later
@@ -122,11 +127,9 @@ public class AlertInsightsProvider {
    * This method is not responsible for checking authz of the alertDto
    */
   public AlertInsightsApi getInsights(final ThirdEyePrincipal principal, final AlertDTO alertDTO) {
-    // fixme cyril add authz on template, dataset, datasource, etc  - next PR - requires redesign
-    authorizationManager.enrichNamespace(principal, alertDTO);
+    // principal not used on purpose - kept because enforced by Architecture tests
     try {
-      final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertDTO,
-          NOT_USED_INTERVAL);
+      final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertDTO);
       return buildInsights(templateWithProperties, alertDTO.namespace());
     } catch (final WebApplicationException e) {
       throw e;

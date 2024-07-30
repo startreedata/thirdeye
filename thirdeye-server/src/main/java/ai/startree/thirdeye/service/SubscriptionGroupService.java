@@ -110,10 +110,11 @@ public class SubscriptionGroupService extends
 
     // For new Subscription Group or existing Subscription Group with different name
     if (existing == null || !existing.getName().equals(api.getName())) {
-      final List<SubscriptionGroupDTO> sameName = dtoManager.findByName(api.getName());
-      final List<SubscriptionGroupDTO> sameNameSameNamespace = authorizationManager.filterByNamespace(principal,
-          optional(api.getAuth()).map(AuthorizationConfigurationApi::getNamespace).orElse(null), sameName);
-      ensure(sameNameSameNamespace.isEmpty(), ERR_DUPLICATE_NAME, api.getName());
+      final SubscriptionGroupDTO sameNameSameNamespace = dtoManager.findUniqueByNameAndNamespace(api.getName(),
+          optional(api.getAuth()).map(AuthorizationConfigurationApi::getNamespace)
+              .orElse(authorizationManager.currentNamespace(principal))
+          );
+      ensure(sameNameSameNamespace == null, ERR_DUPLICATE_NAME, api.getName());
     }
     optional(api.getAlertAssociations())
         .ifPresent(l -> l.forEach(SubscriptionGroupService::validateAlertAssociation));

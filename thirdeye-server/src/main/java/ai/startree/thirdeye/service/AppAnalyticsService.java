@@ -14,32 +14,26 @@
 package ai.startree.thirdeye.service;
 
 import static ai.startree.thirdeye.spi.Constants.METRICS_CACHE_TIMEOUT;
-import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.spi.api.AppAnalyticsApi;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
-import ai.startree.thirdeye.spi.datalayer.Predicate;
+import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
+import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import com.google.common.base.Suppliers;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.Metrics;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-import javax.ws.rs.BadRequestException;
-import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,28 +44,21 @@ public class AppAnalyticsService {
 
   private final AlertManager alertManager;
   private final AlertTemplateRenderer renderer;
-  private final AnomalyMetricsProvider anomalyMetricsProvider;
   private final AuthorizationManager authorizationManager;
-
-  // FIXME CYRIL need to implement a cache with namespace key 
-  public Supplier<Set<MonitoredMetricWrapper>> uniqueMonitoredMetricsSupplier =
-      Suppliers.memoizeWithExpiration(this::getUniqueMonitoredMetrics,
-          METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES)::get;
+  private final AnomalyManager anomalyDao;
 
   @Inject
-  public AppAnalyticsService(final AlertManager alertManager,
-      final AlertTemplateRenderer renderer,
-      final AnomalyMetricsProvider anomalyMetricsProvider,
-      final AuthorizationManager authorizationManager
-  ) {
+  public AppAnalyticsService(final AlertManager alertManager, final AlertTemplateRenderer renderer,
+      final AuthorizationManager authorizationManager, final AnomalyManager anomalyManager) {
     this.alertManager = alertManager;
     this.renderer = renderer;
-    this.anomalyMetricsProvider = anomalyMetricsProvider;
     this.authorizationManager = authorizationManager;
+    this.anomalyDao = anomalyManager;
+    // todo cyril authz global entity metrics should be maintained by DAOs - this one requires access to the alertTemplate manager though
     Gauge.builder("thirdeye_active_distinct_metrics",
-            () -> uniqueMonitoredMetricsSupplier.get().size())
+            Suppliers.memoizeWithExpiration(this::getUniqueMonitoredMetrics,
+                METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES))
         .register(Metrics.globalRegistry);
-    
   }
 
   public String appVersion(final @Nullable ThirdEyePrincipal principal) {
@@ -80,44 +67,47 @@ public class AppAnalyticsService {
     return AppAnalyticsService.class.getPackage().getImplementationVersion();
   }
 
-  private Set<MonitoredMetricWrapper> getUniqueMonitoredMetrics() {
-    // fixme cyril add authz
-    return alertManager.findAllActive().stream()
-        .map(this::getMetadata)
-        .filter(Objects::nonNull)
-        .map(this::wrapMonitoredMetric)
-        .collect(Collectors.toSet());
+  public AppAnalyticsApi getAppAnalytics(final ThirdEyePrincipal principal,
+      final @Nullable Long startTime, final @Nullable Long endTime) {
+    final AnomalyFilter filter = new AnomalyFilter().setStartTimeIsGte(startTime)
+        .setEndTimeIsLte(endTime);
+
+    final @Nullable String namespace = authorizationManager.currentNamespace(principal);
+
+    // ensure the user has read access to alert and entities
+    // todo cyril authz - usage of dummy entities for access check - avoid
+    authorizationManager.ensureCanRead(principal, new AlertDTO().setAuth(new AuthorizationConfigurationDTO().setNamespace(namespace)));
+    authorizationManager.ensureCanRead(principal, new AnomalyDTO().setAuth(new AuthorizationConfigurationDTO().setNamespace(namespace)));
+
+    return new AppAnalyticsApi().setVersion(appVersion(null))
+        .setnMonitoredMetrics(getUniqueMonitoredMetricsInNamespace(namespace))
+        .setAnomalyStats(anomalyDao.anomalyStats(namespace, filter));
   }
 
-  private AlertMetadataDTO getMetadata(final AlertDTO alertDTO) {
-    try {
-      // Interval does not have significance in this case, just a placeholder.
-      return renderer.renderAlert(alertDTO, new Interval(1L, 2L)).getMetadata();
-    } catch (final IOException | ClassNotFoundException | BadRequestException e) {
-      log.warn(String.format("Trouble while rendering alert, %s. id : %d",
-          alertDTO.getName(),
-          alertDTO.getId()), e);
-      return null;
+  private int getUniqueMonitoredMetricsInNamespace(final @Nullable String namespace) {
+    return Math.toIntExact(alertManager.findAllActiveInNamespace(namespace)
+        .stream()
+        .map(alertDTO -> renderer.renderAlert(alertDTO).getMetadata())
+        .filter(Objects::nonNull)
+        .map(MonitoredMetricKey::fromMetadata)
+        .distinct().count());
+  }
+  
+  // for internal use only - see getUniqueMonitoredMetricsWithNamespace
+  private int getUniqueMonitoredMetrics() {
+    return Math.toIntExact(alertManager.findAllActive()
+        .stream()
+        .map(alertDTO -> renderer.renderAlert(alertDTO).getMetadata())
+        .filter(Objects::nonNull)
+        .map(MonitoredMetricKey::fromMetadata)
+        .distinct().count());
+  }
+
+  private record MonitoredMetricKey(String datasource, String dataset, String metric) {
+
+    public static MonitoredMetricKey fromMetadata(final AlertMetadataDTO metadata) {
+      return new MonitoredMetricKey(metadata.getDatasource().getName(),
+          metadata.getDataset().getDataset(), metadata.getMetric().getName());
     }
   }
-
-  private MonitoredMetricWrapper wrapMonitoredMetric(final AlertMetadataDTO metadata) {
-    return new MonitoredMetricWrapper(metadata.getDatasource().getName(),
-        metadata.getDataset().getDataset(), metadata.getMetric().getName());
-  }
-
-  public AppAnalyticsApi getAppAnalytics(final ThirdEyePrincipal principal, final Long startTime, final Long endTime) {
-    final List<Predicate> predicates = new ArrayList<>();
-    optional(startTime).ifPresent(start -> predicates.add(Predicate.GE("startTime", startTime)));
-    optional(endTime).ifPresent(end -> predicates.add(Predicate.LE("endTime", endTime)));
-    final Predicate predicate = predicates.isEmpty()
-        ? null : Predicate.AND(predicates.toArray(Predicate[]::new));
-    return new AppAnalyticsApi()
-        .setVersion(appVersion(null))
-        // FIXME CYRIL need authz filter
-        .setnMonitoredMetrics(getUniqueMonitoredMetrics().size())
-        .setAnomalyStats(anomalyMetricsProvider.computeAnomalyStats(principal, predicate));
-  }
-
-  private record MonitoredMetricWrapper(String datasource, String dataset, String metric) {}
 }

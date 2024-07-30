@@ -14,7 +14,6 @@
 package ai.startree.thirdeye.plugins.datasource.pinot;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
-import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.plugins.datasource.pinot.resultset.ThirdEyeResultSet;
 import ai.startree.thirdeye.plugins.datasource.pinot.resultset.ThirdEyeResultSetGroup;
@@ -32,6 +31,9 @@ import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.Tag;
+import io.micrometer.core.instrument.binder.cache.GuavaCacheMetrics;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.HashMap;
@@ -60,7 +62,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   private final PinotDatasetReader datasetReader;
   private final LoadingCache<PinotQuery, ThirdEyeResultSetGroup> queryCache;
   private final PinotThirdEyeDataSourceConfig config;
-  private final PinotConnectionManager connectionManager;
+  private final Runnable queryExecutorCloser;
 
   /* Use case: Log Query Cache stats few min */
   private long queryCacheTs = 0;
@@ -68,23 +70,24 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   @Inject
   public PinotThirdEyeDataSource(
       final ThirdEyeDataSourceContext context,
-      final SqlExpressionBuilder sqlExpressionBuilder,
-      final PinotSqlLanguage sqlLanguage,
       final PinotDatasetReader datasetReader,
-      final PinotConnectionManager connectionManager,
       final PinotQueryExecutor queryExecutor,
       final PinotThirdEyeDataSourceConfig config) {
-    this.sqlExpressionBuilder = sqlExpressionBuilder;
-    this.sqlLanguage = sqlLanguage;
+    this.sqlExpressionBuilder = new PinotSqlExpressionBuilder();
+    this.sqlLanguage = new PinotSqlLanguage();
     this.datasetReader = datasetReader;
 
     this.dataSourceDTO = context.getDataSourceDTO();
-    name = context.getDataSourceDTO().getName();
-    this.connectionManager = connectionManager;
+    this.name = context.getDataSourceDTO().getName();
 
     /* Uses LoadingCache to cache queries */
-    queryCache = requireNonNull(buildQueryCache(queryExecutor),
-        String.format("%s doesn't connect to Pinot or cache is not initialized.", getName()));
+    this.queryCache = buildQueryCache(queryExecutor);
+    GuavaCacheMetrics.monitor(Metrics.globalRegistry, queryCache, "thirdeye_cache_pinot_query",
+        List.of(Tag.of("datasource_name", name),
+            Tag.of("namespace", optional(dataSourceDTO.namespace()).orElse("null"))));
+    
+    // keep reference to the queryExecutor to close it at the end
+    this.queryExecutorCloser = queryExecutor::close;
     this.config = config;
   }
 
@@ -198,6 +201,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
     return false;
   }
 
+  // todo cyril healthcheck should be abstracted by the controller
   private boolean validate0() throws IOException, ExecutionException {
     final PinotHealthCheckConfiguration healthCheck = config.getHealthCheck();
     if (healthCheck == null || !healthCheck.isEnabled()) {
@@ -253,7 +257,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
 
   @Override
   public void close() {
-    connectionManager.close();
+    queryExecutorCloser.run();
     datasetReader.close();
   }
 

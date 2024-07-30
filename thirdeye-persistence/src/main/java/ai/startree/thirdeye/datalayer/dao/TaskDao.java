@@ -19,12 +19,11 @@ import ai.startree.thirdeye.datalayer.DatabaseClient;
 import ai.startree.thirdeye.datalayer.DatabaseOrm;
 import ai.startree.thirdeye.datalayer.entity.TaskEntity;
 import ai.startree.thirdeye.datalayer.mapper.TaskEntityMapper;
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
-import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -34,8 +33,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import org.apache.commons.collections4.CollectionUtils;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +43,6 @@ public class TaskDao {
 
   private static final Logger LOG = LoggerFactory.getLogger(TaskDao.class);
   private static final boolean IS_DEBUG = LOG.isDebugEnabled();
-  private static final ObjectMapper OBJECT_MAPPER = ThirdEyeSerialization.getObjectMapper();
 
   private final DatabaseOrm databaseOrm;
   private final DatabaseClient databaseClient;
@@ -69,7 +67,7 @@ public class TaskDao {
   }
 
   private TaskDTO toDto(final TaskEntity entity) throws JsonProcessingException {
-    TaskDTO dto = OBJECT_MAPPER.readValue(entity.getJsonVal(), TaskDTO.class);
+    TaskDTO dto = Constants.TEMPLATABLE_OBJECT_MAPPER.readValue(entity.getJsonVal(), TaskDTO.class);
     dto.setId(entity.getId());
     dto.setCreateTime(entity.getCreateTime());
     dto.setUpdateTime(entity.getUpdateTime());
@@ -89,7 +87,7 @@ public class TaskDao {
   }
 
   private String toJsonString(final TaskDTO dto) throws JsonProcessingException {
-    return OBJECT_MAPPER.writeValueAsString(dto);
+    return Constants.TEMPLATABLE_OBJECT_MAPPER.writeValueAsString(dto);
   }
 
   public Long put(final TaskDTO pojo) {
@@ -205,24 +203,18 @@ public class TaskDao {
     requireNonNull(daoFilter.getPredicate(),
         "If the predicate is null, you can just do "
             + "getAll() which doesn't need to fetch IDs first");
-    return get(daoFilter.getPredicate());
-  }
-
-  public List<TaskDTO> get(final Map<String, Object> filterParams) {
-    final Predicate[] childPredicates = new Predicate[filterParams.size()];
-    int index = 0;
-    for (final Entry<String, Object> entry : filterParams.entrySet()) {
-      childPredicates[index] = Predicate.EQ(entry.getKey(), entry.getValue());
-      index = index + 1;
-    }
-    return get(Predicate.AND(childPredicates));
+    return get(daoFilter.getPredicate(), daoFilter.getLimit());
   }
 
   public List<TaskDTO> get(final Predicate predicate) {
+    return get(predicate, null);
+  }
+  
+  public List<TaskDTO> get(final Predicate predicate, @Nullable Long limit) {
     try {
       final List<TaskEntity> entities = databaseClient.executeTransaction(
           (connection) -> databaseOrm.findAll(
-              predicate, null, null, TaskEntity.class, connection),
+              predicate, limit, null, TaskEntity.class, connection),
           Collections.emptyList());
       return toDto(entities);
     } catch (final JsonProcessingException | SQLException e) {

@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.auth;
 
+import static ai.startree.thirdeye.spi.Constants.VANILLA_OBJECT_MAPPER;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
@@ -20,8 +21,9 @@ import ai.startree.thirdeye.auth.oauth.OAuthConfiguration;
 import ai.startree.thirdeye.spi.auth.AuthenticationType;
 import ai.startree.thirdeye.spi.auth.OpenIdConfigurationProvider;
 import ai.startree.thirdeye.spi.auth.OpenIdConfigurationProvider.Factory;
+import ai.startree.thirdeye.spi.auth.ThirdEyeAuthenticator;
+import ai.startree.thirdeye.spi.auth.ThirdEyeAuthenticator.AuthTokenAndNamespace;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthenticator.OauthThirdEyeAuthenticatorFactory;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Singleton;
 import io.dropwizard.auth.Authenticator;
 import java.util.HashMap;
@@ -32,14 +34,13 @@ public class AuthRegistry {
 
   public static final String OAUTH_DEFAULT = "oauth-default";
   public static final String OPENID_DEFAULT = "openid-default";
-  public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private final Map<String, OauthThirdEyeAuthenticatorFactory> oauthFactories = new HashMap<>();
   private final Map<String, OpenIdConfigurationProvider.Factory> openIdConfigurationFactories = new HashMap<>();
 
   @SuppressWarnings("unchecked")
   private static Map<String, Object> toMap(final OAuthConfiguration oauthConfig) {
     // TODO spyne: oauthConfig should be moved to a plugin style config
-    return OBJECT_MAPPER.convertValue(oauthConfig, Map.class);
+    return VANILLA_OBJECT_MAPPER.convertValue(oauthConfig, Map.class);
   }
 
   public void registerOAuthFactory(OauthThirdEyeAuthenticatorFactory f) {
@@ -57,29 +58,26 @@ public class AuthRegistry {
     openIdConfigurationFactories.put(f.getName(), f);
   }
 
-  private OauthThirdEyeAuthenticatorFactory getDefaultOAuthFactory() {
-    return requireNonNull(oauthFactories.get(OAUTH_DEFAULT), "oauth plugin not loaded!");
-  }
-
   @SuppressWarnings("unchecked")
-  public Authenticator<String, ThirdEyeServerPrincipal> createOAuthAuthenticator(
+  public Authenticator<AuthTokenAndNamespace, ThirdEyeServerPrincipal> createOAuthAuthenticator(
       final OAuthConfiguration oauthConfig) {
     final Map<String, Object> oauthConfigMap = toMap(oauthConfig);
 
-    final var authenticator = requireNonNull(getDefaultOAuthFactory().build(oauthConfigMap),
+    final OauthThirdEyeAuthenticatorFactory defaultOAuthFactory = requireNonNull(
+        oauthFactories.get(OAUTH_DEFAULT), "oauth plugin not loaded!");
+    final ThirdEyeAuthenticator<AuthTokenAndNamespace> authenticator = requireNonNull(
+        defaultOAuthFactory.build(oauthConfigMap),
         "failed to build authenticator");
     return credentials -> authenticator.authenticate(credentials)
-        .map(p -> new ThirdEyeServerPrincipal(p.getName(), credentials, AuthenticationType.OAUTH));
+        .map(p -> new ThirdEyeServerPrincipal(p.getName(), credentials.authToken(), AuthenticationType.OAUTH,
+            credentials.namespace()));
   }
 
   public OpenIdConfigurationProvider createDefaultOpenIdConfigurationProvider(
       final OAuthConfiguration oAuthConfiguration) {
-    return requireNonNull(getDefaultOpenIdConfigurationFactory().build(toMap(oAuthConfiguration)),
-        "failed to build OpenIdConfigurationProvider");
-  }
-
-  private Factory getDefaultOpenIdConfigurationFactory() {
-    return requireNonNull(openIdConfigurationFactories.get(OPENID_DEFAULT),
+    final Factory factory = requireNonNull(openIdConfigurationFactories.get(OPENID_DEFAULT),
         "OpenIdConfigurationProvider plugin not loaded!");
+    return requireNonNull(factory.build(toMap(oAuthConfiguration)),
+        "failed to build OpenIdConfigurationProvider");
   }
 }

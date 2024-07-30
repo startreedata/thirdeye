@@ -18,6 +18,8 @@ import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import java.util.List;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * This class is generated using IntelliJ IDEA.
@@ -57,8 +59,8 @@ public class DelegateDatasetConfigManager implements DatasetConfigManager {
   }
 
   @Override
-  public List<DatasetConfigDTO> findByName(final String name) {
-    return delegate.findByName(name);
+  public @Nullable DatasetConfigDTO findUniqueByNameAndNamespace(final @NonNull String name, final @Nullable String namespace) {
+    return delegate.findUniqueByNameAndNamespace(name, namespace);
   }
 
   @Override

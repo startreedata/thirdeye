@@ -38,6 +38,7 @@ public class PluginClassLoader extends URLClassLoader {
       .add("org.slf4j")
       .add("com.mysql")
       .add("javax.activation")
+      .add("com.fasterxml.jackson")
       .build();
 
   private final ClassLoader parentClassLoader;

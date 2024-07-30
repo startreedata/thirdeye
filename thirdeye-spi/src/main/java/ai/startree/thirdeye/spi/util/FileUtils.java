@@ -15,8 +15,7 @@ package ai.startree.thirdeye.spi.util;
 
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.spi.json.ThirdEyeSerialization;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import ai.startree.thirdeye.spi.Constants;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,12 +29,10 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class FileUtils {
 
-  private static final ObjectMapper OBJECT_MAPPER = ThirdEyeSerialization.getObjectMapper();
-
   @NonNull
   public static <T> T readJsonObject(File file, Class<T> clazz) {
     try {
-      return OBJECT_MAPPER.readValue(file, clazz);
+      return Constants.TEMPLATABLE_OBJECT_MAPPER.readValue(file, clazz);
     } catch (IOException e) {
       throw new RuntimeException(String.format("Could not read file: %s as %s",
           file.getAbsolutePath(),
@@ -46,7 +43,7 @@ public class FileUtils {
   @NonNull
   public static <T> T readJsonObject(InputStream file, Class<T> clazz) {
     try {
-      return OBJECT_MAPPER.readValue(file, clazz);
+      return Constants.TEMPLATABLE_OBJECT_MAPPER.readValue(file, clazz);
     } catch (IOException e) {
       throw new RuntimeException(String.format("Could not inputStream as %s",
           clazz.getSimpleName()));

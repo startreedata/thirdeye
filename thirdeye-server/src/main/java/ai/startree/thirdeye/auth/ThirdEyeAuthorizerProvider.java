@@ -19,6 +19,7 @@ import ai.startree.thirdeye.spi.auth.AccessType;
 import ai.startree.thirdeye.spi.auth.ResourceIdentifier;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
+import java.util.Collections;
 import java.util.List;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -31,6 +32,8 @@ public class ThirdEyeAuthorizerProvider implements ThirdEyeAuthorizer {
   public final static ThirdEyeAuthorizer ALWAYS_ALLOW = new AlwaysAllowAuthorizer();
 
   public final static ThirdEyeAuthorizer ALWAYS_DENY = new AlwaysDenyAuthorizer();
+  
+  private final static List<String> LIST_OF_NULL = Collections.singletonList(null);
 
   private final AccessControlConfiguration config;
   private ThirdEyeAuthorizer thirdEyeAuthorizer = null;
@@ -91,7 +94,7 @@ public class ThirdEyeAuthorizerProvider implements ThirdEyeAuthorizer {
 
     @Override
     public @NonNull List<String> listNamespaces(final ThirdEyePrincipal principal) {
-      return List.of();
+      return LIST_OF_NULL;
     }
   }
 
@@ -105,7 +108,7 @@ public class ThirdEyeAuthorizerProvider implements ThirdEyeAuthorizer {
 
     @Override
     public @NonNull List<String> listNamespaces(final ThirdEyePrincipal principal) {
-      return List.of();
+      return LIST_OF_NULL;
     }
   }
 }

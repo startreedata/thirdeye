@@ -30,14 +30,12 @@ import ai.startree.thirdeye.ThirdEyeServerModule;
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.alert.EvaluationContextProcessor;
 import ai.startree.thirdeye.auth.AuthorizationManager;
-import ai.startree.thirdeye.auth.NamespaceResolver;
 import ai.startree.thirdeye.datalayer.DataSourceBuilder;
 import ai.startree.thirdeye.datalayer.DatabaseClient;
 import ai.startree.thirdeye.datalayer.DatabaseOrm;
 import ai.startree.thirdeye.datalayer.ThirdEyePersistenceModule;
 import ai.startree.thirdeye.datalayer.bao.AlertManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.TaskManagerImpl;
-import ai.startree.thirdeye.datalayer.core.EnumerationItemDeleter;
 import ai.startree.thirdeye.datalayer.core.EnumerationItemMaintainer;
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.datalayer.dao.TaskDao;
@@ -69,7 +67,6 @@ import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer.ThirdEyeAuthorizerFactory;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.bao.AbstractManager;
-import ai.startree.thirdeye.spi.detection.health.DetectionHealth;
 import ai.startree.thirdeye.worker.task.TaskDriver;
 import ai.startree.thirdeye.worker.task.TaskDriverRunnable;
 import ai.startree.thirdeye.worker.task.runner.DetectionPipelineTaskRunner;
@@ -159,14 +156,12 @@ public class ArchitectureTest {
 
   @Test
   public void testNoUnknownUserOfNonSecuredDbLayerClasses() {
-    // FIXME CYRIL  apart from services - these are the class allowed to use non secured db layers
-    // review, and enforce namespace isolation where necessary
-    //  or all methods should require an identity
+    // TODO CYRIL authz  apart from services - these are the class allowed to use non secured db layers
+    //  review, and enforce namespace isolation where necessary
     final Class<?>[] NON_SECURED_DB_LAYER_USERS_WHITELIST = {NotificationTaskRunner.class,
         DetectionPipelineTaskRunner.class,
         TaskDriverRunnable.class,
         TaskDriver.class,
-        DetectionHealth.class,
         DetectionPipelineJob.class,
         NotificationPipelineJob.class,
         MockEventsLoader.class,
@@ -188,11 +183,9 @@ public class ArchitectureTest {
         PlanExecutor.class,
         DataSourceCache.class,
         EnumerationItemMaintainer.class,
-        EnumerationItemDeleter.class,
         TaskManagerImpl.class,
         AlertManagerImpl.class,
         DataSourceOnboarder.class, // OK - REVIEWED ON APRIL 12 2024
-        NamespaceResolver.class,
         EvaluationContextProcessor.class,
         AlertTemplateRenderer.class,
         AuthorizationManager.class // OK - REVIEW ON MAY 6 2024

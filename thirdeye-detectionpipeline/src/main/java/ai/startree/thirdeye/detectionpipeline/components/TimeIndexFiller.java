@@ -66,7 +66,7 @@ public class TimeIndexFiller implements IndexFiller<TimeIndexFillerSpec> {
   }
 
   private static final NullReplacer WITH_ZERO_NULL_REPLACER = new NullReplacerRegistry().buildNullReplacer(
-      "FILL_WITH_ZEROES", new HashMap<>());
+      "FILL_WITH_ZEROES", Map.of());
 
   private static final TimeLimitInferenceStrategy DEFAULT_MIN_TIME_INFERENCE_STRATEGY = TimeLimitInferenceStrategy.FROM_DATA;
   private static final TimeLimitInferenceStrategy DEFAULT_MAX_TIME_INFERENCE_STRATEGY = TimeLimitInferenceStrategy.FROM_DETECTION_TIME;

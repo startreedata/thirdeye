@@ -13,15 +13,12 @@
  */
 package ai.startree.thirdeye.plugins.datasource.pinot.restclient;
 
-import static ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSourceUtils.buildConfig;
+import static ai.startree.thirdeye.spi.Constants.VANILLA_OBJECT_MAPPER;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSourceConfig;
-import ai.startree.thirdeye.spi.datalayer.dto.DataSourceMetaBean;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
@@ -43,40 +40,22 @@ import org.slf4j.LoggerFactory;
 public class PinotControllerRestClient {
 
   private static final Logger LOG = LoggerFactory.getLogger(PinotControllerRestClient.class);
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final String PINOT_TABLES_ENDPOINT = "/tables/";
   private static final String PINOT_TABLES_ENDPOINT_TEMPLATE = "/tables/%s";
   private static final String PINOT_SCHEMA_ENDPOINT_TEMPLATE = "/schemas/%s";
   private static final String PINOT_TABLE_CONFIG_ENDPOINT_TEMPLATE = "/tables/%s/schema";
 
   private final HttpHost pinotControllerHost;
-  private final PinotControllerRestClientSupplier pinotControllerRestClientSupplier;
+  private final PinotControllerHttpClientSupplier pinotControllerRestClientSupplier;
 
   @Inject
   public PinotControllerRestClient(final PinotThirdEyeDataSourceConfig config,
-      final PinotControllerRestClientSupplier pinotControllerRestClientSupplier) {
+      final PinotControllerHttpClientSupplier pinotControllerRestClientSupplier) {
 
     pinotControllerHost = new HttpHost(config.getControllerHost(),
         config.getControllerPort(),
         config.getControllerConnectionScheme());
     this.pinotControllerRestClientSupplier = pinotControllerRestClientSupplier;
-  }
-
-  /**
-   * TODO shounak refactor constructor
-   */
-  @Deprecated
-  public PinotControllerRestClient(final DataSourceMetaBean dataSourceMeta,
-      final String dataSourceType) {
-    final Map<String, Object> properties = dataSourceMeta.getProperties();
-    Preconditions.checkArgument(dataSourceType.equals("pinot-sql"),
-        "This constructor is only called from pinot-sql connector");
-    final PinotThirdEyeDataSourceConfig config = buildConfig(properties);
-    pinotControllerHost = new HttpHost(config.getControllerHost(),
-        config.getControllerPort(),
-        config.getControllerConnectionScheme());
-
-    pinotControllerRestClientSupplier = null;
   }
 
   public List<String> getAllTablesFromPinot() throws IOException {
@@ -88,7 +67,7 @@ public class PinotControllerRestClient {
         throw new IllegalStateException(tablesRes.getStatusLine().toString());
       }
       final InputStream tablesContent = tablesRes.getEntity().getContent();
-      final GetTablesResponseApi api = OBJECT_MAPPER.readValue(tablesContent,
+      final GetTablesResponseApi api = VANILLA_OBJECT_MAPPER.readValue(tablesContent,
           GetTablesResponseApi.class);
       return optional(api)
           .map(GetTablesResponseApi::getTables)
@@ -122,7 +101,7 @@ public class PinotControllerRestClient {
         LOG.error("Schema {} not found, {}", dataset, schemaRes.getStatusLine().toString());
       } else {
         final InputStream schemaContent = schemaRes.getEntity().getContent();
-        schema = OBJECT_MAPPER.readValue(schemaContent, Schema.class);
+        schema = VANILLA_OBJECT_MAPPER.readValue(schemaContent, Schema.class);
       }
     } catch (final Exception e) {
       LOG.error("Exception in retrieving schema collections, skipping {}", dataset);
@@ -147,7 +126,7 @@ public class PinotControllerRestClient {
         throw new IllegalStateException(response.getStatusLine().toString());
       }
       final InputStream tablesContent = response.getEntity().getContent();
-      tables = OBJECT_MAPPER.readTree(tablesContent);
+      tables = VANILLA_OBJECT_MAPPER.readTree(tablesContent);
     } catch (final Exception e) {
       LOG.error("Exception in loading dataset {}", dataset, e);
     } finally {
@@ -170,12 +149,12 @@ public class PinotControllerRestClient {
   /**
    * Returns the map of custom configs of the given dataset from the Pinot table config json.
    */
-  public Map<String, String> extractCustomConfigsFromPinotTable(final JsonNode tableConfigJson) {
+  public static Map<String, String> extractCustomConfigsFromPinotTable(final JsonNode tableConfigJson) {
 
     Map<String, String> customConfigs = Collections.emptyMap();
     try {
       final JsonNode jsonNode = tableConfigJson.get("metadata").get("customConfigs");
-      customConfigs = OBJECT_MAPPER.convertValue(jsonNode, new TypeReference<>() {});
+      customConfigs = VANILLA_OBJECT_MAPPER.convertValue(jsonNode, new TypeReference<>() {});
     } catch (final Exception e) {
       LOG.warn("Failed to get custom config from table: {}. Exception:", tableConfigJson, e);
     }

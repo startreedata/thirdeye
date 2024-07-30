@@ -16,7 +16,6 @@ package ai.startree.thirdeye.auth.basic;
 import ai.startree.thirdeye.spi.Constants;
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.Authenticator;
-import io.dropwizard.auth.basic.BasicCredentialAuthFilter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
@@ -92,7 +91,7 @@ public class BasicNamespacedCredentialAuthFilter<P extends Principal> extends Au
     }
 
     /**
-     * Builder for {@link BasicCredentialAuthFilter}.
+     * Builder for {@link BasicNamespacedCredentialAuthFilter}.
      * <p>An {@link Authenticator} must be provided during the building process.</p>
      *
      * @param <P> the principal

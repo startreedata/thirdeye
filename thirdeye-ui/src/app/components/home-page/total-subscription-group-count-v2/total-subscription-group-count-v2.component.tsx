@@ -12,10 +12,12 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Grid, Typography } from "@material-ui/core";
+import { Box, Grid, Link, Typography } from "@material-ui/core";
 import SettingsIcon from "@material-ui/icons/Settings";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
+// eslint-disable-next-line no-restricted-imports
+import { Link as RouterLink } from "react-router-dom";
 import { SkeletonV1 } from "../../../platform/components";
 import { getSubscriptionGroupsAllPath } from "../../../utils/routes/routes.util";
 import IconLink from "../../icon-link/icon-link.component";
@@ -62,11 +64,16 @@ export const TotalSubscriptionGroupCountV2: FunctionComponent<TotalSubscriptionG
                             </LoadingErrorStateSwitch>
                         </Grid>
                         <Grid item>
-                            <Typography>
-                                {t("label.active-entity", {
-                                    entity: t("label.groups"),
-                                })}
-                            </Typography>
+                            <Link
+                                component={RouterLink}
+                                to={getSubscriptionGroupsAllPath()}
+                            >
+                                <Typography>
+                                    {t("label.active-entity", {
+                                        entity: t("label.groups"),
+                                    })}
+                                </Typography>
+                            </Link>
                         </Grid>
                     </Grid>
                 </Grid>

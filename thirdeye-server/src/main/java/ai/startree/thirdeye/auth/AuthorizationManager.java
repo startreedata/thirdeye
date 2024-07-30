@@ -80,7 +80,7 @@ public class AuthorizationManager {
       "thirdeye-root", "thirdeye-root", "thirdeye-root");
 
   private static final ThirdEyeServerPrincipal INTERNAL_VALID_PRINCIPAL = new ThirdEyeServerPrincipal(
-      "thirdeye-internal", RandomStringUtils.random(1024, true, true), 
+      "thirdeye-internal", RandomStringUtils.random(1024, true, true),
       AuthenticationType.INTERNAL,
       // a dedicated code path gives access to all namespaces to this internal valid principal
       null);
@@ -272,7 +272,6 @@ public class AuthorizationManager {
                         LoadingCache<String, Optional<DatasetConfigDTO>> datasetCache) {}
 
   /**
-   *
    * For the moment this method is responsible for checking whether related entities are in the
    * same namespace - todo cyril authz - is this the right place ?
    *
@@ -352,13 +351,18 @@ public class AuthorizationManager {
       final AlertTemplateDTO alertTemplateDTO = caches.templateCache.getUnchecked(
               alertDto.getTemplate())
           .orElse(null);
-      checkArgument(alertTemplateDTO != null,
-          "Invalid template %s. Not found in alert namespace %s.", alertDto.getTemplate(),
-          alertDto.namespace());
-      final ResourceIdentifier resourceId = resourceId(alertTemplateDTO);
-      if (!result.contains(resourceId)) {
-        result.add(resourceId);
-        addRelatedEntities(alertTemplateDTO, result, caches);
+      if (alertTemplateDTO != null) {
+        final ResourceIdentifier resourceId = resourceId(alertTemplateDTO);
+        if (!result.contains(resourceId)) {
+          result.add(resourceId);
+          addRelatedEntities(alertTemplateDTO, result, caches);
+        }
+      } else {
+        // not having a valid template can happen if a template is deleted or rename - so we don't throw an error
+        // error level for the moment but can be warn level later
+        LOG.error(
+            "Invalid template {}. Not found in alert namespace {}. No template added to related entities of the alert.",
+            alertDto.getTemplate(), alertDto.namespace());
       }
       // hack: find the related dataset by looking at the property value directly - assume the key is "dataset"
       // TODO cyril authz - fix this consider rendering the template? but make sure it's not too slow - 

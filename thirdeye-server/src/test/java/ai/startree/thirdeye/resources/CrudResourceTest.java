@@ -15,6 +15,7 @@ package ai.startree.thirdeye.resources;
 
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -142,13 +143,8 @@ public class CrudResourceTest {
 
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
         ThirdEyeAuthorizerProvider.ALWAYS_DENY);
-    try (Response resp = resource.list(nobody(), uriInfo)) {
-      assertThat(resp.getStatus()).isEqualTo(200);
-
-      final List<DummyApi> entities = ((Stream<DummyApi>) resp.getEntity()).collect(
-          Collectors.toList());
-      assertThat(entities).isEmpty();
-    }
+    assertThatThrownBy(() -> resource.list(nobody(), uriInfo)).isInstanceOf(ForbiddenException.class);
+    
   }
 
   @Test

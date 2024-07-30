@@ -18,14 +18,14 @@ import static ai.startree.thirdeye.spi.Constants.AUTH_BEARER;
 import static com.google.common.base.Preconditions.checkState;
 
 import ai.startree.thirdeye.auth.basic.BasicAuthConfiguration;
-import ai.startree.thirdeye.auth.basic.ThirdEyeBasicAuthenticator;
+import ai.startree.thirdeye.auth.basic.BasicNamespacedCredentialAuthFilter;
+import ai.startree.thirdeye.auth.basic.ThirdEyeBasicNamespacedAuthenticator;
 import ai.startree.thirdeye.auth.oauth.OAuthConfiguration;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import io.dropwizard.auth.AuthFilter;
-import io.dropwizard.auth.basic.BasicCredentialAuthFilter;
 import io.dropwizard.auth.chained.ChainedAuthFilter;
 import io.dropwizard.auth.oauth.OAuthCredentialAuthFilter;
 import java.util.ArrayList;
@@ -70,7 +70,7 @@ public class ThirdEyeAuthModule extends AbstractModule {
       final AuthConfiguration authConfig,
       @Nullable final BasicAuthConfiguration basicAuthConfig,
       @Nullable final OAuthConfiguration oauthConfig,
-      final Provider<BasicCredentialAuthFilter<ThirdEyeServerPrincipal>> basicAuthFilter,
+      final Provider<BasicNamespacedCredentialAuthFilter<ThirdEyeServerPrincipal>> basicAuthFilter,
       final Provider<OAuthCredentialAuthFilter<ThirdEyeServerPrincipal>> oAuthFilter) {
     final List<AuthFilter> filters = new ArrayList<>();
     if (authConfig.isEnabled()) {
@@ -97,9 +97,9 @@ public class ThirdEyeAuthModule extends AbstractModule {
 
   @Singleton
   @Provides
-  public BasicCredentialAuthFilter<ThirdEyeServerPrincipal> getBasicAuthFilter(
-      final ThirdEyeBasicAuthenticator authenticator) {
-    return new BasicCredentialAuthFilter.Builder<ThirdEyeServerPrincipal>()
+  public BasicNamespacedCredentialAuthFilter<ThirdEyeServerPrincipal> getBasicAuthFilter(
+      final ThirdEyeBasicNamespacedAuthenticator authenticator) {
+    return new BasicNamespacedCredentialAuthFilter.Builder<ThirdEyeServerPrincipal>()
         .setAuthenticator(authenticator)
         .setPrefix(AUTH_BASIC)
         .buildAuthFilter();

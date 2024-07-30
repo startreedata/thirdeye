@@ -79,7 +79,8 @@ public class ThirdEyeOAuthThirdEyeAuthenticator implements ThirdEyeAuthenticator
           throws Exception {
         final SignedJWT jwt = SignedJWT.parse(authToken);
         final JWTClaimsSet claims = processor.process(jwt, oidcContext);
-        return new ai.startree.thirdeye.plugins.oauth.ThirdEyePrincipal(getName(claims));
+        // FIXME CYRIL authz add namespace 
+        return new ai.startree.thirdeye.plugins.oauth.ThirdEyePrincipal(getName(claims), null);
       }
     };
   }

@@ -67,7 +67,7 @@ public class AlertResourceTest {
   private static final String VALID_CRON = "0 0 * * * ? *";
 
   static ThirdEyeServerPrincipal nobody() {
-    return new ThirdEyeServerPrincipal("nobody", "", AuthenticationType.OAUTH);
+    return new ThirdEyeServerPrincipal("nobody", "", AuthenticationType.OAUTH, null);
   }
 
   private static AlertResource newAlertResource(final AlertManager alertManager,

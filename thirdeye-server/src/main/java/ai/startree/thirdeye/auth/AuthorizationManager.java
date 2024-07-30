@@ -80,7 +80,10 @@ public class AuthorizationManager {
       "thirdeye-root", "thirdeye-root", "thirdeye-root");
 
   private static final ThirdEyeServerPrincipal INTERNAL_VALID_PRINCIPAL = new ThirdEyeServerPrincipal(
-      "thirdeye-internal", RandomStringUtils.random(1024, true, true), AuthenticationType.INTERNAL);
+      "thirdeye-internal", RandomStringUtils.random(1024, true, true), 
+      AuthenticationType.INTERNAL,
+      // a dedicated code path gives access to all namespaces to this internal valid principal
+      null);
 
   private final DatasetConfigManager datasetConfigDao;
   private final AlertManager alertDao;

@@ -45,7 +45,8 @@ public class DataSourceResourceTest {
   private final DataSourceDTO dataSourceDTO = (DataSourceDTO) new DataSourceDTO().setName(dataSourceName).setId(1L);
   private final ThirdEyeServerPrincipal principal = new ThirdEyeServerPrincipal("test",
       "",
-      AuthenticationType.OAUTH);
+      AuthenticationType.OAUTH, 
+      null);
   private ThirdEyeDataSource dataSource;
   private DataSourceCache dataSourceCache;
   private DataSourceResource dataSourceResource;

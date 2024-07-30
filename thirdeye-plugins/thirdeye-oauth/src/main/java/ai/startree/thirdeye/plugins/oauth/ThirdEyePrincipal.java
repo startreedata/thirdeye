@@ -14,13 +14,16 @@
 package ai.startree.thirdeye.plugins.oauth;
 
 import ai.startree.thirdeye.spi.auth.AuthenticationType;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class ThirdEyePrincipal implements ai.startree.thirdeye.spi.auth.ThirdEyePrincipal {
 
   private final String name;
+  private @Nullable String namespace;
 
-  public ThirdEyePrincipal(final String name) {
+  public ThirdEyePrincipal(final String name, final @Nullable String namespace) {
     this.name = name;
+    this.namespace = namespace;
   }
 
   @Override
@@ -36,5 +39,10 @@ public class ThirdEyePrincipal implements ai.startree.thirdeye.spi.auth.ThirdEye
   @Override
   public AuthenticationType getAuthenticationType() {
     return null;
+  }
+
+  @Override
+  public @Nullable String getNamespace() {
+    return namespace;
   }
 }

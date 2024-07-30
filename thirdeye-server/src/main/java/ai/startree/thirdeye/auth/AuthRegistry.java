@@ -68,7 +68,8 @@ public class AuthRegistry {
     final var authenticator = requireNonNull(getDefaultOAuthFactory().build(oauthConfigMap),
         "failed to build authenticator");
     return credentials -> authenticator.authenticate(credentials)
-        .map(p -> new ThirdEyeServerPrincipal(p.getName(), credentials, AuthenticationType.OAUTH));
+        // FIXME CYRIL authz implement namespacing
+        .map(p -> new ThirdEyeServerPrincipal(p.getName(), credentials, AuthenticationType.OAUTH, null));
   }
 
   public OpenIdConfigurationProvider createDefaultOpenIdConfigurationProvider(

@@ -368,7 +368,7 @@ public class AuthorizationManager {
       // TODO cyril authz - fix this consider rendering the template? but make sure it's not too slow - 
       //  also slight security concern because it means we are rendering the template even if access to the template has not been checked yet
       // in effect templates could do anything, accessing one or multiple dataset/datasource - so we don't attempt to perform a full check - the alert pipeline execution will fail if entities are not valid 
-      final @Nullable Object datasetName = optional(alertDto.getProperties()).map(
+      final @Nullable Object datasetName = optional(alertDto.getTemplateProperties()).map(
           e -> e.get("dataset")).orElse(null);
       if (datasetName instanceof String datasetNameStr) {
         final DatasetConfigDTO datasetConfigDTO = caches.datasetCache.getUnchecked(datasetNameStr)

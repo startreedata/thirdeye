@@ -42,6 +42,7 @@ import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.ws.rs.ForbiddenException;
@@ -66,7 +67,7 @@ public class CrudResourceTest {
     });
     when(manager.update(any(DummyDto.class))).thenReturn(1);
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
-        ThirdEyeAuthorizerProvider.alwaysAllowAuthorizer);
+        new ThirdEyeAuthorizerProvider.AlwaysAllowAuthorizer(Map.of()));
 
     final List<String> emails = List.of("tester1@testing.com", "tester2@testing.com");
     final ThirdEyeServerPrincipal owner = getPrincipal(emails.get(0));
@@ -94,7 +95,7 @@ public class CrudResourceTest {
     });
     when(manager.update(any(DummyDto.class))).thenReturn(1);
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
-        ThirdEyeAuthorizerProvider.alwaysAllowAuthorizer);
+        new ThirdEyeAuthorizerProvider.AlwaysAllowAuthorizer(Map.of()));
 
     final List<String> emails = List.of("tester1@testing.com", "tester2@testing.com");
     final Timestamp before = new Timestamp(1671476530000L);

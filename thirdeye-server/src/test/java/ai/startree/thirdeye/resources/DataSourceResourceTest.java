@@ -35,6 +35,7 @@ import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
+import java.util.Map;
 import javax.ws.rs.core.Response;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -67,7 +68,7 @@ public class DataSourceResourceTest {
             mock(AlertTemplateManager.class),
             mock(AlertManager.class),
             mock(AnomalyManager.class),
-            ThirdEyeAuthorizerProvider.alwaysAllowAuthorizer
+            new ThirdEyeAuthorizerProvider.AlwaysAllowAuthorizer(Map.of())
         ));
     dataSourceResource = new DataSourceResource(dataSourceService);
   }

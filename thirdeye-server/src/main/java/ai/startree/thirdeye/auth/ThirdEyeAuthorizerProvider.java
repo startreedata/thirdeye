@@ -19,6 +19,7 @@ import ai.startree.thirdeye.spi.auth.AccessType;
 import ai.startree.thirdeye.spi.auth.ResourceIdentifier;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
+import com.google.common.annotations.VisibleForTesting;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -87,7 +88,8 @@ public class ThirdEyeAuthorizerProvider implements ThirdEyeAuthorizer {
     return getAccessControl().listNamespaces(principal);
   }
 
-  private static class AlwaysAllowAuthorizer implements ThirdEyeAuthorizer {
+  @VisibleForTesting
+  public static class AlwaysAllowAuthorizer implements ThirdEyeAuthorizer {
 
     private final Map<String, List<String>> nameToNamespaces;
 

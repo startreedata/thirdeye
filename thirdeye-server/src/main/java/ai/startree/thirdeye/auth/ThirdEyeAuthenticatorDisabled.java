@@ -24,7 +24,7 @@ public class ThirdEyeAuthenticatorDisabled implements
 
   @Override
   public Optional<ThirdEyeServerPrincipal> authenticate(final String s) {
-    // FIXME CYRIL review usage of this
+    // FIXME CYRIL authz add namespacing support to this too
     return optional(new ThirdEyeServerPrincipal(s, "", AuthenticationType.DISABLED, null));
   }
 }

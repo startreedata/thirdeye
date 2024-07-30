@@ -52,7 +52,6 @@ public class ThirdEyeBasicNamespacedAuthenticator implements
     }
   }
 
-  // todo cyril authz - should namespace be resolved in the authorizer? or twice?
   @Override
   public Optional<ThirdEyeServerPrincipal> authenticate(
       final BasicNamespacedCredentials basicNamespacedCredentials) {

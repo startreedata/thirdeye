@@ -141,7 +141,6 @@ public class AuthorizationManager {
     // else namespace is passed explicitly - don't modify it
   }
 
-  // TODO CYRIL authz should be moved down to ThirdEyeAuthorizer once we implement multi-namespace UI support?
   public @Nullable String currentNamespace(final ThirdEyePrincipal principal) {
     final List<String> namespaces = thirdEyeAuthorizer.listNamespaces(principal);
     if (namespaces.size() == 0) {
@@ -149,7 +148,11 @@ public class AuthorizationManager {
     } else if (namespaces.size() == 1) {
       return namespaces.get(0);
     } else {
-      // todo cyril authz - resolve from principal
+      final String principalNamespace = principal.getNamespace();
+      // assuming the list of namespace is short so contains in list should be fine
+      if (namespaces.contains(principalNamespace)) {
+        return principalNamespace;
+      }
       throw new NotAuthorizedException(String.format(
           "Namespace not cannot be resolved automatically. Please provide a namespace explicitly. Namespaces: %s",
           namespaces));

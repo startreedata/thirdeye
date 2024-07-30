@@ -66,9 +66,9 @@ public class DataSourcesLoader {
           .build(buildContext(dataSource));
       return requireNonNull(thirdEyeDataSource, "thirdEyeDataSource is null");
     } catch (Exception e) {
-      LOG.error(String.format("Exception creating data source. name: %s, type: %s",
+      LOG.error("Exception creating data source. name: {}, type: {}",
               dataSource.getName(),
-              dataSource.getType()),
+              dataSource.getType(),
           e);
       throw e;
     }

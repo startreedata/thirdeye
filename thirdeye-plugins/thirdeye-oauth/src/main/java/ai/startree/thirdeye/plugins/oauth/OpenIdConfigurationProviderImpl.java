@@ -82,7 +82,7 @@ public class OpenIdConfigurationProviderImpl implements OpenIdConfigurationProvi
           response.code(),
           response.message());
     } catch (final IOException e) {
-      log.error(String.format("Unable to fetch oidc info! url : %s", url), e);
+      log.error("Unable to fetch oidc info! url: " + url, e);
     }
     return Collections.emptyMap();
   }

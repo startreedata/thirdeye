@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.spi.auth;
 
 import java.security.Principal;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface ThirdEyePrincipal extends Principal {
 
@@ -23,4 +24,6 @@ public interface ThirdEyePrincipal extends Principal {
   String getAuthToken();
 
   AuthenticationType getAuthenticationType();
+  
+  @Nullable String getNamespace(); 
 }

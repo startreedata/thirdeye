@@ -27,7 +27,7 @@ import ai.startree.thirdeye.spi.detection.postprocessing.PostProcessingContext;
 import ai.startree.thirdeye.spi.detection.v2.OperatorResult;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
-import java.util.HashMap;
+import com.google.common.collect.Maps;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -130,7 +130,7 @@ public class TimeOfWeekPostProcessor implements AnomalyPostProcessor {
     if (dayHoursOfWeek == null) {
       return DEFAULT_INT_DAY_HOURS_OF_WEEK;
     }
-    final Map<Integer, Set<Integer>> intDaysHoursOfWeek = new HashMap<>();
+    final Map<Integer, Set<Integer>> intDaysHoursOfWeek = Maps.newHashMapWithExpectedSize(dayHoursOfWeek.size());
     for (final Entry<String, List<Integer>> entry : dayHoursOfWeek.entrySet()) {
       final Integer intDay = dayStringToDayInt(entry.getKey());
       intDaysHoursOfWeek.put(intDay, parseHours(Objects.requireNonNull(entry.getValue())));

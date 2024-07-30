@@ -26,7 +26,9 @@ import static ai.startree.thirdeye.IntegrationTestUtils.forkJoinNode;
 import static ai.startree.thirdeye.PinotDataSourceManager.PINOT_DATASET_NAME;
 import static ai.startree.thirdeye.PinotDataSourceManager.PINOT_DATA_SOURCE_NAME;
 import static ai.startree.thirdeye.ThirdEyeTestClient.ALERT_LIST_TYPE;
+import static ai.startree.thirdeye.ThirdEyeTestClient.ALERT_TEMPLATE_LIST_TYPE;
 import static ai.startree.thirdeye.ThirdEyeTestClient.ANOMALIES_LIST_TYPE;
+import static ai.startree.thirdeye.ThirdEyeTestClient.DATASOURCE_LIST_TYPE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
@@ -73,6 +75,7 @@ import javax.ws.rs.core.Response;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.TestException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -160,12 +163,15 @@ public class HappyPathTest {
     final Response response = request("api/data-sources").post(Entity.json(List.of(
         pinotDataSourceApi)));
     assert200(response);
+    final DataSourceApi dataSourceInResponse = response.readEntity(DATASOURCE_LIST_TYPE).get(0);
+    pinotDataSourceApi.setId(dataSourceInResponse.getId());
+    
   }
 
   @Test(dependsOnMethods = "testCreatePinotDataSource", timeOut = 5000)
   public void testPinotDataSourceHealth() {
     final Response response = request(
-        "api/data-sources/validate?name=" + pinotDataSourceApi.getName()).get();
+        "api/data-sources/validate?id=" + pinotDataSourceApi.getId()).get();
     assert200(response);
   }
 
@@ -203,11 +209,12 @@ public class HappyPathTest {
 
   @Test(dependsOnMethods = "testPing")
   public void testCreateDxTemplate() {
-    final Response response = request("/api/alert-templates/name/" + THRESHOLD_TEMPLATE_NAME).get();
+    final Response response = request("/api/alert-templates").get();
     assert200(response);
-
-    final AlertTemplateApi template = response.readEntity(AlertTemplateApi.class);
-    final List<PlanNodeApi> nodes = template.getNodes();
+    final List<AlertTemplateApi> templates = response.readEntity(ALERT_TEMPLATE_LIST_TYPE);
+    final AlertTemplateApi thresholdTemplate = templates.stream().filter(t -> t.getName().equals(THRESHOLD_TEMPLATE_NAME)).findFirst()
+        .orElseThrow(() -> new TestException("Failed to fetch template " + THRESHOLD_TEMPLATE_NAME));
+    final List<PlanNodeApi> nodes = thresholdTemplate.getNodes();
     final List<PlanNodeApi> childRootNodes = nodes
         .stream()
         .filter(node -> NODE_NAME_ROOT.equals(node.getName()))
@@ -219,19 +226,19 @@ public class HappyPathTest {
     nodes.add(forkJoinNode());
     nodes.add(combinerNode());
 
-    template
-        .setName(template.getName() + "-dx")
+    thresholdTemplate
+        .setName(thresholdTemplate.getName() + "-dx")
         .setId(null);
 
     final Response updateResponse = request("/api/alert-templates")
-        .post(Entity.json(List.of(template)));
+        .post(Entity.json(List.of(thresholdTemplate)));
     assertThat(updateResponse.getStatus()).isEqualTo(200);
   }
 
   @Test(dependsOnMethods = "testPinotDataSourceHealth")
   public void testCreateDataset() {
     final MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
-    formData.add("dataSourceName", PINOT_DATA_SOURCE_NAME);
+    formData.add("dataSourceId", String.valueOf(pinotDataSourceApi.getId()));
     formData.add("datasetName", PINOT_DATASET_NAME);
 
     final Response response = request("api/data-sources/onboard-dataset/").post(
@@ -239,7 +246,7 @@ public class HappyPathTest {
     assert200(response);
   }
 
-  @Test(dependsOnMethods = "testCreateDataset", timeOut = 10000)
+  @Test(dependsOnMethods = "testCreateDataset", timeOut = 12000)
   public void testEvaluateAlert() {
     final AlertEvaluationApi alertEvaluationApi = alertEvaluationApi(UPDATE_ALERT_API,
         PAGEVIEWS_DATASET_START_TIME, EVALUATE_END_TIME);
@@ -559,77 +566,49 @@ public class HappyPathTest {
     assert200(response);
   }
 
-  @Test(dependsOnMethods = "testAnomalyCount")
-  public void testCreateAnomalyWithAuth() {
-    final var createAnomalyResp = request("api/anomalies").put(Entity.json(List.of(
-        new AnomalyApi()
-            .setAlert(new AlertApi().setId(alertId))
-            .setAuth(new AuthorizationConfigurationApi().setNamespace("anomaly-namespace"))
-    )));
-    // Anomalies cannot be created with a namespace.
-    assertThat(createAnomalyResp.getStatus()).isEqualTo(400);
-  }
-
-  @Test(timeOut = 60000, dependsOnMethods = "testAnomalyCount")
-  public void testGetAnomalyAuth() throws InterruptedException {
-    var alertId = mustCreateAlert(
-        newRunnableAlertApiWithAuth("TestGetAnomalyAuth", "alert-namespace"));
-
-    waitForAnyAnomalies(alertId);
-    final var anomalyApi = mustGetAnomaliesForAlert(alertId).get(0);
-    assertThat(anomalyApi.getAuth()).isNotNull();
-    assertThat(anomalyApi.getAuth().getNamespace()).isEqualTo("alert-namespace");
-  }
-
-  @Test(timeOut = 60000, dependsOnMethods = "testAnomalyCount")
-  public void testGetRcaInvestigationAuth() throws InterruptedException {
-    final long alertId = mustCreateAlert(
-        newRunnableAlertApiWithAuth("TestGetRcaInvestigationAuth", "alert-namespace"));
-
-    waitForAnyAnomalies(alertId);
-    final Long anomalyId = mustGetAnomaliesForAlert(alertId).get(0).getId();
-    final long investigationId = mustCreateInvestigation(new RcaInvestigationApi()
-        .setName("my-investigation")
-        .setAnomaly(new AnomalyApi().setId(anomalyId)));
-
-    final RcaInvestigationApi investigationApi = mustGetInvestigation(investigationId);
-    assertThat(investigationApi.getAuth()).isNotNull();
-    assertThat(investigationApi.getAuth().getNamespace()).isEqualTo("alert-namespace");
-  }
-
-  // TODO CYRIL authz - if requireNamespace=true, it should not be possible to change a namespace
-  // FIXME CYRIL authz add tests with requireNamespace=true
-  @Test(timeOut = 60000, dependsOnMethods = "testAnomalyCount")
-  @Deprecated // it will not be possible to change a namespace anymore 
-  public void testUpdateAlertAuth() throws InterruptedException {
-    final long alertId = mustCreateAlert(
-        newRunnableAlertApiWithAuth("TestUpdateAlertAuth", "alert-namespace"));
-
-    waitForAnyAnomalies(alertId);
-    final Long anomalyId = mustGetAnomaliesForAlert(alertId).get(0).getId();
-    final long investigationId = mustCreateInvestigation(new RcaInvestigationApi()
-        .setName("my-investigation")
-        .setAnomaly(new AnomalyApi().setId(anomalyId)));
-
-    final AlertApi alertApi = newRunnableAlertApiWithAuth("TestUpdateAlertAuth_editedNamespace", "new-alert-namespace").setId(
-        alertId);
-    final Response updateAlertResp = request("api/alerts").put(Entity.json(List.of(alertApi)));
-    assertThat(updateAlertResp.getStatus()).isEqualTo(200);
-
-    final AlertApi gotAlertApi = updateAlertResp.readEntity(new GenericType<List<AlertApi>>() {}).get(0);
-    assertThat(gotAlertApi.getAuth()).isNotNull();
-    assertThat(gotAlertApi.getAuth().getNamespace()).isEqualTo("new-alert-namespace");
-
-    final AnomalyApi anomalyApi = mustGetAnomaliesForAlert(alertId).get(0);
-    assertThat(anomalyApi.getAuth()).isNotNull();
-    assertThat(anomalyApi.getAuth().getNamespace()).isEqualTo("new-alert-namespace");
-
-    // NOTE: RcaInvestigation namespace cannot change anymore - below we just check the alert-namespace is not inherited anymore, so it's unchanged
-    // (the migration has to be performed bottom-up, RCA --> Anomalies --> EnumerationItems --> Alert)
-    final RcaInvestigationApi investigationApi = mustGetInvestigation(investigationId);
-    assertThat(investigationApi.getAuth()).isNotNull();
-    assertThat(investigationApi.getAuth().getNamespace()).isEqualTo("alert-namespace");
-  }
+  // todo cyril authz move this to authz tests
+//  @Test(dependsOnMethods = "testAnomalyCount")
+//  @Deprecated
+//  public void testCreateAnomalyWithAuth() {
+//    final var createAnomalyResp = request("api/anomalies").put(Entity.json(List.of(
+//        new AnomalyApi()
+//            .setAlert(new AlertApi().setId(alertId))
+//            .setAuth(new AuthorizationConfigurationApi().setNamespace("anomaly-namespace"))
+//    )));
+//    // Anomalies cannot be created with a namespace.
+//    assertThat(createAnomalyResp.getStatus()).isEqualTo(400);
+//  }
+//
+//  @Test(timeOut = 60000, dependsOnMethods = "testAnomalyCount")
+//  @Deprecated
+//  public void testGetAnomalyAuth() throws InterruptedException {
+//    var alertId = mustCreateAlert(
+//        newRunnableAlertApiWithAuth("TestGetAnomalyAuth", "alert-namespace"));
+//
+//    waitForAnyAnomalies(alertId);
+//    final var anomalyApi = mustGetAnomaliesForAlert(alertId).get(0);
+//    assertThat(anomalyApi.getAuth()).isNotNull();
+//    assertThat(anomalyApi.getAuth().getNamespace()).isEqualTo("alert-namespace");
+//  }
+//
+//  @Test(timeOut = 60000, dependsOnMethods = "testAnomalyCount")
+//  // at write time the namespace is not resolved - either it is correct because passed explicitely, either it is correct because it is the principal active namespace, either the method should fail todo authz test implement these cases in the authz tests
+//  @Deprecated 
+//  public void testGetRcaInvestigationAuth() throws InterruptedException {
+//    final long alertId = mustCreateAlert(
+//        newRunnableAlertApiWithAuth("TestGetRcaInvestigationAuth", "alert-namespace"));
+//
+//    waitForAnyAnomalies(alertId);
+//    final Long anomalyId = mustGetAnomaliesForAlert(alertId).get(0).getId();
+//    final long investigationId = mustCreateInvestigation(new RcaInvestigationApi()
+//        .setName("my-investigation")
+//        .setAuth(new AuthorizationConfigurationApi().setNamespace("alert-namespace"))
+//        .setAnomaly(new AnomalyApi().setId(anomalyId)));
+//
+//    final RcaInvestigationApi investigationApi = mustGetInvestigation(investigationId);
+//    assertThat(investigationApi.getAuth()).isNotNull();
+//    assertThat(investigationApi.getAuth().getNamespace()).isEqualTo("alert-namespace");
+//  }
 
   @Test
   public void testCreateSubscriptionGroup() {

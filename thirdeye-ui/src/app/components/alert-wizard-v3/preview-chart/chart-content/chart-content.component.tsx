@@ -42,6 +42,7 @@ export const ChartContent: FunctionComponent<ChartContentProps> = ({
     onAlertPropertyChange,
     alert,
     hideCallToActionPrompt,
+    evaluationTimeRange,
 }) => {
     const sharedWizardClasses = useAlertWizardV2Styles();
     const previewChartClasses = usePreviewChartStyles();
@@ -59,9 +60,12 @@ export const ChartContent: FunctionComponent<ChartContentProps> = ({
         useState(detectionEvaluations);
 
     const firstTimeSeriesOptions = useMemo(() => {
+        /* If there are enumeration items we return from here,
+        as the rendering is taken care by table component and we dont need to
+        evaluate for the case where we are just rendering for alerts with no enumeration items */
         if (
-            !workingDetectionEvaluations ||
-            workingDetectionEvaluations.length === 0
+            workingDetectionEvaluations.length === 0 ||
+            workingDetectionEvaluations[0].enumerationItem
         ) {
             return null;
         }
@@ -192,9 +196,11 @@ export const ChartContent: FunctionComponent<ChartContentProps> = ({
                     workingDetectionEvaluations.length > 1 && (
                         <Box marginTop={1}>
                             <EnumerationItemsTable
+                                alert={alert}
                                 detectionEvaluations={
                                     workingDetectionEvaluations
                                 }
+                                evaluationTimeRange={evaluationTimeRange}
                                 hideDelete={onAlertPropertyChange === undefined}
                                 hideTime={shouldHideTimeInDatetimeFormat(
                                     alertEvaluation?.alert.template

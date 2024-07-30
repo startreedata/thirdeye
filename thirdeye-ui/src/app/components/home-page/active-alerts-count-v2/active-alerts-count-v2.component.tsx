@@ -12,12 +12,17 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Grid, Typography } from "@material-ui/core";
+import { Box, Grid, Link, Typography } from "@material-ui/core";
 import AddCircleOutline from "@material-ui/icons/AddCircleOutline";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
+// eslint-disable-next-line no-restricted-imports
+import { Link as RouterLink } from "react-router-dom";
 import { SkeletonV1 } from "../../../platform/components";
-import { getAlertsCreatePath } from "../../../utils/routes/routes.util";
+import {
+    getAlertsAllPath,
+    getAlertsCreatePath,
+} from "../../../utils/routes/routes.util";
 import IconLink from "../../icon-link/icon-link.component";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
@@ -65,7 +70,9 @@ export const ActiveAlertsCountV2: FunctionComponent<ActiveAlertsCountProps> = ({
                         </LoadingErrorStateSwitch>
                     </Grid>
                     <Grid item>
-                        <Typography>{t("label.active-alerts")}</Typography>
+                        <Link component={RouterLink} to={getAlertsAllPath()}>
+                            <Typography>{t("label.active-alerts")}</Typography>
+                        </Link>
                     </Grid>
                 </Grid>
             </Grid>

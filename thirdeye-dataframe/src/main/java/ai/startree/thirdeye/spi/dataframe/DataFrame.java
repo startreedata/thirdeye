@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.spi.dataframe;
 
 import ai.startree.thirdeye.spi.dataframe.Series.SeriesType;
+import com.google.common.collect.Maps;
 import java.io.IOException;
 import java.io.Reader;
 import java.sql.ResultSet;
@@ -24,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -685,7 +685,7 @@ public class DataFrame {
     Set<String> headers = first.toMap().keySet();
 
     // transform column headers into series names
-    Map<String, String> header2name = new HashMap<>();
+    Map<String, String> header2name = Maps.newHashMapWithExpectedSize(headers.size());
     for (String h : headers) {
       // remove spaces
       String name = Pattern.compile("\\W+").matcher(h).replaceAll("_");
@@ -699,7 +699,7 @@ public class DataFrame {
     }
 
     // read first line and initialize builders
-    Map<String, StringSeries.Builder> builders = new HashMap<>();
+    Map<String, StringSeries.Builder> builders = Maps.newHashMapWithExpectedSize(headers.size());;
     for (String h : headers) {
       StringSeries.Builder builder = StringSeries.builder();
       builder.addValues(first.get(h));

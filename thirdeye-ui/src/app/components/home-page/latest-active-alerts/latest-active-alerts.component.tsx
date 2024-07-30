@@ -22,6 +22,7 @@ import {
 } from "@material-ui/core";
 import * as React from "react";
 import { useTranslation } from "react-i18next";
+// eslint-disable-next-line no-restricted-imports
 import { Link as RouterLink } from "react-router-dom";
 import { SkeletonV1 } from "../../../platform/components";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
@@ -75,50 +76,70 @@ export const LatestActiveAlerts: React.FunctionComponent<LatestActiveAlertsProps
                             <TableCell>{t("label.created")}</TableCell>
                         </TitleCardTableHead>
                         <TableBody>
-                            {alertsQuery.data?.slice(0, 5).map((alert) => (
-                                <TableRow
-                                    className={styles.tableRow}
-                                    key={alert.id}
-                                >
-                                    <TableCell>
-                                        <Link
-                                            component={RouterLink}
-                                            to={getAlertsAlertPath(alert.id)}
+                            {alertsQuery?.data?.length ? (
+                                alertsQuery.data
+                                    ?.sort((a, b) => {
+                                        return (
+                                            new Date(b.created).getTime() -
+                                            new Date(a.created).getTime()
+                                        );
+                                    })
+                                    .slice(0, 5)
+                                    .map((alert) => (
+                                        <TableRow
+                                            className={styles.tableRow}
+                                            key={alert.id}
                                         >
-                                            {alert.name}
-                                        </Link>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Box
-                                            className={
-                                                styles.statusCellContainer
-                                            }
-                                        >
-                                            {alert.active ? (
-                                                <CheckCircle
+                                            <TableCell>
+                                                <Link
+                                                    component={RouterLink}
+                                                    to={getAlertsAlertPath(
+                                                        alert.id
+                                                    )}
+                                                >
+                                                    {alert.name}
+                                                </Link>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Box
                                                     className={
-                                                        styles.healthyIcon
+                                                        styles.statusCellContainer
                                                     }
-                                                />
-                                            ) : (
-                                                <WarningOutlined
-                                                    className={
-                                                        styles.unhealthyIcon
-                                                    }
-                                                />
-                                            )}
-                                            {t(
-                                                alert.active
-                                                    ? "label.healthy"
-                                                    : "label.unhealthy"
-                                            )}
-                                        </Box>
-                                    </TableCell>
+                                                >
+                                                    {alert.active ? (
+                                                        <CheckCircle
+                                                            className={
+                                                                styles.healthyIcon
+                                                            }
+                                                        />
+                                                    ) : (
+                                                        <WarningOutlined
+                                                            className={
+                                                                styles.unhealthyIcon
+                                                            }
+                                                        />
+                                                    )}
+                                                    {t(
+                                                        alert.active
+                                                            ? "label.healthy"
+                                                            : "label.unhealthy"
+                                                    )}
+                                                </Box>
+                                            </TableCell>
+                                            <TableCell>
+                                                {formatDateAndTimeV1(
+                                                    alert.created
+                                                )}
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                            ) : (
+                                <TableRow className={styles.tableRow}>
                                     <TableCell>
-                                        {formatDateAndTimeV1(alert.created)}
+                                        {t("message.no-active-alerts")}
                                     </TableCell>
                                 </TableRow>
-                            ))}
+                            )}
                         </TableBody>
                     </TitleCardTable>
                 </LoadingErrorStateSwitch>

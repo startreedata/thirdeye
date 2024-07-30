@@ -17,6 +17,7 @@ import ai.startree.thirdeye.spi.Constants.JobStatus;
 import ai.startree.thirdeye.spi.task.TaskType;
 import java.sql.Timestamp;
 
+// fixme cyril - don't think this should implement ThirdEyeCrudApi<JobApi>  
 public class JobApi implements ThirdEyeCrudApi<JobApi>{
   private Long id;
   private String jobName;
@@ -38,6 +39,17 @@ public class JobApi implements ThirdEyeCrudApi<JobApi>{
   public JobApi setId(final Long id) {
     this.id = id;
     return this;
+  }
+
+  // fixme cyril - auth not implemented for JobApi. See fixme above
+  @Override
+  public AuthorizationConfigurationApi getAuth() {
+    return null;
+  }
+
+  @Override
+  public JobApi setAuth(final AuthorizationConfigurationApi auth) {
+    return null;
   }
 
   public String getJobName() {

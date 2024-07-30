@@ -180,8 +180,8 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
   private OperatorResult run(final AlertDTO alert, final Interval detectionInterval,
       final AlertTemplateDTO renderedTemplate)
       throws Exception {
-    LOG.info(String.format("Running detection pipeline for alert: %d, start: %s, end: %s",
-        alert.getId(), detectionInterval.getStart(), detectionInterval.getEnd()));
+    LOG.info("Running detection pipeline for alert: {}, start: {}, end: {}",
+        alert.getId(), detectionInterval.getStart(), detectionInterval.getEnd());
     final DetectionPipelineContext context = new DetectionPipelineContext()
         .setAlertId(alert.getId())
         .setNamespace(alert.namespace())

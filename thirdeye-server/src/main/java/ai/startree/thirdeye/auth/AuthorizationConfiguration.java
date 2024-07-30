@@ -15,8 +15,8 @@ package ai.startree.thirdeye.auth;
 
 public class AuthorizationConfiguration {
   
-  // long term this should always be true - need to migrate current user to this new namespace design first
-  private boolean requireNamespace = false;
+  @Deprecated // not read anymore - considered to be always true
+  private boolean requireNamespace = true;
 
   public boolean isRequireNamespace() {
     return requireNamespace;

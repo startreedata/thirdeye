@@ -69,6 +69,9 @@ export interface GetAlertEvaluationPayload {
     alert: Alert | EditableAlert | Pick<Alert, "id">;
     start: number;
     end: number;
+    evaluationContext?: {
+        listEnumerationItemsOnly?: boolean;
+    };
 }
 
 export interface GetEvaluationRequestPayload extends GetAlertEvaluationPayload {

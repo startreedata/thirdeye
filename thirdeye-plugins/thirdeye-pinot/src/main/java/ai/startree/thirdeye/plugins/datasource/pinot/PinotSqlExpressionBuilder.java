@@ -37,13 +37,9 @@ import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
-
-  private static final Logger LOG = LoggerFactory.getLogger(PinotSqlExpressionBuilder.class);
-
+  
   public static final Pattern SIMPLE_DATE_FORMAT_PATTERN = Pattern.compile(
       "^([0-9]:[A-Z]+:)?SIMPLE_DATE_FORMAT:");
   private static final Map<Period, String> DATE_TRUNC_COMPATIBLE_PERIOD_TO_DATE_TRUNC_STRING = Map.of(

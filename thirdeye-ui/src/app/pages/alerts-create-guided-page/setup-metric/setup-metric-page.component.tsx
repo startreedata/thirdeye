@@ -92,6 +92,10 @@ export const SetupMetricPage: FunctionComponent = () => {
         null
     );
     const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
+    const [evaluationTimeRange, setEvaluationTimeRange] = useState({
+        startTime: startTime,
+        endTime: endTime,
+    });
 
     const {
         alert,
@@ -262,8 +266,23 @@ export const SetupMetricPage: FunctionComponent = () => {
     const fetchAlertEvaluation = (start: number, end: number): void => {
         const copiedAlert = { ...alertConfigForPreview };
         delete copiedAlert.id;
+        /* On the Preview Page we have to defer fetching the data for enumeration items till they
+        are in view.
+        We only fetch the list of enumeration items without data and anomalies
+        by passing {listEnumerationItemsOnly: true} as fetching all the data at once introduces
+        significant latency because of the request size.
+        Hence we first fetch the evaluations with enumeration items without anomalies and data.
+        And then enumerationRow component fetches anomalies and data progresivelly */
+        const hasEnumerationItems =
+            !!alert.templateProperties?.enumeratorQuery ||
+            !!alert.templateProperties?.enumerationItems;
         setAlertUsedForEvaulation(copiedAlert);
-        getEvaluation(createAlertEvaluation(copiedAlert, start, end));
+        getEvaluation(
+            createAlertEvaluation(copiedAlert, start, end, {
+                listEnumerationItemsOnly: hasEnumerationItems,
+            })
+        );
+        setEvaluationTimeRange({ startTime: start, endTime: end });
     };
 
     const handleReloadPreviewClick = (): void => {
@@ -439,6 +458,7 @@ export const SetupMetricPage: FunctionComponent = () => {
                                     showOnlyActivity
                                     alert={alert}
                                     alertEvaluation={evaluation}
+                                    evaluationTimeRange={evaluationTimeRange}
                                     hideCallToActionPrompt={
                                         shouldShowLoadButton
                                     }

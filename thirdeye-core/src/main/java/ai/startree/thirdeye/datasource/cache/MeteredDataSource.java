@@ -22,34 +22,22 @@ import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
 import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
-import com.codahale.metrics.Meter;
-import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Timer;
 import io.micrometer.core.instrument.Metrics;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 /**
  * This class intercepts all data source calls and helps with telemetry, etc.
  */
-public class DataSourceWrapper implements ThirdEyeDataSource {
+public class MeteredDataSource implements ThirdEyeDataSource {
 
   private final ThirdEyeDataSource delegate;
+  private final io.micrometer.core.instrument.Timer fetchTableTimer;
 
-  @Deprecated
-  private final Meter fetchTableExceptionMeter;
-  @Deprecated
-  private final Timer fetchTableTimer;
-  private final io.micrometer.core.instrument.Timer fetchTableTimer2;
-
-  public DataSourceWrapper(final ThirdEyeDataSource delegate, final MetricRegistry metricRegistry) {
+  public MeteredDataSource(final ThirdEyeDataSource delegate) {
     this.delegate = delegate;
     
     // deprecated with no replacement - should not be used anymore - metric should be inside the delegate
-    fetchTableExceptionMeter = metricRegistry.meter("fetchTableExceptionMeter");
-    // deprecated - use thirdeye_fetch_data_table
-    fetchTableTimer = metricRegistry.timer("fetchTableTimer");
-    fetchTableTimer2 = io.micrometer.core.instrument.Timer.builder(
+    fetchTableTimer = io.micrometer.core.instrument.Timer.builder(
             "thirdeye_fetch_data_table")
         .description("Start: an input SQL query string is passed to the DataSource implementation. End: the result of the query is returned as a dataframe OR an exception is thrown.")
         .publishPercentiles(METRICS_TIMER_PERCENTILES)
@@ -78,17 +66,7 @@ public class DataSourceWrapper implements ThirdEyeDataSource {
 
   @Override
   public DataTable fetchDataTable(final DataSourceRequest request) throws Exception {
-    return fetchTableTimer.time(fetchTableTimer2.wrap((Callable<? extends DataTable>) () -> fetchDataTable0(request)));
-  }
-
-  private DataTable fetchDataTable0(final DataSourceRequest request) throws Exception {
-    try {
-      return delegate.fetchDataTable(request);
-    } catch (Exception e) {
-      // track exceptions
-      fetchTableExceptionMeter.mark();
-      throw e;
-    }
+    return fetchTableTimer.recordCallable(() -> delegate.fetchDataTable(request));
   }
 
   @Override

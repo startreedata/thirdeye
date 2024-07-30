@@ -35,6 +35,9 @@ public class TaskApi implements ThirdEyeCrudApi<TaskApi> {
   private String message;
   private Timestamp lastModified;
   private Timestamp lastActive;
+  
+  private AuthorizationConfigurationApi auth;
+  
 
   @Override
   public Long getId() {
@@ -152,6 +155,16 @@ public class TaskApi implements ThirdEyeCrudApi<TaskApi> {
 
   public TaskApi setJob(JobApi job) {
     this.job = job;
+    return this;
+  }
+
+  public AuthorizationConfigurationApi getAuth() {
+    return auth;
+  }
+
+  public TaskApi setAuth(
+      final AuthorizationConfigurationApi auth) {
+    this.auth = auth;
     return this;
   }
 }

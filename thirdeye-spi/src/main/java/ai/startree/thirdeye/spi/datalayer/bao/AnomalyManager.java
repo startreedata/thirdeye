@@ -18,10 +18,9 @@ import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedback;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedbackType;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -37,30 +36,24 @@ public interface AnomalyManager extends AbstractManager<AnomalyDTO> {
 
   List<AnomalyDTO> decorate(List<AnomalyDTO> anomalyDTOList);
 
+  // internal only - prefer countWithNamespace  
   long count(final @NonNull AnomalyFilter filter);
 
-  // fixme cyril authz **EXTREMELY** inefficient - will load entities in memory before counting
-  // fixme cyril authz add namespace to AnomalyFilter - requires to put namespace in the index tables - so requires to migrate entities
   default long countWithNamespace(final @NonNull AnomalyFilter filter, final @Nullable String namespace) {
-    return filter(filter).stream()
-        .filter(e -> Objects.equals(e.namespace(), namespace))
-        .count(); 
+    // todo authz extremely inefficient because will load anomalies in memory to count them
+    // it is not possible to perform a count directly in the DB until all anomalies are migrated in the index table to ensure they have their namespace value set
+    return filterWithNamespace(filter, namespace).size(); 
   }
 
   List<AnomalyDTO> filter(@NonNull AnomalyFilter anomalyFilter);
-
-  // fixme cyril authz add namespace to AnomalyFilter - requires to put namespace in the index tables
-  default List<AnomalyDTO> filterWithNamespace(final @NonNull AnomalyFilter anomalyFilter,
-      final @Nullable String namespace) {
-    return filter(anomalyFilter).stream()
-        .filter(e -> Objects.equals(e.namespace(), namespace))
-        .toList();
-  }
+  
+  List<AnomalyDTO> filterWithNamespace(final @NonNull AnomalyFilter anomalyFilter,
+      final @Nullable String namespace);
 
   default AnomalyStatsApi anomalyStats(final @Nullable String namespace, final AnomalyFilter filter) {
     final AnomalyFilter notChildNotIgnoredFilter = filter.copy().setIsIgnored(false).setIsChild(false);
     final AnomalyFilter feedbackFilter = notChildNotIgnoredFilter.copy().setHasFeedback(true);
-    final List<AnomalyFeedback> allFeedbacks =filterWithNamespace(feedbackFilter, namespace)
+    final List<AnomalyFeedback> allFeedbacks = filterWithNamespace(feedbackFilter, namespace)
         .stream()
         .map(AnomalyDTO::getFeedback)
         .toList();
@@ -72,7 +65,7 @@ public interface AnomalyManager extends AbstractManager<AnomalyDTO> {
 
   private static Map<AnomalyFeedbackType, Long> feedbackTypesCount(
       final List<AnomalyFeedback> feedbacks) {
-    final Map<AnomalyFeedbackType, Long> feedbackStats = new HashMap<>();
+    final Map<AnomalyFeedbackType, Long> feedbackStats = new EnumMap<>(AnomalyFeedbackType.class);
     for (final AnomalyFeedbackType type : AnomalyFeedbackType.values()) {
       feedbackStats.put(type, 0L);
     }

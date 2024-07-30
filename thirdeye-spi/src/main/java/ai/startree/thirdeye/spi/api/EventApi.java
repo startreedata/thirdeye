@@ -26,6 +26,7 @@ public class EventApi implements ThirdEyeCrudApi<EventApi> {
   private long startTime;
   private long endTime;
   private Map<String, List<String>> targetDimensionMap;
+  private AuthorizationConfigurationApi auth;
 
   @Override
   public Long getId() {
@@ -99,6 +100,16 @@ public class EventApi implements ThirdEyeCrudApi<EventApi> {
   public EventApi setTargetDimensionMap(
       final Map<String, List<String>> targetDimensionMap) {
     this.targetDimensionMap = targetDimensionMap;
+    return this;
+  }
+
+  public AuthorizationConfigurationApi getAuth() {
+    return auth;
+  }
+
+  public EventApi setAuth(
+      final AuthorizationConfigurationApi auth) {
+    this.auth = auth;
     return this;
   }
 }

@@ -54,7 +54,7 @@ import org.testng.annotations.Test;
 public class CrudResourceTest {
 
   static ThirdEyeServerPrincipal nobody() {
-    return new ThirdEyeServerPrincipal("nobody", "", AuthenticationType.OAUTH);
+    return new ThirdEyeServerPrincipal("nobody", "", AuthenticationType.OAUTH, null);
   }
 
   @Test
@@ -125,7 +125,7 @@ public class CrudResourceTest {
   }
 
   private ThirdEyeServerPrincipal getPrincipal(String name) {
-    return new ThirdEyeServerPrincipal(name, "", AuthenticationType.OAUTH);
+    return new ThirdEyeServerPrincipal(name, "", AuthenticationType.OAUTH, null);
   }
 
   @Test

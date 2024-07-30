@@ -13,12 +13,14 @@
  */
 package ai.startree.thirdeye.auth.basic;
 
+import java.util.List;
 import java.util.Objects;
 
 public class UserCredentialConfiguration {
 
   private String username;
   private String password;
+  private List<String> namespaces; 
 
   public String getUsername() {
     return username;
@@ -53,5 +55,14 @@ public class UserCredentialConfiguration {
   @Override
   public int hashCode() {
     return Objects.hash(getUsername(), getPassword());
+  }
+
+  public List<String> getNamespaces() {
+    return namespaces;
+  }
+
+  public UserCredentialConfiguration setNamespaces(final List<String> namespaces) {
+    this.namespaces = namespaces;
+    return this;
   }
 }

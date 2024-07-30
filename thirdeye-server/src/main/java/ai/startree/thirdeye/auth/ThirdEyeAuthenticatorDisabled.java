@@ -24,6 +24,7 @@ public class ThirdEyeAuthenticatorDisabled implements
 
   @Override
   public Optional<ThirdEyeServerPrincipal> authenticate(final String s) {
-    return optional(new ThirdEyeServerPrincipal(s, "", AuthenticationType.DISABLED));
+    // FIXME CYRIL review usage of this
+    return optional(new ThirdEyeServerPrincipal(s, "", AuthenticationType.DISABLED, null));
   }
 }

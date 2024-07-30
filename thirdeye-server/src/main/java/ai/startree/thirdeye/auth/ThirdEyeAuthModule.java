@@ -18,7 +18,8 @@ import static ai.startree.thirdeye.spi.Constants.AUTH_BEARER;
 import static com.google.common.base.Preconditions.checkState;
 
 import ai.startree.thirdeye.auth.basic.BasicAuthConfiguration;
-import ai.startree.thirdeye.auth.basic.ThirdEyeBasicAuthenticator;
+import ai.startree.thirdeye.auth.basic.BasicNamespacedCredentialAuthFilter;
+import ai.startree.thirdeye.auth.basic.ThirdEyeBasicNamespacedAuthenticator;
 import ai.startree.thirdeye.auth.oauth.OAuthConfiguration;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provider;
@@ -97,9 +98,9 @@ public class ThirdEyeAuthModule extends AbstractModule {
 
   @Singleton
   @Provides
-  public BasicCredentialAuthFilter<ThirdEyeServerPrincipal> getBasicAuthFilter(
-      final ThirdEyeBasicAuthenticator authenticator) {
-    return new BasicCredentialAuthFilter.Builder<ThirdEyeServerPrincipal>()
+  public BasicNamespacedCredentialAuthFilter<ThirdEyeServerPrincipal> getBasicAuthFilter(
+      final ThirdEyeBasicNamespacedAuthenticator authenticator) {
+    return new BasicNamespacedCredentialAuthFilter.Builder<ThirdEyeServerPrincipal>()
         .setAuthenticator(authenticator)
         .setPrefix(AUTH_BASIC)
         .buildAuthFilter();

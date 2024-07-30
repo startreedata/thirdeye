@@ -180,7 +180,7 @@ public class SubscriptionGroupService extends
   public SubscriptionGroupApi reset(final ThirdEyePrincipal principal, Long id) {
     final SubscriptionGroupDTO sg = getDto(id);
     sg.setVectorClocks(null);
-    // todo authz ensureCanEdit is used to also go through related entities - but it's not a great design - consider related entities should be done in the Service? 
+    authorizationManager.ensureNamespace(principal, sg);
     authorizationManager.ensureCanEdit(principal, sg, sg);
     dtoManager.save(sg);
 
@@ -189,6 +189,7 @@ public class SubscriptionGroupService extends
 
   public void sendTestMessage(final ThirdEyePrincipal principal, final Long id) {
     final SubscriptionGroupDTO sg = getDto(id);
+    authorizationManager.ensureNamespace(principal, sg);
     // no need to check read access of all associated alerts, because the test message should not use alerts. 
     // todo authz change role?
     authorizationManager.ensureCanRead(principal, sg);

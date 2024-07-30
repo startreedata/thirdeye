@@ -66,7 +66,7 @@ public class CrudResourceTest {
     });
     when(manager.update(any(DummyDto.class))).thenReturn(1);
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
-        ThirdEyeAuthorizerProvider.ALWAYS_ALLOW);
+        ThirdEyeAuthorizerProvider.alwaysAllowAuthorizer);
 
     final List<String> emails = List.of("tester1@testing.com", "tester2@testing.com");
     final ThirdEyeServerPrincipal owner = getPrincipal(emails.get(0));
@@ -94,7 +94,7 @@ public class CrudResourceTest {
     });
     when(manager.update(any(DummyDto.class))).thenReturn(1);
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
-        ThirdEyeAuthorizerProvider.ALWAYS_ALLOW);
+        ThirdEyeAuthorizerProvider.alwaysAllowAuthorizer);
 
     final List<String> emails = List.of("tester1@testing.com", "tester2@testing.com");
     final Timestamp before = new Timestamp(1671476530000L);

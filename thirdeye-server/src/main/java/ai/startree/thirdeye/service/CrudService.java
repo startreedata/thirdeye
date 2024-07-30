@@ -61,11 +61,11 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
         .build();
   }
 
-  // FIXME CYRIL authz SUVODEEP MAIN DESIGN QUESTION ON WHETHER ONLY IF namespace match AND or if  
   public ApiT get(
       final ThirdEyeServerPrincipal principal,
       final Long id) {
     final DtoT dto = getDto(id);
+    authorizationManager.ensureNamespace(principal, dto);
     authorizationManager.ensureCanRead(principal, dto);
 
     return toApi(dto);
@@ -135,6 +135,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
   private DtoT updateDto(final ThirdEyeServerPrincipal principal, final ApiT api) {
     final Long id = ensureExists(api.getId(), ERR_MISSING_ID);
     final DtoT existing = ensureExists(dtoManager.findById(id));
+    authorizationManager.ensureNamespace(principal, existing);
     validate(principal, api, existing);
 
     final DtoT updated = toDto(api);
@@ -190,11 +191,10 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
     return updated;
   }
 
-  // FIXME CYRIL authz SUVODEEP MAIN DESIGN QUESTION ON WHETHER ONLY IF namespace match we apply
   public ApiT delete(final ThirdEyeServerPrincipal principal, final Long id) {
     final DtoT dto = dtoManager.findById(id);
     if (dto != null) {
-      // todo authz - this leaks ids of other namespaces
+      authorizationManager.ensureNamespace(principal, dto);
       authorizationManager.ensureCanDelete(principal, dto);
       deleteDto(dto);
       LOG.warn("Deleted id: {} by principal: {}", id, principal.getName());

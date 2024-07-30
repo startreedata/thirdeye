@@ -21,7 +21,9 @@ import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * AccessControlProvider serves as a mutable layer between Guice bindings and the access control
@@ -29,7 +31,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  */
 public class ThirdEyeAuthorizerProvider implements ThirdEyeAuthorizer {
 
-  public final static ThirdEyeAuthorizer ALWAYS_ALLOW = new AlwaysAllowAuthorizer();
+  public final ThirdEyeAuthorizer alwaysAllowAuthorizer;
 
   public final static ThirdEyeAuthorizer ALWAYS_DENY = new AlwaysDenyAuthorizer();
   
@@ -40,6 +42,7 @@ public class ThirdEyeAuthorizerProvider implements ThirdEyeAuthorizer {
 
   public ThirdEyeAuthorizerProvider(final AccessControlConfiguration config) {
     this.config = config;
+    alwaysAllowAuthorizer = new AlwaysAllowAuthorizer(config.getStaticNameToNamespaces());
   }
 
   public void addAccessControlFactory(final ThirdEyeAuthorizerFactory f) {
@@ -59,9 +62,9 @@ public class ThirdEyeAuthorizerProvider implements ThirdEyeAuthorizer {
     this.thirdEyeAuthorizer = accessControl;
   }
 
-  public ThirdEyeAuthorizer getAccessControl() {
+  private ThirdEyeAuthorizer getAccessControl() {
     if (!config.isEnabled()) {
-      return ALWAYS_ALLOW;
+      return alwaysAllowAuthorizer;
     }
 
     checkState(this.thirdEyeAuthorizer != null,
@@ -86,14 +89,32 @@ public class ThirdEyeAuthorizerProvider implements ThirdEyeAuthorizer {
 
   private static class AlwaysAllowAuthorizer implements ThirdEyeAuthorizer {
 
+    private final Map<String, List<String>> nameToNamespaces;
+
+    public AlwaysAllowAuthorizer(final @Nullable Map<String, List<String>> nameToNamespaces) {
+      if (nameToNamespaces != null) {
+        for (final String e : nameToNamespaces.keySet()) {
+          if (e.contains("null")) {
+            throw new IllegalArgumentException("Illegal namespace name null (the string). It is forbidden to avoid confusion with the null (not set) value.");
+          }
+        }
+      }
+      this.nameToNamespaces = nameToNamespaces;
+    }
+
     @Override
     public boolean authorize(final ThirdEyePrincipal principal, final ResourceIdentifier identifier,
         final AccessType accessType) {
-      return true;
+      return listNamespaces(principal).contains(identifier.getNamespace());
     }
 
     @Override
     public @NonNull List<String> listNamespaces(final ThirdEyePrincipal principal) {
+      if (nameToNamespaces != null) {
+        if (nameToNamespaces.containsKey(principal.getName())) {
+          return nameToNamespaces.get(principal.getName());
+        }
+      }
       return LIST_OF_NULL;
     }
   }
@@ -108,7 +129,7 @@ public class ThirdEyeAuthorizerProvider implements ThirdEyeAuthorizer {
 
     @Override
     public @NonNull List<String> listNamespaces(final ThirdEyePrincipal principal) {
-      return LIST_OF_NULL;
+      return List.of();
     }
   }
 }

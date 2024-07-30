@@ -79,8 +79,6 @@ For a complete description of ThirdEye's features, see [**ThirdEye documentation
 If you have MySQL 8.0 installed, run `scripts/db-setup.sh`. This script uses the `root` user to
 create the database and tables.
 
-Alternatively, you can use docker to launch mysql. Simply execute `scripts/mysql-docker-start.sh`
-
 ### Build with Maven
 
 ThirdEye is a maven project and uses standard maven commands.

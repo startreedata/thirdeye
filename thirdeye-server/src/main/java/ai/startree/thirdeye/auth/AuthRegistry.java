@@ -21,6 +21,8 @@ import ai.startree.thirdeye.auth.oauth.OAuthConfiguration;
 import ai.startree.thirdeye.spi.auth.AuthenticationType;
 import ai.startree.thirdeye.spi.auth.OpenIdConfigurationProvider;
 import ai.startree.thirdeye.spi.auth.OpenIdConfigurationProvider.Factory;
+import ai.startree.thirdeye.spi.auth.ThirdEyeAuthenticator;
+import ai.startree.thirdeye.spi.auth.ThirdEyeAuthenticator.AuthTokenAndNamespace;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthenticator.OauthThirdEyeAuthenticatorFactory;
 import com.google.inject.Singleton;
 import io.dropwizard.auth.Authenticator;
@@ -56,30 +58,26 @@ public class AuthRegistry {
     openIdConfigurationFactories.put(f.getName(), f);
   }
 
-  private OauthThirdEyeAuthenticatorFactory getDefaultOAuthFactory() {
-    return requireNonNull(oauthFactories.get(OAUTH_DEFAULT), "oauth plugin not loaded!");
-  }
-
   @SuppressWarnings("unchecked")
-  public Authenticator<String, ThirdEyeServerPrincipal> createOAuthAuthenticator(
+  public Authenticator<AuthTokenAndNamespace, ThirdEyeServerPrincipal> createOAuthAuthenticator(
       final OAuthConfiguration oauthConfig) {
     final Map<String, Object> oauthConfigMap = toMap(oauthConfig);
 
-    final var authenticator = requireNonNull(getDefaultOAuthFactory().build(oauthConfigMap),
+    final OauthThirdEyeAuthenticatorFactory defaultOAuthFactory = requireNonNull(
+        oauthFactories.get(OAUTH_DEFAULT), "oauth plugin not loaded!");
+    final ThirdEyeAuthenticator<AuthTokenAndNamespace> authenticator = requireNonNull(
+        defaultOAuthFactory.build(oauthConfigMap),
         "failed to build authenticator");
     return credentials -> authenticator.authenticate(credentials)
-        // FIXME CYRIL authz implement namespacing
-        .map(p -> new ThirdEyeServerPrincipal(p.getName(), credentials, AuthenticationType.OAUTH, null));
+        .map(p -> new ThirdEyeServerPrincipal(p.getName(), credentials.authToken(), AuthenticationType.OAUTH,
+            credentials.namespace()));
   }
 
   public OpenIdConfigurationProvider createDefaultOpenIdConfigurationProvider(
       final OAuthConfiguration oAuthConfiguration) {
-    return requireNonNull(getDefaultOpenIdConfigurationFactory().build(toMap(oAuthConfiguration)),
-        "failed to build OpenIdConfigurationProvider");
-  }
-
-  private Factory getDefaultOpenIdConfigurationFactory() {
-    return requireNonNull(openIdConfigurationFactories.get(OPENID_DEFAULT),
+    final Factory factory = requireNonNull(openIdConfigurationFactories.get(OPENID_DEFAULT),
         "OpenIdConfigurationProvider plugin not loaded!");
+    return requireNonNull(factory.build(toMap(oAuthConfiguration)),
+        "failed to build OpenIdConfigurationProvider");
   }
 }

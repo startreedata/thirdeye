@@ -21,6 +21,8 @@ import java.util.Optional;
 
 public interface ThirdEyeAuthenticator<CredentialsT> {
 
+  record AuthTokenAndNamespace(String authToken, String namespace){}
+
   /**
    * Authenticates the given credentials. Returns an empty optional if the credentials could not be
    * authenticated.
@@ -33,6 +35,6 @@ public interface ThirdEyeAuthenticator<CredentialsT> {
   Optional<ThirdEyePrincipal> authenticate(CredentialsT credentials) throws ThirdEyeException;
 
   interface OauthThirdEyeAuthenticatorFactory extends
-      PluginServiceFactory<ThirdEyeAuthenticator<String>, Map> {
+      PluginServiceFactory<ThirdEyeAuthenticator<AuthTokenAndNamespace>, Map> {
   }
 }

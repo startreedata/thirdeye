@@ -196,6 +196,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
 
   public AlertInsightsApi getInsightsById(final ThirdEyeServerPrincipal principal, final Long id) {
     final AlertDTO dto = getDto(id);
+    authorizationManager.ensureNamespace(principal, dto);
     authorizationManager.ensureCanRead(principal, dto);
     return alertInsightsProvider.getInsights(principal, dto);
   }
@@ -214,6 +215,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     final AlertDTO dto = getDto(id);
     ensureExists(dto);
     ensureExists(startTime, "start");
+    authorizationManager.ensureNamespace(principal, dto);
     authorizationManager.ensureCanEdit(principal, dto, dto);
 
     createDetectionTask(dto, startTime, safeEndTime(endTime));
@@ -288,6 +290,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
       final ThirdEyeServerPrincipal principal,
       final Long id) {
     final AlertDTO dto = getDto(id);
+    authorizationManager.ensureNamespace(principal, dto);
     authorizationManager.ensureCanEdit(principal, dto, dto);
     LOG.warn("Resetting alert id: {} by principal: {}", id, principal.getName());
 
@@ -314,6 +317,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
       final Long endTime
   ) {
     final AlertDTO dto = ensureExists(getDto(id));
+    authorizationManager.ensureNamespace(principal, dto);
     authorizationManager.ensureCanRead(principal, dto);
     // no need to check authz for the enumerationItem - in the new workspace system, if the user has access to the alert then he has access to the enumerationItem
     // no explicit need for namespace filter given alert id is passed - todo cyril authz - still pass one

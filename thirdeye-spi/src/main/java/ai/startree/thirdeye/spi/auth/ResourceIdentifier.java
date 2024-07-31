@@ -16,11 +16,12 @@ package ai.startree.thirdeye.spi.auth;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class ResourceIdentifier {
 
   public static final String DEFAULT_NAME = "0";
-  public static final String DEFAULT_NAMESPACE = "default";
+  public static final String DEFAULT_NAMESPACE = null;
   public static final String DEFAULT_ENTITY_TYPE = "RESOURCE";
 
   public static final ResourceIdentifier NULL_IDENTIFIER = ResourceIdentifier.from(DEFAULT_NAME, DEFAULT_NAMESPACE, DEFAULT_ENTITY_TYPE);
@@ -35,7 +36,7 @@ public class ResourceIdentifier {
     this.entityType = entityType;
   }
 
-  public static ResourceIdentifier from(final String name, final String namespace,
+  public static ResourceIdentifier from(final String name, final @Nullable String namespace,
       final String entityType) {
     return new ResourceIdentifier(
         optional(name).filter(StringUtils::isNotEmpty).orElse(DEFAULT_NAME),

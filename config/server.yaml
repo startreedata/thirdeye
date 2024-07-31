@@ -68,6 +68,11 @@ auth:
   authorization:
     # set to true to enable the new namespace system
     requireNamespace: false
+ 
+#accessControl:
+  # used for dev, test and debug 
+#  staticNameToNamespaces:
+#    no-auth-user: ["namespace3", null]
 
 database:
   # Assuming a local MySQL server running on the default port 3306

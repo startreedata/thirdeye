@@ -18,9 +18,11 @@ import static ai.startree.thirdeye.spi.auth.ResourceIdentifier.DEFAULT_ENTITY_TY
 import static ai.startree.thirdeye.spi.auth.ResourceIdentifier.DEFAULT_NAME;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.ResourceUtils.authorize;
+import static ai.startree.thirdeye.util.ResourceUtils.notFoundError;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.datalayer.entity.SubEntityType;
+import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
@@ -62,7 +64,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.ws.rs.ForbiddenException;
-import javax.ws.rs.NotAuthorizedException;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -80,7 +82,7 @@ public class AuthorizationManager {
       "thirdeye-root", "thirdeye-root", "thirdeye-root");
 
   private static final ThirdEyeServerPrincipal INTERNAL_VALID_PRINCIPAL = new ThirdEyeServerPrincipal(
-      "thirdeye-internal", RandomStringUtils.random(1024, true, true), 
+      "thirdeye-internal", RandomStringUtils.random(1024, true, true),
       AuthenticationType.INTERNAL,
       // a dedicated code path gives access to all namespaces to this internal valid principal
       null);
@@ -141,18 +143,17 @@ public class AuthorizationManager {
     // else namespace is passed explicitly - don't modify it
   }
 
-  // TODO CYRIL authz should be moved down to ThirdEyeAuthorizer once we implement multi-namespace UI support?
   public @Nullable String currentNamespace(final ThirdEyePrincipal principal) {
     final List<String> namespaces = thirdEyeAuthorizer.listNamespaces(principal);
     if (namespaces.size() == 0) {
       throw new ForbiddenException("Access Denied.");  // throw 403
-    } else if (namespaces.size() == 1) {
-      return namespaces.get(0);
     } else {
-      // todo cyril authz - resolve from principal
-      throw new NotAuthorizedException(String.format(
-          "Namespace not cannot be resolved automatically. Please provide a namespace explicitly. Namespaces: %s",
-          namespaces));
+      final String principalNamespace = principal.getNamespace();
+      // assuming the list of namespace is short so contains in list should be fine
+      if (namespaces.contains(principalNamespace)) {
+        return principalNamespace;
+      }
+      throw new NotFoundException("Unknown namespace " + principalNamespace  + ". Known namespaces: " + namespaces);
     }
   }
 
@@ -174,6 +175,18 @@ public class AuthorizationManager {
       final T entity) {
     if (!canRead(principal, entity)) {
       throw forbiddenExceptionFor(principal, resourceId(entity), AccessType.READ);
+    }
+  }
+  
+  // send a 404 if the dto namespace does not match the principal namespace
+  // note: maybe this should be put in other methods but not sure yet
+  public <T extends AbstractDTO> void ensureNamespace(final ThirdEyePrincipal principal, final T dto) {
+    if (INTERNAL_VALID_PRINCIPAL.equals(principal)) {
+      // don't check when using the internal namespace
+      return;
+    }
+    if (!Objects.equals(dto.namespace(), currentNamespace(principal))) {
+      throw notFoundError(ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST, dto.getId());
     }
   }
 
@@ -269,7 +282,6 @@ public class AuthorizationManager {
                         LoadingCache<String, Optional<DatasetConfigDTO>> datasetCache) {}
 
   /**
-   *
    * For the moment this method is responsible for checking whether related entities are in the
    * same namespace - todo cyril authz - is this the right place ?
    *
@@ -346,22 +358,29 @@ public class AuthorizationManager {
       final Set<ResourceIdentifier> result,
       final Caches caches) {
     if (entity instanceof final AlertDTO alertDto) {
-      final AlertTemplateDTO alertTemplateDTO = caches.templateCache.getUnchecked(
-              alertDto.getTemplate())
-          .orElse(null);
-      checkArgument(alertTemplateDTO != null,
-          "Invalid template %s. Not found in alert namespace %s.", alertDto.getTemplate(),
-          alertDto.namespace());
-      final ResourceIdentifier resourceId = resourceId(alertTemplateDTO);
-      if (!result.contains(resourceId)) {
-        result.add(resourceId);
-        addRelatedEntities(alertTemplateDTO, result, caches);
+      if (alertDto.getTemplate() != null) {
+        final AlertTemplateDTO alertTemplateDTO = caches.templateCache.getUnchecked(
+                alertDto.getTemplate())
+            .orElse(null);
+        if (alertTemplateDTO != null) {
+          final ResourceIdentifier resourceId = resourceId(alertTemplateDTO);
+          if (!result.contains(resourceId)) {
+            result.add(resourceId);
+            addRelatedEntities(alertTemplateDTO, result, caches);
+          }
+        } else {
+          // not having a valid template can happen if a template is deleted or renamed - so we don't throw an error
+          // error level for the moment but can be warn level later
+          LOG.error(
+              "Invalid template {}. Not found in alert namespace {}. No template added to related entities of the alert.",
+              alertDto.getTemplate(), alertDto.namespace());
+        } 
       }
       // hack: find the related dataset by looking at the property value directly - assume the key is "dataset"
       // TODO cyril authz - fix this consider rendering the template? but make sure it's not too slow - 
       //  also slight security concern because it means we are rendering the template even if access to the template has not been checked yet
       // in effect templates could do anything, accessing one or multiple dataset/datasource - so we don't attempt to perform a full check - the alert pipeline execution will fail if entities are not valid 
-      final @Nullable Object datasetName = optional(alertDto.getProperties()).map(
+      final @Nullable Object datasetName = optional(alertDto.getTemplateProperties()).map(
           e -> e.get("dataset")).orElse(null);
       if (datasetName instanceof String datasetNameStr) {
         final DatasetConfigDTO datasetConfigDTO = caches.datasetCache.getUnchecked(datasetNameStr)
@@ -418,16 +437,18 @@ public class AuthorizationManager {
         addRelatedEntities(anomaly, result, caches);
       }
     } else if (entity instanceof AnomalyDTO anomalyDto) {
-      final @NonNull Long alertId = anomalyDto.getDetectionConfigId();
-      final AlertDTO alertDto = caches.alertCache.getUnchecked(alertId).orElse(null);
-      checkArgument(
-          alertDto != null && Objects.equals(anomalyDto.namespace(), alertDto.namespace()),
-          "Invalid alert id or anomaly namespace %s and alert namespace do not match for alert id %s.",
-          anomalyDto.namespace(), alertId);
-      final ResourceIdentifier resourceId = resourceId(alertDto);
-      if (!result.contains(resourceId)) {
-        result.add(resourceId);
-        addRelatedEntities(alertDto, result, caches);
+      final Long alertId = anomalyDto.getDetectionConfigId();
+      if (alertId != null) {
+        final AlertDTO alertDto = caches.alertCache.getUnchecked(alertId).orElse(null);
+        checkArgument(
+            alertDto != null && Objects.equals(anomalyDto.namespace(), alertDto.namespace()),
+            "Invalid alert id or anomaly namespace %s and alert namespace do not match for alert id %s.",
+            anomalyDto.namespace(), alertId);
+        final ResourceIdentifier resourceId = resourceId(alertDto);
+        if (!result.contains(resourceId)) {
+          result.add(resourceId);
+          addRelatedEntities(alertDto, result, caches);
+        }  
       }
       // todo cyril authz implement enumeration item related entity anomalyDto.getEnumerationItem
     } else if (entity instanceof DatasetConfigDTO datasetConfigDTO) {

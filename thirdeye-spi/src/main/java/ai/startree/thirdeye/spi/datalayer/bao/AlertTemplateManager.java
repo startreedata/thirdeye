@@ -30,7 +30,7 @@ public interface AlertTemplateManager extends AbstractManager<AlertTemplateDTO> 
    *    if alertTemplateDto nodes are set:
    *      return the alertTemplateDto
    *    else:
-   *      throw an error
+   *      return null
    */
   // todo cyril authz - remove orUnsetNamespace once migration is done.
   AlertTemplateDTO findMatchInNamespaceOrUnsetNamespace(final @NonNull AlertTemplateDTO alertTemplateDTO, final @Nullable String namespace);

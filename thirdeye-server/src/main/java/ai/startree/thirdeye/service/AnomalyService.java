@@ -74,6 +74,7 @@ public class AnomalyService extends CrudService<AnomalyApi, AnomalyDTO> {
       final AnomalyFeedbackApi api) {
     final AnomalyDTO dto = getDto(id);
     // todo cyril review authz - only require read right to add a feedback to an anomaly - to avoid feedback frictions for the moment
+    authorizationManager.ensureNamespace(principal, dto);
     authorizationManager.ensureCanRead(principal, dto);
     final AnomalyFeedbackDTO feedbackDTO = ApiBeanMapper.toAnomalyFeedbackDTO(api);
     feedbackDTO.setUpdatedBy(principal.getName());

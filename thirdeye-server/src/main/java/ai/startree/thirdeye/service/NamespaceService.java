@@ -24,7 +24,7 @@ import java.util.List;
 @Singleton
 public class NamespaceService {
 
-  // kept to respect architecture test - maybe the listNamespaces 
+  // kept to respect architecture test 
   private final AuthorizationManager authorizationManager;
   private final ThirdEyeAuthorizer thirdEyeAuthorizer;
 

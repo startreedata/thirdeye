@@ -144,7 +144,6 @@ public class CrudResourceTest {
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
         ThirdEyeAuthorizerProvider.ALWAYS_DENY);
     assertThatThrownBy(() -> resource.list(nobody(), uriInfo)).isInstanceOf(ForbiddenException.class);
-    
   }
 
   @Test

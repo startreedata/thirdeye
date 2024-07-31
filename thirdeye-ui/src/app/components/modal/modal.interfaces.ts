@@ -31,4 +31,5 @@ export interface ModalProps {
     initiallyOpen?: boolean;
     disableCancelButton?: boolean;
     disableSubmitButton?: boolean;
+    showFooter?: boolean;
 }

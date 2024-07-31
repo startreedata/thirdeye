@@ -50,6 +50,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
     hideCallToActionPrompt,
     disableReload,
     showTimeRange = true,
+    children,
 }) => {
     const { t } = useTranslation();
     const [searchParams, setSearchParams] = useSearchParams();
@@ -232,6 +233,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                     </Box>
                 }
             >
+                <Box sx={{ mt: 2 }}> {children}</Box>
                 <ChartContent
                     showLoadButton
                     alert={alert}

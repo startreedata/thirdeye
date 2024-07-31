@@ -167,6 +167,9 @@ export const AppRoute = {
     SUBSCRIPTION_GROUPS_ALL: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.SUBSCRIPTION_GROUPS}/${AppRouteRelative.SUBSCRIPTION_GROUPS_ALL}`,
     SUBSCRIPTION_GROUPS_VIEW: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.SUBSCRIPTION_GROUPS}/${AppRouteRelative.SUBSCRIPTION_GROUPS_VIEW}`,
     SUBSCRIPTION_GROUPS_CREATE: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.SUBSCRIPTION_GROUPS}/${AppRouteRelative.SUBSCRIPTION_GROUPS_CREATE}`,
+    SUBSCRIPTION_GROUPS_CREATE_DETAILS:
+        `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.SUBSCRIPTION_GROUPS}/${AppRouteRelative.SUBSCRIPTION_GROUPS_CREATE}/` +
+        `${AppRouteRelative.SUBSCRIPTION_GROUPS_WIZARD_DETAILS}/${PLACEHOLDER_ROUTE_ID}`,
     SUBSCRIPTION_GROUPS_UPDATE: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.SUBSCRIPTION_GROUPS}/${AppRouteRelative.SUBSCRIPTION_GROUPS_UPDATE}`,
     DATASETS: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.DATASETS}`,
     DATASETS_ALL: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.DATASETS}/${AppRouteRelative.DATASETS_ALL}`,
@@ -402,6 +405,15 @@ export const getAnomaliesViewPath = (id: number): string => {
 
 export const getSubscriptionGroupsCreatePath = (): string => {
     return AppRoute.SUBSCRIPTION_GROUPS_CREATE;
+};
+
+export const getSubscriptionGroupsCreatePathWithAlertId = (
+    id: string
+): string => {
+    let path: string = AppRoute.SUBSCRIPTION_GROUPS_CREATE_DETAILS;
+    path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
+
+    return path;
 };
 
 export const getSubscriptionGroupsUpdatePath = (id: number): string => {

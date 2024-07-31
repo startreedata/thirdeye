@@ -92,6 +92,7 @@
         "aggregation-column": "Aggregation Column",
         "aggregation-function": "Aggregation Function",
         "alert": "Alert",
+        "alert-completed": "Alert completed",
         "alert-details": "Alert Details",
         "alert-editor": "Alert editor",
         "alert-frequency": "Alert Frequency",
@@ -159,6 +160,7 @@
         "confirm": "Confirm",
         "confirm-anomaly": "Confirm anomaly",
         "congratulations-!": "Congratulations!",
+        "congratulations-,": "Congratulations,",
         "consolidated": "Consolidated",
         "contribution": "Contribution",
         "contribution-percentage-for-the-selected-metrics": "Contribution % for the selected metrics",
@@ -586,6 +588,7 @@
         "yes": "Yes",
         "yes-leave-page": "Yes, leave page",
         "yesterday": "Yesterday",
+        "your-alert-has-been-created": " Your alert has been created!",
         "zoom": "Zoom"
     },
     "message": {
@@ -887,6 +890,7 @@
         "threshold-setup-description": "Simplest method, detect an anomaly if a metric is above a maximum or below a minimum threshold.",
         "time-of-the-week-filter-description": "Define the day and/or time of the week that will be used to ignore anomalies",
         "times-displayed-in-timezone": "Times displayed in {{timezone}} Timezone",
+        "to-receive-notifications-configure": "To receive notifications in email, slack or PageDuty configure your subscription groups.",
         "total-anomalies-detected": "Total anomalies detected: {{num}}",
         "total-entity-from-start": "total {{entity}} from start",
         "total-reported-anomalies": "Total Reported Anomalies",

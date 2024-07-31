@@ -278,6 +278,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         const copied = { ...alert };
         delete copied.templateProperties?.queryFilters;
         delete copied.templateProperties?.enumerationItems;
+        setCompositeFilters(null);
         setAlertConfigForPreview(copied);
         onAlertPropertyChange(copied);
         setAnomalyDetection(item);
@@ -1038,7 +1039,22 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                             onAlertPropertyChange={
                                                                                 onAlertPropertyChange
                                                                             }
-                                                                        />
+                                                                        >
+                                                                            {compositeFilters && (
+                                                                                <Button
+                                                                                    color="primary"
+                                                                                    onClick={() =>
+                                                                                        setOpenCompositeFilterModal(
+                                                                                            true
+                                                                                        )
+                                                                                    }
+                                                                                >
+                                                                                    {t(
+                                                                                        "label.add-dimensions"
+                                                                                    )}
+                                                                                </Button>
+                                                                            )}
+                                                                        </ThresholdSetup>
                                                                     ) : (
                                                                         <Button
                                                                             color="primary"

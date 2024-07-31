@@ -26,6 +26,7 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
     onAlertPropertyChange,
     alert,
     alertTemplate,
+    children,
 }) => {
     const [localAlertTemplateProperties, setLocalAlertTemplateProperties] =
         useState<TemplatePropertiesObject>(alert.templateProperties);
@@ -71,7 +72,9 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
                 alert={alert}
                 showTimeRange={false}
                 onAlertPropertyChange={onAlertPropertyChange}
-            />
+            >
+                {children}
+            </PreviewChart>
 
             <Grid item xs={12}>
                 <Box marginBottom={2} marginTop={2} padding={1}>

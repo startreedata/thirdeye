@@ -34,6 +34,7 @@ import React, {
 import { useTranslation } from "react-i18next";
 import { useParams, useSearchParams } from "react-router-dom";
 import { AlertAccuracyColored } from "../../components/alert-accuracy-colored/alert-accuracy-colored.component";
+import { AlertAddConfigrationModal } from "../../components/alert-add-configuration-modal/alert-add-configration-modal.component";
 import { AlertChart } from "../../components/alert-view/alert-chart/alert-chart.component";
 import { AlertOptionsButton } from "../../components/alert-view/alert-options-button/alert-options-button.component";
 import { EnumerationItemsTable } from "../../components/alert-view/enumeration-items-table/enumeration-items-table.component";
@@ -567,6 +568,7 @@ export const AlertsViewPage: FunctionComponent = () => {
                         )}
                     </LoadingErrorStateSwitch>
                 </Grid>
+                {alertId && <AlertAddConfigrationModal alertId={alertId} />}
             </PageContentsGridV1>
         </PageV1>
     );

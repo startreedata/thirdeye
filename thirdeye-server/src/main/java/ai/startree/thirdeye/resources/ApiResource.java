@@ -118,7 +118,7 @@ public class ApiResource {
     return enumerationItemResource;
   }
 
-  // using the same name as in other Startree apps - workspace is equivalent to namespace in ThirdEye
+  // using the same route as in other Startree apps - workspace is equivalent to namespace in ThirdEye
   @Path("workspaces")
   public NamespaceResource getNamespaceResource() {
     return namespaceResource;

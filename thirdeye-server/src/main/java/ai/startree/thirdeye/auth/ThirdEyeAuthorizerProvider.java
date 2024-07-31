@@ -63,7 +63,8 @@ public class ThirdEyeAuthorizerProvider implements ThirdEyeAuthorizer {
     this.thirdEyeAuthorizer = accessControl;
   }
 
-  private ThirdEyeAuthorizer getAccessControl() {
+  @VisibleForTesting
+  public ThirdEyeAuthorizer getAccessControl() {
     if (!config.isEnabled()) {
       return alwaysAllowAuthorizer;
     }

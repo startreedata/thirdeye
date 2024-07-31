@@ -34,6 +34,7 @@ public class ApiResource {
   private final TaskResource taskResource;
   private final UiResource uiResource;
   private final EnumerationItemResource enumerationItemResource;
+  private final NamespaceResource namespaceResource;
 
   @Inject
   public ApiResource(final AppAnalyticsResource appAnalyticsResource,
@@ -51,7 +52,8 @@ public class ApiResource {
       final EventResource eventResource,
       final TaskResource taskResource,
       final UiResource uiResource,
-      final EnumerationItemResource enumerationItemResource) {
+      final EnumerationItemResource enumerationItemResource,
+      final NamespaceResource namespaceResource) {
     this.appAnalyticsResource = appAnalyticsResource;
     this.authResource = authResource;
     this.authInfoResource = authInfoResource;
@@ -68,6 +70,7 @@ public class ApiResource {
     this.taskResource = taskResource;
     this.uiResource = uiResource;
     this.enumerationItemResource = enumerationItemResource;
+    this.namespaceResource = namespaceResource;
   }
 
   @Path("app-analytics")
@@ -113,6 +116,12 @@ public class ApiResource {
   @Path("enumeration-items")
   public EnumerationItemResource getEnumerationItemResource() {
     return enumerationItemResource;
+  }
+
+  // using the same name as in other Startree apps - workspace is equivalent to namespace in ThirdEye
+  @Path("workspaces")
+  public NamespaceResource getNamespaceResource() {
+    return namespaceResource;
   }
 
   @Path("subscription-groups")

@@ -63,6 +63,7 @@ import ai.startree.thirdeye.scheduler.events.MockEventsLoader;
 import ai.startree.thirdeye.scheduler.job.DetectionPipelineJob;
 import ai.startree.thirdeye.scheduler.job.NotificationPipelineJob;
 import ai.startree.thirdeye.service.CrudService;
+import ai.startree.thirdeye.service.NamespaceService;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer.ThirdEyeAuthorizerFactory;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
@@ -253,10 +254,10 @@ public class ArchitectureTest {
         .doNotImplement(ThirdEyeAuthorizerFactory.class)
         .and()
         .doNotBelongToAnyOf(AuthorizationManager.class, ThirdEyeServerModule.class,
-            PluginLoader.class)
+            PluginLoader.class, NamespaceService.class)
         .should()
         .accessClassesThat()
-        .implement(ThirdEyeAuthorizer.class);
+        .areAssignableTo(ThirdEyeAuthorizer.class);
 
     rule.check(thirdeyeClasses);
   }

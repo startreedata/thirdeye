@@ -15,6 +15,7 @@ package ai.startree.thirdeye.resources;
 
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -42,6 +43,7 @@ import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.ws.rs.ForbiddenException;
@@ -66,7 +68,7 @@ public class CrudResourceTest {
     });
     when(manager.update(any(DummyDto.class))).thenReturn(1);
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
-        ThirdEyeAuthorizerProvider.ALWAYS_ALLOW);
+        new ThirdEyeAuthorizerProvider.AlwaysAllowAuthorizer(Map.of()));
 
     final List<String> emails = List.of("tester1@testing.com", "tester2@testing.com");
     final ThirdEyeServerPrincipal owner = getPrincipal(emails.get(0));
@@ -94,7 +96,7 @@ public class CrudResourceTest {
     });
     when(manager.update(any(DummyDto.class))).thenReturn(1);
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
-        ThirdEyeAuthorizerProvider.ALWAYS_ALLOW);
+        new ThirdEyeAuthorizerProvider.AlwaysAllowAuthorizer(Map.of()));
 
     final List<String> emails = List.of("tester1@testing.com", "tester2@testing.com");
     final Timestamp before = new Timestamp(1671476530000L);
@@ -141,13 +143,7 @@ public class CrudResourceTest {
 
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
         ThirdEyeAuthorizerProvider.ALWAYS_DENY);
-    try (Response resp = resource.list(nobody(), uriInfo)) {
-      assertThat(resp.getStatus()).isEqualTo(200);
-
-      final List<DummyApi> entities = ((Stream<DummyApi>) resp.getEntity()).collect(
-          Collectors.toList());
-      assertThat(entities).isEmpty();
-    }
+    assertThatThrownBy(() -> resource.list(nobody(), uriInfo)).isInstanceOf(ForbiddenException.class);
   }
 
   @Test

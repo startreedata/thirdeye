@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.auth;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -31,6 +32,10 @@ public class AccessControlConfiguration {
   private boolean enabled;
   private Map<String, Map<String, Object>> plugins;
 
+  // for dev and test - allows to hardcode a map of username --> list of namespaces
+  // it is used even if AccessControl.enabled is false
+  private Map<String, List<String>> staticNameToNamespaces;
+
   public boolean isEnabled() {
     return enabled;
   }
@@ -45,5 +50,15 @@ public class AccessControlConfiguration {
 
   public void setPlugins(final Map<String, Map<String, Object>> plugins) {
     this.plugins = plugins;
+  }
+
+  public Map<String, List<String>> getStaticNameToNamespaces() {
+    return staticNameToNamespaces;
+  }
+
+  public AccessControlConfiguration setStaticNameToNamespaces(
+      final Map<String, List<String>> staticNameToNamespaces) {
+    this.staticNameToNamespaces = staticNameToNamespaces;
+    return this;
   }
 }

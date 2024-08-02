@@ -75,7 +75,7 @@ public class AppAnalyticsService {
     final @Nullable String namespace = authorizationManager.currentNamespace(principal);
 
     // ensure the user has read access to alert and entities
-    // todo cyril authz - usage of dummy entities for access check - avoid
+    // todo cyril authz - usage of dummy entities for access check - avoid by using the alertService
     authorizationManager.ensureCanRead(principal, new AlertDTO().setAuth(new AuthorizationConfigurationDTO().setNamespace(namespace)));
     authorizationManager.ensureCanRead(principal, new AnomalyDTO().setAuth(new AuthorizationConfigurationDTO().setNamespace(namespace)));
 

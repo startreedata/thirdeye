@@ -95,6 +95,7 @@ public class DataSourceService extends CrudService<DataSourceApi, DataSourceDTO>
   public List<DatasetApi> getDatasets(final ThirdEyePrincipal principal, final long id) {
     final DataSourceDTO dataSourceDto = dtoManager.findById(id);
     checkArgument(dataSourceDto != null, "Could not find datasource with id %s", id);
+    authorizationManager.ensureNamespace(principal, dataSourceDto);
     authorizationManager.ensureCanRead(principal, dataSourceDto);
     final ThirdEyeDataSource dataSource = dataSourceCache.getDataSource(dataSourceDto);
     return dataSource.getDatasets().stream()

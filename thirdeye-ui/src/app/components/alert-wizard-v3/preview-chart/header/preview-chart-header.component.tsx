@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Button, Grid } from "@material-ui/core";
+import { Box, Button, Grid } from "@material-ui/core";
 import RefreshIcon from "@material-ui/icons/Refresh";
 import { Alert } from "@material-ui/lab";
 import React, { FunctionComponent } from "react";
@@ -30,6 +30,7 @@ export const PreviewChartHeader: FunctionComponent<PreviewChartHeaderProps> = ({
     onStartEndChange,
     showConfigurationNotReflective,
     showTimeRange = true,
+    children,
 }) => {
     const { t } = useTranslation();
 
@@ -42,15 +43,20 @@ export const PreviewChartHeader: FunctionComponent<PreviewChartHeaderProps> = ({
                     justifyContent="space-between"
                 >
                     <Grid item>
-                        <Button
-                            color="primary"
-                            disabled={disableReload}
-                            variant="outlined"
-                            onClick={onReloadClick}
-                        >
-                            <RefreshIcon fontSize="small" />
-                            {t("label.reload-preview")}
-                        </Button>
+                        <Grid container>
+                            <Grid item>
+                                <Button
+                                    color="primary"
+                                    disabled={disableReload}
+                                    variant="outlined"
+                                    onClick={onReloadClick}
+                                >
+                                    <RefreshIcon fontSize="small" />
+                                    {t("label.reload-preview")}
+                                </Button>
+                            </Grid>
+                            <Grid item>{children}</Grid>
+                        </Grid>
                     </Grid>
                     {showConfigurationNotReflective &&
                         getEvaluationStatus !== ActionStatus.Working && (

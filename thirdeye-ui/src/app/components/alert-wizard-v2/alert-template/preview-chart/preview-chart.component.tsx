@@ -206,7 +206,9 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                 onStartEndChange={(newStart, newEnd) => {
                     fetchAlertEvaluation(newStart, newEnd);
                 }}
-            />
+            >
+                {children}
+            </PreviewChartHeader>
             <LoadingErrorStateSwitch
                 errorState={
                     <Box pb={20} pt={20}>
@@ -233,7 +235,6 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                     </Box>
                 }
             >
-                <Box sx={{ mt: 2 }}> {children}</Box>
                 <ChartContent
                     showLoadButton
                     alert={alert}

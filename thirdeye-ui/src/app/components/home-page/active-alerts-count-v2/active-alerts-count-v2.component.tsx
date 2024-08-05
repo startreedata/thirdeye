@@ -21,7 +21,7 @@ import { Link as RouterLink } from "react-router-dom";
 import { SkeletonV1 } from "../../../platform/components";
 import {
     getAlertsAllPath,
-    getAlertsCreatePath,
+    getAlertsEasyCreatePath,
 } from "../../../utils/routes/routes.util";
 import IconLink from "../../icon-link/icon-link.component";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
@@ -82,7 +82,7 @@ export const ActiveAlertsCountV2: FunctionComponent<ActiveAlertsCountProps> = ({
                     label={t("label.create-entity", {
                         entity: t("label.alert"),
                     })}
-                    route={getAlertsCreatePath()}
+                    route={getAlertsEasyCreatePath()}
                 />
             </Grid>
         </Grid>

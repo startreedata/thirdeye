@@ -12,12 +12,13 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
+import { Investigation } from "../../../rest/dto/rca.interfaces";
 
-import { makeStyles } from "@material-ui/core";
-
-export const useStyles = makeStyles({
-    sectionHeading: {
-        display: "flex",
-        justifyContent: "space-between",
-    },
-});
+export interface RecentInvestigationsProps {
+    investigations: Investigation[] | null;
+    anomalies: Anomaly[] | null;
+    selectedAnalysisPeriod: string;
+    onAnalysisPeriodChange: (period: string) => void;
+    analysisPeriods: string[];
+}

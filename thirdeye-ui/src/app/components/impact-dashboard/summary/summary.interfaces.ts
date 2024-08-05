@@ -44,4 +44,7 @@ export interface SummaryProps {
             };
         };
     };
+    selectedAnalysisPeriod: string;
+    onAnalysisPeriodChange: (period: string) => void;
+    analysisPeriods: string[];
 }

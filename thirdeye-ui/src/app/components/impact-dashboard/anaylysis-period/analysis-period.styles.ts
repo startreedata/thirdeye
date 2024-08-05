@@ -12,3 +12,27 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { makeStyles } from "@material-ui/core";
+
+export const useStyles = makeStyles({
+    container: {
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        gap: "8px",
+    },
+    rangeContainer: {
+        display: "flex",
+        gap: "4px",
+    },
+    range: {
+        // display: "flex",
+        // justifyContent: "center",
+        // alignItems: "center",
+        cursor: "pointer",
+    },
+    selected: {
+        background: "#e1edff",
+        fontWeight: "bold",
+    },
+});

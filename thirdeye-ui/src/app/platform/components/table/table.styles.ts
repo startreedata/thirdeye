@@ -12,3 +12,17 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { makeStyles } from "@material-ui/core";
+
+export const useStyles = makeStyles({
+    table: {},
+    columnHeaders: {
+        background: "#e1edff",
+    },
+    emptyView: {
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        padding: "16px",
+    },
+});

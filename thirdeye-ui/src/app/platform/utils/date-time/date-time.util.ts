@@ -315,3 +315,58 @@ export const switchMeridiemV1 = (date: number): number => {
 
     return switchedDate.toMillis();
 };
+
+export const anaylysisPeriodStartTimeMapping: {
+    [key: string]: { startTime: number; endTime: number };
+} = (function () {
+    const today = new Date();
+    const date4WeeksAgo = new Date(today);
+    const date13WeeksAgo = new Date(today);
+    const date26WeeksAgo = new Date(today);
+    date4WeeksAgo.setDate(today.getDate() - 28);
+    date13WeeksAgo.setDate(today.getDate() - 91);
+    date26WeeksAgo.setDate(today.getDate() - 182);
+
+    return {
+        "4w": { startTime: date4WeeksAgo.getTime(), endTime: today.getTime() },
+        "13w": {
+            startTime: date13WeeksAgo.getTime(),
+            endTime: today.getTime(),
+        },
+        "26w": {
+            startTime: date26WeeksAgo.getTime(),
+            endTime: today.getTime(),
+        },
+    };
+})();
+
+export const anaylysisPeriodPreviousWindowTimeMapping: {
+    [key: string]: { startTime: number; endTime: number };
+} = (function () {
+    const today = new Date();
+    const date4WeeksAgo = new Date(today);
+    const date8WeeksAgo = new Date(today);
+    const date13WeeksAgo = new Date(today);
+    const date26WeeksAgo = new Date(today);
+    const date52WeeksAgo = new Date(today);
+    date4WeeksAgo.setDate(today.getDate() - 28);
+    date8WeeksAgo.setDate(today.getDate() - 56);
+    date13WeeksAgo.setDate(today.getDate() - 91);
+    date26WeeksAgo.setDate(today.getDate() - 182);
+    date52WeeksAgo.setDate(today.getDate() - 364);
+
+    return {
+        "4w": {
+            startTime: date8WeeksAgo.getTime(),
+            endTime: date4WeeksAgo.getTime(),
+        },
+        "13w": {
+            startTime: date26WeeksAgo.getTime(),
+            endTime: date13WeeksAgo.getTime(),
+        },
+        "26w": {
+            startTime: date52WeeksAgo.getTime(),
+            endTime: date26WeeksAgo.getTime(),
+        },
+    };
+})();

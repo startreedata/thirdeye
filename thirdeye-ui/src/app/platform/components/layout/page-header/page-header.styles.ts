@@ -17,7 +17,6 @@ import { makeStyles } from "@material-ui/core";
 export const usePageHeaderStyles = makeStyles({
     container: {
         display: "flex",
-        overflow: "auto",
         justifyContent: "space-between",
     },
     headingWrapper: {

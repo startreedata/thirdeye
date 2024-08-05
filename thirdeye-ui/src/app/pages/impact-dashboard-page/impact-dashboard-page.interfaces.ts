@@ -12,12 +12,9 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
-import { makeStyles } from "@material-ui/core";
-
-export const useStyles = makeStyles({
-    sectionHeading: {
-        display: "flex",
-        justifyContent: "space-between",
-    },
-});
+export interface AlertEffectivnessData {
+    id: string;
+    name: string;
+    anomaliesCount: number;
+    dimensionsCount: number;
+}

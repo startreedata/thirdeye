@@ -228,3 +228,9 @@ export const getAlertRecommendation = async (
 
     return response.data.recommendations;
 };
+
+export const getAlertsCount = async (): Promise<{ count: number }> => {
+    const response = await axios.get(`${BASE_URL_ALERTS}/count`);
+
+    return response.data;
+};

@@ -12,12 +12,19 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { ReactElement } from "react";
 
-import { makeStyles } from "@material-ui/core";
+export interface TableColumns {
+    datakey: string;
+    title: string;
+    customRender?: (data: TableRow) => unknown;
+}
 
-export const useStyles = makeStyles({
-    sectionHeading: {
-        display: "flex",
-        justifyContent: "space-between",
-    },
-});
+export interface TableRow {
+    [datakey: string]: unknown;
+}
+export interface TableProps {
+    data: TableRow[];
+    columns: TableColumns[];
+    emptyStateView?: ReactElement | string;
+}

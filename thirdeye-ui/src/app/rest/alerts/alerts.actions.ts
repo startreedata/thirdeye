@@ -38,6 +38,7 @@ import {
     getAlertStats as getAlertStatsREST,
     getAllAlerts,
     resetAlert as resetAlertREST,
+    getAlertsCount as getAlertsCountREST,
 } from "./alerts.rest";
 
 export const useGetEvaluation = (): GetEvaluation => {
@@ -127,6 +128,23 @@ export const useGetAlertStats = (): GetAlertStats => {
     return {
         alertStats: data,
         getAlertStats,
+        status,
+        errorMessages,
+        resetData,
+    };
+};
+
+export const useGetAlertsCount = (): any => {
+    const { data, makeRequest, status, errorMessages, resetData } =
+        useHTTPAction<{ count: number }>(getAlertsCountREST);
+
+    const getAlertsCount = (): Promise<{ count: number } | undefined> => {
+        return makeRequest();
+    };
+
+    return {
+        alertsConfigured: data,
+        getAlertsCount,
         status,
         errorMessages,
         resetData,

@@ -29,7 +29,7 @@ import {
 
 const AlertsAllPage = lazy(() =>
     import(
-        /* webpackChunkName: "alerts-all-page" */ "../../pages/alerts-all-page/alerts-all-page.component"
+        /* webpackChunkName: "alerts-all-page" */ "../../pages/alerts-all-page-v2/alerts-all-page.component"
     ).then((module) => ({ default: module.AlertsAllPage }))
 );
 
@@ -101,7 +101,7 @@ const AlertsCreateEasyPage = lazy(() =>
 
 const CreateAlertGuidedPage = lazy(() =>
     import(
-        /* webpackChunkName: "create-alert-guided-page" */ "../../pages/alerts-create-guided-page/alerts-create-guided-page.component"
+        /* webpackChunkName: "create-alert-guided-page" */ "../../pages/alerts-create-guided-page/alerts-create-guided-page.component-v2"
     ).then((module) => ({ default: module.CreateAlertGuidedPage }))
 );
 

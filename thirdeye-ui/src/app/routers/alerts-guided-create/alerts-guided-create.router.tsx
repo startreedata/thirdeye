@@ -31,7 +31,7 @@ const AlertsCreateEasyPage = lazy(() =>
 
 const CreateAlertGuidedPage = lazy(() =>
     import(
-        /* webpackChunkName: "create-alert-guided-page" */ "../../pages/alerts-create-guided-page/alerts-create-guided-page.component"
+        /* webpackChunkName: "create-alert-guided-page" */ "../../pages/alerts-create-guided-page/alerts-create-guided-page.component-v2"
     ).then((module) => ({ default: module.CreateAlertGuidedPage }))
 );
 
@@ -79,7 +79,7 @@ const SetupAnomaliesFilterPage = lazy(() =>
 
 const SetupDimensionGroupsPage = lazy(() =>
     import(
-        /* webpackChunkName: "setup-dimension-groups-page" */ "../../pages/alerts-create-guided-page/setup-dimension-groups/setup-dimension-groups-page.component"
+        /* webpackChunkName: "setup-dimension-groups-page" */ "../../pages/alerts-create-guided-page/setup-dimension-groups/setup-dimension-groups-page-v2.component"
     ).then((module) => ({ default: module.SetupDimensionGroupsPage }))
 );
 

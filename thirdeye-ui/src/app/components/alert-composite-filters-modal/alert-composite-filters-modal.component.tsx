@@ -30,13 +30,13 @@ import {
     SessionStorageKeys,
     useSessionStorage,
 } from "../../utils/storage/use-session-storage";
-import { CohortsTable } from "../cohort-detector/cohorts-table/cohorts-table.component";
-import { CohortTableRowData } from "../cohort-detector/cohorts-table/cohorts-table.interfaces";
+import { CohortsTable } from "../cohort-detector/cohorts-table-v2/cohorts-table.component";
+import { CohortTableRowData } from "../cohort-detector/cohorts-table-v2/cohorts-table.interfaces";
 import {
     getCohortTableRowFromData,
     NAME_JOIN_KEY,
-} from "../cohort-detector/cohorts-table/cohorts-table.utils";
-import { DatasetDetails } from "../cohort-detector/dataset-details/dataset-details.component";
+} from "../cohort-detector/cohorts-table-v2/cohorts-table.utils";
+import { DatasetDetails } from "../cohort-detector/dataset-details/dataset-details-v2.component";
 import { Modal } from "../modal/modal.component";
 import { AlertCompositeFiltersModalProps } from "./alert-composite-filters-modal.interfaces";
 

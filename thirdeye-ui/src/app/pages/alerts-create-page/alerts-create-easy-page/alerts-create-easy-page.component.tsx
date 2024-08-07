@@ -39,7 +39,7 @@ import {
     GranularityValue,
     GRANULARITY_OPTIONS,
 } from "../../../components/alert-wizard-v3/select-metric/select-metric.utils";
-import { ThresholdSetup } from "../../../components/alert-wizard-v3/threshold-setup/threshold-setup.component";
+import { ThresholdSetup } from "../../../components/alert-wizard-v3/threshold-setup/threshold-setup-v2.component";
 import { InputSectionV2 } from "../../../components/form-basics/input-section-v2/input-section-v2.component";
 import { RadioSection } from "../../../components/form-basics/radio-section/radio-section.component";
 import { RadioSectionOptions } from "../../../components/form-basics/radio-section/radio-section.interfaces";

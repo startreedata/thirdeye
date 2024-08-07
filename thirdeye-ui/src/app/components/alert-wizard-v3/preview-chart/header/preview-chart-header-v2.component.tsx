@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Button, Grid } from "@material-ui/core";
+import { Button, Grid } from "@material-ui/core";
 import RefreshIcon from "@material-ui/icons/Refresh";
 import { Alert } from "@material-ui/lab";
 import React, { FunctionComponent } from "react";

@@ -18,7 +18,7 @@ import { TemplatePropertiesObject } from "../../../rest/dto/alert.interfaces";
 import { PreviewChart } from "../../alert-wizard-v2/alert-template/preview-chart/preview-chart.component";
 import { InputSectionV2 } from "../../form-basics/input-section-v2/input-section-v2.component";
 import { ParseMarkdown } from "../../parse-markdown/parse-markdown.component";
-import { SpecificPropertiesRenderer } from "./specific-properties-renderer/specific-properties-renderer.component";
+import { SpecificPropertiesRenderer } from "./specific-properties-renderer/specific-properties-renderer-v2.component";
 import { ThresholdSetupProps } from "./threshold-setup.interfaces";
 import { generateInputFieldConfigsForAlertTemplate } from "./threshold-setup.utils";
 

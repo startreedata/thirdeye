@@ -13,11 +13,12 @@
  * the License.
  */
 import React, { ReactElement } from "react";
-import { useStyles } from "./app-header.styles";
+import { useAppHeaderStyles } from "./app-header.styles";
 import { MenuItem, Select, Link } from "@material-ui/core";
 import { AppHeaderprops } from "./app-header.inerfaces";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 import { useTranslation } from "react-i18next";
+import { useNavBarV1 } from "../../../platform/stores/nav-bar-v1/nav-bar-v1.store";
 
 const Appheader = ({
     isFullScreen,
@@ -26,10 +27,12 @@ const Appheader = ({
     onWorkspaceChange,
 }: AppHeaderprops): ReactElement => {
     const { t } = useTranslation();
+    const [navBarMinimized] = useNavBarV1((state) => [state.navBarMinimized]);
     const showWorkspaceSwitcher = Boolean(workspaces) && workspaces?.length > 1;
-    const compoenentStyles = useStyles({
+    const compoenentStyles = useAppHeaderStyles({
         showWorkspaceSwitcher,
         isFullScreen,
+        navBarMinimized,
     })();
     const handleChange = (event: { target: { value: any } }): void => {
         onWorkspaceChange({ id: event.target.value });

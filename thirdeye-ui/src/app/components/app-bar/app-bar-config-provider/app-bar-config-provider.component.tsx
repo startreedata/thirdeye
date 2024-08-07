@@ -120,12 +120,14 @@ export const AppBarConfigProvider: FunctionComponent<AppBarConfigProviderProps> 
             mappedSelectedWorkspace = { id: workspace.id };
         }
 
+        const showNavbar = okToRender && showAppNavBar;
+
         return (
             <AppBarConfigProviderContext.Provider value={{ setShowAppNavBar }}>
-                {okToRender && showAppNavBar && <AppBar />}
+                {showNavbar && <AppBar />}
                 <div className={compoenentStyles.rightView}>
                     <Appheader
-                        isFullScreen={okToRender && showAppNavBar}
+                        isFullScreen={!showNavbar}
                         selectedWorkspace={mappedSelectedWorkspace}
                         workspaces={mappedWorkspaces}
                         onWorkspaceChange={handleWorkspaceChange}

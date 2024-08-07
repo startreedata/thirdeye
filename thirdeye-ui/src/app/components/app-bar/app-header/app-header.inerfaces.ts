@@ -12,18 +12,19 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-interface Workspace {
+interface WorkspaceDropdownOptions {
     id: string;
 }
 
 export interface AppHeaderprops {
-    workspaces: Workspace[] | undefined;
-    selectedWorkspace: Workspace;
-    onWorkspaceChange: (workspace: Workspace) => void;
+    workspaces: WorkspaceDropdownOptions[] | undefined;
+    selectedWorkspace: WorkspaceDropdownOptions;
+    onWorkspaceChange: (workspace: WorkspaceDropdownOptions) => void;
     isFullScreen: boolean;
 }
 
 export interface AppHeaderStyleProps {
     showWorkspaceSwitcher: boolean;
     isFullScreen: boolean;
+    navBarMinimized: boolean;
 }

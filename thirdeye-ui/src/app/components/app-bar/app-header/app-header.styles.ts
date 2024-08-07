@@ -15,12 +15,16 @@
 import { makeStyles } from "@material-ui/core";
 import { AppHeaderStyleProps } from "./app-header.inerfaces";
 
-export const useStyles = (
+export const useAppHeaderStyles = (
     props: AppHeaderStyleProps
 ): ReturnType<typeof makeStyles> =>
     makeStyles({
         header: {
-            width: props.isFullScreen ? "calc(100% - 180px)" : "100%",
+            width: props.isFullScreen
+                ? "100%"
+                : props.navBarMinimized
+                ? "calc(100% - 64px)"
+                : "calc(100% - 180px)",
             position: "fixed",
             height: "40px",
             padding: "8px 16px",

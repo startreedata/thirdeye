@@ -61,7 +61,7 @@ export const AppBarConfigProvider: FunctionComponent<AppBarConfigProviderProps> 
         useEffect(() => {
             if (!isEmpty(workspaces)) {
                 /* If the workspace name is not set, we get null as the workspace id,
-                so we map it to a deafilt name to be shown on the UI
+                so we map it to a default name to be shown on the UI
                 */
                 setMappedWorkspaes(
                     workspaces?.map((workspace) => {

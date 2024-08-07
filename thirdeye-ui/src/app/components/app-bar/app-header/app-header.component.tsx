@@ -49,16 +49,16 @@ const Appheader = ({
                             onChange={handleChange}
                         >
                             {workspaces &&
-                                workspaces.map((workspace): ReactElement => {
+                                workspaces.map(({ id }): ReactElement => {
                                     return (
                                         <MenuItem
                                             className={
                                                 compoenentStyles.dropdownItem
                                             }
-                                            key={workspace.id}
-                                            value={workspace.id}
+                                            key={id}
+                                            value={id}
                                         >
-                                            {workspace.id}
+                                            {id}
                                         </MenuItem>
                                     );
                                 })}

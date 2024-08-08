@@ -119,7 +119,7 @@
         "anomaly-sensitivity": "Anomaly sensitivity",
         "anomaly-start": "Anomaly start",
         "app-header": {
-            "null-mapped-name": "default(Not set)",
+            "null-mapped-name": "Default(Not set)",
             "startree-cloud": "Startree Cloud",
             "workspace": "Workspace"
         },

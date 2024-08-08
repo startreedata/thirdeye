@@ -20,7 +20,7 @@ import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 import { useTranslation } from "react-i18next";
 import { useNavBarV1 } from "../../../platform/stores/nav-bar-v1/nav-bar-v1.store";
 
-const Appheader = ({
+export const Appheader = ({
     isFullScreen,
     workspaces,
     selectedWorkspace,
@@ -70,10 +70,7 @@ const Appheader = ({
                 </div>
             )}
             <div>
-                <Link
-                    href="https://startree.ai/products/startree-cloud"
-                    target="_blank"
-                >
+                <Link href="https://startree.cloud/" target="_blank">
                     <div className={compoenentStyles.button}>
                         <div>{t("label.app-header.startree-cloud")}</div>
                         <OpenInNewIcon
@@ -86,5 +83,3 @@ const Appheader = ({
         </div>
     );
 };
-
-export default Appheader;

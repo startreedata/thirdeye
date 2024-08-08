@@ -26,7 +26,7 @@ import {
     AppBarConfigProviderProps,
     AppBarConfigProviderPropsContextProps,
 } from "./app-bar-config-provider.interface";
-import Appheader from "../app-header/app-header.component";
+import { Appheader } from "../app-header/app-header.component";
 import { useStyle } from "./app-bar.styles";
 import { useGetWorkspaces } from "../../../rest/workspace/workspace-action";
 import { useAuthV1 } from "../../../platform/stores/auth-v1/auth-v1.store";

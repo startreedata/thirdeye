@@ -1,3 +1,10 @@
+### [2.48.1](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.48.0...thirdeye-ui-2.48.1) (2024-07-31)
+
+
+### Bug Fixes
+
+* [TE-2346](https://cortexdata.atlassian.net/browse/TE-2346) landing page improvements ([034d6fdbe](https://github.com/startreedata/thirdeye/commit/034d6fdbef22915dabfed87043ca8978ab4b6a32))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

@@ -121,6 +121,11 @@
         "anomaly-period": "Anomaly Period",
         "anomaly-sensitivity": "Anomaly sensitivity",
         "anomaly-start": "Anomaly start",
+        "app-header": {
+            "null-mapped-name": "Default(Not set)",
+            "startree-cloud": "Startree Cloud",
+            "workspace": "Workspace"
+        },
         "apply": "Apply",
         "apply-changes": "Apply changes",
         "associated-datasource": "Associated Datasource",

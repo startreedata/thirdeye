@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.spi.datalayer.dto;
 
+import ai.startree.thirdeye.spi.api.AlertMetadataApi;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -30,6 +31,7 @@ public class AlertMetadataDTO {
   private String granularity;
   private String timezone;
   private EventContextDto eventContext;
+  private String detectionAggregationFunction;
 
   public DataSourceDTO getDatasource() {
     return datasource;
@@ -57,6 +59,16 @@ public class AlertMetadataDTO {
 
   public AlertMetadataDTO setMetric(final MetricConfigDTO metric) {
     this.metric = metric;
+    return this;
+  }
+
+  public String getDetectionAggregationFunction() {
+    return detectionAggregationFunction;
+  }
+
+  public AlertMetadataDTO setDetectionAggregationFunction(
+      final String detectionAggregationFunction) {
+    this.detectionAggregationFunction = detectionAggregationFunction;
     return this;
   }
 

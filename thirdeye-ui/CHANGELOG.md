@@ -1,3 +1,15 @@
+## [2.49.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.48.1...thirdeye-ui-2.49.0) (2024-08-09)
+
+
+### Features
+
+* [TE-2386](https://cortexdata.atlassian.net/browse/TE-2386) add workspace switcher support on UI ([8f5855712](https://github.com/startreedata/thirdeye/commit/8f58557126f3ddc3839e979ca38afac8d9442eeb))
+
+
+### Bug Fixes
+
+* [TE-2386](https://cortexdata.atlassian.net/browse/TE-2386) build fix ([98083eb08](https://github.com/startreedata/thirdeye/commit/98083eb08f96d6f3325f44d5e03bcad515d2b613))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

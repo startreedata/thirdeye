@@ -57,6 +57,7 @@ export const AnomaliesViewContainerPage: FunctionComponent = () => {
 
     useEffect(() => {
         !!fetchedAnomaly &&
+            fetchedAnomaly.alert?.id &&
             getAlertInsight({ alertId: fetchedAnomaly.alert.id });
     }, [fetchedAnomaly]);
 

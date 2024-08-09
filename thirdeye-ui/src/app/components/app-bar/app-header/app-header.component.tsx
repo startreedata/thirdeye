@@ -28,7 +28,7 @@ export const Appheader = ({
 }: AppHeaderprops): ReactElement => {
     const { t } = useTranslation();
     const [navBarMinimized] = useNavBarV1((state) => [state.navBarMinimized]);
-    const showWorkspaceSwitcher = Boolean(workspaces) && workspaces?.length > 1;
+    const showWorkspaceSwitcher = Boolean(workspaces && workspaces?.length > 1);
     const compoenentStyles = useAppHeaderStyles({
         showWorkspaceSwitcher,
         isFullScreen,

@@ -37,6 +37,7 @@ export const Modal: FunctionComponent<ModalProps> = ({
     footerActions,
     onOpen,
     initiallyOpen = false,
+    showFooter = true,
     disableCancelButton,
     disableSubmitButton,
 }) => {
@@ -59,10 +60,11 @@ export const Modal: FunctionComponent<ModalProps> = ({
 
     return (
         <>
-            {trigger(() => {
-                onOpen && onOpen();
-                setIsOpen(true);
-            })}
+            {trigger &&
+                trigger(() => {
+                    onOpen && onOpen();
+                    setIsOpen(true);
+                })}
 
             <Dialog
                 maxWidth={maxWidth}
@@ -74,37 +76,40 @@ export const Modal: FunctionComponent<ModalProps> = ({
 
                 <DialogContent dividers>{children}</DialogContent>
 
-                <Box pb={2} pl={2} pr={2} pt={2}>
-                    <Grid container justifyContent="space-between">
-                        <Grid item>{footerActions}</Grid>
-                        <Grid item>
-                            <Grid container spacing={2}>
-                                <Grid item>
-                                    <Button
-                                        color="secondary"
-                                        disabled={disableCancelButton}
-                                        onClick={handleCancelClick}
-                                    >
-                                        {cancelButtonLabel || t("label.cancel")}
-                                    </Button>
-                                </Grid>
-                                <Grid item>
-                                    {onSubmit && (
+                {showFooter && (
+                    <Box pb={2} pl={2} pr={2} pt={2}>
+                        <Grid container justifyContent="space-between">
+                            <Grid item>{footerActions}</Grid>
+                            <Grid item>
+                                <Grid container spacing={2}>
+                                    <Grid item>
                                         <Button
-                                            color="primary"
-                                            disabled={disableSubmitButton}
-                                            type="submit"
-                                            onClick={handleSubmit}
+                                            color="secondary"
+                                            disabled={disableCancelButton}
+                                            onClick={handleCancelClick}
                                         >
-                                            {submitButtonLabel ||
-                                                t("label.submit")}
+                                            {cancelButtonLabel ||
+                                                t("label.cancel")}
                                         </Button>
-                                    )}
+                                    </Grid>
+                                    <Grid item>
+                                        {onSubmit && (
+                                            <Button
+                                                color="primary"
+                                                disabled={disableSubmitButton}
+                                                type="submit"
+                                                onClick={handleSubmit}
+                                            >
+                                                {submitButtonLabel ||
+                                                    t("label.submit")}
+                                            </Button>
+                                        )}
+                                    </Grid>
                                 </Grid>
                             </Grid>
                         </Grid>
-                    </Grid>
-                </Box>
+                    </Box>
+                )}
             </Dialog>
         </>
     );

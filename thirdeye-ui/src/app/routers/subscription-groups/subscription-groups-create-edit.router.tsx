@@ -57,7 +57,8 @@ export const SubscriptionGroupsCreateEditRouter: FunctionComponent<SubscriptionG
                         <Route
                             element={<SubscriptionGroupsWizardDetailsPage />}
                             path={
-                                AppRouteRelative.SUBSCRIPTION_GROUPS_WIZARD_DETAILS
+                                AppRouteRelative.SUBSCRIPTION_GROUPS_WIZARD_DETAILS +
+                                `/:id?`
                             }
                         />
                         <Route
@@ -65,7 +66,8 @@ export const SubscriptionGroupsCreateEditRouter: FunctionComponent<SubscriptionG
                                 <SubscriptionGroupsWizardAlertDimensionsPage />
                             }
                             path={
-                                AppRouteRelative.SUBSCRIPTION_GROUPS_WIZARD_ALERT_DIMENSIONS
+                                AppRouteRelative.SUBSCRIPTION_GROUPS_WIZARD_ALERT_DIMENSIONS +
+                                `/:id?`
                             }
                         />
 

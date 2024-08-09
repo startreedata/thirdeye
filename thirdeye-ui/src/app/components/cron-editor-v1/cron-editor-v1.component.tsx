@@ -37,11 +37,13 @@ enum CronMode {
 interface CronEditorProps {
     cron: string;
     handleUpdateCron: (value: string) => void;
+    fullWidth?: boolean;
 }
 
 export const CronEditor: FunctionComponent<CronEditorProps> = ({
     cron,
     handleUpdateCron,
+    fullWidth = false,
 }) => {
     const { showDialog } = useDialogProviderV1();
     const [currentCron, setCurrentCron] = useState<string>(cron);
@@ -79,6 +81,7 @@ export const CronEditor: FunctionComponent<CronEditorProps> = ({
     return (
         <>
             <InputSection
+                fullWidth={fullWidth}
                 inputComponent={
                     <FormControl component="fieldset">
                         <RadioGroup
@@ -117,10 +120,15 @@ export const CronEditor: FunctionComponent<CronEditorProps> = ({
             />
 
             {cronConfigTab === CronMode.SIMPLE ? (
-                <CronSimple value={currentCron} onChange={handleCronChange} />
+                <CronSimple
+                    fullWidth={fullWidth}
+                    value={currentCron}
+                    onChange={handleCronChange}
+                />
             ) : (
                 <CronAdvance
                     cron={currentCron}
+                    fullWidth={fullWidth}
                     onCronChange={handleCronChange}
                 />
             )}

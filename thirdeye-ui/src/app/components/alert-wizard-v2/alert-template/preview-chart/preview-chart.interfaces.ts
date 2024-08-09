@@ -23,6 +23,7 @@ export interface PreviewChartProps {
         contents: Partial<EditableAlert>,
         isTotalReplace?: boolean
     ) => void;
+    showTimeRange?: boolean;
 }
 
 export const PREVIEW_CHART_TEST_IDS = {

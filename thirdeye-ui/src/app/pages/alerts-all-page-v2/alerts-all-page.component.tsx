@@ -16,7 +16,7 @@ import { Icon } from "@iconify/react";
 import { Box, Button, Card, CardContent, Grid, Link } from "@material-ui/core";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Link as RouterLink } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { AlertListV1 } from "../../components/alert-list-v1/alert-list-v1.component";
 import { alertsBasicHelpCards } from "../../components/help-drawer-v1/help-drawer-card-contents.utils";
 import { HelpDrawerV1 } from "../../components/help-drawer-v1/help-drawer-v1.component";
@@ -25,6 +25,9 @@ import { PageHeader } from "../../components/page-header/page-header.component";
 import { EmptyStateSwitch } from "../../components/page-states/empty-state-switch/empty-state-switch.component";
 import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import {
+    DropdownButtonTypeV1,
+    DropdownButtonV1,
+    DropdownMenuItemV1,
     NotificationTypeV1,
     PageContentsGridV1,
     PageHeaderActionsV1,
@@ -40,15 +43,22 @@ import { Alert } from "../../rest/dto/alert.interfaces";
 import { UiAlert } from "../../rest/dto/ui-alert.interfaces";
 import { getUiAlerts } from "../../utils/alerts/alerts.util";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
-import { getAlertsCreatePath } from "../../utils/routes/routes.util";
+import {
+    getAlertsCreatePath,
+    getAlertsEasyCreatePath,
+} from "../../utils/routes/routes.util";
 import { useQuery } from "@tanstack/react-query";
 import { getAllSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.rest";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import { AxiosError } from "axios";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
+import { EasyAlertModal } from "../../components/easy-alert-modal/easy-alert-modal.component";
 
 export const AlertsAllPage: FunctionComponent = () => {
     const [uiAlerts, setUiAlerts] = useState<UiAlert[]>([]);
+    const [createId, setCreateId] = useState<string | null>(null);
+    const navigate = useNavigate();
+
     const { showDialog } = useDialogProviderV1();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
@@ -192,6 +202,25 @@ export const AlertsAllPage: FunctionComponent = () => {
         });
     };
 
+    const createMenuItems: DropdownMenuItemV1[] = [
+        {
+            id: "easyAlert",
+            text: t("label.easy-alert"),
+        },
+        {
+            id: "advancedAlert",
+            text: t("label.advanced-alert"),
+        },
+        {
+            id: "jsonAlert",
+            text: t("label.json-alert"),
+        },
+        {
+            id: "alertRecipes",
+            text: t("label.alert-recipes"),
+        },
+    ];
+
     const loadingErrorStateParams = {
         isError: isGetAlertError,
         isLoading: isGetAlertLoading || isGetSubscriptionGroupsLoading,
@@ -268,13 +297,20 @@ export const AlertsAllPage: FunctionComponent = () => {
                                 </Button>
                             )}
                         />
-                        <Button
+                        {/* Menu */}
+                        <DropdownButtonV1
                             color="primary"
-                            component={RouterLink}
-                            to={getAlertsCreatePath()}
+                            data-testid="create-menu-button"
+                            dropdownMenuItems={createMenuItems}
+                            type={DropdownButtonTypeV1.Regular}
+                            onClick={(id) => {
+                                if (id === "easyAlert") {
+                                    setCreateId(id as string);
+                                }
+                            }}
                         >
                             {t("label.create")}
-                        </Button>
+                        </DropdownButtonV1>
                     </PageHeaderActionsV1>
                 }
                 title={t("label.alerts")}
@@ -291,6 +327,16 @@ export const AlertsAllPage: FunctionComponent = () => {
                     </EmptyStateSwitch>
                 </LoadingErrorStateSwitch>
             </PageContentsGridV1>
+            {createId && (
+                <EasyAlertModal
+                    onCancel={() => {
+                        setCreateId(null);
+                    }}
+                    onGotItClick={() => {
+                        navigate(getAlertsEasyCreatePath());
+                    }}
+                />
+            )}
         </PageV1>
     );
 };

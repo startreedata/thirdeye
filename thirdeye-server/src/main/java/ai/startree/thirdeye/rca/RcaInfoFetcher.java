@@ -131,20 +131,10 @@ public class RcaInfoFetcher {
     // we get the namespace from the alert and inject it in all persistence access - authz is not performed - the consumer of this method should ensure authz on the anomaly
     final String alertNamespace = alertDTO.namespace();
     MetricConfigDTO metricConfigDTO = metricDAO.findBy(metricName, datasetName, alertNamespace);
-    if (metricConfigDTO == null) {
-      LOG.warn("Could not find metric {} for dataset {}. Building a custom metric for RCA.",
-          metricName, datasetName);
-      String metricAggFunction = metadataMetricDTO.getDefaultAggFunction();
-      if (StringUtils.isBlank(metricAggFunction)) {
-        LOG.warn(
-            "Custom aggregation function not provided in alert configuration for metric {} for dataset {}. Defaulting to COUNT",
-            metricName, datasetName);
-        metricAggFunction = COUNT.toString();
-      }
-      metricConfigDTO = new MetricConfigDTO().setDataset(datasetName)
-          .setName(metricName)
-          .setDefaultAggFunction(metricAggFunction);
-    }
+
+    // For RCA, override the metric agg function based on provided rcaAggregationFn / alert aggregationFn in template properties
+    String metricAggFunction = resolveRcaAggFunction(alertMetadataDto, metadataMetricDTO, metricConfigDTO, metricName, datasetName);
+    metricConfigDTO.setDefaultAggFunction(metricAggFunction);
 
     final DatasetConfigDTO datasetConfigDto;
     if (metricConfigDTO.getDatasetConfig() != null) {
@@ -224,7 +214,30 @@ public class RcaInfoFetcher {
       final MetricConfigDTO metadataMetricDTO) {
     // fields that can be configured at the alert level can be added here
     optional(metadataMetricDTO.getWhere()).ifPresent(metricConfigDTO::setWhere);
-    optional(metadataMetricDTO.getDefaultAggFunction()).filter(StringUtils::isNotBlank)
-        .ifPresent(metricConfigDTO::setDefaultAggFunction);
+  }
+
+  private String resolveRcaAggFunction(AlertMetadataDTO alertMetadataDto,
+      MetricConfigDTO metadataMetricDTO,
+      MetricConfigDTO metricConfigDTO,
+      String metricName,
+      String datasetName) {
+
+    String rcaAggFunction = metadataMetricDTO.getDefaultAggFunction();
+    if (StringUtils.isNotBlank(rcaAggFunction)) {
+      return rcaAggFunction;
+    }
+    String detectionAggFunction = alertMetadataDto.getDetectionAggregationFunction();
+    if (StringUtils.isNotBlank(detectionAggFunction)) {
+      return detectionAggFunction;
+    }
+    String metricAggFunction = metricConfigDTO.getDefaultAggFunction();
+    if (StringUtils.isNotBlank(metricAggFunction)) {
+      return metricAggFunction;
+    }
+
+    LOG.warn(
+        "aggregation function not provided in alert configuration for metric {} for dataset {}. Defaulting to COUNT",
+        metricName, datasetName);
+    return COUNT.toString();
   }
 }

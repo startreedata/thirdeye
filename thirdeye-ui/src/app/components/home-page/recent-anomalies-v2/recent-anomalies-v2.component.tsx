@@ -15,7 +15,6 @@
 import { Box, Button, Grid, Link, Typography } from "@material-ui/core";
 import TableCell from "@material-ui/core/TableCell";
 import TableRow from "@material-ui/core/TableRow";
-import { useQuery } from "@tanstack/react-query";
 import { capitalize, sortBy } from "lodash";
 import { DateTime } from "luxon";
 import React, { FunctionComponent, useMemo } from "react";
@@ -32,6 +31,7 @@ import {
     TitleCardTableHead,
 } from "../title-card-table/title-card-table.component";
 import { AnomalyRowV2 } from "./anomaly-row-v2/anomaly-row-v2.component";
+import { useFetchQuery } from "../../../rest/hooks/useFetchQuery";
 
 export const RecentAnomaliesV2: FunctionComponent = () => {
     const { t } = useTranslation();
@@ -42,7 +42,7 @@ export const RecentAnomaliesV2: FunctionComponent = () => {
         .toMillis();
     const endTime = DateTime.local().endOf("hour").toMillis();
 
-    const getAnomaliesQuery = useQuery({
+    const getAnomaliesQuery = useFetchQuery({
         queryKey: ["anomalies", startTime, endTime],
         queryFn: () => {
             return getAnomalies({

@@ -13,7 +13,6 @@
  * the License.
  */
 import { Box, Divider, Grid, Typography } from "@material-ui/core";
-import { useQuery } from "@tanstack/react-query";
 import { isEqual } from "lodash";
 import {
     default as React,
@@ -61,6 +60,7 @@ import {
 } from "../../../utils/routes/routes.util";
 import { AlertCreatedGuidedPageOutletContext } from "../alerts-create-guided-page.interfaces";
 import { DateTime, Duration } from "luxon";
+import { useFetchQuery } from "../../../rest/hooks/useFetchQuery";
 
 const ALERT_TEMPLATE_FOR_EVALUATE = "startree-threshold";
 const ALERT_TEMPLATE_FOR_EVALUATE_DX = "startree-threshold-dx";
@@ -136,7 +136,7 @@ export const SetupMetricPage: FunctionComponent = () => {
             return workingAlert;
         });
 
-    const { data: alertInsight } = useQuery({
+    const { data: alertInsight } = useFetchQuery({
         queryKey: [
             "alertInsight",
             alertConfigForPreview.templateProperties?.dataset,

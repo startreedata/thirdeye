@@ -15,7 +15,6 @@
 
 import { Icon } from "@iconify/react";
 import { Box, Button, Divider, Grid, Typography } from "@material-ui/core";
-import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios/index";
 import React, { FunctionComponent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
@@ -49,6 +48,7 @@ import {
     getAnomaliesCreatePath,
     getAnomaliesViewPath,
 } from "../../utils/routes/routes.util";
+import { useFetchQuery } from "../../rest/hooks/useFetchQuery";
 
 export const AnomaliesCreatePage: FunctionComponent = () => {
     const { t } = useTranslation();
@@ -58,7 +58,7 @@ export const AnomaliesCreatePage: FunctionComponent = () => {
         data: alerts,
         isInitialLoading: isGetAlertLoading,
         isError: isGetAlertError,
-    } = useQuery<Alert[], AxiosError>({
+    } = useFetchQuery<Alert[], AxiosError>({
         queryKey: ["alerts"],
         queryFn: () => {
             return getAllAlerts();

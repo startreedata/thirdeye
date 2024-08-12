@@ -37,10 +37,10 @@ import {
 import { TimeSeriesChart } from "../../../../visualizations/time-series-chart/time-series-chart.component";
 import { EnumerationItemRowProps } from "./enumeration-item-row.interfaces";
 import { useInView } from "react-intersection-observer";
-import { useQuery } from "@tanstack/react-query";
 import { getAlertEvaluation } from "../../../../../rest/alerts/alerts.rest";
 import { LoadingErrorStateSwitch } from "../../../../page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { NoDataIndicator } from "../../../../no-data-indicator/no-data-indicator.component";
+import { useFetchQuery } from "../../../../../rest/hooks/useFetchQuery";
 
 export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
     detectionEvaluation,
@@ -67,7 +67,7 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
     const [timeSeriesData, setTimeSeriesData] = useState<any>();
     const [timeSeriesExpandedData, setTimeSeriesExpandedData] = useState<any>();
 
-    const getEvaluationQuery = useQuery({
+    const getEvaluationQuery = useFetchQuery({
         enabled: false,
         queryKey: [
             "evaluation",

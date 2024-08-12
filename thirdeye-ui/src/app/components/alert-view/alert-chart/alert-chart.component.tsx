@@ -21,7 +21,6 @@ import {
     Grid,
     Typography,
 } from "@material-ui/core";
-import { useQuery } from "@tanstack/react-query";
 import React, { FunctionComponent, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
@@ -47,6 +46,7 @@ import {
 import { TimeRangeQueryStringKey } from "../../time-range/time-range-provider/time-range-provider.interfaces";
 import { TimeSeriesChart } from "../../visualizations/time-series-chart/time-series-chart.component";
 import { AlertChartProps } from "./alert-chart.interfaces";
+import { useFetchQuery } from "../../../rest/hooks/useFetchQuery";
 
 export const AlertChart: FunctionComponent<AlertChartProps> = ({
     anomalies,
@@ -57,7 +57,7 @@ export const AlertChart: FunctionComponent<AlertChartProps> = ({
     const navigate = useNavigate();
     const { t } = useTranslation();
 
-    const getEvaluationQuery = useQuery({
+    const getEvaluationQuery = useFetchQuery({
         queryKey: ["evaluation", alertId, startTime, endTime],
         queryFn: () => {
             return getAlertEvaluation({

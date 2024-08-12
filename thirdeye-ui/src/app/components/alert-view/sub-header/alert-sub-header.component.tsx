@@ -15,7 +15,6 @@
 import { Box, Button, Grid, Typography, useTheme } from "@material-ui/core";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import HighlightOffIcon from "@material-ui/icons/HighlightOff";
-import { useQuery } from "@tanstack/react-query";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -27,6 +26,7 @@ import { getAlertsUpdatePath } from "../../../utils/routes/routes.util";
 import { Modal } from "../../modal/modal.component";
 import { TimeRangeButtonWithContext } from "../../time-range/time-range-button-with-context/time-range-button.component";
 import { AlertViewSubHeaderProps } from "./alert-sub-header.interfaces";
+import { useFetchQuery } from "../../../rest/hooks/useFetchQuery";
 
 export const AlertViewSubHeader: FunctionComponent<AlertViewSubHeaderProps> = ({
     alert,
@@ -35,7 +35,7 @@ export const AlertViewSubHeader: FunctionComponent<AlertViewSubHeaderProps> = ({
     const { t } = useTranslation();
     const theme = useTheme();
 
-    const getAlertInsightQuery = useQuery({
+    const getAlertInsightQuery = useFetchQuery({
         queryKey: ["alertInsight", alert.id],
         queryFn: () => {
             return getAlertInsight({ alertId: alert.id });

@@ -34,7 +34,10 @@ import {
 import { getDatasetByName } from "../../rest/datasets/datasets.rest";
 import { Dataset } from "../../rest/dto/dataset.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
-import { AlertEffectivnessData } from "./impact-dashboard-page.interfaces";
+import {
+    AlertEffectivnessData,
+    VerboseSummary,
+} from "./impact-dashboard-page.interfaces";
 import AlertEffectiveness from "../../components/impact-dashboard/alert-effectiveness/alert-effectiveness.component";
 import { isEmpty } from "lodash";
 import DetectionPerformance from "../../components/impact-dashboard/detection-performance/detection-performance.component";
@@ -44,6 +47,7 @@ import {
 } from "../../platform/utils";
 import RecentInvestigations from "../../components/impact-dashboard/investigations/investigations.component";
 import { useGetInvestigations } from "../../rest/rca/rca.actions";
+import { epochToDate } from "../../components/impact-dashboard/detection-performance/util";
 const anaylysisPeriods = ["4w", "13w", "26w"];
 
 export const ImpactDashboardPage: FunctionComponent = () => {
@@ -88,23 +92,24 @@ export const ImpactDashboardPage: FunctionComponent = () => {
             groups: 0,
         },
     });
-    const [verboseSummaryItems, setVerboseSummaryItems] = useState({
-        weeks: selectedAnalysisPeriod,
-        percentageChange: "",
-        topAlert: {
-            id: "",
-            name: "",
-            anomaliesCount: 0,
-        },
-        investigation: {
-            count: 0,
-            date: "",
-            alert: {
-                id: "",
+    const [verboseSummaryItems, setVerboseSummaryItems] =
+        useState<VerboseSummary>({
+            weeks: selectedAnalysisPeriod,
+            percentageChange: "",
+            topAlert: {
+                id: null,
                 name: "",
+                anomaliesCount: 0,
             },
-        },
-    });
+            investigation: {
+                count: 0,
+                date: "",
+                anomaly: {
+                    id: null,
+                    name: "",
+                },
+            },
+        });
 
     useEffect(() => {
         if (selectedAnalysisPeriod) {
@@ -166,11 +171,29 @@ export const ImpactDashboardPage: FunctionComponent = () => {
                 }
             }
             setVerboseSummaryItems((prevState) => {
+                let recentInvestigation;
+                if (investigations && investigations.length) {
+                    recentInvestigation =
+                        investigations[investigations.length - 1];
+                }
+
                 return {
                     ...prevState,
                     percentageChange: percentChange,
+                    investigation: {
+                        count: investigations?.length || 0,
+                        date: recentInvestigation
+                            ? epochToDate(recentInvestigation.created)
+                            : "",
+                        anomaly: {
+                            id: recentInvestigation
+                                ? recentInvestigation.anomaly?.id
+                                : null,
+                            name: "",
+                        },
+                    },
                     topAlert: {
-                        id: topFiveActiveAlerts[0][0],
+                        id: Number(topFiveActiveAlerts[0][0]),
                         name: topFiveActiveAlerts[0][1][0].alert.name,
                         anomaliesCount: topFiveActiveAlerts[0][1].length,
                     },
@@ -180,7 +203,7 @@ export const ImpactDashboardPage: FunctionComponent = () => {
             setAnomalyGroupByAlertId([]);
             setVerboseSummaryItems;
         }
-    }, [anomalies, previousPeriodAnomalies]);
+    }, [anomalies, previousPeriodAnomalies, investigations]);
 
     useEffect(() => {
         if (!isEmpty(anomalyGroupByAlertId)) {
@@ -228,7 +251,7 @@ export const ImpactDashboardPage: FunctionComponent = () => {
             ...summaryData,
             anomalies: {
                 detected: anomalyStats?.totalCount || 0,
-                investigations: 0,
+                investigations: investigations?.length || 0,
             },
             alerts: {
                 activeAlerts: alertsConfigured?.count || 0,
@@ -239,7 +262,7 @@ export const ImpactDashboardPage: FunctionComponent = () => {
                 groups: summaryData.notifications.groups,
             },
         });
-    }, [alertsConfigured, anomalyStats, anomalies]);
+    }, [alertsConfigured, anomalyStats, anomalies, investigations]);
 
     const renderActionButtons = (): JSX.Element => {
         return (

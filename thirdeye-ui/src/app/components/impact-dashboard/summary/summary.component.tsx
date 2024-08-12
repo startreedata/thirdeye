@@ -175,11 +175,11 @@ const Summary = ({
                                     for an anomaly that happened on{" "}
                                     <b>
                                         {verboseSummaryItems.investigation.date}
-                                    </b>
+                                    </b>{" "}
                                     on metric{" "}
                                     {
-                                        verboseSummaryItems.investigation.alert
-                                            .name
+                                        verboseSummaryItems.investigation
+                                            .anomaly.name
                                     }
                                 </span>
                             )}

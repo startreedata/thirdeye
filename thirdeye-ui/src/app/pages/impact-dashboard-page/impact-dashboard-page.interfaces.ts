@@ -18,3 +18,21 @@ export interface AlertEffectivnessData {
     anomaliesCount: number;
     dimensionsCount: number;
 }
+
+export interface VerboseSummary {
+    weeks: string;
+    percentageChange: string;
+    topAlert: {
+        id: number | null;
+        name: string;
+        anomaliesCount: number;
+    };
+    investigation: {
+        count: number;
+        date: string;
+        anomaly: {
+            id: number | null | undefined;
+            name: string | undefined;
+        };
+    };
+}

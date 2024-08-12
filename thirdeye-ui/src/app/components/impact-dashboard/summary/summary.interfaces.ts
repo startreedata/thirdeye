@@ -1,3 +1,5 @@
+import { VerboseSummary } from "../../../pages/impact-dashboard-page/impact-dashboard-page.interfaces";
+
 /*
  * Copyright 2024 StarTree Inc
  *
@@ -27,23 +29,7 @@ export interface SummaryProps {
             groups: number;
         };
     };
-    verboseSummaryItems: {
-        weeks: number;
-        percentageChange: number;
-        topAlert: {
-            id: string;
-            name: string;
-            anomaliesCount: number;
-        };
-        investigation: {
-            count: number;
-            date: string;
-            alert: {
-                id: string;
-                name: string;
-            };
-        };
-    };
+    verboseSummaryItems: VerboseSummary;
     selectedAnalysisPeriod: string;
     onAnalysisPeriodChange: (period: string) => void;
     analysisPeriods: string[];

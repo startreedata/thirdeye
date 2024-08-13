@@ -48,9 +48,13 @@ public class EmailSendgridNotificationService implements NotificationService {
 
   @Override
   public void notify(final NotificationPayloadApi api) throws ThirdEyeException {
+    if (api.getAnomalyReports().isEmpty()) {
+      LOG.debug("No new anomalies to notify");
+      return;
+    }
+
     try {
       final EmailContent emailContent = new EmailContentBuilder().build(api);
-
       sendEmail(emailContent);
     } catch (final Exception e) {
       throw new ThirdEyeException(e, ERR_NOTIFICATION_DISPATCH, "sendgrid dispatch failed!");

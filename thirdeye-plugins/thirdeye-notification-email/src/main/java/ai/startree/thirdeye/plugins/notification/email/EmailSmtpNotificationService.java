@@ -69,11 +69,14 @@ public class EmailSmtpNotificationService implements NotificationService {
 
   @Override
   public void notify(final NotificationPayloadApi api) throws ThirdEyeException {
+    if (api.getAnomalyReports().isEmpty()) {
+      LOG.debug("No new anomalies to notify");
+      return;
+    }
+
     final EmailContentBuilder emailContentBuilder = new EmailContentBuilder();
     try {
-      final EmailContent emailContent = emailContentBuilder.build(api
-      );
-
+      final EmailContent emailContent = emailContentBuilder.build(api);
       final HtmlEmail email = buildHtmlEmail(emailContent);
       sendEmail(email);
     } catch (final Exception e) {

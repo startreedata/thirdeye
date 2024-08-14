@@ -29,8 +29,8 @@ import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-s
 import { TimeRangeQueryStringKey } from "../../time-range/time-range-provider/time-range-provider.interfaces";
 import { TimeRangeSelectorButton } from "../../time-range/v2/time-range-selector-button/time-range-selector-button.component";
 import { TaskRow } from "./task-row/task-row.component";
-import { useQuery } from "@tanstack/react-query";
 import { getTasks } from "../../../rest/tasks/tasks.rest";
+import { useFetchQuery } from "../../../rest/hooks/useFetchQuery";
 
 export const RecentFailures: FunctionComponent = () => {
     const { t } = useTranslation();
@@ -63,7 +63,7 @@ export const RecentFailures: FunctionComponent = () => {
         data: tasks,
         isLoading,
         isError,
-    } = useQuery({
+    } = useFetchQuery({
         queryKey: ["tasks", startTime, endTime],
         queryFn: () => {
             return getTasks({

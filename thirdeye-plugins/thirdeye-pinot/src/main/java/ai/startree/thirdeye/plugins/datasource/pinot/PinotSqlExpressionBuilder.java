@@ -39,7 +39,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
-  
+
   public static final Pattern SIMPLE_DATE_FORMAT_PATTERN = Pattern.compile(
       "^([0-9]:[A-Z]+:)?SIMPLE_DATE_FORMAT:");
   private static final Map<Period, String> DATE_TRUNC_COMPATIBLE_PERIOD_TO_DATE_TRUNC_STRING = Map.of(
@@ -58,9 +58,12 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
 
   private static final String PERCENTILE_TDIGEST_PREFIX = "PERCENTILETDigest";
 
-  public static final long SECOND_MILLIS = 1000; // number of milliseconds in a second
-  public static final long MINUTE_MILLIS =
-      60 * SECOND_MILLIS; // number of milliseconds in a minute
+  // number of milliseconds in a second
+  public static final long SECOND_MILLIS = 1000;
+  // number of milliseconds in a minute
+  public static final long MINUTE_MILLIS = 60 * SECOND_MILLIS;
+  // number of milliseconds in 10 minutes
+  public static final long TEN_MINUTE_MILLIS = 10 * MINUTE_MILLIS;
   public static final long HOUR_MILLIS = 60 * MINUTE_MILLIS;
   public static final long DAY_MILLIS = 24 * HOUR_MILLIS;
   public static final String STRING_LITERAL_QUOTE = "'";
@@ -274,6 +277,14 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
           dateTruncString = "MINUTES";
           isEpochFormat = true;
           timeFormatter = d -> String.valueOf(d.getMillis() / MINUTE_MILLIS);
+          exactGranularity = null;
+          break;
+        case "10:MINUTES:EPOCH":
+        case "EPOCH|MINUTES|10":
+          dateTimeConvertString = "10:MINUTES:EPOCH";
+          dateTruncString = null;
+          isEpochFormat = false;
+          timeFormatter = d -> String.valueOf(d.getMillis() / TEN_MINUTE_MILLIS);
           exactGranularity = null;
           break;
         case "EPOCH_HOURS":

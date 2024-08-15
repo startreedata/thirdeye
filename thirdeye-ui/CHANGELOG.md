@@ -1,3 +1,10 @@
+### [2.49.1](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.49.0...thirdeye-ui-2.49.1) (2024-08-15)
+
+
+### Bug Fixes
+
+* [TE-2389](https://cortexdata.atlassian.net/browse/TE-2389) zIndex fix and redirect to home page if alerts exist in workspace ([ab4220187](https://github.com/startreedata/thirdeye/commit/ab422018779541c10b18b189dbc6dd9b1a6e4b42))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

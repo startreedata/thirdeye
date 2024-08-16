@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import classNames from "classnames";
 import React, { FunctionComponent } from "react";
 import { Helmet } from "react-helmet-async";
 import { PageV1Props } from "./page.interfaces";

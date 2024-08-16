@@ -12,128 +12,185 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import React, { ReactElement } from "react";
+import React, { ReactElement, useEffect, useState } from "react";
 import { useStyles } from "./detection-performance.styles";
-import { Typography } from "@material-ui/core";
+import { MenuItem, Select, Typography } from "@material-ui/core";
 import AnalysisPeriod from "../anaylysis-period/analysis-period.component";
 import { DetectionPerformanceProps } from "./detection-performance.interfaces";
-import { epochToDate, getTimeWindows, groupDataByTimeWindows } from "./util";
 import {
     anaylysisPeriodStartTimeMapping,
     anaylysisPeriodPreviousWindowTimeMapping,
 } from "../../../platform/utils";
-import { TimeSeriesChart } from "../../visualizations/time-series-chart/time-series-chart.component";
-import TitleCard from "../../title-card/title-card.component";
-import BarGraph from "../../visualizations/bar-graph/bar-graph.component";
+import { useGetAnomalies } from "../../../rest/anomalies/anomaly.actions";
+import { useGetAlerts } from "../../../rest/alerts/alerts.actions";
+import { TotalAnomaliesGraph } from "./total-anomalies.component";
+import { WeekAnomaliesGraph } from "./weekly-anomalies.component";
+
+const defaultAlertDropdownOption = { id: -1, name: "All alerts" };
 
 const DetectionPerformance = ({
-    anomalies,
-    previousPeriodAnomalies,
+    anomalies: allAnomalies,
+    previousPeriodAnomalies: allPreviousPeriodAnomalies,
     analysisPeriods,
     selectedAnalysisPeriod,
     onAnalysisPeriodChange,
 }: DetectionPerformanceProps): ReactElement => {
+    const { alerts, getAlerts, status, errorMessages } = useGetAlerts();
+    const {
+        anomalies: currentPeriodAnomaliesByAlert,
+        getAnomalies: getCurrentPeriodAnomaliesByAlert,
+    } = useGetAnomalies();
+    const {
+        anomalies: previousPeriodAnomaliesByAlert,
+        getAnomalies: getPreviousPeriodAnomaliesByAlert,
+    } = useGetAnomalies();
+    const [alertDropdownOptions, setAlertDropdownOptions] =
+        useState<{ id: number; name: string }[]>();
+    const [anomalies, setAnomalies] = useState(allAnomalies);
+    const [previousPeriodAnomalies, setPreviousPeriodAnomalies] = useState(
+        allPreviousPeriodAnomalies
+    );
+    const [selectedAlert, setSelectedAlert] = useState<{
+        id: number;
+        name: string;
+    }>(defaultAlertDropdownOption);
     const componentStyles = useStyles();
 
-    const currentTimeWindow = getTimeWindows(
-        anaylysisPeriodStartTimeMapping[selectedAnalysisPeriod].startTime,
-        anaylysisPeriodStartTimeMapping[selectedAnalysisPeriod].endTime
-    );
-    const previousTimeWindow = getTimeWindows(
-        anaylysisPeriodPreviousWindowTimeMapping[selectedAnalysisPeriod]
-            .startTime,
-        anaylysisPeriodPreviousWindowTimeMapping[selectedAnalysisPeriod].endTime
-    );
-    const groupedAnomaliesDataByTimeCurrentWindow = groupDataByTimeWindows(
-        anomalies || [],
-        currentTimeWindow
-    );
+    useEffect(() => {
+        if (selectedAlert === defaultAlertDropdownOption) {
+            setAnomalies(allAnomalies);
+        }
+    }, [allAnomalies]);
 
-    const currentSeriesData: { x: number; y: number }[] =
-        groupedAnomaliesDataByTimeCurrentWindow.map((data) => {
-            return {
-                x: data.windowStart,
-                y: data.data.length,
-            };
-        });
-    const groupedAnomaliesDataByTimePreviousWindow = groupDataByTimeWindows(
-        previousPeriodAnomalies || [],
-        previousTimeWindow
-    );
-    const previousSeriesData: { x: number; y: number }[] =
-        groupedAnomaliesDataByTimePreviousWindow.map((data, idx) => {
-            return {
-                x: groupedAnomaliesDataByTimeCurrentWindow[idx].windowStart,
-                y: data.data.length,
-            };
-        });
-    const previousPeriodReadableDate = {
-        startTime: epochToDate(
-            anaylysisPeriodPreviousWindowTimeMapping[selectedAnalysisPeriod]
-                .startTime
-        ),
-        endTime: epochToDate(
-            anaylysisPeriodPreviousWindowTimeMapping[selectedAnalysisPeriod]
-                .endTime
-        ),
+    useEffect(() => {
+        if (selectedAlert === defaultAlertDropdownOption) {
+            setPreviousPeriodAnomalies(allPreviousPeriodAnomalies);
+        }
+    }, [allPreviousPeriodAnomalies]);
+
+    useEffect(() => {
+        getAlerts();
+    }, []);
+
+    useEffect(() => {
+        if (selectedAlert !== defaultAlertDropdownOption) {
+            getCurrentPeriodAnomaliesByAlert({
+                alertId: selectedAlert.id,
+                startTime:
+                    anaylysisPeriodStartTimeMapping[selectedAnalysisPeriod]
+                        .startTime,
+            });
+            getPreviousPeriodAnomaliesByAlert({
+                alertId: selectedAlert.id,
+                startTime:
+                    anaylysisPeriodPreviousWindowTimeMapping[
+                        selectedAnalysisPeriod
+                    ].startTime,
+                endTime:
+                    anaylysisPeriodPreviousWindowTimeMapping[
+                        selectedAnalysisPeriod
+                    ].endTime,
+            });
+        } else {
+            setAnomalies(allAnomalies);
+            setPreviousPeriodAnomalies(allPreviousPeriodAnomalies);
+        }
+    }, [selectedAnalysisPeriod, selectedAlert]);
+
+    useEffect(() => {
+        const options =
+            alerts?.map((alert) => {
+                return { id: alert.id, name: alert.name };
+            }) || [];
+        setAlertDropdownOptions([...options, defaultAlertDropdownOption]);
+    }, [alerts]);
+
+    useEffect(() => {
+        setAnomalies(currentPeriodAnomaliesByAlert);
+        setPreviousPeriodAnomalies(previousPeriodAnomaliesByAlert);
+    }, [currentPeriodAnomaliesByAlert, previousPeriodAnomaliesByAlert]);
+
+    const handleAlertChange = (event): void => {
+        alertDropdownOptions &&
+            setSelectedAlert(
+                alertDropdownOptions.find(
+                    (alertDropdownOption) =>
+                        alertDropdownOption.id === event.target.value
+                )!
+            );
     };
-    const sd = [
-        {
-            name: `Current ${selectedAnalysisPeriod} period`,
-            data: currentSeriesData,
-        },
-        {
-            name: `Previous ${selectedAnalysisPeriod} period(${previousPeriodReadableDate.startTime}-${previousPeriodReadableDate.endTime})`,
-            data: previousSeriesData,
-        },
-    ];
-
-    const barGraphData = currentSeriesData.map((data, idx) => {
-        const d = epochToDate(
-            groupedAnomaliesDataByTimeCurrentWindow[idx].windowStart
-        );
-        const date = new Date();
-        date.setDate(idx + 1);
-
-        return {
-            currentPeriod: data.y,
-            previousPeriod: previousSeriesData[idx].y,
-            date: d,
-        };
-    });
 
     return (
         <>
             <div className={componentStyles.sectionHeading}>
-                <Typography>Detection performance</Typography>
-                <AnalysisPeriod
-                    analysisPeriods={analysisPeriods}
-                    selectedPeriod={selectedAnalysisPeriod}
-                    onClick={onAnalysisPeriodChange}
-                />
+                <Typography variant="h6">Detection performance</Typography>
+                <div className={componentStyles.alertAndRange}>
+                    <AnalysisPeriod
+                        analysisPeriods={analysisPeriods}
+                        selectedPeriod={selectedAnalysisPeriod}
+                        onClick={onAnalysisPeriodChange}
+                    />
+                    <Select
+                        className={componentStyles.select}
+                        id="alert-dropdown"
+                        label="Age"
+                        labelId="alert-dropdown"
+                        value={selectedAlert?.id}
+                        variant="outlined"
+                        onChange={handleAlertChange}
+                    >
+                        {alertDropdownOptions?.map((alertDropdownOption) => {
+                            return (
+                                <MenuItem
+                                    key={alertDropdownOption.id}
+                                    value={alertDropdownOption.id}
+                                >
+                                    {alertDropdownOption.name}
+                                </MenuItem>
+                            );
+                        })}
+                    </Select>
+                </div>
             </div>
             <div className={componentStyles.visualizationContainer}>
-                <div className={componentStyles.visualization}>
-                    <TitleCard
-                        content={<TimeSeriesChart height={500} series={sd} />}
-                        title="Total # of anomalies detected"
-                    />
-                </div>
-                <div className={componentStyles.visualization}>
-                    <TitleCard
-                        content={
-                            // <TimeSeriesChart
-                            //   height={500}
-                            //   series={sd}
-                            // />
-                            <BarGraph
-                                data={barGraphData}
-                                keys={["currentPeriod", "previousPeriod"]}
-                            />
-                        }
-                        title="Weekly anomalies reported"
-                    />
-                </div>
+                <TotalAnomaliesGraph
+                    anomalies={anomalies}
+                    previousPeriodAnomalies={previousPeriodAnomalies}
+                    selectedAnalysisPeriod={selectedAnalysisPeriod}
+                    title="Total # of anomalies detected"
+                />
+                <WeekAnomaliesGraph
+                    anomalies={anomalies}
+                    previousPeriodAnomalies={previousPeriodAnomalies}
+                    selectedAnalysisPeriod={selectedAnalysisPeriod}
+                    title="Weekly anomalies detected"
+                />
+                <TotalAnomaliesGraph
+                    anomalies={
+                        anomalies?.filter((anomaly) => anomaly.notified) || null
+                    }
+                    notificationText="notification"
+                    previousPeriodAnomalies={
+                        previousPeriodAnomalies?.filter(
+                            (anomaly) => anomaly.notified
+                        ) || null
+                    }
+                    selectedAnalysisPeriod={selectedAnalysisPeriod}
+                    title="Total # of notifications sent"
+                />
+                <WeekAnomaliesGraph
+                    anomalies={
+                        anomalies?.filter((anomaly) => anomaly.notified) || null
+                    }
+                    notificationText="notification"
+                    previousPeriodAnomalies={
+                        previousPeriodAnomalies?.filter(
+                            (anomaly) => anomaly.notified
+                        ) || null
+                    }
+                    selectedAnalysisPeriod={selectedAnalysisPeriod}
+                    title="Weekly notifcations sent"
+                />
             </div>
         </>
     );

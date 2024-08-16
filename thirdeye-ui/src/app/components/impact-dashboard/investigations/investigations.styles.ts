@@ -31,4 +31,11 @@ export const useStyles = makeStyles({
     label: {
         color: "grey",
     },
+    validAnomaly: {
+        color: "#039855",
+    },
+    invalidAnomaly: {
+        color: "#F04438",
+    },
+    text: {},
 });

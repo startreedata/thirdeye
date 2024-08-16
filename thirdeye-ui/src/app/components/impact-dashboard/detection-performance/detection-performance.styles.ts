@@ -20,10 +20,19 @@ export const useStyles = makeStyles({
         justifyContent: "space-between",
     },
     visualizationContainer: {
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr",
+        gap: "10px",
+    },
+    alertAndRange: {
         display: "flex",
         gap: "10px",
     },
-    visualization: {
-        width: "50%",
+    select: {
+        width: "250px",
+        borderRadius: "6px",
+        "& .MuiOutlinedInput-input": {
+            padding: "0 12px",
+        },
     },
 });

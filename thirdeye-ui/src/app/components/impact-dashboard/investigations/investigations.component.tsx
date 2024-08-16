@@ -12,26 +12,102 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import React, { ReactElement } from "react";
+import React, { ReactElement, useEffect, useState } from "react";
 import AnalysisPeriod from "../anaylysis-period/analysis-period.component";
 import { Box, Grid, Typography } from "@material-ui/core";
 import { useStyles } from "./investigations.styles";
 import { RecentInvestigationsProps } from "./investigations.interfaces";
 import { epochToDate } from "../detection-performance/util";
+import { compact, isEmpty, uniq } from "lodash";
+import { getAnomaly } from "../../../rest/anomalies/anomalies.rest";
+import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
+
+const getFeedbackText = (feedback: string | undefined): string | undefined => {
+    if (feedback === "ANOMALY") {
+        return "Yes, this is a valid anomaly";
+    } else if (feedback === "NOT_ANOMALY") {
+        return "No, this is not an anomaly";
+    } else if (!feedback) {
+        return "No feedback present";
+    } else {
+        return feedback;
+    }
+};
+
+const getFeedbackClass = (feedback: string | undefined): string => {
+    if (feedback === "ANOMALY") {
+        return "validAnomaly";
+    } else if (feedback === "NOT_ANOMALY") {
+        return "invalidAnomaly";
+    } else {
+        return "text";
+    }
+};
 
 const RecentInvestigations = ({
     investigations,
-    anomalies,
     analysisPeriods,
     selectedAnalysisPeriod,
     onAnalysisPeriodChange,
 }: RecentInvestigationsProps): ReactElement => {
     const componentStyles = useStyles();
+    const [anomaliesInvestigated, setAnomaliesInvestigated] =
+        useState<number[]>();
+    const [anomaliesFeedback, setAnomaliesFeedback] = useState<{
+        [key: number]: string | undefined;
+    }>({});
+
+    useEffect(() => {
+        if (investigations?.length) {
+            const anomaliesId = compact(
+                investigations.map((investigation) => investigation.anomaly?.id)
+            );
+            const uniqueAnomalies = uniq(anomaliesId);
+            setAnomaliesInvestigated(uniqueAnomalies);
+        }
+    }, [investigations]);
+
+    useEffect(() => {
+        if (!isEmpty(anomaliesInvestigated)) {
+            const anomalyPromises: { id: number; promise: Promise<Anomaly> }[] =
+                anomaliesInvestigated!.map((anomalyInvestigated) => ({
+                    id: anomalyInvestigated,
+                    promise: getAnomaly(anomalyInvestigated),
+                }));
+            anomalyPromises?.forEach(({ id, promise }) => {
+                promise
+                    .then((response) => {
+                        setAnomaliesFeedback((prevState) => {
+                            if (prevState) {
+                                return {
+                                    ...prevState,
+                                    [id]: response.feedback?.type,
+                                };
+                            } else {
+                                return { [id]: response.feedback?.type };
+                            }
+                        });
+                    })
+                    .catch(() => {
+                        setAnomaliesFeedback((prevState) => {
+                            if (prevState) {
+                                return {
+                                    ...prevState,
+                                    [id]: "Error fetching feedback",
+                                };
+                            } else {
+                                return { [id]: "Error fetching feedback" };
+                            }
+                        });
+                    });
+            });
+        }
+    }, [anomaliesInvestigated]);
 
     return (
         <>
             <div className={componentStyles.sectionHeading}>
-                <Typography>Recent investigations</Typography>
+                <Typography variant="h6">Recent investigations</Typography>
                 <AnalysisPeriod
                     analysisPeriods={analysisPeriods}
                     selectedPeriod={selectedAnalysisPeriod}
@@ -82,7 +158,28 @@ const RecentInvestigations = ({
                                     </Typography>
                                 </Grid>
                                 <Grid item sm={3}>
-                                    <div>Yes this is an anomaly</div>
+                                    <div
+                                        className={
+                                            investigation.anomaly?.id
+                                                ? componentStyles[
+                                                      getFeedbackClass(
+                                                          anomaliesFeedback[
+                                                              investigation
+                                                                  .anomaly?.id
+                                                          ]
+                                                      )
+                                                  ]
+                                                : ""
+                                        }
+                                    >
+                                        {investigation.anomaly?.id
+                                            ? getFeedbackText(
+                                                  anomaliesFeedback[
+                                                      investigation.anomaly?.id
+                                                  ]
+                                              )
+                                            : ""}
+                                    </div>
                                     <Typography
                                         className={componentStyles.label}
                                         variant="body2"

@@ -14,50 +14,91 @@
  */
 
 import React from "react";
-// import { Group } from '@visx/group';
-// import { BarGroup } from '@visx/shape';
-// import { AxisBottom, AxisLeft, AxisRight, AxisTop } from '@visx/axis';
-// import { scaleBand, scaleLinear, scaleOrdinal } from '@visx/scale';
-// import { epochToDate } from "../../impact-dashboard/detection-performance/util";
+import { Group } from "@visx/group";
+import { BarGroup } from "@visx/shape";
+import { AxisBottom, AxisLeft, AxisRight, AxisTop } from "@visx/axis";
+import { ParentSize } from "@visx/responsive";
+import { scaleBand, scaleLinear, scaleOrdinal } from "@visx/scale";
+import { epochToDate } from "../../impact-dashboard/detection-performance/util";
 
 import { ReactElement } from "react-markdown/lib/react-markdown";
+import { TimeSeriesChartProps } from "../time-series-chart/time-series-chart.interfaces";
+import { getMinMax } from "../time-series-chart/time-series-chart.utils";
+import { Legend } from "../time-series-chart/legend/legend.component";
 
-// const blue = '#aeeef8';
-// export const green = '#e5fd3d';
-// const purple = '#9caff6';
-// export const background = '#612efb';
+const blue = "#aeeef8";
 
-// const BarGraph = ({data, keys}) => {
+export const green = "#F37B0E";
+const purple = "#9caff6";
+
+export const background = "#612efb";
+const MIN_DATA_POINTS_TO_DISPLAY = 14;
+const CHART_SEPARATION = 30;
+const CHART_MARGINS = {
+    top: 20,
+    left: 50,
+    bottom: 20,
+    right: 50,
+};
+
+// export const BarGraph: FunctionComponent<TimeSeriesChartProps> = (
+//     props
+// ) => {
+//     return (
+//         <ParentSize>
+//             {({ width, height }) => (
+//                 <BarGraphInternal
+//                     height={props.height || height}
+//                     margins={CHART_MARGINS}
+//                     width={width}
+//                     {...props}
+//                 />
+//             )}
+//         </ParentSize>
+//     );
+// };
+
+// export const BarGraphInternal = (
+// {data, keys, height, width, margins, LegendComponent=Legend}) => {
+//     console.log('hw', height, width, data)
+//     const xMax = width - margins.left - margins.right;
+//   const yMax = height - margins.top - margins.bottom;
 //   const formatDate = (date: number) => epochToDate(date)
 //   const getDate = (d) => epochToDate(d.date);
 //   const dateScale = scaleBand<string>({
 //     domain: data.map(getDate),
 //     padding: 0.1,
 //   });
+//   dateScale.rangeRound([0, xMax]);
 //   const cityScale = scaleBand<string>({
 //     domain: keys,
 //     padding: 0.1,
 //   });
+//   cityScale.rangeRound([0, dateScale.bandwidth()]);
 //   const tempScale = scaleLinear<number>({
 //     domain: [0, Math.max(...data.map((d) => Math.max(...keys.map((key) => Number(d[key])))))],
 //   });
+
+//   tempScale.range([yMax, 0]);
 //   const colorScale = scaleOrdinal<string, string>({
 //     domain: keys,
-//     range: ['red', 'green'],
+//     range: ['#F37B0E','#006CA7'],
 //   });
-//   dateScale.rangeRound([0, 600]);
-//   cityScale.rangeRound([0, dateScale.bandwidth()]);
-//   tempScale.range([500, 0]);
-//   const width = 475
-//   const height = 475
+// //   dateScale.rangeRound([0, 600]);
+// //   cityScale.rangeRound([0, dateScale.bandwidth()]);
+// //   tempScale.range([500, 0]);
+// //   const width = 500
+// //   const height = 500
+//   console.log('data', data)
 //   return (
+//     <>
 //     <svg  width={width} height={height}>
-//       <rect x={0} y={0} width={width} height={height}  rx={14} />
-//     <Group>
+//       {/* <rect width={'100%'} height={'1400'}/> */}
+//     <Group top={margins.top} left={margins.left}>
 //       <BarGroup
 //         data={data}
 //         keys={keys}
-//         height={1400}
+//         height={yMax}
 //         x0={getDate}
 //         x0Scale={dateScale}
 //         x1Scale={cityScale}
@@ -92,38 +133,38 @@ import { ReactElement } from "react-markdown/lib/react-markdown";
 //       </BarGroup>
 //     </Group>
 //     <AxisBottom
-//       top={450}
+//       top={yMax + margins.top}
+//       left={70}
 //       // tickFormat={formatDate}
 //       scale={dateScale}
-//       stroke={green}
-//       tickStroke={green}
-//       // hideAxisLine
+//       stroke={'black'}
+//     //   tickStroke={green}
+//     //   hideAxisLine
 //       tickLabelProps={{
-//         fill: green,
+//         fill: 'black',
 //         fontSize: 11,
 //         textAnchor: 'middle',
 //       }}
 //     />
 //     <AxisRight
-//       top={100}
+//       top={margins.top}
 //       // tickFormat={formatDate}
+//       left={xMax + margins.right}
 //       scale={tempScale}
-//       stroke={green}
-//       tickStroke={green}
-//       hideAxisLine
+//       stroke={'black'}
+//     //   tickStroke={'red'}
+//     //   hideAxisLine
 //       tickLabelProps={{
-//         fill: green,
+//         fill: 'black',
 //         fontSize: 11,
-//         textAnchor: 'middle',
+//         textAnchor: 'start',
 //       }}
 //     />
 //     </svg>
+//                     </>
 //   )
 // }
 
-// export default BarGraph
-const BarGraph = ({ data, keys }: any): ReactElement => {
+export const BarGraph = ({ data, keys }: any): ReactElement => {
     return <></>;
 };
-
-export default BarGraph;

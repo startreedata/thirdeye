@@ -20,6 +20,8 @@ export const useStyles = makeStyles({
         justifyContent: "space-between",
         alignItems: "center",
         gap: "8px",
+        color: "#3D5F82",
+        fontSize: "12px",
     },
     rangeContainer: {
         display: "flex",

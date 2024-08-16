@@ -48,6 +48,7 @@ import {
 import RecentInvestigations from "../../components/impact-dashboard/investigations/investigations.component";
 import { useGetInvestigations } from "../../rest/rca/rca.actions";
 import { epochToDate } from "../../components/impact-dashboard/detection-performance/util";
+import { Alert } from "../../rest/dto/alert.interfaces";
 const anaylysisPeriods = ["4w", "13w", "26w"];
 
 export const ImpactDashboardPage: FunctionComponent = () => {
@@ -55,10 +56,7 @@ export const ImpactDashboardPage: FunctionComponent = () => {
     const [selectedAnalysisPeriod, setSelectedAnalysisPeriod] =
         useState<string>("4w");
     const { anomalyStats, getAnomalyStats } = useGetAnomalyStats();
-    const {
-        anomalyStats: previousPeriodAnomalyStats,
-        getAnomalyStats: getPreviousPeriodAnomaliesStats,
-    } = useGetAnomalyStats();
+
     const {
         alertsConfigured,
         getAlertsCount,
@@ -72,12 +70,12 @@ export const ImpactDashboardPage: FunctionComponent = () => {
         getAnomalies: getPreviousPeriodAnomalies,
     } = useGetAnomalies();
     const { investigations, getInvestigations } = useGetInvestigations();
-    // const [startTime, setStartTime] = useState<number>(defaultStartDate);
 
     const [anomalyGroupByAlertId, setAnomalyGroupByAlertId] =
         useState<[string, Anomaly[]][]>();
     const [activeAlertsDimensions, setActiveAlertsDimensions] =
         useState<{ [key: string]: string[] }>();
+
     const [summaryData, setSummaryData] = useState({
         anomalies: {
             detected: 0,
@@ -95,7 +93,7 @@ export const ImpactDashboardPage: FunctionComponent = () => {
     const [verboseSummaryItems, setVerboseSummaryItems] =
         useState<VerboseSummary>({
             weeks: selectedAnalysisPeriod,
-            percentageChange: "",
+            percentageChange: "0% more",
             topAlert: {
                 id: null,
                 name: "",
@@ -158,14 +156,16 @@ export const ImpactDashboardPage: FunctionComponent = () => {
                     currentPeriodAnomaliesCount > prevoiusPeriodAnomaliesCount
                 ) {
                     percentChange = `${(
-                        (currentPeriodAnomaliesCount -
-                            prevoiusPeriodAnomaliesCount) /
+                        ((currentPeriodAnomaliesCount -
+                            prevoiusPeriodAnomaliesCount) *
+                            100) /
                         prevoiusPeriodAnomaliesCount
                     ).toFixed(2)}% more`;
                 } else {
                     percentChange = `${(
-                        (prevoiusPeriodAnomaliesCount -
-                            currentPeriodAnomaliesCount) /
+                        ((prevoiusPeriodAnomaliesCount -
+                            currentPeriodAnomaliesCount) *
+                            100) /
                         prevoiusPeriodAnomaliesCount
                     ).toFixed(2)}% less`;
                 }
@@ -201,7 +201,23 @@ export const ImpactDashboardPage: FunctionComponent = () => {
             });
         } else {
             setAnomalyGroupByAlertId([]);
-            setVerboseSummaryItems;
+            setVerboseSummaryItems({
+                weeks: selectedAnalysisPeriod,
+                percentageChange: "0% more",
+                topAlert: {
+                    id: null,
+                    name: "",
+                    anomaliesCount: 0,
+                },
+                investigation: {
+                    count: 0,
+                    date: "",
+                    anomaly: {
+                        id: null,
+                        name: "",
+                    },
+                },
+            });
         }
     }, [anomalies, previousPeriodAnomalies, investigations]);
 

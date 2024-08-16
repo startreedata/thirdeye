@@ -21,3 +21,16 @@ export interface DetectionPerformanceProps {
     onAnalysisPeriodChange: (period: string) => void;
     analysisPeriods: string[];
 }
+
+export interface AnomaliesGraphProps {
+    title: string;
+    notificationText?: string;
+    anomalies: Anomaly[] | null;
+    previousPeriodAnomalies: Anomaly[] | null;
+    selectedAnalysisPeriod: string;
+}
+
+export interface TileRendererProps {
+    title: string;
+    notificationText?: string;
+}

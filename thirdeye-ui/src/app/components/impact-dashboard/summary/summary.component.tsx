@@ -12,17 +12,18 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import React from "react";
+import React, { useRef } from "react";
 import TitleCard from "../../title-card/title-card.component";
 import NotificationsIcon from "@material-ui/icons/Notifications";
 import EventAvailableIcon from "@material-ui/icons/EventAvailable";
 import WarningIcon from "@material-ui/icons/Warning";
-import { Box, Grid, Link, Typography } from "@material-ui/core";
+import { Grid, Link, Typography } from "@material-ui/core";
 import { SummaryProps } from "./summary.interfaces";
 import { startCase } from "lodash";
 import { Link as RouterLink } from "react-router-dom";
 import { getAlertsAlertPath } from "../../../utils/routes/routes.util";
 import AnalysisPeriod from "../anaylysis-period/analysis-period.component";
+import { CopyButton } from "../../copy-button/copy-button.component";
 import { useStyles } from "./summary.styles";
 
 const Summary = ({
@@ -32,6 +33,7 @@ const Summary = ({
     onAnalysisPeriodChange,
     analysisPeriods,
 }: SummaryProps): JSX.Element => {
+    const summaryRef = useRef<HTMLDivElement>(null);
     const componentStyles = useStyles();
     const summaryCardsData = [
         {
@@ -84,10 +86,14 @@ const Summary = ({
         );
     };
 
+    const getCopyContent = (): string => {
+        return summaryRef.current?.textContent || "";
+    };
+
     return (
         <>
             <div className={componentStyles.sectionHeading}>
-                <Typography>System stats</Typography>
+                <Typography variant="h6">System stats</Typography>
                 <AnalysisPeriod
                     analysisPeriods={analysisPeriods}
                     selectedPeriod={selectedAnalysisPeriod}
@@ -106,87 +112,71 @@ const Summary = ({
                     );
                 })}
             </Grid>
-            <Box
-                border={1}
-                borderColor="grey.500"
-                borderRadius={16}
-                paddingBottom={1}
-                paddingLeft={2}
-                paddingRight={2}
-                paddingTop={1}
-            >
-                <Grid container>
-                    <Grid item md={11} xs={11}>
+            <div className={componentStyles.verboseSummaryContainer}>
+                <div className={componentStyles.verboseSummaryHeading}>
+                    <div>
                         <Typography variant="h6">Summary</Typography>
-                    </Grid>
-                    <Grid item alignItems="flex-end" md={1} xs={1}>
-                        Copy
-                    </Grid>
-                    <Grid item md={12} xs={12}>
-                        <p>
-                            In the last <b>{verboseSummaryItems.weeks} weeks</b>
-                            ,
-                            <b>
-                                {summaryData.anomalies.detected} anomlaies were
-                                detected
-                            </b>
-                            , which is{" "}
-                            <b>{verboseSummaryItems.percentageChange}</b> than
-                            the previous {verboseSummaryItems.weeks} weeks.{" "}
-                            {summaryData.anomalies.detected > 0 && (
-                                <>
-                                    Notifications about anomallies were sent via
-                                    Slack and Email.
-                                </>
-                            )}
-                        </p>
-                        {verboseSummaryItems.topAlert.name && (
-                            <p>
-                                The metric with the most anomalies is{" "}
-                                <Link
-                                    component={RouterLink}
-                                    to={getAlertsAlertPath(
-                                        Number(verboseSummaryItems.topAlert.id)
-                                    )}
-                                >
-                                    {verboseSummaryItems.topAlert.name}.
-                                </Link>
-                                In the{" "}
-                                <b>
-                                    last {verboseSummaryItems.weeks} weeks,
-                                    {
-                                        verboseSummaryItems.topAlert
-                                            .anomaliesCount
-                                    }{" "}
-                                    anomalies were detected on this metric.
-                                </b>
-                            </p>
+                    </div>
+                    <div>
+                        <CopyButton content={getCopyContent()} />
+                    </div>
+                </div>
+                <div ref={summaryRef}>
+                    <div>
+                        In the last <b>{verboseSummaryItems.weeks} weeks</b>,
+                        <b>
+                            {summaryData.anomalies.detected} anomlaies were
+                            detected
+                        </b>
+                        , which is <b>{verboseSummaryItems.percentageChange}</b>{" "}
+                        than the previous {verboseSummaryItems.weeks} weeks.{" "}
+                        {summaryData.anomalies.detected > 0 && (
+                            <>
+                                Notifications about anomallies were sent via
+                                Slack and Email.
+                            </>
                         )}
-                        <p>
+                    </div>
+                    {verboseSummaryItems.topAlert.name && (
+                        <div>
+                            The metric with the most anomalies is{" "}
+                            <Link
+                                component={RouterLink}
+                                to={getAlertsAlertPath(
+                                    Number(verboseSummaryItems.topAlert.id)
+                                )}
+                            >
+                                {verboseSummaryItems.topAlert.name}.
+                            </Link>
+                            In the{" "}
                             <b>
-                                {verboseSummaryItems.investigation.count}{" "}
-                                investigations
-                            </b>{" "}
-                            were performed in the last{" "}
-                            {verboseSummaryItems.weeks} weeks.{" "}
-                            {verboseSummaryItems.investigation.count > 0 && (
-                                <span>
-                                    The most recent investigation was performed
-                                    for an anomaly that happened on{" "}
-                                    <b>
-                                        {verboseSummaryItems.investigation.date}
-                                    </b>{" "}
-                                    on metric{" "}
-                                    {
-                                        verboseSummaryItems.investigation
-                                            .anomaly.name
-                                    }
-                                </span>
-                            )}
-                        </p>
-                    </Grid>
-                </Grid>
-            </Box>
+                                last {verboseSummaryItems.weeks} weeks,
+                                {
+                                    verboseSummaryItems.topAlert.anomaliesCount
+                                }{" "}
+                                anomalies were detected on this metric.
+                            </b>
+                        </div>
+                    )}
+                    <div>
+                        <b>
+                            {verboseSummaryItems.investigation.count}{" "}
+                            investigations
+                        </b>{" "}
+                        were performed in the last {verboseSummaryItems.weeks}{" "}
+                        weeks.{" "}
+                        {verboseSummaryItems.investigation.count > 0 && (
+                            <span>
+                                The most recent investigation was performed for
+                                an anomaly that happened on{" "}
+                                <b>{verboseSummaryItems.investigation.date}</b>{" "}
+                                on metric{" "}
+                                {verboseSummaryItems.investigation.anomaly.name}
+                            </span>
+                        )}
+                    </div>
+                </div>
+            </div>
         </>
     );
 };

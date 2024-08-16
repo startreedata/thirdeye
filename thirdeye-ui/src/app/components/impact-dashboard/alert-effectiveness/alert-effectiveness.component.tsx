@@ -49,7 +49,7 @@ const AlertEffectiveness = ({
     return (
         <>
             <div className={componentStyles.sectionHeading}>
-                <Typography>Alerts effectiveness</Typography>
+                <Typography variant="h6">Usage insights</Typography>
                 <AnalysisPeriod
                     analysisPeriods={analysisPeriods}
                     selectedPeriod={selectedAnalysisPeriod}
@@ -58,7 +58,7 @@ const AlertEffectiveness = ({
             </div>
             <div>
                 <div className={componentStyles.heading}>
-                    <Typography>Most active alerts</Typography>
+                    <Typography>Top anomaly alerts</Typography>
                 </div>
                 <div className={componentStyles.table}>
                     <DataTable columns={columns} data={mostActiveAlerts} />

@@ -1,3 +1,10 @@
+### [2.49.2](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.49.1...thirdeye-ui-2.49.2) (2024-08-16)
+
+
+### Bug Fixes
+
+* [TE-2411](https://cortexdata.atlassian.net/browse/TE-2411) avoid passing alertId in evaluate call when updating alert ([8844c9bb1](https://github.com/startreedata/thirdeye/commit/8844c9bb1b8528c331baf2fcb57a228d12bca541))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

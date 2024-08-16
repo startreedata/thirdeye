@@ -96,7 +96,7 @@ public class DetectionCronScheduler implements Runnable {
 
   private void processAlert(final AlertDTO alert) {
     if (!alert.isActive()) {
-      LOG.debug("Alert: " + alert.getId() + " is inactive. Skipping.");
+      LOG.debug("Alert: {} is inactive. Skipping.", alert.getId());
       return;
     }
 

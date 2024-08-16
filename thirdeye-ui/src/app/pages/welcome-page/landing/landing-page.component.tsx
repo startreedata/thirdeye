@@ -31,19 +31,36 @@ import { useGetDatasets } from "../../../rest/datasets/datasets.actions";
 import {
     getConfigurationPath,
     getDataConfigurationCreatePath,
+    getHomePath,
     getWelcomeCreateAlert,
 } from "../../../utils/routes/routes.util";
+import { useGetAlertsCount } from "../../../rest/alerts/alerts.actions";
+import { useNavigate } from "react-router-dom";
+import { useAppBarConfigProvider } from "../../../components/app-bar/app-bar-config-provider/app-bar-config-provider.component";
 
 export const WelcomeLandingPage: FunctionComponent = () => {
     const { t } = useTranslation();
+    const navigate = useNavigate();
+    const { setShowAppNavBar } = useAppBarConfigProvider();
 
     const { status, datasets, getDatasets } = useGetDatasets();
+    const { alertsCount, getAlertsCount } = useGetAlertsCount();
 
     const hasDatasets = !!(datasets && datasets.length > 0);
 
     useEffect(() => {
         getDatasets();
+        getAlertsCount();
     }, []);
+
+    useEffect(() => {
+        if (alertsCount?.count) {
+            setShowAppNavBar(true);
+            navigate(getHomePath());
+
+            return;
+        }
+    }, [alertsCount?.count]);
 
     return (
         <PageV1>

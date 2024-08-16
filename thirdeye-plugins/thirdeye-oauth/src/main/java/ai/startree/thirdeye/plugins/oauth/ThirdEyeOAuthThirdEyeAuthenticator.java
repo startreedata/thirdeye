@@ -67,7 +67,7 @@ public class ThirdEyeOAuthThirdEyeAuthenticator implements ThirdEyeAuthenticator
     try {
       return optional(tokenPrincipalCache.get(authTokenAndNamespace));
     } catch (final Exception exception) {
-      LOG.error("Authentication failed. msg: {}", exception.getMessage());
+      LOG.error("Authentication failed.", exception);
       return Optional.empty();
     }
   }

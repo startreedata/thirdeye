@@ -30,6 +30,7 @@ export const useAppHeaderStyles = (
             padding: "8px 16px",
             background: "#e1edff",
             display: "flex",
+            zIndex: 9999999,
             justifyContent: props.showWorkspaceSwitcher
                 ? "space-between"
                 : "end",

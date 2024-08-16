@@ -159,7 +159,7 @@ public class MySqlTestDatabase {
   private static DataSource buildDataSource(final DatabaseConfiguration dbConfig) {
     final DataSource dataSource = new DataSource();
     dataSource.setUrl(dbConfig.getUrl());
-    log.debug("Creating db with connection url : " + dataSource.getUrl());
+    log.debug("Creating db with connection url: {}", dataSource.getUrl());
     dataSource.setPassword(dbConfig.getPassword());
     dataSource.setUsername(dbConfig.getUser());
     dataSource.setDriverClassName(dbConfig.getDriver());

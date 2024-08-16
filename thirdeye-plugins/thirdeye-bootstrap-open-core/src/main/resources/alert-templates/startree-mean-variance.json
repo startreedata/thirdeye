@@ -207,7 +207,8 @@
       "sqlFilter": "${rcaEventSqlFilter}"
     },
     "timezone": "${timezone}",
-    "granularity": "${monitoringGranularity}"
+    "granularity": "${monitoringGranularity}",
+    "detectionAggregationFunction": "${aggregationFunction}"
   },
   "properties": [
     {

@@ -41,6 +41,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getAlertEvaluation } from "../../../../../rest/alerts/alerts.rest";
 import { LoadingErrorStateSwitch } from "../../../../page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { NoDataIndicator } from "../../../../no-data-indicator/no-data-indicator.component";
+import { cloneDeep } from "lodash";
 
 export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
     detectionEvaluation,
@@ -67,11 +68,14 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
     const [timeSeriesData, setTimeSeriesData] = useState<any>();
     const [timeSeriesExpandedData, setTimeSeriesExpandedData] = useState<any>();
 
+    const alertParams = cloneDeep(alert);
+    delete (alertParams as any).id;
+
     const getEvaluationQuery = useQuery({
         enabled: false,
         queryKey: [
             "evaluation",
-            alert,
+            alertParams,
             detectionEvaluation.enumerationItem,
             evaluationTimeRange?.startTime,
             evaluationTimeRange?.endTime,
@@ -79,7 +83,7 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
         queryFn: () => {
             return getAlertEvaluation(
                 {
-                    alert,
+                    alert: alertParams,
                     start: evaluationTimeRange?.startTime,
                     end: evaluationTimeRange?.endTime,
                 },

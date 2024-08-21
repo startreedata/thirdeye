@@ -12,14 +12,13 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-export interface AlertEffectivenessProps {
-    mostActiveAlerts: {
-        id: string;
-        name: string;
-        anomaliesCount: number;
-        dimensionsCount: number;
-    }[];
-    selectedAnalysisPeriod: string;
-    onAnalysisPeriodChange: (period: string) => void;
-    analysisPeriods: string[];
-}
+import { makeStyles } from "@material-ui/core";
+
+export const bargraphStyles = makeStyles({
+    container: {
+        display: "flex",
+        flexDirection: "column",
+        gap: "20px",
+        alignItems: "center",
+    },
+});

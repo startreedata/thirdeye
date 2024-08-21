@@ -13,8 +13,12 @@
  * the License.
  */
 import React from "react";
-import { Grid, Typography } from "@material-ui/core";
+
+// Components
 import HelpOutlineIcon from "@material-ui/icons/HelpOutline";
+import { Grid, Typography } from "@material-ui/core";
+
+// Interfaces
 import { TileRendererProps } from "./detection-performance.interfaces";
 
 export const TitleRenderer = ({

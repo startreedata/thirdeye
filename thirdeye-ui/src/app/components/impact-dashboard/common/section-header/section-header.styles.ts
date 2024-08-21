@@ -14,21 +14,10 @@
  */
 import { makeStyles } from "@material-ui/core";
 
-export const useStyles = makeStyles({
-    sectionHeading: {
-        display: "flex",
-        justifyContent: "space-between",
-    },
-    heading: {
-        padding: "8px 16px",
-        border: "1px solid rgb(158, 158, 158)",
-        borderBottom: 0,
-        borderTopLeftRadius: "16px",
-        borderTopRightRadius: "16px",
-    },
-    table: {
-        border: "1px solid rgb(158, 158, 158)",
-        borderBottomLeftRadius: "16px",
-        borderBottomRightRadius: "16px",
+export const useSectionHeaderStyles = makeStyles({
+    header: {
+        fontSize: "16px",
+        fontWeight: 700,
+        color: "#0B263E",
     },
 });

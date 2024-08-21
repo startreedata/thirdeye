@@ -1,5 +1,3 @@
-import { VerboseSummary } from "../../../pages/impact-dashboard-page/impact-dashboard-page.interfaces";
-
 /*
  * Copyright 2024 StarTree Inc
  *
@@ -14,23 +12,63 @@ import { VerboseSummary } from "../../../pages/impact-dashboard-page/impact-dash
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-export interface SummaryProps {
-    summaryData: {
-        alerts: {
-            activeAlerts: number;
-            activeDimensions: number;
-        };
-        anomalies: {
-            detected: number;
-            investigations: number;
-        };
-        notifications: {
-            notificationsSent: number;
-            groups: number;
-        };
-    };
-    verboseSummaryItems: VerboseSummary;
+
+import { AlertEffectivnessData } from "../../../pages/impact-dashboard-page/impact-dashboard-page.interfaces";
+import { Alert } from "../../../rest/dto/alert.interfaces";
+import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
+import { Investigation } from "../../../rest/dto/rca.interfaces";
+import { SubscriptionGroup } from "../../../rest/dto/subscription-group.interfaces";
+
+export interface SummaryDataProps {
+    mostRecentlyInvestigatedAnomalyAlert?: Pick<Alert, "id" | "name">;
+    anomalies: Anomaly[] | null;
+    previousPeriodAnomalies: Anomaly[] | null;
+    topAlert: AlertEffectivnessData;
+    investigations: Investigation[] | null;
+    alertsConfigured: { count: number };
+    subscriptionGroups: SubscriptionGroup[] | null;
     selectedAnalysisPeriod: string;
+}
+
+export interface SummaryProps extends SummaryDataProps {
     onAnalysisPeriodChange: (period: string) => void;
     analysisPeriods: string[];
+}
+
+export interface SummaryData {
+    alerts: {
+        activeAlerts: { count: number; href: string };
+        activeDimensions: { count: number; href: string };
+    };
+    anomalies: {
+        detected: { count: number; href: string };
+        investigations: { count: number; href: string };
+    };
+    notifications: {
+        notificationsSent: { count: number; href: string };
+        groups: { count: number; href: string };
+    };
+}
+
+export interface VerboseSummary {
+    weeks: string;
+    percentageChange: string;
+    topAlert: {
+        id: number | null;
+        name: string;
+        anomaliesCount: number;
+    };
+    investigation: {
+        count: number;
+        date: string;
+        alert: {
+            id: number | null | undefined;
+            name: string | undefined;
+        };
+    };
+}
+
+export interface Summary {
+    summaryData: SummaryData;
+    verboseSummaryItems: VerboseSummary;
 }

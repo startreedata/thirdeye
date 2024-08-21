@@ -12,24 +12,29 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 import { makeStyles } from "@material-ui/core";
 
-export const useSummaryStyles = makeStyles({
-    sectionHeading: {
+export const useAnalysisPeriodStyles = makeStyles({
+    container: {
         display: "flex",
         justifyContent: "space-between",
-    },
-    verboseSummaryContainer: {
-        padding: "8px 16px",
-        border: "1px solid rgb(158, 158, 158)",
-        borderRadius: "8px",
-        display: "flex",
-        flexDirection: "column",
+        alignItems: "center",
         gap: "8px",
+        color: "#3D5F82",
+        fontSize: "12px",
     },
-    verboseSummaryHeading: {
+    rangeContainer: {
         display: "flex",
-        justifyContent: "space-between",
+        gap: "4px",
+    },
+    range: {
+        // display: "flex",
+        // justifyContent: "center",
+        // alignItems: "center",
+        cursor: "pointer",
+    },
+    selected: {
+        background: "#e1edff",
+        fontWeight: "bold",
     },
 });

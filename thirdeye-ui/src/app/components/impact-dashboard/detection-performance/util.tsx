@@ -54,8 +54,6 @@ export function groupDataByTimeWindows(
     return timeWindows.map(({ windowStart, windowEnd }) => {
         const windowData = data.filter(
             (entry) =>
-                // entry.endTime > windowStart && entry.startTime < windowEnd
-
                 entry.startTime > windowStart && entry.startTime < windowEnd
         );
 

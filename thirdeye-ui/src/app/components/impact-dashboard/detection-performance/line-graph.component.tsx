@@ -13,23 +13,30 @@
  * the License.
  */
 import React from "react";
+
+// Interfaces
 import { AnomaliesGraphProps } from "./detection-performance.interfaces";
+
+// Utils
 import { epochToDate, getTimeWindows, groupDataByTimeWindows } from "./util";
 import {
     anaylysisPeriodStartTimeMapping,
     anaylysisPeriodPreviousWindowTimeMapping,
 } from "../../../platform/utils";
-import { TimeSeriesChart } from "../../visualizations/time-series-chart/time-series-chart.component";
+
+// Components
 import TitleCard from "../../title-card/title-card.component";
+import { TimeSeriesChart } from "../../visualizations/time-series-chart/time-series-chart.component";
 import { TitleRenderer } from "./title-renderer.component";
 
-export const TotalAnomaliesGraph = ({
+export const LineGraph = ({
     title,
     notificationText,
     selectedAnalysisPeriod,
     anomalies,
     previousPeriodAnomalies,
 }: AnomaliesGraphProps): JSX.Element => {
+    // Get all the 24hr time windows for the selected range
     const currentTimeWindow = getTimeWindows(
         anaylysisPeriodStartTimeMapping[selectedAnalysisPeriod].startTime,
         anaylysisPeriodStartTimeMapping[selectedAnalysisPeriod].endTime
@@ -39,11 +46,18 @@ export const TotalAnomaliesGraph = ({
             .startTime,
         anaylysisPeriodPreviousWindowTimeMapping[selectedAnalysisPeriod].endTime
     );
+    // group the anomalies based on their startime with the approprie time window
     const groupedAnomaliesDataByTimeCurrentWindow = groupDataByTimeWindows(
         anomalies || [],
         currentTimeWindow
     );
+    const groupedAnomaliesDataByTimePreviousWindow = groupDataByTimeWindows(
+        previousPeriodAnomalies || [],
+        previousTimeWindow
+    );
 
+    /* create data point for every startTime of the window period with yAxis as number of
+    anomalies in those periods */
     const currentPeriodDataPoints = groupedAnomaliesDataByTimeCurrentWindow.map(
         (data) => {
             return {
@@ -52,7 +66,16 @@ export const TotalAnomaliesGraph = ({
             };
         }
     );
+    const previousPeriodDataPoints =
+        groupedAnomaliesDataByTimePreviousWindow.map((data) => {
+            return {
+                x: data.windowStart,
+                y: data.data.length,
+            };
+        });
 
+    /* At every date, we have to show anomalies for that date + anomalies recorded till
+    that date in the period */
     const currentPeriodCumulativeSumDataPoints = currentPeriodDataPoints.map(
         (d, idx) => {
             return {
@@ -71,23 +94,10 @@ export const TotalAnomaliesGraph = ({
             };
         }
     );
-
-    const groupedAnomaliesDataByTimePreviousWindow = groupDataByTimeWindows(
-        previousPeriodAnomalies || [],
-        previousTimeWindow
-    );
-    const previousPeriodDataPoints =
-        groupedAnomaliesDataByTimePreviousWindow.map((data) => {
-            return {
-                x: data.windowStart,
-                y: data.data.length,
-            };
-        });
-
     const previousPeriodCumulativeSumDataPoints = previousPeriodDataPoints.map(
         (d, idx) => {
             return {
-                x: d.x,
+                x: currentPeriodDataPoints[idx].x,
                 y:
                     d.y +
                     (idx > 0
@@ -115,21 +125,21 @@ export const TotalAnomaliesGraph = ({
                 .endTime
         ),
     };
-    const sd = [
+    const seriesData = [
         {
             name: `Current ${selectedAnalysisPeriod} period`,
-            data: currentPeriodCumulativeSumDataPoints, // currentSeriesData,
+            data: currentPeriodCumulativeSumDataPoints,
         },
         {
             name: `Previous ${selectedAnalysisPeriod} period(${previousPeriodReadableDate.startTime}-${previousPeriodReadableDate.endTime})`,
-            data: previousPeriodCumulativeSumDataPoints, // previousSeriesData,
+            data: previousPeriodCumulativeSumDataPoints,
         },
     ];
 
     return (
         <>
             <TitleCard
-                content={<TimeSeriesChart height={500} series={sd} />}
+                content={<TimeSeriesChart height={500} series={seriesData} />}
                 title={
                     <TitleRenderer
                         notificationText={notificationText}

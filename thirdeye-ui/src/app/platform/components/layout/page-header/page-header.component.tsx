@@ -17,7 +17,7 @@ import { PageHeaderProps } from "./page-header.interfaces";
 import { usePageHeaderStyles } from "./page-header.styles";
 import { Button, Typography } from "@material-ui/core";
 
-const PageHeader = ({
+export const PageHeader = ({
     mainHeading,
     subHeading = "",
     actionButtons = [],
@@ -58,5 +58,3 @@ const PageHeader = ({
         </div>
     );
 };
-
-export default PageHeader;

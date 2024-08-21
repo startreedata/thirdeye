@@ -12,3 +12,10 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+
+import { Summary } from "../../components/impact-dashboard/summary/summary.component";
+import { UsageInsights } from "../../components/impact-dashboard/usage-insights/usage-insights.component";
+import { DetectionPerformance } from "../../components/impact-dashboard/detection-performance/detection-performance.component";
+import { RecentInvestigations } from "../../components/impact-dashboard/investigations/investigations.component";
+
+export { Summary, UsageInsights, DetectionPerformance, RecentInvestigations };

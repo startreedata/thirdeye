@@ -22,3 +22,5 @@ export interface RecentInvestigationsProps {
     onAnalysisPeriodChange: (period: string) => void;
     analysisPeriods: string[];
 }
+
+export type FeedbackClass = "validAnomaly" | "invalidAnomaly" | "text";

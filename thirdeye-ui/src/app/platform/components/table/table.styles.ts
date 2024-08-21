@@ -18,6 +18,10 @@ export const useStyles = makeStyles({
     table: {},
     columnHeaders: {
         background: "#e1edff",
+        height: "20px",
+        "& th": {
+            padding: "8px 12px",
+        },
     },
     emptyView: {
         display: "flex",

@@ -90,7 +90,10 @@ export const getInvestigations = async (
         queryParams.set("created", `[gte]${created}`);
     }
 
-    if (queryParams.size) {
+    if (
+        queryParams.has("created") ||
+        queryParams.has(ANOMALY_ID_FILTER_QUERY_PARAM_KEY)
+    ) {
         queryString = `?${queryParams.toString()}`;
     }
 

@@ -20,7 +20,6 @@ import { useStyles } from "./page.styles";
 export const MainLayout: FunctionComponent<PageV1Props> = ({
     documentTitle,
     children,
-    ...otherProps
 }) => {
     const pageStyles = useStyles();
 

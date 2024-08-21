@@ -13,17 +13,27 @@
  * the License.
  */
 import React from "react";
-import { AnomaliesGraphProps } from "./detection-performance.interfaces";
+
+// Interfaces
+import {
+    AnomaliesGraphProps,
+    TooltipData,
+} from "./detection-performance.interfaces";
+
+// Utils
 import { epochToDate, getTimeWindows, groupDataByTimeWindows } from "./util";
 import {
     anaylysisPeriodStartTimeMapping,
     anaylysisPeriodPreviousWindowTimeMapping,
 } from "../../../platform/utils";
+
+// Components
 import TitleCard from "../../title-card/title-card.component";
 import { BarGraph } from "../../visualizations/bar-graph/bar-graph.component";
 import { TitleRenderer } from "./title-renderer.component";
+import { ReactElement } from "react-markdown/lib/react-markdown";
 
-export const WeekAnomaliesGraph = ({
+export const WeeklyGraph = ({
     title,
     notificationText,
     anomalies,
@@ -67,18 +77,67 @@ export const WeekAnomaliesGraph = ({
             };
         });
     const barGraphData = currentPeriodWeeklyDataPoints.map((data, idx) => {
-        const d = epochToDate(
+        const currentWindowDate = epochToDate(
             groupedAnomaliesDataByTimeCurrentWeeklyWindow[idx].windowStart
         );
-        const date = new Date();
-        date.setDate(idx + 1);
+        const previousWindowDate = epochToDate(
+            groupedAnomaliesDataByTimePrevioustWeeklyWindow[idx].windowStart
+        );
 
         return {
             currentPeriod: data.y,
             previousPeriod: previoustPeriodWeeklyDataPoints[idx].y,
-            date: d,
+            date: currentWindowDate,
+            tooltipData: {
+                currentPeriod: data.y,
+                previousPeriod: previoustPeriodWeeklyDataPoints[idx].y,
+                currentPeriodDate: currentWindowDate,
+                previousPeriodDate: previousWindowDate,
+            },
         };
     });
+
+    const tootltipRender = (tooltipData: unknown): ReactElement => {
+        const data = tooltipData as TooltipData;
+
+        return (
+            <div>
+                <div>
+                    {`Current Period(${data.currentPeriodDate}): ${data.currentPeriod}`}
+                </div>
+                <div>
+                    {`Previous Period(${data.previousPeriodDate}): ${data.previousPeriod}`}
+                </div>
+            </div>
+        );
+    };
+
+    const previousPeriodReadableDate = {
+        startTime: epochToDate(
+            anaylysisPeriodPreviousWindowTimeMapping[selectedAnalysisPeriod]
+                .startTime
+        ),
+        endTime: epochToDate(
+            anaylysisPeriodPreviousWindowTimeMapping[selectedAnalysisPeriod]
+                .endTime
+        ),
+    };
+
+    const keysColorMapping = {
+        currentPeriod: "#F37B0E",
+        previousPeriod: "#006CA7",
+    };
+
+    const graphLegend = [
+        {
+            text: `Current ${selectedAnalysisPeriod} period`,
+            value: keysColorMapping.currentPeriod,
+        },
+        {
+            text: `Previous ${selectedAnalysisPeriod} period(${previousPeriodReadableDate.startTime}-${previousPeriodReadableDate.endTime})`,
+            value: keysColorMapping.previousPeriod,
+        },
+    ];
 
     return (
         <>
@@ -86,8 +145,10 @@ export const WeekAnomaliesGraph = ({
                 content={
                     <BarGraph
                         data={barGraphData}
-                        height={520}
-                        keys={["currentPeriod", "previousPeriod"]}
+                        graphLegend={graphLegend}
+                        height={480}
+                        keysColorMapping={keysColorMapping}
+                        tooltipRenderer={tootltipRender}
                     />
                 }
                 title={

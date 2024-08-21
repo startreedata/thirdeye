@@ -100,6 +100,7 @@
         "alert-templates": "Alert Templates",
         "alerts": "Alerts",
         "alerts-and-dimensions": "Alerts & dimensions",
+        "alerts-count": "Alerts count",
         "all": "All",
         "all-entity": "All {{entity}}",
         "am": "AM",
@@ -294,7 +295,6 @@
         "how-to-perform-root-cause-analysis-doc": "View documentation on how to perform root cause analysis",
         "id": "ID",
         "ignored": "ignored",
-        "impact-dashboard": "Impact dashboard",
         "impact-percentage": "Impact %",
         "impact-score": "Impact Score",
         "improve-alert-accuracy": "Improve alert accuracy",
@@ -899,6 +899,47 @@
         "you-can-now-start-using-thirdeye": "You can now start using ThirdEye",
         "you-can-use-our": "You can use our sample configurations as reference to build your own: ",
         "your-changes-wont-save": "Your changes won’t be saved."
+    },
+    "pages": {
+        "impact-dashboard": {
+            "sections": {
+                "detection-performance": {
+                    "heading": "Detection performance",
+                    "total-anomalies-graph-title": "Total # of anomalies detected",
+                    "total-anomalies-weekly-graph-title": "Weekly anomalies detected",
+                    "total-notifications-graph-title": "Total # of notifications sent",
+                    "total-notifications-weekly-graph-title": "Weekly notifcations sent"
+                },
+                "investigations": {
+                    "heading": "Recent investigations",
+                    "labels": {
+                        "anomaly-confirmation": "Anomaly confirmation",
+                        "created-by": "Created by",
+                        "created-date": "Created date",
+                        "invalid-anomaly-text": "No, this is not an anomaly",
+                        "investigation-name": "Investigation name",
+                        "related-event": "Anomaly was related to",
+                        "valid-anomaly-text": "Yes, this is a valid anomaly"
+                    }
+                },
+                "summary": {
+                    "cards": {
+                        "alerts": "Alerts",
+                        "anomalies": "Anomalies",
+                        "notifications": "Notifications"
+                    },
+                    "heading": "System stats",
+                    "verbose-summary-heading": "Summary"
+                },
+                "usage-insights": {
+                    "anomaly-table-title": "Top anomaly alerts",
+                    "heading": "Usage insights",
+                    "notification-group-table-title": "Top anomaly notification groups"
+                }
+            },
+            "subHeading": "Overview of system statistics, anomaly detection performance, and usage insights.",
+            "title": "Impact dashboard"
+        }
     },
     "server": {},
     "url": {

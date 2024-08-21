@@ -12,24 +12,16 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import React from "react";
 
-import { makeStyles } from "@material-ui/core";
+// Interfaces
+import { SectionHeaderProps } from "./section-header.interfaces";
 
-export const useSummaryStyles = makeStyles({
-    sectionHeading: {
-        display: "flex",
-        justifyContent: "space-between",
-    },
-    verboseSummaryContainer: {
-        padding: "8px 16px",
-        border: "1px solid rgb(158, 158, 158)",
-        borderRadius: "8px",
-        display: "flex",
-        flexDirection: "column",
-        gap: "8px",
-    },
-    verboseSummaryHeading: {
-        display: "flex",
-        justifyContent: "space-between",
-    },
-});
+// Styles
+import { useSectionHeaderStyles } from "./section-header.styles";
+
+export const SectionHeader = ({ heading }: SectionHeaderProps): JSX.Element => {
+    const componentStyles = useSectionHeaderStyles();
+
+    return <div className={componentStyles.header}>{heading}</div>;
+};

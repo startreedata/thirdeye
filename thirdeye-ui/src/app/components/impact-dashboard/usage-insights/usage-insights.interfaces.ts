@@ -1,3 +1,6 @@
+import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
+import { SubscriptionGroup } from "../../../rest/dto/subscription-group.interfaces";
+
 /*
  * Copyright 2024 StarTree Inc
  *
@@ -12,3 +15,16 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+export interface AlertEffectivenessProps {
+    anomalies: Anomaly[] | null;
+    subscriptionGroups: SubscriptionGroup[] | null;
+    mostActiveAlerts: {
+        id: string;
+        name: string;
+        anomaliesCount: number;
+        dimensionsCount: number;
+    }[];
+    selectedAnalysisPeriod: string;
+    onAnalysisPeriodChange: (period: string) => void;
+    analysisPeriods: string[];
+}

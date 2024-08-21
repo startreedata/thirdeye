@@ -12,24 +12,17 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { Alert } from "../../../../rest/dto/alert.interfaces";
+import { Anomaly } from "../../../../rest/dto/anomaly.interfaces";
 
-import { makeStyles } from "@material-ui/core";
+export interface ApiReuqestProps {
+    selectedAlert: { id: number; name: string };
+    defaultAlertDropdownOption: { id: number; name: string };
+    selectedAnalysisPeriod: string;
+}
 
-export const useSummaryStyles = makeStyles({
-    sectionHeading: {
-        display: "flex",
-        justifyContent: "space-between",
-    },
-    verboseSummaryContainer: {
-        padding: "8px 16px",
-        border: "1px solid rgb(158, 158, 158)",
-        borderRadius: "8px",
-        display: "flex",
-        flexDirection: "column",
-        gap: "8px",
-    },
-    verboseSummaryHeading: {
-        display: "flex",
-        justifyContent: "space-between",
-    },
-});
+export interface APIRequestData {
+    alerts: Alert[] | null;
+    currentPeriodAnomaliesByAlert: Anomaly[] | null;
+    previousPeriodAnomaliesByAlert: Anomaly[] | null;
+}

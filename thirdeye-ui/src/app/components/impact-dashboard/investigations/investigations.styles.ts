@@ -14,7 +14,7 @@
  */
 import { makeStyles } from "@material-ui/core";
 
-export const useStyles = makeStyles({
+export const useInvestigationStyles = makeStyles({
     sectionHeading: {
         display: "flex",
         justifyContent: "space-between",

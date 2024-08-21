@@ -13,44 +13,38 @@
  * the License.
  */
 import React, { ReactElement, useEffect, useState } from "react";
-import AnalysisPeriod from "../anaylysis-period/analysis-period.component";
-import { Box, Grid, Typography } from "@material-ui/core";
-import { useStyles } from "./investigations.styles";
+import { useTranslation } from "react-i18next";
+
+// Components
+import { AnalysisPeriod } from "../common/anaylysis-period/analysis-period.component";
+import { SectionHeader } from "../common/section-header/section-header.component";
+import { Link as RouterLink } from "react-router-dom";
+import { Box, Grid, Link, Typography } from "@material-ui/core";
+
+// Styles
+import { useInvestigationStyles } from "./investigations.styles";
+
+// Interfaces
 import { RecentInvestigationsProps } from "./investigations.interfaces";
+
+// Utils
 import { epochToDate } from "../detection-performance/util";
 import { compact, isEmpty, uniq } from "lodash";
+import { getRootCauseAnalysisForAnomalyInvestigateV2StepsPath } from "../../../utils/routes/routes.util";
+import { getFeedbackClass, getFeedbackText } from "./util";
+
+// APIs
 import { getAnomaly } from "../../../rest/anomalies/anomalies.rest";
 import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 
-const getFeedbackText = (feedback: string | undefined): string | undefined => {
-    if (feedback === "ANOMALY") {
-        return "Yes, this is a valid anomaly";
-    } else if (feedback === "NOT_ANOMALY") {
-        return "No, this is not an anomaly";
-    } else if (!feedback) {
-        return "No feedback present";
-    } else {
-        return feedback;
-    }
-};
-
-const getFeedbackClass = (feedback: string | undefined): string => {
-    if (feedback === "ANOMALY") {
-        return "validAnomaly";
-    } else if (feedback === "NOT_ANOMALY") {
-        return "invalidAnomaly";
-    } else {
-        return "text";
-    }
-};
-
-const RecentInvestigations = ({
+export const RecentInvestigations = ({
     investigations,
     analysisPeriods,
     selectedAnalysisPeriod,
     onAnalysisPeriodChange,
 }: RecentInvestigationsProps): ReactElement => {
-    const componentStyles = useStyles();
+    const { t } = useTranslation();
+    const componentStyles = useInvestigationStyles();
     const [anomaliesInvestigated, setAnomaliesInvestigated] =
         useState<number[]>();
     const [anomaliesFeedback, setAnomaliesFeedback] = useState<{
@@ -67,6 +61,8 @@ const RecentInvestigations = ({
         }
     }, [investigations]);
 
+    // Anomaly feedback is only returned in indivudual details call of the anomaly.
+    // Hence we have to make those calls here.
     useEffect(() => {
         if (!isEmpty(anomaliesInvestigated)) {
             const anomalyPromises: { id: number; promise: Promise<Anomaly> }[] =
@@ -107,7 +103,11 @@ const RecentInvestigations = ({
     return (
         <>
             <div className={componentStyles.sectionHeading}>
-                <Typography variant="h6">Recent investigations</Typography>
+                <SectionHeader
+                    heading={t(
+                        "pages.impact-dashboard.sections.investigations.heading"
+                    )}
+                />
                 <AnalysisPeriod
                     analysisPeriods={analysisPeriods}
                     selectedPeriod={selectedAnalysisPeriod}
@@ -115,102 +115,127 @@ const RecentInvestigations = ({
                 />
             </div>
             <Box border={1} borderColor="grey.500" borderRadius={16}>
-                {investigations?.map((investigation, idx) => {
-                    return (
-                        <Box
-                            borderBottom={
-                                idx !== investigations.length - 1 ? 1 : 0
-                            }
-                            borderColor="grey.500"
-                            key={investigation.id}
-                            padding={2}
-                        >
-                            <Grid container key={investigation.id}>
-                                <Grid item sm={3}>
-                                    <div>{investigation.name}</div>
-                                    <Typography
-                                        className={componentStyles.label}
-                                        variant="body2"
-                                    >
-                                        Investigation name
-                                    </Typography>
-                                </Grid>
-                                <Grid item sm={3}>
-                                    <div>
-                                        {epochToDate(investigation.created)}
-                                    </div>
-                                    <Typography
-                                        className={componentStyles.label}
-                                        variant="body2"
-                                    >
-                                        Created date
-                                    </Typography>
-                                </Grid>
-                                <Grid item sm={3}>
-                                    <div>
-                                        {investigation.createdBy.principal}
-                                    </div>
-                                    <Typography
-                                        className={componentStyles.label}
-                                        variant="body2"
-                                    >
-                                        Created by
-                                    </Typography>
-                                </Grid>
-                                <Grid item sm={3}>
-                                    <div
-                                        className={
-                                            investigation.anomaly?.id
-                                                ? componentStyles[
-                                                      getFeedbackClass(
-                                                          anomaliesFeedback[
-                                                              investigation
-                                                                  .anomaly?.id
-                                                          ]
-                                                      )
-                                                  ]
-                                                : ""
-                                        }
-                                    >
-                                        {investigation.anomaly?.id
-                                            ? getFeedbackText(
-                                                  anomaliesFeedback[
-                                                      investigation.anomaly?.id
-                                                  ]
-                                              )
-                                            : ""}
-                                    </div>
-                                    <Typography
-                                        className={componentStyles.label}
-                                        variant="body2"
-                                    >
-                                        Anomaly confirmation
-                                    </Typography>
-                                </Grid>
-                                <Grid item sm={3}>
-                                    <div>
-                                        {investigation.uiMetadata?.eventSet &&
-                                            "Anomaly was related to:"}
-                                    </div>
-                                    <ul>
-                                        {investigation.uiMetadata?.eventSet?.map(
-                                            (event) => {
-                                                return (
-                                                    <li key={event.name}>
-                                                        {event.name}
-                                                    </li>
-                                                );
-                                            }
+                {investigations
+                    ?.sort((a, b) => b.created - a.created)
+                    .map((investigation, idx) => {
+                        return (
+                            <Box
+                                borderBottom={
+                                    idx !== investigations.length - 1 ? 1 : 0
+                                }
+                                borderColor="grey.500"
+                                key={investigation.id}
+                                padding={2}
+                            >
+                                <Grid container key={investigation.id}>
+                                    <Grid item sm={3}>
+                                        {investigation.anomaly?.id ? (
+                                            <Link
+                                                component={RouterLink}
+                                                to={getRootCauseAnalysisForAnomalyInvestigateV2StepsPath(
+                                                    investigation.anomaly?.id,
+                                                    "what-where-page"
+                                                )}
+                                            >
+                                                {investigation.name}
+                                            </Link>
+                                        ) : (
+                                            <div>{investigation.name}</div>
                                         )}
-                                    </ul>
+                                        <Typography
+                                            className={componentStyles.label}
+                                            variant="body2"
+                                        >
+                                            {t(
+                                                "pages.impact-dashboard.sections.investigations.labels.investigation-name"
+                                            )}
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item sm={3}>
+                                        <div>
+                                            {epochToDate(investigation.created)}
+                                        </div>
+                                        <Typography
+                                            className={componentStyles.label}
+                                            variant="body2"
+                                        >
+                                            {t(
+                                                "pages.impact-dashboard.sections.investigations.labels.created-date"
+                                            )}
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item sm={3}>
+                                        <div>
+                                            {investigation.createdBy.principal}
+                                        </div>
+                                        <Typography
+                                            className={componentStyles.label}
+                                            variant="body2"
+                                        >
+                                            {t(
+                                                "pages.impact-dashboard.sections.investigations.labels.created-by"
+                                            )}
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item sm={3}>
+                                        <div
+                                            className={
+                                                investigation.anomaly?.id
+                                                    ? componentStyles[
+                                                          getFeedbackClass(
+                                                              anomaliesFeedback[
+                                                                  investigation
+                                                                      .anomaly
+                                                                      ?.id
+                                                              ]
+                                                          )
+                                                      ]
+                                                    : ""
+                                            }
+                                        >
+                                            {investigation.anomaly?.id
+                                                ? getFeedbackText(
+                                                      anomaliesFeedback[
+                                                          investigation.anomaly
+                                                              ?.id
+                                                      ]
+                                                  )
+                                                : ""}
+                                        </div>
+                                        <Typography
+                                            className={componentStyles.label}
+                                            variant="body2"
+                                        >
+                                            {t(
+                                                "pages.impact-dashboard.sections.investigations.labels.anomaly-confirmation"
+                                            )}
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item sm={3}>
+                                        <div>
+                                            {investigation.uiMetadata
+                                                ?.eventSet &&
+                                                t(
+                                                    "pages.impact-dashboard.sections.investigations.labels.related-event"
+                                                )}
+                                        </div>
+                                        <ul>
+                                            {investigation.uiMetadata?.eventSet?.map(
+                                                (event) => {
+                                                    return (
+                                                        <li key={event.name}>
+                                                            {event.name}
+                                                        </li>
+                                                    );
+                                                }
+                                            )}
+                                        </ul>
+                                    </Grid>
                                 </Grid>
-                            </Grid>
-                        </Box>
-                    );
-                })}
+                            </Box>
+                        );
+                    })}
             </Box>
         </>
     );
 };
-
-export default RecentInvestigations;

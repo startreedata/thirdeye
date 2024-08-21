@@ -12,29 +12,18 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { makeStyles } from "@material-ui/core";
+import { Anomaly } from "../../../../rest/dto/anomaly.interfaces";
 
-export const useStyles = makeStyles({
-    container: {
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        gap: "8px",
-        color: "#3D5F82",
-        fontSize: "12px",
-    },
-    rangeContainer: {
-        display: "flex",
-        gap: "4px",
-    },
-    range: {
-        // display: "flex",
-        // justifyContent: "center",
-        // alignItems: "center",
-        cursor: "pointer",
-    },
-    selected: {
-        background: "#e1edff",
-        fontWeight: "bold",
-    },
-});
+export interface DataProps {
+    selectedAlert: { id: number; name: string };
+    defaultAlertDropdownOption: { id: number; name: string };
+    allAnomalies: Anomaly[] | null;
+    allPreviousPeriodAnomalies: Anomaly[] | null;
+    currentPeriodAnomaliesByAlert: Anomaly[] | null;
+    previousPeriodAnomaliesByAlert: Anomaly[] | null;
+}
+
+export interface DetectionData {
+    anomalies: Anomaly[] | null;
+    previousPeriodAnomalies: Anomaly[] | null;
+}

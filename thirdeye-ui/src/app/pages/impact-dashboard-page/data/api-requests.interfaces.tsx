@@ -12,32 +12,20 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { Alert } from "../../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
+import { Investigation } from "../../../rest/dto/rca.interfaces";
+import { SubscriptionGroup } from "../../../rest/dto/subscription-group.interfaces";
 
-export interface DetectionPerformanceProps {
-    anomalies: Anomaly[] | null;
-    previousPeriodAnomalies: Anomaly[] | null;
-    selectedAnalysisPeriod: string;
-    onAnalysisPeriodChange: (period: string) => void;
-    analysisPeriods: string[];
-}
-
-export interface AnomaliesGraphProps {
-    title: string;
-    notificationText?: string;
-    anomalies: Anomaly[] | null;
-    previousPeriodAnomalies: Anomaly[] | null;
+export interface ApiRequestsProps {
     selectedAnalysisPeriod: string;
 }
 
-export interface TileRendererProps {
-    title: string;
-    notificationText?: string;
+export interface APIRequestData {
+    anomalies: Anomaly[] | null;
+    previousPeriodAnomalies: Anomaly[] | null;
+    investigations: Investigation[] | null;
+    alertsConfigured: { count: number };
+    subscriptionGroups: SubscriptionGroup[] | null;
+    mostRecentlyInvestigatedAnomalyAlert?: Pick<Alert, "id" | "name">;
 }
-
-export type TooltipData = {
-    currentPeriod: number;
-    previousPeriod: number;
-    currentPeriodDate: string;
-    previousPeriodDate: string;
-};

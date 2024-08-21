@@ -12,24 +12,6 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
-import { makeStyles } from "@material-ui/core";
-
-export const useSummaryStyles = makeStyles({
-    sectionHeading: {
-        display: "flex",
-        justifyContent: "space-between",
-    },
-    verboseSummaryContainer: {
-        padding: "8px 16px",
-        border: "1px solid rgb(158, 158, 158)",
-        borderRadius: "8px",
-        display: "flex",
-        flexDirection: "column",
-        gap: "8px",
-    },
-    verboseSummaryHeading: {
-        display: "flex",
-        justifyContent: "space-between",
-    },
-});
+export interface SectionHeaderProps {
+    heading: string;
+}

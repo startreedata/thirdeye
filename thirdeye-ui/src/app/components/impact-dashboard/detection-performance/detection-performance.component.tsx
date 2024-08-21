@@ -13,89 +13,63 @@
  * the License.
  */
 import React, { ReactElement, useEffect, useState } from "react";
-import { useStyles } from "./detection-performance.styles";
-import { MenuItem, Select, Typography } from "@material-ui/core";
-import AnalysisPeriod from "../anaylysis-period/analysis-period.component";
+import { useTranslation } from "react-i18next";
+
+// Styles
+import { useDetectionPerformanceStyles } from "./detection-performance.styles";
+
+// Components
+import { AnalysisPeriod } from "../common/anaylysis-period/analysis-period.component";
+import { LineGraph } from "./line-graph.component";
+import { WeeklyGraph } from "./weekly-graph.component";
+import { SectionHeader } from "../common/section-header/section-header.component";
+import { MenuItem, Select } from "@material-ui/core";
+
+// Interfaces
 import { DetectionPerformanceProps } from "./detection-performance.interfaces";
-import {
-    anaylysisPeriodStartTimeMapping,
-    anaylysisPeriodPreviousWindowTimeMapping,
-} from "../../../platform/utils";
-import { useGetAnomalies } from "../../../rest/anomalies/anomaly.actions";
-import { useGetAlerts } from "../../../rest/alerts/alerts.actions";
-import { TotalAnomaliesGraph } from "./total-anomalies.component";
-import { WeekAnomaliesGraph } from "./weekly-anomalies.component";
+
+// APIs
+import { useApiRequests } from "./api";
+
+// Data
+import { useGetData } from "./data";
 
 const defaultAlertDropdownOption = { id: -1, name: "All alerts" };
 
-const DetectionPerformance = ({
+export const DetectionPerformance = ({
     anomalies: allAnomalies,
     previousPeriodAnomalies: allPreviousPeriodAnomalies,
     analysisPeriods,
     selectedAnalysisPeriod,
     onAnalysisPeriodChange,
 }: DetectionPerformanceProps): ReactElement => {
-    const { alerts, getAlerts, status, errorMessages } = useGetAlerts();
-    const {
-        anomalies: currentPeriodAnomaliesByAlert,
-        getAnomalies: getCurrentPeriodAnomaliesByAlert,
-    } = useGetAnomalies();
-    const {
-        anomalies: previousPeriodAnomaliesByAlert,
-        getAnomalies: getPreviousPeriodAnomaliesByAlert,
-    } = useGetAnomalies();
+    const { t } = useTranslation();
     const [alertDropdownOptions, setAlertDropdownOptions] =
         useState<{ id: number; name: string }[]>();
-    const [anomalies, setAnomalies] = useState(allAnomalies);
-    const [previousPeriodAnomalies, setPreviousPeriodAnomalies] = useState(
-        allPreviousPeriodAnomalies
-    );
     const [selectedAlert, setSelectedAlert] = useState<{
         id: number;
         name: string;
     }>(defaultAlertDropdownOption);
-    const componentStyles = useStyles();
 
-    useEffect(() => {
-        if (selectedAlert === defaultAlertDropdownOption) {
-            setAnomalies(allAnomalies);
-        }
-    }, [allAnomalies]);
+    const {
+        alerts,
+        currentPeriodAnomaliesByAlert,
+        previousPeriodAnomaliesByAlert,
+    } = useApiRequests({
+        selectedAlert,
+        defaultAlertDropdownOption,
+        selectedAnalysisPeriod,
+    });
+    const { anomalies, previousPeriodAnomalies } = useGetData({
+        selectedAlert,
+        defaultAlertDropdownOption,
+        allAnomalies,
+        allPreviousPeriodAnomalies,
+        currentPeriodAnomaliesByAlert,
+        previousPeriodAnomaliesByAlert,
+    });
 
-    useEffect(() => {
-        if (selectedAlert === defaultAlertDropdownOption) {
-            setPreviousPeriodAnomalies(allPreviousPeriodAnomalies);
-        }
-    }, [allPreviousPeriodAnomalies]);
-
-    useEffect(() => {
-        getAlerts();
-    }, []);
-
-    useEffect(() => {
-        if (selectedAlert !== defaultAlertDropdownOption) {
-            getCurrentPeriodAnomaliesByAlert({
-                alertId: selectedAlert.id,
-                startTime:
-                    anaylysisPeriodStartTimeMapping[selectedAnalysisPeriod]
-                        .startTime,
-            });
-            getPreviousPeriodAnomaliesByAlert({
-                alertId: selectedAlert.id,
-                startTime:
-                    anaylysisPeriodPreviousWindowTimeMapping[
-                        selectedAnalysisPeriod
-                    ].startTime,
-                endTime:
-                    anaylysisPeriodPreviousWindowTimeMapping[
-                        selectedAnalysisPeriod
-                    ].endTime,
-            });
-        } else {
-            setAnomalies(allAnomalies);
-            setPreviousPeriodAnomalies(allPreviousPeriodAnomalies);
-        }
-    }, [selectedAnalysisPeriod, selectedAlert]);
+    const componentStyles = useDetectionPerformanceStyles();
 
     useEffect(() => {
         const options =
@@ -105,12 +79,9 @@ const DetectionPerformance = ({
         setAlertDropdownOptions([...options, defaultAlertDropdownOption]);
     }, [alerts]);
 
-    useEffect(() => {
-        setAnomalies(currentPeriodAnomaliesByAlert);
-        setPreviousPeriodAnomalies(previousPeriodAnomaliesByAlert);
-    }, [currentPeriodAnomaliesByAlert, previousPeriodAnomaliesByAlert]);
-
-    const handleAlertChange = (event): void => {
+    const handleAlertChange = (
+        event: React.ChangeEvent<{ value: unknown }>
+    ): void => {
         alertDropdownOptions &&
             setSelectedAlert(
                 alertDropdownOptions.find(
@@ -123,7 +94,11 @@ const DetectionPerformance = ({
     return (
         <>
             <div className={componentStyles.sectionHeading}>
-                <Typography variant="h6">Detection performance</Typography>
+                <SectionHeader
+                    heading={t(
+                        "pages.impact-dashboard.sections.detection-performance.heading"
+                    )}
+                />
                 <div className={componentStyles.alertAndRange}>
                     <AnalysisPeriod
                         analysisPeriods={analysisPeriods}
@@ -153,19 +128,23 @@ const DetectionPerformance = ({
                 </div>
             </div>
             <div className={componentStyles.visualizationContainer}>
-                <TotalAnomaliesGraph
+                <LineGraph
                     anomalies={anomalies}
                     previousPeriodAnomalies={previousPeriodAnomalies}
                     selectedAnalysisPeriod={selectedAnalysisPeriod}
-                    title="Total # of anomalies detected"
+                    title={t(
+                        "pages.impact-dashboard.sections.detection-performance.total-anomalies-graph-title"
+                    )}
                 />
-                <WeekAnomaliesGraph
+                <WeeklyGraph
                     anomalies={anomalies}
                     previousPeriodAnomalies={previousPeriodAnomalies}
                     selectedAnalysisPeriod={selectedAnalysisPeriod}
-                    title="Weekly anomalies detected"
+                    title={t(
+                        "pages.impact-dashboard.sections.detection-performance.total-anomalies-weekly-graph-title"
+                    )}
                 />
-                <TotalAnomaliesGraph
+                <LineGraph
                     anomalies={
                         anomalies?.filter((anomaly) => anomaly.notified) || null
                     }
@@ -176,9 +155,11 @@ const DetectionPerformance = ({
                         ) || null
                     }
                     selectedAnalysisPeriod={selectedAnalysisPeriod}
-                    title="Total # of notifications sent"
+                    title={t(
+                        "pages.impact-dashboard.sections.detection-performance.total-notifications-graph-title"
+                    )}
                 />
-                <WeekAnomaliesGraph
+                <WeeklyGraph
                     anomalies={
                         anomalies?.filter((anomaly) => anomaly.notified) || null
                     }
@@ -189,11 +170,11 @@ const DetectionPerformance = ({
                         ) || null
                     }
                     selectedAnalysisPeriod={selectedAnalysisPeriod}
-                    title="Weekly notifcations sent"
+                    title={t(
+                        "pages.impact-dashboard.sections.detection-performance.total-notifications-weekly-graph-title"
+                    )}
                 />
             </div>
         </>
     );
 };
-
-export default DetectionPerformance;

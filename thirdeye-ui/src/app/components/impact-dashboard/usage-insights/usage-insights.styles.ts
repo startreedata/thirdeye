@@ -12,24 +12,33 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 import { makeStyles } from "@material-ui/core";
 
-export const useSummaryStyles = makeStyles({
+export const usageInsightsStyle = makeStyles({
     sectionHeading: {
         display: "flex",
         justifyContent: "space-between",
     },
-    verboseSummaryContainer: {
+    tableHeading: {
         padding: "8px 16px",
         border: "1px solid rgb(158, 158, 158)",
-        borderRadius: "8px",
-        display: "flex",
-        flexDirection: "column",
-        gap: "8px",
+        borderBottom: 0,
+        borderTopLeftRadius: "16px",
+        borderTopRightRadius: "16px",
+        color: "#0B263E",
+        fontSize: "14px",
+        fontWeight: 700,
     },
-    verboseSummaryHeading: {
+    table: {
+        border: "1px solid rgb(158, 158, 158)",
+        borderBottomLeftRadius: "16px",
+        borderBottomRightRadius: "16px",
+    },
+    tablesContainer: {
         display: "flex",
-        justifyContent: "space-between",
+        gap: "10px",
+        "& >div": {
+            flex: 1,
+        },
     },
 });

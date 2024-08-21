@@ -12,17 +12,20 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import React from "react";
-import { AnalysisPeriodProps } from "./analysis-period.interaces";
-import { useStyles } from "./analysis-period.styles";
-import { ReactElement } from "react-markdown/lib/react-markdown";
+import React, { ReactElement } from "react";
 
-const AnalysisPeriod = ({
+// Interfaces
+import { AnalysisPeriodProps } from "./analysis-period.interaces";
+
+// Styles
+import { useAnalysisPeriodStyles } from "./analysis-period.styles";
+
+export const AnalysisPeriod = ({
     selectedPeriod,
     analysisPeriods,
     onClick,
 }: AnalysisPeriodProps): ReactElement => {
-    const componentStyles = useStyles();
+    const componentStyles = useAnalysisPeriodStyles();
 
     return (
         <div className={componentStyles.container}>
@@ -47,5 +50,3 @@ const AnalysisPeriod = ({
         </div>
     );
 };
-
-export default AnalysisPeriod;

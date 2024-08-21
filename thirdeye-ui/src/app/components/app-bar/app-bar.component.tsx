@@ -102,7 +102,7 @@ export const AppBar: FunctionComponent = () => {
                         <MultilineChartIcon />
                     </NavBarLinkIconV1>
                     <NavBarLinkTextV1>
-                        {t("label.impact-dashboard")}
+                        {t("pages.impact-dashboard.title")}
                     </NavBarLinkTextV1>
                 </NavBarLinkV1>
 

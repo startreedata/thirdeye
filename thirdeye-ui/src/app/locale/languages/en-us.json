@@ -902,6 +902,9 @@
     },
     "pages": {
         "impact-dashboard": {
+            "common": {
+                "date-range": "Date range"
+            },
             "sections": {
                 "detection-performance": {
                     "heading": "Detection performance",
@@ -932,9 +935,24 @@
                     "verbose-summary-heading": "Summary"
                 },
                 "usage-insights": {
-                    "anomaly-table-title": "Top anomaly alerts",
+                    "anomaly-table": {
+                        "columns": {
+                            "alert-name": "Alert name",
+                            "anomalies-detected": "Anomalies detected",
+                            "dimensions-within-alert": "Dimensions within alert"
+                        },
+                        "emptyState": "No anomalies detected in the selected period",
+                        "title": "Top anomaly alerts"
+                    },
                     "heading": "Usage insights",
-                    "notification-group-table-title": "Top anomaly notification groups"
+                    "notification-group-table": {
+                        "columns": {
+                            "anomalies": "Anomalies",
+                            "subscription-group": "Subscription group"
+                        },
+                        "emptyState": "Detected anomalies were not subscribed to any group",
+                        "title": "Top anomaly notification groups"
+                    }
                 }
             },
             "subHeading": "Overview of system statistics, anomaly detection performance, and usage insights.",

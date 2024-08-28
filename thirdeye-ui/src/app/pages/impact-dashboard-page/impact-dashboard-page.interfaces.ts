@@ -12,27 +12,9 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-export interface AlertEffectivnessData {
+export type AlertEffectivnessData = {
     id: string;
     name: string;
     anomaliesCount: number;
     dimensionsCount: number;
-}
-
-export interface VerboseSummary {
-    weeks: string;
-    percentageChange: string;
-    topAlert: {
-        id: number | null;
-        name: string;
-        anomaliesCount: number;
-    };
-    investigation: {
-        count: number;
-        date: string;
-        anomaly: {
-            id: number | null | undefined;
-            name: string | undefined;
-        };
-    };
-}
+};

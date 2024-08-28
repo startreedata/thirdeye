@@ -75,7 +75,7 @@ export const UsageInsights = ({
         });
 
         return data;
-    }, [anomalies, subscriptionGroups]);
+    }, [anomalies, subscriptionGroups, mostActiveAlerts]);
 
     const renderAlertLink = (data: TableRow): ReactElement => {
         const id = Number(data.id);
@@ -96,18 +96,41 @@ export const UsageInsights = ({
         );
     };
     const topAnomalycolumns: TableColumns[] = [
-        { title: "Alert name", datakey: "name", customRender: renderAlertLink },
-        { title: "Anomalies detected", datakey: "anomaliesCount" },
-        { title: "Dimensions within alert", datakey: "dimensionsCount" },
+        {
+            title: t(
+                "pages.impact-dashboard.sections.usage-insights.anomaly-table.columns.alert-name"
+            ),
+            datakey: "name",
+            customRender: renderAlertLink,
+        },
+        {
+            title: t(
+                "pages.impact-dashboard.sections.usage-insights.anomaly-table.columns.anomalies-detected"
+            ),
+            datakey: "anomaliesCount",
+        },
+        {
+            title: t(
+                "pages.impact-dashboard.sections.usage-insights.anomaly-table.columns.dimensions-within-alert"
+            ),
+            datakey: "dimensionsCount",
+        },
     ];
 
     const topAnomalyNotifcationGroupscolumns: TableColumns[] = [
         {
-            title: "Subscrition group",
+            title: t(
+                "pages.impact-dashboard.sections.usage-insights.notification-group-table.columns.subscription-group"
+            ),
             datakey: "name",
             customRender: renderSubscriptionLink,
         },
-        { title: "Anomalies", datakey: "anomaliesCount" },
+        {
+            title: t(
+                "pages.impact-dashboard.sections.usage-insights.notification-group-table.columns.anomalies"
+            ),
+            datakey: "anomaliesCount",
+        },
     ];
 
     return (
@@ -128,28 +151,32 @@ export const UsageInsights = ({
                 <div>
                     <div className={componentStyles.tableHeading}>
                         {t(
-                            "pages.impact-dashboard.sections.usage-insights.anomaly-table-title"
+                            "pages.impact-dashboard.sections.usage-insights.anomaly-table.title"
                         )}
                     </div>
                     <div className={componentStyles.table}>
                         <DataTable
                             columns={topAnomalycolumns}
                             data={mostActiveAlerts}
-                            emptyStateView="No anomalies detected in the selected period"
+                            emptyStateView={t(
+                                "pages.impact-dashboard.sections.usage-insights.anomaly-table.emptyState"
+                            )}
                         />
                     </div>
                 </div>
                 <div>
                     <div className={componentStyles.tableHeading}>
                         {t(
-                            "pages.impact-dashboard.sections.usage-insights.notification-group-table-title"
+                            "pages.impact-dashboard.sections.usage-insights.notification-group-table.title"
                         )}
                     </div>
                     <div className={componentStyles.table}>
                         <DataTable
                             columns={topAnomalyNotifcationGroupscolumns}
                             data={topNotificationGroupData}
-                            emptyStateView="No anomalies detected in the selected period"
+                            emptyStateView={t(
+                                "pages.impact-dashboard.sections.usage-insights.notification-group-table.emptyState"
+                            )}
                         />
                     </div>
                 </div>

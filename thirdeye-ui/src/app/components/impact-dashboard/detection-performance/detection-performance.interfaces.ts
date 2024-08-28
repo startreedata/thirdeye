@@ -14,26 +14,26 @@
  */
 import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 
-export interface DetectionPerformanceProps {
+export type DetectionPerformanceProps = {
     anomalies: Anomaly[] | null;
     previousPeriodAnomalies: Anomaly[] | null;
     selectedAnalysisPeriod: string;
     onAnalysisPeriodChange: (period: string) => void;
     analysisPeriods: string[];
-}
+};
 
-export interface AnomaliesGraphProps {
+export type AnomaliesGraphProps = {
     title: string;
     notificationText?: string;
     anomalies: Anomaly[] | null;
     previousPeriodAnomalies: Anomaly[] | null;
     selectedAnalysisPeriod: string;
-}
+};
 
-export interface TileRendererProps {
+export type TileRendererProps = {
     title: string;
     notificationText?: string;
-}
+};
 
 export type TooltipData = {
     currentPeriod: number;

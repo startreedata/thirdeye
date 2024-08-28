@@ -35,7 +35,7 @@ export interface SummaryProps extends SummaryDataProps {
     analysisPeriods: string[];
 }
 
-export interface SummaryData {
+export type SummaryData = {
     alerts: {
         activeAlerts: { count: number; href: string };
         activeDimensions: { count: number; href: string };
@@ -48,9 +48,9 @@ export interface SummaryData {
         notificationsSent: { count: number; href: string };
         groups: { count: number; href: string };
     };
-}
+};
 
-export interface VerboseSummary {
+export type VerboseSummary = {
     weeks: string;
     percentageChange: string;
     topAlert: {
@@ -66,9 +66,9 @@ export interface VerboseSummary {
             name: string | undefined;
         };
     };
-}
+};
 
-export interface Summary {
+export type Summary = {
     summaryData: SummaryData;
     verboseSummaryItems: VerboseSummary;
-}
+};

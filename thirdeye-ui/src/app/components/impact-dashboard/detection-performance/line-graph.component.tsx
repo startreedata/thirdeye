@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import React from "react";
+import React, { ReactElement } from "react";
 
 // Interfaces
 import { AnomaliesGraphProps } from "./detection-performance.interfaces";
@@ -28,6 +28,8 @@ import {
 import TitleCard from "../../title-card/title-card.component";
 import { TimeSeriesChart } from "../../visualizations/time-series-chart/time-series-chart.component";
 import { TitleRenderer } from "./title-renderer.component";
+import { useDetectionPerformanceStyles } from "./detection-performance.styles";
+import { startCase } from "lodash";
 
 export const LineGraph = ({
     title,
@@ -36,6 +38,7 @@ export const LineGraph = ({
     anomalies,
     previousPeriodAnomalies,
 }: AnomaliesGraphProps): JSX.Element => {
+    const componentStyles = useDetectionPerformanceStyles();
     // Get all the 24hr time windows for the selected range
     const currentTimeWindow = getTimeWindows(
         anaylysisPeriodStartTimeMapping[selectedAnalysisPeriod].startTime,
@@ -125,14 +128,54 @@ export const LineGraph = ({
                 .endTime
         ),
     };
+
+    const tootltipRender = (
+        tooltipData: { x: number; y: number },
+        period: string
+    ): ReactElement => {
+        let date = tooltipData.x;
+
+        let weeksToSubtract = 4;
+
+        if (period === "previousPeriod") {
+            switch (selectedAnalysisPeriod) {
+                case "13w":
+                    weeksToSubtract = 13;
+
+                    break;
+                case "26w":
+                    weeksToSubtract = 26;
+            }
+            date = date - weeksToSubtract * 7 * 24 * 60 * 60 * 1000;
+        }
+
+        return (
+            <div className={componentStyles.tooltip}>
+                <div className={period}>
+                    {`${startCase(period)} (${epochToDate(date)}): ${
+                        tooltipData.y
+                    }`}
+                </div>
+            </div>
+        );
+    };
+
     const seriesData = [
         {
             name: `Current ${selectedAnalysisPeriod} period`,
             data: currentPeriodCumulativeSumDataPoints,
+            tooltip: {
+                tooltipFormatter: (d: { x: number; y: number }) =>
+                    tootltipRender(d, "currentPeriod"),
+            },
         },
         {
             name: `Previous ${selectedAnalysisPeriod} period(${previousPeriodReadableDate.startTime}-${previousPeriodReadableDate.endTime})`,
             data: previousPeriodCumulativeSumDataPoints,
+            tooltip: {
+                tooltipFormatter: (d: { x: number; y: number }) =>
+                    tootltipRender(d, "previousPeriod"),
+            },
         },
     ];
 

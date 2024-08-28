@@ -35,4 +35,16 @@ export const useDetectionPerformanceStyles = makeStyles({
             padding: "0 12px",
         },
     },
+    tooltip: {
+        display: "flex",
+        flexDirection: "column",
+        gap: "10px",
+        padding: "8px",
+        "& .currentPeriod": {
+            color: "#F37B0E",
+        },
+        "& .previousPeriod": {
+            color: "#006CA7",
+        },
+    },
 });

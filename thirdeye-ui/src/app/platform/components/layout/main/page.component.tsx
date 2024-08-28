@@ -34,11 +34,3 @@ export const MainLayout: FunctionComponent<PageV1Props> = ({
         </div>
     );
 };
-
-// const PageV1Context = createContext<PageV1ContextProps>(
-//     {} as PageV1ContextProps
-// );
-
-// export const usePageV1 = (): PageV1ContextProps => {
-//     return useContext(PageV1Context);
-// };

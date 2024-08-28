@@ -13,6 +13,7 @@
  * the License.
  */
 import React, { ReactElement } from "react";
+import { useTranslation } from "react-i18next";
 
 // Interfaces
 import { AnalysisPeriodProps } from "./analysis-period.interaces";
@@ -26,10 +27,11 @@ export const AnalysisPeriod = ({
     onClick,
 }: AnalysisPeriodProps): ReactElement => {
     const componentStyles = useAnalysisPeriodStyles();
+    const { t } = useTranslation();
 
     return (
         <div className={componentStyles.container}>
-            <div>Date range:</div>
+            <div>{`${t("pages.impact-dashboard.common.date-range")}`}:</div>
             <div className={componentStyles.rangeContainer}>
                 {analysisPeriods.map((analysisPeriod) => {
                     return (

@@ -34,7 +34,7 @@ const DataTable = ({
 
     return (
         <TableContainer>
-            <Table aria-label="simple table" className={tableStyles.table}>
+            <Table aria-label="simple table">
                 <TableHead className={tableStyles.columnHeaders}>
                     <TableRow>
                         {columns.map((column) => {

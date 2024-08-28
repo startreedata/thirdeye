@@ -33,6 +33,9 @@ import { BarGraph } from "../../visualizations/bar-graph/bar-graph.component";
 import { TitleRenderer } from "./title-renderer.component";
 import { ReactElement } from "react-markdown/lib/react-markdown";
 
+// Styles
+import { useDetectionPerformanceStyles } from "./detection-performance.styles";
+
 export const WeeklyGraph = ({
     title,
     notificationText,
@@ -40,6 +43,8 @@ export const WeeklyGraph = ({
     selectedAnalysisPeriod,
     previousPeriodAnomalies,
 }: AnomaliesGraphProps): JSX.Element => {
+    const componentStyles = useDetectionPerformanceStyles();
+
     const currentWeeklyTimeWindow = getTimeWindows(
         anaylysisPeriodStartTimeMapping[selectedAnalysisPeriod].startTime,
         anaylysisPeriodStartTimeMapping[selectedAnalysisPeriod].endTime,
@@ -77,22 +82,28 @@ export const WeeklyGraph = ({
             };
         });
     const barGraphData = currentPeriodWeeklyDataPoints.map((data, idx) => {
-        const currentWindowDate = epochToDate(
+        const currentWindowStartDate = epochToDate(
             groupedAnomaliesDataByTimeCurrentWeeklyWindow[idx].windowStart
         );
-        const previousWindowDate = epochToDate(
+        const currentWindowEndDate = epochToDate(
+            groupedAnomaliesDataByTimeCurrentWeeklyWindow[idx].windowEnd
+        );
+        const previousWindowStartDate = epochToDate(
             groupedAnomaliesDataByTimePrevioustWeeklyWindow[idx].windowStart
+        );
+        const previousWindowEndDate = epochToDate(
+            groupedAnomaliesDataByTimePrevioustWeeklyWindow[idx].windowEnd
         );
 
         return {
             currentPeriod: data.y,
             previousPeriod: previoustPeriodWeeklyDataPoints[idx].y,
-            date: currentWindowDate,
+            date: currentWindowStartDate,
             tooltipData: {
                 currentPeriod: data.y,
                 previousPeriod: previoustPeriodWeeklyDataPoints[idx].y,
-                currentPeriodDate: currentWindowDate,
-                previousPeriodDate: previousWindowDate,
+                currentPeriodDate: `${currentWindowStartDate}-${currentWindowEndDate}`,
+                previousPeriodDate: `${previousWindowStartDate}-${previousWindowEndDate}`,
             },
         };
     });
@@ -101,11 +112,11 @@ export const WeeklyGraph = ({
         const data = tooltipData as TooltipData;
 
         return (
-            <div>
-                <div>
+            <div className={componentStyles.tooltip}>
+                <div className="currentPeriod">
                     {`Current Period(${data.currentPeriodDate}): ${data.currentPeriod}`}
                 </div>
-                <div>
+                <div className="previousPeriod">
                     {`Previous Period(${data.previousPeriodDate}): ${data.previousPeriod}`}
                 </div>
             </div>

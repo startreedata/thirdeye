@@ -15,12 +15,12 @@
 import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
 import { Investigation } from "../../../rest/dto/rca.interfaces";
 
-export interface RecentInvestigationsProps {
+export type RecentInvestigationsProps = {
     investigations: Investigation[] | null;
     anomalies: Anomaly[] | null;
     selectedAnalysisPeriod: string;
     onAnalysisPeriodChange: (period: string) => void;
     analysisPeriods: string[];
-}
+};
 
 export type FeedbackClass = "validAnomaly" | "invalidAnomaly" | "text";

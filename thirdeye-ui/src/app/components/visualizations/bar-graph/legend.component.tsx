@@ -37,13 +37,7 @@ export const BarLegend = ({ labels }: LegendProps): JSX.Element => {
             {(labels) => (
                 <div style={{ display: "flex", flexDirection: "row" }}>
                     {labels.map((label, i) => (
-                        <LegendItem
-                            key={`legend-quantile-${i}`}
-                            margin="0 5px"
-                            onClick={() => {
-                                // if (events) alert(`clicked: ${JSON.stringify(label)}`);
-                            }}
-                        >
+                        <LegendItem key={`legend-quantile-${i}`} margin="0 5px">
                             <svg
                                 height={legendGlyphSize1}
                                 width={legendGlyphSize}

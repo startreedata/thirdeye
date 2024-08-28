@@ -15,7 +15,7 @@ import { SubscriptionGroup } from "../../../rest/dto/subscription-group.interfac
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-export interface AlertEffectivenessProps {
+export type AlertEffectivenessProps = {
     anomalies: Anomaly[] | null;
     subscriptionGroups: SubscriptionGroup[] | null;
     mostActiveAlerts: {
@@ -27,4 +27,4 @@ export interface AlertEffectivenessProps {
     selectedAnalysisPeriod: string;
     onAnalysisPeriodChange: (period: string) => void;
     analysisPeriods: string[];
-}
+};

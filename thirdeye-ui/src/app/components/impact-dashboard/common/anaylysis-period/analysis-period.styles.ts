@@ -28,9 +28,6 @@ export const useAnalysisPeriodStyles = makeStyles({
         gap: "4px",
     },
     range: {
-        // display: "flex",
-        // justifyContent: "center",
-        // alignItems: "center",
         cursor: "pointer",
     },
     selected: {

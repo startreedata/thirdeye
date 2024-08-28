@@ -84,13 +84,13 @@ create the database and tables.
 ThirdEye is a maven project and uses standard maven commands.
 ```
 # Build ThirdEye from source
-./mvnw -T 1C install
+./mvnw install
 
 # To skip tests during build
-./mvnw -T 1C install -DskipTests
+./mvnw install -DskipTests
 
 # To Skip Integration tests
-./mvnw -T 1C install -pl '!thirdeye-integration-tests'
+./mvnw install -pl '!thirdeye-integration-tests'
 ```
 
 To build the UI, see [thirdeye-ui](thirdeye-ui/README.md).
@@ -110,11 +110,8 @@ cd thirdeye-distribution/target/thirdeye-distribution-*-SNAPSHOT-dist/thirdeye-d
 # To run a scheduler, enable scheduler.enabled: true inside the configuration
 # To run a worker, enable taskDriver.enabled: true inside the configuration
 
-# To load plugins, export the plugin directory
-export THIRDEYE_PLUGINS_DIR="${PWD}/plugins"
-
 # Run the server
-bin/thirdeye.sh server 
+./bin/thirdeye.sh server 
 ```
 
 ### Docker

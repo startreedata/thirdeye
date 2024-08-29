@@ -1,0 +1,37 @@
+name: FE Test and Build
+
+on:
+  push:
+    branches:
+      - '!master'
+    paths:
+      - thirdeye-ui/**
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Pull Repository
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            thirdeye-ui
+            pom.xml
+            .mvn
+
+      - name: Install node and npm
+        uses: actions/setup-node@v3
+        with:
+          node-version: 14
+          cache: "npm"
+          cache-dependency-path: './thirdeye-ui/package-lock.json'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm run test
+
+      - name: Build
+        run: npm run build

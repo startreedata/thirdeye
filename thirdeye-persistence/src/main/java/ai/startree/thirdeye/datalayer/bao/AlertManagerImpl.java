@@ -110,8 +110,19 @@ public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
 
   @Override
   public List<AlertDTO> findAllActiveInNamespace(final @Nullable String namespace) {
-    // fixme cyril authz filter by namespace at the db level
-    return findAllActive().stream().filter(e -> Objects.equals(e.namespace(), namespace)).toList();
+    return
+        findByPredicate(
+            Predicate.AND(
+                Predicate.EQ("active", true),
+                Predicate.OR(
+                    Predicate.EQ("namespace", namespace),
+                    // existing entities are not migrated automatically so they can have their namespace column to null in the index table, even if they do belong to a namespace 
+                    //  todo cyril authz - prepare migration scripts - or some logic to ensure all entities are eventually migrated
+                    Predicate.EQ("namespace", null)
+                )
+            ))
+        // we still need to perform in-app filtering until all entities namespace are migrated in db - see above 
+        .stream().filter(e -> Objects.equals(e.namespace(), namespace)).toList();
   }
 
   public Long countActive() {

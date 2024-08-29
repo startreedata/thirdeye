@@ -25,7 +25,7 @@ export interface SummaryDataProps {
     previousPeriodAnomalies: Anomaly[] | null;
     topAlert: AlertEffectivnessData;
     investigations: Investigation[] | null;
-    alertsConfigured: { count: number };
+    alertsCount: { count: number } | null;
     subscriptionGroups: SubscriptionGroup[] | null;
     selectedAnalysisPeriod: string;
 }

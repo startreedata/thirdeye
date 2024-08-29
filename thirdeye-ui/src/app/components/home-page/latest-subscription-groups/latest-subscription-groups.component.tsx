@@ -22,6 +22,7 @@ import {
 } from "@material-ui/core";
 import * as React from "react";
 import { useTranslation } from "react-i18next";
+// eslint-disable-next-line no-restricted-imports
 import { Link as RouterLink } from "react-router-dom";
 import { SkeletonV1 } from "../../../platform/components";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
@@ -31,19 +32,54 @@ import {
     TitleCardTableHead,
 } from "../title-card-table/title-card-table.component";
 
-import { ArrowForward } from "@material-ui/icons";
+import {
+    ArrowForward,
+    KeyboardArrowDown,
+    KeyboardArrowUp,
+} from "@material-ui/icons";
 import { formatDateAndTimeV1 } from "../../../platform/utils";
 import {
     getSubscriptionGroupsAllPath,
     getSubscriptionGroupsViewPath,
 } from "../../../utils/routes/routes.util";
-import { LatestSubscriptionGroupsProps } from "./latest-subscription-groups.interfaces";
+import {
+    LatestSubscriptionChangeCreatedSort,
+    LatestSubscriptionGroupsProps,
+} from "./latest-subscription-groups.interfaces";
 import { useLatestSubscriptionGroupsStyles } from "./latest-subscription-groups.styles";
+import { SortableTableHeader } from "../../rca/top-contributors-table/top-contributors-table.component";
+import { SubscriptionGroup } from "../../../rest/dto/subscription-group.interfaces";
 
 export const LatestSubscriptionGroups: React.FunctionComponent<LatestSubscriptionGroupsProps> =
     ({ subscriptionGroupsQuery }) => {
         const { t } = useTranslation();
         const styles = useLatestSubscriptionGroupsStyles();
+        const [changeCreatedSort, setChangeCreatedSort] =
+            React.useState<LatestSubscriptionChangeCreatedSort | null>(null);
+
+        const toggleSort = (): void => {
+            if (changeCreatedSort === LatestSubscriptionChangeCreatedSort.ASC) {
+                setChangeCreatedSort(LatestSubscriptionChangeCreatedSort.DESC);
+            } else {
+                setChangeCreatedSort(LatestSubscriptionChangeCreatedSort.ASC);
+            }
+        };
+
+        const sortFunction = (
+            a: SubscriptionGroup,
+            b: SubscriptionGroup
+        ): number => {
+            if (changeCreatedSort === LatestSubscriptionChangeCreatedSort.ASC) {
+                return (
+                    new Date(a.created).getTime() -
+                    new Date(b.created).getTime()
+                );
+            }
+
+            return (
+                new Date(b.created).getTime() - new Date(a.created).getTime()
+            );
+        };
 
         return (
             <>
@@ -75,33 +111,52 @@ export const LatestSubscriptionGroups: React.FunctionComponent<LatestSubscriptio
                             <TableCell>
                                 {t("label.subscription-name")}
                             </TableCell>
-                            <TableCell>{t("label.created")}</TableCell>
+                            <SortableTableHeader onClick={toggleSort}>
+                                <strong>{t("label.created")}</strong>
+                                {changeCreatedSort === null ? (
+                                    <></>
+                                ) : changeCreatedSort ===
+                                  LatestSubscriptionChangeCreatedSort.ASC ? (
+                                    <KeyboardArrowUp />
+                                ) : (
+                                    <KeyboardArrowDown />
+                                )}
+                            </SortableTableHeader>
                         </TitleCardTableHead>
                         <TableBody>
-                            {subscriptionGroupsQuery.data
-                                ?.slice(0, 5)
-                                .map((subscriptionGroup) => (
-                                    <TableRow
-                                        className={styles.tableRow}
-                                        key={subscriptionGroup.id}
-                                    >
-                                        <TableCell>
-                                            <Link
-                                                component={RouterLink}
-                                                to={getSubscriptionGroupsViewPath(
-                                                    subscriptionGroup.id
+                            {subscriptionGroupsQuery?.data?.length ? (
+                                subscriptionGroupsQuery.data
+                                    .sort(sortFunction)
+                                    .slice(0, 5)
+                                    .map((subscriptionGroup) => (
+                                        <TableRow
+                                            className={styles.tableRow}
+                                            key={subscriptionGroup.id}
+                                        >
+                                            <TableCell>
+                                                <Link
+                                                    component={RouterLink}
+                                                    to={getSubscriptionGroupsViewPath(
+                                                        subscriptionGroup.id
+                                                    )}
+                                                >
+                                                    {subscriptionGroup.name}
+                                                </Link>
+                                            </TableCell>
+                                            <TableCell>
+                                                {formatDateAndTimeV1(
+                                                    subscriptionGroup.created
                                                 )}
-                                            >
-                                                {subscriptionGroup.name}
-                                            </Link>
-                                        </TableCell>
-                                        <TableCell>
-                                            {formatDateAndTimeV1(
-                                                subscriptionGroup.created
-                                            )}
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                            ) : (
+                                <TableRow className={styles.tableRow}>
+                                    <TableCell>
+                                        {t("message.no-subscription-groups")}
+                                    </TableCell>
+                                </TableRow>
+                            )}
                         </TableBody>
                     </TitleCardTable>
                 </LoadingErrorStateSwitch>

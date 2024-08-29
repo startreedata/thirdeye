@@ -36,7 +36,7 @@ export const useSummaryData = ({
     anomalies,
     previousPeriodAnomalies,
     topAlert,
-    alertsConfigured,
+    alertsCount,
     investigations,
     subscriptionGroups,
     selectedAnalysisPeriod,
@@ -195,14 +195,14 @@ export const useSummaryData = ({
                 ...prevState,
                 alerts: {
                     activeAlerts: {
-                        count: alertsConfigured?.count || 0,
+                        count: alertsCount?.count || 0,
                         href: prevState.alerts.activeAlerts.href,
                     },
                     activeDimensions: { count: 0, href: "" },
                 },
             };
         });
-    }, [alertsConfigured]);
+    }, [alertsCount]);
 
     useEffect(() => {
         setSummaryData((prevState) => {

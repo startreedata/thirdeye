@@ -59,7 +59,7 @@ export const ImpactDashboardPage: FunctionComponent = () => {
         anomalies,
         previousPeriodAnomalies,
         investigations,
-        alertsConfigured,
+        alertsCount,
         subscriptionGroups,
         mostRecentlyInvestigatedAnomalyAlert,
     } = useApiRequests({ selectedAnalysisPeriod });
@@ -159,7 +159,7 @@ export const ImpactDashboardPage: FunctionComponent = () => {
                 subHeading={t("pages.impact-dashboard.subHeading")}
             />
             <Summary
-                alertsConfigured={alertsConfigured}
+                alertsCount={alertsCount}
                 analysisPeriods={anaylysisPeriods}
                 anomalies={anomalies}
                 investigations={investigations}

@@ -62,6 +62,7 @@ public class TaskDriverRunnable implements Runnable {
   private final io.micrometer.core.instrument.Timer taskRunTimerOfException;
   private final io.micrometer.core.instrument.Timer taskWaitTimer;
   private final io.micrometer.core.instrument.Timer taskRunnerWaitIdleTimer;
+  private final io.micrometer.core.instrument.Counter taskConcurrentAcquisition;
 
   public TaskDriverRunnable(final TaskContext taskContext) {
     this.taskContext = taskContext;
@@ -90,19 +91,19 @@ public class TaskDriverRunnable implements Runnable {
         .publishPercentiles(METRICS_TIMER_PERCENTILES)
         .tag("exception", "true")
         .register(Metrics.globalRegistry);
-
     this.taskWaitTimer = io.micrometer.core.instrument.Timer.builder("thirdeye_task_wait")
         .publishPercentiles(METRICS_TIMER_PERCENTILES)
         .description(
             "Start: a task is created in the persistence layer. End: the task is picked by a task runner for execution.")
         .register(Metrics.globalRegistry);
-
-    // deprecated - use thirdeye_task_runner_idle
     this.taskRunnerWaitIdleTimer = io.micrometer.core.instrument.Timer.builder(
             "thirdeye_task_runner_idle")
         .description(
             "Start: start thread sleep because no tasks were found. End: end of sleep. Mostly used for the sum and the count.")
         .publishPercentiles(METRICS_TIMER_PERCENTILES)
+        .register(Metrics.globalRegistry);
+    taskConcurrentAcquisition = io.micrometer.core.instrument.Counter.builder("thirdeye_task_concurrent_acquisition")
+        .description("Count the number of time a worker fails to take a lock on a task because the task is locked by another process (most likely another worker).")
         .register(Metrics.globalRegistry);
   }
 
@@ -116,8 +117,7 @@ public class TaskDriverRunnable implements Runnable {
       // a task was acquired - try to finish executing it before termination
       taskRunningTimer.time(() -> runTask(taskDTO));
     }
-    LOG.info(String.format("TaskDriverRunnable safely quitting. name: %s",
-        Thread.currentThread().getName()));
+    LOG.info("TaskDriverRunnable safely quitting. name: " + Thread.currentThread().getName());
   }
 
   private boolean isShutdown() {
@@ -213,7 +213,7 @@ public class TaskDriverRunnable implements Runnable {
           taskWaitTimer.record(waitTime, TimeUnit.MILLISECONDS);
           return nextTask;
         } else {
-          // fixme cyril add metric for this
+          taskConcurrentAcquisition.increment();
           LOG.debug("Failed to acquire task {} referencing {} from worker id {}. Task was locked, or edited by another transaction.)", nextTask.getId(),
               nextTask.getRefId(), workerId);
           // don't sleep - look for a next task
@@ -255,11 +255,11 @@ public class TaskDriverRunnable implements Runnable {
           message);
       LOG.info("Updated status to {}", newStatus);
     } catch (Exception e) {
-      LOG.error(String.format(
-          "Exception: updating task status. Request: taskId: %d, newStatus: %s, msg: %s",
+      LOG.error(
+          "Exception: updating task status. Request: taskId: {}, newStatus: {}, msg: {}",
           taskId,
           newStatus,
-          message), e);
+          message, e);
     }
   }
 }

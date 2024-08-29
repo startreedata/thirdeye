@@ -848,6 +848,12 @@ export function DataGridV1<T>({
         setSearchValue(value);
     };
 
+    /* TODO: There is some issue where Autoresize is not resizing the table based on the data,
+    which leads to data not being visible. Setting the min height to viewport height seems to
+    fix the issue, but do a proper RCA on this. Also there are mutlitple table components
+    being used, mui and react-base-table. Check the use cases and maintain one common
+    component for all tables.
+    */
     return (
         <Box
             {...otherProps}
@@ -859,7 +865,7 @@ export function DataGridV1<T>({
                 "data-grid-v1"
             )}
             height={gridContainerHeight}
-            minHeight="100%"
+            minHeight="100vh"
             width="100%"
         >
             {/* Toolbar */}

@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.service.alert;
 
+import static ai.startree.thirdeye.mapper.ApiBeanMapper.toAlertDto;
 import static ai.startree.thirdeye.mapper.ApiBeanMapper.toAlertTemplateApi;
 import static ai.startree.thirdeye.spi.Constants.UTC_TIMEZONE;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DATASET_NOT_FOUND_IN_NAMESPACE;
@@ -35,6 +36,7 @@ import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertInsightsApi;
 import ai.startree.thirdeye.spi.api.AlertInsightsRequestApi;
 import ai.startree.thirdeye.spi.api.AnalysisRunInfo;
+import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
@@ -98,9 +100,14 @@ public class AlertInsightsProvider {
 
   public AlertInsightsApi getInsights(final ThirdEyePrincipal principal,
       final AlertInsightsRequestApi request) {
-    // fixme cyril add authz on template, dataset, datasource, etc - next PR - requires redesign
     final AlertApi alertApi = request.getAlert();
-    final String namespace = authorizationManager.currentNamespace(principal);
+    // creating a dummy entity to check access then inject namespace - rewrite this - todo authz possible to redesign this?
+    final AlertDTO alertDto = toAlertDto(alertApi);
+    authorizationManager.enrichNamespace(principal, alertDto);
+    authorizationManager.ensureCanRead(principal, alertDto);
+    alertApi.setAuth(new AuthorizationConfigurationApi().setNamespace(alertDto.namespace()));
+    final String namespace = alertDto.namespace();
+    
     try {
       final AlertTemplateDTO templateWithProperties = alertTemplateRenderer.renderAlert(alertApi, namespace);
       return buildInsights(templateWithProperties, namespace);

@@ -19,6 +19,7 @@ import {
     AlertInsight,
     AlertStats,
     EditableAlert,
+    AlertsCount,
 } from "../dto/alert.interfaces";
 import { EnumerationItemInEvaluation } from "../dto/detection.interfaces";
 import { EnumerationItem } from "../dto/enumeration-item.interfaces";
@@ -69,6 +70,9 @@ export interface GetAlertEvaluationPayload {
     alert: Alert | EditableAlert | Pick<Alert, "id">;
     start: number;
     end: number;
+    evaluationContext?: {
+        listEnumerationItemsOnly?: boolean;
+    };
 }
 
 export interface GetEvaluationRequestPayload extends GetAlertEvaluationPayload {
@@ -88,4 +92,9 @@ export interface GetAlertStatsParams {
     alertId: number;
     startTime?: number;
     endTime?: number;
+}
+
+export interface GetAlertsCount extends ActionHook {
+    alertsCount: AlertsCount | null;
+    getAlertsCount: () => Promise<AlertsCount | undefined>;
 }

@@ -41,11 +41,11 @@ import { UiAlert } from "../../rest/dto/ui-alert.interfaces";
 import { getUiAlerts } from "../../utils/alerts/alerts.util";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { getAlertsCreatePath } from "../../utils/routes/routes.util";
-import { useQuery } from "@tanstack/react-query";
 import { getAllSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.rest";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import { AxiosError } from "axios";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
+import { useFetchQuery } from "../../rest/hooks/useFetchQuery";
 
 export const AlertsAllPage: FunctionComponent = () => {
     const [uiAlerts, setUiAlerts] = useState<UiAlert[]>([]);
@@ -64,7 +64,7 @@ export const AlertsAllPage: FunctionComponent = () => {
         isInitialLoading: isGetAlertLoading,
         isError: isGetAlertError,
         error: getAlertsErrors,
-    } = useQuery<Alert[], AxiosError>({
+    } = useFetchQuery<Alert[], AxiosError>({
         queryKey: ["alerts"],
         queryFn: () => {
             return getAllAlerts();
@@ -76,7 +76,7 @@ export const AlertsAllPage: FunctionComponent = () => {
         isInitialLoading: isGetSubscriptionGroupsLoading,
         isError: isGetSubscriptionGroupsError,
         error: getSubscriptionGroupsErrors,
-    } = useQuery<SubscriptionGroup[], AxiosError>({
+    } = useFetchQuery<SubscriptionGroup[], AxiosError>({
         queryKey: ["subscriptiongroups"],
         queryFn: () => {
             return getAllSubscriptionGroups();

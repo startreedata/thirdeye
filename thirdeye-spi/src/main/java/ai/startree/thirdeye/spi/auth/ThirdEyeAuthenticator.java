@@ -17,9 +17,55 @@ import ai.startree.thirdeye.spi.PluginServiceFactory;
 import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 public interface ThirdEyeAuthenticator<CredentialsT> {
+
+  // should be a record - kept as a class for compatibility with a customer running on JDK 11
+  final class AuthTokenAndNamespace {
+
+    private final String authToken;
+    private final String namespace;
+
+    public AuthTokenAndNamespace(String authToken, String namespace) {
+      this.authToken = authToken;
+      this.namespace = namespace;
+    }
+
+    public String authToken() {
+      return authToken;
+    }
+
+    public String namespace() {
+      return namespace;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (obj == this) {
+        return true;
+      }
+      if (obj == null || obj.getClass() != this.getClass()) {
+        return false;
+      }
+      var that = (AuthTokenAndNamespace) obj;
+      return Objects.equals(this.authToken, that.authToken) &&
+          Objects.equals(this.namespace, that.namespace);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(authToken, namespace);
+    }
+
+    @Override
+    public String toString() {
+      return "AuthTokenAndNamespace[" +
+          "authToken=" + authToken + ", " +
+          "namespace=" + namespace + ']';
+    }
+  }
 
   /**
    * Authenticates the given credentials. Returns an empty optional if the credentials could not be
@@ -33,6 +79,6 @@ public interface ThirdEyeAuthenticator<CredentialsT> {
   Optional<ThirdEyePrincipal> authenticate(CredentialsT credentials) throws ThirdEyeException;
 
   interface OauthThirdEyeAuthenticatorFactory extends
-      PluginServiceFactory<ThirdEyeAuthenticator<String>, Map> {
+      PluginServiceFactory<ThirdEyeAuthenticator<AuthTokenAndNamespace>, Map> {
   }
 }

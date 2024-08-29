@@ -18,16 +18,17 @@ import static ai.startree.thirdeye.spi.Constants.AUTH_BEARER;
 import static com.google.common.base.Preconditions.checkState;
 
 import ai.startree.thirdeye.auth.basic.BasicAuthConfiguration;
-import ai.startree.thirdeye.auth.basic.ThirdEyeBasicAuthenticator;
+import ai.startree.thirdeye.auth.basic.BasicNamespacedCredentialAuthFilter;
+import ai.startree.thirdeye.auth.basic.ThirdEyeBasicNamespacedAuthenticator;
 import ai.startree.thirdeye.auth.oauth.OAuthConfiguration;
+import ai.startree.thirdeye.auth.oauth.OAuthCredentialNamespacedAuthFilter;
+import ai.startree.thirdeye.auth.oauth.ThirdEyeAuthenticatorDisabled;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import io.dropwizard.auth.AuthFilter;
-import io.dropwizard.auth.basic.BasicCredentialAuthFilter;
 import io.dropwizard.auth.chained.ChainedAuthFilter;
-import io.dropwizard.auth.oauth.OAuthCredentialAuthFilter;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -42,10 +43,10 @@ public class ThirdEyeAuthModule extends AbstractModule {
 
   @Singleton
   @Provides
-  public OAuthCredentialAuthFilter<ThirdEyeServerPrincipal> getOAuthFilter(
+  public OAuthCredentialNamespacedAuthFilter<ThirdEyeServerPrincipal> getOAuthFilter(
       final AuthRegistry authRegistry,
       final OAuthConfiguration oauthConfig) {
-    return new OAuthCredentialAuthFilter.Builder<ThirdEyeServerPrincipal>()
+    return new OAuthCredentialNamespacedAuthFilter.Builder<ThirdEyeServerPrincipal>()
         .setAuthenticator(authRegistry.createOAuthAuthenticator(oauthConfig))
         .setPrefix(AUTH_BEARER)
         .buildAuthFilter();
@@ -70,8 +71,8 @@ public class ThirdEyeAuthModule extends AbstractModule {
       final AuthConfiguration authConfig,
       @Nullable final BasicAuthConfiguration basicAuthConfig,
       @Nullable final OAuthConfiguration oauthConfig,
-      final Provider<BasicCredentialAuthFilter<ThirdEyeServerPrincipal>> basicAuthFilter,
-      final Provider<OAuthCredentialAuthFilter<ThirdEyeServerPrincipal>> oAuthFilter) {
+      final Provider<BasicNamespacedCredentialAuthFilter<ThirdEyeServerPrincipal>> basicAuthFilter,
+      final Provider<OAuthCredentialNamespacedAuthFilter<ThirdEyeServerPrincipal>> oAuthFilter) {
     final List<AuthFilter> filters = new ArrayList<>();
     if (authConfig.isEnabled()) {
       if (oauthConfig != null && oauthConfig.isEnabled()) {
@@ -87,9 +88,9 @@ public class ThirdEyeAuthModule extends AbstractModule {
     return new ChainedAuthFilter<>(filters);
   }
 
-  private OAuthCredentialAuthFilter<ThirdEyeServerPrincipal> getNoAuthFilter() {
+  private OAuthCredentialNamespacedAuthFilter<ThirdEyeServerPrincipal> getNoAuthFilter() {
     final ThirdEyeAuthenticatorDisabled authenticator = new ThirdEyeAuthenticatorDisabled();
-    return new OAuthCredentialAuthFilter.Builder<ThirdEyeServerPrincipal>()
+    return new OAuthCredentialNamespacedAuthFilter.Builder<ThirdEyeServerPrincipal>()
         .setAuthenticator(authenticator)
         .setPrefix(AUTH_BEARER)
         .buildAuthFilter();
@@ -97,9 +98,9 @@ public class ThirdEyeAuthModule extends AbstractModule {
 
   @Singleton
   @Provides
-  public BasicCredentialAuthFilter<ThirdEyeServerPrincipal> getBasicAuthFilter(
-      final ThirdEyeBasicAuthenticator authenticator) {
-    return new BasicCredentialAuthFilter.Builder<ThirdEyeServerPrincipal>()
+  public BasicNamespacedCredentialAuthFilter<ThirdEyeServerPrincipal> getBasicAuthFilter(
+      final ThirdEyeBasicNamespacedAuthenticator authenticator) {
+    return new BasicNamespacedCredentialAuthFilter.Builder<ThirdEyeServerPrincipal>()
         .setAuthenticator(authenticator)
         .setPrefix(AUTH_BASIC)
         .buildAuthFilter();

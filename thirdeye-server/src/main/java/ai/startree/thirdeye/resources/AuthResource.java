@@ -17,6 +17,7 @@ import static ai.startree.thirdeye.spi.Constants.NO_AUTH_USER;
 import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
 
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.AuthApi;
 import ai.startree.thirdeye.spi.api.UserApi;
 import com.google.inject.Singleton;
@@ -39,10 +40,13 @@ import javax.ws.rs.core.Response;
 @Singleton
 @Tag(name = "Auth")
 @SecurityRequirement(name="oauth")
+@SecurityRequirement(name = Constants.NAMESPACE_SECURITY)
 @OpenAPIDefinition(security = {
-    @SecurityRequirement(name = "oauth")
+    @SecurityRequirement(name = "oauth"),
+    @SecurityRequirement(name = Constants.NAMESPACE_SECURITY)
 })
 @SecurityScheme(name = "oauth", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER, paramName = HttpHeaders.AUTHORIZATION)
+@SecurityScheme(name = Constants.NAMESPACE_SECURITY, type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER, paramName = Constants.NAMESPACE_HTTP_HEADER)
 @Produces(MediaType.APPLICATION_JSON)
 public class AuthResource {
 

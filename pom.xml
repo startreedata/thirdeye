@@ -18,7 +18,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>ai.startree.thirdeye</groupId>
   <artifactId>thirdeye</artifactId>
-  <version>1.303.0-SNAPSHOT</version>
+  <version>1.322.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>thirdeye</name>
 
@@ -42,6 +42,7 @@
     <!--  Run the Integration test modules after building the distribution (required for plugins) -->
     <module>pinot-test-container</module>
     <module>thirdeye-integration-tests</module>
+    <module>thirdeye-benchmarks</module>
   </modules>
 
   <properties>
@@ -70,11 +71,11 @@
     <guava.version>32.1.3-jre</guava.version>
     <guice.version>5.1.0</guice.version>
     <hsqldb.version>2.7.1</hsqldb.version>
-    <jackson.version>2.13.5</jackson.version>
+    <jackson.version>2.17.2</jackson.version>
     <jetty.version>9.4.48.v20220622</jetty.version>
     <jodatime.version>2.12.5</jodatime.version>
     <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
-    <mockito.version>4.3.1</mockito.version>
+    <mockito.version>5.12.0</mockito.version>
     <modelmapper.version>3.1.1</modelmapper.version>
     <!-- WARNING do not upgrade before MySql regression is fixed: https://bugs.mysql.com/bug.php?id=113378 -->
     <!-- See our internal ticket for more info https://startree.atlassian.net/browse/TE-1970 -->
@@ -88,6 +89,7 @@
     <sendgrid.version>4.0.1</sendgrid.version>
     <slack.version>1.29.2</slack.version>
     <slf4j-api.version>1.7.12</slf4j-api.version>
+    <snakeyaml.version>2.2</snakeyaml.version>
     <swagger.version>2.1.6-1</swagger.version>
     <testcontainers.version>1.19.3</testcontainers.version>
     <micrometer.version>1.11.4</micrometer.version>
@@ -900,6 +902,17 @@
         <groupId>org.apache.calcite</groupId>
         <artifactId>calcite-babel</artifactId>
         <version>${calcite.version}</version>
+      </dependency>
+      <!--
+      Force upgrading snakeyaml version due to conflicts from latest jackson dependency
+      snakeyaml upgraded from v2.16. see: https://github.com/FasterXML/jackson/wiki/Jackson-Release-2.16
+      This dependency conflicts with snakeyaml versions from pinot and swagger in several modules
+      Remove this when swagger and pinot are upgraded to latest versions with required snakeyaml dep
+      -->
+      <dependency>
+        <groupId>org.yaml</groupId>
+        <artifactId>snakeyaml</artifactId>
+        <version>${snakeyaml.version}</version>
       </dependency>
 
       <!-- test dependencies -->

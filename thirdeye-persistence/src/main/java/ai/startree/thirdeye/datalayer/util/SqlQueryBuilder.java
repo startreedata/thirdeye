@@ -303,10 +303,27 @@ public class SqlQueryBuilder {
         whereClause.append(")");
         break;
       case EQ:
+        if (predicate.getRhs() == null) {
+          whereClause.append(columnName).append(" IS NULL ");
+        } else {
+          // duplicated code with NEQ and LIKE/GT/GE/... - ok for the moment, this needs to be migrated to JOOQ anyway
+          whereClause.append(columnName).append(" ").append(predicate.getOper().toString())
+              .append(" ?");
+          parametersList.add(ImmutablePair.of(columnName, predicate.getRhs()));
+        }
+        break;
+      case NEQ:
+        if (predicate.getRhs() == null) {
+          whereClause.append(columnName).append(" IS NOT NULL ");
+        } else {
+          whereClause.append(columnName).append(" ").append(predicate.getOper().toString())
+              .append(" ?");
+          parametersList.add(ImmutablePair.of(columnName, predicate.getRhs()));
+        }
+        break;
       case LIKE:
       case GT:
       case LT:
-      case NEQ:
       case LE:
       case GE:
         whereClause.append(columnName).append(" ").append(predicate.getOper().toString())

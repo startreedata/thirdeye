@@ -8,33 +8,14 @@
  * Unless required by applicable law or agreed to in writing, software distributed under the
  * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
  * either express or implied.
+ *
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.plugins.oauth;
+import { ActionHook } from "../actions.interfaces";
+import { Workspace } from "../dto/workspace.interfaces";
 
-import ai.startree.thirdeye.spi.auth.AuthenticationType;
-
-public class ThirdEyePrincipal implements ai.startree.thirdeye.spi.auth.ThirdEyePrincipal {
-
-  private final String name;
-
-  public ThirdEyePrincipal(final String name) {
-    this.name = name;
-  }
-
-  @Override
-  public String getName() {
-    return name;
-  }
-
-  @Override
-  public String getAuthToken() {
-    return null;
-  }
-
-  @Override
-  public AuthenticationType getAuthenticationType() {
-    return null;
-  }
+export interface GetWorkspaces extends ActionHook {
+    workspaces: Workspace[] | null;
+    getWorkspaces: () => Promise<Workspace[] | undefined>;
 }

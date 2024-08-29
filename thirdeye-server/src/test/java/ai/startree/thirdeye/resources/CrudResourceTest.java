@@ -15,31 +15,35 @@ package ai.startree.thirdeye.resources;
 
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import ai.startree.thirdeye.auth.AuthConfiguration;
 import ai.startree.thirdeye.auth.AuthorizationManager;
-import ai.startree.thirdeye.auth.NamespaceResolver;
 import ai.startree.thirdeye.auth.ThirdEyeAuthorizerProvider;
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.datalayer.bao.AbstractManagerImpl;
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.resources.testutils.SingleResourceAuthorizer;
 import ai.startree.thirdeye.service.CrudService;
+import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
 import ai.startree.thirdeye.spi.auth.AuthenticationType;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
+import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.bao.AbstractManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
+import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
+import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.ws.rs.ForbiddenException;
@@ -52,7 +56,7 @@ import org.testng.annotations.Test;
 public class CrudResourceTest {
 
   static ThirdEyeServerPrincipal nobody() {
-    return new ThirdEyeServerPrincipal("nobody", "", AuthenticationType.OAUTH);
+    return new ThirdEyeServerPrincipal("nobody", "", AuthenticationType.OAUTH, null);
   }
 
   @Test
@@ -64,7 +68,7 @@ public class CrudResourceTest {
     });
     when(manager.update(any(DummyDto.class))).thenReturn(1);
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
-        ThirdEyeAuthorizerProvider.ALWAYS_ALLOW);
+        new ThirdEyeAuthorizerProvider.AlwaysAllowAuthorizer(Map.of()));
 
     final List<String> emails = List.of("tester1@testing.com", "tester2@testing.com");
     final ThirdEyeServerPrincipal owner = getPrincipal(emails.get(0));
@@ -92,7 +96,7 @@ public class CrudResourceTest {
     });
     when(manager.update(any(DummyDto.class))).thenReturn(1);
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
-        ThirdEyeAuthorizerProvider.ALWAYS_ALLOW);
+        new ThirdEyeAuthorizerProvider.AlwaysAllowAuthorizer(Map.of()));
 
     final List<String> emails = List.of("tester1@testing.com", "tester2@testing.com");
     final Timestamp before = new Timestamp(1671476530000L);
@@ -123,7 +127,7 @@ public class CrudResourceTest {
   }
 
   private ThirdEyeServerPrincipal getPrincipal(String name) {
-    return new ThirdEyeServerPrincipal(name, "", AuthenticationType.OAUTH);
+    return new ThirdEyeServerPrincipal(name, "", AuthenticationType.OAUTH, null);
   }
 
   @Test
@@ -139,13 +143,7 @@ public class CrudResourceTest {
 
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
         ThirdEyeAuthorizerProvider.ALWAYS_DENY);
-    try (Response resp = resource.list(nobody(), uriInfo)) {
-      assertThat(resp.getStatus()).isEqualTo(200);
-
-      final List<DummyApi> entities = ((Stream<DummyApi>) resp.getEntity()).collect(
-          Collectors.toList());
-      assertThat(entities).isEmpty();
-    }
+    assertThatThrownBy(() -> resource.list(nobody(), uriInfo)).isInstanceOf(ForbiddenException.class);
   }
 
   @Test
@@ -153,7 +151,7 @@ public class CrudResourceTest {
     final DummyManager manager = mock(DummyManager.class);
     final UriInfo uriInfo = mock(UriInfo.class);
     when(uriInfo.getQueryParameters()).thenReturn(new MultivaluedHashMap<>());
-    when(manager.findAll()).thenReturn(Arrays.asList(
+    when(manager.filter(any(DaoFilter.class))).thenReturn(Arrays.asList(
         (DummyDto) new DummyDto().setId(1L),
         (DummyDto) new DummyDto().setId(2L),
         (DummyDto) new DummyDto().setId(3L)
@@ -193,7 +191,7 @@ public class CrudResourceTest {
   @Test(expectedExceptions = ForbiddenException.class)
   public void testDeleteAll_withNoAccess() {
     final DummyManager manager = mock(DummyManager.class);
-    when(manager.findAll()).thenReturn(Arrays.asList(
+    when(manager.filter(any(DaoFilter.class))).thenReturn(Arrays.asList(
         (DummyDto) new DummyDto().setId(1L),
         (DummyDto) new DummyDto().setId(2L),
         (DummyDto) new DummyDto().setId(3L)
@@ -211,7 +209,7 @@ public class CrudResourceTest {
         (DummyDto) new DummyDto().setId(2L),
         (DummyDto) new DummyDto().setId(3L)
     );
-    when(manager.findAll()).thenReturn(dtos);
+    when(manager.filter(any(DaoFilter.class))).thenReturn(dtos);
 
     final DummyResource resource = new DummyResource(manager, ImmutableMap.of(),
         new SingleResourceAuthorizer("2"));
@@ -307,6 +305,16 @@ class DummyApi implements ThirdEyeCrudApi<DummyApi> {
     return this;
   }
 
+  @Override
+  public AuthorizationConfigurationApi getAuth() {
+    return null;
+  }
+
+  @Override
+  public DummyApi setAuth(final AuthorizationConfigurationApi auth) {
+    return null;
+  }
+
   public Timestamp getCreateTime() {
     return createTime;
   }
@@ -381,11 +389,13 @@ class DummyResource extends CrudResource<DummyApi, DummyDto> {
       final ImmutableMap<String, String> apiToBeanMap,
       final ThirdEyeAuthorizer thirdEyeAuthorizer) {
     super(new DummyService(
-        new AuthorizationManager(mock(AlertTemplateManager.class),
+        new AuthorizationManager(
+            mock(DataSourceManager.class), 
+            mock(DatasetConfigManager.class), 
+            mock(AlertTemplateManager.class),
             mock(AlertManager.class),
             mock(AnomalyManager.class),
-            thirdEyeAuthorizer, new NamespaceResolver(null, null, null, null),
-            new AuthConfiguration()),
+            thirdEyeAuthorizer),
         dtoManager,
         apiToBeanMap));
   }

@@ -28,6 +28,7 @@ import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.Predicate.OPER;
 import ai.startree.thirdeye.spi.util.Pair;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import java.util.ArrayList;
@@ -36,10 +37,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import javax.ws.rs.core.MultivaluedMap;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class DaoFilterBuilder {
+public class DaoFilterUtils {
 
   private static final ImmutableSet<String> KEYWORDS = ImmutableSet.of("limit", "offset");
   private static final ImmutableMap<String, OPER> OPERATOR_MAP = ImmutableMap.<String, OPER>builder()
@@ -52,36 +53,11 @@ public class DaoFilterBuilder {
       .put("in", OPER.IN)
       .build();
   private static final Pattern PATTERN = Pattern.compile("\\[(\\w+)\\](\\S+)");
-  private final ImmutableMap<String, String> apiToBeanMap;
 
-  public DaoFilterBuilder(final ImmutableMap<String, String> apiToBeanMap) {
-    this.apiToBeanMap = apiToBeanMap;
-  }
-
-  static Pair<OPER, String> toPair(final Object o) {
-    final String s = o.toString();
-
-    final Matcher m = PATTERN.matcher(s);
-    if (m.matches()) {
-      final OPER operator = OPERATOR_MAP.get(m.group(1));
-      if (operator == null) {
-        throw new ThirdEyeException(ERR_INVALID_QUERY_PARAM_OPERATOR, OPERATOR_MAP.keySet());
-      }
-      return pair(operator, m.group(2));
-    }
-    return pair(OPER.EQ, s);
-  }
-
-  static Predicate toPredicate(final String columnName, final Object[] objects) {
-    final List<Predicate> predicates = Arrays.stream(objects)
-        .map(DaoFilterBuilder::toPair)
-        .map(p -> new Predicate(columnName, p.getFirst(), p.getSecond()))
-        .collect(Collectors.toList());
-
-    return Predicate.AND(predicates.toArray(new Predicate[]{}));
-  }
-
-  public DaoFilter buildFilter(final MultivaluedMap<String, String> queryParameters) {
+  public static DaoFilter buildFilter(
+      final MultivaluedMap<String, String> queryParameters,
+      final Map<String, String> apiToBeanMap,
+      final String namespace) {
     final DaoFilter daoFilter = new DaoFilter();
     optional(queryParameters.getFirst("limit"))
         .map(Long::valueOf)
@@ -97,10 +73,15 @@ public class DaoFilterBuilder {
           daoFilter.setOffset(offset);
         });
 
-    return daoFilter.setPredicate(buildPredicate(queryParameters));
+    final List<Predicate> predicates = buildPredicates(queryParameters, apiToBeanMap);
+    predicates.add(Predicate.EQ("namespace", namespace));
+    
+    return daoFilter.setPredicate(Predicate.AND(predicates.toArray(new Predicate[]{})));
   }
 
-  private Predicate buildPredicate(final MultivaluedMap<String, String> queryParameters) {
+  private static @NonNull List<Predicate> buildPredicates(
+      final MultivaluedMap<String, String> queryParameters,
+      final Map<String, String> apiToBeanMap) {
     final List<Predicate> predicates = new ArrayList<>();
     for (Map.Entry<String, List<String>> e : queryParameters.entrySet()) {
       final String qParam = e.getKey();
@@ -114,6 +95,31 @@ public class DaoFilterBuilder {
       final Object[] objects = e.getValue().toArray();
       predicates.add(toPredicate(columnName, objects));
     }
-    return predicates.size() == 0 ? null : Predicate.AND(predicates.toArray(new Predicate[]{}));
+    return predicates;
+  }
+  
+  @VisibleForTesting
+  protected static Pair<OPER, String> toPair(final Object o) {
+    final String s = o.toString();
+
+    final Matcher m = PATTERN.matcher(s);
+    if (m.matches()) {
+      final OPER operator = OPERATOR_MAP.get(m.group(1));
+      if (operator == null) {
+        throw new ThirdEyeException(ERR_INVALID_QUERY_PARAM_OPERATOR, OPERATOR_MAP.keySet());
+      }
+      return pair(operator, m.group(2));
+    }
+    return pair(OPER.EQ, s);
+  }
+
+  @VisibleForTesting
+  protected static Predicate toPredicate(final String columnName, final Object[] objects) {
+    final List<Predicate> predicates = Arrays.stream(objects)
+        .map(DaoFilterUtils::toPair)
+        .map(p -> new Predicate(columnName, p.getFirst(), p.getSecond()))
+        .toList();
+
+    return Predicate.AND(predicates.toArray(new Predicate[]{}));
   }
 }

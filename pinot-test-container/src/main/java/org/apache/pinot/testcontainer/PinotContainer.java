@@ -31,7 +31,7 @@ import org.testcontainers.utility.MountableFile;
 
 public class PinotContainer extends GenericContainer<PinotContainer> {
 
-  public static final Logger log = LoggerFactory.getLogger(PinotContainer.class);
+  public static final Logger LOG = LoggerFactory.getLogger(PinotContainer.class);
 
   public static final int DEFAULT_ZOOKEEPER_PORT = 2123;
   public static final int DEFAULT_CONTROLLER_HTTP_PORT = 9000;
@@ -147,7 +147,7 @@ public class PinotContainer extends GenericContainer<PinotContainer> {
           "-exec"
       );
       final String stdout = addTableResult.getStdout();
-      log.info(stdout);
+      LOG.info(stdout);
     }
     for (ImportData importData : this.importDataList) {
       final Container.ExecResult launchDataIngestionJobResult = this.execInContainer(
@@ -158,13 +158,13 @@ public class PinotContainer extends GenericContainer<PinotContainer> {
           "-controllerPort", "9000"
       );
       final String stdout = launchDataIngestionJobResult.getStdout();
-      log.info(stdout);
+      LOG.info(stdout);
     }
     for (AddTable table : this.addTables) {
       final String tableName = findTableName(table);
       long tableSize = getTableSize(tableName);
       while (tableSize == 0) {
-        log.info(String.format("Waiting for %s ingestion to be complete.", tableName));
+        LOG.info("Waiting for {} ingestion to be complete.", tableName);
         Thread.sleep(1000);
         tableSize = getTableSize(tableName);
       }

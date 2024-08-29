@@ -13,6 +13,8 @@
  */
 package ai.startree.thirdeye.datalayer.bao;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.spi.datalayer.bao.RcaInvestigationManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
@@ -113,7 +115,7 @@ public class TestRcaInvestigationManager {
   public void testFindSessionById() {
     Long id = this.sessionDAO.save(makeDefault());
 
-    RcaInvestigationDTO session = this.sessionDAO.findById(id);
+    final RcaInvestigationDTO session = this.sessionDAO.findById(id);
     Assert.assertEquals(session.getName(), INVESTIGATION_NAME);
     Assert.assertEquals(session.getText(), INVESTIGATION_DESCRIPTION);
     Assert.assertEquals(session.getUiMetadata(), INVESTIGATION_UI_METADATA);
@@ -124,15 +126,14 @@ public class TestRcaInvestigationManager {
   public void testFindSessionByName() {
     this.sessionDAO.save(makeName("A"));
     this.sessionDAO.save(makeName("B"));
-    this.sessionDAO.save(makeName("A"));
 
-    List<RcaInvestigationDTO> sessionsA = this.sessionDAO.findByName("A");
-    List<RcaInvestigationDTO> sessionsB = this.sessionDAO.findByName("B");
-    List<RcaInvestigationDTO> sessionsC = this.sessionDAO.findByName("C");
+    final RcaInvestigationDTO sessionA = this.sessionDAO.findUniqueByNameAndNamespace("A", null);
+    final RcaInvestigationDTO sessionB = this.sessionDAO.findUniqueByNameAndNamespace("B", null);
+    final RcaInvestigationDTO sessionC = this.sessionDAO.findUniqueByNameAndNamespace("C", null);
 
-    Assert.assertEquals(sessionsA.size(), 2);
-    Assert.assertEquals(sessionsB.size(), 1);
-    Assert.assertEquals(sessionsC.size(), 0);
+    assertThat(sessionA).isNotNull();
+    assertThat(sessionB).isNotNull();
+    assertThat(sessionC).isNull();
   }
 
   @Test

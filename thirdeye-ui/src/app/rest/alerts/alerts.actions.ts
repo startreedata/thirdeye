@@ -18,6 +18,7 @@ import {
     AlertEvaluation,
     AlertInsight,
     AlertStats,
+    AlertsCount,
     EditableAlert,
 } from "../dto/alert.interfaces";
 import { EnumerationItem } from "../dto/enumeration-item.interfaces";
@@ -26,6 +27,7 @@ import {
     GetAlertEvaluationPayload,
     GetAlertInsight,
     GetAlerts,
+    GetAlertsCount,
     GetAlertStats,
     GetAlertStatsParams,
     GetEvaluation,
@@ -134,16 +136,16 @@ export const useGetAlertStats = (): GetAlertStats => {
     };
 };
 
-export const useGetAlertsCount = (): any => {
+export const useGetAlertsCount = (): GetAlertsCount => {
     const { data, makeRequest, status, errorMessages, resetData } =
-        useHTTPAction<{ count: number }>(getAlertsCountREST);
+        useHTTPAction<AlertsCount>(getAlertsCountREST);
 
-    const getAlertsCount = (): Promise<{ count: number } | undefined> => {
+    const getAlertsCount = (): Promise<AlertsCount | undefined> => {
         return makeRequest();
     };
 
     return {
-        alertsConfigured: data,
+        alertsCount: data,
         getAlertsCount,
         status,
         errorMessages,

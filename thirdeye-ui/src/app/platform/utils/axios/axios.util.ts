@@ -16,7 +16,8 @@ import { AxiosError, InternalAxiosRequestConfig } from "axios";
 
 // Returns axios request interceptor
 export const getRequestInterceptorV1 = (
-    accessToken: string
+    accessToken: string,
+    selectedWorkspace?: string | null
 ): ((
     requestConfig: InternalAxiosRequestConfig
 ) => InternalAxiosRequestConfig) => {
@@ -26,6 +27,9 @@ export const getRequestInterceptorV1 = (
         // If access token is available, attach it to the request
         if (accessToken) {
             requestConfig.headers["Authorization"] = `Bearer ${accessToken}`;
+        }
+        if (selectedWorkspace) {
+            requestConfig.headers["namespace"] = selectedWorkspace;
         }
 
         return requestConfig;

@@ -20,6 +20,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.expectThrows;
 
+import ai.startree.thirdeye.spi.auth.ThirdEyeAuthenticator.AuthTokenAndNamespace;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import com.google.common.cache.CacheLoader;
 import com.nimbusds.jose.JOSEException;
@@ -38,7 +39,7 @@ import org.testng.annotations.Test;
 
 public class ThirdEyeOAuthAuthenticatorTest {
 
-  private CacheLoader<String, ThirdEyePrincipal> cache;
+  private CacheLoader<AuthTokenAndNamespace, ThirdEyePrincipal> cache;
 
   public static JWK getJWK(String kid) throws JOSEException {
     return new RSAKeyGenerator(2048)
@@ -71,15 +72,19 @@ public class ThirdEyeOAuthAuthenticatorTest {
 
   @Test
   public void cachedEntriesTest() throws Exception {
-    ThirdEyePrincipal principal = cache.load(getToken(getJWK(
+    ThirdEyePrincipal principal = cache.load(
+        new AuthTokenAndNamespace(
+        getToken(getJWK(
             RandomStringUtils.randomAlphanumeric(16)),
-        new JWTClaimsSet.Builder().build()));
+        new JWTClaimsSet.Builder().build()),
+            null
+        ));
     assertNotNull(principal);
     assertEquals(principal.getName(), "test");
   }
 
   @Test
   public void invalidJwtTokenTest() {
-    expectThrows(Exception.class, () -> cache.load("invalid-token"));
+    expectThrows(Exception.class, () -> cache.load(new AuthTokenAndNamespace("invalid-token", null)));
   }
 }

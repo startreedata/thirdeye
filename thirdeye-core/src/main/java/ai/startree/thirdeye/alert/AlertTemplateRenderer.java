@@ -18,6 +18,7 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
+import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
@@ -52,6 +53,11 @@ public class AlertTemplateRenderer {
   /**
    * Render the alert template API for /evaluate
    *
+   * todo cyril refactor - this method is not great :
+   *  not clear that passing an ID will in effect override changes made in the alert because - so the frontend has to be aware of this and remove the id
+   *  makes it strange for consumers because authz has to be checked upstream and authz is performed on DTOs not API
+   *  consumers should be responsible for transforming their alertApi in alertDto then we can remove this
+   *
    * @param alert the alert API
    * @return template populated with properties
    */
@@ -65,18 +71,24 @@ public class AlertTemplateRenderer {
 
     final AlertTemplateApi templateApi = alert.getTemplate();
     ensureExists(templateApi, ERR_OBJECT_DOES_NOT_EXIST, "alert template body is null");
-    final Map<String, Object> alertProperties = alert.getTemplateProperties();
 
     final AlertTemplateDTO alertTemplateDTO = ApiBeanMapper.toAlertTemplateDto(templateApi);
     final AlertTemplateDTO fullTemplate = alertTemplateManager.findMatchInNamespaceOrUnsetNamespace(
         alertTemplateDTO, namespace);
+    if (fullTemplate == null) {
+      throw new ThirdEyeException(ERR_OBJECT_DOES_NOT_EXIST,
+          "Template not found. Name: %s. Namespace: %s. Id: %s. ".formatted(
+              alertTemplateDTO.getName(), namespace, alertTemplateDTO.getId()));
+    }
 
+    final Map<String, Object> alertProperties = alert.getTemplateProperties();
     try {
       return renderTemplate(fullTemplate, alertProperties, alert.getName());
     } catch (IOException e) {
       // todo cyril - create a dedicated exception type for this - see below
-      throw new RuntimeException(String.format("Error rendering alert. Name: %s. Template name: %s. ",
-          alert.getName(), fullTemplate.getName()), e);
+      throw new RuntimeException(
+          String.format("Error rendering alert. Name: %s. Template name: %s. ",
+              alert.getName(), fullTemplate.getName()), e);
     }
   }
 
@@ -92,14 +104,21 @@ public class AlertTemplateRenderer {
   public AlertTemplateDTO renderAlert(final AlertDTO alert) {
     final AlertTemplateDTO fullTemplate = alertTemplateManager.findMatchInNamespaceOrUnsetNamespace(
         alert.getTemplate(), alert.namespace());
+    if (fullTemplate == null) {
+      throw new ThirdEyeException(ERR_OBJECT_DOES_NOT_EXIST,
+          "Template not found. Name: %s. Namespace: %s. Id: %s. ".formatted(
+              alert.getTemplate().getName(), alert.namespace(), alert.getTemplate().getName()));
+    }
+
     final Map<String, Object> alertProperties = alert.getTemplateProperties();
 
     try {
       return renderTemplate(fullTemplate, alertProperties, alert.getName());
     } catch (IOException e) {
       // todo cyril - create a dedicated exception type for this - see ThirdEyeStatus
-      throw new RuntimeException(String.format("Error rendering alert. Id: %s. Name: %s. Template name: %s. ",
-          alert.getId(), alert.getName(), fullTemplate.getName()), e);
+      throw new RuntimeException(
+          String.format("Error rendering alert. Id: %s. Name: %s. Template name: %s. ",
+              alert.getId(), alert.getName(), fullTemplate.getName()), e);
     }
   }
 

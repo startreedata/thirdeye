@@ -24,7 +24,6 @@ import { useTranslation } from "react-i18next";
 import { SkeletonV1 } from "../../../platform/components";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
-import { useQuery } from "@tanstack/react-query";
 import {
     getSubscriptionGroupsAllPath,
     getSubscriptionGroupsCreatePath,
@@ -49,6 +48,7 @@ import { useNavigate } from "react-router-dom";
 import { subscriptionGroupChannelIconsMap } from "../../subscription-group-view/notification-channels-card/notification-channels-card.utils";
 import { Icon } from "@iconify/react";
 import { EmptyStateSwitch } from "../../page-states/empty-state-switch/empty-state-switch.component";
+import { useFetchQuery } from "../../../rest/hooks/useFetchQuery";
 
 export const SubscriptionGroupsTable: FunctionComponent<SubscriptionGroupsTableProps> =
     ({ alertId, headerName }) => {
@@ -66,7 +66,7 @@ export const SubscriptionGroupsTable: FunctionComponent<SubscriptionGroupsTableP
             data: subscriptionGroups,
             isInitialLoading,
             isError,
-        } = useQuery<SubscriptionGroup[], AxiosError>({
+        } = useFetchQuery<SubscriptionGroup[], AxiosError>({
             queryKey: ["subscriptiongroups"],
             queryFn: () => {
                 return getAllSubscriptionGroups();

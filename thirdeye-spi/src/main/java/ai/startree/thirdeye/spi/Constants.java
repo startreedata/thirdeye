@@ -19,6 +19,8 @@ import ai.startree.thirdeye.spi.json.ApiTemplatableSerializer;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.time.Duration;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
@@ -108,6 +110,8 @@ public interface Constants {
   String MAX_DECIMALS_FORMAT = "#,###.#####";
   String DECIMALS_FORMAT_TOKEN = "#";
 
+  DecimalFormat TWO_DIGITS_FORMATTER = new DecimalFormat("#.##", DecimalFormatSymbols.getInstance( Locale.ENGLISH ));
+
   enum JobStatus {
     SCHEDULED,
     COMPLETED,
@@ -133,4 +137,7 @@ public interface Constants {
 
   Duration METRICS_CACHE_TIMEOUT = Duration.ofMinutes(10);
   double[] METRICS_TIMER_PERCENTILES = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999};
+  
+  String NAMESPACE_HTTP_HEADER = "namespace";
+  String NAMESPACE_SECURITY = "namespace";
 }

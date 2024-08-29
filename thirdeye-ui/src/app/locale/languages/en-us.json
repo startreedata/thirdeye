@@ -45,6 +45,9 @@
         "unknown": "Unknown error occurred.",
         "unknown-rca-algorithm": "Unknown error running the RCA algorithm."
     },
+    "info": {
+        "notifyHistoricalAnomalies": "By default, notifications are only sent for anomalies detected on times greater than the alert creation time. If enabled, notifications will also be sent for anomalies detected on times less than the alert creation time."
+    },
     "label": {
         "1-minute": "1 Minute",
         "15-minutes": "15 Minutes",
@@ -119,6 +122,11 @@
         "anomaly-period": "Anomaly Period",
         "anomaly-sensitivity": "Anomaly sensitivity",
         "anomaly-start": "Anomaly start",
+        "app-header": {
+            "null-mapped-name": "Default(Not set)",
+            "startree-cloud": "Startree Cloud",
+            "workspace": "Workspace"
+        },
         "apply": "Apply",
         "apply-changes": "Apply changes",
         "associated-datasource": "Associated Datasource",
@@ -376,6 +384,7 @@
         "none": "None",
         "not-saved": "not saved",
         "notifications": "notifications",
+        "notifyHistoricalAnomalies": "Notify Historical Anomalies",
         "num-dimensions": "{{num}} dimensions",
         "ok": "Ok",
         "onboard": "Onboard",
@@ -741,6 +750,7 @@
         "needs-to-be-an-array": "\"{{propertyKey}}\" needs to be an array",
         "needs-to-be-an-object": "\"{{propertyKey}}\" needs to be an object",
         "no-access-to-support-tooltip-msg": "If you dont have access to the support page, reach out to your AE (Account Executive) or join our community: https://dev.startree.ai/docs/community",
+        "no-active-alerts": "No active alerts",
         "no-alerts-created": "No alerts created. Visit",
         "no-alerts-were-subscribed-to": "No alerts were subscribed to",
         "no-data": "No data available",
@@ -761,6 +771,7 @@
         "no-saved-investigations": "No saved investigations for Anomaly",
         "no-search-results": "No search results available",
         "no-specific-top-contributor-is-detected": "No specific top contributor is detected",
+        "no-subscription-groups": "No subscription groups",
         "no-subscription-groups-created": "No subscription groups created",
         "no-subscription-groups-for-alert": "No subscription groups have been configured for alert",
         "no-this-is-an-anomaly": "No, this is not an anomaly",

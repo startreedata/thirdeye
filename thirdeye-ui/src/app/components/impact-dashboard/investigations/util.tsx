@@ -17,25 +17,27 @@ import { FeedbackClass } from "./investigations.interfaces";
 export const getFeedbackText = (
     feedback: string | undefined
 ): string | undefined => {
-    if (feedback === "ANOMALY") {
-        return "Yes, this is a valid anomaly";
-    } else if (feedback === "NOT_ANOMALY") {
-        return "No, this is not an anomaly";
-    } else if (!feedback) {
-        return "No feedback present";
-    } else {
-        return feedback;
+    switch (feedback) {
+        case "ANOMALY":
+            return "Yes, this is a valid anomaly";
+        case "NOT_ANOMALY":
+            return "No, this is not an anomaly";
+        case undefined:
+            return "No feedback present";
+        default:
+            return feedback;
     }
 };
 
 export const getFeedbackClass = (
     feedback: string | undefined
 ): FeedbackClass => {
-    if (feedback === "ANOMALY") {
-        return "validAnomaly";
-    } else if (feedback === "NOT_ANOMALY") {
-        return "invalidAnomaly";
-    } else {
-        return "text";
+    switch (feedback) {
+        case "ANOMALY":
+            return "validAnomaly";
+        case "NOT_ANOMALY":
+            return "invalidAnomaly";
+        default:
+            return "text";
     }
 };

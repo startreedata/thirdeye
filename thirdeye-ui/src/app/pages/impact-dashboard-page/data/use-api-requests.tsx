@@ -59,7 +59,7 @@ export const useApiRequests = ({
     } = useGetAnomaly();
 
     const {
-        alertsConfigured,
+        alertsCount,
         getAlertsCount,
         status: alertsCountStatus,
         errorMessages: alertsCountErrorMessages,
@@ -189,7 +189,7 @@ export const useApiRequests = ({
         anomalies,
         previousPeriodAnomalies,
         investigations,
-        alertsConfigured,
+        alertsCount,
         subscriptionGroups,
         mostRecentlyInvestigatedAnomalyAlert:
             mostRecentlyInvestigatedAnomaly?.alert,

@@ -36,6 +36,10 @@ public class PinotThirdEyeDataSourceConfig {
   private Integer requestTimeoutMs;
   private Integer connectTimeoutMs;
   private Integer brokerResponseTimeoutMs;
+  
+  public boolean isOAuthEnabled() {
+    return oauth != null && oauth.isEnabled();
+  }
 
   public PinotOauthConfiguration getOauth() {
     return oauth;

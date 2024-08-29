@@ -13,6 +13,7 @@
  * the License.
  */
 import { DetectionEvaluation } from "../../../../rest/dto/detection.interfaces";
+import { TimeRange } from "../../../../rest/dto/time-range.interfaces";
 
 export interface EnumerationItemsTableProps {
     detectionEvaluations: DetectionEvaluation[];
@@ -21,4 +22,6 @@ export interface EnumerationItemsTableProps {
     hideTime: boolean;
     showOnlyActivity?: boolean;
     hideDelete?: boolean;
+    alert?: any;
+    evaluationTimeRange: TimeRange;
 }

@@ -13,11 +13,9 @@
  */
 package ai.startree.thirdeye.datalayer.bao;
 
-import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST;
 import static com.google.common.base.Preconditions.checkState;
 
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
-import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import com.google.inject.Inject;
@@ -41,7 +39,7 @@ public class AlertTemplateManagerImpl extends AbstractManagerImpl<AlertTemplateD
 
   //todo cyril authz - deprecate the unset namespace fallback logic once envs are migrated
   @Override
-  public AlertTemplateDTO findMatchInNamespaceOrUnsetNamespace(final @NonNull AlertTemplateDTO alertTemplateDTO, final @Nullable String namespace) {
+  public @Nullable AlertTemplateDTO findMatchInNamespaceOrUnsetNamespace(final @NonNull AlertTemplateDTO alertTemplateDTO, final @Nullable String namespace) {
     AlertTemplateDTO match = null;
     final Long id = alertTemplateDTO.getId();
     final String name = alertTemplateDTO.getName();
@@ -55,7 +53,7 @@ public class AlertTemplateManagerImpl extends AbstractManagerImpl<AlertTemplateD
       if (match == null && namespace != null) { // todo cyril authz - this if condition will be removed once unset namespace backward compatibility logic is removed
         match = findUniqueByNameAndNamespace(name, null);
         if (match != null) {
-          LOG.warn( // fixme cyril authz - make it error level once we start migrating
+          LOG.warn( // todo cyril authz - make it error level once we start migrating
               "Could not find template with name {} in namespace {}, but found a template with this name with an unset namespace. "
                   + "Using this template. This behaviour will change. Please migrate your templates to a namespace.",
               name, namespace);
@@ -67,8 +65,8 @@ public class AlertTemplateManagerImpl extends AbstractManagerImpl<AlertTemplateD
     } else if (alertTemplateDTO.getNodes() != null) {
       return alertTemplateDTO;
     } else {
-      throw new ThirdEyeException(ERR_OBJECT_DOES_NOT_EXIST,
-          "Template not found. Name: %s. Namespace: %s. Id: %s. ".formatted(name, namespace, id));
+      LOG.error("Template not found. Name: {}. Namespace: {}. Id: {}. ", name, namespace, id);
+      return null;
     }
   }
 }

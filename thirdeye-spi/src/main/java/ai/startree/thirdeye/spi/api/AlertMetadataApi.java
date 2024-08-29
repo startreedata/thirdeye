@@ -30,6 +30,7 @@ public class AlertMetadataApi {
   private String granularity;
   private String timezone;
   private EventContextApi eventContext;
+  private String detectionAggregationFunction;
 
   public DataSourceApi getDatasource() {
     return datasource;
@@ -55,6 +56,16 @@ public class AlertMetadataApi {
 
   public AlertMetadataApi setMetric(final MetricApi metric) {
     this.metric = metric;
+    return this;
+  }
+
+  public String getDetectionAggregationFunction() {
+    return detectionAggregationFunction;
+  }
+
+  public AlertMetadataApi setDetectionAggregationFunction(
+      final String detectionAggregationFunction) {
+    this.detectionAggregationFunction = detectionAggregationFunction;
     return this;
   }
 

@@ -15,16 +15,6 @@
 
 import { PropertyConfigValueTypes } from "./alert.interfaces";
 
-export enum MetadataPropertyStep {
-    DATA = "DATA",
-    PREPROCESS = "PREPROCESS",
-    DETECTION = "DETECTION",
-    FILTER = "FILTER",
-    POSTPROCESS = "POSTPROCESS",
-    RCA = "RCA",
-    OTHER = "OTHER",
-}
-
 export interface MetadataProperty {
     name: string;
     description?: string;
@@ -55,7 +45,7 @@ export interface MetadataProperty {
      *
      * See introduction PR https://github.com/startreedata/thirdeye/pull/974
      */
-    step?: MetadataPropertyStep;
+    step?: string;
     /**
      * A free string subStep. Used to group properties belonging to the same
      * step in smaller groups.

@@ -13,3 +13,6 @@ Alert: DONE
 
 ## [V1_293_5__remove_name_unique_constraints_subscription_group.sql](V1_293_5__remove_name_unique_constraints_subscription_group.sql)
 Subscription Group: DONE
+
+## remove name unique constraints on alert_template_index
+DONE in V1_306_0

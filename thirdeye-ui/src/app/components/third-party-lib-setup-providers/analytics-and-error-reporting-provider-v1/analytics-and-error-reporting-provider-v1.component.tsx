@@ -18,13 +18,13 @@
  * All rights reserved. Confidential and proprietary information of StarTree Inc.
  */
 import * as Sentry from "@sentry/react";
-import { useQuery } from "@tanstack/react-query";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useAuthProviderV1 } from "../../../platform/components";
 import { getAppConfiguration as getAppConfigurationRest } from "../../../rest/app-config/app-config.rest";
 import { getThirdEyeUiVersion } from "../../../utils/version/version.util";
 import { IntercomProvider } from "../intercom-provider/intercom-provider.component";
 import { AnalyticsAndErrorReportingProviderV1Props } from "./analytics-and-error-reporting-provider-v1.interfaces";
+import { useFetchQuery } from "../../../rest/hooks/useFetchQuery";
 
 const getEnvironmentFromHostname = (hostname: string): string => {
     return hostname.split(".").slice(1).join(".") || "production";
@@ -33,7 +33,7 @@ const getEnvironmentFromHostname = (hostname: string): string => {
 export const AnalyticsAndErrorReportingProviderV1: FunctionComponent<AnalyticsAndErrorReportingProviderV1Props> =
     ({ children }) => {
         const [isSentrySetup, setIsSentrySetup] = useState(false);
-        const { data: appConfig } = useQuery({
+        const { data: appConfig } = useFetchQuery({
             queryKey: ["appConfig"],
             queryFn: getAppConfigurationRest,
         });

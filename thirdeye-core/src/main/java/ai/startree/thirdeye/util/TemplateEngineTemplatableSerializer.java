@@ -26,10 +26,12 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 /**
  * This serializer can be used to apply template properties on {@link Templatable} fields.
  * Do not use for API or persistence.
+ * 
+ * Not thread-safe if setValuesMap is used.
  */
 public class TemplateEngineTemplatableSerializer extends JsonSerializer<Templatable> {
 
-  private final Map<String, Object> valuesMap;
+  private Map<String, Object> valuesMap;
 
   public TemplateEngineTemplatableSerializer(final Map<String, Object> valuesMap) {
     this.valuesMap = valuesMap;
@@ -50,5 +52,9 @@ public class TemplateEngineTemplatableSerializer extends JsonSerializer<Templata
       jsonGenerator.writeObjectField(Templatable.VALUE_FIELD_STRING,  templatable.getValue());
       jsonGenerator.writeEndObject();
     }
+  }
+
+  public void setValuesMap(final Map<String, Object> valuesMap) {
+    this.valuesMap = valuesMap;
   }
 }

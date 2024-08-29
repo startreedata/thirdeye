@@ -21,6 +21,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.notification.NotificationServiceRegistry;
 import ai.startree.thirdeye.service.InternalService;
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import ai.startree.thirdeye.worker.task.TaskDriver;
@@ -56,16 +57,20 @@ import org.slf4j.LoggerFactory;
 
 @Produces(MediaType.APPLICATION_JSON)
 @Tag(name = "zzz Internal zzz")
-@SecurityRequirement(name = "oauth")
-@OpenAPIDefinition(security = {@SecurityRequirement(name = "oauth")})
+@SecurityRequirement(name="oauth")
+@SecurityRequirement(name = Constants.NAMESPACE_SECURITY)
+@OpenAPIDefinition(security = {
+    @SecurityRequirement(name = "oauth"),
+    @SecurityRequirement(name = Constants.NAMESPACE_SECURITY)
+})
 @SecurityScheme(name = "oauth", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER, paramName = HttpHeaders.AUTHORIZATION)
+@SecurityScheme(name = Constants.NAMESPACE_SECURITY, type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER, paramName = Constants.NAMESPACE_HTTP_HEADER)
 // FIXME CYRIL - does not have authorization and workspace checks everywhere because it is not exposed in production - add checks everywhere when time just in case - or remove 
 public class InternalResource {
 
   private static final Logger log = LoggerFactory.getLogger(InternalResource.class);
   private static final Package PACKAGE = InternalResource.class.getPackage();
 
-  private final HttpDetectorResource httpDetectorResource;
   private final DatabaseAdminResource databaseAdminResource;
   private final NotificationServiceRegistry notificationServiceRegistry;
   private final TaskDriverConfiguration taskDriverConfiguration;
@@ -74,22 +79,16 @@ public class InternalResource {
   private final InternalService internalService;
 
   @Inject
-  public InternalResource(final HttpDetectorResource httpDetectorResource,
+  public InternalResource(
       final DatabaseAdminResource databaseAdminResource,
       final NotificationServiceRegistry notificationServiceRegistry,
       final TaskDriverConfiguration taskDriverConfiguration, final TaskDriver taskDriver,
       final InternalService internalService) {
-    this.httpDetectorResource = httpDetectorResource;
     this.databaseAdminResource = databaseAdminResource;
     this.notificationServiceRegistry = notificationServiceRegistry;
     this.taskDriverConfiguration = taskDriverConfiguration;
     this.taskDriver = taskDriver;
     this.internalService = internalService;
-  }
-
-  @Path("http-detector")
-  public HttpDetectorResource getHttpDetectorResource() {
-    return httpDetectorResource;
   }
 
   @Path("db-admin")

@@ -37,6 +37,7 @@ import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.NotAuthorizedException;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -139,7 +140,7 @@ public class ResourceUtils {
     return badRequest(statusResponse(status, args));
   }
 
-  public static BadRequestException badRequest(final StatusListApi response) {
+  private static BadRequestException badRequest(final StatusListApi response) {
     return new BadRequestException(Response
         .status(Status.BAD_REQUEST)
         .entity(response)
@@ -155,6 +156,19 @@ public class ResourceUtils {
   public static InternalServerErrorException serverError(final StatusListApi response) {
     return new InternalServerErrorException(Response
         .status(Status.INTERNAL_SERVER_ERROR)
+        .entity(response)
+        .build()
+    );
+  }
+
+  public static NotFoundException notFoundError(final ThirdEyeStatus status,
+      final Object... args) {
+    return notFoundError(statusResponse(status, args));
+  }
+
+  public static NotFoundException notFoundError(final StatusListApi response) {
+    return new NotFoundException(Response
+        .status(Status.NOT_FOUND)
         .entity(response)
         .build()
     );

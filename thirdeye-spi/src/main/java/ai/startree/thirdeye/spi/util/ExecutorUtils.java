@@ -55,8 +55,7 @@ public class ExecutorUtils {
         // failed to terminate. shutdown all active tasks now.
         final List<Runnable> runnables = executorService.shutdownNow();
         if (!runnables.isEmpty()) {
-          LOG.error(String.format("%d tasks pending. Trying one last time.",
-              runnables.size()));
+          LOG.error("{} tasks pending. Trying one last time.", runnables.size());
         }
 
         // Wait a while for tasks to respond to being cancelled
@@ -68,7 +67,7 @@ public class ExecutorUtils {
       // Interrupt all currently executing tasks for the last time
       final List<Runnable> runnables = executorService.shutdownNow();
       if (!runnables.isEmpty()) {
-        LOG.error(String.format("%d tasks still running. Thread interrupted!", runnables.size()));
+        LOG.error("{} tasks still running. Thread interrupted!", runnables.size());
       }
       Thread.currentThread().interrupt();
     }

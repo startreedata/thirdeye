@@ -30,7 +30,6 @@ import ai.startree.thirdeye.ThirdEyeServerModule;
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.alert.EvaluationContextProcessor;
 import ai.startree.thirdeye.auth.AuthorizationManager;
-import ai.startree.thirdeye.auth.NamespaceResolver;
 import ai.startree.thirdeye.datalayer.DataSourceBuilder;
 import ai.startree.thirdeye.datalayer.DatabaseClient;
 import ai.startree.thirdeye.datalayer.DatabaseOrm;
@@ -64,6 +63,7 @@ import ai.startree.thirdeye.scheduler.events.MockEventsLoader;
 import ai.startree.thirdeye.scheduler.job.DetectionPipelineJob;
 import ai.startree.thirdeye.scheduler.job.NotificationPipelineJob;
 import ai.startree.thirdeye.service.CrudService;
+import ai.startree.thirdeye.service.NamespaceService;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer.ThirdEyeAuthorizerFactory;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
@@ -187,7 +187,6 @@ public class ArchitectureTest {
         TaskManagerImpl.class,
         AlertManagerImpl.class,
         DataSourceOnboarder.class, // OK - REVIEWED ON APRIL 12 2024
-        NamespaceResolver.class,
         EvaluationContextProcessor.class,
         AlertTemplateRenderer.class,
         AuthorizationManager.class // OK - REVIEW ON MAY 6 2024
@@ -255,10 +254,10 @@ public class ArchitectureTest {
         .doNotImplement(ThirdEyeAuthorizerFactory.class)
         .and()
         .doNotBelongToAnyOf(AuthorizationManager.class, ThirdEyeServerModule.class,
-            PluginLoader.class)
+            PluginLoader.class, NamespaceService.class)
         .should()
         .accessClassesThat()
-        .implement(ThirdEyeAuthorizer.class);
+        .areAssignableTo(ThirdEyeAuthorizer.class);
 
     rule.check(thirdeyeClasses);
   }

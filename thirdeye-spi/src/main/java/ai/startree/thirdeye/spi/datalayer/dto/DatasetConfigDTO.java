@@ -95,6 +95,8 @@ public class DatasetConfigDTO extends AbstractDTO {
    * Configuration for non-additive dataset
    **/
   // By default, every dataset is additive and this section of configurations should be ignored.
+  @Deprecated
+  @JsonIgnore
   private boolean additive = true;
 
   // We assume that non-additive dataset has a default TOP dimension value, which is specified via preAggregatedKeyword,
@@ -108,6 +110,8 @@ public class DatasetConfigDTO extends AbstractDTO {
   private List<String> dimensionsHaveNoPreAggregation = Collections.emptyList();
 
   // The pre-aggregated keyword
+  @Deprecated
+  @JsonIgnore
   private String preAggregatedKeyword = DEFAULT_PREAGGREGATED_DIMENSION_VALUE;
 
   @Deprecated
@@ -229,10 +233,12 @@ public class DatasetConfigDTO extends AbstractDTO {
     return this;
   }
 
+  @Deprecated
   public boolean isAdditive() {
     return additive;
   }
 
+  @Deprecated
   public DatasetConfigDTO setAdditive(boolean additive) {
     this.additive = additive;
     return this;
@@ -248,10 +254,12 @@ public class DatasetConfigDTO extends AbstractDTO {
     return this;
   }
 
+  @Deprecated
   public String getPreAggregatedKeyword() {
     return preAggregatedKeyword;
   }
 
+  @Deprecated
   public DatasetConfigDTO setPreAggregatedKeyword(String preAggregatedKeyword) {
     this.preAggregatedKeyword = preAggregatedKeyword;
     return this;

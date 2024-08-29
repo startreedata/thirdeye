@@ -14,7 +14,6 @@
  */
 import { Box, Chip, Link, Typography } from "@material-ui/core";
 import { GridColumns, GridSortModel } from "@mui/x-data-grid";
-import { useQuery } from "@tanstack/react-query";
 import React, { FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -31,6 +30,7 @@ import { StyledDataGrid } from "../../data-grid/styled-data-grid.component";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { TaskTableProps } from "./task-table.interfaces";
+import { useFetchQuery } from "../../../rest/hooks/useFetchQuery";
 
 export const TasksTable: FunctionComponent<TaskTableProps> = ({
     alertId,
@@ -50,7 +50,7 @@ export const TasksTable: FunctionComponent<TaskTableProps> = ({
         data: tasks,
         isLoading,
         isError,
-    } = useQuery({
+    } = useFetchQuery({
         queryKey: ["tasks", "alert", alertId, start, end],
         queryFn: () => {
             return getTasks({

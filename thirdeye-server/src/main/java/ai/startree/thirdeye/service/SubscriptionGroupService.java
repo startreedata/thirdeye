@@ -110,10 +110,11 @@ public class SubscriptionGroupService extends
 
     // For new Subscription Group or existing Subscription Group with different name
     if (existing == null || !existing.getName().equals(api.getName())) {
-      final List<SubscriptionGroupDTO> sameName = dtoManager.findByName(api.getName());
-      final List<SubscriptionGroupDTO> sameNameSameNamespace = authorizationManager.filterByNamespace(principal,
-          optional(api.getAuth()).map(AuthorizationConfigurationApi::getNamespace).orElse(null), sameName);
-      ensure(sameNameSameNamespace.isEmpty(), ERR_DUPLICATE_NAME, api.getName());
+      final SubscriptionGroupDTO sameNameSameNamespace = dtoManager.findUniqueByNameAndNamespace(api.getName(),
+          optional(api.getAuth()).map(AuthorizationConfigurationApi::getNamespace)
+              .orElse(authorizationManager.currentNamespace(principal))
+          );
+      ensure(sameNameSameNamespace == null, ERR_DUPLICATE_NAME, api.getName());
     }
     optional(api.getAlertAssociations())
         .ifPresent(l -> l.forEach(SubscriptionGroupService::validateAlertAssociation));
@@ -179,7 +180,7 @@ public class SubscriptionGroupService extends
   public SubscriptionGroupApi reset(final ThirdEyePrincipal principal, Long id) {
     final SubscriptionGroupDTO sg = getDto(id);
     sg.setVectorClocks(null);
-    // todo authz ensureCanEdit is used to also go through related entities - but it's not a great design - consider related entities should be done in the Service? 
+    authorizationManager.ensureNamespace(principal, sg);
     authorizationManager.ensureCanEdit(principal, sg, sg);
     dtoManager.save(sg);
 
@@ -188,6 +189,7 @@ public class SubscriptionGroupService extends
 
   public void sendTestMessage(final ThirdEyePrincipal principal, final Long id) {
     final SubscriptionGroupDTO sg = getDto(id);
+    authorizationManager.ensureNamespace(principal, sg);
     // no need to check read access of all associated alerts, because the test message should not use alerts. 
     // todo authz change role?
     authorizationManager.ensureCanRead(principal, sg);

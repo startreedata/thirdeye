@@ -44,7 +44,7 @@ export const Summary = ({
     anomalies,
     previousPeriodAnomalies,
     topAlert,
-    alertsConfigured,
+    alertsCount,
     investigations,
     subscriptionGroups,
     selectedAnalysisPeriod,
@@ -60,7 +60,7 @@ export const Summary = ({
         selectedAnalysisPeriod,
         topAlert,
         investigations,
-        alertsConfigured,
+        alertsCount,
         subscriptionGroups,
         mostRecentlyInvestigatedAnomalyAlert,
     });

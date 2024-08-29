@@ -98,6 +98,22 @@ public class SelectQueryTranslatorTest {
   }
 
   @Test
+  public void testGetSqlWithStarIdentifier() {
+    final SelectQuery builder = new SelectQuery(TABLE).withDatabase(DATABASE)
+        .select(aggProjection("COUNT", List.of("*")));
+
+    final SelectQueryTranslator request = builder.build();
+    final String output = request.getSql(SQL_LANGUAGE, SQL_EXPRESSION_BUILDER);
+
+    // the * should not be quoted 
+    final String expected = String.format("SELECT COUNT(*) FROM \"%s\".\"%s\"",
+        DATABASE,
+        TABLE);
+
+    assertEquivalent(output, expected);
+  }
+
+  @Test
   public void testGetSqlWithProjectionWithOperationCharacterInName() {
     final SqlIdentifier columnWithMiddleDashIdentifier =  identifierOf("sub-category");
     final SelectQuery builder = new SelectQuery(TABLE).withDatabase(DATABASE)

@@ -288,7 +288,7 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
       try {
         outList.add(f.get(60, TimeUnit.SECONDS));
       } catch (final InterruptedException | TimeoutException | ExecutionException e) {
-        LOG.warn("Failed to convert MergedAnomalyResultDTO from bean: {}", e.toString());
+        LOG.warn("Failed to convert MergedAnomalyResultDTO from bean", e);
       }
     }
 
@@ -354,7 +354,26 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
     final List<AnomalyDTO> list = filter(new DaoFilter().setPredicate(predicate));
     return decorate(list);
   }
-  
+
+  @Override
+  public List<AnomalyDTO> filterWithNamespace(final @NonNull AnomalyFilter anomalyFilter,
+      final @Nullable String namespace) {
+    final Predicate predicate = Predicate.AND(
+        toPredicate(anomalyFilter),
+        Predicate.OR(
+            Predicate.EQ("namespace", namespace),
+            // existing entities are not migrated automatically so they can have their namespace column to null in the index table, even if they do belong to a namespace 
+            //  todo cyril authz - prepare migration scripts - or some logic to ensure all entities are eventually migrated
+            Predicate.EQ("namespace", null)
+        )
+    );
+    final List<AnomalyDTO> list = filter(new DaoFilter().setPredicate(predicate))
+        .stream()
+        // we still need to perform in-app filtering until all entities namespace are migrated in db - see above
+        .filter(e -> Objects.equals(e.namespace(), namespace)).toList();
+    return decorate(list);
+  }
+
   @Override
   public long count(final @NonNull AnomalyFilter filter) {
     Predicate finalPredicate = toPredicate(filter);

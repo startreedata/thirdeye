@@ -143,7 +143,7 @@ public class CalciteUtils {
       final SqlParser.Config sqlParserConfig) {
     // calcite parser cannot recognize * as a valid expression
     if (sqlExpression.equals("*")) {
-      return identifierOf(sqlExpression);
+      return SqlIdentifier.STAR;
     }
     SqlParser sqlParser = SqlParser.create(sqlExpression, sqlParserConfig);
     try {

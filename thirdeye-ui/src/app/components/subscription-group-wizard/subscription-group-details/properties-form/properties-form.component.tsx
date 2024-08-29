@@ -18,6 +18,7 @@ import {
     CardContent,
     CardHeader,
     Grid,
+    Switch,
     TextField,
 } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
@@ -25,10 +26,11 @@ import { useTranslation } from "react-i18next";
 import { CronEditor } from "../../../cron-editor-v1/cron-editor-v1.component";
 import { InputSection } from "../../../form-basics/input-section/input-section.component";
 import { PropertiesFormProps } from "./properties-form.interfaces";
+import { InfoLabel } from "../../../info-label/info-label.component";
 
 // Refer: SubscriptionGroupPropertiesForm
 export const PropertiesForm: FunctionComponent<PropertiesFormProps> = ({
-    values: { name, cron },
+    values: { name, cron, notifyHistoricalAnomalies },
     onChange,
     customHeader,
 }) => {
@@ -40,6 +42,12 @@ export const PropertiesForm: FunctionComponent<PropertiesFormProps> = ({
 
     const handleUpdateName = (name: string): void => {
         onChange((stateProp) => ({ ...stateProp, name }));
+    };
+
+    const handleUpdateNotifyHistoricAnomalies = (
+        notifyHistoricalAnomalies: boolean
+    ): void => {
+        onChange((stateProp) => ({ ...stateProp, notifyHistoricalAnomalies }));
     };
 
     return (
@@ -76,6 +84,26 @@ export const PropertiesForm: FunctionComponent<PropertiesFormProps> = ({
                     <CronEditor
                         cron={cron}
                         handleUpdateCron={handleUpdateCron}
+                    />
+                    <InputSection
+                        inputComponent={
+                            <Switch
+                                defaultChecked={!!notifyHistoricalAnomalies}
+                                onChange={(e) => {
+                                    handleUpdateNotifyHistoricAnomalies(
+                                        e.target.checked
+                                    );
+                                }}
+                            />
+                        }
+                        labelComponent={
+                            <InfoLabel
+                                label={t("label.notifyHistoricalAnomalies")}
+                                tooltipText={t(
+                                    "info.notifyHistoricalAnomalies"
+                                )}
+                            />
+                        }
                     />
                 </CardContent>
             </Card>

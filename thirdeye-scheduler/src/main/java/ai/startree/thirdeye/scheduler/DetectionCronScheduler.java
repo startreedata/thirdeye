@@ -96,7 +96,7 @@ public class DetectionCronScheduler implements Runnable {
 
   private void processAlert(final AlertDTO alert) {
     if (!alert.isActive()) {
-      LOG.debug("Alert: " + alert.getId() + " is inactive. Skipping.");
+      LOG.debug("Alert: {} is inactive. Skipping.", alert.getId());
       return;
     }
 
@@ -109,9 +109,7 @@ public class DetectionCronScheduler implements Runnable {
           .withIdentity(alertJobKey)
           .build();
       if (scheduler.checkExists(alertJobKey)) {
-        LOG.info(String.format("Alert %s is already scheduled for detection",
-            alertJobKey.getName()));
-
+        LOG.info("Alert {} is already scheduled for detection", alertJobKey.getName());
         if (isJobUpdated(alert, alertJobKey)) {
           restartJob(alert, detectionJob);
         }
@@ -174,7 +172,7 @@ public class DetectionCronScheduler implements Runnable {
         .withSchedule(cronScheduleBuilder)
         .build();
     scheduler.scheduleJob(job, trigger);
-    LOG.info(String.format("scheduled detection pipeline job %s", job.getKey().getName()));
+    LOG.info("Scheduled detection pipeline job " + job.getKey().getName());
   }
 
   public void stopJob(final JobKey jobKey) throws SchedulerException {
@@ -183,7 +181,7 @@ public class DetectionCronScheduler implements Runnable {
           "Cannot stop detection pipeline " + jobKey.getName() + ", it has not been scheduled");
     }
     scheduler.deleteJob(jobKey);
-    LOG.info("Stopped detection pipeline {}", jobKey.getName());
+    LOG.info("Stopped detection pipeline " + jobKey.getName());
   }
 
   public String getJobKey(final Long id, final TaskType taskType) {

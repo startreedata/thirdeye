@@ -106,7 +106,7 @@ public class GenericDataFetcher implements DataFetcher<DataFetcherSpec> {
     this.thirdEyeDataSource = requireNonNull(dataSourceCache
         .getDataSource(dataSourceDto), "data source is unavailable");
 
-    if (!dataFetcherSpec.getTimeseriesFilters().isEmpty()) {
+    if (dataFetcherSpec.isEnableFilterInjection() && !dataFetcherSpec.getTimeseriesFilters().isEmpty()) {
       checkArgument(tableName != null,
           "tableName is not set in DataFetcherSpec. Cannot inject filters without tableName");
       this.timeseriesFilters = dataFetcherSpec.getTimeseriesFilters()

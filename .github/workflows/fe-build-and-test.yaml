@@ -27,11 +27,9 @@ jobs:
           cache: "npm"
           cache-dependency-path: './thirdeye-ui/package-lock.json'
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run tests
-        run: npm run test
-
-      - name: Build
-        run: npm run build
+      - name: Install dependencies, run test, and build
+        run: |
+          cd thirdeye-ui
+          npm ci
+          npm run test
+          npm run build

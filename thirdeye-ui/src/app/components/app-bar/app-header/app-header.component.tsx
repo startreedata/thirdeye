@@ -34,7 +34,7 @@ export const Appheader = ({
         isFullScreen,
         navBarMinimized,
     })();
-    const handleWorkspaceChange = (event: { target: { value: any } }): void => {
+    const handleChange = (event: { target: { value: any } }): void => {
         onWorkspaceChange({ id: event.target.value });
     };
 
@@ -49,7 +49,7 @@ export const Appheader = ({
                             displayEmpty
                             className={compoenentStyles.selectEmpty}
                             value={selectedWorkspace?.id}
-                            onChange={handleWorkspaceChange}
+                            onChange={handleChange}
                         >
                             {workspaces &&
                                 workspaces.map(({ id }): ReactElement => {

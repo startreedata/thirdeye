@@ -6,6 +6,7 @@ on:
       - '!master'
     paths:
       - thirdeye-ui/**
+  workflow_dispatch:
 
 jobs:
   build-and-test:

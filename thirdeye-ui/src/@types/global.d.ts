@@ -12,19 +12,5 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
-export const getEnv = (): string | undefined => {
-    if (VERCEL_ENV === "true") {
-        return "vercel";
-    } else {
-        return "";
-    }
-};
-
-export const getBaseUrl = (): string | undefined => {
-    if (getEnv() === "vercel") {
-        return VERCEL_DEPLOYMENT_API_URL;
-    } else {
-        return "";
-    }
-};
+declare const VERCEL_ENV: string;
+declare const VERCEL_DEPLOYMENT_API_URL: string;

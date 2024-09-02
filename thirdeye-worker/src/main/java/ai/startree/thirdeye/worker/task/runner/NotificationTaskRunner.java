@@ -22,7 +22,6 @@ import ai.startree.thirdeye.notification.NotificationTaskFilter;
 import ai.startree.thirdeye.notification.NotificationTaskPostProcessor;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
-import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.NotificationSpecDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
@@ -31,9 +30,6 @@ import ai.startree.thirdeye.worker.task.DetectionAlertTaskInfo;
 import ai.startree.thirdeye.worker.task.TaskContext;
 import ai.startree.thirdeye.worker.task.TaskResult;
 import ai.startree.thirdeye.worker.task.TaskRunner;
-import com.codahale.metrics.Counter;
-import com.codahale.metrics.Histogram;
-import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.micrometer.core.instrument.Metrics;
@@ -54,43 +50,26 @@ public class NotificationTaskRunner implements TaskRunner {
   private static final Logger LOG = LoggerFactory.getLogger(NotificationTaskRunner.class);
 
   private final SubscriptionGroupManager subscriptionGroupManager;
-  private final AnomalyManager anomalyManager;
   private final NotificationDispatcher notificationDispatcher;
   private final NotificationPayloadBuilder notificationPayloadBuilder;
   private final NotificationTaskFilter notificationTaskFilter;
   private final NotificationTaskPostProcessor notificationTaskPostProcessor;
 
-  @Deprecated
-  private final Counter notificationTaskSuccessCounter;
-  @Deprecated
-  private final Counter notificationTaskCounter;
-  @Deprecated
-  private final Histogram notificationTaskDuration;
   private final Timer notificationTaskTimerOfSuccess;
   private final Timer notificationTaskTimerOfException;
 
   @Inject
   public NotificationTaskRunner(
       final SubscriptionGroupManager subscriptionGroupManager,
-      final AnomalyManager anomalyManager,
-      final MetricRegistry metricRegistry,
       final NotificationDispatcher notificationDispatcher,
       final NotificationPayloadBuilder notificationPayloadBuilder,
       final NotificationTaskFilter notificationTaskFilter,
       final NotificationTaskPostProcessor notificationTaskPostProcessor) {
     this.subscriptionGroupManager = subscriptionGroupManager;
-    this.anomalyManager = anomalyManager;
     this.notificationDispatcher = notificationDispatcher;
     this.notificationPayloadBuilder = notificationPayloadBuilder;
     this.notificationTaskFilter = notificationTaskFilter;
     this.notificationTaskPostProcessor = notificationTaskPostProcessor;
-
-    // deprecated - use thirdeye_notification_task
-    notificationTaskCounter = metricRegistry.counter("notificationTaskCounter");
-    // deprecated - use thirdeye_notification_task
-    notificationTaskSuccessCounter = metricRegistry.counter("notificationTaskSuccessCounter");
-    // deprecated - use thirdeye_notification_task
-    notificationTaskDuration = metricRegistry.histogram("notificationTaskDuration");
 
     final String description = "Start: a task is started from an input subscription group id. End: the task execution is finished. Tag exception=true means an exception was thrown by the method call.";
     this.notificationTaskTimerOfSuccess = Timer.builder("thirdeye_notification_task")
@@ -124,14 +103,8 @@ public class NotificationTaskRunner implements TaskRunner {
   public List<TaskResult> execute(final long subscriptionGroupId) throws Exception {
     return record(
         () -> {
-          final long tStart = System.currentTimeMillis();
-          notificationTaskCounter.inc();
-
           final SubscriptionGroupDTO sg = getSubscriptionGroupDTO(subscriptionGroupId);
-
           executeInternal(sg);
-          notificationTaskSuccessCounter.inc();
-          notificationTaskDuration.update(System.currentTimeMillis() - tStart);
           return Collections.emptyList();
         },
         notificationTaskTimerOfSuccess, 

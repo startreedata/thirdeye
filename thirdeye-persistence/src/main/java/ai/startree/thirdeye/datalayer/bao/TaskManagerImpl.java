@@ -13,7 +13,6 @@
  */
 package ai.startree.thirdeye.datalayer.bao;
 
-import static ai.startree.thirdeye.spi.Constants.METRICS_CACHE_TIMEOUT;
 import static ai.startree.thirdeye.spi.Constants.TASK_EXPIRY_DURATION;
 import static ai.startree.thirdeye.spi.Constants.TASK_MAX_DELETES_PER_CLEANUP;
 import static ai.startree.thirdeye.spi.Constants.TWO_DIGITS_FORMATTER;
@@ -30,9 +29,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskInfo;
 import ai.startree.thirdeye.spi.task.TaskStatus;
 import ai.startree.thirdeye.spi.task.TaskType;
-import com.codahale.metrics.CachedGauge;
-import com.codahale.metrics.Meter;
-import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -48,6 +44,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nullable;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.joda.time.DateTime;
@@ -57,20 +54,18 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public class TaskManagerImpl implements TaskManager {
-  
+
   private final TaskDao dao;
 
   private static final Logger LOG = LoggerFactory.getLogger(TaskManagerImpl.class);
 
-  private final Meter orphanTasksCount;
-  private final MetricRegistry metricRegistry;
+  private final AtomicInteger orphanTasksCountMetric;
 
   @Inject
-  public TaskManagerImpl(final TaskDao dao,
-      final MetricRegistry metricRegistry) {
+  public TaskManagerImpl(final TaskDao dao) {
     this.dao = dao;
-    orphanTasksCount = metricRegistry.meter("orphanTasksCount");
-    this.metricRegistry = metricRegistry;
+    orphanTasksCountMetric = Metrics.globalRegistry.gauge("thirdeye_task_orphans",
+        new AtomicInteger(0));
     registerMetrics();
   }
 
@@ -104,12 +99,13 @@ public class TaskManagerImpl implements TaskManager {
             Predicate.EQ("status", TaskStatus.WAITING.toString())
         ))
     );
-    
+
     // debugging logs TODO cyril remove 
     if (!tasksInQueue.isEmpty()) {
-      LOG.warn("Task {} is already running or waiting in the queue. Found the tasks {}: ", taskName, tasksInQueue);
+      LOG.warn("Task {} is already running or waiting in the queue. Found the tasks {}: ", taskName,
+          tasksInQueue);
     }
-    
+
     return !tasksInQueue.isEmpty();
   }
 
@@ -223,21 +219,20 @@ public class TaskManagerImpl implements TaskManager {
   @Override
   public void orphanTaskCleanUp(final Timestamp activeThreshold) {
     final long current = System.currentTimeMillis();
-    findByPredicate(
+    final List<TaskDTO> orphanTasks = findByPredicate(
         Predicate.AND(
             Predicate.EQ("status", TaskStatus.RUNNING.toString()),
             Predicate.LT("lastActive", activeThreshold)
         )
-    ).forEach(task -> {
-          updateStatusAndTaskEndTime(
-              task.getId(),
-              TaskStatus.RUNNING,
-              TaskStatus.FAILED,
-              current,
-              String.format("Orphan Task. Worker id : %s", task.getWorkerId())
-          );
-          orphanTasksCount.mark();
-        }
+    );
+    orphanTasksCountMetric.set(orphanTasks.size());
+    orphanTasks.forEach(task -> updateStatusAndTaskEndTime(
+            task.getId(),
+            TaskStatus.RUNNING,
+            TaskStatus.FAILED,
+            current,
+            String.format("Orphan Task. Worker id : %s", task.getWorkerId())
+        )
     );
   }
 
@@ -252,40 +247,10 @@ public class TaskManagerImpl implements TaskManager {
   }
 
   private void registerMetrics() {
-    // deprecated - use thirdeye_tasks
-    metricRegistry.register("taskCountTotal",
-        new CachedGauge<Long>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
-          @Override
-          protected Long loadValue() {
-            return count();
-          }
-        });
-
-    // deprecated - use thirdeye_task_latency
-    metricRegistry.register("detectionTaskLatencyInMillis",
-        new CachedGauge<Long>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
-          @Override
-          protected Long loadValue() {
-            return getTaskLatency(TaskType.DETECTION);
-          }
-        });
-
-    // deprecated - use thirdeye_task_latency
-    metricRegistry.register("notificationTaskLatencyInMillis",
-        new CachedGauge<Long>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
-          @Override
-          protected Long loadValue() {
-            return getTaskLatency(TaskType.NOTIFICATION);
-          }
-        });
-
-    for (final TaskStatus status : TaskStatus.values()) {
-      registerStatusMetric(status);
-    }
-
     for (final TaskType type : TaskType.values()) {
       Gauge.builder("thirdeye_task_latency",
               memoizeWithExpiration(() -> getTaskLatency(type), 1, TimeUnit.MINUTES))
+          .tags("type", type.toString())
           .register(Metrics.globalRegistry);
       for (final TaskStatus status : TaskStatus.values()) {
         Gauge.builder("thirdeye_tasks",
@@ -311,17 +276,6 @@ public class TaskManagerImpl implements TaskManager {
         // Calculate latency as max value of (current time) - (task creation time) from the filtered tasks
         .map(task -> currentTime - task.getCreateTime().getTime())
         .max(Long::compare).orElse(0L);
-  }
-
-  private void registerStatusMetric(final TaskStatus status) {
-    // deprecated - use thirdeye_tasks
-    metricRegistry.register(String.format("taskCount_%s", status),
-        new CachedGauge<Long>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
-          @Override
-          protected Long loadValue() {
-            return countByStatus(status);
-          }
-        });
   }
 
   @Override

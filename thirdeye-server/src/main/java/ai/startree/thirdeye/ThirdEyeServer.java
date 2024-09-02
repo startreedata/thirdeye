@@ -129,10 +129,7 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
     final DataSource dataSource = new DataSourceBuilder()
         .build(configuration.getDatabaseConfiguration());
 
-    injector = Guice.createInjector(new ThirdEyeServerModule(
-        configuration,
-        dataSource,
-        env.metrics()));
+    injector = Guice.createInjector(new ThirdEyeServerModule(configuration, dataSource));
 
     // Load plugins
     optional(thirdEyePluginDirOverride())

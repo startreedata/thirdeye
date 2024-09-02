@@ -60,8 +60,6 @@ import io.micrometer.core.instrument.binder.jvm.JvmThreadMetrics;
 import io.micrometer.core.instrument.binder.system.ProcessorMetrics;
 import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
-import io.prometheus.client.CollectorRegistry;
-import io.prometheus.client.dropwizard.DropwizardExports;
 import io.sentry.Hint;
 import io.sentry.Sentry;
 import io.sentry.SentryLevel;
@@ -161,7 +159,6 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
         .orElse("unknown");
     // Expose dropwizard metrics in prometheus compatible format
     if (configuration.getPrometheusConfiguration().isEnabled()) {
-      // new registry based on micrometers
       final PrometheusMeterRegistry registry = new PrometheusMeterRegistry(
           PrometheusConfig.DEFAULT);
       Metrics.globalRegistry.add(registry);
@@ -185,11 +182,8 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
       new ProcessorMetrics().bindTo(registry);
       new JvmThreadMetrics().bindTo(registry);
 
-      // old registry based on dropwizard-metrics
-      final CollectorRegistry legacyRegistry = new CollectorRegistry();
-      legacyRegistry.register(new DropwizardExports(env.metrics()));
       env.admin()
-          .addServlet("prometheus", new MergingMetricsServlet(registry, legacyRegistry))
+          .addServlet("prometheus", new MicrometerPrometheusServlet(registry))
           .addMapping("/prometheus");
     }
     Gauge.builder("thirdeye_version_info", () -> 1)

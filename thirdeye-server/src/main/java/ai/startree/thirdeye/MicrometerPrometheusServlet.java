@@ -14,58 +14,31 @@
 package ai.startree.thirdeye;
 
 import io.micrometer.prometheus.PrometheusMeterRegistry;
-import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.exporter.common.TextFormat;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-/**
- * Temporary classes that merges old metrics from dropwizard-metrics and new metrics from micrometers
- */
-public class MergingMetricsServlet extends HttpServlet {
+public class MicrometerPrometheusServlet extends HttpServlet {
 
   private final PrometheusMeterRegistry promRegistry;
-  // based on dropwizard metrics and prometheus client
-  private final CollectorRegistry legacyRegistry;
 
-  public MergingMetricsServlet(final PrometheusMeterRegistry newRegistry, final
-  CollectorRegistry legacyRegistry) {
+  public MicrometerPrometheusServlet(final PrometheusMeterRegistry newRegistry) {
     this.promRegistry = newRegistry;
-    this.legacyRegistry = legacyRegistry;
   }
 
   @Override
-  protected void doGet(final HttpServletRequest req, final HttpServletResponse resp)
-      throws ServletException, IOException {
+  protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
     resp.setStatus(200);
     String contentType = TextFormat.chooseContentType(req.getHeader("Accept"));
     resp.setContentType(contentType);
     try (Writer writer = new BufferedWriter(resp.getWriter())) {
       String scrape = promRegistry.scrape(contentType);
-      // in the openmetrics-text format, there is an end of file token - remove it before writing the second part of metrics
-      if (scrape.endsWith("# EOF\n")) {
-        scrape = scrape.substring(0, scrape.length() - 6);
-      }
       writer.write(scrape);
       writer.flush();
-      TextFormat.writeFormat(contentType, writer,
-          this.legacyRegistry.filteredMetricFamilySamples(this.parse(req)));
-      writer.flush();
     }
-  }
-
-  private Set<String> parse(HttpServletRequest req) {
-    String[] includedParam = req.getParameterValues("name[]");
-    return (Set) (includedParam == null ? Collections.emptySet()
-        : new HashSet(Arrays.asList(includedParam)));
   }
 }

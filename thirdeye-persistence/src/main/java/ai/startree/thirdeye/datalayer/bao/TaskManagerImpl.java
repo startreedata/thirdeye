@@ -262,7 +262,7 @@ public class TaskManagerImpl implements TaskManager {
     }
   }
 
-  // FIXME CYRIL - this should have as less cache as possible and as precise as possible - so it should be a direct query to the index table
+  // FIXME CYRIL - this should have as less cache as possible and as precise as possible
   private long getTaskLatency(final TaskType type) {
     // fetch pending tasks from DB of the given type
     final List<TaskStatus> pendingStatus = List.of(TaskStatus.WAITING, TaskStatus.RUNNING);

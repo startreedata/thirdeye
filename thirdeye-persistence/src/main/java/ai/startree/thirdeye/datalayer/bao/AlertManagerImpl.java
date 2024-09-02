@@ -21,8 +21,6 @@ import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
-import com.codahale.metrics.CachedGauge;
-import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Supplier;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -38,24 +36,14 @@ public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
     AlertManager {
 
   @Inject
-  public AlertManagerImpl(final GenericPojoDao genericPojoDao,
-      final MetricRegistry metricRegistry) {
+  public AlertManagerImpl(final GenericPojoDao genericPojoDao) {
     super(AlertDTO.class, genericPojoDao);
-    // TODO CYRIL micrometer migration - test for CachedGauge   
     Gauge.builder("thirdeye_active_alerts",
             memoizeWithExpiration(this::countActive, METRICS_CACHE_TIMEOUT.toMinutes(),
                 TimeUnit.MINUTES))
         .register(Metrics.globalRegistry);
-    // deprecated - use thirdeye_active_alerts above
-    metricRegistry.register("activeAlertsCount",
-        new CachedGauge<Long>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
-          @Override
-          public Long loadValue() {
-            return countActive();
-          }
-        });
 
-    Supplier<Number> activeTimeseriesCountFun = () -> {
+    final Supplier<Number> activeTimeseriesCountFun = () -> {
       final List<AlertDTO> activeAlerts = findAllActive();
       return activeAlerts.stream()
           // Assumes dangling enumeration items are handled and only linked items are present in DB
@@ -67,13 +55,6 @@ public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
     Gauge.builder("thirdeye_active_timeseries",
             memoizeWithExpiration(activeTimeseriesCountFun, 15, TimeUnit.MINUTES))
         .register(Metrics.globalRegistry);
-    // deprecated - use thirdeye_active_timeseries above
-    metricRegistry.register("activeTimeseriesMonitoredCount",
-        new CachedGauge<Number>(15, TimeUnit.MINUTES) {
-          @Override
-          protected Number loadValue() {
-            return activeTimeseriesCountFun.get();}
-        });
   }
 
   @Override
@@ -117,7 +98,7 @@ public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
                 Predicate.OR(
                     Predicate.EQ("namespace", namespace),
                     // existing entities are not migrated automatically so they can have their namespace column to null in the index table, even if they do belong to a namespace 
-                    //  todo cyril authz - prepare migration scripts - or some logic to ensure all entities are eventually migrated
+                    //  todo cyril authz - ensure all entities are eventually migrated - then remove this
                     Predicate.EQ("namespace", null)
                 )
             ))

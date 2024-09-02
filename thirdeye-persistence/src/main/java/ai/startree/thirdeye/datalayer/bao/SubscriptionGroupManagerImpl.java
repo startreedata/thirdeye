@@ -19,8 +19,6 @@ import static com.google.common.base.Suppliers.memoizeWithExpiration;
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
-import com.codahale.metrics.CachedGauge;
-import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Supplier;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -34,30 +32,17 @@ public class SubscriptionGroupManagerImpl extends
     AbstractManagerImpl<SubscriptionGroupDTO> implements SubscriptionGroupManager {
 
   @Inject
-  public SubscriptionGroupManagerImpl(final GenericPojoDao genericPojoDao,
-      final MetricRegistry metricRegistry) {
+  public SubscriptionGroupManagerImpl(final GenericPojoDao genericPojoDao) {
     super(SubscriptionGroupDTO.class, genericPojoDao);
-    registerMetrics(metricRegistry);
-  }
-
-  private void registerMetrics(final MetricRegistry metricRegistry) {
     final Supplier<Number> notificationFlowsFun = () -> findAll().stream()
         .filter(sg -> CollectionUtils.isNotEmpty(sg.getAlertAssociations()))
         .filter(sg -> CollectionUtils.isNotEmpty(sg.getSpecs()))
         .map(sg -> sg.getAlertAssociations().size() * sg.getSpecs().size())
         .reduce(0, Integer::sum);
-    
-    Gauge.builder("thirdeye_notification_flows",
-            memoizeWithExpiration( notificationFlowsFun,METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES))
-        .register(Metrics.globalRegistry);
 
-    // deprecated - use thirdeye_notification_flows
-    metricRegistry.register("notificationFlowCountTotal",
-        new CachedGauge<Number>(METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES) {
-          @Override
-          public Number loadValue() {
-            return notificationFlowsFun.get();
-          }
-        });
+    Gauge.builder("thirdeye_notification_flows",
+            memoizeWithExpiration(notificationFlowsFun, METRICS_CACHE_TIMEOUT.toMinutes(),
+                TimeUnit.MINUTES))
+        .register(Metrics.globalRegistry);
   }
 }

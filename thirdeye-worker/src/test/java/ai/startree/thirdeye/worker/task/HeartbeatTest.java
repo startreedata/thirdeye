@@ -28,7 +28,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.DetectionPipelineTaskInfo;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskStatus;
 import ai.startree.thirdeye.spi.task.TaskType;
-import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
@@ -137,7 +136,6 @@ public class HeartbeatTest {
         .setWorkerId(0)
         .setTaskManager(taskManager)
         .setTaskRunnerFactory(taskRunnerFactory)
-        .setMetricRegistry(new MetricRegistry())
         .setTaskDriverThreadPoolManager(taskDriverThreadPoolManager);
   }
 

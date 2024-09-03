@@ -33,9 +33,6 @@ import ai.startree.thirdeye.spi.task.TaskInfo;
 import ai.startree.thirdeye.worker.task.TaskContext;
 import ai.startree.thirdeye.worker.task.TaskResult;
 import ai.startree.thirdeye.worker.task.TaskRunner;
-import com.codahale.metrics.Counter;
-import com.codahale.metrics.Histogram;
-import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.micrometer.core.instrument.Metrics;
@@ -58,21 +55,12 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
   private final AnomalyManager anomalyManager;
   private final PlanExecutor planExecutor;
   private final AlertTemplateRenderer alertTemplateRenderer;
-
-  @Deprecated
-  private final Counter detectionTaskExceptionCounter;
-  @Deprecated
-  private final Counter detectionTaskSuccessCounter;
-  @Deprecated
-  private final Counter detectionTaskCounter;
-  @Deprecated
-  private final Histogram detectionTaskDuration;
+  
   private final Timer detectionTaskTimerOfSuccess;
   private final Timer detectionTaskTimerOfException;
 
   @Inject
   public DetectionPipelineTaskRunner(final AlertManager alertManager,
-      final MetricRegistry metricRegistry,
       final AnomalyManager anomalyManager,
       final PlanExecutor planExecutor,
       final AlertTemplateRenderer alertTemplateRenderer) {
@@ -80,16 +68,6 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
     this.anomalyManager = anomalyManager;
     this.planExecutor = planExecutor;
     this.alertTemplateRenderer = alertTemplateRenderer;
-
-    // TODO CYRIL WARNING - REMOVE AT THE END OF THE MIGRATION TO MICROMETER ONLY - USED IN IMPORTANT PRODUCTION ALERTS
-    // deprecated metrics - use thirdeye_detection_task
-    detectionTaskExceptionCounter = metricRegistry.counter("detectionTaskExceptionCounter");
-    detectionTaskCounter = metricRegistry.counter("detectionTaskCounter");
-    
-    // TODO CYRIL micrometer - safe to remove if not used by distribution users
-    // deprecated metrics - use thirdeye_detection_task
-    detectionTaskSuccessCounter = metricRegistry.counter("detectionTaskSuccessCounter");
-    detectionTaskDuration = metricRegistry.histogram("detectionTaskDuration");
     
     this.detectionTaskTimerOfSuccess = Timer
         .builder("thirdeye_detection_task")
@@ -107,18 +85,13 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
   @Override
   public List<TaskResult> execute(final TaskInfo taskInfo, final TaskContext taskContext)
       throws Exception {
-    final long tStart = System.currentTimeMillis();
-    detectionTaskCounter.inc();
     final Timer.Sample sample = Timer.start(Metrics.globalRegistry);
     try {
       final List<TaskResult> result = execute0((DetectionPipelineTaskInfo) taskInfo);
       sample.stop(detectionTaskTimerOfSuccess);
-      detectionTaskSuccessCounter.inc();
-      detectionTaskDuration.update(System.currentTimeMillis() - tStart);
       return result;
     } catch (final Exception e) {
       sample.stop(detectionTaskTimerOfException);
-      detectionTaskExceptionCounter.inc();
       throw e;
     }
   }

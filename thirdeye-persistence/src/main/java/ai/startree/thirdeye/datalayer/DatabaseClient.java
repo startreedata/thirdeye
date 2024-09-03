@@ -15,8 +15,7 @@ package ai.startree.thirdeye.datalayer;
 
 import static ai.startree.thirdeye.datalayer.DataSourceBuilder.migrateDatabase;
 
-import com.codahale.metrics.Counter;
-import com.codahale.metrics.MetricRegistry;
+import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -37,21 +36,12 @@ public class DatabaseClient {
   private static final Logger LOG = LoggerFactory.getLogger(DatabaseClient.class);
 
   private final DataSource dataSource;
-  @Deprecated
-  private final Counter dbExceptionCounter;
-  @Deprecated
-  private final Counter dbCallCounter;
-  private final io.micrometer.core.instrument.Counter dbTransactionCounterOfSuccess;
-  private final io.micrometer.core.instrument.Counter dbTransactionCounterOfException;
+  private final Counter dbTransactionCounterOfSuccess;
+  private final Counter dbTransactionCounterOfException;
 
   @Inject
-  public DatabaseClient(final DataSource dataSource, final MetricRegistry metricRegistry) {
+  public DatabaseClient(final DataSource dataSource) {
     this.dataSource = dataSource;
-
-    // deprecated - use thirdeye_persistence_transaction_total
-    dbExceptionCounter = metricRegistry.counter("dbExceptionCounter");
-    // deprecated - use thirdeye_persistence_transaction_total
-    dbCallCounter = metricRegistry.counter("dbCallCounter");
     this.dbTransactionCounterOfSuccess = io.micrometer.core.instrument.Counter.builder(
             "thirdeye_persistence_transaction_total")
         .tag("exception", "false")
@@ -64,7 +54,6 @@ public class DatabaseClient {
 
   public <T> T executeTransaction(final DBOperation<T> operation, final T defaultReturn)
       throws SQLException {
-    dbCallCounter.inc();
     try (Connection connection = dataSource.getConnection()) {
       try {
         connection.setAutoCommit(false);
@@ -75,7 +64,6 @@ public class DatabaseClient {
       } catch (final Exception e) {
         LOG.error("Exception while executing query task", e);
         dbTransactionCounterOfException.increment();
-        dbExceptionCounter.inc();
         // Rollback transaction in case json table is updated but index table isn't due to any errors (duplicate key, etc.)
         if (connection != null) {
           try {

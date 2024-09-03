@@ -159,10 +159,6 @@
       <groupId>joda-time</groupId>
       <artifactId>joda-time</artifactId>
     </dependency>
-    <dependency>
-      <groupId>io.dropwizard.metrics</groupId>
-      <artifactId>metrics-core</artifactId>
-    </dependency>
 
     <!--reuse persistence MySQLTestDatabase class - need to import testcontainers and aspect todo cyril make all dependencies packaged together -->
     <dependency>

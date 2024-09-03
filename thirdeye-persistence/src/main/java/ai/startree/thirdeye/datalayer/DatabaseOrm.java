@@ -18,9 +18,6 @@ import ai.startree.thirdeye.datalayer.entity.AbstractIndexEntity;
 import ai.startree.thirdeye.datalayer.util.GenericResultSetMapper;
 import ai.startree.thirdeye.datalayer.util.SqlQueryBuilder;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
-import com.codahale.metrics.Counter;
-import com.codahale.metrics.Histogram;
-import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.micrometer.core.instrument.Metrics;
@@ -37,14 +34,6 @@ public class DatabaseOrm {
 
   private final SqlQueryBuilder sqlQueryBuilder;
   private final GenericResultSetMapper genericResultSetMapper;
-  @Deprecated // use thirdeye_db_crud_operation
-  private final Counter dbReadCallCounter;
-  @Deprecated // use thirdeye_db_crud_operation
-  private final Counter dbWriteCallCounter;
-  @Deprecated // use thirdeye_db_crud_operation
-  private final Histogram dbReadDuration;
-  @Deprecated // use thirdeye_db_crud_operation
-  private final Histogram dbWriteDuration;
   private final Timer dbCrudTimerOfCreate;
   private final Timer dbCrudTimerOfUpdate;
   private final Timer dbCrudTimerOfRead;
@@ -52,15 +41,9 @@ public class DatabaseOrm {
 
   @Inject
   public DatabaseOrm(final SqlQueryBuilder sqlQueryBuilder,
-      final GenericResultSetMapper genericResultSetMapper,
-      final MetricRegistry metricRegistry) {
+      final GenericResultSetMapper genericResultSetMapper) {
     this.sqlQueryBuilder = sqlQueryBuilder;
     this.genericResultSetMapper = genericResultSetMapper;
-
-    dbReadCallCounter = metricRegistry.counter("dbReadCallCounter");
-    dbWriteDuration = metricRegistry.histogram("dbWriteDuration");
-    dbWriteCallCounter = metricRegistry.counter("dbWriteCallCounter");
-    dbReadDuration = metricRegistry.histogram("dbReadDuration");
 
     final String description = "Persistence layer performance. Start: just before the statement creation. End: result of the query is returned or the query failed. The operation label contains the crud type.";
     this.dbCrudTimerOfCreate = Timer.builder("thirdeye_persistence_crud_operation")
@@ -96,7 +79,6 @@ public class DatabaseOrm {
       final Long offset, final Class<E> clazz, final Connection connection)
       throws Exception {
     final Timer.Sample sample = Timer.start(Metrics.globalRegistry);
-    final long tStart = System.nanoTime();
     try {
       try (final PreparedStatement selectStatement = sqlQueryBuilder
           .createFindByParamsStatementWithLimit(connection,
@@ -109,8 +91,6 @@ public class DatabaseOrm {
         }
       }
     } finally {
-      dbReadCallCounter.inc();
-      dbReadDuration.update(System.nanoTime() - tStart);
       sample.stop(dbCrudTimerOfRead);
     }
   }
@@ -118,7 +98,6 @@ public class DatabaseOrm {
   public <E extends AbstractEntity> Long save(final E entity, final Connection connection)
       throws Exception {
     final Timer.Sample sample = Timer.start(Metrics.globalRegistry);
-    final long tStart = System.nanoTime();
     try {
       try (final PreparedStatement baseTableInsertStmt = sqlQueryBuilder
           .createInsertStatement(connection, entity)) {
@@ -135,8 +114,6 @@ public class DatabaseOrm {
       }
       return null;
     } finally {
-      dbWriteCallCounter.inc();
-      dbWriteDuration.update(System.nanoTime() - tStart);
       sample.stop(dbCrudTimerOfCreate);
     }
   }
@@ -154,7 +131,6 @@ public class DatabaseOrm {
     }
     if (dbEntity != null) {
       final Timer.Sample sample = Timer.start(Metrics.globalRegistry);
-      final long tStart = System.nanoTime();
       entity.setCreateTime(dbEntity.getCreateTime());
       try {
         try (final PreparedStatement baseTableInsertStmt = sqlQueryBuilder
@@ -162,8 +138,6 @@ public class DatabaseOrm {
           return baseTableInsertStmt.executeUpdate();
         }
       } finally {
-        dbWriteCallCounter.inc();
-        dbWriteDuration.update(System.nanoTime() - tStart);
         sample.stop(dbCrudTimerOfUpdate);
       }
     }
@@ -178,15 +152,12 @@ public class DatabaseOrm {
       final Class<? extends AbstractEntity> entityClass, final Connection connection)
       throws Exception {
     final Timer.Sample sample = Timer.start(Metrics.globalRegistry);
-    final long tStart = System.nanoTime();
     try {
       try (final PreparedStatement baseTableDeleteStatement = sqlQueryBuilder
           .createDeleteStatement(connection, entityClass, predicate)) {
         return baseTableDeleteStatement.executeUpdate();
       }
     } finally {
-      dbWriteCallCounter.inc();
-      dbWriteDuration.update(System.nanoTime() - tStart);
       sample.stop(dbCrudTimerOfDelete);
     }
   }
@@ -195,7 +166,6 @@ public class DatabaseOrm {
       final Connection connection)
       throws Exception {
     final Timer.Sample sample = Timer.start(Metrics.globalRegistry);
-    final long tStart = System.nanoTime();
     try {
       try (final PreparedStatement selectStatement = sqlQueryBuilder
           .createCountStatement(connection,
@@ -209,8 +179,6 @@ public class DatabaseOrm {
       }
       return -1L;
     } finally {
-      dbReadCallCounter.inc();
-      dbReadDuration.update(System.nanoTime() - tStart);
       sample.stop(dbCrudTimerOfRead);
     }
   }
@@ -221,7 +189,6 @@ public class DatabaseOrm {
       final Class<E> clazz,
       final Connection connection) throws Exception {
     final Timer.Sample sample = Timer.start(Metrics.globalRegistry);
-    final long tStart = System.nanoTime();
     try {
       try (final PreparedStatement findMatchingIdsStatement = sqlQueryBuilder
           .createStatementFromSQL(connection,
@@ -233,8 +200,6 @@ public class DatabaseOrm {
         }
       }
     } finally {
-      dbReadCallCounter.inc();
-      dbReadDuration.update(System.nanoTime() - tStart);
       sample.stop(dbCrudTimerOfRead);
     }
   }

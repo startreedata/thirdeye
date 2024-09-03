@@ -89,7 +89,7 @@ public class NotificationTaskRunner implements TaskRunner {
         "Cannot find subscription group: " + id);
 
     if (sg.getProperties() == null) {
-      LOG.warn("Detection alert {} contains no properties", id);
+      LOG.warn("Subscription group {} contains no properties", id);
     }
     return sg;
   }

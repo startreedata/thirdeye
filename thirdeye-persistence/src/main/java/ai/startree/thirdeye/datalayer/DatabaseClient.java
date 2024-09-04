@@ -15,6 +15,8 @@ package ai.startree.thirdeye.datalayer;
 
 import static ai.startree.thirdeye.datalayer.DataSourceBuilder.migrateDatabase;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import java.sql.Connection;
@@ -24,8 +26,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

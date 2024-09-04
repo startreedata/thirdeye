@@ -1,3 +1,10 @@
+### [2.49.3](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.49.2...thirdeye-ui-2.49.3) (2024-09-04)
+
+
+### Bug Fixes
+
+* [TE-2418](https://cortexdata.atlassian.net/browse/TE-2418) fix preview load alert with single enum item ([4a5d38def](https://github.com/startreedata/thirdeye/commit/4a5d38defb8945874ea443d99adb60b75b5de2e5))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

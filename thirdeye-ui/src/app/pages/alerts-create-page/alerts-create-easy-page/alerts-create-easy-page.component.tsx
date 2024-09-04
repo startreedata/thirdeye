@@ -15,9 +15,11 @@
 import {
     Box,
     Button,
+    Chip,
     Divider,
     Grid,
     TextField,
+    Tooltip,
     Typography,
 } from "@material-ui/core";
 import { Alert, AlertTitle, Autocomplete } from "@material-ui/lab";
@@ -38,6 +40,7 @@ import {
     generateTemplateProperties,
     GranularityValue,
     GRANULARITY_OPTIONS,
+    GRANULARITY_OPTIONS_TOOLTIP,
 } from "../../../components/alert-wizard-v3/select-metric/select-metric.utils";
 import { ThresholdSetup } from "../../../components/alert-wizard-v3/threshold-setup/threshold-setup-v2.component";
 import { InputSectionV2 } from "../../../components/form-basics/input-section-v2/input-section-v2.component";
@@ -46,6 +49,7 @@ import { RadioSectionOptions } from "../../../components/form-basics/radio-secti
 import { TimeRangeButtonWithContext } from "../../../components/time-range/time-range-button-with-context/time-range-button.component";
 import { TimeRangeQueryStringKey } from "../../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import {
+    JSONEditorV1,
     PageContentsCardV1,
     PageContentsGridV1,
     PageHeaderActionsV1,
@@ -126,7 +130,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
     const [anomalyDetection, setAnomalyDetection] = useState<string | null>(
         null
     );
-
+    const [editedDatasource, setEditedDatasource] = useState({});
     const [algorithmOption, setAlgorithmOption] =
         useState<AvailableAlgorithmOption | null>(null);
 
@@ -206,9 +210,12 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         });
     }, [alertTemplates, alert, isMultiDimensionAlert]);
 
-    const handleGranularityChange = (item: GranularityValue): void => {
+    const handleGranularityChange = (
+        _: unknown,
+        item: { label: string; value: GranularityValue }
+    ): void => {
         const prevGranularity = granularity;
-        setGranularity(item);
+        setGranularity(item.value);
         if (
             prevGranularity &&
             granularity &&
@@ -238,24 +245,6 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
 
             setSearchParams(searchParams);
         }
-    };
-    const getGranularityOptions = (
-        values: {
-            label: string;
-            value: GranularityValue;
-        }[]
-    ): RadioSectionOptions[] => {
-        const options: RadioSectionOptions[] = [];
-        values.map((item) =>
-            options.push({
-                value: item.value,
-                label: item.label,
-                onClick: () => handleGranularityChange(item.value),
-                tooltipText: item.label,
-            })
-        );
-
-        return options.reverse();
     };
 
     const getAggregationOptions = (
@@ -400,6 +389,10 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
 
             return workingAlert;
         });
+
+    const handleMetricsChange = (value: string): void => {
+        setEditedDatasource(JSON.parse(value));
+    };
 
     const fetchAlertEvaluation = (start: number, end: number): void => {
         const copiedAlert = { ...alertConfigForPreview };
@@ -700,6 +693,16 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                 disabled={
                                                                     !selectedTable
                                                                 }
+                                                                groupBy={(
+                                                                    option
+                                                                ) =>
+                                                                    option ===
+                                                                    t(
+                                                                        "label.custom-metric-aggregation"
+                                                                    )
+                                                                        ? "Y"
+                                                                        : "N"
+                                                                }
                                                                 noOptionsText={t(
                                                                     "message.no-options-available-entity",
                                                                     {
@@ -710,14 +713,38 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                 )}
                                                                 options={
                                                                     selectedTable
-                                                                        ? selectedTable.metrics.map(
-                                                                              (
-                                                                                  m
-                                                                              ) =>
-                                                                                  m.name
-                                                                          )
+                                                                        ? (function () {
+                                                                              const a =
+                                                                                  selectedTable.metrics.map(
+                                                                                      (
+                                                                                          m
+                                                                                      ) =>
+                                                                                          m.name
+                                                                                  );
+                                                                              a.unshift(
+                                                                                  t(
+                                                                                      "label.custom-metric-aggregation"
+                                                                                  )
+                                                                              );
+
+                                                                              return a;
+                                                                          })()
                                                                         : []
                                                                 }
+                                                                renderGroup={(
+                                                                    params
+                                                                ) => (
+                                                                    <li
+                                                                        key={
+                                                                            params.key
+                                                                        }
+                                                                    >
+                                                                        {
+                                                                            params.children
+                                                                        }
+                                                                        <Divider />
+                                                                    </li>
+                                                                )}
                                                                 renderInput={(
                                                                     params
                                                                 ) => (
@@ -762,54 +789,150 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                         {selectedMetric && (
                                             <Grid item xs={12}>
                                                 <Grid container>
+                                                    {selectedMetric !==
+                                                    t(
+                                                        "label.custom-metric-aggregation"
+                                                    ) ? (
+                                                        <Grid item xs={12}>
+                                                            <RadioSection
+                                                                defaultValue={
+                                                                    aggregationFunction ||
+                                                                    undefined
+                                                                }
+                                                                label={t(
+                                                                    "label.aggregation-function"
+                                                                )}
+                                                                options={
+                                                                    selectedMetric ===
+                                                                    STAR_COLUMN
+                                                                        ? getAggregationOptions(
+                                                                              [
+                                                                                  MetricAggFunction.COUNT,
+                                                                              ]
+                                                                          )
+                                                                        : getAggregationOptions(
+                                                                              [
+                                                                                  MetricAggFunction.SUM,
+                                                                                  MetricAggFunction.AVG,
+                                                                                  MetricAggFunction.COUNT,
+                                                                                  MetricAggFunction.MIN,
+                                                                                  MetricAggFunction.MAX,
+                                                                              ]
+                                                                          )
+                                                                }
+                                                                subText={t(
+                                                                    "message.select-aggregation-function-to-combine-multiple-data-value-into-a-single-result"
+                                                                )}
+                                                            />
+                                                        </Grid>
+                                                    ) : (
+                                                        <Grid item xs={12}>
+                                                            <JSONEditorV1
+                                                                hideValidationSuccessIcon
+                                                                value={
+                                                                    editedDatasource
+                                                                }
+                                                                onChange={
+                                                                    handleMetricsChange
+                                                                }
+                                                            />
+                                                        </Grid>
+                                                    )}
                                                     <Grid item xs={12}>
-                                                        <RadioSection
-                                                            defaultValue={
-                                                                aggregationFunction ||
-                                                                undefined
-                                                            }
-                                                            label={t(
-                                                                "label.aggregation-function"
-                                                            )}
-                                                            options={
-                                                                selectedMetric ===
-                                                                STAR_COLUMN
-                                                                    ? getAggregationOptions(
-                                                                          [
-                                                                              MetricAggFunction.COUNT,
-                                                                          ]
-                                                                      )
-                                                                    : getAggregationOptions(
-                                                                          [
-                                                                              MetricAggFunction.SUM,
-                                                                              MetricAggFunction.AVG,
-                                                                              MetricAggFunction.COUNT,
-                                                                              MetricAggFunction.MIN,
-                                                                              MetricAggFunction.MAX,
-                                                                          ]
-                                                                      )
-                                                            }
-                                                            subText={t(
-                                                                "message.select-aggregation-function-to-combine-multiple-data-value-into-a-single-result"
-                                                            )}
-                                                        />
-                                                    </Grid>
-                                                    <Grid item xs={12}>
-                                                        <RadioSection
-                                                            defaultValue={
-                                                                granularity ||
-                                                                undefined
-                                                            }
-                                                            label={t(
-                                                                "label.granularity"
-                                                            )}
-                                                            options={getGranularityOptions(
-                                                                GRANULARITY_OPTIONS
-                                                            )}
-                                                            subText={t(
-                                                                "label.select-how-often-to-check-for-anomalies"
-                                                            )}
-                                                        />
+                                                        <Box marginBottom="10px">
+                                                            <Typography variant="h5">
+                                                                {t(
+                                                                    "label.granularity"
+                                                                )}
+                                                            </Typography>
+
+                                                            <Typography variant="body2">
+                                                                {t(
+                                                                    "label.select-the-level-of-detail-at-which-data-is-aggregated-or-stored-in-the-time-series-data"
+                                                                )}
+                                                            </Typography>
+                                                        </Box>
+                                                        <Grid item xs={4}>
+                                                            <InputSectionV2
+                                                                inputComponent={
+                                                                    <>
+                                                                        <Autocomplete
+                                                                            disableClearable
+                                                                            fullWidth
+                                                                            getOptionLabel={(
+                                                                                option
+                                                                            ) =>
+                                                                                option.label
+                                                                            }
+                                                                            options={
+                                                                                GRANULARITY_OPTIONS
+                                                                            }
+                                                                            renderInput={(
+                                                                                params
+                                                                            ) => (
+                                                                                <TextField
+                                                                                    {...params}
+                                                                                    InputProps={{
+                                                                                        ...params.InputProps,
+                                                                                    }}
+                                                                                    placeholder={t(
+                                                                                        "label.select-granularity"
+                                                                                    )}
+                                                                                    variant="outlined"
+                                                                                />
+                                                                            )}
+                                                                            renderOption={({
+                                                                                value,
+                                                                                label,
+                                                                            }) => (
+                                                                                <Box
+                                                                                    alignItems="center"
+                                                                                    display="flex"
+                                                                                    justifyContent="space-between"
+                                                                                    width="100%"
+                                                                                >
+                                                                                    {
+                                                                                        label
+                                                                                    }
+                                                                                    {GRANULARITY_OPTIONS_TOOLTIP[
+                                                                                        value
+                                                                                    ] && (
+                                                                                        <Tooltip
+                                                                                            arrow
+                                                                                            placement="top"
+                                                                                            title={
+                                                                                                GRANULARITY_OPTIONS_TOOLTIP[
+                                                                                                    value
+                                                                                                ]
+                                                                                            }
+                                                                                        >
+                                                                                            <Chip
+                                                                                                color="primary"
+                                                                                                label={t(
+                                                                                                    "label.beta"
+                                                                                                )}
+                                                                                                size="small"
+                                                                                            />
+                                                                                        </Tooltip>
+                                                                                    )}
+                                                                                </Box>
+                                                                            )}
+                                                                            value={
+                                                                                granularity
+                                                                                    ? {
+                                                                                          value: granularity,
+                                                                                          label: granularity,
+                                                                                      }
+                                                                                    : undefined
+                                                                            }
+                                                                            onChange={
+                                                                                handleGranularityChange
+                                                                            }
+                                                                        />
+                                                                    </>
+                                                                }
+                                                            />
+                                                        </Grid>
                                                     </Grid>
                                                     <Grid item xs={12}>
                                                         <RadioSection

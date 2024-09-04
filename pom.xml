@@ -213,7 +213,7 @@
           <inherited>true</inherited>
           <configuration>
             <configLocation>thirdeye-checkstyle.xml</configLocation>
-            <encoding>UTF-8</encoding>
+            <inputEncoding>UTF-8</inputEncoding>
             <consoleOutput>true</consoleOutput>
             <failsOnError>true</failsOnError>
             <failOnViolation>true</failOnViolation>

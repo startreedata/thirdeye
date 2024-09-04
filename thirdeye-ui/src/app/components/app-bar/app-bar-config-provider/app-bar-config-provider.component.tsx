@@ -77,7 +77,7 @@ export const AppBarConfigProvider: FunctionComponent<AppBarConfigProviderProps> 
                         }
                     })
                 );
-                // Check if the there is a workspace present in localStorage and its a valid
+                // Check if there is a workspace present in localStorage and whether its a valid
                 // workspace by checking it against fetched workspaces. If its present set it as
                 // workspace for current session else set the first workpsace from fetched data.
                 const sessionWorkspace = localPreferences.currentWorkspace;

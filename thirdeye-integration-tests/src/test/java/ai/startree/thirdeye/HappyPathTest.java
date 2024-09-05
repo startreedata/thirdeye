@@ -177,7 +177,7 @@ public class HappyPathTest {
 
   @Test(dependsOnMethods = "testPing")
   public void testSwaggerApiJson() throws JsonProcessingException {
-    final Response response = request("/openapi.json").get();
+    final Response response = request("openapi.json").get();
     assert200(response);
     final JsonNode r = new ObjectMapper().readTree(
         response.readEntity(JSONObject.class).toJSONString());

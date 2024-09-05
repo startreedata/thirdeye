@@ -928,6 +928,7 @@
         <artifactId>dropwizard-swagger</artifactId>
         <version>${dropwizard.swagger.version}</version>
         <exclusions>
+          <!--dropwizard-swagger depends on dropwizard packages - the version of dropwizard packages is defined above so will take precedence - just make sure to use a version of dropwizard-swagger that is compatible with the dropwizard version -->
           <!-- javax.validation:validation-api conflicting with -->
           <!-- jakarta.validation:jakarta.validation-api which is a dropwizard dependency -->
           <exclusion>

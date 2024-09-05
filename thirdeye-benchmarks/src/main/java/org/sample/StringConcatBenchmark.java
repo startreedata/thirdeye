@@ -37,19 +37,34 @@ import org.openjdk.jmh.infra.Blackhole;
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 public class StringConcatBenchmark {
 
-
   @Benchmark
-  public String stringFormat()  {
-    return String.format("%s:%s:%s:%s:%s", "SRN_PREFIX", "ZONE", "entityType", "namespace", "entityName");
+  public String stringFormat() {
+    return String.format("%s:%s:%s:%s:%s", "SRN_PREFIX", "ZONE", "entityType", "namespace",
+        "entityName");
   }
 
   @Benchmark
-  public String stringConcat()  {
-    return "SRN_PREFIX" + ":" + "ZONE" + ":" + "entityType" +":" +"namespace" + ":" + "entityName";
+  public String stringBuilder() {
+    return new
+        StringBuilder("SRN_PREFIX")
+        .append(":")
+        .append("ZONE")
+        .append(":")
+        .append("entityType")
+        .append(":")
+        .append("namespace")
+        .append(":")
+        .append("entityName").toString();
   }
 
   @Benchmark
-  public String stringJoin()  {
+  public String stringConcat() {
+    return "SRN_PREFIX" + ":" + "ZONE" + ":" + "entityType" + ":" + "namespace" + ":"
+        + "entityName";
+  }
+
+  @Benchmark
+  public String stringJoin() {
     return String.join(":", List.of("SRN_PREFIX", "ZONE", "entityType", "namespace", "entityName"));
   }
 }

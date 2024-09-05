@@ -61,5 +61,5 @@ export enum MetricAggFunction {
 
 export enum AnomalyDetectionOptions {
     SINGLE = "Single metric",
-    COMPOSITE = "Composite metric",
+    COMPOSITE = "Multiple dimensions",
 }

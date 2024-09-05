@@ -15,11 +15,14 @@
 import { Box, Button, Grid, Typography } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
-import SettingsIcon from "@material-ui/icons/Settings";
+import ControlPointOutlinedIcon from "@material-ui/icons/ControlPointOutlined";
 import { Modal } from "../modal/modal.component";
 import { AlertAddConfigrationModalProps } from "./alert-add-configration-modal.interfaces";
 import Image from "../../../assets/images/alert-type-examples/configuration.png";
-import { getSubscriptionGroupsCreatePathWithAlertId } from "../../utils/routes/routes.util";
+import {
+    getSubscriptionGroupsCreatePathWithAlertId,
+    getSubscriptionGroupsPath,
+} from "../../utils/routes/routes.util";
 import { boxCardStyles } from "./alert-add-configration-modal.styles";
 
 export const AlertAddConfigrationModal: FunctionComponent<AlertAddConfigrationModalProps> =
@@ -51,16 +54,6 @@ export const AlertAddConfigrationModal: FunctionComponent<AlertAddConfigrationMo
                                         )}
                                     </Typography>
                                 </Box>
-                                <Button
-                                    color="primary"
-                                    href={getSubscriptionGroupsCreatePathWithAlertId(
-                                        alertId
-                                    )}
-                                    startIcon={<SettingsIcon />}
-                                    variant="contained"
-                                >
-                                    {t("label.configure-notifications")}
-                                </Button>
                             </Box>
                         </Grid>
                         <Grid item>
@@ -69,6 +62,27 @@ export const AlertAddConfigrationModal: FunctionComponent<AlertAddConfigrationMo
                                     alt={t("label.configure-notifications")}
                                     src={Image}
                                 />
+                            </Box>
+                        </Grid>
+                        <Grid item>
+                            <Box display="flex" gridGap={2}>
+                                <Button
+                                    color="primary"
+                                    href={getSubscriptionGroupsCreatePathWithAlertId(
+                                        alertId
+                                    )}
+                                    startIcon={<ControlPointOutlinedIcon />}
+                                    variant="contained"
+                                >
+                                    {t("label.create-notifications")}
+                                </Button>
+                                <Button
+                                    color="primary"
+                                    href={getSubscriptionGroupsPath()}
+                                    variant="outlined"
+                                >
+                                    {t("label.explore-all-notifications")}
+                                </Button>
                             </Box>
                         </Grid>
                     </Grid>

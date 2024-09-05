@@ -22,6 +22,8 @@ import {
     Tooltip,
     Typography,
 } from "@material-ui/core";
+import { ReactComponent as FilterListRoundedIcon } from "../../../platform/assets/images/filter-icon.svg";
+import InfoOutlinedIcon from "@material-ui/icons/InfoOutlined";
 import { Alert, AlertTitle, Autocomplete } from "@material-ui/lab";
 import DoneAllIcon from "@material-ui/icons/DoneAll";
 import { toLower } from "lodash";
@@ -46,7 +48,7 @@ import { ThresholdSetup } from "../../../components/alert-wizard-v3/threshold-se
 import { InputSectionV2 } from "../../../components/form-basics/input-section-v2/input-section-v2.component";
 import { RadioSection } from "../../../components/form-basics/radio-section/radio-section.component";
 import { RadioSectionOptions } from "../../../components/form-basics/radio-section/radio-section.interfaces";
-import { TimeRangeButtonWithContext } from "../../../components/time-range/time-range-button-with-context/time-range-button.component";
+import { TimeRangeButtonWithContext } from "../../../components/time-range/time-range-button-with-context-v2/time-range-button.component";
 import { TimeRangeQueryStringKey } from "../../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import {
     JSONEditorV1,
@@ -81,6 +83,7 @@ import { HelpDrawerV1 } from "../../../components/help-drawer-v1/help-drawer-v1.
 import { alertsBasicHelpCards } from "../../../components/help-drawer-v1/help-drawer-card-contents.utils";
 import { Icon } from "@iconify/react";
 import { getAlertsAllPath } from "../../../utils/routes/routes.util";
+import { borderCardStyles } from "./alerts-create-easy-page.styles";
 const PROPERTIES_TO_COPY = [
     "dataSource",
     "dataset",
@@ -95,10 +98,13 @@ const ALERT_TEMPLATE_FOR_EVALUATE = "startree-threshold";
 const ALERT_TEMPLATE_FOR_EVALUATE_DX = "startree-threshold-dx";
 
 export const AlertsCreateEasyPage: FunctionComponent = () => {
+    const classes = borderCardStyles();
+
     const { t } = useTranslation();
     const navigate = useNavigate();
 
     const [searchParams, setSearchParams] = useSearchParams();
+    const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
     const [startTime, endTime] = useMemo(
         () => [
             Number(searchParams.get(TimeRangeQueryStringKey.START_TIME)),
@@ -524,9 +530,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                         <Grid item xs={12}>
                                             <Box display="flex">
                                                 <Typography variant="h5">
-                                                    {t(
-                                                        "label.dataset-and-metric"
-                                                    )}
+                                                    {t("label.alert-wizard")}
                                                 </Typography>
                                                 <PageHeaderActionsV1>
                                                     <HelpDrawerV1
@@ -827,15 +831,41 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                         </Grid>
                                                     ) : (
                                                         <Grid item xs={12}>
-                                                            <JSONEditorV1
-                                                                hideValidationSuccessIcon
-                                                                value={
-                                                                    editedDatasource
-                                                                }
-                                                                onChange={
-                                                                    handleMetricsChange
-                                                                }
-                                                            />
+                                                            <Grid container>
+                                                                <Grid
+                                                                    item
+                                                                    xs={8}
+                                                                >
+                                                                    <JSONEditorV1
+                                                                        hideValidationSuccessIcon
+                                                                        value={
+                                                                            editedDatasource
+                                                                        }
+                                                                        onChange={
+                                                                            handleMetricsChange
+                                                                        }
+                                                                    />
+                                                                </Grid>
+                                                                <Grid
+                                                                    item
+                                                                    xs={4}
+                                                                >
+                                                                    <Button
+                                                                        color="primary"
+                                                                        startIcon={
+                                                                            <InfoOutlinedIcon />
+                                                                        }
+                                                                        variant="outlined"
+                                                                        onClick={() => {
+                                                                            // TODO Add guide link
+                                                                        }}
+                                                                    >
+                                                                        {t(
+                                                                            "label.aggregation-functions-guide-write-custom"
+                                                                        )}
+                                                                    </Button>
+                                                                </Grid>
+                                                            </Grid>
                                                         </Grid>
                                                     )}
                                                     <Grid item xs={12}>
@@ -954,261 +984,338 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                             )}
                                                         />
                                                     </Grid>
+
                                                     <Grid item xs={12}>
-                                                        <Grid
-                                                            container
-                                                            alignItems="center"
-                                                        >
-                                                            <Grid item xs={4}>
-                                                                <InputSectionV2
-                                                                    description={t(
-                                                                        "message.for-additional-algorithms-go-to",
-                                                                        {
-                                                                            entity: t(
-                                                                                "label.advanced-mode"
-                                                                            ),
-                                                                        }
-                                                                    )}
-                                                                    inputComponent={
-                                                                        <Autocomplete<AvailableAlgorithmOption>
-                                                                            fullWidth
-                                                                            data-testId="datasource-select"
-                                                                            getOptionLabel={(
-                                                                                option
-                                                                            ) =>
-                                                                                option
-                                                                                    .algorithmOption
-                                                                                    .title as string
-                                                                            }
-                                                                            noOptionsText={t(
-                                                                                "message.no-options-available-entity",
-                                                                                {
-                                                                                    entity: t(
-                                                                                        "label.dataset"
-                                                                                    ),
-                                                                                }
-                                                                            )}
-                                                                            options={
-                                                                                recommendedAlertTemplateFirst ||
-                                                                                []
-                                                                            }
-                                                                            renderInput={(
-                                                                                params
-                                                                            ) => (
-                                                                                <TextField
-                                                                                    {...params}
-                                                                                    InputProps={{
-                                                                                        ...params.InputProps,
-                                                                                    }}
-                                                                                    placeholder={t(
-                                                                                        "message.select-dataset"
-                                                                                    )}
-                                                                                    variant="outlined"
-                                                                                />
-                                                                            )}
-                                                                            renderOption={(
-                                                                                option: AvailableAlgorithmOption
-                                                                            ): JSX.Element => {
-                                                                                return (
-                                                                                    <Box
-                                                                                        data-testId={`${toLower(
-                                                                                            option
-                                                                                                .algorithmOption
-                                                                                                .title
-                                                                                        )}-datasource-option`}
-                                                                                    >
-                                                                                        <Typography variant="h6">
-                                                                                            {
-                                                                                                option
-                                                                                                    .algorithmOption
-                                                                                                    .title
-                                                                                            }
-                                                                                        </Typography>
-                                                                                    </Box>
-                                                                                );
-                                                                            }}
-                                                                            value={
-                                                                                algorithmOption
-                                                                            }
-                                                                            onChange={(
-                                                                                _,
-                                                                                value
-                                                                            ) => {
-                                                                                if (
-                                                                                    !value
-                                                                                ) {
-                                                                                    return;
-                                                                                }
-                                                                                setAlgorithmOption(
-                                                                                    value
-                                                                                );
-                                                                            }}
-                                                                        />
-                                                                    }
-                                                                    label={t(
-                                                                        "label.recommended-algorithm"
-                                                                    )}
-                                                                />
-                                                            </Grid>
-                                                            <Grid item xs={6}>
-                                                                <TimeRangeButtonWithContext
-                                                                    hideQuickExtend
-                                                                    btnGroupColor="primary"
-                                                                    maxDate={
-                                                                        alertInsight?.datasetEndTime
-                                                                    }
-                                                                    minDate={
-                                                                        alertInsight?.datasetStartTime
-                                                                    }
-                                                                    timezone={determineTimezoneFromAlertInEvaluation(
-                                                                        alertInsight?.templateWithProperties
-                                                                    )}
-                                                                    onTimeRangeChange={(
-                                                                        newStart,
-                                                                        newEnd
-                                                                    ) => {
-                                                                        fetchAlertEvaluation(
-                                                                            newStart,
-                                                                            newEnd
-                                                                        );
-                                                                    }}
-                                                                />
-                                                            </Grid>
-
-                                                            {recommendedAlertConfigMatchingTemplate && (
+                                                        {anomalyDetection &&
+                                                            granularity &&
+                                                            aggregationFunction && (
                                                                 <Grid
-                                                                    item
-                                                                    xs={12}
+                                                                    container
+                                                                    alignItems="center"
                                                                 >
-                                                                    <Alert
-                                                                        action={
-                                                                            <>
-                                                                                {doesAlertHaveRecommendedValues ? (
-                                                                                    <Box
-                                                                                        alignContent="center"
-                                                                                        position="flex"
-                                                                                        style={{
-                                                                                            color: ColorV1.Green2,
-                                                                                        }}
-                                                                                        textAlign="center"
-                                                                                    >
-                                                                                        <Box
-                                                                                            mr={
-                                                                                                1
-                                                                                            }
-                                                                                        >
-                                                                                            <DoneAllIcon />
-                                                                                        </Box>
-                                                                                        <Box
-                                                                                            pr={
-                                                                                                2
-                                                                                            }
-                                                                                        >
-                                                                                            Alert
-                                                                                            Tuned
-                                                                                        </Box>
-                                                                                    </Box>
-                                                                                ) : (
-                                                                                    <Button
-                                                                                        color="primary"
-                                                                                        onClick={
-                                                                                            handleTuneAlertClick
-                                                                                        }
-                                                                                    >
-                                                                                        {t(
-                                                                                            "label.tune-my-alert"
-                                                                                        )}
-                                                                                    </Button>
-                                                                                )}
-                                                                            </>
+                                                                    <Box
+                                                                        className={
+                                                                            classes.card
                                                                         }
-                                                                        severity="info"
-                                                                        style={{
-                                                                            backgroundColor:
-                                                                                "#FFF",
-                                                                        }}
-                                                                        variant="outlined"
                                                                     >
-                                                                        <AlertTitle>
-                                                                            {t(
-                                                                                "message.we-can-tune-the-alert-for-you"
-                                                                            )}
-                                                                        </AlertTitle>
-                                                                        {t(
-                                                                            "message.our-new-feature-sets-up-your-alert-with-the-parameters"
-                                                                        )}
-                                                                    </Alert>
-                                                                </Grid>
-                                                            )}
-
-                                                            {algorithmOption && (
-                                                                <Grid
-                                                                    item
-                                                                    xs={12}
-                                                                >
-                                                                    {anomalyDetection !==
-                                                                        AnomalyDetectionOptions.COMPOSITE ||
-                                                                    compositeFilters ? (
-                                                                        <ThresholdSetup
-                                                                            alert={
-                                                                                alert
-                                                                            }
-                                                                            alertTemplate={
-                                                                                selectedAlertTemplate
-                                                                            }
-                                                                            algorithmOptionConfig={
-                                                                                algorithmOption
-                                                                            }
-                                                                            onAlertPropertyChange={
-                                                                                onAlertPropertyChange
+                                                                        <Grid
+                                                                            item
+                                                                            xs={
+                                                                                12
                                                                             }
                                                                         >
-                                                                            {compositeFilters && (
-                                                                                <Button
-                                                                                    color="primary"
-                                                                                    onClick={() =>
-                                                                                        setOpenCompositeFilterModal(
-                                                                                            true
-                                                                                        )
+                                                                            {" "}
+                                                                            <Grid
+                                                                                container
+                                                                                alignItems="center"
+                                                                                justifyContent="space-between"
+                                                                            >
+                                                                                <Grid
+                                                                                    container
+                                                                                    alignItems="flex-start"
+                                                                                    xs={
+                                                                                        8
                                                                                     }
                                                                                 >
+                                                                                    <Grid
+                                                                                        item
+                                                                                        xs={
+                                                                                            6
+                                                                                        }
+                                                                                    >
+                                                                                        <InputSectionV2
+                                                                                            description={t(
+                                                                                                "message.for-additional-algorithms-go-to",
+                                                                                                {
+                                                                                                    entity: t(
+                                                                                                        "label.advanced-mode"
+                                                                                                    ),
+                                                                                                }
+                                                                                            )}
+                                                                                            inputComponent={
+                                                                                                <Autocomplete<AvailableAlgorithmOption>
+                                                                                                    fullWidth
+                                                                                                    data-testId="datasource-select"
+                                                                                                    getOptionLabel={(
+                                                                                                        option
+                                                                                                    ) =>
+                                                                                                        option
+                                                                                                            .algorithmOption
+                                                                                                            .title as string
+                                                                                                    }
+                                                                                                    noOptionsText={t(
+                                                                                                        "message.no-options-available-entity",
+                                                                                                        {
+                                                                                                            entity: t(
+                                                                                                                "label.dataset"
+                                                                                                            ),
+                                                                                                        }
+                                                                                                    )}
+                                                                                                    options={
+                                                                                                        recommendedAlertTemplateFirst ||
+                                                                                                        []
+                                                                                                    }
+                                                                                                    renderInput={(
+                                                                                                        params
+                                                                                                    ) => (
+                                                                                                        <TextField
+                                                                                                            {...params}
+                                                                                                            InputProps={{
+                                                                                                                ...params.InputProps,
+                                                                                                            }}
+                                                                                                            placeholder={t(
+                                                                                                                "message.select-dataset"
+                                                                                                            )}
+                                                                                                            variant="outlined"
+                                                                                                        />
+                                                                                                    )}
+                                                                                                    renderOption={(
+                                                                                                        option: AvailableAlgorithmOption
+                                                                                                    ): JSX.Element => {
+                                                                                                        return (
+                                                                                                            <Box
+                                                                                                                data-testId={`${toLower(
+                                                                                                                    option
+                                                                                                                        .algorithmOption
+                                                                                                                        .title
+                                                                                                                )}-datasource-option`}
+                                                                                                            >
+                                                                                                                <Typography variant="h6">
+                                                                                                                    {
+                                                                                                                        option
+                                                                                                                            .algorithmOption
+                                                                                                                            .title
+                                                                                                                    }
+                                                                                                                </Typography>
+                                                                                                            </Box>
+                                                                                                        );
+                                                                                                    }}
+                                                                                                    value={
+                                                                                                        algorithmOption
+                                                                                                    }
+                                                                                                    onChange={(
+                                                                                                        _,
+                                                                                                        value
+                                                                                                    ) => {
+                                                                                                        if (
+                                                                                                            !value
+                                                                                                        ) {
+                                                                                                            return;
+                                                                                                        }
+                                                                                                        setAlgorithmOption(
+                                                                                                            value
+                                                                                                        );
+                                                                                                    }}
+                                                                                                />
+                                                                                            }
+                                                                                            label={t(
+                                                                                                "label.recommended-algorithm"
+                                                                                            )}
+                                                                                        />
+                                                                                    </Grid>
+                                                                                    <Grid
+                                                                                        item
+                                                                                        xs={
+                                                                                            6
+                                                                                        }
+                                                                                    >
+                                                                                        <>
+                                                                                            <Typography variant="body2">
+                                                                                                {t(
+                                                                                                    "label.date-range"
+                                                                                                )}
+
+                                                                                                :
+                                                                                            </Typography>
+                                                                                        </>
+                                                                                        <TimeRangeButtonWithContext
+                                                                                            hideQuickExtend
+                                                                                            btnGroupColor="default"
+                                                                                            maxDate={
+                                                                                                alertInsight?.datasetEndTime
+                                                                                            }
+                                                                                            minDate={
+                                                                                                alertInsight?.datasetStartTime
+                                                                                            }
+                                                                                            timezone={determineTimezoneFromAlertInEvaluation(
+                                                                                                alertInsight?.templateWithProperties
+                                                                                            )}
+                                                                                            onTimeRangeChange={(
+                                                                                                newStart,
+                                                                                                newEnd
+                                                                                            ) => {
+                                                                                                fetchAlertEvaluation(
+                                                                                                    newStart,
+                                                                                                    newEnd
+                                                                                                );
+                                                                                            }}
+                                                                                        />
+                                                                                    </Grid>
+                                                                                </Grid>
+                                                                                <Grid>
+                                                                                    <Grid
+                                                                                        container
+                                                                                    >
+                                                                                        <Button
+                                                                                            color="primary"
+                                                                                            startIcon={
+                                                                                                <FilterListRoundedIcon />
+                                                                                            }
+                                                                                            variant="outlined"
+                                                                                            onClick={() => {
+                                                                                                setShowAdvancedOptions(
+                                                                                                    true
+                                                                                                );
+                                                                                            }}
+                                                                                        >
+                                                                                            {t(
+                                                                                                "label.add-advanced-options"
+                                                                                            )}
+                                                                                        </Button>
+                                                                                    </Grid>
+                                                                                </Grid>
+                                                                            </Grid>
+                                                                        </Grid>
+                                                                        {recommendedAlertConfigMatchingTemplate && (
+                                                                            <Grid
+                                                                                item
+                                                                                xs={
+                                                                                    12
+                                                                                }
+                                                                            >
+                                                                                <Alert
+                                                                                    action={
+                                                                                        <>
+                                                                                            {doesAlertHaveRecommendedValues ? (
+                                                                                                <Box
+                                                                                                    alignContent="center"
+                                                                                                    position="flex"
+                                                                                                    style={{
+                                                                                                        color: ColorV1.Green2,
+                                                                                                    }}
+                                                                                                    textAlign="center"
+                                                                                                >
+                                                                                                    <Box
+                                                                                                        mr={
+                                                                                                            1
+                                                                                                        }
+                                                                                                    >
+                                                                                                        <DoneAllIcon />
+                                                                                                    </Box>
+                                                                                                    <Box
+                                                                                                        pr={
+                                                                                                            2
+                                                                                                        }
+                                                                                                    >
+                                                                                                        Alert
+                                                                                                        Tuned
+                                                                                                    </Box>
+                                                                                                </Box>
+                                                                                            ) : (
+                                                                                                <Button
+                                                                                                    color="primary"
+                                                                                                    onClick={
+                                                                                                        handleTuneAlertClick
+                                                                                                    }
+                                                                                                >
+                                                                                                    {t(
+                                                                                                        "label.tune-my-alert"
+                                                                                                    )}
+                                                                                                </Button>
+                                                                                            )}
+                                                                                        </>
+                                                                                    }
+                                                                                    severity="info"
+                                                                                    style={{
+                                                                                        backgroundColor:
+                                                                                            "#FFF",
+                                                                                    }}
+                                                                                    variant="outlined"
+                                                                                >
+                                                                                    <AlertTitle>
+                                                                                        {t(
+                                                                                            "message.we-can-tune-the-alert-for-you"
+                                                                                        )}
+                                                                                    </AlertTitle>
                                                                                     {t(
-                                                                                        "label.add-dimensions"
+                                                                                        "message.our-new-feature-sets-up-your-alert-with-the-parameters"
                                                                                     )}
-                                                                                </Button>
-                                                                            )}
-                                                                        </ThresholdSetup>
-                                                                    ) : (
-                                                                        <Button
-                                                                            color="primary"
-                                                                            onClick={() =>
-                                                                                setOpenCompositeFilterModal(
-                                                                                    true
-                                                                                )
-                                                                            }
-                                                                        >
-                                                                            {t(
-                                                                                "label.add-dimensions"
-                                                                            )}
-                                                                        </Button>
-                                                                    )}
+                                                                                </Alert>
+                                                                            </Grid>
+                                                                        )}
+
+                                                                        {algorithmOption && (
+                                                                            <Grid
+                                                                                item
+                                                                                xs={
+                                                                                    12
+                                                                                }
+                                                                            >
+                                                                                {anomalyDetection !==
+                                                                                    AnomalyDetectionOptions.COMPOSITE ||
+                                                                                compositeFilters ? (
+                                                                                    <ThresholdSetup
+                                                                                        alert={
+                                                                                            alert
+                                                                                        }
+                                                                                        alertTemplate={
+                                                                                            selectedAlertTemplate
+                                                                                        }
+                                                                                        algorithmOptionConfig={
+                                                                                            algorithmOption
+                                                                                        }
+                                                                                        onAlertPropertyChange={
+                                                                                            onAlertPropertyChange
+                                                                                        }
+                                                                                    >
+                                                                                        {anomalyDetection ===
+                                                                                            AnomalyDetectionOptions.COMPOSITE &&
+                                                                                            compositeFilters && (
+                                                                                                <Button
+                                                                                                    color="primary"
+                                                                                                    onClick={() =>
+                                                                                                        setOpenCompositeFilterModal(
+                                                                                                            true
+                                                                                                        )
+                                                                                                    }
+                                                                                                >
+                                                                                                    {t(
+                                                                                                        "label.add-dimensions"
+                                                                                                    )}
+                                                                                                </Button>
+                                                                                            )}
+                                                                                    </ThresholdSetup>
+                                                                                ) : (
+                                                                                    <Box
+                                                                                        paddingTop={
+                                                                                            2
+                                                                                        }
+                                                                                    >
+                                                                                        <Button
+                                                                                            color="primary"
+                                                                                            onClick={() =>
+                                                                                                setOpenCompositeFilterModal(
+                                                                                                    true
+                                                                                                )
+                                                                                            }
+                                                                                        >
+                                                                                            {t(
+                                                                                                "label.add-dimensions"
+                                                                                            )}
+                                                                                        </Button>
+                                                                                    </Box>
+                                                                                )}
+                                                                            </Grid>
+                                                                        )}
+                                                                    </Box>
                                                                 </Grid>
                                                             )}
-                                                        </Grid>
-                                                        <Grid item xs={12}>
-                                                            <Box
-                                                                paddingBottom={
-                                                                    2
-                                                                }
-                                                                paddingTop={1}
-                                                            >
-                                                                <Divider />
-                                                            </Box>
-                                                        </Grid>
+
                                                         <Grid item xs={12}>
                                                             <Box
                                                                 display="flex"
                                                                 gridGap={10}
+                                                                paddingTop={2}
                                                             >
                                                                 <Button
                                                                     color="primary"

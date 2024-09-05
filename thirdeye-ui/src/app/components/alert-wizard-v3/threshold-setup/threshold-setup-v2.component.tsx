@@ -14,6 +14,7 @@
  */
 import { Box, Divider, Grid, Typography } from "@material-ui/core";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
+import { borderCardStyles } from "../../../pages/alerts-create-page/alerts-create-easy-page/alerts-create-easy-page.styles";
 import { TemplatePropertiesObject } from "../../../rest/dto/alert.interfaces";
 import { PreviewChart } from "../../alert-wizard-v2/alert-template/preview-chart/preview-chart.component";
 import { InputSectionV2 } from "../../form-basics/input-section-v2/input-section-v2.component";
@@ -28,6 +29,8 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
     alertTemplate,
     children,
 }) => {
+    const classes = borderCardStyles();
+
     const [localAlertTemplateProperties, setLocalAlertTemplateProperties] =
         useState<TemplatePropertiesObject>(alert.templateProperties);
 
@@ -66,7 +69,47 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
     };
 
     return (
-        <>
+        <Box className={classes.card} marginTop={2}>
+            <Grid container>
+                {inputFieldConfigs.length > 0 &&
+                    inputFieldConfigs.map((config, index) => {
+                        return (
+                            <Grid item key={index} xs={8}>
+                                <InputSectionV2
+                                    inputComponent={
+                                        <>
+                                            <SpecificPropertiesRenderer
+                                                inputFieldConfig={config}
+                                                selectedTemplateProperties={
+                                                    localAlertTemplateProperties
+                                                }
+                                                onAlertPropertyChange={
+                                                    handleExtraPropertyChange
+                                                }
+                                            />
+                                            {!!config.description && (
+                                                <Typography variant="caption">
+                                                    <ParseMarkdown>
+                                                        {config.description}
+                                                    </ParseMarkdown>
+                                                </Typography>
+                                            )}
+                                        </>
+                                    }
+                                    key={config.label}
+                                    label={config.label}
+                                />
+                            </Grid>
+                        );
+                    })}
+            </Grid>
+            {inputFieldConfigs.length > 0 && (
+                <Grid item xs={12}>
+                    <Box marginBottom={2} marginTop={2} padding={1}>
+                        <Divider />
+                    </Box>
+                </Grid>
+            )}
             <PreviewChart
                 hideCallToActionPrompt
                 alert={alert}
@@ -75,41 +118,6 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
             >
                 {children}
             </PreviewChart>
-
-            <Grid item xs={12}>
-                <Box marginBottom={2} marginTop={2} padding={1}>
-                    <Divider />
-                </Box>
-            </Grid>
-            {inputFieldConfigs.length > 0 &&
-                inputFieldConfigs.map((config) => {
-                    return (
-                        <InputSectionV2
-                            inputComponent={
-                                <>
-                                    <SpecificPropertiesRenderer
-                                        inputFieldConfig={config}
-                                        selectedTemplateProperties={
-                                            localAlertTemplateProperties
-                                        }
-                                        onAlertPropertyChange={
-                                            handleExtraPropertyChange
-                                        }
-                                    />
-                                    {!!config.description && (
-                                        <Typography variant="caption">
-                                            <ParseMarkdown>
-                                                {config.description}
-                                            </ParseMarkdown>
-                                        </Typography>
-                                    )}
-                                </>
-                            }
-                            key={config.label}
-                            label={config.label}
-                        />
-                    );
-                })}
-        </>
+        </Box>
     );
 };

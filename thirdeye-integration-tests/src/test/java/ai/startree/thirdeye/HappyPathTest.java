@@ -186,7 +186,7 @@ public class HappyPathTest {
     assertThat(oauthSecurityConfig.get("in").textValue()).isEqualTo("header");
     assertThat(oauthSecurityConfig.get("name").textValue()).isEqualTo("Authorization");
     // test a POST formData path
-    final JsonNode alertRunPath = r.get("paths").get("api/alerts/{id}/run");
+    final JsonNode alertRunPath = r.get("paths").get("/api/alerts/{id}/run");
     assertThat(alertRunPath.get("post")
         .get("requestBody")
         .get("content")
@@ -197,7 +197,7 @@ public class HappyPathTest {
         .get("type")
         .textValue()).isEqualTo("integer");
     // test a POST json data path
-    final JsonNode evaluatePath = r.get("paths").get("api/alerts/evaluate");
+    final JsonNode evaluatePath = r.get("paths").get("/api/alerts/evaluate");
     assertThat(evaluatePath.get("post")
         .get("requestBody")
         .get("content")

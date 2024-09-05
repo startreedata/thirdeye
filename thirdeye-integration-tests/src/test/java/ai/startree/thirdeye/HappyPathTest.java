@@ -653,8 +653,13 @@ public class HappyPathTest {
     try {
       assertThat(response.getStatus()).isEqualTo(200);
     } catch (AssertionError e) {
-      System.out.printf("Status 200 assertion failed. Response Status: %s Response content: %s%n",
-          response.getStatus(), response.readEntity(Object.class));
+      try {
+        System.out.printf("Status 200 assertion failed. Response Status: %s Response content: %s%n",
+            response.getStatus(), response.readEntity(Object.class)); 
+      } catch (Exception e2) {
+        System.out.printf("Status 200 assertion failed and failed to read the response entity. Response Status: %s Response headers: %s.%n",
+            response.getStatus(), response.getHeaders());
+      }
       throw e;
     }
   }

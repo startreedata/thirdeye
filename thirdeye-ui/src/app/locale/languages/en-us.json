@@ -461,6 +461,7 @@
         "review-entities": "Review {{entity}}",
         "review-investigation-share": "Review investigation & share",
         "root-cause-analysis": "Root Cause Analysis",
+        "run-enumeration": "Run enumerations",
         "sample-alert": "Sample Alert",
         "save": "Save",
         "save-entity": "Save {{entity}}",

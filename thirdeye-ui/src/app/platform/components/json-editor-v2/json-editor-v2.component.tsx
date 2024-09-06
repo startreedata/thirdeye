@@ -32,11 +32,9 @@ import "codemirror/addon/fold/foldgutter.js";
 import "codemirror/addon/selection/active-line.js";
 import "codemirror/lib/codemirror.css";
 import "codemirror/mode/javascript/javascript.js";
-import { debounce, isNil } from "lodash";
+import { debounce } from "lodash";
 import React, { ReactElement, useCallback, useEffect, useState } from "react";
 import { Controlled as CodeMirror } from "react-codemirror2";
-import { useTranslation } from "react-i18next";
-import { ColumnsDrawer } from "../../../components/columns-drawer/columns-drawer.component";
 import { JSONEditorV2Props } from "./json-editor-v2.interfaces";
 import { useJSONEditorV2Styles } from "./json-editor-v2.styles";
 
@@ -54,7 +52,7 @@ export function JSONEditorV2<T = string>({
     hideValidationSuccessIcon,
     validationDelay = DELAY_VALIDATION_DEFAULT,
     className,
-    datasetId,
+    actions = [],
     showFooter,
     onChange,
     onValidate,
@@ -64,11 +62,8 @@ export function JSONEditorV2<T = string>({
     const [jsonValue, setJSONValue] = useState("");
     const [validating, setValidating] = useState(true);
     const [valid, setValid] = useState(true);
-    const [openViewColumnsListDrawer, setOpenViewColumnsListDrawer] =
-        useState(false);
 
     const theme = useTheme();
-    const { t } = useTranslation();
 
     useEffect(() => {
         // Input value changed, initialize JSON value
@@ -282,31 +277,18 @@ export function JSONEditorV2<T = string>({
             </FormControl>
             {showFooter && (
                 <Box className={jsonEditorV2Classes.footer}>
-                    <Button size="small" variant="contained">
-                        <Box component="span" mr={1}>
-                            {t("label.apply-custom-metric")}
-                        </Box>
-                    </Button>
-                    <Button
-                        variant="contained"
-                        size="small"
-                        onClick={() =>
-                            setOpenViewColumnsListDrawer((prev) => !prev)
-                        }
-                    >
-                        <Box component="span" mr={1}>
-                            {t("label.view-columns-list")}
-                        </Box>
-                    </Button>
-                    {!isNil(datasetId) && (
-                        <ColumnsDrawer
-                            isOpen={openViewColumnsListDrawer}
-                            onClose={() =>
-                                setOpenViewColumnsListDrawer((prev) => !prev)
-                            }
-                            datasetId={datasetId}
-                        />
-                    )}
+                    {actions.map(({ label, onClick }, key) => (
+                        <Button
+                            key={key}
+                            size="small"
+                            variant="contained"
+                            onClick={onClick}
+                        >
+                            <Box component="span" mr={1}>
+                                {label}
+                            </Box>
+                        </Button>
+                    ))}
                 </Box>
             )}
         </Box>

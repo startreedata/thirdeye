@@ -23,7 +23,10 @@ export interface JSONEditorV2Props<T = string> {
     disableValidation?: boolean;
     validationDelay?: number;
     className?: string;
-    datasetId?: number;
+    actions: Array<{
+        label: string;
+        onClick: () => void;
+    }>;
     showFooter?: boolean;
     onChange?: (value: string) => void;
     onValidate?: (valid: boolean) => void;

@@ -28,7 +28,7 @@ import InfoOutlinedIcon from "@material-ui/icons/InfoOutlined";
 import AddCircleOutline from "@material-ui/icons/AddCircleOutline";
 import { Alert, AlertTitle, Autocomplete } from "@material-ui/lab";
 import DoneAllIcon from "@material-ui/icons/DoneAll";
-import { toLower } from "lodash";
+import { isNil, toLower } from "lodash";
 import { DateTime, Duration } from "luxon";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -90,6 +90,7 @@ import { borderCardStyles } from "./alerts-create-easy-page.styles";
 import { AdditonalFiltersDrawer } from "../../../components/additional-filters-drawer/additional-filters-drawer.component";
 import { getAvailableFilterOptions } from "../../../components/alert-wizard-v3/anomalies-filter-panel/anomalies-filter-panel.utils";
 import { AnomaliesFilterConfiguratorRenderConfigs } from "../../../components/alert-wizard-v3/anomalies-filter-panel/anomalies-filter-panel.interfaces";
+import { ColumnsDrawer } from "../../../components/columns-drawer/columns-drawer.component";
 const PROPERTIES_TO_COPY = [
     "dataSource",
     "dataset",
@@ -155,6 +156,8 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
     const [openCompositeFilterModal, setOpenCompositeFilterModal] =
         useState(false);
     const [openCreateAlertModal, setOpenCreateAlertModal] = useState(false);
+    const [openViewColumnsListDrawer, setOpenViewColumnsListDrawer] =
+        useState(false);
 
     useEffect(() => {
         if (alert.templateProperties?.dataset && datasetsInfo) {
@@ -435,7 +438,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
 
     const handleApplyAdvancedOptions = (): void => {
         // handle advance options
-    }
+    };
 
     const fetchAlertEvaluation = (start: number, end: number): void => {
         const copiedAlert = { ...alertConfigForPreview };
@@ -874,15 +877,28 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                     xs={8}
                                                                 >
                                                                     <JSONEditorV2
-                                                                        showFooter={
-                                                                            true
-                                                                        }
-                                                                        datasetId={
-                                                                            selectedTable
-                                                                                ?.dataset
-                                                                                .id
-                                                                        }
                                                                         hideValidationSuccessIcon
+                                                                        showFooter
+                                                                        actions={[
+                                                                            {
+                                                                                label: t(
+                                                                                    "label.apply-custom-metric"
+                                                                                ),
+                                                                                onClick:
+                                                                                    () =>
+                                                                                        null,
+                                                                            },
+                                                                            {
+                                                                                label: t(
+                                                                                    "label.view-columns-list"
+                                                                                ),
+                                                                                onClick:
+                                                                                    () =>
+                                                                                        setOpenViewColumnsListDrawer(
+                                                                                            true
+                                                                                        ),
+                                                                            },
+                                                                        ]}
                                                                         value={
                                                                             editedDatasource
                                                                         }
@@ -1053,15 +1069,27 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                         SelectDimensionsOptions.ENUMERATORS && (
                                                         <Grid item xs={12}>
                                                             <JSONEditorV2
-                                                                showFooter={
-                                                                    true
-                                                                }
-                                                                datasetId={
-                                                                    selectedTable
-                                                                        ?.dataset
-                                                                        .id
-                                                                }
                                                                 hideValidationSuccessIcon
+                                                                actions={[
+                                                                    {
+                                                                        label: t(
+                                                                            "label.run-enumeration"
+                                                                        ),
+                                                                        onClick:
+                                                                            () =>
+                                                                                null,
+                                                                    },
+                                                                    {
+                                                                        label: t(
+                                                                            "label.view-columns-list"
+                                                                        ),
+                                                                        onClick:
+                                                                            () =>
+                                                                                setOpenViewColumnsListDrawer(
+                                                                                    true
+                                                                                ),
+                                                                    },
+                                                                ]}
                                                                 value={
                                                                     enumerators
                                                                 }
@@ -1282,11 +1310,11 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                                 availableConfigurations={
                                                                                                     availableConfigurations as AnomaliesFilterConfiguratorRenderConfigs[]
                                                                                                 }
-                                                                                                onApply={
-                                                                                                    handleApplyAdvancedOptions
-                                                                                                }
                                                                                                 isOpen={
                                                                                                     showAdvancedOptions
+                                                                                                }
+                                                                                                onApply={
+                                                                                                    handleApplyAdvancedOptions
                                                                                                 }
                                                                                                 onClose={() => {
                                                                                                     setShowAdvancedOptions(
@@ -1517,6 +1545,17 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                         {openCreateAlertModal && (
                             <CreateAlertModal
                                 onCancel={() => setOpenCreateAlertModal(false)}
+                            />
+                        )}
+                        {!isNil(selectedTable?.dataset?.id) && (
+                            <ColumnsDrawer
+                                datasetId={selectedTable.dataset.id}
+                                isOpen={openViewColumnsListDrawer}
+                                onClose={() =>
+                                    setOpenViewColumnsListDrawer(
+                                        (prev) => !prev
+                                    )
+                                }
                             />
                         )}
                     </PageContentsCardV1>

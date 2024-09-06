@@ -28,7 +28,10 @@ import { getErrorMessages } from "../../utils/rest/rest.util";
 import { getAlertsAlertPath } from "../../utils/routes/routes.util";
 import { createEmptySubscriptionGroup } from "../../utils/subscription-groups/subscription-groups.util";
 import { AlertsEditCreateBasePageComponent } from "../alerts-edit-create-common/alerts-edit-create-base-page-v2.component";
-import { QUERY_PARAM_KEY_ANOMALIES_RETRY } from "../alerts-view-page/alerts-view-page.utils";
+import {
+    QUERY_PARAM_KEY_ALERT_TYPE,
+    QUERY_PARAM_KEY_ANOMALIES_RETRY,
+} from "../alerts-view-page/alerts-view-page.utils";
 import { AlertsCreatePageProps } from "./alerts-create-page.interfaces";
 
 export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
@@ -49,6 +52,7 @@ export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
         return handleCreateAlertClickGenerator(notify, t, (savedAlert) => {
             const searchParams = new URLSearchParams([
                 [QUERY_PARAM_KEY_ANOMALIES_RETRY, "true"],
+                [QUERY_PARAM_KEY_ALERT_TYPE, "create"],
             ]);
             navigate(getAlertsAlertPath(savedAlert.id, searchParams));
         });

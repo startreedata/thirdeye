@@ -72,6 +72,7 @@ import { getAlertsAllPath } from "../../utils/routes/routes.util";
 import { AlertsViewPageParams } from "./alerts-view-page.interfaces";
 import {
     CONCAT_SEPARATOR,
+    QUERY_PARAM_KEY_ALERT_TYPE,
     QUERY_PARAM_KEY_ANOMALIES_RETRY,
     QUERY_PARAM_KEY_FOR_SEARCH,
     QUERY_PARAM_KEY_FOR_SORT,
@@ -568,7 +569,9 @@ export const AlertsViewPage: FunctionComponent = () => {
                         )}
                     </LoadingErrorStateSwitch>
                 </Grid>
-                {alertId && <AlertAddConfigrationModal alertId={alertId} />}
+                {alertId && searchParams.has(QUERY_PARAM_KEY_ALERT_TYPE) && (
+                    <AlertAddConfigrationModal alertId={alertId} />
+                )}
             </PageContentsGridV1>
         </PageV1>
     );

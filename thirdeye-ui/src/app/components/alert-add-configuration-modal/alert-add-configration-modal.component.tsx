@@ -24,11 +24,14 @@ import {
     getSubscriptionGroupsPath,
 } from "../../utils/routes/routes.util";
 import { boxCardStyles } from "./alert-add-configration-modal.styles";
+import { useSearchParams } from "react-router-dom";
+import { QUERY_PARAM_KEY_ALERT_TYPE } from "../../pages/alerts-view-page/alerts-view-page.utils";
 
 export const AlertAddConfigrationModal: FunctionComponent<AlertAddConfigrationModalProps> =
     ({ alertId }) => {
         const { t } = useTranslation();
         const classes = boxCardStyles();
+        const [searchParams] = useSearchParams();
 
         return (
             <Modal
@@ -45,7 +48,13 @@ export const AlertAddConfigrationModal: FunctionComponent<AlertAddConfigrationMo
                                     {t("label.congratulations-,")}
                                 </Typography>
                                 <Typography variant="h6">
-                                    {t("label.your-alert-has-been-created")}
+                                    {searchParams.get(
+                                        QUERY_PARAM_KEY_ALERT_TYPE
+                                    ) === "create"
+                                        ? t("label.your-alert-has-been-created")
+                                        : t(
+                                              "label.your-alert-has-been-updated"
+                                          )}
                                 </Typography>
                                 <Box sx={{ my: 2 }}>
                                     <Typography variant="subtitle2">

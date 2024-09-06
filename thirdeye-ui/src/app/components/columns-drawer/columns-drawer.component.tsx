@@ -14,12 +14,7 @@
  */
 
 import { Icon } from "@iconify/react";
-import {
-    Box,
-    Button,
-    Drawer,
-    Typography
-} from "@material-ui/core";
+import { Box, Button, Drawer, Typography } from "@material-ui/core";
 import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -57,7 +52,7 @@ export const ColumnsDrawer: FunctionComponent<ColumnsDrawerProps> = ({
 
     const handleCopy = (text: string): void => {
         if (navigator.clipboard) {
-            navigator.clipboard.writeText(text)
+            navigator.clipboard.writeText(text);
         }
     };
 
@@ -71,10 +66,10 @@ export const ColumnsDrawer: FunctionComponent<ColumnsDrawerProps> = ({
                 open={isOpen}
                 onClose={onClose}
             >
-                <Box display="flex" flexDirection={"column"} height="100%">
+                <Box display="flex" flexDirection="column" height="100%">
                     <Box
-                        className={classes.header}
                         alignItems="center"
+                        className={classes.header}
                         display="flex"
                         justifyContent="space-between"
                     >
@@ -88,31 +83,33 @@ export const ColumnsDrawer: FunctionComponent<ColumnsDrawerProps> = ({
                             onClick={onClose}
                         />
                     </Box>
-                    <Box flex={1} className={classes.content}>
+                    <Box className={classes.content} flex={1}>
                         <Box
                             border={1}
                             borderColor={ColorV1.Grey10}
                             borderRadius={10}
-                            overflow={"hidden"}
-                            height={"100%"}
+                            display="flex"
+                            flexDirection="column"
+                            height="100%"
+                            overflow="hidden"
                         >
                             <SearchInputV1
+                                fullWidth
                                 className={classes.searchInput}
+                                placeholder={t("label.search")}
                                 value={searchQuery}
                                 onChange={setSearchQuery}
-                                fullWidth
-                                placeholder={t("label.search")}
                             />
-                            <Box>
+                            <Box className={classes.listContainer}>
                                 {filteredDimensions.map((dimension) => (
                                     <Box
+                                        alignItems="center"
+                                        className={classes.listItem}
+                                        display="flex"
+                                        justifyContent="space-between"
+                                        key={dimension}
                                         role="button"
                                         onClick={() => handleCopy(dimension)}
-                                        className={classes.listItem}
-                                        key={dimension}
-                                        display={"flex"}
-                                        justifyContent={"space-between"}
-                                        alignItems={"center"}
                                     >
                                         <Typography variant="body2">
                                             {dimension}
@@ -128,9 +125,9 @@ export const ColumnsDrawer: FunctionComponent<ColumnsDrawerProps> = ({
                         </Box>
                     </Box>
                     <Box
-                        display={"flex"}
-                        justifyContent={"flex-end"}
                         className={classes.footer}
+                        display="flex"
+                        justifyContent="flex-end"
                     >
                         <Button
                             className={classes.action}

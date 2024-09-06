@@ -21,7 +21,7 @@ import {
     FormControl,
     FormLabel,
     TextField,
-    Typography
+    Typography,
 } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
@@ -38,74 +38,77 @@ export const AdditonalFiltersDrawer: FunctionComponent<AdditonalFiltersDrawerPro
         const { t } = useTranslation();
 
         return (
-            <>
-                <Drawer
-                    PaperProps={{
-                        className: classes.drawerPaper,
-                    }}
-                    anchor="right"
-                    open={isOpen}
-                    onClose={onClose}
+            <Drawer
+                PaperProps={{
+                    className: classes.drawerPaper,
+                }}
+                anchor="right"
+                open={isOpen}
+                onClose={onClose}
+            >
+                <Box
+                    alignItems="center"
+                    className={classes.header}
+                    display="flex"
+                    justifyContent="space-between"
                 >
-                    <Box
-                        className={classes.header}
-                        alignItems="center"
-                        display="flex"
-                        justifyContent="space-between"
+                    <Typography variant="h6">
+                        {t("label.advanced-options")}
+                    </Typography>
+                    <Icon
+                        cursor="pointer"
+                        fontSize={24}
+                        icon="ic:round-close"
+                        onClick={onClose}
+                    />
+                </Box>
+                <Box className={classes.content} flex={1}>
+                    <Box>
+                        {availableConfigurations.map((config) => (
+                            <Box key={config.name} mb={3} width="100%">
+                                <Typography variant="h6">
+                                    {config.name}
+                                </Typography>
+                                {config.requiredPropertiesWithMetadata.map(
+                                    (property) => (
+                                        <FormControl
+                                            fullWidth
+                                            key={property.name}
+                                        >
+                                            <FormLabel>
+                                                {property.name}
+                                            </FormLabel>
+                                            <TextField fullWidth />
+                                        </FormControl>
+                                    )
+                                )}
+                            </Box>
+                        ))}
+                    </Box>
+                </Box>
+                <Box
+                    className={classes.footer}
+                    display="flex"
+                    justifyContent="space-between"
+                >
+                    <Button
+                        className={classes.actionSecondary}
+                        size="medium"
+                        variant="contained"
+                        onClick={onClose}
                     >
-                        <Typography variant="h6">
-                            {t("label.filter-for-single-metric")}
-                        </Typography>
-                        <Icon
-                            cursor="pointer"
-                            fontSize={24}
-                            icon="ic:round-close"
-                            onClick={onClose}
-                        />
-                    </Box>
-                    <Box flex={1} className={classes.content}>
-                        <Box>
-                            {availableConfigurations.map((config) => (
-                                <Box key={config.name} mb={3} width={'100%'}>
-                                    <Typography variant="h6">{config.name}</Typography>
-                                    {config.requiredPropertiesWithMetadata.map(
-                                        (property) => (
-                                            <FormControl fullWidth key={property.name}>
-                                                <FormLabel>
-                                                    {property.name}
-                                                </FormLabel>
-                                                <TextField fullWidth />
-                                            </FormControl>
-                                        )
-                                    )}
-                                </Box>
-                            ))}
-                        </Box>
-                    </Box>
-                    <Box
-                        display={"flex"}
-                        justifyContent={"space-between"}
-                        className={classes.footer}
+                        {t("label.close")}
+                    </Button>
+                    <Button
+                        className={classes.actionPrimary}
+                        color="primary"
+                        size="medium"
+                        variant="contained"
+                        onClick={onApply}
                     >
-                        <Button
-                            className={classes.actionSecondary}
-                            size="medium"
-                            variant="contained"
-                            onClick={onClose}
-                        >
-                            {t("label.close")}
-                        </Button>
-                        <Button
-                            className={classes.actionPrimary}
-                            color="primary"
-                            size="medium"
-                            variant="contained"
-                            onClick={onApply}
-                        >
-                            {t("label.apply-filter")}
-                        </Button>
-                    </Box>
-                </Drawer>
-            </>
+                        {t("label.apply-filter")}
+                    </Button>
+                </Box>
+            </Drawer>
         );
     };

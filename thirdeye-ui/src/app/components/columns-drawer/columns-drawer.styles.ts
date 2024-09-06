@@ -19,40 +19,45 @@ export const useColumnsDrawerStyles = makeStyles((theme) => ({
     drawerPaper: {
         backgroundColor: theme.palette.background.paper,
         maxWidth: 280,
-        width: '100%'
+        width: "100%",
     },
     header: {
-        padding: '10px 12px',
+        padding: "10px 12px",
     },
     content: {
         borderBottom: `1px solid ${ColorV1.Grey10}`,
         borderTop: `1px solid ${ColorV1.Grey10}`,
-        padding: '20px 12px',
+        padding: "20px 12px",
     },
     searchInput: {
-        '& > div': {
-            borderRadius: '10px 10px 0 0'
+        "& > div": {
+            borderRadius: "10px 10px 0 0",
         },
-        '& fieldset': {
-            borderColor: 'transparent',
+        "& fieldset": {
+            borderColor: "transparent",
             borderBottom: `1px solid ${ColorV1.Grey10}`,
-        }
+        },
+    },
+    listContainer: {
+        flex: "1 1 auto",
+        overflowY: "auto",
+        height: 0,
     },
     listItem: {
         padding: `5px 12px`,
-        cursor: 'pointer',
+        cursor: "pointer",
         borderBottom: `1px solid ${ColorV1.Grey10}`,
-        '&:hover': {
-            backgroundColor: ColorV1.Grey9
-        }
+        "&:hover": {
+            backgroundColor: ColorV1.Grey9,
+        },
     },
     footer: {
-        padding: '10px 12px',
-        backgroundColor: ColorV1.Grey9
+        padding: "10px 12px",
+        backgroundColor: ColorV1.Grey9,
     },
     action: {
-        textTransform: 'none',
+        textTransform: "none",
         backgroundColor: ColorV1.White1,
         border: `1px solid ${ColorV1.Grey10}`,
-    }
+    },
 }));

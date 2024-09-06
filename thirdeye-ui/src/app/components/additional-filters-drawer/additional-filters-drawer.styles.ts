@@ -19,26 +19,29 @@ export const useAdditonalFiltersDrawerStyles = makeStyles((theme) => ({
     drawerPaper: {
         backgroundColor: theme.palette.background.paper,
         maxWidth: 280,
-        width: '100%'
+        width: "100%",
     },
     header: {
-        padding: '10px 12px',
+        padding: "10px 12px",
     },
     content: {
         borderBottom: `1px solid ${ColorV1.Grey10}`,
         borderTop: `1px solid ${ColorV1.Grey10}`,
-        padding: '20px 12px',
+        padding: "20px 12px",
+        flex: "1 1 auto",
+        overflowY: "auto",
+        height: 0,
     },
     footer: {
-        padding: '10px 12px',
-        backgroundColor: ColorV1.Grey9
+        padding: "10px 12px",
+        backgroundColor: ColorV1.Grey9,
     },
     actionSecondary: {
-        textTransform: 'none',
+        textTransform: "none",
         backgroundColor: ColorV1.White1,
         border: `1px solid ${ColorV1.Grey10}`,
     },
     actionPrimary: {
-        textTransform: 'none',
-    }
+        textTransform: "none",
+    },
 }));

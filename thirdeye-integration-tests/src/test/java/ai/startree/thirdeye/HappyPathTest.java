@@ -177,7 +177,7 @@ public class HappyPathTest {
 
   @Test(dependsOnMethods = "testPing")
   public void testSwaggerApiJson() throws JsonProcessingException {
-    final Response response = request("/openapi.json").get();
+    final Response response = request("openapi.json").get();
     assert200(response);
     final JsonNode r = new ObjectMapper().readTree(
         response.readEntity(JSONObject.class).toJSONString());
@@ -209,7 +209,7 @@ public class HappyPathTest {
 
   @Test(dependsOnMethods = "testPing")
   public void testCreateDxTemplate() {
-    final Response response = request("/api/alert-templates").get();
+    final Response response = request("api/alert-templates").get();
     assert200(response);
     final List<AlertTemplateApi> templates = response.readEntity(ALERT_TEMPLATE_LIST_TYPE);
     final AlertTemplateApi thresholdTemplate = templates.stream().filter(t -> t.getName().equals(THRESHOLD_TEMPLATE_NAME)).findFirst()
@@ -230,7 +230,7 @@ public class HappyPathTest {
         .setName(thresholdTemplate.getName() + "-dx")
         .setId(null);
 
-    final Response updateResponse = request("/api/alert-templates")
+    final Response updateResponse = request("api/alert-templates")
         .post(Entity.json(List.of(thresholdTemplate)));
     assertThat(updateResponse.getStatus()).isEqualTo(200);
   }
@@ -653,8 +653,13 @@ public class HappyPathTest {
     try {
       assertThat(response.getStatus()).isEqualTo(200);
     } catch (AssertionError e) {
-      System.out.printf("Status 200 assertion failed. Response Status: %s Response content: %s%n",
-          response.getStatus(), response.readEntity(Object.class));
+      try {
+        System.out.printf("Status 200 assertion failed. Response Status: %s Response content: %s%n",
+            response.getStatus(), response.readEntity(Object.class)); 
+      } catch (Exception e2) {
+        System.out.printf("Status 200 assertion failed and failed to read the response entity. Response Status: %s Response headers: %s.%n",
+            response.getStatus(), response.getHeaders());
+      }
       throw e;
     }
   }
@@ -696,13 +701,13 @@ public class HappyPathTest {
   }
 
   private List<AnomalyApi> mustGetAnomaliesForAlert(long alertId) {
-    final Response resp = request("/api/anomalies?alert.id=" + alertId).get();
+    final Response resp = request("api/anomalies?alert.id=" + alertId).get();
     assertThat(resp.getStatus()).isEqualTo(200);
     return resp.readEntity(new GenericType<>() {});
   }
 
   private RcaInvestigationApi mustGetInvestigation(long id) {
-    final Response response = request("/api/rca/investigations/" + id).get();
+    final Response response = request("api/rca/investigations/" + id).get();
     assertThat(response.getStatus()).isEqualTo(200);
     final RcaInvestigationApi investigationApi = response.readEntity(RcaInvestigationApi.class);
     assertThat(investigationApi).isNotNull();

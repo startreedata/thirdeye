@@ -57,8 +57,7 @@
     <auto-service.version>1.0.1</auto-service.version>
     <calcite.version>1.37.0</calcite.version>
     <calendar-api.version>v3-rev300-1.23.0</calendar-api.version>
-    <checkerframework.version>3.39.0</checkerframework.version>
-    <commons-cli.version>1.3</commons-cli.version>
+    <checkerframework.version>3.46.0</checkerframework.version>
     <commons-collection4.version>4.1</commons-collection4.version>
     <commons-csv.version>1.3</commons-csv.version>
     <commons-lang3.version>3.9</commons-lang3.version>
@@ -66,11 +65,12 @@
     <commons.email.version>1.5</commons.email.version>
     <flyway.version>8.5.13</flyway.version>
     <freemarker.version>2.3.32</freemarker.version>
-    <guava.version>32.1.3-jre</guava.version>
+    <guava.version>33.3.0-jre</guava.version>
     <guice.version>5.1.0</guice.version>
     <hsqldb.version>2.7.1</hsqldb.version>
+    <!-- should match dropwizard version - except for security issues -->
     <jackson.version>2.17.2</jackson.version>
-    <jodatime.version>2.12.5</jodatime.version>
+    <jodatime.version>2.12.7</jodatime.version>
     <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
     <mockito.version>5.12.0</mockito.version>
     <modelmapper.version>3.1.1</modelmapper.version>
@@ -85,9 +85,10 @@
     <retrofit2.version>2.9.0</retrofit2.version>
     <sendgrid.version>4.0.1</sendgrid.version>
     <slack.version>1.29.2</slack.version>
-    <slf4j-api.version>1.7.12</slf4j-api.version>
+    <!-- should match dropwizard version - except for security issues -->
+    <slf4j-api.version>2.0.16</slf4j-api.version>
     <snakeyaml.version>2.2</snakeyaml.version>
-    <swagger.version>2.1.6-1</swagger.version>
+    <dropwizard.swagger.version>3.0.0-1</dropwizard.swagger.version>
     <testcontainers.version>1.19.3</testcontainers.version>
     <micrometer.version>1.11.4</micrometer.version>
     <sentry.version>7.2.0</sentry.version>
@@ -639,7 +640,7 @@
       <dependency>
         <groupId>io.dropwizard</groupId>
         <artifactId>dropwizard-bom</artifactId>
-        <version>2.1.6</version>
+        <version>3.0.8</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -727,11 +728,6 @@
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-email</artifactId>
         <version>${commons.email.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>commons-cli</groupId>
-        <artifactId>commons-cli</artifactId>
-        <version>${commons-cli.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>
@@ -861,8 +857,8 @@
       <!--
       Force upgrading snakeyaml version due to conflicts from latest jackson dependency
       snakeyaml upgraded from v2.16. see: https://github.com/FasterXML/jackson/wiki/Jackson-Release-2.16
-      This dependency conflicts with snakeyaml versions from pinot and swagger in several modules
-      Remove this when swagger and pinot are upgraded to latest versions with required snakeyaml dep
+      This dependency conflicts with snakeyaml versions from pinot in several modules
+      Remove this when pinot is upgraded to latest versions with required snakeyaml dep
       -->
       <dependency>
         <groupId>org.yaml</groupId>
@@ -924,21 +920,9 @@
       <dependency>
         <groupId>com.smoketurner</groupId>
         <artifactId>dropwizard-swagger</artifactId>
-        <version>${swagger.version}</version>
+        <version>${dropwizard.swagger.version}</version>
         <exclusions>
-          <!-- excluded the dropwizard 2.0.0 dependencies -->
-          <exclusion>
-            <groupId>io.dropwizard</groupId>
-            <artifactId>dropwizard-auth</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>io.dropwizard</groupId>
-            <artifactId>dropwizard-core</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>io.dropwizard</groupId>
-            <artifactId>dropwizard-servlets</artifactId>
-          </exclusion>
+          <!--dropwizard-swagger depends on dropwizard packages - the version of dropwizard packages is defined above so will take precedence - just make sure to use a version of dropwizard-swagger that is compatible with the dropwizard version -->
           <!-- javax.validation:validation-api conflicting with -->
           <!-- jakarta.validation:jakarta.validation-api which is a dropwizard dependency -->
           <exclusion>

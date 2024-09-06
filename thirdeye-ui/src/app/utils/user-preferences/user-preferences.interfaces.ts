@@ -16,12 +16,14 @@ export enum UserPreferencesKeys {
     SHOW_DOCUMENTATION_RESOURCES = "showHomeDocumentationResources",
     ANOMALIES_LIST_DEFAULT_ALERT_FILTERS = "anomaliesListDefaultAlertFilter",
     ANOMALIES_LIST_DEFAULT_SUBSCRIPTION_FILTERS = "anomaliesListDefaultSubscriptionFilter",
+    CURRENT_WORKSPACE = "currentWorkspace",
 }
 
 export interface UserPreferences {
     showHomeDocumentationResources?: boolean;
     anomaliesListDefaultAlertFilter?: number[];
     anomaliesListDefaultSubscriptionFilter?: number[];
+    currentWorkspace?: string;
 }
 
 export type GetPreferenceFunction = (

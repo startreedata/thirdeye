@@ -53,7 +53,7 @@ import { RadioSectionOptions } from "../../../components/form-basics/radio-secti
 import { TimeRangeButtonWithContext } from "../../../components/time-range/time-range-button-with-context-v2/time-range-button.component";
 import { TimeRangeQueryStringKey } from "../../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import {
-    JSONEditorV1,
+    JSONEditorV2,
     PageContentsCardV1,
     PageContentsGridV1,
     PageHeaderActionsV1,
@@ -87,6 +87,9 @@ import { alertsBasicHelpCards } from "../../../components/help-drawer-v1/help-dr
 import { Icon } from "@iconify/react";
 import { getAlertsAllPath } from "../../../utils/routes/routes.util";
 import { borderCardStyles } from "./alerts-create-easy-page.styles";
+import { AdditonalFiltersDrawer } from "../../../components/additional-filters-drawer/additional-filters-drawer.component";
+import { getAvailableFilterOptions } from "../../../components/alert-wizard-v3/anomalies-filter-panel/anomalies-filter-panel.utils";
+import { AnomaliesFilterConfiguratorRenderConfigs } from "../../../components/alert-wizard-v3/anomalies-filter-panel/anomalies-filter-panel.interfaces";
 const PROPERTIES_TO_COPY = [
     "dataSource",
     "dataset",
@@ -222,6 +225,14 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
             return alertTemplateCandidate.name === alertTemplateToFind;
         });
     }, [alertTemplates, alert, isMultiDimensionAlert]);
+
+    const availableConfigurations = useMemo(() => {
+        if (!alertTemplateForEvaluate) {
+            return undefined;
+        }
+
+        return getAvailableFilterOptions(alertTemplateForEvaluate, t);
+    }, [alertTemplateForEvaluate]);
 
     const handleGranularityChange = (
         _: unknown,
@@ -421,6 +432,10 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
     const handleMetricsChange = (value: string): void => {
         setEditedDatasource(JSON.parse(value));
     };
+
+    const handleApplyAdvancedOptions = (): void => {
+        // handle advance options
+    }
 
     const fetchAlertEvaluation = (start: number, end: number): void => {
         const copiedAlert = { ...alertConfigForPreview };
@@ -858,7 +873,15 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                     item
                                                                     xs={8}
                                                                 >
-                                                                    <JSONEditorV1
+                                                                    <JSONEditorV2
+                                                                        showFooter={
+                                                                            true
+                                                                        }
+                                                                        datasetId={
+                                                                            selectedTable
+                                                                                ?.dataset
+                                                                                .id
+                                                                        }
                                                                         hideValidationSuccessIcon
                                                                         value={
                                                                             editedDatasource
@@ -1029,7 +1052,15 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                     {dimension ===
                                                         SelectDimensionsOptions.ENUMERATORS && (
                                                         <Grid item xs={12}>
-                                                            <JSONEditorV1
+                                                            <JSONEditorV2
+                                                                showFooter={
+                                                                    true
+                                                                }
+                                                                datasetId={
+                                                                    selectedTable
+                                                                        ?.dataset
+                                                                        .id
+                                                                }
                                                                 hideValidationSuccessIcon
                                                                 value={
                                                                     enumerators
@@ -1247,6 +1278,22 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                                     "label.add-advanced-options"
                                                                                                 )}
                                                                                             </Button>
+                                                                                            <AdditonalFiltersDrawer
+                                                                                                availableConfigurations={
+                                                                                                    availableConfigurations as AnomaliesFilterConfiguratorRenderConfigs[]
+                                                                                                }
+                                                                                                onApply={
+                                                                                                    handleApplyAdvancedOptions
+                                                                                                }
+                                                                                                isOpen={
+                                                                                                    showAdvancedOptions
+                                                                                                }
+                                                                                                onClose={() => {
+                                                                                                    setShowAdvancedOptions(
+                                                                                                        false
+                                                                                                    );
+                                                                                                }}
+                                                                                            />
                                                                                         </Grid>
                                                                                     </Grid>
                                                                                 </Grid>

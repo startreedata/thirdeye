@@ -1,0 +1,314 @@
+/*
+ * Copyright 2023 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ *
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
+import {
+    Box,
+    Button,
+    CircularProgress,
+    FormControl,
+    FormHelperText,
+    useTheme,
+} from "@material-ui/core";
+import CancelIcon from "@material-ui/icons/Cancel";
+import CheckCircleIcon from "@material-ui/icons/CheckCircle";
+import classNames from "classnames";
+import { Editor, EditorChange } from "codemirror";
+import "codemirror/addon/edit/closebrackets.js";
+import "codemirror/addon/edit/matchbrackets.js";
+import "codemirror/addon/fold/brace-fold.js";
+import "codemirror/addon/fold/foldgutter.css";
+import "codemirror/addon/fold/foldgutter.js";
+import "codemirror/addon/selection/active-line.js";
+import "codemirror/lib/codemirror.css";
+import "codemirror/mode/javascript/javascript.js";
+import { debounce, isNil } from "lodash";
+import React, { ReactElement, useCallback, useEffect, useState } from "react";
+import { Controlled as CodeMirror } from "react-codemirror2";
+import { useTranslation } from "react-i18next";
+import { ColumnsDrawer } from "../../../components/columns-drawer/columns-drawer.component";
+import { JSONEditorV2Props } from "./json-editor-v2.interfaces";
+import { useJSONEditorV2Styles } from "./json-editor-v2.styles";
+
+const TAB_SIZE_JSON_EDITOR = 2;
+const DELAY_VALIDATION_DEFAULT = 500;
+
+export function JSONEditorV2<T = string>({
+    value,
+    helperText,
+    error,
+    readOnly,
+    disableAutoFormat,
+    allowEmpty,
+    disableValidation,
+    hideValidationSuccessIcon,
+    validationDelay = DELAY_VALIDATION_DEFAULT,
+    className,
+    datasetId,
+    showFooter,
+    onChange,
+    onValidate,
+    ...otherProps
+}: JSONEditorV2Props<T>): ReactElement {
+    const jsonEditorV2Classes = useJSONEditorV2Styles();
+    const [jsonValue, setJSONValue] = useState("");
+    const [validating, setValidating] = useState(true);
+    const [valid, setValid] = useState(true);
+    const [openViewColumnsListDrawer, setOpenViewColumnsListDrawer] =
+        useState(false);
+
+    const theme = useTheme();
+    const { t } = useTranslation();
+
+    useEffect(() => {
+        // Input value changed, initialize JSON value
+        initializeJSONValue();
+    }, [value]);
+
+    useEffect(() => {
+        if (disableValidation) {
+            setValidating(false);
+
+            return;
+        }
+
+        // JSON value changed, validate
+        setValidating(true);
+        validateJSONValueDebounced(jsonValue);
+    }, [jsonValue]);
+
+    const initializeJSONValue = (): void => {
+        if (!value) {
+            setJSONValue("");
+
+            return;
+        }
+
+        if (typeof value === "string" && disableAutoFormat) {
+            setJSONValue(value);
+
+            return;
+        }
+
+        if (typeof value === "string" && !disableAutoFormat) {
+            // First, validate
+            let jsonObject;
+            try {
+                jsonObject = JSON.parse(value);
+            } catch (error) {
+                // Invalid JSON
+                setJSONValue(value);
+
+                return;
+            }
+
+            setJSONValue(
+                JSON.stringify(jsonObject, null, TAB_SIZE_JSON_EDITOR)
+            );
+
+            return;
+        }
+
+        if (typeof value === "object" && disableAutoFormat) {
+            setJSONValue(JSON.stringify(value));
+
+            return;
+        }
+
+        if (typeof value === "object" && !disableAutoFormat) {
+            setJSONValue(JSON.stringify(value, null, TAB_SIZE_JSON_EDITOR));
+
+            return;
+        }
+    };
+
+    const validateJSONValueDebounced = useCallback(
+        debounce((jsonValue) => {
+            let valid = true;
+            if (!jsonValue && !allowEmpty) {
+                // Invalid JSON
+                valid = false;
+            }
+
+            try {
+                jsonValue && JSON.parse(jsonValue);
+            } catch (error) {
+                // Invalid JSON
+                valid = false;
+            }
+
+            setValid(valid);
+            setValidating(false);
+
+            // Notify
+            onValidate && onValidate(valid);
+        }, validationDelay),
+        []
+    );
+
+    const showValidationLoading = (): boolean => {
+        return !disableValidation && validating;
+    };
+
+    const showValidationIcon = (): boolean => {
+        return !disableValidation && !validating;
+    };
+
+    const handleInputBeforeChange = (
+        _editor: Editor,
+        _data: EditorChange,
+        value: string
+    ): void => {
+        setJSONValue(value);
+    };
+
+    const handleInputChange = (
+        _editor: Editor,
+        _data: EditorChange,
+        value: string
+    ): void => {
+        onChange && onChange(value);
+    };
+
+    return (
+        <Box>
+            <FormControl
+                {...otherProps}
+                className={classNames(
+                    jsonEditorV2Classes.jsonEditor,
+                    className,
+                    "json-editor-v1"
+                )}
+            >
+                {/* CodeMirror */}
+                <CodeMirror
+                    className={classNames(
+                        jsonEditorV2Classes.codeMirror,
+                        {
+                            [jsonEditorV2Classes.codeMirrorError]:
+                                error || !valid,
+                        },
+                        "json-editor-v1-codemirror"
+                    )}
+                    options={{
+                        tabSize: TAB_SIZE_JSON_EDITOR,
+                        indentUnit: TAB_SIZE_JSON_EDITOR,
+                        indentWithTabs: false,
+                        lineNumbers: true,
+                        lineWrapping: true,
+                        styleActiveLine: true,
+                        matchBrackets: true,
+                        autoCloseBrackets: true,
+                        foldGutter: true,
+                        gutters: [
+                            "CodeMirror-linenumbers",
+                            "CodeMirror-foldgutter",
+                        ],
+                        mode: {
+                            name: "javascript",
+                            json: true,
+                        },
+                        readOnly: readOnly,
+                    }}
+                    value={jsonValue}
+                    onBeforeChange={handleInputBeforeChange}
+                    onChange={handleInputChange}
+                />
+
+                {/* Validation in progress */}
+                {showValidationLoading() && (
+                    <div
+                        className={classNames(
+                            jsonEditorV2Classes.validationIcon,
+                            "json-editor-v1-validation-loading-indicator"
+                        )}
+                    >
+                        <CircularProgress color="primary" size={20} />
+                    </div>
+                )}
+
+                {/* Valid icon */}
+                {showValidationIcon() &&
+                    !error &&
+                    valid &&
+                    !hideValidationSuccessIcon && (
+                        <div
+                            className={classNames(
+                                jsonEditorV2Classes.validationIcon,
+                                "json-editor-v1-valid-icon"
+                            )}
+                        >
+                            <CheckCircleIcon
+                                fontSize="medium"
+                                htmlColor={theme.palette.success.main}
+                            />
+                        </div>
+                    )}
+
+                {/* Invalid icon */}
+                {showValidationIcon() && (error || !valid) && (
+                    <div
+                        className={classNames(
+                            jsonEditorV2Classes.validationIcon,
+                            "json-editor-v1-invalid-icon"
+                        )}
+                    >
+                        <CancelIcon
+                            fontSize="medium"
+                            htmlColor={theme.palette.error.main}
+                        />
+                    </div>
+                )}
+
+                {/* Helper text */}
+                {helperText && (
+                    <FormHelperText
+                        className="json-editor-v1-helper-text"
+                        error={error || !valid}
+                    >
+                        {helperText}
+                    </FormHelperText>
+                )}
+            </FormControl>
+            {showFooter && (
+                <Box className={jsonEditorV2Classes.footer}>
+                    <Button size="small" variant="contained">
+                        <Box component="span" mr={1}>
+                            {t("label.apply-custom-metric")}
+                        </Box>
+                    </Button>
+                    <Button
+                        variant="contained"
+                        size="small"
+                        onClick={() =>
+                            setOpenViewColumnsListDrawer((prev) => !prev)
+                        }
+                    >
+                        <Box component="span" mr={1}>
+                            {t("label.view-columns-list")}
+                        </Box>
+                    </Button>
+                    {!isNil(datasetId) && (
+                        <ColumnsDrawer
+                            isOpen={openViewColumnsListDrawer}
+                            onClose={() =>
+                                setOpenViewColumnsListDrawer((prev) => !prev)
+                            }
+                            datasetId={datasetId}
+                        />
+                    )}
+                </Box>
+            )}
+        </Box>
+    );
+}

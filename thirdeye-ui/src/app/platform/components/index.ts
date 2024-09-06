@@ -22,6 +22,7 @@ export * from "./dropdown-menu-v1";
 export * from "./help-link-icon-v1";
 export * from "./info-icon-v1";
 export * from "./json-editor-v1";
+export * from "./json-editor-v2";
 export * from "./link-button-v1";
 export * from "./link-v1";
 export * from "./loading-button-v1";

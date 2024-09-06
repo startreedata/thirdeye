@@ -65,12 +65,13 @@ export const AlertAddConfigrationModal: FunctionComponent<AlertAddConfigrationMo
                             </Box>
                         </Grid>
                         <Grid item>
-                            <Box display="flex" gridGap={2}>
+                            <Box display="flex" gridGap={10}>
                                 <Button
                                     color="primary"
                                     href={getSubscriptionGroupsCreatePathWithAlertId(
                                         alertId
                                     )}
+                                    size="small"
                                     startIcon={<ControlPointOutlinedIcon />}
                                     variant="contained"
                                 >
@@ -79,6 +80,7 @@ export const AlertAddConfigrationModal: FunctionComponent<AlertAddConfigrationMo
                                 <Button
                                     color="primary"
                                     href={getSubscriptionGroupsPath()}
+                                    size="small"
                                     variant="outlined"
                                 >
                                     {t("label.explore-all-notifications")}

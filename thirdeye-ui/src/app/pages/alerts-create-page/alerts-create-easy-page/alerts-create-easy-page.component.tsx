@@ -108,6 +108,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
 
     const [searchParams, setSearchParams] = useSearchParams();
     const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
+    const [enumerations, setEnumerations] = useState(null);
     const [dimension, setDimension] = useState<string | null>(null);
 
     const [startTime, endTime] = useMemo(
@@ -365,15 +366,14 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
             selectedMetric &&
             selectedTable &&
             granularity &&
-            aggregationFunction &&
-            algorithmOption
+            aggregationFunction
         ) {
             onAlertPropertyChange({
                 template: {
                     name: isMultiDimensionAlert
-                        ? algorithmOption.algorithmOption
+                        ? algorithmOption?.algorithmOption
                               .alertTemplateForMultidimension
-                        : algorithmOption.algorithmOption.alertTemplate,
+                        : algorithmOption?.algorithmOption?.alertTemplate,
                 },
                 templateProperties: {
                     ...alert.templateProperties,
@@ -868,7 +868,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                         }
                                                                     />
                                                                 </Grid>
-                                                                <Grid
+                                                                {/* <Grid
                                                                     item
                                                                     xs={4}
                                                                 >
@@ -883,10 +883,10 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                         }}
                                                                     >
                                                                         {t(
-                                                                            "label.aggregation-functions-guide-write-custom"
+                                "label.aggregation-functions-guide-write-custom"
                                                                         )}
                                                                     </Button>
-                                                                </Grid>
+                                                                </Grid> */}
                                                             </Grid>
                                                         </Grid>
                                                     )}
@@ -1026,12 +1026,36 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                             />
                                                         </Grid>
                                                     )}
-
+                                                    {dimension ===
+                                                        SelectDimensionsOptions.ENUMERATORS && (
+                                                        <Grid item xs={12}>
+                                                            <JSONEditorV1
+                                                                hideValidationSuccessIcon
+                                                                value={
+                                                                    enumerators
+                                                                }
+                                                                onChange={(
+                                                                    value
+                                                                ) =>
+                                                                    setEnumerators(
+                                                                        JSON.parse(
+                                                                            value
+                                                                        )
+                                                                    )
+                                                                }
+                                                            />
+                                                        </Grid>
+                                                    )}
                                                     <Grid item xs={12}>
                                                         {((anomalyDetection ===
                                                             AnomalyDetectionOptions.COMPOSITE &&
                                                             dimension ===
                                                                 SelectDimensionsOptions.DIMENSION_RECOMMENDER) ||
+                                                            (anomalyDetection ===
+                                                                AnomalyDetectionOptions.COMPOSITE &&
+                                                                dimension ===
+                                                                    SelectDimensionsOptions.ENUMERATORS &&
+                                                                enumerations) ||
                                                             anomalyDetection ===
                                                                 AnomalyDetectionOptions.SINGLE) &&
                                                             anomalyDetection &&
@@ -1386,26 +1410,6 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                     )}
                                                                 </Grid>
                                                             )}
-                                                        {dimension ===
-                                                            SelectDimensionsOptions.ENUMERATORS && (
-                                                            <Grid item xs={12}>
-                                                                <JSONEditorV1
-                                                                    hideValidationSuccessIcon
-                                                                    value={
-                                                                        enumerators
-                                                                    }
-                                                                    onChange={(
-                                                                        value
-                                                                    ) =>
-                                                                        setEnumerators(
-                                                                            JSON.parse(
-                                                                                value
-                                                                            )
-                                                                        )
-                                                                    }
-                                                                />
-                                                            </Grid>
-                                                        )}
 
                                                         <Grid item xs={12}>
                                                             <Box

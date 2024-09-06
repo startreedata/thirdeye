@@ -2,8 +2,8 @@ name: FE Test and Build
 
 on:
   push:
-    branches:
-      - '!master'
+    branches-ignore:
+      - master
     paths:
       - thirdeye-ui/**
   workflow_dispatch:
@@ -18,8 +18,6 @@ jobs:
         with:
           sparse-checkout: |
             thirdeye-ui
-            pom.xml
-            .mvn
 
       - name: Install node and npm
         uses: actions/setup-node@v3

@@ -63,6 +63,7 @@ export const AppBarConfigProvider: FunctionComponent<AppBarConfigProviderProps> 
                 /* If the workspace name is not set, we get null as the workspace id,
                 so we map it to a default name to be shown on the UI
                 */
+                //    Test comment
                 setMappedWorkspaes(
                     workspaces?.map((workspace) => {
                         if (workspace.id) {

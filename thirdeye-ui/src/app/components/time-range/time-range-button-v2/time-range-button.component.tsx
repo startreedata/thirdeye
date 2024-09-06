@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Button, ButtonGroup, Popover } from "@material-ui/core";
+import { Button, ButtonGroup, Popover } from "@material-ui/core";
 import KeyboardArrowLeft from "@material-ui/icons/KeyboardArrowLeft";
 import KeyboardArrowRight from "@material-ui/icons/KeyboardArrowRight";
 import CalendarTodayIcon from "@material-ui/icons/CalendarToday";

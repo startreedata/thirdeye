@@ -63,3 +63,8 @@ export enum AnomalyDetectionOptions {
     SINGLE = "Single metric",
     COMPOSITE = "Multiple dimensions",
 }
+
+export enum SelectDimensionsOptions {
+    ENUMERATORS = "Enumerators",
+    DIMENSION_RECOMMENDER = "Dimension recommender",
+}

@@ -14,17 +14,15 @@
  */
 
 import { Icon } from "@iconify/react";
-import {
-    Box,
-    Button,
-    Drawer,
-    FormControl,
-    FormLabel,
-    TextField,
-    Typography,
-} from "@material-ui/core";
-import React, { FunctionComponent } from "react";
+import { Box, Button, Drawer, Typography } from "@material-ui/core";
+import React, { FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
+import {
+    PropertyConfigValueTypes,
+    TemplatePropertiesObject,
+} from "../../rest/dto/alert.interfaces";
+import { FormComponentForTemplateField } from "../alert-wizard-v3/form-component-for-template-field/form-component-for-template-field.component";
+import { LabelForTemplateField } from "../alert-wizard-v3/label-for-template-field/label-for-template-field.component";
 import { AdditonalFiltersDrawerProps } from "./additional-filters-drawer.interfaces";
 import { useAdditonalFiltersDrawerStyles } from "./additional-filters-drawer.styles";
 
@@ -33,9 +31,27 @@ import { useAdditonalFiltersDrawerStyles } from "./additional-filters-drawer.sty
  * to maintain isOpen state
  */
 export const AdditonalFiltersDrawer: FunctionComponent<AdditonalFiltersDrawerProps> =
-    ({ onApply, isOpen, onClose, availableConfigurations }) => {
+    ({ defaultValues, onApply, isOpen, onClose, availableConfigurations }) => {
         const classes = useAdditonalFiltersDrawerStyles();
         const { t } = useTranslation();
+        const [localCopyOfProperties, setLocalCopyOfProperties] =
+            useState<TemplatePropertiesObject>({
+                ...defaultValues,
+            });
+
+        const handleOnChange = (
+            key: string,
+            value: PropertyConfigValueTypes
+        ): void => {
+            setLocalCopyOfProperties((prev) => ({
+                ...prev,
+                [key]: value,
+            }));
+        };
+
+        const onSubmit = (): void => {
+            onApply(localCopyOfProperties);
+        };
 
         return (
             <Drawer
@@ -46,69 +62,106 @@ export const AdditonalFiltersDrawer: FunctionComponent<AdditonalFiltersDrawerPro
                 open={isOpen}
                 onClose={onClose}
             >
-                <Box
-                    alignItems="center"
-                    className={classes.header}
-                    display="flex"
-                    justifyContent="space-between"
-                >
-                    <Typography variant="h6">
-                        {t("label.advanced-options")}
-                    </Typography>
-                    <Icon
-                        cursor="pointer"
-                        fontSize={24}
-                        icon="ic:round-close"
-                        onClick={onClose}
-                    />
-                </Box>
-                <Box className={classes.content} flex={1}>
-                    <Box>
-                        {availableConfigurations.map((config) => (
-                            <Box key={config.name} mb={3} width="100%">
-                                <Typography variant="h6">
-                                    {config.name}
-                                </Typography>
-                                {config.requiredPropertiesWithMetadata.map(
-                                    (property) => (
-                                        <FormControl
-                                            fullWidth
-                                            key={property.name}
-                                        >
-                                            <FormLabel>
-                                                {property.name}
-                                            </FormLabel>
-                                            <TextField fullWidth />
-                                        </FormControl>
-                                    )
-                                )}
-                            </Box>
-                        ))}
+                <form onSubmit={onSubmit}>
+                    <Box
+                        alignItems="center"
+                        className={classes.header}
+                        display="flex"
+                        justifyContent="space-between"
+                    >
+                        <Typography variant="h6">
+                            {t("label.advanced-options")}
+                        </Typography>
+                        <Icon
+                            cursor="pointer"
+                            fontSize={24}
+                            icon="ic:round-close"
+                            onClick={onClose}
+                        />
                     </Box>
-                </Box>
-                <Box
-                    className={classes.footer}
-                    display="flex"
-                    justifyContent="space-between"
-                >
-                    <Button
-                        className={classes.actionSecondary}
-                        size="medium"
-                        variant="contained"
-                        onClick={onClose}
+                    <Box className={classes.content} flex={1}>
+                        <Box>
+                            {availableConfigurations.map((config) => (
+                                <Box
+                                    className={classes.configItem}
+                                    key={config.name}
+                                    mb={3}
+                                    width="100%"
+                                >
+                                    <Typography color="inherit" variant="h6">
+                                        {config.name}
+                                    </Typography>
+                                    <Box className={classes.configItemFields}>
+                                        {config.requiredPropertiesWithMetadata.map(
+                                            (propertyMetadata) => (
+                                                <Box
+                                                    key={propertyMetadata.name}
+                                                >
+                                                    <LabelForTemplateField
+                                                        className={
+                                                            classes.formLabel
+                                                        }
+                                                        name={
+                                                            propertyMetadata.name
+                                                        }
+                                                        tooltipText={
+                                                            propertyMetadata.description
+                                                        }
+                                                    />
+                                                    <FormComponentForTemplateField
+                                                        propertyKey={
+                                                            propertyMetadata.name
+                                                        }
+                                                        templateFieldProperty={
+                                                            propertyMetadata
+                                                        }
+                                                        value={
+                                                            localCopyOfProperties[
+                                                                propertyMetadata
+                                                                    .name
+                                                            ]
+                                                        }
+                                                        onChange={(
+                                                            newValue
+                                                        ) => {
+                                                            handleOnChange(
+                                                                propertyMetadata.name,
+                                                                newValue
+                                                            );
+                                                        }}
+                                                    />
+                                                </Box>
+                                            )
+                                        )}
+                                    </Box>
+                                </Box>
+                            ))}
+                        </Box>
+                    </Box>
+                    <Box
+                        className={classes.footer}
+                        display="flex"
+                        justifyContent="space-between"
                     >
-                        {t("label.close")}
-                    </Button>
-                    <Button
-                        className={classes.actionPrimary}
-                        color="primary"
-                        size="medium"
-                        variant="contained"
-                        onClick={onApply}
-                    >
-                        {t("label.apply-filter")}
-                    </Button>
-                </Box>
+                        <Button
+                            className={classes.actionSecondary}
+                            size="medium"
+                            variant="contained"
+                            onClick={onClose}
+                        >
+                            {t("label.close")}
+                        </Button>
+                        <Button
+                            className={classes.actionPrimary}
+                            color="primary"
+                            size="medium"
+                            type="submit"
+                            variant="contained"
+                        >
+                            {t("label.apply-filter")}
+                        </Button>
+                    </Box>
+                </form>
             </Drawer>
         );
     };

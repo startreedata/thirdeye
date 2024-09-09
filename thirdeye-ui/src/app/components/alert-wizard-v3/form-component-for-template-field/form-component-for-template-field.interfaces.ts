@@ -12,14 +12,14 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { MetadataProperty } from "../../../rest/dto/alert-template.interfaces";
+import { PropertyConfigValueTypes } from "../../../rest/dto/alert.interfaces";
 
-import { TemplatePropertiesObject } from "../../rest/dto/alert.interfaces";
-import { AnomaliesFilterConfiguratorRenderConfigs } from "../alert-wizard-v3/anomalies-filter-panel/anomalies-filter-panel.interfaces";
-
-export interface AdditonalFiltersDrawerProps {
-    defaultValues: TemplatePropertiesObject;
-    isOpen: boolean;
-    onApply: (fieldData: TemplatePropertiesObject) => void;
-    onClose: () => void;
-    availableConfigurations: AnomaliesFilterConfiguratorRenderConfigs[];
+export interface FormComponentForTemplateFieldProps {
+    templateFieldProperty: MetadataProperty;
+    onChange: (selected: PropertyConfigValueTypes) => void;
+    placeholder?: string;
+    tabIndex?: number;
+    value: PropertyConfigValueTypes;
+    propertyKey: string;
 }

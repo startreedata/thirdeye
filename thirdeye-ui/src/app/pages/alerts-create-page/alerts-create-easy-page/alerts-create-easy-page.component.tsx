@@ -24,7 +24,6 @@ import {
 } from "@material-ui/core";
 import DimensionImage from "../../../../assets/images/dimensions.png";
 import { ReactComponent as FilterListRoundedIcon } from "../../../platform/assets/images/filter-icon.svg";
-import InfoOutlinedIcon from "@material-ui/icons/InfoOutlined";
 import AddCircleOutline from "@material-ui/icons/AddCircleOutline";
 import { Alert, AlertTitle, Autocomplete } from "@material-ui/lab";
 import DoneAllIcon from "@material-ui/icons/DoneAll";
@@ -436,8 +435,17 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         setEditedDatasource(JSON.parse(value));
     };
 
-    const handleApplyAdvancedOptions = (): void => {
-        // handle advance options
+    const handleApplyAdvancedOptions = (
+        fieldData: TemplatePropertiesObject
+    ): void => {
+        // handle advance options fields data
+        onAlertPropertyChange({
+            templateProperties: {
+                ...alert.templateProperties,
+                ...fieldData,
+            },
+        });
+        setShowAdvancedOptions(false);
     };
 
     const fetchAlertEvaluation = (start: number, end: number): void => {
@@ -1312,6 +1320,9 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                             <AdditonalFiltersDrawer
                                                                                                 availableConfigurations={
                                                                                                     availableConfigurations as AnomaliesFilterConfiguratorRenderConfigs[]
+                                                                                                }
+                                                                                                defaultValues={
+                                                                                                    alert.templateProperties
                                                                                                 }
                                                                                                 isOpen={
                                                                                                     showAdvancedOptions

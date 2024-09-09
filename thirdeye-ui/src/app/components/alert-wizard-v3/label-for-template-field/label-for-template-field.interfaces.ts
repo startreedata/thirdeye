@@ -13,13 +13,8 @@
  * the License.
  */
 
-import { TemplatePropertiesObject } from "../../rest/dto/alert.interfaces";
-import { AnomaliesFilterConfiguratorRenderConfigs } from "../alert-wizard-v3/anomalies-filter-panel/anomalies-filter-panel.interfaces";
-
-export interface AdditonalFiltersDrawerProps {
-    defaultValues: TemplatePropertiesObject;
-    isOpen: boolean;
-    onApply: (fieldData: TemplatePropertiesObject) => void;
-    onClose: () => void;
-    availableConfigurations: AnomaliesFilterConfiguratorRenderConfigs[];
+export interface LabelForTemplateFieldProps {
+    name: string;
+    tooltipText?: string | null;
+    className?: string;
 }

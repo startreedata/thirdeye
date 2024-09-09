@@ -112,7 +112,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
 
     const [searchParams, setSearchParams] = useSearchParams();
     const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
-    const [enumerations, setEnumerations] = useState(null);
+    const [enumerations, setEnumerations] = useState(false);
     const [dimension, setDimension] = useState<string | null>(null);
 
     const [startTime, endTime] = useMemo(
@@ -1070,6 +1070,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                         <Grid item xs={12}>
                                                             <JSONEditorV2
                                                                 hideValidationSuccessIcon
+                                                                showFooter
                                                                 actions={[
                                                                     {
                                                                         label: t(
@@ -1077,7 +1078,9 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                         ),
                                                                         onClick:
                                                                             () =>
-                                                                                null,
+                                                                                setEnumerations(
+                                                                                    true
+                                                                                ),
                                                                     },
                                                                     {
                                                                         label: t(
@@ -1549,7 +1552,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                         )}
                         {!isNil(selectedTable?.dataset?.id) && (
                             <ColumnsDrawer
-                                datasetId={selectedTable.dataset.id}
+                                datasetId={selectedTable?.dataset.id}
                                 isOpen={openViewColumnsListDrawer}
                                 onClose={() =>
                                     setOpenViewColumnsListDrawer(

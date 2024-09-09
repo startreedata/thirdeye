@@ -13,9 +13,8 @@
  * the License.
  */
 
-
 export interface ColumnsDrawerProps {
     isOpen: boolean;
-    datasetId: number;
+    datasetId?: number;
     onClose: () => void;
 }

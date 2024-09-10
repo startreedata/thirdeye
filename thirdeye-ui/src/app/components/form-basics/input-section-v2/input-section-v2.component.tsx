@@ -16,6 +16,7 @@ import { Grid, Typography } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { InputSectionV2Props } from "./input-section-v2.interfaces";
+import { inputStyles } from "./input-section-v2.styles";
 
 export const InputSectionV2: FunctionComponent<InputSectionV2Props> = ({
     label,
@@ -27,6 +28,7 @@ export const InputSectionV2: FunctionComponent<InputSectionV2Props> = ({
     isOptional,
 }) => {
     const { t } = useTranslation();
+    const classes = inputStyles();
 
     return (
         <Grid item xs={12}>
@@ -35,7 +37,10 @@ export const InputSectionV2: FunctionComponent<InputSectionV2Props> = ({
                     {!!labelComponent && labelComponent}
                     {!labelComponent && label && (
                         <>
-                            <Typography variant="body2">
+                            <Typography
+                                className={classes.header}
+                                variant="caption"
+                            >
                                 {label}
                                 {isOptional && (
                                     <Typography variant="caption">
@@ -53,7 +58,10 @@ export const InputSectionV2: FunctionComponent<InputSectionV2Props> = ({
                     {inputComponent}
                     {description && (
                         <>
-                            <Typography variant="caption">
+                            <Typography
+                                className={classes.description}
+                                variant="caption"
+                            >
                                 {description}
                             </Typography>
                         </>

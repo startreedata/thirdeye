@@ -14,7 +14,7 @@
  */
 import { Box, Divider, Grid, Typography } from "@material-ui/core";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
-import { borderCardStyles } from "../../../pages/alerts-create-page/alerts-create-easy-page/alerts-create-easy-page.styles";
+import { easyAlertStyles } from "../../../pages/alerts-create-page/alerts-create-easy-page/alerts-create-easy-page.styles";
 import { TemplatePropertiesObject } from "../../../rest/dto/alert.interfaces";
 import { PreviewChart } from "../../alert-wizard-v2/alert-template/preview-chart/preview-chart.component";
 import { InputSectionV2 } from "../../form-basics/input-section-v2/input-section-v2.component";
@@ -29,7 +29,7 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
     alertTemplate,
     children,
 }) => {
-    const classes = borderCardStyles();
+    const classes = easyAlertStyles();
 
     const [localAlertTemplateProperties, setLocalAlertTemplateProperties] =
         useState<TemplatePropertiesObject>(alert.templateProperties);

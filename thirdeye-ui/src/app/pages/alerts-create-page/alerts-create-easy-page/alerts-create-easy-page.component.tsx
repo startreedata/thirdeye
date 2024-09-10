@@ -19,6 +19,7 @@ import {
     Divider,
     Grid,
     TextField,
+    ThemeProvider,
     Tooltip,
     Typography,
 } from "@material-ui/core";
@@ -47,14 +48,13 @@ import {
 } from "../../../components/alert-wizard-v3/select-metric/select-metric.utils";
 import { ThresholdSetup } from "../../../components/alert-wizard-v3/threshold-setup/threshold-setup-v2.component";
 import { InputSectionV2 } from "../../../components/form-basics/input-section-v2/input-section-v2.component";
-import { RadioSection } from "../../../components/form-basics/radio-section/radio-section.component";
-import { RadioSectionOptions } from "../../../components/form-basics/radio-section/radio-section.interfaces";
+import { RadioSection } from "../../../components/form-basics/radio-section-v2/radio-section.component";
+import { RadioSectionOptions } from "../../../components/form-basics/radio-section-v2/radio-section.interfaces";
 import { TimeRangeButtonWithContext } from "../../../components/time-range/time-range-button-with-context-v2/time-range-button.component";
 import { TimeRangeQueryStringKey } from "../../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import {
     JSONEditorV2,
     PageContentsCardV1,
-    PageContentsGridV1,
     PageHeaderActionsV1,
 } from "../../../platform/components";
 import { ColorV1 } from "../../../platform/utils/material-ui/color.util";
@@ -85,11 +85,15 @@ import { HelpDrawerV1 } from "../../../components/help-drawer-v1/help-drawer-v1.
 import { alertsBasicHelpCards } from "../../../components/help-drawer-v1/help-drawer-card-contents.utils";
 import { Icon } from "@iconify/react";
 import { getAlertsAllPath } from "../../../utils/routes/routes.util";
-import { borderCardStyles } from "./alerts-create-easy-page.styles";
+import {
+    easyAlertStyles,
+    crateAlertPageTheme,
+} from "./alerts-create-easy-page.styles";
 import { AdditonalFiltersDrawer } from "../../../components/additional-filters-drawer/additional-filters-drawer.component";
 import { getAvailableFilterOptions } from "../../../components/alert-wizard-v3/anomalies-filter-panel/anomalies-filter-panel.utils";
 import { AnomaliesFilterConfiguratorRenderConfigs } from "../../../components/alert-wizard-v3/anomalies-filter-panel/anomalies-filter-panel.interfaces";
 import { ColumnsDrawer } from "../../../components/columns-drawer/columns-drawer.component";
+
 const PROPERTIES_TO_COPY = [
     "dataSource",
     "dataset",
@@ -104,7 +108,7 @@ const ALERT_TEMPLATE_FOR_EVALUATE = "startree-threshold";
 const ALERT_TEMPLATE_FOR_EVALUATE_DX = "startree-threshold-dx";
 
 export const AlertsCreateEasyPage: FunctionComponent = () => {
-    const classes = borderCardStyles();
+    const classes = easyAlertStyles();
 
     const { t } = useTranslation();
     const navigate = useNavigate();
@@ -564,9 +568,9 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
 
     return (
         <>
-            <PageContentsGridV1>
+            <ThemeProvider theme={crateAlertPageTheme}>
                 <Grid item xs={12}>
-                    <PageContentsCardV1>
+                    <PageContentsCardV1 className={classes.container}>
                         <Grid container>
                             <Grid item xs={12}>
                                 <Box marginBottom={2}>
@@ -577,7 +581,10 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                     >
                                         <Grid item xs={12}>
                                             <Box display="flex">
-                                                <Typography variant="h5">
+                                                <Typography
+                                                    className={classes.header}
+                                                    variant="h5"
+                                                >
                                                     {t("label.alert-wizard")}
                                                 </Typography>
                                                 <PageHeaderActionsV1>
@@ -592,6 +599,9 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                             handleOpen
                                                         ) => (
                                                             <Button
+                                                                className={
+                                                                    classes.infoButton
+                                                                }
                                                                 color="primary"
                                                                 size="small"
                                                                 variant="outlined"
@@ -624,7 +634,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                 </PageHeaderActionsV1>
                                             </Box>
                                             <Box>
-                                                <Typography variant="caption">
+                                                <Typography variant="body2">
                                                     {t(
                                                         "message.create-your-first-step-filling-fields"
                                                     )}
@@ -939,7 +949,12 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                     )}
                                                     <Grid item xs={12}>
                                                         <Box marginBottom="10px">
-                                                            <Typography variant="h5">
+                                                            <Typography
+                                                                className={
+                                                                    classes.inputHeader
+                                                                }
+                                                                variant="h6"
+                                                            >
                                                                 {t(
                                                                     "label.granularity"
                                                                 )}
@@ -1265,7 +1280,12 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                             }
                                                                                         >
                                                                                             <>
-                                                                                                <Typography variant="body2">
+                                                                                                <Typography
+                                                                                                    className={
+                                                                                                        classes.inputHeader
+                                                                                                    }
+                                                                                                    variant="caption"
+                                                                                                >
                                                                                                     {t(
                                                                                                         "label.date-range"
                                                                                                     )}
@@ -1302,6 +1322,9 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                             container
                                                                                         >
                                                                                             <Button
+                                                                                                className={
+                                                                                                    classes.infoButton
+                                                                                                }
                                                                                                 color="primary"
                                                                                                 startIcon={
                                                                                                     <FilterListRoundedIcon />
@@ -1574,7 +1597,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                         )}
                     </PageContentsCardV1>
                 </Grid>
-            </PageContentsGridV1>
+            </ThemeProvider>
         </>
     );
 };

@@ -12,9 +12,12 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { makeStyles } from "@material-ui/core";
+import { makeStyles, createTheme } from "@material-ui/core";
+import { lightV1 } from "../../../platform/utils";
+import { ColorV1 } from "../../../platform/utils/material-ui/color.util";
+import { paletteOptionsV1 } from "../../../platform/utils/material-ui/palette.util";
 
-export const borderCardStyles = makeStyles(() => ({
+export const easyAlertStyles = makeStyles(() => ({
     card: {
         borderRadius: "8px",
         border: "1px solid #B4CDE0",
@@ -22,4 +25,31 @@ export const borderCardStyles = makeStyles(() => ({
         width: "100%",
         alignItems: "center",
     },
+    container: {
+        padding: "30px",
+    },
+    header: {
+        fontWeight: 700,
+        fontSize: "27px",
+    },
+    inputHeader: {
+        fontWeight: 700,
+    },
+    infoButton: {
+        height: "36px",
+        backgroundColor: "#f3f9ff",
+    },
 }));
+
+export const crateAlertPageTheme = createTheme({
+    ...lightV1,
+    palette: {
+        ...paletteOptionsV1,
+        primary: {
+            light: ColorV1.Blue1,
+            main: "#003D86",
+            dark: ColorV1.Blue3,
+            contrastText: ColorV1.White1,
+        },
+    },
+});

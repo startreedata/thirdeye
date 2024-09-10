@@ -175,7 +175,7 @@ export const SubscriptionGroups: FunctionComponent<SubscriptionGroupsProps> = ({
                             </Grid>
                             <Grid container item xs={12}>
                                 <Grid item lg={5} md={6} xs={12}>
-                                    <Box height={300}>
+                                    <Box height={300} overflow="auto">
                                         <DataGridV1<SubscriptionGroup>
                                             hideBorder
                                             hideToolbar

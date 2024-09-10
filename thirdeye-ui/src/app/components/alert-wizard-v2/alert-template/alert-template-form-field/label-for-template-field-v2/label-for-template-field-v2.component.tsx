@@ -14,14 +14,14 @@
  */
 import { Box, Tooltip, Typography, useTheme } from "@material-ui/core";
 import React, { FunctionComponent, useMemo } from "react";
-import { LinkV1 } from "../../../platform/components";
-import { ParseMarkdown } from "../../parse-markdown/parse-markdown.component";
-import { ParseMarkdownProps } from "../../parse-markdown/parse-markdown.interfaces";
-import { LabelForTemplateFieldProps } from "./label-for-template-field.interfaces";
+import { LinkV1 } from "../../../../../platform/components";
+import { ParseMarkdown } from "../../../../parse-markdown/parse-markdown.component";
+import { ParseMarkdownProps } from "../../../../parse-markdown/parse-markdown.interfaces";
+import { LabelForTemplateFieldV2Props } from "./label-for-template-field-v2.interfaces";
 import { Icon } from "@iconify/react";
-import { ColorV1 } from "../../../platform/utils/material-ui/color.util";
+import { ColorV1 } from "../../../../../platform/utils/material-ui/color.util";
 
-export const LabelForTemplateField: FunctionComponent<LabelForTemplateFieldProps> =
+export const LabelForTemplateFieldV2: FunctionComponent<LabelForTemplateFieldV2Props> =
     ({ name, tooltipText, className }) => {
         const theme = useTheme();
 

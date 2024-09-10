@@ -23,6 +23,7 @@ import { ColorV1 } from "../../platform/utils/material-ui/color.util";
 import { useGetDataset } from "../../rest/datasets/datasets.actions";
 import { ColumnsDrawerProps } from "./columns-drawer.interfaces";
 import { useColumnsDrawerStyles } from "./columns-drawer.styles";
+import { CopyButtonV2 } from "../copy-button-v2/copy-button-v2.component";
 
 /**
  * Convenience wrapper on top of HelpDrawerCoreV1 so consumers do not have
@@ -49,12 +50,6 @@ export const ColumnsDrawer: FunctionComponent<ColumnsDrawerProps> = ({
     useEffect(() => {
         getDataset(toNumber(datasetId));
     }, [datasetId]);
-
-    const handleCopy = (text: string): void => {
-        if (navigator.clipboard) {
-            navigator.clipboard.writeText(text);
-        }
-    };
 
     return (
         <>
@@ -99,6 +94,7 @@ export const ColumnsDrawer: FunctionComponent<ColumnsDrawerProps> = ({
                                 placeholder={t("label.search")}
                                 value={searchQuery}
                                 onChange={setSearchQuery}
+                                onChangeDelay={0}
                             />
                             <Box className={classes.listContainer}>
                                 {filteredDimensions.map((dimension) => (
@@ -108,17 +104,11 @@ export const ColumnsDrawer: FunctionComponent<ColumnsDrawerProps> = ({
                                         display="flex"
                                         justifyContent="space-between"
                                         key={dimension}
-                                        role="button"
-                                        onClick={() => handleCopy(dimension)}
                                     >
                                         <Typography variant="body2">
                                             {dimension}
                                         </Typography>
-                                        <Icon
-                                            color={ColorV1.Blue8}
-                                            fontSize={16}
-                                            icon="bi:copy"
-                                        />
+                                        <CopyButtonV2 content={dimension} />
                                     </Box>
                                 ))}
                             </Box>

@@ -47,8 +47,15 @@ export const useColumnsDrawerStyles = makeStyles((theme) => ({
         padding: `5px 12px`,
         cursor: "pointer",
         borderBottom: `1px solid ${ColorV1.Grey10}`,
+        minHeight: 33,
+        "& > button": {
+            display: "none",
+        },
         "&:hover": {
             backgroundColor: ColorV1.Grey9,
+            "& > button": {
+                display: "revert",
+            },
         },
     },
     footer: {

@@ -21,10 +21,10 @@ import {
     PropertyConfigValueTypes,
     TemplatePropertiesObject,
 } from "../../rest/dto/alert.interfaces";
-import { FormComponentForTemplateField } from "../alert-wizard-v3/form-component-for-template-field/form-component-for-template-field.component";
-import { LabelForTemplateField } from "../alert-wizard-v3/label-for-template-field/label-for-template-field.component";
 import { AdditonalFiltersDrawerProps } from "./additional-filters-drawer.interfaces";
 import { useAdditonalFiltersDrawerStyles } from "./additional-filters-drawer.styles";
+import { FormComponentForTemplateField } from "../alert-wizard-v2/alert-template/alert-template-form-field/form-component-for-template-field/form-component-for-template-field.component";
+import { LabelForTemplateFieldV2 } from "../alert-wizard-v2/alert-template/alert-template-form-field/label-for-template-field-v2/label-for-template-field-v2.component";
 
 /**
  * Convenience wrapper on top of HelpDrawerCoreV1 so consumers do not have
@@ -97,7 +97,7 @@ export const AdditonalFiltersDrawer: FunctionComponent<AdditonalFiltersDrawerPro
                                                 <Box
                                                     key={propertyMetadata.name}
                                                 >
-                                                    <LabelForTemplateField
+                                                    <LabelForTemplateFieldV2
                                                         className={
                                                             classes.formLabel
                                                         }

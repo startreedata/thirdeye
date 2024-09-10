@@ -13,7 +13,7 @@
  * the License.
  */
 
-export interface LabelForTemplateFieldProps {
+export interface LabelForTemplateFieldV2Props {
     name: string;
     tooltipText?: string | null;
     className?: string;

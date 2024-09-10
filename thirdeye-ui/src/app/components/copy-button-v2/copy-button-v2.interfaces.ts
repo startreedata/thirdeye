@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 StarTree Inc
+ * Copyright 2024 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -12,14 +12,19 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { MetadataProperty } from "../../../rest/dto/alert-template.interfaces";
-import { PropertyConfigValueTypes } from "../../../rest/dto/alert.interfaces";
+import {
+    TooltipProps,
+    IconButtonProps,
+    SvgIconTypeMap,
+} from "@material-ui/core";
+import { OverridableComponent } from "@material-ui/core/OverridableComponent";
 
-export interface FormComponentForTemplateFieldProps {
-    templateFieldProperty: MetadataProperty;
-    onChange: (selected: PropertyConfigValueTypes) => void;
-    placeholder?: string;
-    tabIndex?: number;
-    value: PropertyConfigValueTypes;
-    propertyKey: string;
+export interface CopyButtonV2Props {
+    content: string;
+    beforeCopyTooltip?: string;
+    afterCopyTooltip?: string;
+    successTickDuration?: number;
+    tooltipProps?: Partial<TooltipProps>;
+    iconButtonProps?: Partial<IconButtonProps>;
+    iconProps?: Partial<OverridableComponent<SvgIconTypeMap>>;
 }

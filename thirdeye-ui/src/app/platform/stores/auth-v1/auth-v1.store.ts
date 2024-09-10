@@ -131,7 +131,7 @@ export const useAuthV1 = create<AuthV1>(
         }),
         {
             name: KEY_AUTH, // Persist in browser local storage
-            blacklist: ["authAction", "authActionData"], // Prevent persisting in state
+            blacklist: ["authAction", "authActionData", "workspace"], // Prevent persisting in state
         }
     )
 );

@@ -22,6 +22,7 @@ import { ParseMarkdown } from "../../parse-markdown/parse-markdown.component";
 import { SpecificPropertiesRenderer } from "./specific-properties-renderer/specific-properties-renderer-v2.component";
 import { ThresholdSetupProps } from "./threshold-setup.interfaces";
 import { generateInputFieldConfigsForAlertTemplate } from "./threshold-setup.utils";
+import { LegendPlacement } from "../../alert-wizard-v2/alert-template/preview-chart/preview-chart.interfaces";
 
 export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
     onAlertPropertyChange,
@@ -113,6 +114,7 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
             <PreviewChart
                 hideCallToActionPrompt
                 alert={alert}
+                legendsPlacement={LegendPlacement.TOP}
                 showTimeRange={false}
                 onAlertPropertyChange={onAlertPropertyChange}
             >

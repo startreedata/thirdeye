@@ -14,6 +14,7 @@
  */
 import { DetectionEvaluation } from "../../../../rest/dto/detection.interfaces";
 import { TimeRange } from "../../../../rest/dto/time-range.interfaces";
+import { LegendPlacement } from "../../../alert-wizard-v2/alert-template/preview-chart/preview-chart.interfaces";
 
 export interface EnumerationItemsTableProps {
     detectionEvaluations: DetectionEvaluation[];
@@ -24,4 +25,5 @@ export interface EnumerationItemsTableProps {
     hideDelete?: boolean;
     alert?: any;
     evaluationTimeRange: TimeRange;
+    legendsPlacement?: `${LegendPlacement}`;
 }

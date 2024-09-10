@@ -51,6 +51,7 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
     hideDelete,
     alert,
     evaluationTimeRange,
+    legendsPlacement,
 }) => {
     const { ref, inView } = useInView({
         triggerOnce: true,
@@ -266,6 +267,7 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
                         {timeSeriesExpandedData && (
                             <TimeSeriesChart
                                 height={expandedChartHeight}
+                                legendsPlacement={legendsPlacement}
                                 {...timeSeriesExpandedData}
                             />
                         )}

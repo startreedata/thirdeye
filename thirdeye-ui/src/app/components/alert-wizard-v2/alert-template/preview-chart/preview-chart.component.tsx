@@ -51,6 +51,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
     disableReload,
     showTimeRange = true,
     children,
+    legendsPlacement,
 }) => {
     const { t } = useTranslation();
     const [searchParams, setSearchParams] = useSearchParams();
@@ -241,6 +242,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                     alertEvaluation={evaluation}
                     evaluationTimeRange={evaluationTimeRange}
                     hideCallToActionPrompt={hideCallToActionPrompt}
+                    legendsPlacement={legendsPlacement}
                     onReloadClick={handleAutoRangeClick}
                 />
             </LoadingErrorStateSwitch>

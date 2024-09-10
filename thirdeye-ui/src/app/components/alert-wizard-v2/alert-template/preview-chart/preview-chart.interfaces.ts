@@ -24,6 +24,12 @@ export interface PreviewChartProps {
         isTotalReplace?: boolean
     ) => void;
     showTimeRange?: boolean;
+    legendsPlacement?: `${LegendPlacement}`;
+}
+
+export enum LegendPlacement {
+    TOP = "top",
+    BOTTOM = "bottom",
 }
 
 export const PREVIEW_CHART_TEST_IDS = {

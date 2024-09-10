@@ -74,7 +74,7 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
                 {inputFieldConfigs.length > 0 &&
                     inputFieldConfigs.map((config, index) => {
                         return (
-                            <Grid item key={index} xs={8}>
+                            <Grid item key={index} xs={12}>
                                 <InputSectionV2
                                     inputComponent={
                                         <>

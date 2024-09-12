@@ -15,6 +15,7 @@ package ai.startree.thirdeye.service;
 
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DUPLICATE_NAME;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static ai.startree.thirdeye.util.ResourceUtils.badRequest;
 import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -23,11 +24,16 @@ import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.datasource.DataSourceOnboarder;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
+import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
 import ai.startree.thirdeye.spi.api.DatasetApi;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.spi.datalayer.Predicate;
+import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
+import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
@@ -43,28 +49,39 @@ public class DataSourceService extends CrudService<DataSourceApi, DataSourceDTO>
 
   private final DataSourceCache dataSourceCache;
   private final DataSourceOnboarder dataSourceOnboarder;
+  private final DatasetConfigManager datasetConfigDAO;
 
   @Inject
   public DataSourceService(
       final DataSourceManager dataSourceManager,
       final DataSourceCache dataSourceCache,
       final DataSourceOnboarder dataSourceOnboarder,
-      final AuthorizationManager authorizationManager) {
+      final AuthorizationManager authorizationManager,
+      final DatasetConfigManager datasetConfigDAO) {
     super(authorizationManager, dataSourceManager, ImmutableMap.of());
     this.dataSourceCache = dataSourceCache;
     this.dataSourceOnboarder = dataSourceOnboarder;
+    this.datasetConfigDAO = datasetConfigDAO;
   }
 
   @Override
   protected void validate(final ThirdEyePrincipal principal, final DataSourceApi api, @Nullable final DataSourceDTO existing) {
     super.validate(principal, api, existing);
     /* new entity creation or name change in existing entity */
-    if (existing == null || !existing.getName().equals(api.getName())) {
+    if (existing == null) {
       final DataSourceDTO sameNameSameNamespace = dtoManager.findUniqueByNameAndNamespace(api.getName(),
           optional(api.getAuth()).map(AuthorizationConfigurationApi::getNamespace)
               .orElse(authorizationManager.currentNamespace(principal))
       );
       ensure(sameNameSameNamespace == null, ERR_DUPLICATE_NAME, api.getName());
+    } else if (!existing.getName().equals(api.getName())) {
+      // see TE-2431 - need datasets to point to datasource by id instead of name - in the meantime, we forbid datasource name change
+      throw badRequest(
+          ThirdEyeStatus.ERR_DATASOURCE_VALIDATION_FAILED,
+          api.getName(),
+          String.format(
+              "Changing the name of a datasource is not allowed. Please delete the datasource %s and create a new one with the new name.",
+              existing.getName()));
     }
   }
 
@@ -81,6 +98,18 @@ public class DataSourceService extends CrudService<DataSourceApi, DataSourceDTO>
   @Override
   protected void deleteDto(final DataSourceDTO dto) {
     super.deleteDto(dto);
+    // deleting a datasource has cascading effects down to alerts
+    // we only delete datasets because datasets maintain a reference to a datasource and not deleting those dataset will prevent from creating new ones with the same name because of the db uniqueness constraint (name,namespace) 
+    // todo have datasets point to datasource by id - see https://startree.atlassian.net/browse/TE-2432 and then rewrite this query exploiting an index on the datasource id
+    // todo eventually we should relax the constraint to (name, datasourceId, namespace) but the use cases for this are limited and this would require some changes in the UI
+    final List<Long> datasetIdsToDelete = datasetConfigDAO
+        .findByPredicate(Predicate.EQ("namespace", dto.namespace()))
+        .stream()
+        .filter(e -> e.getDataSource().equals(dto.getName()))
+        .map(AbstractDTO::getId)
+        .toList()
+    ;
+    datasetConfigDAO.deleteByIds(datasetIdsToDelete);
     dataSourceCache.removeDataSource(dto);
   }
 

@@ -1,3 +1,11 @@
+### [2.49.4](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.49.3...thirdeye-ui-2.49.4) (2024-09-12)
+
+
+### Bug Fixes
+
+* [TE-2424](https://cortexdata.atlassian.net/browse/TE-2424) avoid persisting workspace in zustand state ([102677ac2](https://github.com/startreedata/thirdeye/commit/102677ac256d9514e609054272b37813803063e4))
+* [TE-2426](https://cortexdata.atlassian.net/browse/TE-2426) fix scroll in subscription group in create alert flow ([82cbe22c1](https://github.com/startreedata/thirdeye/commit/82cbe22c140fc7f2d7474ca1661994a1a47d6607))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

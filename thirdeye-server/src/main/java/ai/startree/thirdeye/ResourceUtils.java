@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.util;
+package ai.startree.thirdeye;
 
 import static ai.startree.thirdeye.spi.Constants.VANILLA_OBJECT_MAPPER;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_OBJECT_UNEXPECTED;

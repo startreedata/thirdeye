@@ -13,13 +13,13 @@
  */
 package ai.startree.thirdeye.alert;
 
+import static ai.startree.thirdeye.ResourceUtils.ensure;
 import static ai.startree.thirdeye.alert.AlertEvaluatorResponseMapper.toAlertEvaluationApi;
 import static ai.startree.thirdeye.core.ExceptionHandler.handleAlertEvaluationException;
 import static ai.startree.thirdeye.mapper.ApiBeanMapper.toAlertTemplateApi;
 import static ai.startree.thirdeye.spi.util.SpiUtils.bool;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.DetectionIntervalUtils.computeCorrectedInterval;
-import static ai.startree.thirdeye.util.ResourceUtils.ensure;
 
 import ai.startree.thirdeye.detectionpipeline.DetectionPipelineContext;
 import ai.startree.thirdeye.detectionpipeline.PlanExecutor;

@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.resources;
 
-import static ai.startree.thirdeye.util.ResourceUtils.ensure;
+import static ai.startree.thirdeye.ResourceUtils.ensure;
 
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.scheduler.events.HolidayEventsLoaderConfiguration;

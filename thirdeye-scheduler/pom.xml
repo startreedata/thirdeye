@@ -42,6 +42,11 @@
       <artifactId>quartz</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+    </dependency>
+
     <!-- used to mock events with some random distributions -->
     <dependency>
       <groupId>org.apache.commons</groupId>

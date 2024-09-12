@@ -14,7 +14,7 @@
 package ai.startree.thirdeye.resources;
 
 import static ai.startree.thirdeye.spi.Constants.NO_AUTH_USER;
-import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
+import static ai.startree.thirdeye.ResourceUtils.respondOk;
 
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.spi.Constants;

@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.service;
 
-import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
+import static ai.startree.thirdeye.ResourceUtils.ensureExists;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.rca.HeatmapCalculator;

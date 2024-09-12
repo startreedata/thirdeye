@@ -18,8 +18,8 @@ import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_CRON_INVALID;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DUPLICATE_NAME;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.maximumTriggersPerMinute;
-import static ai.startree.thirdeye.util.ResourceUtils.ensure;
-import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
+import static ai.startree.thirdeye.ResourceUtils.ensure;
+import static ai.startree.thirdeye.ResourceUtils.ensureExists;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 

@@ -19,7 +19,7 @@ import static ai.startree.thirdeye.spi.metric.MetricAggFunction.COUNT;
 import static ai.startree.thirdeye.spi.util.AlertMetadataUtils.getDateTimeZone;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
-import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
+import static ai.startree.thirdeye.ResourceUtils.ensureExists;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;

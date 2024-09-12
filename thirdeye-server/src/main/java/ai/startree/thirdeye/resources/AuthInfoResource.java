@@ -13,8 +13,8 @@
  */
 package ai.startree.thirdeye.resources;
 
-import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
-import static ai.startree.thirdeye.util.ResourceUtils.serverError;
+import static ai.startree.thirdeye.ResourceUtils.respondOk;
+import static ai.startree.thirdeye.ResourceUtils.serverError;
 
 import ai.startree.thirdeye.auth.AuthConfiguration;
 import ai.startree.thirdeye.service.AuthService;

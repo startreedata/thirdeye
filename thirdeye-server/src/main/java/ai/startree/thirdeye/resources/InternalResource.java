@@ -13,8 +13,8 @@
  */
 package ai.startree.thirdeye.resources;
 
-import static ai.startree.thirdeye.util.ResourceUtils.ensure;
-import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
+import static ai.startree.thirdeye.ResourceUtils.ensure;
+import static ai.startree.thirdeye.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.SecurityUtils.hmacSHA512;
 import static com.google.common.base.Preconditions.checkArgument;
 

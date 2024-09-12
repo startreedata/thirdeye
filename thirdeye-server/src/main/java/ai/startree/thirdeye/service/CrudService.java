@@ -15,8 +15,8 @@ package ai.startree.thirdeye.service;
 
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_ID_UNEXPECTED_AT_CREATION;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_ID;
-import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
-import static ai.startree.thirdeye.util.ResourceUtils.ensureNull;
+import static ai.startree.thirdeye.ResourceUtils.ensureExists;
+import static ai.startree.thirdeye.ResourceUtils.ensureNull;
 
 import ai.startree.thirdeye.DaoFilterUtils;
 import ai.startree.thirdeye.auth.AuthorizationManager;

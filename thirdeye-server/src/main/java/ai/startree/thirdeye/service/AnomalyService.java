@@ -14,8 +14,8 @@
 package ai.startree.thirdeye.service;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
-import static ai.startree.thirdeye.util.ResourceUtils.ensure;
-import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
+import static ai.startree.thirdeye.ResourceUtils.ensure;
+import static ai.startree.thirdeye.ResourceUtils.ensureExists;
 import static com.google.common.base.Preconditions.checkState;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;

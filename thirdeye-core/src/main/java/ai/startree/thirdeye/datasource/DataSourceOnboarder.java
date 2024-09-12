@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.datasource;
 
-import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
+import static ai.startree.thirdeye.spi.ThirdEyeException.checkThirdEye;
 import static com.google.common.base.Preconditions.checkState;
 
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
@@ -61,7 +61,7 @@ public class DataSourceOnboarder {
 
   public List<DatasetConfigDTO> onboardAll(final DataSourceDTO dataSourceDto) {
     final ThirdEyeDataSource dataSource = dataSourceCache.getDataSource(dataSourceDto);
-    ensureExists(dataSource, ThirdEyeStatus.ERR_DATASOURCE_NOT_LOADED, dataSourceDto.getName());
+    checkThirdEye(dataSource != null, ThirdEyeStatus.ERR_DATASOURCE_NOT_LOADED, dataSourceDto.getName());
 
     // TODO CYRIL authz perf - findAll by namespace directly instead of filtering in app
     final Set<String> alreadyOnboardedDatasets = datasetConfigManager.findAll()
@@ -88,13 +88,11 @@ public class DataSourceOnboarder {
   public DatasetConfigDTO onboardDataset(final DataSourceDTO dataSourceDto,
       final String datasetName) {
     final ThirdEyeDataSource dataSource = dataSourceCache.getDataSource(dataSourceDto);
-    ensureExists(dataSource, ThirdEyeStatus.ERR_DATASOURCE_NOT_LOADED, dataSource.getName());
-
+    checkThirdEye(dataSource != null, ThirdEyeStatus.ERR_DATASOURCE_NOT_LOADED, dataSourceDto.getName());
     final DatasetConfigDTO newDataset = dataSource.getDataset(datasetName);
-    ensureExists(newDataset, ThirdEyeStatus.ERR_DATASET_NOT_FOUND, datasetName);
-
+    checkThirdEye(newDataset != null, ThirdEyeStatus.ERR_DATASET_NOT_FOUND, datasetName);
     final DatasetConfigDTO datasetConfigDTO = persist(newDataset, dataSourceDto.getAuth());
-    ensureExists(datasetConfigDTO, ThirdEyeStatus.ERR_DATASET_NOT_FOUND, datasetName);
+    checkThirdEye(datasetConfigDTO != null, ThirdEyeStatus.ERR_DATASET_NOT_FOUND, datasetName);
 
     return datasetConfigDTO;
   }

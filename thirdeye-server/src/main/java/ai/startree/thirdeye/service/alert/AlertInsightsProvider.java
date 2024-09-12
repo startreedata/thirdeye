@@ -23,8 +23,8 @@ import static ai.startree.thirdeye.spi.util.AlertMetadataUtils.getDelay;
 import static ai.startree.thirdeye.spi.util.AlertMetadataUtils.getGranularity;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.timezonesAreEquivalent;
-import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
-import static ai.startree.thirdeye.util.ResourceUtils.serverError;
+import static ai.startree.thirdeye.ResourceUtils.ensureExists;
+import static ai.startree.thirdeye.ResourceUtils.serverError;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;

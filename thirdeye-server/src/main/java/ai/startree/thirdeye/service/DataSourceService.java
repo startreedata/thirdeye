@@ -15,8 +15,8 @@ package ai.startree.thirdeye.service;
 
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DUPLICATE_NAME;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
-import static ai.startree.thirdeye.util.ResourceUtils.badRequest;
-import static ai.startree.thirdeye.util.ResourceUtils.ensure;
+import static ai.startree.thirdeye.ResourceUtils.badRequest;
+import static ai.startree.thirdeye.ResourceUtils.ensure;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
@@ -30,7 +30,6 @@ import ai.startree.thirdeye.spi.api.DataSourceApi;
 import ai.startree.thirdeye.spi.api.DatasetApi;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
-import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;

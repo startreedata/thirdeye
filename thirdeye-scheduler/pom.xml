@@ -42,6 +42,12 @@
       <artifactId>quartz</artifactId>
     </dependency>
 
+    <!-- used to mock events with some random distributions -->
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-math3</artifactId>
+    </dependency>
+
     <!-- Holiday loader dependencies -->
     <dependency>
       <groupId>com.google.apis</groupId>

@@ -18,6 +18,11 @@ import { ColorV1 } from "../../../platform/utils/material-ui/color.util";
 import { paletteOptionsV1 } from "../../../platform/utils/material-ui/palette.util";
 
 export const easyAlertStyles = makeStyles(() => ({
+    sqlButton: {
+        padding: 0,
+        margin: "10px 0",
+        color: "#0097A9",
+    },
     card: {
         borderRadius: "8px",
         border: "1px solid #B4CDE0",
@@ -38,6 +43,31 @@ export const easyAlertStyles = makeStyles(() => ({
     infoButton: {
         height: "36px",
         backgroundColor: "#f3f9ff",
+    },
+    footer: {
+        border: `1px solid ${ColorV1.Grey10}`,
+        borderRadius: "0 0 8px 8px",
+        overflow: "hidden",
+        backgroundColor: ColorV1.Grey9,
+        padding: "8px 12px",
+        display: "flex",
+        justifyContent: "end",
+
+        "& > button": {
+            backgroundColor: ColorV1.White1,
+            border: `1px solid ${ColorV1.Grey10}`,
+            borderRadius: 8,
+        },
+    },
+    textArea: {
+        width: "100%",
+        borderRadius: "8px 8px 0 0",
+        paddingTop: "5px",
+    },
+    textAreaContainer: {
+        gap: 0,
+        display: "flex",
+        flexDirection: "column",
     },
 }));
 

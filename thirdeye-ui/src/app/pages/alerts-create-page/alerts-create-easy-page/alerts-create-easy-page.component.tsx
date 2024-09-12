@@ -18,11 +18,13 @@ import {
     Chip,
     Divider,
     Grid,
+    TextareaAutosize,
     TextField,
     ThemeProvider,
     Tooltip,
     Typography,
 } from "@material-ui/core";
+import { KeyboardArrowDown, KeyboardArrowUp } from "@material-ui/icons";
 import DimensionImage from "../../../../assets/images/dimensions.png";
 import { ReactComponent as FilterListRoundedIcon } from "../../../platform/assets/images/filter-icon.svg";
 import AddCircleOutline from "@material-ui/icons/AddCircleOutline";
@@ -115,6 +117,9 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
 
     const [searchParams, setSearchParams] = useSearchParams();
     const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
+    const [queryFilters, setQueryFilters] = useState("");
+
+    const [showSQLWhere, setShowSQLWhere] = useState(false);
     const [enumerations, setEnumerations] = useState(false);
     const [dimension, setDimension] = useState<string | null>(null);
 
@@ -149,7 +154,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
     const [anomalyDetection, setAnomalyDetection] = useState<string | null>(
         null
     );
-    const [editedDatasource, setEditedDatasource] = useState({});
+    const [editedDatasource, setEditedDatasource] = useState("");
     const [enumerators, setEnumerators] = useState({});
     const [algorithmOption, setAlgorithmOption] =
         useState<AvailableAlgorithmOption | null>(null);
@@ -170,13 +175,16 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                         alert.templateProperties?.dataset === item.dataset.name
                 ) || null;
             if (dataSource) {
-                setSelectedTable(dataSource);
-                setSelectedMetric(
+                const metrics =
                     dataSource.metrics.find(
                         (item) =>
                             item.name ===
                             alert.templateProperties?.aggregationColumn
-                    )?.name || null
+                    )?.name || t("label.custom-metric-aggregation");
+                setSelectedTable(dataSource);
+                setSelectedMetric(metrics || null);
+                setEditedDatasource(
+                    String(alert.templateProperties?.aggregationColumn)
                 );
                 setAggregationFunction(
                     alert.templateProperties.aggregationFunction as string
@@ -201,6 +209,9 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                         : AnomalyDetectionOptions.SINGLE
                 );
                 setCompositeFilters(alert.templateProperties);
+                setQueryFilters(
+                    String(alert.templateProperties?.queryFilters) || ""
+                );
             }
         }
     }, [datasetsInfo]);
@@ -379,11 +390,15 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
     }, [alertTemplates, recommendedAlertTemplate]);
 
     useEffect(() => {
+        let isCustomMetrics = false;
+        if (selectedMetric === t("label.custom-metric-aggregation")) {
+            isCustomMetrics = true;
+        }
         if (
             selectedMetric &&
             selectedTable &&
             granularity &&
-            aggregationFunction
+            (aggregationFunction || (isCustomMetrics && editedDatasource))
         ) {
             onAlertPropertyChange({
                 template: {
@@ -395,11 +410,12 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                 templateProperties: {
                     ...alert.templateProperties,
                     ...generateTemplateProperties(
-                        selectedMetric,
+                        isCustomMetrics ? editedDatasource : selectedMetric,
                         selectedTable?.dataset,
-                        aggregationFunction,
+                        aggregationFunction || "",
                         granularity
                     ),
+                    queryFilters: queryFilters,
                 },
             });
             handleReloadPreviewClick();
@@ -410,6 +426,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         granularity,
         aggregationFunction,
         algorithmOption,
+        queryFilters,
     ]);
 
     const { getEvaluation } = useGetEvaluation();
@@ -435,10 +452,6 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
             return workingAlert;
         });
 
-    const handleMetricsChange = (value: string): void => {
-        setEditedDatasource(JSON.parse(value));
-    };
-
     const handleApplyAdvancedOptions = (
         fieldData: TemplatePropertiesObject
     ): void => {
@@ -459,11 +472,15 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
     };
     // Update the preview config if selections change
     useEffect(() => {
+        let isCustomMetrics = false;
+        if (selectedMetric === t("label.custom-metric-aggregation")) {
+            isCustomMetrics = true;
+        }
         if (
             !selectedTable ||
             !selectedMetric ||
             !granularity ||
-            !aggregationFunction
+            (!aggregationFunction && !(isCustomMetrics && editedDatasource))
         ) {
             return;
         }
@@ -479,11 +496,12 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
             copied.templateProperties = {
                 ...copied.templateProperties,
                 ...generateTemplateProperties(
-                    selectedMetric,
+                    isCustomMetrics ? editedDatasource : selectedMetric,
                     selectedTable?.dataset,
-                    aggregationFunction,
+                    aggregationFunction || "",
                     granularity
                 ),
+                queryFilters: queryFilters,
             };
 
             copied.templateProperties.min = 0;
@@ -497,6 +515,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         granularity,
         aggregationFunction,
         alertTemplateForEvaluate,
+        queryFilters,
     ]);
 
     const handleReloadPreviewClick = (): void => {
@@ -886,44 +905,164 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                     "message.select-aggregation-function-to-combine-multiple-data-value-into-a-single-result"
                                                                 )}
                                                             />
+                                                            <Button
+                                                                className={
+                                                                    classes.sqlButton
+                                                                }
+                                                                endIcon={
+                                                                    showSQLWhere ? (
+                                                                        <KeyboardArrowUp />
+                                                                    ) : (
+                                                                        <KeyboardArrowDown />
+                                                                    )
+                                                                }
+                                                                size="small"
+                                                                variant="text"
+                                                                onClick={() =>
+                                                                    setShowSQLWhere(
+                                                                        !showSQLWhere
+                                                                    )
+                                                                }
+                                                            >
+                                                                {t(
+                                                                    "label.sql-where-filter"
+                                                                )}
+                                                            </Button>
+
+                                                            {showSQLWhere && (
+                                                                <Grid container>
+                                                                    <Grid
+                                                                        item
+                                                                        className={
+                                                                            classes.textAreaContainer
+                                                                        }
+                                                                        xs={8}
+                                                                    >
+                                                                        <Typography
+                                                                            className={
+                                                                                classes.inputHeader
+                                                                            }
+                                                                            variant="caption"
+                                                                        >
+                                                                            {t(
+                                                                                "label.sql-where-function"
+                                                                            )}{" "}
+                                                                            <Typography variant="caption">
+                                                                                (
+                                                                                {t(
+                                                                                    "label.optional"
+                                                                                )}
+
+                                                                                )
+                                                                            </Typography>
+                                                                        </Typography>
+                                                                        <TextareaAutosize
+                                                                            aria-label="minimum height"
+                                                                            className={
+                                                                                classes.textArea
+                                                                            }
+                                                                            minRows={
+                                                                                3
+                                                                            }
+                                                                            placeholder={t(
+                                                                                "label.placeholder-sql-where"
+                                                                            )}
+                                                                            value={
+                                                                                queryFilters
+                                                                            }
+                                                                            onChange={(
+                                                                                e
+                                                                            ) =>
+                                                                                setQueryFilters(
+                                                                                    e
+                                                                                        .target
+                                                                                        .value
+                                                                                )
+                                                                            }
+                                                                        />
+                                                                        <Box
+                                                                            className={
+                                                                                classes.footer
+                                                                            }
+                                                                        >
+                                                                            <Button
+                                                                                size="small"
+                                                                                variant="contained"
+                                                                                onClick={() =>
+                                                                                    setOpenViewColumnsListDrawer(
+                                                                                        true
+                                                                                    )
+                                                                                }
+                                                                            >
+                                                                                {t(
+                                                                                    "label.view-columns-list"
+                                                                                )}
+                                                                            </Button>
+                                                                        </Box>
+                                                                    </Grid>
+                                                                </Grid>
+                                                            )}
                                                         </Grid>
                                                     ) : (
                                                         <Grid item xs={12}>
                                                             <Grid container>
                                                                 <Grid
                                                                     item
+                                                                    className={
+                                                                        classes.textAreaContainer
+                                                                    }
                                                                     xs={8}
                                                                 >
-                                                                    <JSONEditorV2
-                                                                        hideValidationSuccessIcon
-                                                                        showFooter
-                                                                        actions={[
-                                                                            {
-                                                                                label: t(
-                                                                                    "label.apply-custom-metric"
-                                                                                ),
-                                                                                onClick:
-                                                                                    () =>
-                                                                                        null,
-                                                                            },
-                                                                            {
-                                                                                label: t(
-                                                                                    "label.view-columns-list"
-                                                                                ),
-                                                                                onClick:
-                                                                                    () =>
-                                                                                        setOpenViewColumnsListDrawer(
-                                                                                            true
-                                                                                        ),
-                                                                            },
-                                                                        ]}
+                                                                    <Typography
+                                                                        className={
+                                                                            classes.inputHeader
+                                                                        }
+                                                                        variant="caption"
+                                                                    >
+                                                                        {t(
+                                                                            "label.custom-metric"
+                                                                        )}
+                                                                    </Typography>
+                                                                    <TextareaAutosize
+                                                                        aria-label="minimum height"
+                                                                        className={
+                                                                            classes.textArea
+                                                                        }
+                                                                        minRows={
+                                                                            3
+                                                                        }
                                                                         value={
                                                                             editedDatasource
                                                                         }
-                                                                        onChange={
-                                                                            handleMetricsChange
+                                                                        onChange={(
+                                                                            e
+                                                                        ) =>
+                                                                            setEditedDatasource(
+                                                                                e
+                                                                                    .target
+                                                                                    .value
+                                                                            )
                                                                         }
                                                                     />
+                                                                    <Box
+                                                                        className={
+                                                                            classes.footer
+                                                                        }
+                                                                    >
+                                                                        <Button
+                                                                            size="small"
+                                                                            variant="contained"
+                                                                            onClick={() =>
+                                                                                setOpenViewColumnsListDrawer(
+                                                                                    true
+                                                                                )
+                                                                            }
+                                                                        >
+                                                                            {t(
+                                                                                "label.view-columns-list"
+                                                                            )}
+                                                                        </Button>
+                                                                    </Box>
                                                                 </Grid>
                                                                 {/* <Grid
                                                                     item
@@ -1145,7 +1284,8 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                 AnomalyDetectionOptions.SINGLE) &&
                                                             anomalyDetection &&
                                                             granularity &&
-                                                            aggregationFunction && (
+                                                            (aggregationFunction ||
+                                                                editedDatasource) && (
                                                                 <Grid
                                                                     container
                                                                     alignItems="center"

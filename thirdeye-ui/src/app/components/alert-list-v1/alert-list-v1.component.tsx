@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Button, Grid, Link } from "@material-ui/core";
+import { Box, Button, Grid, Link } from "@material-ui/core";
 import React, {
     FunctionComponent,
     ReactElement,
@@ -211,74 +211,76 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = ({
     return (
         <Grid item xs={12}>
             <PageContentsCardV1 disablePadding fullHeight>
-                <DataGridV1<UiAlert>
-                    hideBorder
-                    columns={alertGroupColumns}
-                    data={alertsData as UiAlert[]}
-                    data-testId={TEST_IDS.TABLE}
-                    expandColumnKey="name"
-                    initialSortState={{
-                        key: "created",
-                        order: DataGridSortOrderV1.DESC,
-                    }}
-                    rowKey="id"
-                    scroll={DataGridScrollV1.Body}
-                    searchPlaceholder={t("label.search-entity", {
-                        entity: t("label.alerts"),
-                    })}
-                    toolbarComponent={
-                        <Grid container alignItems="center" spacing={2}>
-                            {/* Duplicate */}
-                            <Grid item>
-                                <Button
-                                    data-testId={TEST_IDS.DUPLICATE_BUTTON}
-                                    disabled={isActionButtonDisable}
-                                    variant="contained"
-                                    onClick={handleAlertDuplicate}
-                                >
-                                    {t("label.duplicate")}
-                                </Button>
-                            </Grid>
+                <Box height="90vh">
+                    <DataGridV1<UiAlert>
+                        hideBorder
+                        columns={alertGroupColumns}
+                        data={alertsData as UiAlert[]}
+                        data-testId={TEST_IDS.TABLE}
+                        expandColumnKey="name"
+                        initialSortState={{
+                            key: "created",
+                            order: DataGridSortOrderV1.DESC,
+                        }}
+                        rowKey="id"
+                        scroll={DataGridScrollV1.Body}
+                        searchPlaceholder={t("label.search-entity", {
+                            entity: t("label.alerts"),
+                        })}
+                        toolbarComponent={
+                            <Grid container alignItems="center" spacing={2}>
+                                {/* Duplicate */}
+                                <Grid item>
+                                    <Button
+                                        data-testId={TEST_IDS.DUPLICATE_BUTTON}
+                                        disabled={isActionButtonDisable}
+                                        variant="contained"
+                                        onClick={handleAlertDuplicate}
+                                    >
+                                        {t("label.duplicate")}
+                                    </Button>
+                                </Grid>
 
-                            {/* Edit */}
-                            <Grid item>
-                                <Button
-                                    data-testId={TEST_IDS.EDIT_BUTTON}
-                                    disabled={isActionButtonDisable}
-                                    variant="contained"
-                                    onClick={handleAlertEdit}
-                                >
-                                    {t("label.edit")}
-                                </Button>
-                            </Grid>
+                                {/* Edit */}
+                                <Grid item>
+                                    <Button
+                                        data-testId={TEST_IDS.EDIT_BUTTON}
+                                        disabled={isActionButtonDisable}
+                                        variant="contained"
+                                        onClick={handleAlertEdit}
+                                    >
+                                        {t("label.edit")}
+                                    </Button>
+                                </Grid>
 
-                            {/* Delete */}
-                            <Grid item>
-                                <Button
-                                    data-testId={TEST_IDS.DELETE_BUTTON}
-                                    disabled={isActionButtonDisable}
-                                    variant="contained"
-                                    onClick={handleAlertDelete}
-                                >
-                                    {t("label.delete")}
-                                </Button>
-                            </Grid>
+                                {/* Delete */}
+                                <Grid item>
+                                    <Button
+                                        data-testId={TEST_IDS.DELETE_BUTTON}
+                                        disabled={isActionButtonDisable}
+                                        variant="contained"
+                                        onClick={handleAlertDelete}
+                                    >
+                                        {t("label.delete")}
+                                    </Button>
+                                </Grid>
 
-                            {/* Reset */}
-                            <Grid item>
-                                <Button
-                                    data-testId={TEST_IDS.RESET_BUTTON}
-                                    disabled={isActionButtonDisable}
-                                    variant="contained"
-                                    onClick={handleAlertReset}
-                                >
-                                    {t("label.reset")}
-                                </Button>
+                                {/* Reset */}
+                                <Grid item>
+                                    <Button
+                                        data-testId={TEST_IDS.RESET_BUTTON}
+                                        disabled={isActionButtonDisable}
+                                        variant="contained"
+                                        onClick={handleAlertReset}
+                                    >
+                                        {t("label.reset")}
+                                    </Button>
+                                </Grid>
                             </Grid>
-                        </Grid>
-                    }
-                    onSelectionChange={setSelectedAlert}
-                />
+                        }
+                        onSelectionChange={setSelectedAlert}
+                    />
+                </Box>
             </PageContentsCardV1>
         </Grid>
     );

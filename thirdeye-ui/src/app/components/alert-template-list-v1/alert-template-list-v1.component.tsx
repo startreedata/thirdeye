@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Button, Grid, Link } from "@material-ui/core";
+import { Box, Button, Grid, Link } from "@material-ui/core";
 import React, {
     FunctionComponent,
     ReactElement,
@@ -139,47 +139,49 @@ export const AlertTemplateListV1: FunctionComponent<AlertTemplateListV1Props> =
         return (
             <Grid item xs={12}>
                 <PageContentsCardV1 disablePadding fullHeight>
-                    <DataGridV1<AlertTemplate>
-                        hideBorder
-                        columns={alertGroupColumns}
-                        data={alertTemplatesData as AlertTemplate[]}
-                        expandColumnKey="name"
-                        rowKey="id"
-                        scroll={DataGridScrollV1.Body}
-                        searchPlaceholder={t("label.search-entity", {
-                            entity: t("label.alert-templates"),
-                        })}
-                        toolbarComponent={
-                            <Grid container alignItems="center" spacing={2}>
-                                {/* Edit */}
-                                <Grid item>
-                                    <Button
-                                        disabled={isActionButtonDisable}
-                                        variant="contained"
-                                        onClick={handleAlertEdit}
-                                    >
-                                        {t("label.edit")}
-                                    </Button>
-                                </Grid>
+                    <Box height="90vh">
+                        <DataGridV1<AlertTemplate>
+                            hideBorder
+                            columns={alertGroupColumns}
+                            data={alertTemplatesData as AlertTemplate[]}
+                            expandColumnKey="name"
+                            rowKey="id"
+                            scroll={DataGridScrollV1.Body}
+                            searchPlaceholder={t("label.search-entity", {
+                                entity: t("label.alert-templates"),
+                            })}
+                            toolbarComponent={
+                                <Grid container alignItems="center" spacing={2}>
+                                    {/* Edit */}
+                                    <Grid item>
+                                        <Button
+                                            disabled={isActionButtonDisable}
+                                            variant="contained"
+                                            onClick={handleAlertEdit}
+                                        >
+                                            {t("label.edit")}
+                                        </Button>
+                                    </Grid>
 
-                                {/* Delete */}
-                                <Grid>
-                                    <Button
-                                        disabled={
-                                            !selectedAlertTemplate ||
-                                            selectedAlertTemplate.rowKeyValues
-                                                .length === 0
-                                        }
-                                        variant="contained"
-                                        onClick={handleAlertTemplateDelete}
-                                    >
-                                        {t("label.delete")}
-                                    </Button>
+                                    {/* Delete */}
+                                    <Grid>
+                                        <Button
+                                            disabled={
+                                                !selectedAlertTemplate ||
+                                                selectedAlertTemplate
+                                                    .rowKeyValues.length === 0
+                                            }
+                                            variant="contained"
+                                            onClick={handleAlertTemplateDelete}
+                                        >
+                                            {t("label.delete")}
+                                        </Button>
+                                    </Grid>
                                 </Grid>
-                            </Grid>
-                        }
-                        onSelectionChange={setSelectedAlertTemplate}
-                    />
+                            }
+                            onSelectionChange={setSelectedAlertTemplate}
+                        />
+                    </Box>
                 </PageContentsCardV1>
             </Grid>
         );

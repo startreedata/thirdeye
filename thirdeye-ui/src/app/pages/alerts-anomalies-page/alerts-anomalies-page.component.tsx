@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Grid } from "@material-ui/core";
+import { Box, Grid } from "@material-ui/core";
 import React, { FunctionComponent, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams, useSearchParams } from "react-router-dom";
@@ -234,30 +234,33 @@ export const AlertsAnomaliesPage: FunctionComponent = () => {
             <PageContentsGridV1 fullHeight>
                 <Grid item xs={12}>
                     <PageContentsCardV1 disablePadding fullHeight>
-                        <AnomalyListV1
-                            anomalies={
-                                // This prop is set to null every time the API is called again to
-                                // trigger a UI loading state, since otherwise the new data just
-                                // replaces the old one abruptly
-                                anomaliesRequestStatus ===
-                                    ActionStatus.Working ||
-                                anomaliesRequestStatus === ActionStatus.Initial
-                                    ? null
-                                    : uiAnomalies
-                            }
-                            timezone={determineTimezoneFromAlertInEvaluation(
-                                alertInsight?.templateWithProperties
-                            )}
-                            toolbar={
-                                <AnomalyQuickFilters
-                                    showTimeSelectorOnly
-                                    timezone={determineTimezoneFromAlertInEvaluation(
-                                        alertInsight?.templateWithProperties
-                                    )}
-                                />
-                            }
-                            onDelete={handleAnomalyDelete}
-                        />
+                        <Box height="90vh">
+                            <AnomalyListV1
+                                anomalies={
+                                    // This prop is set to null every time the API is called again to
+                                    // trigger a UI loading state, since otherwise the new data just
+                                    // replaces the old one abruptly
+                                    anomaliesRequestStatus ===
+                                        ActionStatus.Working ||
+                                    anomaliesRequestStatus ===
+                                        ActionStatus.Initial
+                                        ? null
+                                        : uiAnomalies
+                                }
+                                timezone={determineTimezoneFromAlertInEvaluation(
+                                    alertInsight?.templateWithProperties
+                                )}
+                                toolbar={
+                                    <AnomalyQuickFilters
+                                        showTimeSelectorOnly
+                                        timezone={determineTimezoneFromAlertInEvaluation(
+                                            alertInsight?.templateWithProperties
+                                        )}
+                                    />
+                                }
+                                onDelete={handleAnomalyDelete}
+                            />
+                        </Box>
                     </PageContentsCardV1>
                 </Grid>
             </PageContentsGridV1>

@@ -86,11 +86,5 @@
       <artifactId>commons-io</artifactId>
       <scope>test</scope>
     </dependency>
-
-    <!-- Swagger -->
-    <dependency>
-      <groupId>com.smoketurner</groupId>
-      <artifactId>dropwizard-swagger</artifactId>
-    </dependency>
   </dependencies>
 </project>

@@ -23,7 +23,7 @@ jobs:
       - name: Install node and npm
         uses: actions/setup-node@v3
         with:
-          node-version: 14
+          node-version: 15
           cache: "npm"
           cache-dependency-path: './thirdeye-ui/package-lock.json'
       - name: Release UI

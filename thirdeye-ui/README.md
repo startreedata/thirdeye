@@ -57,10 +57,10 @@ This will switch to the required Node version if already installed and make `npm
 If the required Node version is not installed, it will recommend the command to install it
 
 ```console
-Found '/Users/default/thirdeye/thirdeye-ui/.nvmrc' with version <14.18.1>
-N/A: version "14.18.1 -> N/A" is not yet installed.
+Found '/Users/default/thirdeye/thirdeye-ui/.nvmrc' with version <15.14.0>
+N/A: version "15.14.0 -> N/A" is not yet installed.
 
-You need to run "nvm install 14.18.1" to install it before using it.
+You need to run "nvm install 15.14.0" to install it before using it.
 ```
 
 Following the installation, the command above will let you switch to the required Node version.

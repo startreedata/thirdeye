@@ -36,6 +36,11 @@
       <groupId>ai.startree.thirdeye</groupId>
       <artifactId>thirdeye-persistence</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.google.inject</groupId>
+      <artifactId>guice</artifactId>
+      <version>${guice.version}</version>
+    </dependency>
 
     <!-- Pin jackson version and omit from third party dependencies-->
     <dependency>

@@ -13,10 +13,10 @@
  */
 package ai.startree.thirdeye.service;
 
-import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DUPLICATE_NAME;
-import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.ResourceUtils.badRequest;
 import static ai.startree.thirdeye.ResourceUtils.ensure;
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DUPLICATE_NAME;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;

@@ -13,11 +13,11 @@
  */
 package ai.startree.thirdeye.service;
 
+import static ai.startree.thirdeye.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.rca.RcaDimensionFilterHelper.getRcaDimensions;
 import static ai.startree.thirdeye.spi.Constants.VANILLA_OBJECT_MAPPER;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
-import static ai.startree.thirdeye.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.StringUtils.timeFormatterFor;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;

@@ -13,12 +13,12 @@
  */
 package ai.startree.thirdeye.auth;
 
+import static ai.startree.thirdeye.ResourceUtils.authorize;
+import static ai.startree.thirdeye.ResourceUtils.notFoundError;
 import static ai.startree.thirdeye.datalayer.dao.SubEntities.BEAN_TYPE_MAP;
 import static ai.startree.thirdeye.spi.auth.ResourceIdentifier.DEFAULT_ENTITY_TYPE;
 import static ai.startree.thirdeye.spi.auth.ResourceIdentifier.DEFAULT_NAME;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
-import static ai.startree.thirdeye.ResourceUtils.authorize;
-import static ai.startree.thirdeye.ResourceUtils.notFoundError;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.datalayer.entity.SubEntityType;

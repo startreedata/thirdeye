@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Button, Grid, Link } from "@material-ui/core";
+import { Box, Button, Grid, Link } from "@material-ui/core";
 import React, { FunctionComponent, ReactElement, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -141,43 +141,46 @@ export const MetricListV1: FunctionComponent<MetricListV1Props> = ({
     return (
         <Grid item xs={12}>
             <PageContentsCardV1 disablePadding fullHeight>
-                <DataGridV1<UiMetric>
-                    hideBorder
-                    columns={metricColumns}
-                    data={metrics as UiMetric[]}
-                    rowKey="id"
-                    scroll={DataGridScrollV1.Contents}
-                    searchPlaceholder={t("label.search-entity", {
-                        entity: t("label.metrics"),
-                    })}
-                    toolbarComponent={
-                        <Grid container alignItems="center" spacing={2}>
-                            <Grid item>
-                                <Button
-                                    disabled={isActionButtonDisable}
-                                    variant="contained"
-                                    onClick={handleMetricEdit}
-                                >
-                                    {t("label.edit")}
-                                </Button>
-                            </Grid>
+                <Box height="90vh">
+                    <DataGridV1<UiMetric>
+                        hideBorder
+                        columns={metricColumns}
+                        data={metrics as UiMetric[]}
+                        rowKey="id"
+                        scroll={DataGridScrollV1.Contents}
+                        searchPlaceholder={t("label.search-entity", {
+                            entity: t("label.metrics"),
+                        })}
+                        toolbarComponent={
+                            <Grid container alignItems="center" spacing={2}>
+                                <Grid item>
+                                    <Button
+                                        disabled={isActionButtonDisable}
+                                        variant="contained"
+                                        onClick={handleMetricEdit}
+                                    >
+                                        {t("label.edit")}
+                                    </Button>
+                                </Grid>
 
-                            <Grid>
-                                <Button
-                                    disabled={
-                                        !selectedMetric ||
-                                        selectedMetric.rowKeyValues.length === 0
-                                    }
-                                    variant="contained"
-                                    onClick={handleMetricDelete}
-                                >
-                                    {t("label.delete")}
-                                </Button>
+                                <Grid>
+                                    <Button
+                                        disabled={
+                                            !selectedMetric ||
+                                            selectedMetric.rowKeyValues
+                                                .length === 0
+                                        }
+                                        variant="contained"
+                                        onClick={handleMetricDelete}
+                                    >
+                                        {t("label.delete")}
+                                    </Button>
+                                </Grid>
                             </Grid>
-                        </Grid>
-                    }
-                    onSelectionChange={setSelectedMetric}
-                />
+                        }
+                        onSelectionChange={setSelectedMetric}
+                    />
+                </Box>
             </PageContentsCardV1>
         </Grid>
     );

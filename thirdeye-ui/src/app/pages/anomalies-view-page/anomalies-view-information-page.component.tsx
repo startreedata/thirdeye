@@ -244,38 +244,38 @@ export const AnomaliesViewInformationPage: FunctionComponent = () => {
                         </Alert>
                     </Grid>
                 )}
-                {feedback && (
-                    <Grid item xs={12}>
-                        <Card>
-                            <CardContent>
-                                <Grid container>
-                                    <Grid item xs={12}>
-                                        <FeedbackCard
-                                            anomalyId={anomaly.id}
-                                            feedback={feedback}
-                                            onFeedbackUpdate={
-                                                handleFeedbackChange
-                                            }
-                                        />
-                                    </Grid>
-                                    <Grid
-                                        item
-                                        hidden={isEmpty(investigations)}
-                                        xs={12}
-                                    >
-                                        <InvestigationsList
-                                            anomalyId={anomaly.id}
-                                            getInvestigationsRequestStatus={
-                                                getInvestigationsRequestStatus
-                                            }
-                                            investigations={investigations}
-                                        />
-                                    </Grid>
+                <Grid
+                    item
+                    hidden={isEmpty(feedback) && isEmpty(investigations)}
+                    xs={12}
+                >
+                    <Card>
+                        <CardContent>
+                            <Grid container>
+                                <Grid item hidden={isEmpty(feedback)} xs={12}>
+                                    <FeedbackCard
+                                        anomalyId={anomaly.id}
+                                        feedback={feedback}
+                                        onFeedbackUpdate={handleFeedbackChange}
+                                    />
                                 </Grid>
-                            </CardContent>
-                        </Card>
-                    </Grid>
-                )}
+                                <Grid
+                                    item
+                                    hidden={isEmpty(investigations)}
+                                    xs={12}
+                                >
+                                    <InvestigationsList
+                                        anomalyId={anomaly.id}
+                                        getInvestigationsRequestStatus={
+                                            getInvestigationsRequestStatus
+                                        }
+                                        investigations={investigations}
+                                    />
+                                </Grid>
+                            </Grid>
+                        </CardContent>
+                    </Card>
+                </Grid>
                 <Grid item xs={12}>
                     <AnomalyCard
                         anomaly={anomaly}

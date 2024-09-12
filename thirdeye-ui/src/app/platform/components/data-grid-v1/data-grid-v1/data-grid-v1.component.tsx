@@ -865,7 +865,7 @@ export function DataGridV1<T>({
                 "data-grid-v1"
             )}
             height={gridContainerHeight}
-            minHeight="100vh"
+            minHeight="100%"
             width="100%"
         >
             {/* Toolbar */}

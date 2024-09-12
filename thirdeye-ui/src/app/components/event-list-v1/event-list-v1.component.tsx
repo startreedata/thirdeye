@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Button, Grid, Link } from "@material-ui/core";
+import { Box, Button, Grid, Link } from "@material-ui/core";
 import React, {
     FunctionComponent,
     ReactNode,
@@ -141,43 +141,46 @@ export const EventListV1: FunctionComponent<EventListV1Props> = ({
     return (
         <Grid item xs={12}>
             <PageContentsCardV1 disablePadding fullHeight>
-                <DataGridV1<Event>
-                    hideBorder
-                    columns={eventColumns}
-                    data={uiEvents as Event[]}
-                    expandColumnKey="name"
-                    rowKey="id"
-                    scroll={DataGridScrollV1.Contents}
-                    searchDataKeys={searchDataKeys}
-                    searchPlaceholder={t("label.search-entity", {
-                        entity: t("label.event"),
-                    })}
-                    toolbarComponent={
-                        <Grid
-                            container
-                            alignItems="center"
-                            justifyContent="space-between"
-                            spacing={2}
-                        >
-                            <Grid item>
-                                <Button
-                                    disabled={
-                                        !selectedEvent ||
-                                        selectedEvent.rowKeyValues.length === 0
-                                    }
-                                    variant="contained"
-                                    onClick={handleEventDelete}
-                                >
-                                    {t("label.delete")}
-                                </Button>
+                <Box height="90vh">
+                    <DataGridV1<Event>
+                        hideBorder
+                        columns={eventColumns}
+                        data={uiEvents as Event[]}
+                        expandColumnKey="name"
+                        rowKey="id"
+                        scroll={DataGridScrollV1.Contents}
+                        searchDataKeys={searchDataKeys}
+                        searchPlaceholder={t("label.search-entity", {
+                            entity: t("label.event"),
+                        })}
+                        toolbarComponent={
+                            <Grid
+                                container
+                                alignItems="center"
+                                justifyContent="space-between"
+                                spacing={2}
+                            >
+                                <Grid item>
+                                    <Button
+                                        disabled={
+                                            !selectedEvent ||
+                                            selectedEvent.rowKeyValues
+                                                .length === 0
+                                        }
+                                        variant="contained"
+                                        onClick={handleEventDelete}
+                                    >
+                                        {t("label.delete")}
+                                    </Button>
+                                </Grid>
+                                <Grid item>
+                                    <TimeRangeButtonWithContext />
+                                </Grid>
                             </Grid>
-                            <Grid item>
-                                <TimeRangeButtonWithContext />
-                            </Grid>
-                        </Grid>
-                    }
-                    onSelectionChange={setSelectedEvent}
-                />
+                        }
+                        onSelectionChange={setSelectedEvent}
+                    />
+                </Box>
             </PageContentsCardV1>
         </Grid>
     );

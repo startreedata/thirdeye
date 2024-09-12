@@ -16,7 +16,7 @@
 import { AnomalyFeedback } from "../../../rest/dto/anomaly.interfaces";
 
 export interface FeedbackCardProps {
-    feedback: AnomalyFeedback;
+    feedback?: AnomalyFeedback;
     anomalyId: number;
     onFeedbackUpdate: (feedback: AnomalyFeedback) => void;
 }

@@ -23,12 +23,19 @@ const LoginPage = lazy(() =>
     ).then((module) => ({ default: module.LoginPage }))
 );
 
+const SwaggerDocs = lazy(() =>
+    import(/* webpackChunkName: "swagger-page" */ "../../pages/swagger").then(
+        (module) => ({ default: module.SwaggerDocs })
+    )
+);
+
 export const GeneralUnauthenticatedRouter: FunctionComponent = () => {
     return (
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
             <Routes>
                 {/* Login path */}
                 <Route element={<LoginPage />} path={AppRoute.LOGIN} />
+                <Route element={<SwaggerDocs />} path={AppRoute.SWAGGER} />
 
                 {/* No match found, redirect to login path */}
                 <Route

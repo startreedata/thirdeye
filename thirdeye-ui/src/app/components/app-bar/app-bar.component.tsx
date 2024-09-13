@@ -136,11 +136,7 @@ export const AppBar: FunctionComponent = () => {
                 </NavBarLinkV1>
 
                 {/* Swagger */}
-                <NavBarLinkV1
-                    externalLink
-                    href={getSwaggerPath()}
-                    target="_blank"
-                >
+                <NavBarLinkV1 href={getSwaggerPath()}>
                     <NavBarLinkIconV1>
                         <CodeIcon />
                     </NavBarLinkIconV1>

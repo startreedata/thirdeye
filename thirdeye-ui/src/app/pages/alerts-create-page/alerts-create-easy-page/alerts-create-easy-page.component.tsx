@@ -1311,7 +1311,9 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                     container
                                                                     alignItems="center"
                                                                 >
-                                                                    {anomalyDetection !==
+                                                                    {dimension ===
+                                                                        SelectDimensionsOptions.ENUMERATORS ||
+                                                                    anomalyDetection !==
                                                                         AnomalyDetectionOptions.COMPOSITE ||
                                                                     compositeFilters ? (
                                                                         <Box
@@ -1613,8 +1615,10 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                             onAlertPropertyChange
                                                                                         }
                                                                                     >
-                                                                                        {anomalyDetection ===
-                                                                                            AnomalyDetectionOptions.COMPOSITE &&
+                                                                                        {dimension !==
+                                                                                            SelectDimensionsOptions.ENUMERATORS &&
+                                                                                            anomalyDetection ===
+                                                                                                AnomalyDetectionOptions.COMPOSITE &&
                                                                                             compositeFilters && (
                                                                                                 <Button
                                                                                                     color="primary"

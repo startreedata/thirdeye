@@ -163,7 +163,9 @@ export const RecentFailures: FunctionComponent = () => {
                                 <TableCell>{t("label.alert-name")}</TableCell>
                                 <TableCell>{t("label.active")}</TableCell>
                                 <TableCell>{t("label.more-info")}</TableCell>
-                                <TableCell>{t("label.timestamp")}</TableCell>
+                                <TableCell>{t("label.created-at")}</TableCell>
+                                <TableCell>{t("label.start-time")}</TableCell>
+                                <TableCell>{t("label.duration")}</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>

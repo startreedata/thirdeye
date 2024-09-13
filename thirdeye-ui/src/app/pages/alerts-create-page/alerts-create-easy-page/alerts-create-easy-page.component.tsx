@@ -138,6 +138,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         alertInsight,
         alertRecommendations,
         alert,
+        getAlertRecommendation,
     } = useOutletContext<AlertCreatedGuidedPageOutletContext>();
     const { datasetsInfo } = useGetDatasourcesTree();
 
@@ -212,6 +213,10 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                 setQueryFilters(
                     String(alert.templateProperties?.queryFilters) || ""
                 );
+                if (alert.templateProperties?.enumeratoryQuery) {
+                    setEnumerators(alert.templateProperties?.enumeratoryQuery);
+                    setDimension(SelectDimensionsOptions.ENUMERATORS);
+                }
             }
         }
     }, [datasetsInfo]);
@@ -400,12 +405,15 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
             granularity &&
             (aggregationFunction || (isCustomMetrics && editedDatasource))
         ) {
-            onAlertPropertyChange({
+            const workingAlert = {
                 template: {
-                    name: isMultiDimensionAlert
-                        ? algorithmOption?.algorithmOption
-                              .alertTemplateForMultidimension
-                        : algorithmOption?.algorithmOption?.alertTemplate,
+                    name:
+                        (isMultiDimensionAlert
+                            ? algorithmOption?.algorithmOption
+                                  .alertTemplateForMultidimension
+                            : algorithmOption?.algorithmOption
+                                  ?.alertTemplate) ||
+                        createNewStartingAlert().template?.name,
                 },
                 templateProperties: {
                     ...alert.templateProperties,
@@ -416,8 +424,14 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                         granularity
                     ),
                     queryFilters: queryFilters,
+                    enumeratoryQuery:
+                        dimension === SelectDimensionsOptions.ENUMERATORS
+                            ? enumerators
+                            : null,
                 },
-            });
+            };
+            onAlertPropertyChange(workingAlert);
+            getAlertRecommendation({ ...alert, ...workingAlert });
             handleReloadPreviewClick();
         }
     }, [
@@ -427,6 +441,8 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         aggregationFunction,
         algorithmOption,
         queryFilters,
+        anomalyDetection,
+        enumerators,
     ]);
 
     const { getEvaluation } = useGetEvaluation();
@@ -502,6 +518,10 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                     granularity
                 ),
                 queryFilters: queryFilters,
+                enumeratoryQuery:
+                    dimension === SelectDimensionsOptions.ENUMERATORS
+                        ? enumerators
+                        : null,
             };
 
             copied.templateProperties.min = 0;
@@ -516,6 +536,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         aggregationFunction,
         alertTemplateForEvaluate,
         queryFilters,
+        enumerators,
     ]);
 
     const handleReloadPreviewClick = (): void => {

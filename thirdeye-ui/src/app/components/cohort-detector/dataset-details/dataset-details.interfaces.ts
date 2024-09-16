@@ -13,6 +13,7 @@
  * the License.
  */
 
+import { Dataset } from "../../../rest/dto/dataset.interfaces";
 import { MetricAggFunction } from "../../../rest/dto/metric.interfaces";
 import { GetCohortParams } from "../../../rest/rca/rca.interfaces";
 
@@ -25,7 +26,12 @@ export interface DatasetDetailsProps {
     initialSelectedDataset?: string;
     initialSelectedDatasource?: string;
     initialSelectedAggregationFunc?: MetricAggFunction;
-
+    onMetricSelect?: (
+        metric: string,
+        selectedTable: Dataset,
+        column: string
+    ) => void;
+    onAggregationFunctionSelect?: (value: MetricAggFunction) => void;
     // For the manually entered query filter
     queryValue: string;
     setQueryValue: (val: string) => void;

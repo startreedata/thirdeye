@@ -21,7 +21,6 @@ import {
     Typography,
 } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
-import { sortBy } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ActionStatus } from "../../../rest/actions.interfaces";
@@ -75,9 +74,6 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
     const { metrics, getMetrics, status: getMetricsStatus } = useGetMetrics();
     const { t } = useTranslation();
 
-    const [datasetsInfo, setDatasetsInfo] = useState<DatasetInfo[] | null>(
-        null
-    );
     const [shouldFetchInsight, setShouldFetchInsight] = useState(true);
     const [isPinotInfraLoading, setIsPinotInfraLoading] = useState(true);
     const [selectedStart, setSelectedStart] = useState<number>(
@@ -91,10 +87,8 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
         null
     );
     const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
-    const [selectedAggregationFunction, setSelectedAggregationFunction] =
-        useState<MetricAggFunction>(
-            initialSelectedAggregationFunc ?? MetricAggFunction.SUM
-        );
+    const selectedAggregationFunction: MetricAggFunction =
+        initialSelectedAggregationFunc ?? MetricAggFunction.SUM;
     const [selectedDimensions, setSelectedDimensions] = useState<string[]>([]);
 
     useEffect(() => {
@@ -163,10 +157,6 @@ export const DatasetDetails: FunctionComponent<DatasetDetailsProps> = ({
                 });
             }
         }
-
-        setDatasetsInfo(
-            sortBy(datasetInfo, [(d) => d.dataset.name.toLowerCase()])
-        );
 
         setIsPinotInfraLoading(false);
     }, [metrics, datasets, datasources]);

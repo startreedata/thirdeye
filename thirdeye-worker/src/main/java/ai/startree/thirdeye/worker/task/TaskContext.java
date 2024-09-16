@@ -14,7 +14,6 @@
 package ai.startree.thirdeye.worker.task;
 
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
-import com.codahale.metrics.MetricRegistry;
 
 public class TaskContext {
 
@@ -24,7 +23,6 @@ public class TaskContext {
   private TaskDriverThreadPoolManager taskDriverThreadPoolManager;
   private TaskManager taskManager;
   private TaskRunnerFactory taskRunnerFactory;
-  private MetricRegistry metricRegistry;
 
   public TaskDriverConfiguration getConfig() {
     return config;
@@ -70,15 +68,6 @@ public class TaskContext {
   public TaskContext setTaskRunnerFactory(
       final TaskRunnerFactory taskRunnerFactory) {
     this.taskRunnerFactory = taskRunnerFactory;
-    return this;
-  }
-
-  public MetricRegistry getMetricRegistry() {
-    return metricRegistry;
-  }
-
-  public TaskContext setMetricRegistry(final MetricRegistry metricRegistry) {
-    this.metricRegistry = metricRegistry;
     return this;
   }
 }

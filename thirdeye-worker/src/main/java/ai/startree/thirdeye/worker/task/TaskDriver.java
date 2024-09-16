@@ -20,7 +20,6 @@ import static java.util.Objects.requireNonNull;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskStatus;
-import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
@@ -43,7 +42,6 @@ public class TaskDriver {
   public TaskDriver(final TaskManager taskManager,
       final TaskRunnerFactory taskRunnerFactory,
       final TaskDriverThreadPoolManager taskDriverThreadPoolManager,
-      final MetricRegistry metricRegistry,
       final TaskDriverConfiguration taskDriverConfiguration) {
     this.taskManager = taskManager;
     this.taskDriverThreadPoolManager = taskDriverThreadPoolManager;
@@ -54,7 +52,6 @@ public class TaskDriver {
         .setTaskManager(taskManager)
         .setTaskDriverThreadPoolManager(taskDriverThreadPoolManager)
         .setTaskRunnerFactory(taskRunnerFactory)
-        .setMetricRegistry(metricRegistry)
         .setConfig(taskDriverConfiguration)
         .setWorkerId(workerId);
   }

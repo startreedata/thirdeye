@@ -17,7 +17,6 @@ import DashboardIcon from "@material-ui/icons/Dashboard";
 import PersonAddIcon from "@material-ui/icons/PersonAdd";
 import PlaylistAddCheckIcon from "@material-ui/icons/PlaylistAddCheck";
 import ReportIcon from "@material-ui/icons/Report";
-import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { default as React, FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -49,6 +48,7 @@ import {
     getAlertsAllPath,
 } from "../../utils/routes/routes.util";
 import { homePageTheme, useHomePageStyles } from "./home-page.styles";
+import { useFetchQuery } from "../../rest/hooks/useFetchQuery";
 
 export const HomePage: FunctionComponent = () => {
     const navigate = useNavigate();
@@ -57,13 +57,13 @@ export const HomePage: FunctionComponent = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const style = useHomePageStyles();
 
-    const getAlertsQuery = useQuery<Alert[], AxiosError>({
+    const getAlertsQuery = useFetchQuery<Alert[], AxiosError>({
         queryKey: ["alerts"],
         queryFn: () => {
             return getAllAlerts();
         },
     });
-    const getSubscriptionGroupsQuery = useQuery<
+    const getSubscriptionGroupsQuery = useFetchQuery<
         SubscriptionGroup[],
         AxiosError
     >({

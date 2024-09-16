@@ -45,6 +45,7 @@ jobs:
             echo "Snapshot build detected. Generating dist with local build"
             export GH_SHA=$(git log -1 --format="%H")
             npm ci
+            npm run test
             npm run build
             SNAPSHOT_VERSION_SUFFIX="-SNAPSHOT"
           else

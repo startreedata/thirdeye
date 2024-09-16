@@ -19,7 +19,7 @@
   <parent>
     <groupId>ai.startree.thirdeye</groupId>
     <artifactId>thirdeye</artifactId>
-    <version>1.313.0-SNAPSHOT</version>
+    <version>1.326.0-SNAPSHOT</version>
   </parent>
   <artifactId>thirdeye-core</artifactId>
 
@@ -37,8 +37,9 @@
       <artifactId>thirdeye-persistence</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-math3</artifactId>
+      <groupId>com.google.inject</groupId>
+      <artifactId>guice</artifactId>
+      <version>${guice.version}</version>
     </dependency>
 
     <!-- Pin jackson version and omit from third party dependencies-->
@@ -46,9 +47,11 @@
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-core</artifactId>
     </dependency>
+
     <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>javax.servlet-api</artifactId>
+      <groupId>org.mapstruct</groupId>
+      <artifactId>mapstruct</artifactId>
+      <version>${org.mapstruct.version}</version>
     </dependency>
 
     <!--macro dependencies -->
@@ -85,20 +88,9 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-core</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
       <scope>test</scope>
-    </dependency>
-
-    <!-- Swagger -->
-    <dependency>
-      <groupId>com.smoketurner</groupId>
-      <artifactId>dropwizard-swagger</artifactId>
     </dependency>
   </dependencies>
 </project>

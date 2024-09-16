@@ -20,6 +20,7 @@ import type {
     AlertEvaluation,
     AlertInsight,
     AlertStats,
+    AlertsCount,
     EditableAlert,
 } from "../dto/alert.interfaces";
 import {
@@ -227,4 +228,10 @@ export const getAlertRecommendation = async (
     }
 
     return response.data.recommendations;
+};
+
+export const getAlertsCount = async (): Promise<AlertsCount> => {
+    const response = await axios.get(`${BASE_URL_ALERTS}/count`);
+
+    return response.data;
 };

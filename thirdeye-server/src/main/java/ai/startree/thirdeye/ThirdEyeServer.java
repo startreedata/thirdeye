@@ -34,18 +34,19 @@ import ai.startree.thirdeye.service.ResourcesBootstrapService;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.worker.task.TaskDriver;
 import ch.qos.logback.classic.Level;
+import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import io.dropwizard.Application;
 import io.dropwizard.auth.AuthDynamicFeature;
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
+import io.dropwizard.core.Application;
+import io.dropwizard.core.setup.Bootstrap;
+import io.dropwizard.core.setup.Environment;
 import io.dropwizard.jersey.setup.JerseyEnvironment;
 import io.dropwizard.lifecycle.Managed;
-import io.dropwizard.setup.Bootstrap;
-import io.dropwizard.setup.Environment;
 import io.federecio.dropwizard.swagger.SwaggerBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import io.micrometer.core.instrument.Gauge;
@@ -60,8 +61,6 @@ import io.micrometer.core.instrument.binder.jvm.JvmThreadMetrics;
 import io.micrometer.core.instrument.binder.system.ProcessorMetrics;
 import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
-import io.prometheus.client.CollectorRegistry;
-import io.prometheus.client.dropwizard.DropwizardExports;
 import io.sentry.Hint;
 import io.sentry.Sentry;
 import io.sentry.SentryLevel;
@@ -109,7 +108,9 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
         return configuration.getSwaggerBundleConfiguration();
       }
     });
-    bootstrap.getObjectMapper().registerModule(Constants.TEMPLATABLE);
+    bootstrap.getObjectMapper()
+        .registerModule(new JodaModule())
+        .registerModule(Constants.TEMPLATABLE);
   }
 
   @Override
@@ -129,10 +130,7 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
     final DataSource dataSource = new DataSourceBuilder()
         .build(configuration.getDatabaseConfiguration());
 
-    injector = Guice.createInjector(new ThirdEyeServerModule(
-        configuration,
-        dataSource,
-        env.metrics()));
+    injector = Guice.createInjector(new ThirdEyeServerModule(configuration, dataSource));
 
     // Load plugins
     optional(thirdEyePluginDirOverride())
@@ -164,7 +162,6 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
         .orElse("unknown");
     // Expose dropwizard metrics in prometheus compatible format
     if (configuration.getPrometheusConfiguration().isEnabled()) {
-      // new registry based on micrometers
       final PrometheusMeterRegistry registry = new PrometheusMeterRegistry(
           PrometheusConfig.DEFAULT);
       Metrics.globalRegistry.add(registry);
@@ -188,11 +185,8 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
       new ProcessorMetrics().bindTo(registry);
       new JvmThreadMetrics().bindTo(registry);
 
-      // old registry based on dropwizard-metrics
-      final CollectorRegistry legacyRegistry = new CollectorRegistry();
-      legacyRegistry.register(new DropwizardExports(env.metrics()));
       env.admin()
-          .addServlet("prometheus", new MergingMetricsServlet(registry, legacyRegistry))
+          .addServlet("prometheus", new MicrometerPrometheusServlet(registry))
           .addMapping("/prometheus");
     }
     Gauge.builder("thirdeye_version_info", () -> 1)

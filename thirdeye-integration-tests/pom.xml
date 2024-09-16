@@ -18,7 +18,7 @@
   <parent>
     <artifactId>thirdeye</artifactId>
     <groupId>ai.startree.thirdeye</groupId>
-    <version>1.313.0-SNAPSHOT</version>
+    <version>1.326.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -158,10 +158,6 @@
     <dependency>
       <groupId>joda-time</groupId>
       <artifactId>joda-time</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.dropwizard.metrics</groupId>
-      <artifactId>metrics-core</artifactId>
     </dependency>
 
     <!--reuse persistence MySQLTestDatabase class - need to import testcontainers and aspect todo cyril make all dependencies packaged together -->

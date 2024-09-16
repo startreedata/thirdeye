@@ -13,10 +13,10 @@
  */
 package ai.startree.thirdeye.resources;
 
+import static ai.startree.thirdeye.ResourceUtils.ensureExists;
+import static ai.startree.thirdeye.ResourceUtils.respondOk;
+import static ai.startree.thirdeye.ResourceUtils.statusResponse;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DATASOURCE_VALIDATION_FAILED;
-import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
-import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
-import static ai.startree.thirdeye.util.ResourceUtils.statusResponse;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;

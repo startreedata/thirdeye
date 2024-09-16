@@ -23,7 +23,6 @@ import {
 } from "@material-ui/core";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import { useQuery } from "@tanstack/react-query";
 import { DateTime } from "luxon";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -55,6 +54,7 @@ import { TimeSeriesChart } from "../../../visualizations/time-series-chart/time-
 import { TimeSeriesChartProps } from "../../../visualizations/time-series-chart/time-series-chart.interfaces";
 import { EnumerationItemRowProps } from "./enumeration-item-row.interfaces";
 import { useEnumerationItemRowStyles } from "./enumeration-item-row.style";
+import { useFetchQuery } from "../../../../rest/hooks/useFetchQuery";
 
 export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
     anomalies,
@@ -72,7 +72,7 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
         delay: 150,
     });
 
-    const getEvaluationQuery = useQuery({
+    const getEvaluationQuery = useFetchQuery({
         enabled: false,
         queryKey: [
             "evaluation",

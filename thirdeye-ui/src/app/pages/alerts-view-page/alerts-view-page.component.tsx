@@ -22,7 +22,6 @@ import {
     Typography,
 } from "@material-ui/core";
 import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
-import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import React, {
     FunctionComponent,
@@ -78,6 +77,7 @@ import {
     QUERY_PARAM_KEY_FOR_SORT,
     QUERY_PARAM_KEY_FOR_SORT_KEY,
 } from "./alerts-view-page.utils";
+import { useFetchQuery } from "../../rest/hooks/useFetchQuery";
 
 export const AlertsViewPage: FunctionComponent = () => {
     const { t } = useTranslation();
@@ -116,21 +116,21 @@ export const AlertsViewPage: FunctionComponent = () => {
         errorMessages: resetAlertRequestErrors,
     } = useResetAlert();
 
-    const getAlertQuery = useQuery({
+    const getAlertQuery = useFetchQuery({
         queryKey: ["alert", alertId],
         queryFn: () => {
             return getAlert(Number(alertId));
         },
     });
 
-    const getEnumerationItemsQuery = useQuery({
+    const getEnumerationItemsQuery = useFetchQuery({
         queryKey: ["enumerationItems", alertId],
         queryFn: () => {
             return getEnumerationItems({ alertId: Number(alertId) });
         },
     });
 
-    const getAnomaliesQuery = useQuery({
+    const getAnomaliesQuery = useFetchQuery({
         queryKey: ["anomalies", alertId, startTime, endTime],
         queryFn: () => {
             return getAnomalies({

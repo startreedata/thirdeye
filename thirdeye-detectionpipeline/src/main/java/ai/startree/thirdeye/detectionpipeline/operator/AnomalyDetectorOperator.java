@@ -14,10 +14,10 @@
 package ai.startree.thirdeye.detectionpipeline.operator;
 
 import static ai.startree.thirdeye.spi.Constants.COL_TIME;
+import static ai.startree.thirdeye.spi.ThirdEyeException.checkThirdEye;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_CONFIGURATION_FIELD;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
-import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
@@ -122,15 +122,14 @@ public class AnomalyDetectorOperator extends DetectionPipelineOperator {
   private AnomalyDetector<? extends AbstractSpec> createDetector(
       final Map<String, Object> params,
       final DetectionRegistry detectionRegistry) {
-    final String type = ensureExists(MapUtils.getString(params, PROP_TYPE),
-        ERR_MISSING_CONFIGURATION_FIELD,
-        "'type' in detector config");
+    final String type = MapUtils.getString(params, PROP_TYPE);
+    checkThirdEye(type != null, ERR_MISSING_CONFIGURATION_FIELD, "'type' in detector config");
 
     final Map<String, Object> componentSpec = getComponentSpec(params);
     // get generic detector info
     AbstractSpec genericDetectorSpec = AbstractSpec.fromProperties(componentSpec,
         GenericDetectorSpec.class);
-    ensureExists(genericDetectorSpec.getMonitoringGranularity(),
+    checkThirdEye(genericDetectorSpec.getMonitoringGranularity() != null,
         ERR_MISSING_CONFIGURATION_FIELD,
         "'monitoringGranularity' in detector config");
     monitoringGranularity = isoPeriod(genericDetectorSpec.getMonitoringGranularity());

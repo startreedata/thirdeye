@@ -13,9 +13,9 @@
  */
 package ai.startree.thirdeye.alert;
 
+import static ai.startree.thirdeye.spi.ThirdEyeException.checkThirdEye;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
-import static ai.startree.thirdeye.util.ResourceUtils.ensureExists;
 
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.ThirdEyeException;
@@ -62,15 +62,16 @@ public class AlertTemplateRenderer {
    * @return template populated with properties
    */
   public AlertTemplateDTO renderAlert(final AlertApi alert, final @Nullable String namespace) {
-    ensureExists(alert, ERR_OBJECT_DOES_NOT_EXIST, "alert body is null");
+    checkThirdEye(alert != null, ERR_OBJECT_DOES_NOT_EXIST, "alert body is null");
 
     if (alert.getId() != null) {
-      final AlertDTO alertDto = ensureExists(alertManager.findById(alert.getId()));
+      final AlertDTO alertDto = alertManager.findById(alert.getId());
+      checkThirdEye(alertDto != null, ERR_OBJECT_DOES_NOT_EXIST, "alert not found for id: " + alert.getId());
       return renderAlert(alertDto);
     }
 
     final AlertTemplateApi templateApi = alert.getTemplate();
-    ensureExists(templateApi, ERR_OBJECT_DOES_NOT_EXIST, "alert template body is null");
+    checkThirdEye(templateApi != null, ERR_OBJECT_DOES_NOT_EXIST, "alert template body is null");
 
     final AlertTemplateDTO alertTemplateDTO = ApiBeanMapper.toAlertTemplateDto(templateApi);
     final AlertTemplateDTO fullTemplate = alertTemplateManager.findMatchInNamespaceOrUnsetNamespace(

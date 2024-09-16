@@ -21,9 +21,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskInfo;
 import ai.startree.thirdeye.spi.task.TaskStatus;
 import ai.startree.thirdeye.spi.task.TaskType;
-import com.codahale.metrics.Counter;
-import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Timer;
 import com.google.inject.Singleton;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.Timer.Sample;
@@ -48,20 +45,13 @@ public class TaskDriverRunnable implements Runnable {
   private final TaskDriverConfiguration config;
   private final long workerId;
   private final TaskRunnerFactory taskRunnerFactory;
-
-  @Deprecated //  use thirdeye_task_run
-  private final Counter taskExceptionCounter;
-  @Deprecated //  use thirdeye_task_run
-  private final Counter taskSuccessCounter;
-  @Deprecated //  use thirdeye_task_run
-  private final Counter taskCounter;
-  @Deprecated //  use thirdeye_task_run
-  private final Timer taskRunningTimer;
+  
   private final TaskDriverThreadPoolManager taskDriverThreadPoolManager;
   private final io.micrometer.core.instrument.Timer taskRunTimerOfSuccess;
   private final io.micrometer.core.instrument.Timer taskRunTimerOfException;
   private final io.micrometer.core.instrument.Timer taskWaitTimer;
   private final io.micrometer.core.instrument.Timer taskRunnerWaitIdleTimer;
+  private final io.micrometer.core.instrument.Counter taskConcurrentAcquisition;
 
   public TaskDriverRunnable(final TaskContext taskContext) {
     this.taskContext = taskContext;
@@ -71,13 +61,6 @@ public class TaskDriverRunnable implements Runnable {
     this.config = taskContext.getConfig();
     this.workerId = taskContext.getWorkerId();
     this.taskRunnerFactory = taskContext.getTaskRunnerFactory();
-
-    final MetricRegistry metricRegistry = taskContext.getMetricRegistry();
-    // deprecated - use thirdeye_task_run
-    taskExceptionCounter = metricRegistry.counter("taskExceptionCounter");
-    taskSuccessCounter = metricRegistry.counter("taskSuccessCounter");
-    taskCounter = metricRegistry.counter("taskCounter");
-    taskRunningTimer = metricRegistry.timer("taskRunningTimer");
 
     final String description = "Start: a taskDTO is passed for execution. End: the task has run or failed. Tag exception=true means an exception was thrown by the method call.";
     this.taskRunTimerOfSuccess = io.micrometer.core.instrument.Timer.builder("thirdeye_task_run")
@@ -90,19 +73,19 @@ public class TaskDriverRunnable implements Runnable {
         .publishPercentiles(METRICS_TIMER_PERCENTILES)
         .tag("exception", "true")
         .register(Metrics.globalRegistry);
-
     this.taskWaitTimer = io.micrometer.core.instrument.Timer.builder("thirdeye_task_wait")
         .publishPercentiles(METRICS_TIMER_PERCENTILES)
         .description(
             "Start: a task is created in the persistence layer. End: the task is picked by a task runner for execution.")
         .register(Metrics.globalRegistry);
-
-    // deprecated - use thirdeye_task_runner_idle
     this.taskRunnerWaitIdleTimer = io.micrometer.core.instrument.Timer.builder(
             "thirdeye_task_runner_idle")
         .description(
             "Start: start thread sleep because no tasks were found. End: end of sleep. Mostly used for the sum and the count.")
         .publishPercentiles(METRICS_TIMER_PERCENTILES)
+        .register(Metrics.globalRegistry);
+    taskConcurrentAcquisition = io.micrometer.core.instrument.Counter.builder("thirdeye_task_concurrent_acquisition")
+        .description("Count the number of time a worker fails to take a lock on a task because the task is locked by another process (most likely another worker).")
         .register(Metrics.globalRegistry);
   }
 
@@ -114,7 +97,7 @@ public class TaskDriverRunnable implements Runnable {
         continue;
       }
       // a task was acquired - try to finish executing it before termination
-      taskRunningTimer.time(() -> runTask(taskDTO));
+      runTask(taskDTO);
     }
     LOG.info("TaskDriverRunnable safely quitting. name: " + Thread.currentThread().getName());
   }
@@ -129,7 +112,6 @@ public class TaskDriverRunnable implements Runnable {
 
     final Sample sample = io.micrometer.core.instrument.Timer.start(Metrics.globalRegistry);
     final long tStart = System.nanoTime();
-    taskCounter.inc();
 
     Future heartbeat = null;
     if (config.isRandomWorkerIdEnabled()) {
@@ -146,17 +128,14 @@ public class TaskDriverRunnable implements Runnable {
       future.get(config.getMaxTaskRunTime().toMillis(), TimeUnit.MILLISECONDS);
       updateTaskStatus(taskDTO.getId(), TaskStatus.COMPLETED, "");
       LOG.info("Task {} {}: COMPLETED", taskDTO.getId(), taskDTO.getJobName());
-      taskSuccessCounter.inc();
       sample.stop(taskRunTimerOfSuccess);
     } catch (TimeoutException e) {
       future.cancel(true);
-      taskExceptionCounter.inc();
       sample.stop(taskRunTimerOfException);
       LOG.error("Task {} {}: TIMEOUT after a period of {}", taskDTO.getId(), taskDTO.getJobName(),
           config.getMaxTaskRunTime(), e);
       updateTaskStatus(taskDTO.getId(), TaskStatus.TIMEOUT, e.getMessage());
     } catch (Exception e) {
-      taskExceptionCounter.inc();
       sample.stop(taskRunTimerOfException);
       LOG.error("Task {} {}: FAILED with exception.", taskDTO.getId(), taskDTO.getJobName(), e);
       updateTaskStatus(taskDTO.getId(), TaskStatus.FAILED,
@@ -212,7 +191,7 @@ public class TaskDriverRunnable implements Runnable {
           taskWaitTimer.record(waitTime, TimeUnit.MILLISECONDS);
           return nextTask;
         } else {
-          // fixme cyril add metric for this
+          taskConcurrentAcquisition.increment();
           LOG.debug("Failed to acquire task {} referencing {} from worker id {}. Task was locked, or edited by another transaction.)", nextTask.getId(),
               nextTask.getRefId(), workerId);
           // don't sleep - look for a next task

@@ -21,6 +21,7 @@ import ai.startree.thirdeye.spi.detection.AnomalyFeedbackType;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -56,7 +57,7 @@ public interface AnomalyManager extends AbstractManager<AnomalyDTO> {
     final List<AnomalyFeedback> allFeedbacks = filterWithNamespace(feedbackFilter, namespace)
         .stream()
         .map(AnomalyDTO::getFeedback)
-        .toList();
+        .collect(Collectors.toList());
     return new AnomalyStatsApi()
         .setTotalCount(countWithNamespace(notChildNotIgnoredFilter, namespace))
         .setCountWithFeedback((long) allFeedbacks.size())

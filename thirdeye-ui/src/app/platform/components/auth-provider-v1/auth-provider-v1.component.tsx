@@ -81,6 +81,7 @@ export const AuthProviderV1: FunctionComponent<AuthProviderV1Props> = ({
         authenticated,
         authDisabled,
         accessToken,
+        workspace,
         authDisabledNotification,
         authExceptionCode,
         redirectHref,
@@ -102,6 +103,7 @@ export const AuthProviderV1: FunctionComponent<AuthProviderV1Props> = ({
         state.authenticated,
         state.authDisabled,
         state.accessToken,
+        state.workspace,
         state.authDisabledNotification,
         state.authExceptionCode,
         state.redirectHref,
@@ -180,11 +182,11 @@ export const AuthProviderV1: FunctionComponent<AuthProviderV1Props> = ({
     }, [getOpenIDConfigurationV1Status]);
 
     useEffect(() => {
-        // Access token changed, initialize axios
+        // Access token or workspace changed, initialize axios
         setAxiosLoading(true);
         initAxios();
         setAxiosLoading(false);
-    }, [accessToken]);
+    }, [accessToken, workspace]);
 
     useEffect(() => {
         // Auth action requested
@@ -449,7 +451,9 @@ export const AuthProviderV1: FunctionComponent<AuthProviderV1Props> = ({
 
         // Set new interceptors
         setAxiosRequestInterceptorId(
-            axios.interceptors.request.use(getRequestInterceptorV1(accessToken))
+            axios.interceptors.request.use(
+                getRequestInterceptorV1(accessToken, workspace.id)
+            )
         );
         setAxiosResponseInterceptorId(
             axios.interceptors.response.use(

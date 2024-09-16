@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.service;
 
-import static ai.startree.thirdeye.util.ResourceUtils.resultSetToMap;
+import static ai.startree.thirdeye.ResourceUtils.resultSetToMap;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.datalayer.DatabaseClient;

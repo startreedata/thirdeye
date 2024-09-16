@@ -34,4 +34,10 @@ public class ThirdEyeException extends RuntimeException {
   public ThirdEyeStatus getStatus() {
     return status;
   }
+
+  public static void checkThirdEye(final boolean condition, final ThirdEyeStatus status, final Object... args) {
+    if (!condition) {
+      throw new ThirdEyeException(status, args);
+    }
+  }
 }

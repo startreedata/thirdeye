@@ -38,6 +38,7 @@ export const useAuthV1 = create<AuthV1>(
             redirectHref: "",
             authAction: "",
             authActionData: "",
+            workspace: { id: null },
 
             enableAuth: () => {
                 set({
@@ -65,7 +66,6 @@ export const useAuthV1 = create<AuthV1>(
                     authDisabledNotification: false,
                 });
             },
-
             setAccessToken: (token) => {
                 set({
                     authUser: {
@@ -79,7 +79,11 @@ export const useAuthV1 = create<AuthV1>(
                     authExceptionCode: "",
                 });
             },
-
+            setWorkspace: (workspace) => {
+                set({
+                    workspace: { id: workspace.id },
+                });
+            },
             clearAuth: (exceptionCode) => {
                 set({
                     authUser: {
@@ -127,7 +131,7 @@ export const useAuthV1 = create<AuthV1>(
         }),
         {
             name: KEY_AUTH, // Persist in browser local storage
-            blacklist: ["authAction", "authActionData"], // Prevent persisting in state
+            blacklist: ["authAction", "authActionData", "workspace"], // Prevent persisting in state
         }
     )
 );

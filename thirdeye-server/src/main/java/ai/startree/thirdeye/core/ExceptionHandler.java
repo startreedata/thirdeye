@@ -13,14 +13,14 @@
  */
 package ai.startree.thirdeye.core;
 
+import static ai.startree.thirdeye.ResourceUtils.serverError;
+import static ai.startree.thirdeye.ResourceUtils.statusApi;
+import static ai.startree.thirdeye.ResourceUtils.statusListApi;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_ALERT_PIPELINE_EXECUTION;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DATA_UNAVAILABLE;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_TIMEOUT;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_UNKNOWN;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_UNKNOWN_RCA_ALGORITHM;
-import static ai.startree.thirdeye.util.ResourceUtils.serverError;
-import static ai.startree.thirdeye.util.ResourceUtils.statusApi;
-import static ai.startree.thirdeye.util.ResourceUtils.statusListApi;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.DataProviderException;

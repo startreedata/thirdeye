@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.resources;
 
-import static ai.startree.thirdeye.util.ResourceUtils.respondOk;
+import static ai.startree.thirdeye.ResourceUtils.respondOk;
 
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.service.NamespaceService;

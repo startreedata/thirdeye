@@ -162,3 +162,7 @@ export interface AlertStats {
     countWithFeedback: number;
     feedbackStats: Record<keyof typeof AnomalyFeedbackType, number>;
 }
+
+export interface AlertsCount {
+    count: number;
+}

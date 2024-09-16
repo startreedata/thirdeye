@@ -16,7 +16,7 @@ version: "3"
 
 services:
     pinot:
-        image: apachepinot/pinot:1.0.0
+        image: apachepinot/pinot:1.1.0
         command: QuickStart -type batch
         ports:
             - "2123:2123"

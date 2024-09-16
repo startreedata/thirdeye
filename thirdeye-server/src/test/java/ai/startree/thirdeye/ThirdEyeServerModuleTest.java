@@ -23,7 +23,6 @@ import ai.startree.thirdeye.auth.AuthConfiguration;
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
 import ai.startree.thirdeye.resources.root.RootResource;
 import ai.startree.thirdeye.worker.task.TaskDriverConfiguration;
-import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import java.sql.Connection;
@@ -75,10 +74,8 @@ public class ThirdEyeServerModuleTest {
         .setAuthConfiguration(new AuthConfiguration())
         .setTaskDriverConfiguration(new TaskDriverConfiguration().setId(0L));
 
-    final Injector injector = Guice.createInjector(new ThirdEyeServerModule(
-        configuration,
-        dataSource,
-        new MetricRegistry()));
+    final Injector injector = Guice.createInjector(
+        new ThirdEyeServerModule(configuration, dataSource));
 
     assertThat(injector.getInstance(RootResource.class)).isNotNull();
   }

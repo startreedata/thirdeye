@@ -16,7 +16,6 @@ import { Box, Button, Grid, Table, Typography } from "@material-ui/core";
 import TableCell from "@material-ui/core/TableCell";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
-import { useQuery } from "@tanstack/react-query";
 import { capitalize, sortBy } from "lodash";
 import { DateTime } from "luxon";
 import React, { FunctionComponent, useMemo } from "react";
@@ -33,6 +32,7 @@ import { EmptyStateSwitch } from "../../page-states/empty-state-switch/empty-sta
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { Pluralize } from "../../pluralize/pluralize.component";
 import { AnomalyRow } from "./anomaly-row/anomaly-row.component";
+import { useFetchQuery } from "../../../rest/hooks/useFetchQuery";
 
 export const RecentAnomalies: FunctionComponent = () => {
     const { t } = useTranslation();
@@ -43,7 +43,7 @@ export const RecentAnomalies: FunctionComponent = () => {
         .toMillis();
     const endTime = DateTime.local().endOf("hour").toMillis();
 
-    const getAnomaliesQuery = useQuery({
+    const getAnomaliesQuery = useFetchQuery({
         queryKey: ["anomalies", startTime, endTime],
         queryFn: () => {
             return getAnomalies({
@@ -53,7 +53,7 @@ export const RecentAnomalies: FunctionComponent = () => {
         },
     });
 
-    const getAnomaliesCountQuery = useQuery({
+    const getAnomaliesCountQuery = useFetchQuery({
         queryKey: ["anomaliesCount"],
         queryFn: () => {
             return getAnomaliesCount();

@@ -35,4 +35,6 @@ export interface AuthV1 {
     setAuthAction: (action: string, actionData?: string) => void;
     clearAuthAction: () => void;
     enableAuthDisabledNotification: () => void;
+    workspace: { id: string | null };
+    setWorkspace: (workspace: { id: string | null }) => void;
 }

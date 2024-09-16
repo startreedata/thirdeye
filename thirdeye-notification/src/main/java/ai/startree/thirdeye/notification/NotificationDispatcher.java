@@ -21,9 +21,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.NotificationSpecDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.notification.NotificationService;
 import ai.startree.thirdeye.util.StringTemplateUtils;
-import com.codahale.metrics.Counter;
-import com.codahale.metrics.Histogram;
-import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.micrometer.core.instrument.Metrics;
@@ -42,14 +39,6 @@ public class NotificationDispatcher {
 
   private final NotificationServiceRegistry notificationServiceRegistry;
   private final NotificationSchemesMigrator notificationSchemesMigrator;
-  @Deprecated // use thirdeye_notification_dispatch 
-  private final Counter notificationDispatchCounter;
-  @Deprecated // use thirdeye_notification_dispatch
-  private final Counter notificationDispatchSuccessCounter;
-  @Deprecated // use thirdeye_notification_dispatch
-  private final Counter notificationDispatchExceptionCounter;
-  @Deprecated // use thirdeye_notification_dispatch
-  private final Histogram notificationDispatchDuration;
   
   private final Timer notificationDispatchTimerOfSuccess;
   private final Timer notificationDispatchTimerOfException;
@@ -57,23 +46,9 @@ public class NotificationDispatcher {
   @Inject
   public NotificationDispatcher(
       final NotificationServiceRegistry notificationServiceRegistry,
-      final NotificationSchemesMigrator notificationSchemesMigrator,
-      final MetricRegistry metricRegistry) {
+      final NotificationSchemesMigrator notificationSchemesMigrator) {
     this.notificationServiceRegistry = notificationServiceRegistry;
     this.notificationSchemesMigrator = notificationSchemesMigrator;
-
-    // TODO CYRIL WARNING - REMOVE AT THE END OF THE MIGRATION TO MICROMETER ONLY - USED IN IMPORTANT PRODUCTION ALERTS
-    // deprecated metrics - use the count of thirdeye_notification_dispatch with exception=true
-    this.notificationDispatchExceptionCounter = metricRegistry.counter(
-        "notificationDispatchExceptionCounter");
-
-    // TODO CYRIL micrometer - safe to remove if not used by distribution users
-    // deprecated metrics - use thirdeye_notification_dispatch
-    this.notificationDispatchCounter = metricRegistry.counter("notificationDispatchCounter");
-    this.notificationDispatchSuccessCounter = metricRegistry.counter(
-        "notificationDispatchSuccessCounter");
-    this.notificationDispatchDuration = metricRegistry.histogram(
-        "notificationDispatchDuration");
     
     // same metric but different tag - the time measure is assigned manually to the correct tag based on whether there was an exception 
     final String description = "Start: A notification payload is passed to the NotificationService#notify implementation. End: The method returns. Tag exception=true means an exception was thrown by the method call.";
@@ -123,17 +98,11 @@ public class NotificationDispatcher {
       final NotificationPayloadApi payload) throws Exception {
     final Timer.Sample sample = Timer.start(Metrics.globalRegistry);
     try {
-      final long tStart = System.currentTimeMillis();
       service.notify(payload);
       sample.stop(notificationDispatchTimerOfSuccess);
-      notificationDispatchDuration.update(System.currentTimeMillis() - tStart);
-      notificationDispatchSuccessCounter.inc();
     } catch (Exception exception) {
-      notificationDispatchExceptionCounter.inc();
       sample.stop(notificationDispatchTimerOfException);
       throw exception;
-    } finally {
-      notificationDispatchCounter.inc();
     }
   }
 

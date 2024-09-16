@@ -23,7 +23,6 @@ import ai.startree.thirdeye.scheduler.ThirdEyeSchedulerModule;
 import ai.startree.thirdeye.scheduler.events.MockEventsConfiguration;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
 import ai.startree.thirdeye.worker.ThirdEyeWorkerModule;
-import com.codahale.metrics.MetricRegistry;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
@@ -35,16 +34,13 @@ public class ThirdEyeServerModule extends AbstractModule {
 
   private final ThirdEyeServerConfiguration configuration;
   private final DataSource dataSource;
-  private final MetricRegistry metricRegistry;
   private final ThirdEyeAuthorizerProvider accessControlProvider;
 
   public ThirdEyeServerModule(
       final ThirdEyeServerConfiguration configuration,
-      final DataSource dataSource,
-      final MetricRegistry metricRegistry) {
+      final DataSource dataSource) {
     this.configuration = configuration;
     this.dataSource = dataSource;
-    this.metricRegistry = metricRegistry;
 
     this.accessControlProvider = new ThirdEyeAuthorizerProvider(
         configuration.getAccessControlConfiguration());
@@ -65,7 +61,6 @@ public class ThirdEyeServerModule extends AbstractModule {
     install(new ThirdEyeSchedulerModule(configuration.getSchedulerConfiguration()));
 
     bind(AuthConfiguration.class).toInstance(configuration.getAuthConfiguration());
-    bind(MetricRegistry.class).toInstance(metricRegistry);
     bind(ThirdEyeServerConfiguration.class).toInstance(configuration);
 
     bindInterceptor(Matchers.any(), Matchers.annotatedWith(Timed.class), new TimedInterceptor());

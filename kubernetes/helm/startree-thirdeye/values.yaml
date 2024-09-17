@@ -171,6 +171,9 @@ auth:
     # set to true to enable the new namespace system
     requireNamespace: false
 
+accessControl:
+  enabled: false
+
 # Do not remove me.
 config:
   description: placeholder for common configs accross coordinator and worker

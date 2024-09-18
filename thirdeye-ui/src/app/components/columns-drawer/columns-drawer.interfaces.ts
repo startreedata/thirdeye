@@ -13,8 +13,11 @@
  * the License.
  */
 
+import { DatasetInfo } from "../../utils/datasources/datasources.util";
+
 export interface ColumnsDrawerProps {
     isOpen: boolean;
     datasetId?: number;
     onClose: () => void;
+    selectedDataset: DatasetInfo | null;
 }

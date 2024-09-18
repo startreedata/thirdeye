@@ -101,7 +101,7 @@ const AlertsCreateEasyPage = lazy(() =>
 
 const CreateAlertGuidedPage = lazy(() =>
     import(
-        /* webpackChunkName: "create-alert-guided-page" */ "../../pages/alerts-create-guided-page/alerts-create-guided-page.component-v2"
+        /* webpackChunkName: "create-alert-guided-page" */ "../../pages/alerts-create-guided-page/alerts-create-guided-page.component"
     ).then((module) => ({ default: module.CreateAlertGuidedPage }))
 );
 

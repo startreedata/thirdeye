@@ -15,12 +15,10 @@
 
 import { Icon } from "@iconify/react";
 import { Box, Button, Drawer, Typography } from "@material-ui/core";
-import { toNumber } from "lodash";
-import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
+import React, { FunctionComponent, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { SearchInputV1 } from "../../platform/components";
 import { ColorV1 } from "../../platform/utils/material-ui/color.util";
-import { useGetDataset } from "../../rest/datasets/datasets.actions";
 import { ColumnsDrawerProps } from "./columns-drawer.interfaces";
 import { useColumnsDrawerStyles } from "./columns-drawer.styles";
 import { CopyButtonV2 } from "../copy-button-v2/copy-button-v2.component";
@@ -30,26 +28,21 @@ import { CopyButtonV2 } from "../copy-button-v2/copy-button-v2.component";
  * to maintain isOpen state
  */
 export const ColumnsDrawer: FunctionComponent<ColumnsDrawerProps> = ({
-    datasetId,
+    selectedDataset,
     isOpen,
     onClose,
 }) => {
     const classes = useColumnsDrawerStyles();
     const { t } = useTranslation();
-    const { dataset, getDataset } = useGetDataset();
     const [searchQuery, setSearchQuery] = useState("");
 
     const filteredDimensions = useMemo(
         () =>
-            dataset?.dimensions.filter((dimension) =>
-                dimension.toLowerCase().includes(searchQuery.toLowerCase())
+            selectedDataset?.metrics.filter((dimension) =>
+                dimension.name.toLowerCase().includes(searchQuery.toLowerCase())
             ) || [],
-        [dataset, searchQuery]
+        [selectedDataset, searchQuery]
     );
-
-    useEffect(() => {
-        getDataset(toNumber(datasetId));
-    }, [datasetId]);
 
     return (
         <>
@@ -103,12 +96,14 @@ export const ColumnsDrawer: FunctionComponent<ColumnsDrawerProps> = ({
                                         className={classes.listItem}
                                         display="flex"
                                         justifyContent="space-between"
-                                        key={dimension}
+                                        key={dimension.id}
                                     >
                                         <Typography variant="body2">
-                                            {dimension}
+                                            {dimension.name}
                                         </Typography>
-                                        <CopyButtonV2 content={dimension} />
+                                        <CopyButtonV2
+                                            content={dimension.name}
+                                        />
                                     </Box>
                                 ))}
                             </Box>

@@ -55,7 +55,6 @@ import { RadioSectionOptions } from "../../../components/form-basics/radio-secti
 import { TimeRangeButtonWithContext } from "../../../components/time-range/time-range-button-with-context-v2/time-range-button.component";
 import { TimeRangeQueryStringKey } from "../../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import {
-    JSONEditorV2,
     PageContentsCardV1,
     PageHeaderActionsV1,
 } from "../../../platform/components";
@@ -139,6 +138,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         alertRecommendations,
         alert,
         getAlertRecommendation,
+        setShouldShowStepper,
     } = useOutletContext<AlertCreatedGuidedPageOutletContext>();
     const { datasetsInfo } = useGetDatasourcesTree();
 
@@ -156,7 +156,10 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         null
     );
     const [editedDatasource, setEditedDatasource] = useState("");
-    const [enumerators, setEnumerators] = useState({});
+    const [editedDatasourceFieldValue, setEditedDatasourceFieldValue] =
+        useState("");
+
+    const [enumerators, setEnumerators] = useState("");
     const [algorithmOption, setAlgorithmOption] =
         useState<AvailableAlgorithmOption | null>(null);
 
@@ -169,6 +172,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         useState(false);
 
     useEffect(() => {
+        setShouldShowStepper(false);
         if (alert.templateProperties?.dataset && datasetsInfo) {
             const dataSource =
                 datasetsInfo.find(
@@ -185,6 +189,9 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                 setSelectedTable(dataSource);
                 setSelectedMetric(metrics || null);
                 setEditedDatasource(
+                    String(alert.templateProperties?.aggregationColumn)
+                );
+                setEditedDatasourceFieldValue(
                     String(alert.templateProperties?.aggregationColumn)
                 );
                 setAggregationFunction(
@@ -214,7 +221,9 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                     String(alert.templateProperties?.queryFilters) || ""
                 );
                 if (alert.templateProperties?.enumeratoryQuery) {
-                    setEnumerators(alert.templateProperties?.enumeratoryQuery);
+                    setEnumerators(
+                        String(alert.templateProperties?.enumeratoryQuery)
+                    );
                     setDimension(SelectDimensionsOptions.ENUMERATORS);
                 }
             }
@@ -1005,6 +1014,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                             className={
                                                                                 classes.footer
                                                                             }
+                                                                            justifyContent="end"
                                                                         >
                                                                             <Button
                                                                                 size="small"
@@ -1053,12 +1063,12 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                             3
                                                                         }
                                                                         value={
-                                                                            editedDatasource
+                                                                            editedDatasourceFieldValue
                                                                         }
                                                                         onChange={(
                                                                             e
                                                                         ) =>
-                                                                            setEditedDatasource(
+                                                                            setEditedDatasourceFieldValue(
                                                                                 e
                                                                                     .target
                                                                                     .value
@@ -1069,7 +1079,22 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                         className={
                                                                             classes.footer
                                                                         }
+                                                                        justifyContent="space-between"
                                                                     >
+                                                                        <Button
+                                                                            size="small"
+                                                                            variant="contained"
+                                                                            onClick={() =>
+                                                                                setEditedDatasource(
+                                                                                    editedDatasourceFieldValue
+                                                                                )
+                                                                            }
+                                                                        >
+                                                                            {t(
+                                                                                "label.apply-custom-metric"
+                                                                            )}
+                                                                        </Button>
+
                                                                         <Button
                                                                             size="small"
                                                                             variant="contained"
@@ -1251,44 +1276,72 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                     {dimension ===
                                                         SelectDimensionsOptions.ENUMERATORS && (
                                                         <Grid item xs={12}>
-                                                            <JSONEditorV2
-                                                                hideValidationSuccessIcon
-                                                                showFooter
-                                                                actions={[
-                                                                    {
-                                                                        label: t(
-                                                                            "label.run-enumeration"
-                                                                        ),
-                                                                        onClick:
-                                                                            () =>
-                                                                                setEnumerations(
-                                                                                    true
-                                                                                ),
-                                                                    },
-                                                                    {
-                                                                        label: t(
-                                                                            "label.view-columns-list"
-                                                                        ),
-                                                                        onClick:
-                                                                            () =>
-                                                                                setOpenViewColumnsListDrawer(
-                                                                                    true
-                                                                                ),
-                                                                    },
-                                                                ]}
-                                                                value={
-                                                                    enumerators
-                                                                }
-                                                                onChange={(
-                                                                    value
-                                                                ) =>
-                                                                    setEnumerators(
-                                                                        JSON.parse(
-                                                                            value
-                                                                        )
-                                                                    )
-                                                                }
-                                                            />
+                                                            <Grid item xs={12}>
+                                                                <Grid container>
+                                                                    <Grid
+                                                                        item
+                                                                        className={
+                                                                            classes.textAreaContainer
+                                                                        }
+                                                                        xs={12}
+                                                                    >
+                                                                        <TextareaAutosize
+                                                                            aria-label="minimum height"
+                                                                            className={
+                                                                                classes.textArea
+                                                                            }
+                                                                            minRows={
+                                                                                3
+                                                                            }
+                                                                            value={
+                                                                                enumerators
+                                                                            }
+                                                                            onChange={(
+                                                                                e
+                                                                            ) =>
+                                                                                setEnumerators(
+                                                                                    e
+                                                                                        .target
+                                                                                        .value
+                                                                                )
+                                                                            }
+                                                                        />
+                                                                        <Box
+                                                                            className={
+                                                                                classes.footer
+                                                                            }
+                                                                            justifyContent="space-between"
+                                                                        >
+                                                                            <Button
+                                                                                size="small"
+                                                                                variant="contained"
+                                                                                onClick={() =>
+                                                                                    setEnumerations(
+                                                                                        true
+                                                                                    )
+                                                                                }
+                                                                            >
+                                                                                {t(
+                                                                                    "label.run-enumeration"
+                                                                                )}
+                                                                            </Button>
+                                                                            <Button
+                                                                                size="small"
+                                                                                variant="contained"
+                                                                                onClick={() =>
+                                                                                    setOpenViewColumnsListDrawer(
+                                                                                        true
+                                                                                    )
+                                                                                }
+                                                                            >
+                                                                                {t(
+                                                                                    "label.view-columns-list"
+                                                                                )}
+                                                                            </Button>
+                                                                        </Box>
+                                                                    </Grid>
+                                                                </Grid>
+                                                            </Grid>
                                                         </Grid>
                                                     )}
                                                     <Grid item xs={12}>
@@ -1753,6 +1806,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                             <ColumnsDrawer
                                 datasetId={selectedTable?.dataset.id}
                                 isOpen={openViewColumnsListDrawer}
+                                selectedDataset={selectedTable}
                                 onClose={() =>
                                     setOpenViewColumnsListDrawer(
                                         (prev) => !prev

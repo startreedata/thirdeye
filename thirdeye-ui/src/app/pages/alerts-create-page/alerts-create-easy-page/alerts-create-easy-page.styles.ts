@@ -51,7 +51,6 @@ export const easyAlertStyles = makeStyles(() => ({
         backgroundColor: ColorV1.Grey9,
         padding: "8px 12px",
         display: "flex",
-        justifyContent: "end",
 
         "& > button": {
             backgroundColor: ColorV1.White1,

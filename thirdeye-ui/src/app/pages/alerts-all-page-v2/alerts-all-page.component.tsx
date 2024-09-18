@@ -305,7 +305,8 @@ export const AlertsAllPage: FunctionComponent = () => {
                             type={DropdownButtonTypeV1.Regular}
                             onClick={(id) => {
                                 if (id === "easyAlert") {
-                                    setCreateId(id as string);
+                                    navigate(getAlertsCreatePath());
+                                    // setCreateId(id as string);
                                 }
                             }}
                         >

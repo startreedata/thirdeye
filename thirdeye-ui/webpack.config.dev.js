@@ -179,7 +179,7 @@ module.exports = {
         // Proxy configuration
         proxy: [
             {
-                context: ["/api", "/swagger"],
+                context: ["/api", "/openapi"],
                 target:
                     process.env.TE_DEV_PROXY_SERVER || "http://localhost:8080/",
                 changeOrigin: true,

@@ -47,6 +47,12 @@ const PageNotFoundPage = lazy(() =>
     ).then((module) => ({ default: module.PageNotFoundPage }))
 );
 
+const SwaggerDocs = lazy(() =>
+    import(/* webpackChunkName: "swagger-page" */ "../../pages/swagger").then(
+        (module) => ({ default: module.SwaggerDocs })
+    )
+);
+
 export const GeneralAuthenticatedRouter: FunctionComponent = () => {
     return (
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
@@ -57,6 +63,7 @@ export const GeneralAuthenticatedRouter: FunctionComponent = () => {
                     element={<Navigate replace to={getHomePath()} />}
                     path={AppRoute.BASE}
                 />
+                <Route element={<SwaggerDocs />} path={AppRoute.SWAGGER} />
 
                 {/* Home path */}
                 <Route

@@ -59,13 +59,13 @@ export const ImpactDashboardPage: FunctionComponent = () => {
         anomalies,
         previousPeriodAnomalies,
         investigations,
-        alertsCount,
+        alerts,
         subscriptionGroups,
         mostRecentlyInvestigatedAnomalyAlert,
     } = useApiRequests({ selectedAnalysisPeriod });
 
     useEffect(() => {
-        /* From anomalies, we group the alerts with anomalies and order them fin descending order
+        /* From anomalies, we group the alerts with anomalies and order them in descending order
         of anomaly count for alerts */
         if (!isEmpty(anomalies)) {
             const alertData: { [key: number]: Anomaly[] } = {};
@@ -113,7 +113,9 @@ export const ImpactDashboardPage: FunctionComponent = () => {
         anomalyGroupByAlertId?.forEach((group) => {
             data.push({
                 id: group[0],
-                name: group[1][0].alert.name,
+                name:
+                    alerts?.find((alert) => alert.id === Number(group[0]))
+                        ?.name || "",
                 anomaliesCount: group[1].length,
                 dimensionsCount: activeAlertsDimensions
                     ? activeAlertsDimensions[group[0]]?.length
@@ -159,7 +161,7 @@ export const ImpactDashboardPage: FunctionComponent = () => {
                 subHeading={t("pages.impact-dashboard.subHeading")}
             />
             <Summary
-                alertsCount={alertsCount}
+                alerts={alerts}
                 analysisPeriods={anaylysisPeriods}
                 anomalies={anomalies}
                 investigations={investigations}

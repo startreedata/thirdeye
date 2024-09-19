@@ -32,15 +32,19 @@ import { epochToDate } from "../detection-performance/util";
 import { isEmpty } from "lodash";
 
 export const useSummaryData = ({
+    alerts,
     mostRecentlyInvestigatedAnomalyAlert,
     anomalies,
     previousPeriodAnomalies,
     topAlert,
-    alertsCount,
     investigations,
     subscriptionGroups,
     selectedAnalysisPeriod,
 }: SummaryDataProps): Summary => {
+    const selectedAnalysisPeriodDisplayText = selectedAnalysisPeriod.substring(
+        0,
+        selectedAnalysisPeriod.length - 1
+    );
     const [summaryData, setSummaryData] = useState<SummaryData>({
         anomalies: {
             detected: { count: 0, href: getAnomaliesAllPath() },
@@ -58,7 +62,7 @@ export const useSummaryData = ({
 
     const [verboseSummaryItems, setVerboseSummaryItems] =
         useState<VerboseSummary>({
-            weeks: selectedAnalysisPeriod,
+            weeks: selectedAnalysisPeriodDisplayText,
             percentageChange: "0% more",
             topAlert: {
                 id: null,
@@ -80,7 +84,7 @@ export const useSummaryData = ({
             setVerboseSummaryItems((prevState) => {
                 return {
                     ...prevState,
-                    weeks: selectedAnalysisPeriod,
+                    weeks: selectedAnalysisPeriodDisplayText,
                     percentageChange: "0% more",
                     topAlert: {
                         id: null,
@@ -94,7 +98,7 @@ export const useSummaryData = ({
             setVerboseSummaryItems((prevState) => {
                 return {
                     ...prevState,
-                    weeks: selectedAnalysisPeriod,
+                    weeks: selectedAnalysisPeriodDisplayText,
                     percentageChange: "100% less",
                     topAlert: {
                         id: null,
@@ -108,7 +112,7 @@ export const useSummaryData = ({
             setVerboseSummaryItems((prevState) => {
                 return {
                     ...prevState,
-                    weeks: selectedAnalysisPeriod,
+                    weeks: selectedAnalysisPeriodDisplayText,
                     percentageChange: "100% more",
                 };
             });
@@ -195,14 +199,14 @@ export const useSummaryData = ({
                 ...prevState,
                 alerts: {
                     activeAlerts: {
-                        count: alertsCount?.count || 0,
+                        count: alerts?.length || 0,
                         href: prevState.alerts.activeAlerts.href,
                     },
                     activeDimensions: { count: 0, href: "" },
                 },
             };
         });
-    }, [alertsCount]);
+    }, [alerts?.length]);
 
     useEffect(() => {
         setSummaryData((prevState) => {
@@ -262,7 +266,11 @@ export const useSummaryData = ({
                     date: prevState.investigation.date,
                     alert: {
                         id: mostRecentlyInvestigatedAnomalyAlert?.id,
-                        name: mostRecentlyInvestigatedAnomalyAlert?.name,
+                        name: alerts?.find(
+                            (alert) =>
+                                alert.id ===
+                                mostRecentlyInvestigatedAnomalyAlert?.id
+                        )?.name,
                     },
                 },
             };
@@ -270,17 +278,13 @@ export const useSummaryData = ({
     }, [mostRecentlyInvestigatedAnomalyAlert]);
 
     useEffect(() => {
-        setVerboseSummaryItems({
-            ...verboseSummaryItems,
-            weeks: selectedAnalysisPeriod,
-        });
         setVerboseSummaryItems((prevState) => {
             return {
                 ...prevState,
-                weeks: selectedAnalysisPeriod,
+                weeks: selectedAnalysisPeriodDisplayText,
             };
         });
-    }, [selectedAnalysisPeriod]);
+    }, [selectedAnalysisPeriodDisplayText]);
 
     return { summaryData, verboseSummaryItems };
 };

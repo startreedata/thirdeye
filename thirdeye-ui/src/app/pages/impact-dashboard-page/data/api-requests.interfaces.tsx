@@ -25,7 +25,8 @@ export interface APIRequestData {
     anomalies: Anomaly[] | null;
     previousPeriodAnomalies: Anomaly[] | null;
     investigations: Investigation[] | null;
-    alertsCount: { count: number } | null;
+    // alertsCount: { count: number } | null;
     subscriptionGroups: SubscriptionGroup[] | null;
     mostRecentlyInvestigatedAnomalyAlert?: Pick<Alert, "id" | "name">;
+    alerts: Alert[] | null;
 }

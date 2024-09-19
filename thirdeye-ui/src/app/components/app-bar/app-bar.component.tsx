@@ -17,7 +17,7 @@ import CodeIcon from "@material-ui/icons/Code";
 import DashboardIcon from "@material-ui/icons/Dashboard";
 import ErrorIcon from "@material-ui/icons/Error";
 import HelpOutlineIcon from "@material-ui/icons/HelpOutline";
-import MultilineChartIcon from "@material-ui/icons/MultilineChart";
+// import MultilineChartIcon from "@material-ui/icons/MultilineChart";
 import SettingsIcon from "@material-ui/icons/Settings";
 import WifiTetheringIcon from "@material-ui/icons/WifiTethering";
 import React, { FunctionComponent } from "react";
@@ -94,7 +94,7 @@ export const AppBar: FunctionComponent = () => {
                     <NavBarLinkTextV1>{t("label.anomalies")}</NavBarLinkTextV1>
                 </NavBarLinkV1>
                 {/* Impact Dashboard */}
-                <NavBarLinkV1
+                {/* <NavBarLinkV1
                     href={AppRoute.IMPACT_DASHBOARD}
                     selected={isRouteCurrent(AppRoute.IMPACT_DASHBOARD)}
                 >
@@ -104,7 +104,7 @@ export const AppBar: FunctionComponent = () => {
                     <NavBarLinkTextV1>
                         {t("pages.impact-dashboard.title")}
                     </NavBarLinkTextV1>
-                </NavBarLinkV1>
+                </NavBarLinkV1> */}
 
                 {/* Admin */}
                 <NavBarLinkV1

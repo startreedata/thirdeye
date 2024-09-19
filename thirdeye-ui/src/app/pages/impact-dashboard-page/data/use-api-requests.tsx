@@ -31,7 +31,7 @@ import {
     anaylysisPeriodStartTimeMapping,
 } from "../../../platform/utils";
 import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
-import { useGetAlertsCount } from "../../../rest/alerts/alerts.actions";
+import { useGetAlerts } from "../../../rest/alerts/alerts.actions";
 
 import { useNotificationProviderV1 } from "../../../platform/components";
 import { useTranslation } from "react-i18next";
@@ -59,11 +59,11 @@ export const useApiRequests = ({
     } = useGetAnomaly();
 
     const {
-        alertsCount,
-        getAlertsCount,
+        alerts,
+        getAlerts,
         status: alertsCountStatus,
         errorMessages: alertsCountErrorMessages,
-    } = useGetAlertsCount();
+    } = useGetAlerts();
     const {
         anomalies,
         getAnomalies,
@@ -165,7 +165,7 @@ export const useApiRequests = ({
                 endTime: previousPeriod.endTime,
             });
             getInvestigations(undefined, currentPeriod.startTime);
-            getAlertsCount();
+            getAlerts();
             getSubscriptionGroups();
         }
     }, [selectedAnalysisPeriod]);
@@ -189,7 +189,7 @@ export const useApiRequests = ({
         anomalies,
         previousPeriodAnomalies,
         investigations,
-        alertsCount,
+        alerts,
         subscriptionGroups,
         mostRecentlyInvestigatedAnomalyAlert:
             mostRecentlyInvestigatedAnomaly?.alert,

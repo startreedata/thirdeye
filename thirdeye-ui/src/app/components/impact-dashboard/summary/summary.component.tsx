@@ -40,11 +40,11 @@ import { SummaryProps } from "./summary.interfaces";
 import { useTranslation } from "react-i18next";
 
 export const Summary = ({
+    alerts,
     mostRecentlyInvestigatedAnomalyAlert,
     anomalies,
     previousPeriodAnomalies,
     topAlert,
-    alertsCount,
     investigations,
     subscriptionGroups,
     selectedAnalysisPeriod,
@@ -55,12 +55,12 @@ export const Summary = ({
     const summaryRef = useRef<HTMLDivElement>(null);
     const componentStyles = useSummaryStyles();
     const { summaryData, verboseSummaryItems } = useSummaryData({
+        alerts,
         anomalies,
         previousPeriodAnomalies,
         selectedAnalysisPeriod,
         topAlert,
         investigations,
-        alertsCount,
         subscriptionGroups,
         mostRecentlyInvestigatedAnomalyAlert,
     });
@@ -195,7 +195,7 @@ export const Summary = ({
                             </>
                         )}
                     </div>
-                    {verboseSummaryItems.topAlert.name && (
+                    {verboseSummaryItems.topAlert.id && (
                         <div>
                             The alert with the most anomalies is{" "}
                             <Link

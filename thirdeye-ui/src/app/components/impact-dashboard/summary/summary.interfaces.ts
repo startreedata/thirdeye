@@ -20,12 +20,12 @@ import { Investigation } from "../../../rest/dto/rca.interfaces";
 import { SubscriptionGroup } from "../../../rest/dto/subscription-group.interfaces";
 
 export interface SummaryDataProps {
+    alerts: Alert[] | null;
     mostRecentlyInvestigatedAnomalyAlert?: Pick<Alert, "id" | "name">;
     anomalies: Anomaly[] | null;
     previousPeriodAnomalies: Anomaly[] | null;
     topAlert: AlertEffectivnessData;
     investigations: Investigation[] | null;
-    alertsCount: { count: number } | null;
     subscriptionGroups: SubscriptionGroup[] | null;
     selectedAnalysisPeriod: string;
 }

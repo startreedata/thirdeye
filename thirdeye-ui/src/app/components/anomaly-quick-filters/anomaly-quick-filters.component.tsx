@@ -31,12 +31,14 @@ import {
     TimeRangeDuration,
     TimeRangeQueryStringKey,
 } from "../time-range/time-range-provider/time-range-provider.interfaces";
-import { TimeRangeSelector } from "../time-range/time-range-selector/time-range-selector/time-range-selector.component";
+// import { TimeRangeSelector }
+// from "../time-range/time-range-selector/time-range-selector/time-range-selector.component";
 import {
     AnomalyFilterQueryStringKey,
     AnomalyQuickFiltersProps,
 } from "./anomaly-quick-filter.interface";
 import { useAnomalyQuickFilterStyles } from "./anomaly-quick-filters.styles";
+import { DateTimeRangePopover } from "../v2/date-time-range-popover";
 
 function initializeSelected(
     searchParams: URLSearchParams,
@@ -245,7 +247,17 @@ export const AnomalyQuickFilters: FunctionComponent<AnomalyQuickFiltersProps> =
                     )}
                 </div>
                 <div>
-                    <TimeRangeSelector
+                    {/* <TimeRangeSelector
+                        hideTimeRange={!screenWidthSmUp}
+                        recentCustomTimeRangeDurations={
+                            recentCustomTimeRangeDurations
+                        }
+                        timeRangeDuration={timeRangeDuration}
+                        timezone={timezone}
+                        onChange={onHandleTimeRangeChange}
+                        onRefresh={onHandleRefresh}
+                    />*/}
+                    <DateTimeRangePopover
                         hideTimeRange={!screenWidthSmUp}
                         recentCustomTimeRangeDurations={
                             recentCustomTimeRangeDurations

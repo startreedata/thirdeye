@@ -24,7 +24,11 @@ import {
     useDialogProviderV1,
 } from "../../../../platform/components";
 import { DialogType } from "../../../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
-import { formatDateAndTimeV1, lightV1 } from "../../../../platform/utils";
+import {
+    formatDateAndTimeV1,
+    formatDurationV1,
+    lightV1,
+} from "../../../../platform/utils";
 import { ActionStatus } from "../../../../rest/actions.interfaces";
 import { useGetAlert } from "../../../../rest/alerts/alerts.actions";
 import { TaskType } from "../../../../rest/dto/taks.interface";
@@ -133,7 +137,15 @@ export const TaskRow: FunctionComponent<TaskRowProps> = ({ task }) => {
                     </LocalThemeProviderV1>
                 )}
             </TableCell>
-            <TableCell>{formatDateAndTimeV1(task.startTime)}</TableCell>
+            <TableCell>
+                {formatDateAndTimeV1(task.created, undefined, true)}
+            </TableCell>
+            <TableCell>
+                {formatDateAndTimeV1(task.startTime, undefined, true)}
+            </TableCell>
+            <TableCell>
+                {formatDurationV1(task.startTime, task.endTime)}
+            </TableCell>
         </TableRow>
     );
 };

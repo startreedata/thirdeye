@@ -14,7 +14,7 @@
  */
 import i18n from "i18next";
 import { isNil, round } from "lodash";
-import { DateTime, Interval } from "luxon";
+import { DateTime, DateTimeFormatOptions, Interval } from "luxon";
 import { formatNumberV1 } from "../number/number.util";
 
 // Returns most appropriate formatted string representation of interval between start and end time
@@ -131,7 +131,8 @@ export const formatDurationV1 = (
 // MMM DD, YYYY, HH:MM AM/PM
 export const formatDateAndTimeV1 = (
     date: number,
-    timezoneOverride?: string
+    timezoneOverride?: string,
+    showSeconds?: boolean
 ): string => {
     if (isNil(date)) {
         return "";
@@ -143,13 +144,19 @@ export const formatDateAndTimeV1 = (
         dateTime = dateTime.setZone(timezoneOverride);
     }
 
-    return dateTime.toLocaleString({
+    const dateFormat: DateTimeFormatOptions = {
         month: "short",
         day: "2-digit",
         year: "numeric",
         hour: "2-digit",
         minute: "2-digit",
-    });
+    };
+
+    if (showSeconds) {
+        dateFormat.second = "2-digit";
+    }
+
+    return dateTime.toLocaleString(dateFormat);
 };
 
 // Returns formatted string representation of date part of date

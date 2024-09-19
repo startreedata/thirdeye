@@ -42,12 +42,12 @@ jest.mock(
     })
 );
 
-jest.mock("../../pages/alerts-all-page/alerts-all-page.component", () => ({
+jest.mock("../../pages/alerts-all-page-v2/alerts-all-page.component", () => ({
     AlertsAllPage: jest.fn().mockReturnValue("testAlertsAllPage"),
 }));
 
-jest.mock("../../pages/alerts-view-page/alerts-view-page.component", () => ({
-    AlertsViewPage: jest.fn().mockReturnValue("testAlertsViewPage"),
+jest.mock("../../pages/alerts-all-page/alerts-all-page.component", () => ({
+    AlertsAllPage: jest.fn().mockReturnValue("testAlertsAllPage"),
 }));
 
 jest.mock(

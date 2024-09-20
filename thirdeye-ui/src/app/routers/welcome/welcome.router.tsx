@@ -67,6 +67,12 @@ const AlertsCreateJSONPage = lazy(() =>
     ).then((module) => ({ default: module.AlertsCreateJSONPage }))
 );
 
+const AlertsCreateJSONPageV2 = lazy(() =>
+    import(
+        /* webpackChunkName: "alerts-create-json-page" */ "../../pages/alerts-create-page/alerts-create-json-page-v2/alerts-create-json-page-v2.component"
+    ).then((module) => ({ default: module.AlertsCreateJSONPage }))
+);
+
 export const WelcomeRouter: FunctionComponent = () => {
     const { t } = useTranslation();
     const { setShowAppNavBar } = useAppBarConfigProvider();
@@ -179,6 +185,10 @@ export const WelcomeRouter: FunctionComponent = () => {
                     <Route
                         element={<AlertsCreateJSONPage />}
                         path={AppRouteRelative.ALERTS_CREATE_JSON_EDITOR}
+                    />
+                    <Route
+                        element={<AlertsCreateJSONPageV2 />}
+                        path={AppRouteRelative.ALERTS_CREATE_JSON_EDITOR_V2}
                     />
                 </Route>
 

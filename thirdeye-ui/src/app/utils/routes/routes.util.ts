@@ -44,6 +44,7 @@ export const AppRouteRelative = {
     ALERTS_CREATE_EASY_ALERT: "easy-alert",
     ALERTS_CREATE_NEW_USER: "new-user",
     ALERTS_CREATE_JSON_EDITOR: "json-editor",
+    ALERTS_CREATE_JSON_EDITOR_V2: "json-editor-v2",
     ALERTS_UPDATE: "update",
     ALERTS_UPDATE_SIMPLE: "simple",
     ALERTS_UPDATE_ADVANCED: "advanced",

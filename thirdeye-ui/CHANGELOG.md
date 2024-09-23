@@ -1,3 +1,10 @@
+## [2.50.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.49.4...thirdeye-ui-2.50.0) (2024-09-23)
+
+
+### Features
+
+* [TE-2216](https://cortexdata.atlassian.net/browse/TE-2216) create alert page ([443f1a897](https://github.com/startreedata/thirdeye/commit/443f1a897b396a36b0a3b529eccdaf2de1c43b49))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

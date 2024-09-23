@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 StarTree Inc
+ * Copyright 2024 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -12,16 +12,24 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+
 import { makeStyles } from "@material-ui/core";
 
-export const useTooltipStyles = makeStyles((theme) => ({
-    table: {
-        width: "50%",
+export const useSummaryStyles = makeStyles({
+    sectionHeading: {
+        display: "flex",
+        justifyContent: "space-between",
     },
-    valueCell: {
-        textAlign: "right",
+    verboseSummaryContainer: {
+        padding: "8px 16px",
+        border: "1px solid rgb(158, 158, 158)",
+        borderRadius: "8px",
+        display: "flex",
+        flexDirection: "column",
+        gap: "8px",
     },
-    time: {
-        marginBottom: theme.spacing(1),
+    verboseSummaryHeading: {
+        display: "flex",
+        justifyContent: "space-between",
     },
-}));
+});

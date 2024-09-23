@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 StarTree Inc
+ * Copyright 2024 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -14,14 +14,24 @@
  */
 import { makeStyles } from "@material-ui/core";
 
-export const useTooltipStyles = makeStyles((theme) => ({
-    table: {
-        width: "50%",
+export const useAnalysisPeriodStyles = makeStyles({
+    container: {
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        gap: "8px",
+        color: "#3D5F82",
+        fontSize: "12px",
     },
-    valueCell: {
-        textAlign: "right",
+    rangeContainer: {
+        display: "flex",
+        gap: "4px",
     },
-    time: {
-        marginBottom: theme.spacing(1),
+    range: {
+        cursor: "pointer",
     },
-}));
+    selected: {
+        background: "#e1edff",
+        fontWeight: "bold",
+    },
+});

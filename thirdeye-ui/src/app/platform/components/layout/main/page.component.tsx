@@ -12,16 +12,25 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { makeStyles } from "@material-ui/core";
+import React, { FunctionComponent } from "react";
+import { Helmet } from "react-helmet-async";
+import { PageV1Props } from "./page.interfaces";
+import { useStyles } from "./page.styles";
 
-export const useTooltipStyles = makeStyles((theme) => ({
-    table: {
-        width: "50%",
-    },
-    valueCell: {
-        textAlign: "right",
-    },
-    time: {
-        marginBottom: theme.spacing(1),
-    },
-}));
+export const MainLayout: FunctionComponent<PageV1Props> = ({
+    documentTitle,
+    children,
+}) => {
+    const pageStyles = useStyles();
+
+    return (
+        <div className={pageStyles.container}>
+            {/* Document title */}
+            <Helmet>
+                <title>{documentTitle}</title>
+            </Helmet>
+
+            {children}
+        </div>
+    );
+};

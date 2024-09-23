@@ -14,14 +14,12 @@
  */
 import { makeStyles } from "@material-ui/core";
 
-export const useTooltipStyles = makeStyles((theme) => ({
-    table: {
-        width: "50%",
+export const useStyles = makeStyles({
+    container: {
+        width: "100%",
+        display: "flex",
+        padding: "24px",
+        flexDirection: "column",
+        gap: "24px",
     },
-    valueCell: {
-        textAlign: "right",
-    },
-    time: {
-        marginBottom: theme.spacing(1),
-    },
-}));
+});

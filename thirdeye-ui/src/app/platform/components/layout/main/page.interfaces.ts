@@ -12,16 +12,9 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { makeStyles } from "@material-ui/core";
+import { ReactNode } from "react";
 
-export const useTooltipStyles = makeStyles((theme) => ({
-    table: {
-        width: "50%",
-    },
-    valueCell: {
-        textAlign: "right",
-    },
-    time: {
-        marginBottom: theme.spacing(1),
-    },
-}));
+export interface PageV1Props {
+    documentTitle?: string;
+    children?: ReactNode;
+}

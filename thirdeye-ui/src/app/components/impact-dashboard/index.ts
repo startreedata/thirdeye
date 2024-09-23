@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 StarTree Inc
+ * Copyright 2024 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -12,16 +12,10 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { makeStyles } from "@material-ui/core";
 
-export const useTooltipStyles = makeStyles((theme) => ({
-    table: {
-        width: "50%",
-    },
-    valueCell: {
-        textAlign: "right",
-    },
-    time: {
-        marginBottom: theme.spacing(1),
-    },
-}));
+import { Summary } from "./summary/summary.component";
+import { UsageInsights } from "./usage-insights/usage-insights.component";
+import { DetectionPerformance } from "./detection-performance/detection-performance.component";
+import { RecentInvestigations } from "./investigations/investigations.component";
+
+export { Summary, UsageInsights, DetectionPerformance, RecentInvestigations };

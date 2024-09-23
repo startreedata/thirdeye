@@ -914,7 +914,9 @@
     "pages": {
         "impact-dashboard": {
             "common": {
-                "date-range": "Date range"
+                "current-period": "Current Period",
+                "date-range": "Date range",
+                "previous-period": "Previous Period"
             },
             "sections": {
                 "detection-performance": {
@@ -932,6 +934,7 @@
                         "created-date": "Created date",
                         "invalid-anomaly-text": "No, this is not an anomaly",
                         "investigation-name": "Investigation name",
+                        "no-feedback-text": "No feedback present",
                         "related-event": "Anomaly was related to",
                         "valid-anomaly-text": "Yes, this is a valid anomaly"
                     }

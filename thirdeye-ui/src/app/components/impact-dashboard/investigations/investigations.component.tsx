@@ -31,7 +31,7 @@ import { RecentInvestigationsProps } from "./investigations.interfaces";
 import { epochToDate } from "../detection-performance/util";
 import { compact, isEmpty, uniq } from "lodash";
 import { getRootCauseAnalysisForAnomalyInvestigateV2StepsPath } from "../../../utils/routes/routes.util";
-import { getFeedbackClass, getFeedbackText } from "./util";
+import { getFeedbackClass, useGetFeedbackText } from "./util";
 
 // APIs
 import { getAnomaly } from "../../../rest/anomalies/anomalies.rest";
@@ -44,6 +44,7 @@ export const RecentInvestigations = ({
     onAnalysisPeriodChange,
 }: RecentInvestigationsProps): ReactElement => {
     const { t } = useTranslation();
+    const getFeedbackText = useGetFeedbackText();
     const componentStyles = useInvestigationStyles();
     const [anomaliesInvestigated, setAnomaliesInvestigated] =
         useState<number[]>();

@@ -15,7 +15,7 @@
 import { useEffect, useState } from "react";
 import { DataProps, DetectionData } from "./interfaces";
 
-export const useGetData = ({
+export const useGetDetectionPerformanceData = ({
     selectedAlert,
     defaultAlertDropdownOption,
     allAnomalies,

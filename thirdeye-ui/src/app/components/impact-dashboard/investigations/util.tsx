@@ -12,21 +12,33 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { useTranslation } from "react-i18next";
 import { FeedbackClass } from "./investigations.interfaces";
 
-export const getFeedbackText = (
+export const useGetFeedbackText = (): ((
     feedback: string | undefined
-): string | undefined => {
-    switch (feedback) {
-        case "ANOMALY":
-            return "Yes, this is a valid anomaly";
-        case "NOT_ANOMALY":
-            return "No, this is not an anomaly";
-        case undefined:
-            return "No feedback present";
-        default:
-            return feedback;
-    }
+) => string | undefined) => {
+    const { t } = useTranslation();
+    const getFeedback = (feedback: string | undefined): string | undefined => {
+        switch (feedback) {
+            case "ANOMALY":
+                return t(
+                    "pages.impact-dashboard.sections.investigations.labels.valid-anomaly-text"
+                );
+            case "NOT_ANOMALY":
+                return t(
+                    "pages.impact-dashboard.sections.investigations.labels.invalid-anomaly-text"
+                );
+            case undefined:
+                return t(
+                    "pages.impact-dashboard.sections.investigations.labels.no-feedback-text"
+                );
+            default:
+                return feedback;
+        }
+    };
+
+    return getFeedback;
 };
 
 export const getFeedbackClass = (

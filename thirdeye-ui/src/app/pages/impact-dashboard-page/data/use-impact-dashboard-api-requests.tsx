@@ -15,7 +15,10 @@
 import { useEffect, useState } from "react";
 
 // Interfaces
-import { APIRequestData, ApiRequestsProps } from "./api-requests.interfaces";
+import {
+    APIRequestData,
+    ApiRequestsProps,
+} from "./impact-dashboard-api-requests.interfaces";
 
 // APIs
 import { useGetSubscriptionGroups } from "../../../rest/subscription-groups/subscription-groups.actions";
@@ -37,7 +40,7 @@ import { useNotificationProviderV1 } from "../../../platform/components";
 import { useTranslation } from "react-i18next";
 import { isEmpty } from "lodash";
 
-export const useApiRequests = ({
+export const useImpactDashBoardApiRequests = ({
     selectedAnalysisPeriod,
 }: ApiRequestsProps): APIRequestData => {
     const { t } = useTranslation();

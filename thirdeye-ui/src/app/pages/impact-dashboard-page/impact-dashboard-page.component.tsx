@@ -34,7 +34,7 @@ import { isEmpty } from "lodash";
 
 // APIs
 import { getDatasetByName } from "../../rest/datasets/datasets.rest";
-import { useApiRequests } from "./data/use-api-requests";
+import { useImpactDashBoardApiRequests } from "./data/use-impact-dashboard-api-requests";
 
 // Interfaces
 import { Dataset } from "../../rest/dto/dataset.interfaces";
@@ -62,7 +62,7 @@ export const ImpactDashboardPage: FunctionComponent = () => {
         alerts,
         subscriptionGroups,
         mostRecentlyInvestigatedAnomalyAlert,
-    } = useApiRequests({ selectedAnalysisPeriod });
+    } = useImpactDashBoardApiRequests({ selectedAnalysisPeriod });
 
     useEffect(() => {
         /* From anomalies, we group the alerts with anomalies and order them in descending order

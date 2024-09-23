@@ -29,10 +29,10 @@ import { MenuItem, Select } from "@material-ui/core";
 import { DetectionPerformanceProps } from "./detection-performance.interfaces";
 
 // APIs
-import { useApiRequests } from "./api";
+import { useDetectionPerformanceApiRequests } from "./api";
 
 // Data
-import { useGetData } from "./data";
+import { useGetDetectionPerformanceData } from "./data";
 
 const defaultAlertDropdownOption = { id: -1, name: "All alerts" };
 
@@ -55,19 +55,20 @@ export const DetectionPerformance = ({
         alerts,
         currentPeriodAnomaliesByAlert,
         previousPeriodAnomaliesByAlert,
-    } = useApiRequests({
+    } = useDetectionPerformanceApiRequests({
         selectedAlert,
         defaultAlertDropdownOption,
         selectedAnalysisPeriod,
     });
-    const { anomalies, previousPeriodAnomalies } = useGetData({
-        selectedAlert,
-        defaultAlertDropdownOption,
-        allAnomalies,
-        allPreviousPeriodAnomalies,
-        currentPeriodAnomaliesByAlert,
-        previousPeriodAnomaliesByAlert,
-    });
+    const { anomalies, previousPeriodAnomalies } =
+        useGetDetectionPerformanceData({
+            selectedAlert,
+            defaultAlertDropdownOption,
+            allAnomalies,
+            allPreviousPeriodAnomalies,
+            currentPeriodAnomaliesByAlert,
+            previousPeriodAnomaliesByAlert,
+        });
 
     const componentStyles = useDetectionPerformanceStyles();
 

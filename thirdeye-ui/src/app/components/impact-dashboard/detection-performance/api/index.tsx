@@ -27,7 +27,7 @@ import {
 // Interaces
 import { APIRequestData, ApiReuqestProps } from "./api-interfaces";
 
-export const useApiRequests = ({
+export const useDetectionPerformanceApiRequests = ({
     selectedAlert,
     defaultAlertDropdownOption,
     selectedAnalysisPeriod,

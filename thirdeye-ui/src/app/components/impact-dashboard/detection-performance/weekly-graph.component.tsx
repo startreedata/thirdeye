@@ -13,7 +13,7 @@
  * the License.
  */
 import React from "react";
-
+import { useTranslation } from "react-i18next";
 // Interfaces
 import {
     AnomaliesGraphProps,
@@ -43,6 +43,7 @@ export const WeeklyGraph = ({
     selectedAnalysisPeriod,
     previousPeriodAnomalies,
 }: AnomaliesGraphProps): JSX.Element => {
+    const { t } = useTranslation();
     const componentStyles = useDetectionPerformanceStyles();
 
     const currentWeeklyTimeWindow = getTimeWindows(
@@ -114,10 +115,14 @@ export const WeeklyGraph = ({
         return (
             <div className={componentStyles.tooltip}>
                 <div className="currentPeriod">
-                    {`Current Period(${data.currentPeriodDate}): ${data.currentPeriod}`}
+                    {`${t("pages.impact-dashboard.common.current-period")}(${
+                        data.currentPeriodDate
+                    }): ${data.currentPeriod}`}
                 </div>
                 <div className="previousPeriod">
-                    {`Previous Period(${data.previousPeriodDate}): ${data.previousPeriod}`}
+                    {`${t("pages.impact-dashboard.common.previous-period")}(${
+                        data.previousPeriodDate
+                    }): ${data.previousPeriod}`}
                 </div>
             </div>
         );

@@ -1,3 +1,10 @@
+## [2.51.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.50.0...thirdeye-ui-2.51.0) (2024-09-23)
+
+
+### Features
+
+* [TE-2217](https://cortexdata.atlassian.net/browse/TE-2217) impact dashboard ([994dc9030](https://github.com/startreedata/thirdeye/commit/994dc90307d989aa0b86dec97df2cdff24ce5a12))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

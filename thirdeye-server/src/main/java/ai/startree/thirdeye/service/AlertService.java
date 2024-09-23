@@ -30,6 +30,7 @@ import ai.startree.thirdeye.alert.AlertEvaluator;
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.config.TimeConfiguration;
+import ai.startree.thirdeye.datalayer.bao.RcaInvestigationManagerImpl;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.service.alert.AlertInsightsProvider;
 import ai.startree.thirdeye.spi.api.AlertApi;
@@ -46,11 +47,14 @@ import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
+import ai.startree.thirdeye.spi.datalayer.bao.RcaInvestigationManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DetectionPipelineTaskInfo;
+import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import com.google.common.collect.ImmutableMap;
@@ -81,6 +85,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
   private final AlertInsightsProvider alertInsightsProvider;
   private final SubscriptionGroupManager subscriptionGroupManager;
   private final EnumerationItemManager enumerationItemManager;
+  private final RcaInvestigationManager rcaInvestigationManager;
 
   private final long minimumOnboardingStartTime;
 
@@ -92,6 +97,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
       final AlertInsightsProvider alertInsightsProvider,
       final SubscriptionGroupManager subscriptionGroupManager,
       final EnumerationItemManager enumerationItemManager,
+      final RcaInvestigationManager rcaInvestigationManager,
       final TaskManager taskManager,
       final TimeConfiguration timeConfiguration,
       final AuthorizationManager authorizationManager) {
@@ -101,6 +107,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     this.anomalyManager = anomalyManager;
     this.subscriptionGroupManager = subscriptionGroupManager;
     this.enumerationItemManager = enumerationItemManager;
+    this.rcaInvestigationManager = rcaInvestigationManager;
     this.taskManager = taskManager;
 
     minimumOnboardingStartTime = timeConfiguration.getMinimumOnboardingStartTime();
@@ -111,6 +118,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     final Long alertId = dto.getId();
 
     disassociateFromSubscriptionGroups(alertId);
+    deleteAssociatedRcaInvestigations(alertId);
     deleteAssociatedAnomalies(alertId);
     deleteAssociatedEnumerationItems(alertId);
 
@@ -360,6 +368,21 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
         .map(AbstractDTO::getId)
         .collect(Collectors.toList());
     enumerationItemManager.deleteByIds(ids);
+  }
+
+  private void deleteAssociatedRcaInvestigations(final Long alertId) {
+    List<AnomalyDTO> associatedAnomalies = anomalyManager.findByPredicate(
+        Predicate.EQ("detectionConfigId", alertId));
+
+    List<Long> relatedRcaInvestigationIds = new ArrayList<>();
+    for (final AnomalyDTO anomaly : associatedAnomalies) {
+      rcaInvestigationManager.findByAnomalyId(anomaly.getId())
+          .stream()
+          .map(RcaInvestigationDTO::getId)
+          .forEach(relatedRcaInvestigationIds::add);
+    }
+
+    rcaInvestigationManager.deleteByIds(relatedRcaInvestigationIds);
   }
 
   private long minimumLastTimestamp(final ThirdEyePrincipal principal, final AlertDTO dto) {

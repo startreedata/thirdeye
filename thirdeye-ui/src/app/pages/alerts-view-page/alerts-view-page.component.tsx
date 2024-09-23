@@ -567,6 +567,9 @@ export const AlertsViewPage: FunctionComponent = () => {
                         )}
                     </LoadingErrorStateSwitch>
                 </Grid>
+                {/* {alertId && searchParams.has(QUERY_PARAM_KEY_ALERT_TYPE) && (
+                    <AlertAddConfigrationModal alertId={alertId} />
+                )} */}
             </PageContentsGridV1>
         </PageV1>
     );

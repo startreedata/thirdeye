@@ -24,7 +24,7 @@ import {
 } from "react-router-dom";
 import { createNewStartingAlert } from "../../../components/alert-wizard-v2/alert-template/alert-template.utils";
 import { NavigateAlertCreationFlowsDropdown } from "../../../components/alert-wizard-v3/navigate-alert-creation-flows-dropdown/navigate-alert-creation-flows-dropdown";
-import { ThresholdSetup } from "../../../components/alert-wizard-v3/threshold-setup/threshold-setup.component";
+import { ThresholdSetup } from "../../../components/alert-wizard-v3/threshold-setup/threshold-setup-v2.component";
 import { WizardBottomBar } from "../../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import { PageContentsGridV1 } from "../../../platform/components";
 import { ColorV1 } from "../../../platform/utils/material-ui/color.util";

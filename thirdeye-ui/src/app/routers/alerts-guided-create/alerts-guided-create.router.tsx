@@ -23,6 +23,12 @@ import {
 } from "../../utils/storage/use-session-storage";
 import { AlertsGuidedCreateRouterProps } from "./alerts-guided-create.router.interface";
 
+const AlertsCreateEasyPage = lazy(() =>
+    import(
+        /* webpackChunkName: "alerts-create-advanced-page" */ "../../pages/alerts-create-page/alerts-create-easy-page/alerts-create-easy-page.component"
+    ).then((module) => ({ default: module.AlertsCreateEasyPage }))
+);
+
 const CreateAlertGuidedPage = lazy(() =>
     import(
         /* webpackChunkName: "create-alert-guided-page" */ "../../pages/alerts-create-guided-page/alerts-create-guided-page.component"
@@ -73,7 +79,7 @@ const SetupAnomaliesFilterPage = lazy(() =>
 
 const SetupDimensionGroupsPage = lazy(() =>
     import(
-        /* webpackChunkName: "setup-dimension-groups-page" */ "../../pages/alerts-create-guided-page/setup-dimension-groups/setup-dimension-groups-page.component"
+        /* webpackChunkName: "setup-dimension-groups-page" */ "../../pages/alerts-create-guided-page/setup-dimension-groups/setup-dimension-groups-page-v2.component"
     ).then((module) => ({ default: module.SetupDimensionGroupsPage }))
 );
 
@@ -120,6 +126,10 @@ export const AlertsCreateGuidedRouter: FunctionComponent<AlertsGuidedCreateRoute
                                     }
                                 />
                             }
+                        />
+                        <Route
+                            element={<AlertsCreateEasyPage />}
+                            path={AppRouteRelative.ALERTS_CREATE_EASY_ALERT}
                         />
                         <Route
                             element={<SetupMetricPage />}

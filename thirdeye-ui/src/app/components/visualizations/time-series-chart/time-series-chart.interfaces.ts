@@ -16,6 +16,7 @@ import { AxisScale } from "@visx/axis";
 import { ScaleOrdinal } from "d3-scale";
 import React, { FunctionComponent } from "react";
 import { Event } from "../../../rest/dto/event.interfaces";
+import { LegendPlacement } from "../../alert-wizard-v2/alert-template/preview-chart/preview-chart.interfaces";
 
 export enum SeriesType {
     LINE = "line",
@@ -173,8 +174,8 @@ export interface TimeSeriesChartProps {
     };
     svgContainerUseAuto?: boolean;
     tooltipPositionOverride?: [number, number];
+    legendsPlacement?: `${LegendPlacement}`;
 }
-
 export interface ZoomDomain {
     x0: number;
     x1: number;

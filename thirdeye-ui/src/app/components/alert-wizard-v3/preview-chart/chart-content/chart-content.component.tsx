@@ -43,6 +43,7 @@ export const ChartContent: FunctionComponent<ChartContentProps> = ({
     alert,
     hideCallToActionPrompt,
     evaluationTimeRange,
+    legendsPlacement,
 }) => {
     const sharedWizardClasses = useAlertWizardV2Styles();
     const previewChartClasses = usePreviewChartStyles();
@@ -187,6 +188,7 @@ export const ChartContent: FunctionComponent<ChartContentProps> = ({
                         <Box>
                             <TimeSeriesChart
                                 height={300}
+                                legendsPlacement={legendsPlacement}
                                 {...firstTimeSeriesOptions}
                             />
                         </Box>
@@ -205,6 +207,7 @@ export const ChartContent: FunctionComponent<ChartContentProps> = ({
                                 hideTime={shouldHideTimeInDatetimeFormat(
                                     alertEvaluation?.alert.template
                                 )}
+                                legendsPlacement={legendsPlacement}
                                 showOnlyActivity={showOnlyActivity}
                                 timezone={determineTimezoneFromAlertInEvaluation(
                                     alertEvaluation?.alert.template

@@ -237,9 +237,9 @@ export const AlertsAnomaliesPage: FunctionComponent = () => {
                         <Box height="90vh">
                             <AnomalyListV1
                                 anomalies={
-                                    // This prop is set to null every time the API is called again to
-                                    // trigger a UI loading state, since otherwise the new data just
-                                    // replaces the old one abruptly
+                                    // This prop is set to null every time the API is called again
+                                    // to trigger a UI loading state, since otherwise the new data
+                                    // just replaces the old one abruptly
                                     anomaliesRequestStatus ===
                                         ActionStatus.Working ||
                                     anomaliesRequestStatus ===

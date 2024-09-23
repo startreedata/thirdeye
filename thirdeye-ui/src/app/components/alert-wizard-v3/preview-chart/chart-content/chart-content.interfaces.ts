@@ -17,6 +17,7 @@ import {
     EditableAlert,
 } from "../../../../rest/dto/alert.interfaces";
 import { TimeRange } from "../../../../rest/dto/time-range.interfaces";
+import { LegendPlacement } from "../../../alert-wizard-v2/alert-template/preview-chart/preview-chart.interfaces";
 
 export interface ChartContentProps {
     alertEvaluation: AlertEvaluation | null;
@@ -27,4 +28,5 @@ export interface ChartContentProps {
     alert: EditableAlert;
     onAlertPropertyChange?: (contents: Partial<EditableAlert>) => void;
     evaluationTimeRange: TimeRange;
+    legendsPlacement?: `${LegendPlacement}`;
 }

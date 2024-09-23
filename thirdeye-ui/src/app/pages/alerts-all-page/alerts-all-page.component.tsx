@@ -58,7 +58,6 @@ export const AlertsAllPage: FunctionComponent = () => {
         status,
         errorMessages,
     } = useResetAlert();
-
     const {
         data: alerts,
         isInitialLoading: isGetAlertLoading,
@@ -70,7 +69,6 @@ export const AlertsAllPage: FunctionComponent = () => {
             return getAllAlerts();
         },
     });
-
     const {
         data: subscriptionGroups,
         isInitialLoading: isGetSubscriptionGroupsLoading,
@@ -82,7 +80,6 @@ export const AlertsAllPage: FunctionComponent = () => {
             return getAllSubscriptionGroups();
         },
     });
-
     // Handle communicating alert reset status to the user
     useEffect(() => {
         if (status === ActionStatus.Done && alertThatWasReset) {
@@ -100,7 +97,6 @@ export const AlertsAllPage: FunctionComponent = () => {
             t("message.alert-reset-error")
         );
     }, [status]);
-
     useEffect(() => {
         isGetAlertError &&
             notifyIfErrors(
@@ -112,7 +108,6 @@ export const AlertsAllPage: FunctionComponent = () => {
                 })
             );
     }, [getAlertsErrors]);
-
     useEffect(() => {
         isGetSubscriptionGroupsError &&
             notifyIfErrors(
@@ -124,7 +119,6 @@ export const AlertsAllPage: FunctionComponent = () => {
                 })
             );
     }, [getSubscriptionGroupsErrors]);
-
     useEffect(() => {
         if (alerts) {
             if (subscriptionGroups) {
@@ -134,7 +128,6 @@ export const AlertsAllPage: FunctionComponent = () => {
             }
         }
     }, [alerts, subscriptionGroups]);
-
     const handleAlertDelete = (uiAlert: UiAlert): void => {
         showDialog({
             type: DialogType.ALERT,
@@ -146,31 +139,26 @@ export const AlertsAllPage: FunctionComponent = () => {
             onOk: () => handleAlertDeleteOk(uiAlert),
         });
     };
-
     const handleAlertDeleteOk = (uiAlert: UiAlert): void => {
         deleteAlert(uiAlert.id).then((alert) => {
             notify(
                 NotificationTypeV1.Success,
                 t("message.delete-success", { entity: t("label.alert") })
             );
-
             // Remove deleted alert from fetched alerts
             removeUiAlert(alert);
         });
     };
-
     const removeUiAlert = (alert: Alert): void => {
         if (!alert) {
             return;
         }
-
         setUiAlerts(
             (uiAlerts) =>
                 uiAlerts &&
                 uiAlerts.filter((uiAlert) => uiAlert.id !== alert.id)
         );
     };
-
     const handleAlertReset = (alert: Alert): void => {
         showDialog({
             type: DialogType.CUSTOM,
@@ -191,14 +179,12 @@ export const AlertsAllPage: FunctionComponent = () => {
             },
         });
     };
-
     const loadingErrorStateParams = {
         isError: isGetAlertError,
         isLoading: isGetAlertLoading || isGetSubscriptionGroupsLoading,
         wrapInGrid: true,
         wrapInCard: true,
     };
-
     const emptyStateParams = {
         emptyState: (
             <Grid item xs={12}>
@@ -279,7 +265,6 @@ export const AlertsAllPage: FunctionComponent = () => {
                 }
                 title={t("label.alerts")}
             />
-
             <PageContentsGridV1 fullHeight>
                 <LoadingErrorStateSwitch {...loadingErrorStateParams}>
                     <EmptyStateSwitch {...emptyStateParams}>

@@ -16,6 +16,7 @@ import { Alert } from "../../../../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../../../../rest/dto/anomaly.interfaces";
 import { DetectionEvaluation } from "../../../../../rest/dto/detection.interfaces";
 import { TimeRange } from "../../../../../rest/dto/time-range.interfaces";
+import { LegendPlacement } from "../../../../alert-wizard-v2/alert-template/preview-chart/preview-chart.interfaces";
 
 export interface EnumerationItemRowProps {
     detectionEvaluation: DetectionEvaluation;
@@ -27,4 +28,5 @@ export interface EnumerationItemRowProps {
     hideDelete?: boolean;
     alert: Alert;
     evaluationTimeRange: TimeRange;
+    legendsPlacement?: `${LegendPlacement}`;
 }

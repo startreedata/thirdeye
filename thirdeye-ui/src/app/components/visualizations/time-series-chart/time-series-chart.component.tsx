@@ -20,6 +20,7 @@ import { TooltipWithBounds, useTooltip } from "@visx/tooltip";
 import React, {
     FunctionComponent,
     MouseEvent,
+    ReactNode,
     useEffect,
     useMemo,
     useState,
@@ -50,6 +51,7 @@ import {
 import { TooltipMarkers } from "./tooltip/tooltip-markers.component";
 import { TooltipPopover } from "./tooltip/tooltip-popover.component";
 import { determineXPointForHover } from "./tooltip/tooltip.utils";
+import { LegendPlacement } from "../../alert-wizard-v2/alert-template/preview-chart/preview-chart.interfaces";
 
 const MIN_DATA_POINTS_TO_DISPLAY = 14;
 const CHART_SEPARATION = 30;
@@ -141,6 +143,7 @@ export const TimeSeriesChartInternal: FunctionComponent<TimeSeriesChartInternalP
         // Zoom override takes precedence
         zoomOverride,
         tooltipPositionOverride,
+        legendsPlacement = LegendPlacement.BOTTOM,
     }) => {
         const { t } = useTranslation();
         const [currentZoom, setCurrentZoom] = useState<ZoomDomain | undefined>(
@@ -459,8 +462,24 @@ export const TimeSeriesChartInternal: FunctionComponent<TimeSeriesChartInternalP
             shouldZoom && isZoomEnabled && handleBrushChange(domain);
         };
 
+        const renderLegends = (): ReactNode => (
+            <LegendComponent
+                colorScale={colorScale}
+                events={processedEvents}
+                series={processedMainChartSeries}
+                onEventsStateChange={setProcessedEvents}
+                onSeriesClick={handleSeriesClickFromLegend}
+            />
+        );
+
         return (
             <div style={{ position: "relative" }}>
+                {isLegendEnabled && legendsPlacement === LegendPlacement.TOP && (
+                    <Box marginLeft="auto" mb={2} width="max-content">
+                        {renderLegends()}
+                    </Box>
+                )}
+
                 {events && events.length > 0 && (
                     <EventsChart
                         events={processedEvents}
@@ -563,15 +582,9 @@ export const TimeSeriesChartInternal: FunctionComponent<TimeSeriesChartInternalP
                         />
                     </TooltipWithBounds>
                 )}
-                {isLegendEnabled && (
-                    <LegendComponent
-                        colorScale={colorScale}
-                        events={processedEvents}
-                        series={processedMainChartSeries}
-                        onEventsStateChange={setProcessedEvents}
-                        onSeriesClick={handleSeriesClickFromLegend}
-                    />
-                )}
+                {isLegendEnabled &&
+                    legendsPlacement === LegendPlacement.BOTTOM &&
+                    renderLegends()}
 
                 {isZoomEnabled && currentZoom && (
                     <Box position="absolute" right={margins.right + 10} top={5}>

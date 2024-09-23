@@ -42,7 +42,7 @@ jest.mock(
     })
 );
 
-jest.mock("../../pages/alerts-all-page/alerts-all-page.component", () => ({
+jest.mock("../../pages/alerts-all-page-v2/alerts-all-page.component", () => ({
     AlertsAllPage: jest.fn().mockReturnValue("testAlertsAllPage"),
 }));
 

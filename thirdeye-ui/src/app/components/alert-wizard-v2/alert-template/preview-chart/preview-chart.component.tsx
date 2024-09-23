@@ -37,7 +37,7 @@ import {
 import { generateNameForDetectionResult } from "../../../../utils/enumeration-items/enumeration-items.util";
 import { notifyIfErrors } from "../../../../utils/notifications/notifications.util";
 import { ChartContent } from "../../../alert-wizard-v3/preview-chart/chart-content/chart-content.component";
-import { PreviewChartHeader } from "../../../alert-wizard-v3/preview-chart/header/preview-chart-header.component";
+import { PreviewChartHeader } from "../../../alert-wizard-v3/preview-chart/header/preview-chart-header-v2.component";
 import { NoDataIndicator } from "../../../no-data-indicator/no-data-indicator.component";
 import { LoadingErrorStateSwitch } from "../../../page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { TimeRangeQueryStringKey } from "../../../time-range/time-range-provider/time-range-provider.interfaces";
@@ -49,6 +49,9 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
     onChartDataLoadSuccess,
     hideCallToActionPrompt,
     disableReload,
+    showTimeRange = true,
+    children,
+    legendsPlacement,
 }) => {
     const { t } = useTranslation();
     const [searchParams, setSearchParams] = useSearchParams();
@@ -199,11 +202,14 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                 showConfigurationNotReflective={
                     !isEqual(alertForCurrentEvaluation, alert)
                 }
+                showTimeRange={showTimeRange}
                 onReloadClick={handleAutoRangeClick}
                 onStartEndChange={(newStart, newEnd) => {
                     fetchAlertEvaluation(newStart, newEnd);
                 }}
-            />
+            >
+                {children}
+            </PreviewChartHeader>
             <LoadingErrorStateSwitch
                 errorState={
                     <Box pb={20} pt={20}>
@@ -236,6 +242,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                     alertEvaluation={evaluation}
                     evaluationTimeRange={evaluationTimeRange}
                     hideCallToActionPrompt={hideCallToActionPrompt}
+                    legendsPlacement={legendsPlacement}
                     onReloadClick={handleAutoRangeClick}
                 />
             </LoadingErrorStateSwitch>

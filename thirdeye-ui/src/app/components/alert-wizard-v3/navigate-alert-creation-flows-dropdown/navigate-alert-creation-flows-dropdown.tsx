@@ -58,7 +58,7 @@ export const NavigateAlertCreationFlowsDropdown: FunctionComponent = () => {
     const shortcutCreateMenuItems = [
         {
             matcher: (path: string) =>
-                path.includes(AppRouteRelative.ALERTS_CREATE_NEW_USER),
+                path.includes(AppRouteRelative.ALERTS_UPDATE_SIMPLE),
             navLink: `${AppRouteRelative.ALERTS_CREATE_NEW_USER}/${AppRouteRelative.WELCOME_CREATE_ALERT_TUNE_ALERT}`,
             text: t("label.simple"),
         },

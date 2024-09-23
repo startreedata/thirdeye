@@ -16,7 +16,7 @@
 import { ReactNode } from "react";
 
 export interface ModalProps {
-    trigger: (callBack: () => void) => ReactNode;
+    trigger?: (callBack: () => void) => ReactNode;
     submitButtonLabel?: ReactNode;
     cancelButtonLabel?: ReactNode;
     footerActions?: ReactNode;
@@ -31,4 +31,5 @@ export interface ModalProps {
     initiallyOpen?: boolean;
     disableCancelButton?: boolean;
     disableSubmitButton?: boolean;
+    showFooter?: boolean;
 }

@@ -53,7 +53,6 @@ import {
     AuthQueryParamV1,
     AuthRedirectMethodV1,
 } from "./auth-provider-v1.interfaces";
-import { getBaseUrl } from "./util";
 
 export const AuthProviderV1: FunctionComponent<AuthProviderV1Props> = ({
     disableAuthOverride,
@@ -446,9 +445,8 @@ export const AuthProviderV1: FunctionComponent<AuthProviderV1Props> = ({
     };
 
     const initAxios = (): void => {
-        const mappedBaseURL = getBaseUrl();
-        if (mappedBaseURL) {
-            axios.defaults.baseURL = mappedBaseURL;
+        if (VERCEL_DEPLOYMENT_API_URL) {
+            axios.defaults.baseURL = VERCEL_DEPLOYMENT_API_URL;
         }
 
         // Clear existing interceptors

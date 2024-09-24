@@ -14,14 +14,12 @@
  */
 import axios from "axios";
 import { AppConfiguration } from "../dto/app-config.interface";
-import { getBaseUrl } from "../../platform/components/auth-provider-v1/util";
 
 const URL_CONFIG = "/api/ui/config";
 
 export const getAppConfiguration = async (): Promise<AppConfiguration> => {
-    const mappedBaseURL = getBaseUrl();
-    if (mappedBaseURL) {
-        axios.defaults.baseURL = mappedBaseURL;
+    if (VERCEL_DEPLOYMENT_API_URL) {
+        axios.defaults.baseURL = VERCEL_DEPLOYMENT_API_URL;
     }
     const response = await axios.get(URL_CONFIG);
 

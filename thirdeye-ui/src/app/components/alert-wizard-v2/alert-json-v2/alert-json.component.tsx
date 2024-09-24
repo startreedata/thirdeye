@@ -70,7 +70,7 @@ export const AlertJson: FunctionComponent<AlertJsonProps> = ({
                     justifyContent="space-between"
                 >
                     <Grid item>
-                        <Typography variant="h5">
+                        <Typography className={classes.header} variant="h5">
                             {t("label.advanced-json-editor")}
                         </Typography>
                     </Grid>

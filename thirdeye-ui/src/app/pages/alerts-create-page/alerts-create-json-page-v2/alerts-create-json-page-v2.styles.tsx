@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 StarTree Inc
+ * Copyright 2024 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -14,23 +14,9 @@
  */
 import { makeStyles } from "@material-ui/core";
 
-export const usePreviewChartStyles = makeStyles((theme) => ({
-    heightWholeContainer: {
-        height: "100%",
-    },
-    alertContainer: {
-        paddingLeft: theme.spacing(5),
-        paddingRight: theme.spacing(5),
-        position: "absolute",
-        textAlign: "center",
-        width: "100%",
-        height: "100%",
-    },
-    chartContainer: {
-        border: "1px solid #B4CDE0",
+export const alertJsonPageStyles = makeStyles(() => ({
+    button: {
         borderRadius: "8px",
-    },
-    selected: {
-        color: theme.palette.primary.main,
+        height: "32px",
     },
 }));

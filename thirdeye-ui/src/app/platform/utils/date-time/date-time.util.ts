@@ -149,6 +149,7 @@ export const formatDateAndTimeV1 = (
         year: "numeric",
         hour: "2-digit",
         minute: "2-digit",
+        hourCycle: "h23",
     });
 };
 

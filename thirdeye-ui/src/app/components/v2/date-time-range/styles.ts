@@ -42,6 +42,7 @@ export const useDateTimeRangeStyles = makeStyles({
     },
     quickSelect: {
         overflow: "auto",
+        width: "200px",
     },
     calendarHeader: {
         marginLeft: "24px",

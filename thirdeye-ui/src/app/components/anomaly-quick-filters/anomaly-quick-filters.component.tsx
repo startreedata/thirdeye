@@ -258,10 +258,10 @@ export const AnomalyQuickFilters: FunctionComponent<AnomalyQuickFiltersProps> =
                         onRefresh={onHandleRefresh}
                     />*/}
                     <DateTimeRangePopover
-                        hideTimeRange={!screenWidthSmUp}
                         recentCustomTimeRangeDurations={
                             recentCustomTimeRangeDurations
                         }
+                        showTimeRangeLabel={!screenWidthSmUp}
                         timeRangeDuration={timeRangeDuration}
                         timezone={timezone}
                         onChange={onHandleTimeRangeChange}

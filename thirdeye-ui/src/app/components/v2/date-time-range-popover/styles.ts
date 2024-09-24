@@ -19,4 +19,9 @@ export const useTimeRangeSelectorStyles = makeStyles((theme) => ({
         minWidth: 0,
         padding: theme.spacing(1),
     },
+    timeRangeDisplay: {
+        border: "1px solid #00A3DE",
+        padding: "4px 8px",
+        borderRadius: "4px",
+    },
 }));

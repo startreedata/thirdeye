@@ -21,14 +21,13 @@ import {
     formatTimeRangeDuration,
 } from "../../../utils/time-range/time-range.util";
 import { timezoneStringShort } from "../../../utils/time/time.util";
-// import { SafariMuiGridFix } from "../../../safari-mui-grid-fix/safari-mui-grid-fix.component";
 import { DateTimeRange } from "../date-time-range";
 import { useTimeRangeSelectorStyles } from "./styles";
 import { TimeRangeDuration } from "../date-time-range/quick-select";
 
 interface TimeRangeSelectorProps {
     hideRefresh?: boolean;
-    hideTimeRange?: boolean;
+    showTimeRangeLabel?: boolean;
     hideTimeRangeSelectorButton?: boolean;
     timeRangeDuration: TimeRangeDuration;
     recentCustomTimeRangeDurations?: TimeRangeDuration[];
@@ -49,7 +48,7 @@ const TIME_SELECTOR_TEST_IDS = {
 export const DateTimeRangePopover: FunctionComponent<TimeRangeSelectorProps> =
     ({
         hideTimeRangeSelectorButton,
-        hideTimeRange,
+        showTimeRangeLabel,
         hideRefresh,
         timeRangeDuration,
         recentCustomTimeRangeDurations,
@@ -81,15 +80,27 @@ export const DateTimeRangePopover: FunctionComponent<TimeRangeSelectorProps> =
                 justifyContent="flex-end"
             >
                 {/* Time range */}
-                {!hideTimeRange && timeRangeDuration && (
-                    <Grid item>
+                {timeRangeDuration && (
+                    <Grid
+                        item
+                        className={
+                            !showTimeRangeLabel
+                                ? timeRangeSelectorClasses.timeRangeDisplay
+                                : ""
+                        }
+                    >
                         {/* Time range label */}
-                        <Typography variant="overline">
-                            {formatTimeRange(timeRangeDuration.timeRange)}
-                        </Typography>
+                        {showTimeRangeLabel && (
+                            <Typography variant="overline">
+                                {formatTimeRange(timeRangeDuration.timeRange)}
+                            </Typography>
+                        )}
 
                         {/* Time range duration */}
-                        <Typography variant="body2">
+                        <Typography
+                            variant="body2"
+                            onClick={handleTimeRangeSelectorClick}
+                        >
                             {formatTimeRangeDuration(
                                 timeRangeDuration,
                                 timezone
@@ -155,9 +166,6 @@ export const DateTimeRangePopover: FunctionComponent<TimeRangeSelectorProps> =
                         </Button>
                     </Grid>
                 )}
-
-                {/* Fixes layout in Safari */}
-                {/* <SafariMuiGridFix /> */}
             </Grid>
         );
     };

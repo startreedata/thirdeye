@@ -30,7 +30,6 @@ import { useCronAdvanceStyles } from "./cron-advance.styles";
 export const CronAdvance: FunctionComponent<CronAdvanceProps> = ({
     cron,
     onCronChange,
-    fullWidth = false,
 }) => {
     const [currentCron, setCurrentCron] = useState<string>(cron);
     const { t } = useTranslation();
@@ -44,7 +43,6 @@ export const CronAdvance: FunctionComponent<CronAdvanceProps> = ({
 
     return (
         <InputSection
-            fullWidth={fullWidth}
             inputComponent={
                 <>
                     <TextField

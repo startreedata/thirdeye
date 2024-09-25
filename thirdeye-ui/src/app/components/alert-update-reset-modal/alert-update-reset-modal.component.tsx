@@ -38,6 +38,7 @@ export const AlertUpdateResetModal: FunctionComponent<AlertUpdateResetModalProps
                 title={t("label.update-entity", {
                     entity: t("label.alert"),
                 })}
+                trigger={() => <></>}
                 onSubmit={() => onUpdateAlertClick(shouldDeleteAnomalies)}
             >
                 <p>Alert Update Options:</p>

@@ -69,7 +69,7 @@ export const AppBar: FunctionComponent = () => {
                     <NavBarLinkIconV1>
                         <Home />
                     </NavBarLinkIconV1>
-                    <NavBarLinkTextV1>{t("label.overview")}</NavBarLinkTextV1>
+                    <NavBarLinkTextV1>{t("label.home")}</NavBarLinkTextV1>
                 </NavBarLinkV1>
 
                 {/* Alerts */}
@@ -175,7 +175,7 @@ export const AppBar: FunctionComponent = () => {
                                 ) as string
                             }
                         >
-                            <span>{t("label.help-and-support")}</span>
+                            <span>{t("label.support")}</span>
                         </TooltipV1>
                     </NavBarLinkTextV1>
                 </NavBarLinkV1>

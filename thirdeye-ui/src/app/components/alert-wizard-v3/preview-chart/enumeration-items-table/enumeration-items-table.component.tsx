@@ -28,7 +28,6 @@ export const EnumerationItemsTable: FunctionComponent<EnumerationItemsTableProps
         hideDelete,
         alert,
         evaluationTimeRange,
-        legendsPlacement,
     }) => {
         return (
             <Card variant="outlined">
@@ -46,7 +45,6 @@ export const EnumerationItemsTable: FunctionComponent<EnumerationItemsTableProps
                                     key={generateNameForDetectionResult(
                                         detectionEvaluation
                                     )}
-                                    legendsPlacement={legendsPlacement}
                                     showOnlyActivity={showOnlyActivity}
                                     timezone={timezone}
                                     onDeleteClick={() =>

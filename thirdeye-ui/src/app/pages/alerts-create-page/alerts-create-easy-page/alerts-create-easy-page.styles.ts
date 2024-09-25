@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { makeStyles, createTheme } from "@material-ui/core";
+import { createTheme, makeStyles } from "@material-ui/core";
 import { lightV1 } from "../../../platform/utils";
 import { ColorV1 } from "../../../platform/utils/material-ui/color.util";
 import { paletteOptionsV1 } from "../../../platform/utils/material-ui/palette.util";
@@ -70,7 +70,7 @@ export const easyAlertStyles = makeStyles(() => ({
     },
 }));
 
-export const crateAlertPageTheme = createTheme({
+export const createAlertPageTheme = createTheme({
     ...lightV1,
     palette: {
         ...paletteOptionsV1,

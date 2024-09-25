@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { Icon } from "@iconify/react";
 import {
     Box,
     Button,
@@ -20,16 +21,13 @@ import {
     Grid,
     TextareaAutosize,
     TextField,
-    ThemeProvider,
     Tooltip,
     Typography,
 } from "@material-ui/core";
 import { KeyboardArrowDown, KeyboardArrowUp } from "@material-ui/icons";
-import DimensionImage from "../../../../assets/images/dimensions.png";
-import { ReactComponent as FilterListRoundedIcon } from "../../../platform/assets/images/filter-icon.svg";
 import AddCircleOutline from "@material-ui/icons/AddCircleOutline";
-import { Alert, AlertTitle, Autocomplete } from "@material-ui/lab";
 import DoneAllIcon from "@material-ui/icons/DoneAll";
+import { Alert, AlertTitle, Autocomplete } from "@material-ui/lab";
 import { isNil, toLower } from "lodash";
 import { DateTime, Duration } from "luxon";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
@@ -39,9 +37,14 @@ import {
     useOutletContext,
     useSearchParams,
 } from "react-router-dom";
+import DimensionImage from "../../../../assets/images/dimensions.png";
+import { AdditonalFiltersDrawer } from "../../../components/additional-filters-drawer/additional-filters-drawer.component";
+import { AlertCompositeFiltersModal } from "../../../components/alert-composite-filters-modal/alert-composite-filters-modal.component";
 import { createNewStartingAlert } from "../../../components/alert-wizard-v2/alert-template/alert-template.utils";
 import { AvailableAlgorithmOption } from "../../../components/alert-wizard-v3/alert-type-selection/alert-type-selection.interfaces";
 import { generateAvailableAlgorithmOptions } from "../../../components/alert-wizard-v3/alert-type-selection/alert-type-selection.utils";
+import { AnomaliesFilterConfiguratorRenderConfigs } from "../../../components/alert-wizard-v3/anomalies-filter-panel/anomalies-filter-panel.interfaces";
+import { getAvailableFilterOptions } from "../../../components/alert-wizard-v3/anomalies-filter-panel/anomalies-filter-panel.utils";
 import {
     generateTemplateProperties,
     GranularityValue,
@@ -49,11 +52,16 @@ import {
     GRANULARITY_OPTIONS_TOOLTIP,
 } from "../../../components/alert-wizard-v3/select-metric/select-metric.utils";
 import { ThresholdSetup } from "../../../components/alert-wizard-v3/threshold-setup/threshold-setup-v2.component";
+import { ColumnsDrawer } from "../../../components/columns-drawer/columns-drawer.component";
+import { CreateAlertModal } from "../../../components/create-alert-modal/create-alert-modal.component";
 import { InputSectionV2 } from "../../../components/form-basics/input-section-v2/input-section-v2.component";
 import { RadioSection } from "../../../components/form-basics/radio-section-v2/radio-section.component";
 import { RadioSectionOptions } from "../../../components/form-basics/radio-section-v2/radio-section.interfaces";
+import { alertsBasicHelpCards } from "../../../components/help-drawer-v1/help-drawer-card-contents.utils";
+import { HelpDrawerV1 } from "../../../components/help-drawer-v1/help-drawer-v1.component";
 import { TimeRangeButtonWithContext } from "../../../components/time-range/time-range-button-with-context-v2/time-range-button.component";
 import { TimeRangeQueryStringKey } from "../../../components/time-range/time-range-provider/time-range-provider.interfaces";
+import { ReactComponent as FilterListRoundedIcon } from "../../../platform/assets/images/filter-icon.svg";
 import {
     PageContentsCardV1,
     PageHeaderActionsV1,
@@ -79,21 +87,9 @@ import {
     STAR_COLUMN,
 } from "../../../utils/datasources/datasources.util";
 import { useGetDatasourcesTree } from "../../../utils/datasources/use-get-datasources-tree.util";
-import { AlertCreatedGuidedPageOutletContext } from "../../alerts-create-guided-page/alerts-create-guided-page.interfaces";
-import { AlertCompositeFiltersModal } from "../../../components/alert-composite-filters-modal/alert-composite-filters-modal.component";
-import { CreateAlertModal } from "../../../components/create-alert-modal/create-alert-modal.component";
-import { HelpDrawerV1 } from "../../../components/help-drawer-v1/help-drawer-v1.component";
-import { alertsBasicHelpCards } from "../../../components/help-drawer-v1/help-drawer-card-contents.utils";
-import { Icon } from "@iconify/react";
 import { getAlertsAllPath } from "../../../utils/routes/routes.util";
-import {
-    easyAlertStyles,
-    crateAlertPageTheme,
-} from "./alerts-create-easy-page.styles";
-import { AdditonalFiltersDrawer } from "../../../components/additional-filters-drawer/additional-filters-drawer.component";
-import { getAvailableFilterOptions } from "../../../components/alert-wizard-v3/anomalies-filter-panel/anomalies-filter-panel.utils";
-import { AnomaliesFilterConfiguratorRenderConfigs } from "../../../components/alert-wizard-v3/anomalies-filter-panel/anomalies-filter-panel.interfaces";
-import { ColumnsDrawer } from "../../../components/columns-drawer/columns-drawer.component";
+import { AlertCreatedGuidedPageOutletContext } from "../../alerts-create-guided-page/alerts-create-guided-page.interfaces";
+import { easyAlertStyles } from "./alerts-create-easy-page.styles";
 
 const PROPERTIES_TO_COPY = [
     "dataSource",
@@ -617,425 +613,335 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
 
     return (
         <>
-            <ThemeProvider theme={crateAlertPageTheme}>
-                <Grid item xs={12}>
-                    <PageContentsCardV1 className={classes.container}>
-                        <Grid container>
-                            <Grid item xs={12}>
-                                <Box marginBottom={2}>
-                                    <Grid
-                                        container
-                                        alignContent="center"
-                                        justifyContent="space-between"
-                                    >
-                                        <Grid item xs={12}>
-                                            <Box display="flex">
-                                                <Typography
-                                                    className={classes.header}
-                                                    variant="h5"
-                                                >
-                                                    {t("label.alert-wizard")}
-                                                </Typography>
-                                                <PageHeaderActionsV1>
-                                                    <HelpDrawerV1
-                                                        cards={
-                                                            alertsBasicHelpCards
-                                                        }
-                                                        title={`${t(
-                                                            "label.need-help"
-                                                        )}?`}
-                                                        trigger={(
-                                                            handleOpen
-                                                        ) => (
-                                                            <Button
-                                                                className={
-                                                                    classes.infoButton
-                                                                }
-                                                                color="primary"
-                                                                size="small"
-                                                                variant="outlined"
-                                                                onClick={
-                                                                    handleOpen
-                                                                }
+            <Grid item xs={12}>
+                <PageContentsCardV1 className={classes.container}>
+                    <Grid container>
+                        <Grid item xs={12}>
+                            <Box marginBottom={2}>
+                                <Grid
+                                    container
+                                    alignContent="center"
+                                    justifyContent="space-between"
+                                >
+                                    <Grid item xs={12}>
+                                        <Box display="flex">
+                                            <Typography
+                                                className={classes.header}
+                                                variant="h5"
+                                            >
+                                                {t("label.alert-wizard")}
+                                            </Typography>
+                                            <PageHeaderActionsV1>
+                                                <HelpDrawerV1
+                                                    cards={alertsBasicHelpCards}
+                                                    title={`${t(
+                                                        "label.need-help"
+                                                    )}?`}
+                                                    trigger={(handleOpen) => (
+                                                        <Button
+                                                            className={
+                                                                classes.infoButton
+                                                            }
+                                                            color="primary"
+                                                            size="small"
+                                                            variant="outlined"
+                                                            onClick={handleOpen}
+                                                        >
+                                                            <Box
+                                                                component="span"
+                                                                mr={1}
                                                             >
-                                                                <Box
-                                                                    component="span"
-                                                                    mr={1}
-                                                                >
-                                                                    {t(
-                                                                        "label.need-help"
-                                                                    )}
-                                                                </Box>
-                                                                <Box
-                                                                    component="span"
-                                                                    display="flex"
-                                                                >
-                                                                    <Icon
-                                                                        fontSize={
-                                                                            24
-                                                                        }
-                                                                        icon="mdi:question-mark-circle-outline"
-                                                                    />
-                                                                </Box>
-                                                            </Button>
-                                                        )}
-                                                    />
-                                                </PageHeaderActionsV1>
-                                            </Box>
-                                            <Box>
-                                                <Typography variant="body2">
-                                                    {t(
-                                                        "message.create-your-first-step-filling-fields"
-                                                    )}
-                                                </Typography>
-                                            </Box>
-                                        </Grid>
-
-                                        <Grid item xs={12}>
-                                            <Grid container>
-                                                <Grid item xs={4}>
-                                                    <InputSectionV2
-                                                        description={t(
-                                                            "message.select-dataset-to-monitor-and-detect-anomalies"
-                                                        )}
-                                                        inputComponent={
-                                                            <Autocomplete<DatasetInfo>
-                                                                fullWidth
-                                                                data-testId="datasource-select"
-                                                                getOptionLabel={(
-                                                                    option
-                                                                ) =>
-                                                                    option
-                                                                        .dataset
-                                                                        .name as string
-                                                                }
-                                                                noOptionsText={t(
-                                                                    "message.no-options-available-entity",
-                                                                    {
-                                                                        entity: t(
-                                                                            "label.dataset"
-                                                                        ),
+                                                                {t(
+                                                                    "label.need-help"
+                                                                )}
+                                                            </Box>
+                                                            <Box
+                                                                component="span"
+                                                                display="flex"
+                                                            >
+                                                                <Icon
+                                                                    fontSize={
+                                                                        24
                                                                     }
-                                                                )}
-                                                                options={
-                                                                    datasetsInfo ||
-                                                                    []
+                                                                    icon="mdi:question-mark-circle-outline"
+                                                                />
+                                                            </Box>
+                                                        </Button>
+                                                    )}
+                                                />
+                                            </PageHeaderActionsV1>
+                                        </Box>
+                                        <Box>
+                                            <Typography variant="body2">
+                                                {t(
+                                                    "message.create-your-first-step-filling-fields"
+                                                )}
+                                            </Typography>
+                                        </Box>
+                                    </Grid>
+
+                                    <Grid item xs={12}>
+                                        <Grid container>
+                                            <Grid item xs={4}>
+                                                <InputSectionV2
+                                                    description={t(
+                                                        "message.select-dataset-to-monitor-and-detect-anomalies"
+                                                    )}
+                                                    inputComponent={
+                                                        <Autocomplete<DatasetInfo>
+                                                            fullWidth
+                                                            data-testId="datasource-select"
+                                                            getOptionLabel={(
+                                                                option
+                                                            ) =>
+                                                                option.dataset
+                                                                    .name as string
+                                                            }
+                                                            noOptionsText={t(
+                                                                "message.no-options-available-entity",
+                                                                {
+                                                                    entity: t(
+                                                                        "label.dataset"
+                                                                    ),
                                                                 }
-                                                                renderInput={(
-                                                                    params
-                                                                ) => (
-                                                                    <TextField
-                                                                        {...params}
-                                                                        InputProps={{
-                                                                            ...params.InputProps,
-                                                                        }}
-                                                                        placeholder={t(
-                                                                            "message.select-dataset"
-                                                                        )}
-                                                                        variant="outlined"
-                                                                    />
-                                                                )}
-                                                                renderOption={(
-                                                                    option: DatasetInfo
-                                                                ): JSX.Element => {
-                                                                    return (
-                                                                        <Box
-                                                                            data-testId={`${toLower(
+                                                            )}
+                                                            options={
+                                                                datasetsInfo ||
+                                                                []
+                                                            }
+                                                            renderInput={(
+                                                                params
+                                                            ) => (
+                                                                <TextField
+                                                                    {...params}
+                                                                    InputProps={{
+                                                                        ...params.InputProps,
+                                                                    }}
+                                                                    placeholder={t(
+                                                                        "message.select-dataset"
+                                                                    )}
+                                                                    variant="outlined"
+                                                                />
+                                                            )}
+                                                            renderOption={(
+                                                                option: DatasetInfo
+                                                            ): JSX.Element => {
+                                                                return (
+                                                                    <Box
+                                                                        data-testId={`${toLower(
+                                                                            option
+                                                                                .dataset
+                                                                                .name
+                                                                        )}-datasource-option`}
+                                                                    >
+                                                                        <Typography variant="h6">
+                                                                            {
                                                                                 option
                                                                                     .dataset
                                                                                     .name
-                                                                            )}-datasource-option`}
-                                                                        >
-                                                                            <Typography variant="h6">
+                                                                            }
+                                                                        </Typography>
+                                                                        <Typography variant="caption">
+                                                                            {t(
+                                                                                "message.num-metrics",
                                                                                 {
-                                                                                    option
-                                                                                        .dataset
-                                                                                        .name
+                                                                                    num: option
+                                                                                        .metrics
+                                                                                        .length,
                                                                                 }
-                                                                            </Typography>
-                                                                            <Typography variant="caption">
-                                                                                {t(
-                                                                                    "message.num-metrics",
-                                                                                    {
-                                                                                        num: option
-                                                                                            .metrics
-                                                                                            .length,
-                                                                                    }
-                                                                                )}
-                                                                            </Typography>
-                                                                        </Box>
-                                                                    );
-                                                                }}
-                                                                value={
-                                                                    selectedTable
+                                                                            )}
+                                                                        </Typography>
+                                                                    </Box>
+                                                                );
+                                                            }}
+                                                            value={
+                                                                selectedTable
+                                                            }
+                                                            onChange={(
+                                                                _,
+                                                                selectedTableInfo
+                                                            ) => {
+                                                                if (
+                                                                    !selectedTableInfo
+                                                                ) {
+                                                                    return;
                                                                 }
-                                                                onChange={(
-                                                                    _,
+                                                                setSelectedTable(
                                                                     selectedTableInfo
-                                                                ) => {
-                                                                    if (
-                                                                        !selectedTableInfo
-                                                                    ) {
-                                                                        return;
-                                                                    }
-                                                                    setSelectedTable(
-                                                                        selectedTableInfo
-                                                                    );
-                                                                    setSelectedMetric(
-                                                                        null
-                                                                    );
-                                                                }}
-                                                            />
-                                                        }
-                                                        label={t(
-                                                            "label.dataset"
-                                                        )}
-                                                    />
-                                                </Grid>
-                                                <Grid item xs={4}>
-                                                    <InputSectionV2
-                                                        description={t(
-                                                            "message.select-metric-to-identify-unusual-changes-when-it-occurs"
-                                                        )}
-                                                        inputComponent={
-                                                            <Autocomplete<string>
-                                                                fullWidth
-                                                                data-testId="metric-select"
-                                                                disabled={
-                                                                    !selectedTable
+                                                                );
+                                                                setSelectedMetric(
+                                                                    null
+                                                                );
+                                                            }}
+                                                        />
+                                                    }
+                                                    label={t("label.dataset")}
+                                                />
+                                            </Grid>
+                                            <Grid item xs={4}>
+                                                <InputSectionV2
+                                                    description={t(
+                                                        "message.select-metric-to-identify-unusual-changes-when-it-occurs"
+                                                    )}
+                                                    inputComponent={
+                                                        <Autocomplete<string>
+                                                            fullWidth
+                                                            data-testId="metric-select"
+                                                            disabled={
+                                                                !selectedTable
+                                                            }
+                                                            groupBy={(option) =>
+                                                                option ===
+                                                                t(
+                                                                    "label.custom-metric-aggregation"
+                                                                )
+                                                                    ? "Y"
+                                                                    : "N"
+                                                            }
+                                                            noOptionsText={t(
+                                                                "message.no-options-available-entity",
+                                                                {
+                                                                    entity: t(
+                                                                        "label.metric"
+                                                                    ),
                                                                 }
-                                                                groupBy={(
-                                                                    option
-                                                                ) =>
-                                                                    option ===
-                                                                    t(
-                                                                        "label.custom-metric-aggregation"
-                                                                    )
-                                                                        ? "Y"
-                                                                        : "N"
-                                                                }
-                                                                noOptionsText={t(
-                                                                    "message.no-options-available-entity",
-                                                                    {
-                                                                        entity: t(
-                                                                            "label.metric"
-                                                                        ),
-                                                                    }
-                                                                )}
-                                                                options={
-                                                                    selectedTable
-                                                                        ? (function () {
-                                                                              const a =
-                                                                                  selectedTable.metrics.map(
-                                                                                      (
-                                                                                          m
-                                                                                      ) =>
-                                                                                          m.name
-                                                                                  );
-                                                                              a.unshift(
-                                                                                  t(
-                                                                                      "label.custom-metric-aggregation"
-                                                                                  )
+                                                            )}
+                                                            options={
+                                                                selectedTable
+                                                                    ? (function () {
+                                                                          const a =
+                                                                              selectedTable.metrics.map(
+                                                                                  (
+                                                                                      m
+                                                                                  ) =>
+                                                                                      m.name
                                                                               );
+                                                                          a.unshift(
+                                                                              t(
+                                                                                  "label.custom-metric-aggregation"
+                                                                              )
+                                                                          );
 
-                                                                              return a;
-                                                                          })()
-                                                                        : []
-                                                                }
-                                                                renderGroup={(
-                                                                    params
-                                                                ) => (
-                                                                    <li
-                                                                        key={
-                                                                            params.key
-                                                                        }
-                                                                    >
-                                                                        {
-                                                                            params.children
-                                                                        }
-                                                                        <Divider />
-                                                                    </li>
-                                                                )}
-                                                                renderInput={(
-                                                                    params
-                                                                ) => (
-                                                                    <TextField
-                                                                        {...params}
-                                                                        InputProps={{
-                                                                            ...params.InputProps,
-                                                                        }}
-                                                                        placeholder={
-                                                                            !selectedTable
-                                                                                ? t(
-                                                                                      "message.select-dataset-first"
-                                                                                  )
-                                                                                : t(
-                                                                                      "message.select-metric"
-                                                                                  )
-                                                                        }
-                                                                        variant="outlined"
-                                                                    />
-                                                                )}
-                                                                value={
-                                                                    selectedMetric
-                                                                }
-                                                                onChange={(
-                                                                    _,
-                                                                    metric
-                                                                ) => {
-                                                                    metric &&
-                                                                        setSelectedMetric(
-                                                                            metric
-                                                                        );
-                                                                }}
-                                                            />
-                                                        }
-                                                        label={t(
-                                                            "label.metric"
-                                                        )}
-                                                    />
-                                                </Grid>
+                                                                          return a;
+                                                                      })()
+                                                                    : []
+                                                            }
+                                                            renderGroup={(
+                                                                params
+                                                            ) => (
+                                                                <li
+                                                                    key={
+                                                                        params.key
+                                                                    }
+                                                                >
+                                                                    {
+                                                                        params.children
+                                                                    }
+                                                                    <Divider />
+                                                                </li>
+                                                            )}
+                                                            renderInput={(
+                                                                params
+                                                            ) => (
+                                                                <TextField
+                                                                    {...params}
+                                                                    InputProps={{
+                                                                        ...params.InputProps,
+                                                                    }}
+                                                                    placeholder={
+                                                                        !selectedTable
+                                                                            ? t(
+                                                                                  "message.select-dataset-first"
+                                                                              )
+                                                                            : t(
+                                                                                  "message.select-metric"
+                                                                              )
+                                                                    }
+                                                                    variant="outlined"
+                                                                />
+                                                            )}
+                                                            value={
+                                                                selectedMetric
+                                                            }
+                                                            onChange={(
+                                                                _,
+                                                                metric
+                                                            ) => {
+                                                                metric &&
+                                                                    setSelectedMetric(
+                                                                        metric
+                                                                    );
+                                                            }}
+                                                        />
+                                                    }
+                                                    label={t("label.metric")}
+                                                />
                                             </Grid>
                                         </Grid>
-                                        {selectedMetric && (
-                                            <Grid item xs={12}>
-                                                <Grid container>
-                                                    {selectedMetric !==
-                                                    t(
-                                                        "label.custom-metric-aggregation"
-                                                    ) ? (
-                                                        <Grid item xs={12}>
-                                                            <RadioSection
-                                                                defaultValue={
-                                                                    aggregationFunction ||
-                                                                    undefined
-                                                                }
-                                                                label={t(
-                                                                    "label.aggregation-function"
-                                                                )}
-                                                                options={
-                                                                    selectedMetric ===
-                                                                    STAR_COLUMN
-                                                                        ? getAggregationOptions(
-                                                                              [
-                                                                                  MetricAggFunction.COUNT,
-                                                                              ]
-                                                                          )
-                                                                        : getAggregationOptions(
-                                                                              [
-                                                                                  MetricAggFunction.SUM,
-                                                                                  MetricAggFunction.AVG,
-                                                                                  MetricAggFunction.COUNT,
-                                                                                  MetricAggFunction.MIN,
-                                                                                  MetricAggFunction.MAX,
-                                                                              ]
-                                                                          )
-                                                                }
-                                                                subText={t(
-                                                                    "message.select-aggregation-function-to-combine-multiple-data-value-into-a-single-result"
-                                                                )}
-                                                            />
-                                                            <Button
-                                                                className={
-                                                                    classes.sqlButton
-                                                                }
-                                                                endIcon={
-                                                                    showSQLWhere ? (
-                                                                        <KeyboardArrowUp />
-                                                                    ) : (
-                                                                        <KeyboardArrowDown />
-                                                                    )
-                                                                }
-                                                                size="small"
-                                                                variant="text"
-                                                                onClick={() =>
-                                                                    setShowSQLWhere(
-                                                                        !showSQLWhere
-                                                                    )
-                                                                }
-                                                            >
-                                                                {t(
-                                                                    "label.sql-where-filter"
-                                                                )}
-                                                            </Button>
-
-                                                            {showSQLWhere && (
-                                                                <Grid container>
-                                                                    <Grid
-                                                                        item
-                                                                        className={
-                                                                            classes.textAreaContainer
-                                                                        }
-                                                                        xs={8}
-                                                                    >
-                                                                        <Typography
-                                                                            className={
-                                                                                classes.inputHeader
-                                                                            }
-                                                                            variant="caption"
-                                                                        >
-                                                                            {t(
-                                                                                "label.sql-where-function"
-                                                                            )}{" "}
-                                                                            <Typography variant="caption">
-                                                                                (
-                                                                                {t(
-                                                                                    "label.optional"
-                                                                                )}
-
-                                                                                )
-                                                                            </Typography>
-                                                                        </Typography>
-                                                                        <TextareaAutosize
-                                                                            aria-label="minimum height"
-                                                                            className={
-                                                                                classes.textArea
-                                                                            }
-                                                                            minRows={
-                                                                                3
-                                                                            }
-                                                                            placeholder={t(
-                                                                                "label.placeholder-sql-where"
-                                                                            )}
-                                                                            value={
-                                                                                queryFilters
-                                                                            }
-                                                                            onChange={(
-                                                                                e
-                                                                            ) =>
-                                                                                setQueryFilters(
-                                                                                    e
-                                                                                        .target
-                                                                                        .value
-                                                                                )
-                                                                            }
-                                                                        />
-                                                                        <Box
-                                                                            className={
-                                                                                classes.footer
-                                                                            }
-                                                                            justifyContent="end"
-                                                                        >
-                                                                            <Button
-                                                                                size="small"
-                                                                                variant="contained"
-                                                                                onClick={() =>
-                                                                                    setOpenViewColumnsListDrawer(
-                                                                                        true
-                                                                                    )
-                                                                                }
-                                                                            >
-                                                                                {t(
-                                                                                    "label.view-columns-list"
-                                                                                )}
-                                                                            </Button>
-                                                                        </Box>
-                                                                    </Grid>
-                                                                </Grid>
+                                    </Grid>
+                                    {selectedMetric && (
+                                        <Grid item xs={12}>
+                                            <Grid container>
+                                                {selectedMetric !==
+                                                t(
+                                                    "label.custom-metric-aggregation"
+                                                ) ? (
+                                                    <Grid item xs={12}>
+                                                        <RadioSection
+                                                            defaultValue={
+                                                                aggregationFunction ||
+                                                                undefined
+                                                            }
+                                                            label={t(
+                                                                "label.aggregation-function"
                                                             )}
-                                                        </Grid>
-                                                    ) : (
-                                                        <Grid item xs={12}>
+                                                            options={
+                                                                selectedMetric ===
+                                                                STAR_COLUMN
+                                                                    ? getAggregationOptions(
+                                                                          [
+                                                                              MetricAggFunction.COUNT,
+                                                                          ]
+                                                                      )
+                                                                    : getAggregationOptions(
+                                                                          [
+                                                                              MetricAggFunction.SUM,
+                                                                              MetricAggFunction.AVG,
+                                                                              MetricAggFunction.COUNT,
+                                                                              MetricAggFunction.MIN,
+                                                                              MetricAggFunction.MAX,
+                                                                          ]
+                                                                      )
+                                                            }
+                                                            subText={t(
+                                                                "message.select-aggregation-function-to-combine-multiple-data-value-into-a-single-result"
+                                                            )}
+                                                        />
+                                                        <Button
+                                                            className={
+                                                                classes.sqlButton
+                                                            }
+                                                            endIcon={
+                                                                showSQLWhere ? (
+                                                                    <KeyboardArrowUp />
+                                                                ) : (
+                                                                    <KeyboardArrowDown />
+                                                                )
+                                                            }
+                                                            size="small"
+                                                            variant="text"
+                                                            onClick={() =>
+                                                                setShowSQLWhere(
+                                                                    !showSQLWhere
+                                                                )
+                                                            }
+                                                        >
+                                                            {t(
+                                                                "label.sql-where-filter"
+                                                            )}
+                                                        </Button>
+
+                                                        {showSQLWhere && (
                                                             <Grid container>
                                                                 <Grid
                                                                     item
@@ -1051,8 +957,15 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                         variant="caption"
                                                                     >
                                                                         {t(
-                                                                            "label.custom-metric"
-                                                                        )}
+                                                                            "label.sql-where-function"
+                                                                        )}{" "}
+                                                                        <Typography variant="caption">
+                                                                            (
+                                                                            {t(
+                                                                                "label.optional"
+                                                                            )}
+                                                                            )
+                                                                        </Typography>
                                                                     </Typography>
                                                                     <TextareaAutosize
                                                                         aria-label="minimum height"
@@ -1062,13 +975,16 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                         minRows={
                                                                             3
                                                                         }
+                                                                        placeholder={t(
+                                                                            "label.placeholder-sql-where"
+                                                                        )}
                                                                         value={
-                                                                            editedDatasourceFieldValue
+                                                                            queryFilters
                                                                         }
                                                                         onChange={(
                                                                             e
                                                                         ) =>
-                                                                            setEditedDatasourceFieldValue(
+                                                                            setQueryFilters(
                                                                                 e
                                                                                     .target
                                                                                     .value
@@ -1079,22 +995,8 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                         className={
                                                                             classes.footer
                                                                         }
-                                                                        justifyContent="space-between"
+                                                                        justifyContent="end"
                                                                     >
-                                                                        <Button
-                                                                            size="small"
-                                                                            variant="contained"
-                                                                            onClick={() =>
-                                                                                setEditedDatasource(
-                                                                                    editedDatasourceFieldValue
-                                                                                )
-                                                                            }
-                                                                        >
-                                                                            {t(
-                                                                                "label.apply-custom-metric"
-                                                                            )}
-                                                                        </Button>
-
                                                                         <Button
                                                                             size="small"
                                                                             variant="contained"
@@ -1110,7 +1012,84 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                         </Button>
                                                                     </Box>
                                                                 </Grid>
-                                                                {/* <Grid
+                                                            </Grid>
+                                                        )}
+                                                    </Grid>
+                                                ) : (
+                                                    <Grid item xs={12}>
+                                                        <Grid container>
+                                                            <Grid
+                                                                item
+                                                                className={
+                                                                    classes.textAreaContainer
+                                                                }
+                                                                xs={8}
+                                                            >
+                                                                <Typography
+                                                                    className={
+                                                                        classes.inputHeader
+                                                                    }
+                                                                    variant="caption"
+                                                                >
+                                                                    {t(
+                                                                        "label.custom-metric"
+                                                                    )}
+                                                                </Typography>
+                                                                <TextareaAutosize
+                                                                    aria-label="minimum height"
+                                                                    className={
+                                                                        classes.textArea
+                                                                    }
+                                                                    minRows={3}
+                                                                    value={
+                                                                        editedDatasourceFieldValue
+                                                                    }
+                                                                    onChange={(
+                                                                        e
+                                                                    ) =>
+                                                                        setEditedDatasourceFieldValue(
+                                                                            e
+                                                                                .target
+                                                                                .value
+                                                                        )
+                                                                    }
+                                                                />
+                                                                <Box
+                                                                    className={
+                                                                        classes.footer
+                                                                    }
+                                                                    justifyContent="space-between"
+                                                                >
+                                                                    <Button
+                                                                        size="small"
+                                                                        variant="contained"
+                                                                        onClick={() =>
+                                                                            setEditedDatasource(
+                                                                                editedDatasourceFieldValue
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        {t(
+                                                                            "label.apply-custom-metric"
+                                                                        )}
+                                                                    </Button>
+
+                                                                    <Button
+                                                                        size="small"
+                                                                        variant="contained"
+                                                                        onClick={() =>
+                                                                            setOpenViewColumnsListDrawer(
+                                                                                true
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        {t(
+                                                                            "label.view-columns-list"
+                                                                        )}
+                                                                    </Button>
+                                                                </Box>
+                                                            </Grid>
+                                                            {/* <Grid
                                                                     item
                                                                     xs={4}
                                                                 >
@@ -1129,694 +1108,690 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                         )}
                                                                     </Button>
                                                                 </Grid> */}
-                                                            </Grid>
-                                                        </Grid>
-                                                    )}
-                                                    <Grid item xs={12}>
-                                                        <Box marginBottom="10px">
-                                                            <Typography
-                                                                className={
-                                                                    classes.inputHeader
-                                                                }
-                                                                variant="h6"
-                                                            >
-                                                                {t(
-                                                                    "label.granularity"
-                                                                )}
-                                                            </Typography>
-
-                                                            <Typography variant="body2">
-                                                                {t(
-                                                                    "label.select-the-level-of-detail-at-which-data-is-aggregated-or-stored-in-the-time-series-data"
-                                                                )}
-                                                            </Typography>
-                                                        </Box>
-                                                        <Grid item xs={4}>
-                                                            <InputSectionV2
-                                                                inputComponent={
-                                                                    <>
-                                                                        <Autocomplete
-                                                                            disableClearable
-                                                                            fullWidth
-                                                                            getOptionLabel={(
-                                                                                option
-                                                                            ) =>
-                                                                                option.label
-                                                                            }
-                                                                            options={
-                                                                                GRANULARITY_OPTIONS
-                                                                            }
-                                                                            renderInput={(
-                                                                                params
-                                                                            ) => (
-                                                                                <TextField
-                                                                                    {...params}
-                                                                                    InputProps={{
-                                                                                        ...params.InputProps,
-                                                                                    }}
-                                                                                    placeholder={t(
-                                                                                        "label.select-granularity"
-                                                                                    )}
-                                                                                    variant="outlined"
-                                                                                />
-                                                                            )}
-                                                                            renderOption={({
-                                                                                value,
-                                                                                label,
-                                                                            }) => (
-                                                                                <Box
-                                                                                    alignItems="center"
-                                                                                    display="flex"
-                                                                                    justifyContent="space-between"
-                                                                                    width="100%"
-                                                                                >
-                                                                                    {
-                                                                                        label
-                                                                                    }
-                                                                                    {GRANULARITY_OPTIONS_TOOLTIP[
-                                                                                        value
-                                                                                    ] && (
-                                                                                        <Tooltip
-                                                                                            arrow
-                                                                                            placement="top"
-                                                                                            title={
-                                                                                                GRANULARITY_OPTIONS_TOOLTIP[
-                                                                                                    value
-                                                                                                ]
-                                                                                            }
-                                                                                        >
-                                                                                            <Chip
-                                                                                                color="primary"
-                                                                                                label={t(
-                                                                                                    "label.beta"
-                                                                                                )}
-                                                                                                size="small"
-                                                                                            />
-                                                                                        </Tooltip>
-                                                                                    )}
-                                                                                </Box>
-                                                                            )}
-                                                                            value={
-                                                                                granularity
-                                                                                    ? {
-                                                                                          value: granularity,
-                                                                                          label: granularity,
-                                                                                      }
-                                                                                    : undefined
-                                                                            }
-                                                                            onChange={
-                                                                                handleGranularityChange
-                                                                            }
-                                                                        />
-                                                                    </>
-                                                                }
-                                                            />
                                                         </Grid>
                                                     </Grid>
+                                                )}
+                                                <Grid item xs={12}>
+                                                    <Box marginBottom="10px">
+                                                        <Typography
+                                                            className={
+                                                                classes.inputHeader
+                                                            }
+                                                            variant="h6"
+                                                        >
+                                                            {t(
+                                                                "label.granularity"
+                                                            )}
+                                                        </Typography>
+
+                                                        <Typography variant="body2">
+                                                            {t(
+                                                                "label.select-the-level-of-detail-at-which-data-is-aggregated-or-stored-in-the-time-series-data"
+                                                            )}
+                                                        </Typography>
+                                                    </Box>
+                                                    <Grid item xs={4}>
+                                                        <InputSectionV2
+                                                            inputComponent={
+                                                                <>
+                                                                    <Autocomplete
+                                                                        disableClearable
+                                                                        fullWidth
+                                                                        getOptionLabel={(
+                                                                            option
+                                                                        ) =>
+                                                                            option.label
+                                                                        }
+                                                                        options={
+                                                                            GRANULARITY_OPTIONS
+                                                                        }
+                                                                        renderInput={(
+                                                                            params
+                                                                        ) => (
+                                                                            <TextField
+                                                                                {...params}
+                                                                                InputProps={{
+                                                                                    ...params.InputProps,
+                                                                                }}
+                                                                                placeholder={t(
+                                                                                    "label.select-granularity"
+                                                                                )}
+                                                                                variant="outlined"
+                                                                            />
+                                                                        )}
+                                                                        renderOption={({
+                                                                            value,
+                                                                            label,
+                                                                        }) => (
+                                                                            <Box
+                                                                                alignItems="center"
+                                                                                display="flex"
+                                                                                justifyContent="space-between"
+                                                                                width="100%"
+                                                                            >
+                                                                                {
+                                                                                    label
+                                                                                }
+                                                                                {GRANULARITY_OPTIONS_TOOLTIP[
+                                                                                    value
+                                                                                ] && (
+                                                                                    <Tooltip
+                                                                                        arrow
+                                                                                        placement="top"
+                                                                                        title={
+                                                                                            GRANULARITY_OPTIONS_TOOLTIP[
+                                                                                                value
+                                                                                            ]
+                                                                                        }
+                                                                                    >
+                                                                                        <Chip
+                                                                                            color="primary"
+                                                                                            label={t(
+                                                                                                "label.beta"
+                                                                                            )}
+                                                                                            size="small"
+                                                                                        />
+                                                                                    </Tooltip>
+                                                                                )}
+                                                                            </Box>
+                                                                        )}
+                                                                        value={
+                                                                            granularity
+                                                                                ? {
+                                                                                      value: granularity,
+                                                                                      label: granularity,
+                                                                                  }
+                                                                                : undefined
+                                                                        }
+                                                                        onChange={
+                                                                            handleGranularityChange
+                                                                        }
+                                                                    />
+                                                                </>
+                                                            }
+                                                        />
+                                                    </Grid>
+                                                </Grid>
+                                                <Grid item xs={12}>
+                                                    <RadioSection
+                                                        defaultValue={
+                                                            anomalyDetection ||
+                                                            undefined
+                                                        }
+                                                        label={t(
+                                                            "label.anomalies-detection-type"
+                                                        )}
+                                                        options={getAnomalyDetectionOptions(
+                                                            [
+                                                                AnomalyDetectionOptions.SINGLE,
+                                                                AnomalyDetectionOptions.COMPOSITE,
+                                                            ]
+                                                        )}
+                                                        subText={t(
+                                                            "message.select-the-algorithm-that-best-matches-the-data-patterns"
+                                                        )}
+                                                    />
+                                                </Grid>
+                                                {anomalyDetection ===
+                                                    AnomalyDetectionOptions.COMPOSITE && (
                                                     <Grid item xs={12}>
                                                         <RadioSection
                                                             defaultValue={
-                                                                anomalyDetection ||
+                                                                dimension ||
                                                                 undefined
                                                             }
                                                             label={t(
-                                                                "label.anomalies-detection-type"
+                                                                "message.select-dimensions"
                                                             )}
-                                                            options={getAnomalyDetectionOptions(
+                                                            options={getSelectDimensionsOptions(
                                                                 [
-                                                                    AnomalyDetectionOptions.SINGLE,
-                                                                    AnomalyDetectionOptions.COMPOSITE,
+                                                                    SelectDimensionsOptions.ENUMERATORS,
+                                                                    SelectDimensionsOptions.DIMENSION_RECOMMENDER,
                                                                 ]
-                                                            )}
-                                                            subText={t(
-                                                                "message.select-the-algorithm-that-best-matches-the-data-patterns"
                                                             )}
                                                         />
                                                     </Grid>
-                                                    {anomalyDetection ===
-                                                        AnomalyDetectionOptions.COMPOSITE && (
+                                                )}
+                                                {dimension ===
+                                                    SelectDimensionsOptions.ENUMERATORS && (
+                                                    <Grid item xs={12}>
                                                         <Grid item xs={12}>
-                                                            <RadioSection
-                                                                defaultValue={
-                                                                    dimension ||
-                                                                    undefined
-                                                                }
-                                                                label={t(
-                                                                    "message.select-dimensions"
-                                                                )}
-                                                                options={getSelectDimensionsOptions(
-                                                                    [
-                                                                        SelectDimensionsOptions.ENUMERATORS,
-                                                                        SelectDimensionsOptions.DIMENSION_RECOMMENDER,
-                                                                    ]
-                                                                )}
-                                                            />
-                                                        </Grid>
-                                                    )}
-                                                    {dimension ===
-                                                        SelectDimensionsOptions.ENUMERATORS && (
-                                                        <Grid item xs={12}>
-                                                            <Grid item xs={12}>
-                                                                <Grid container>
-                                                                    <Grid
-                                                                        item
+                                                            <Grid container>
+                                                                <Grid
+                                                                    item
+                                                                    className={
+                                                                        classes.textAreaContainer
+                                                                    }
+                                                                    xs={12}
+                                                                >
+                                                                    <TextareaAutosize
+                                                                        aria-label="minimum height"
                                                                         className={
-                                                                            classes.textAreaContainer
+                                                                            classes.textArea
                                                                         }
-                                                                        xs={12}
-                                                                    >
-                                                                        <TextareaAutosize
-                                                                            aria-label="minimum height"
-                                                                            className={
-                                                                                classes.textArea
-                                                                            }
-                                                                            minRows={
-                                                                                3
-                                                                            }
-                                                                            value={
-                                                                                enumerators
-                                                                            }
-                                                                            onChange={(
+                                                                        minRows={
+                                                                            3
+                                                                        }
+                                                                        value={
+                                                                            enumerators
+                                                                        }
+                                                                        onChange={(
+                                                                            e
+                                                                        ) =>
+                                                                            setEnumerators(
                                                                                 e
-                                                                            ) =>
-                                                                                setEnumerators(
-                                                                                    e
-                                                                                        .target
-                                                                                        .value
+                                                                                    .target
+                                                                                    .value
+                                                                            )
+                                                                        }
+                                                                    />
+                                                                    <Box
+                                                                        className={
+                                                                            classes.footer
+                                                                        }
+                                                                        justifyContent="space-between"
+                                                                    >
+                                                                        <Button
+                                                                            size="small"
+                                                                            variant="contained"
+                                                                            onClick={() =>
+                                                                                setEnumerations(
+                                                                                    true
                                                                                 )
                                                                             }
-                                                                        />
-                                                                        <Box
-                                                                            className={
-                                                                                classes.footer
-                                                                            }
-                                                                            justifyContent="space-between"
                                                                         >
-                                                                            <Button
-                                                                                size="small"
-                                                                                variant="contained"
-                                                                                onClick={() =>
-                                                                                    setEnumerations(
-                                                                                        true
-                                                                                    )
-                                                                                }
-                                                                            >
-                                                                                {t(
-                                                                                    "label.run-enumeration"
-                                                                                )}
-                                                                            </Button>
-                                                                            <Button
-                                                                                size="small"
-                                                                                variant="contained"
-                                                                                onClick={() =>
-                                                                                    setOpenViewColumnsListDrawer(
-                                                                                        true
-                                                                                    )
-                                                                                }
-                                                                            >
-                                                                                {t(
-                                                                                    "label.view-columns-list"
-                                                                                )}
-                                                                            </Button>
-                                                                        </Box>
-                                                                    </Grid>
+                                                                            {t(
+                                                                                "label.run-enumeration"
+                                                                            )}
+                                                                        </Button>
+                                                                        <Button
+                                                                            size="small"
+                                                                            variant="contained"
+                                                                            onClick={() =>
+                                                                                setOpenViewColumnsListDrawer(
+                                                                                    true
+                                                                                )
+                                                                            }
+                                                                        >
+                                                                            {t(
+                                                                                "label.view-columns-list"
+                                                                            )}
+                                                                        </Button>
+                                                                    </Box>
                                                                 </Grid>
                                                             </Grid>
                                                         </Grid>
-                                                    )}
-                                                    <Grid item xs={12}>
-                                                        {((anomalyDetection ===
+                                                    </Grid>
+                                                )}
+                                                <Grid item xs={12}>
+                                                    {((anomalyDetection ===
+                                                        AnomalyDetectionOptions.COMPOSITE &&
+                                                        dimension ===
+                                                            SelectDimensionsOptions.DIMENSION_RECOMMENDER) ||
+                                                        (anomalyDetection ===
                                                             AnomalyDetectionOptions.COMPOSITE &&
                                                             dimension ===
-                                                                SelectDimensionsOptions.DIMENSION_RECOMMENDER) ||
-                                                            (anomalyDetection ===
-                                                                AnomalyDetectionOptions.COMPOSITE &&
-                                                                dimension ===
-                                                                    SelectDimensionsOptions.ENUMERATORS &&
-                                                                enumerations) ||
-                                                            anomalyDetection ===
-                                                                AnomalyDetectionOptions.SINGLE) &&
-                                                            anomalyDetection &&
-                                                            granularity &&
-                                                            (aggregationFunction ||
-                                                                editedDatasource) && (
-                                                                <Grid
-                                                                    container
-                                                                    alignItems="center"
-                                                                >
-                                                                    {dimension ===
-                                                                        SelectDimensionsOptions.ENUMERATORS ||
-                                                                    anomalyDetection !==
-                                                                        AnomalyDetectionOptions.COMPOSITE ||
-                                                                    compositeFilters ? (
-                                                                        <Box
-                                                                            className={
-                                                                                classes.card
+                                                                SelectDimensionsOptions.ENUMERATORS &&
+                                                            enumerations) ||
+                                                        anomalyDetection ===
+                                                            AnomalyDetectionOptions.SINGLE) &&
+                                                        anomalyDetection &&
+                                                        granularity &&
+                                                        (aggregationFunction ||
+                                                            editedDatasource) && (
+                                                            <Grid
+                                                                container
+                                                                alignItems="center"
+                                                            >
+                                                                {dimension ===
+                                                                    SelectDimensionsOptions.ENUMERATORS ||
+                                                                anomalyDetection !==
+                                                                    AnomalyDetectionOptions.COMPOSITE ||
+                                                                compositeFilters ? (
+                                                                    <Box
+                                                                        className={
+                                                                            classes.card
+                                                                        }
+                                                                    >
+                                                                        <Grid
+                                                                            item
+                                                                            xs={
+                                                                                12
                                                                             }
                                                                         >
+                                                                            {" "}
+                                                                            <Grid
+                                                                                container
+                                                                                alignItems="center"
+                                                                                justifyContent="space-between"
+                                                                            >
+                                                                                <Grid
+                                                                                    container
+                                                                                    alignItems="flex-start"
+                                                                                    xs={
+                                                                                        8
+                                                                                    }
+                                                                                >
+                                                                                    <Grid
+                                                                                        item
+                                                                                        xs={
+                                                                                            6
+                                                                                        }
+                                                                                    >
+                                                                                        <InputSectionV2
+                                                                                            description={t(
+                                                                                                "message.for-additional-algorithms-go-to",
+                                                                                                {
+                                                                                                    entity: t(
+                                                                                                        "label.advanced-mode"
+                                                                                                    ),
+                                                                                                }
+                                                                                            )}
+                                                                                            inputComponent={
+                                                                                                <Autocomplete<AvailableAlgorithmOption>
+                                                                                                    fullWidth
+                                                                                                    data-testId="datasource-select"
+                                                                                                    getOptionLabel={(
+                                                                                                        option
+                                                                                                    ) =>
+                                                                                                        option
+                                                                                                            .algorithmOption
+                                                                                                            .title as string
+                                                                                                    }
+                                                                                                    noOptionsText={t(
+                                                                                                        "message.no-options-available-entity",
+                                                                                                        {
+                                                                                                            entity: t(
+                                                                                                                "label.dataset"
+                                                                                                            ),
+                                                                                                        }
+                                                                                                    )}
+                                                                                                    options={
+                                                                                                        recommendedAlertTemplateFirst ||
+                                                                                                        []
+                                                                                                    }
+                                                                                                    renderInput={(
+                                                                                                        params
+                                                                                                    ) => (
+                                                                                                        <TextField
+                                                                                                            {...params}
+                                                                                                            InputProps={{
+                                                                                                                ...params.InputProps,
+                                                                                                            }}
+                                                                                                            placeholder={t(
+                                                                                                                "message.select-dataset"
+                                                                                                            )}
+                                                                                                            variant="outlined"
+                                                                                                        />
+                                                                                                    )}
+                                                                                                    renderOption={(
+                                                                                                        option: AvailableAlgorithmOption
+                                                                                                    ): JSX.Element => {
+                                                                                                        return (
+                                                                                                            <Box
+                                                                                                                data-testId={`${toLower(
+                                                                                                                    option
+                                                                                                                        .algorithmOption
+                                                                                                                        .title
+                                                                                                                )}-datasource-option`}
+                                                                                                            >
+                                                                                                                <Typography variant="h6">
+                                                                                                                    {
+                                                                                                                        option
+                                                                                                                            .algorithmOption
+                                                                                                                            .title
+                                                                                                                    }
+                                                                                                                </Typography>
+                                                                                                            </Box>
+                                                                                                        );
+                                                                                                    }}
+                                                                                                    value={
+                                                                                                        algorithmOption
+                                                                                                    }
+                                                                                                    onChange={(
+                                                                                                        _,
+                                                                                                        value
+                                                                                                    ) => {
+                                                                                                        if (
+                                                                                                            !value
+                                                                                                        ) {
+                                                                                                            return;
+                                                                                                        }
+                                                                                                        setAlgorithmOption(
+                                                                                                            value
+                                                                                                        );
+                                                                                                    }}
+                                                                                                />
+                                                                                            }
+                                                                                            label={t(
+                                                                                                "label.recommended-algorithm"
+                                                                                            )}
+                                                                                        />
+                                                                                    </Grid>
+                                                                                    <Grid
+                                                                                        item
+                                                                                        xs={
+                                                                                            6
+                                                                                        }
+                                                                                    >
+                                                                                        <>
+                                                                                            <Typography
+                                                                                                className={
+                                                                                                    classes.inputHeader
+                                                                                                }
+                                                                                                variant="caption"
+                                                                                            >
+                                                                                                {t(
+                                                                                                    "label.date-range"
+                                                                                                )}
+
+                                                                                                :
+                                                                                            </Typography>
+                                                                                        </>
+                                                                                        <TimeRangeButtonWithContext
+                                                                                            hideQuickExtend
+                                                                                            btnGroupColor="default"
+                                                                                            maxDate={
+                                                                                                alertInsight?.datasetEndTime
+                                                                                            }
+                                                                                            minDate={
+                                                                                                alertInsight?.datasetStartTime
+                                                                                            }
+                                                                                            timezone={determineTimezoneFromAlertInEvaluation(
+                                                                                                alertInsight?.templateWithProperties
+                                                                                            )}
+                                                                                            onTimeRangeChange={(
+                                                                                                newStart,
+                                                                                                newEnd
+                                                                                            ) => {
+                                                                                                fetchAlertEvaluation(
+                                                                                                    newStart,
+                                                                                                    newEnd
+                                                                                                );
+                                                                                            }}
+                                                                                        />
+                                                                                    </Grid>
+                                                                                </Grid>
+                                                                                <Grid>
+                                                                                    <Grid
+                                                                                        container
+                                                                                    >
+                                                                                        <Button
+                                                                                            className={
+                                                                                                classes.infoButton
+                                                                                            }
+                                                                                            color="primary"
+                                                                                            startIcon={
+                                                                                                <FilterListRoundedIcon />
+                                                                                            }
+                                                                                            variant="outlined"
+                                                                                            onClick={() => {
+                                                                                                setShowAdvancedOptions(
+                                                                                                    true
+                                                                                                );
+                                                                                            }}
+                                                                                        >
+                                                                                            {t(
+                                                                                                "label.add-advanced-options"
+                                                                                            )}
+                                                                                        </Button>
+                                                                                        <AdditonalFiltersDrawer
+                                                                                            availableConfigurations={
+                                                                                                availableConfigurations as AnomaliesFilterConfiguratorRenderConfigs[]
+                                                                                            }
+                                                                                            defaultValues={
+                                                                                                alert.templateProperties
+                                                                                            }
+                                                                                            isOpen={
+                                                                                                showAdvancedOptions
+                                                                                            }
+                                                                                            onApply={
+                                                                                                handleApplyAdvancedOptions
+                                                                                            }
+                                                                                            onClose={() => {
+                                                                                                setShowAdvancedOptions(
+                                                                                                    false
+                                                                                                );
+                                                                                            }}
+                                                                                        />
+                                                                                    </Grid>
+                                                                                </Grid>
+                                                                            </Grid>
+                                                                        </Grid>
+                                                                        {recommendedAlertConfigMatchingTemplate && (
                                                                             <Grid
                                                                                 item
                                                                                 xs={
                                                                                     12
                                                                                 }
                                                                             >
-                                                                                {" "}
-                                                                                <Grid
-                                                                                    container
-                                                                                    alignItems="center"
-                                                                                    justifyContent="space-between"
-                                                                                >
-                                                                                    <Grid
-                                                                                        container
-                                                                                        alignItems="flex-start"
-                                                                                        xs={
-                                                                                            8
-                                                                                        }
-                                                                                    >
-                                                                                        <Grid
-                                                                                            item
-                                                                                            xs={
-                                                                                                6
-                                                                                            }
-                                                                                        >
-                                                                                            <InputSectionV2
-                                                                                                description={t(
-                                                                                                    "message.for-additional-algorithms-go-to",
-                                                                                                    {
-                                                                                                        entity: t(
-                                                                                                            "label.advanced-mode"
-                                                                                                        ),
-                                                                                                    }
-                                                                                                )}
-                                                                                                inputComponent={
-                                                                                                    <Autocomplete<AvailableAlgorithmOption>
-                                                                                                        fullWidth
-                                                                                                        data-testId="datasource-select"
-                                                                                                        getOptionLabel={(
-                                                                                                            option
-                                                                                                        ) =>
-                                                                                                            option
-                                                                                                                .algorithmOption
-                                                                                                                .title as string
-                                                                                                        }
-                                                                                                        noOptionsText={t(
-                                                                                                            "message.no-options-available-entity",
-                                                                                                            {
-                                                                                                                entity: t(
-                                                                                                                    "label.dataset"
-                                                                                                                ),
-                                                                                                            }
-                                                                                                        )}
-                                                                                                        options={
-                                                                                                            recommendedAlertTemplateFirst ||
-                                                                                                            []
-                                                                                                        }
-                                                                                                        renderInput={(
-                                                                                                            params
-                                                                                                        ) => (
-                                                                                                            <TextField
-                                                                                                                {...params}
-                                                                                                                InputProps={{
-                                                                                                                    ...params.InputProps,
-                                                                                                                }}
-                                                                                                                placeholder={t(
-                                                                                                                    "message.select-dataset"
-                                                                                                                )}
-                                                                                                                variant="outlined"
-                                                                                                            />
-                                                                                                        )}
-                                                                                                        renderOption={(
-                                                                                                            option: AvailableAlgorithmOption
-                                                                                                        ): JSX.Element => {
-                                                                                                            return (
-                                                                                                                <Box
-                                                                                                                    data-testId={`${toLower(
-                                                                                                                        option
-                                                                                                                            .algorithmOption
-                                                                                                                            .title
-                                                                                                                    )}-datasource-option`}
-                                                                                                                >
-                                                                                                                    <Typography variant="h6">
-                                                                                                                        {
-                                                                                                                            option
-                                                                                                                                .algorithmOption
-                                                                                                                                .title
-                                                                                                                        }
-                                                                                                                    </Typography>
-                                                                                                                </Box>
-                                                                                                            );
-                                                                                                        }}
-                                                                                                        value={
-                                                                                                            algorithmOption
-                                                                                                        }
-                                                                                                        onChange={(
-                                                                                                            _,
-                                                                                                            value
-                                                                                                        ) => {
-                                                                                                            if (
-                                                                                                                !value
-                                                                                                            ) {
-                                                                                                                return;
-                                                                                                            }
-                                                                                                            setAlgorithmOption(
-                                                                                                                value
-                                                                                                            );
-                                                                                                        }}
-                                                                                                    />
-                                                                                                }
-                                                                                                label={t(
-                                                                                                    "label.recommended-algorithm"
-                                                                                                )}
-                                                                                            />
-                                                                                        </Grid>
-                                                                                        <Grid
-                                                                                            item
-                                                                                            xs={
-                                                                                                6
-                                                                                            }
-                                                                                        >
-                                                                                            <>
-                                                                                                <Typography
-                                                                                                    className={
-                                                                                                        classes.inputHeader
-                                                                                                    }
-                                                                                                    variant="caption"
+                                                                                <Alert
+                                                                                    action={
+                                                                                        <>
+                                                                                            {doesAlertHaveRecommendedValues ? (
+                                                                                                <Box
+                                                                                                    alignContent="center"
+                                                                                                    position="flex"
+                                                                                                    style={{
+                                                                                                        color: ColorV1.Green2,
+                                                                                                    }}
+                                                                                                    textAlign="center"
                                                                                                 >
-                                                                                                    {t(
-                                                                                                        "label.date-range"
-                                                                                                    )}
-
-                                                                                                    :
-                                                                                                </Typography>
-                                                                                            </>
-                                                                                            <TimeRangeButtonWithContext
-                                                                                                hideQuickExtend
-                                                                                                btnGroupColor="default"
-                                                                                                maxDate={
-                                                                                                    alertInsight?.datasetEndTime
-                                                                                                }
-                                                                                                minDate={
-                                                                                                    alertInsight?.datasetStartTime
-                                                                                                }
-                                                                                                timezone={determineTimezoneFromAlertInEvaluation(
-                                                                                                    alertInsight?.templateWithProperties
-                                                                                                )}
-                                                                                                onTimeRangeChange={(
-                                                                                                    newStart,
-                                                                                                    newEnd
-                                                                                                ) => {
-                                                                                                    fetchAlertEvaluation(
-                                                                                                        newStart,
-                                                                                                        newEnd
-                                                                                                    );
-                                                                                                }}
-                                                                                            />
-                                                                                        </Grid>
-                                                                                    </Grid>
-                                                                                    <Grid>
-                                                                                        <Grid
-                                                                                            container
-                                                                                        >
-                                                                                            <Button
-                                                                                                className={
-                                                                                                    classes.infoButton
-                                                                                                }
-                                                                                                color="primary"
-                                                                                                startIcon={
-                                                                                                    <FilterListRoundedIcon />
-                                                                                                }
-                                                                                                variant="outlined"
-                                                                                                onClick={() => {
-                                                                                                    setShowAdvancedOptions(
-                                                                                                        true
-                                                                                                    );
-                                                                                                }}
-                                                                                            >
-                                                                                                {t(
-                                                                                                    "label.add-advanced-options"
-                                                                                                )}
-                                                                                            </Button>
-                                                                                            <AdditonalFiltersDrawer
-                                                                                                availableConfigurations={
-                                                                                                    availableConfigurations as AnomaliesFilterConfiguratorRenderConfigs[]
-                                                                                                }
-                                                                                                defaultValues={
-                                                                                                    alert.templateProperties
-                                                                                                }
-                                                                                                isOpen={
-                                                                                                    showAdvancedOptions
-                                                                                                }
-                                                                                                onApply={
-                                                                                                    handleApplyAdvancedOptions
-                                                                                                }
-                                                                                                onClose={() => {
-                                                                                                    setShowAdvancedOptions(
-                                                                                                        false
-                                                                                                    );
-                                                                                                }}
-                                                                                            />
-                                                                                        </Grid>
-                                                                                    </Grid>
-                                                                                </Grid>
-                                                                            </Grid>
-                                                                            {recommendedAlertConfigMatchingTemplate && (
-                                                                                <Grid
-                                                                                    item
-                                                                                    xs={
-                                                                                        12
-                                                                                    }
-                                                                                >
-                                                                                    <Alert
-                                                                                        action={
-                                                                                            <>
-                                                                                                {doesAlertHaveRecommendedValues ? (
                                                                                                     <Box
-                                                                                                        alignContent="center"
-                                                                                                        position="flex"
-                                                                                                        style={{
-                                                                                                            color: ColorV1.Green2,
-                                                                                                        }}
-                                                                                                        textAlign="center"
-                                                                                                    >
-                                                                                                        <Box
-                                                                                                            mr={
-                                                                                                                1
-                                                                                                            }
-                                                                                                        >
-                                                                                                            <DoneAllIcon />
-                                                                                                        </Box>
-                                                                                                        <Box
-                                                                                                            pr={
-                                                                                                                2
-                                                                                                            }
-                                                                                                        >
-                                                                                                            Alert
-                                                                                                            Tuned
-                                                                                                        </Box>
-                                                                                                    </Box>
-                                                                                                ) : (
-                                                                                                    <Button
-                                                                                                        color="primary"
-                                                                                                        onClick={
-                                                                                                            handleTuneAlertClick
+                                                                                                        mr={
+                                                                                                            1
                                                                                                         }
                                                                                                     >
-                                                                                                        {t(
-                                                                                                            "label.tune-my-alert"
-                                                                                                        )}
-                                                                                                    </Button>
-                                                                                                )}
-                                                                                            </>
-                                                                                        }
-                                                                                        severity="info"
-                                                                                        style={{
-                                                                                            backgroundColor:
-                                                                                                "#FFF",
-                                                                                        }}
-                                                                                        variant="outlined"
-                                                                                    >
-                                                                                        <AlertTitle>
-                                                                                            {t(
-                                                                                                "message.we-can-tune-the-alert-for-you"
-                                                                                            )}
-                                                                                        </AlertTitle>
-                                                                                        {t(
-                                                                                            "message.our-new-feature-sets-up-your-alert-with-the-parameters"
-                                                                                        )}
-                                                                                    </Alert>
-                                                                                </Grid>
-                                                                            )}
-
-                                                                            {algorithmOption && (
-                                                                                <Grid
-                                                                                    item
-                                                                                    xs={
-                                                                                        12
-                                                                                    }
-                                                                                >
-                                                                                    <ThresholdSetup
-                                                                                        alert={
-                                                                                            alert
-                                                                                        }
-                                                                                        alertTemplate={
-                                                                                            selectedAlertTemplate
-                                                                                        }
-                                                                                        algorithmOptionConfig={
-                                                                                            algorithmOption
-                                                                                        }
-                                                                                        onAlertPropertyChange={
-                                                                                            onAlertPropertyChange
-                                                                                        }
-                                                                                    >
-                                                                                        {dimension !==
-                                                                                            SelectDimensionsOptions.ENUMERATORS &&
-                                                                                            anomalyDetection ===
-                                                                                                AnomalyDetectionOptions.COMPOSITE &&
-                                                                                            compositeFilters && (
+                                                                                                        <DoneAllIcon />
+                                                                                                    </Box>
+                                                                                                    <Box
+                                                                                                        pr={
+                                                                                                            2
+                                                                                                        }
+                                                                                                    >
+                                                                                                        Alert
+                                                                                                        Tuned
+                                                                                                    </Box>
+                                                                                                </Box>
+                                                                                            ) : (
                                                                                                 <Button
                                                                                                     color="primary"
-                                                                                                    onClick={() =>
-                                                                                                        setOpenCompositeFilterModal(
-                                                                                                            true
-                                                                                                        )
+                                                                                                    onClick={
+                                                                                                        handleTuneAlertClick
                                                                                                     }
                                                                                                 >
                                                                                                     {t(
-                                                                                                        "label.add-dimensions"
+                                                                                                        "label.tune-my-alert"
                                                                                                     )}
                                                                                                 </Button>
                                                                                             )}
-                                                                                    </ThresholdSetup>
-                                                                                </Grid>
-                                                                            )}
-                                                                        </Box>
-                                                                    ) : (
-                                                                        <Box
-                                                                            className={
-                                                                                classes.card
-                                                                            }
-                                                                            display="flex"
-                                                                            justifyContent="center"
-                                                                        >
-                                                                            <Grid>
-                                                                                <Box marginBottom="10px">
-                                                                                    <Typography variant="h5">
-                                                                                        {t(
-                                                                                            "label.dimensions-recommender"
-                                                                                        )}
-                                                                                    </Typography>
-
-                                                                                    <Typography variant="body2">
-                                                                                        {t(
-                                                                                            "message.find-top-dimension-contributors-to-create-the-alert"
-                                                                                        )}
-                                                                                    </Typography>
-                                                                                </Box>
-                                                                                <Button
-                                                                                    color="primary"
-                                                                                    startIcon={
-                                                                                        <AddCircleOutline />
+                                                                                        </>
                                                                                     }
+                                                                                    severity="info"
+                                                                                    style={{
+                                                                                        backgroundColor:
+                                                                                            "#FFF",
+                                                                                    }}
                                                                                     variant="outlined"
-                                                                                    onClick={() =>
-                                                                                        setOpenCompositeFilterModal(
-                                                                                            true
-                                                                                        )
+                                                                                >
+                                                                                    <AlertTitle>
+                                                                                        {t(
+                                                                                            "message.we-can-tune-the-alert-for-you"
+                                                                                        )}
+                                                                                    </AlertTitle>
+                                                                                    {t(
+                                                                                        "message.our-new-feature-sets-up-your-alert-with-the-parameters"
+                                                                                    )}
+                                                                                </Alert>
+                                                                            </Grid>
+                                                                        )}
+
+                                                                        {algorithmOption && (
+                                                                            <Grid
+                                                                                item
+                                                                                xs={
+                                                                                    12
+                                                                                }
+                                                                            >
+                                                                                <ThresholdSetup
+                                                                                    alert={
+                                                                                        alert
+                                                                                    }
+                                                                                    alertTemplate={
+                                                                                        selectedAlertTemplate
+                                                                                    }
+                                                                                    algorithmOptionConfig={
+                                                                                        algorithmOption
+                                                                                    }
+                                                                                    onAlertPropertyChange={
+                                                                                        onAlertPropertyChange
                                                                                     }
                                                                                 >
+                                                                                    {dimension !==
+                                                                                        SelectDimensionsOptions.ENUMERATORS &&
+                                                                                        anomalyDetection ===
+                                                                                            AnomalyDetectionOptions.COMPOSITE &&
+                                                                                        compositeFilters && (
+                                                                                            <Button
+                                                                                                color="primary"
+                                                                                                onClick={() =>
+                                                                                                    setOpenCompositeFilterModal(
+                                                                                                        true
+                                                                                                    )
+                                                                                                }
+                                                                                            >
+                                                                                                {t(
+                                                                                                    "label.add-dimensions"
+                                                                                                )}
+                                                                                            </Button>
+                                                                                        )}
+                                                                                </ThresholdSetup>
+                                                                            </Grid>
+                                                                        )}
+                                                                    </Box>
+                                                                ) : (
+                                                                    <Box
+                                                                        className={
+                                                                            classes.card
+                                                                        }
+                                                                        display="flex"
+                                                                        justifyContent="center"
+                                                                    >
+                                                                        <Grid>
+                                                                            <Box marginBottom="10px">
+                                                                                <Typography variant="h5">
                                                                                     {t(
-                                                                                        "label.add-dimensions"
+                                                                                        "label.dimensions-recommender"
                                                                                     )}
-                                                                                </Button>
-                                                                            </Grid>
-                                                                            <Grid>
-                                                                                <img
-                                                                                    src={
-                                                                                        DimensionImage
-                                                                                    }
-                                                                                />
-                                                                            </Grid>
-                                                                        </Box>
-                                                                    )}
-                                                                </Grid>
-                                                            )}
+                                                                                </Typography>
 
-                                                        <Grid item xs={12}>
-                                                            <Box
-                                                                display="flex"
-                                                                gridGap={10}
-                                                                paddingTop={2}
+                                                                                <Typography variant="body2">
+                                                                                    {t(
+                                                                                        "message.find-top-dimension-contributors-to-create-the-alert"
+                                                                                    )}
+                                                                                </Typography>
+                                                                            </Box>
+                                                                            <Button
+                                                                                color="primary"
+                                                                                startIcon={
+                                                                                    <AddCircleOutline />
+                                                                                }
+                                                                                variant="outlined"
+                                                                                onClick={() =>
+                                                                                    setOpenCompositeFilterModal(
+                                                                                        true
+                                                                                    )
+                                                                                }
+                                                                            >
+                                                                                {t(
+                                                                                    "label.add-dimensions"
+                                                                                )}
+                                                                            </Button>
+                                                                        </Grid>
+                                                                        <Grid>
+                                                                            <img
+                                                                                alt="Dimension recommender"
+                                                                                src={
+                                                                                    DimensionImage
+                                                                                }
+                                                                            />
+                                                                        </Grid>
+                                                                    </Box>
+                                                                )}
+                                                            </Grid>
+                                                        )}
+
+                                                    <Grid item xs={12}>
+                                                        <Box
+                                                            display="flex"
+                                                            gridGap={10}
+                                                            paddingTop={2}
+                                                        >
+                                                            <Button
+                                                                color="primary"
+                                                                variant="outlined"
+                                                                onClick={() => {
+                                                                    navigate(
+                                                                        getAlertsAllPath()
+                                                                    );
+                                                                }}
                                                             >
-                                                                <Button
-                                                                    color="primary"
-                                                                    variant="outlined"
-                                                                    onClick={() => {
-                                                                        navigate(
-                                                                            getAlertsAllPath()
-                                                                        );
-                                                                    }}
-                                                                >
-                                                                    {t(
-                                                                        "label.cancel"
-                                                                    )}
-                                                                </Button>
-                                                                <Button
-                                                                    color="primary"
-                                                                    disabled={
-                                                                        isCreateButtonDisabled
-                                                                    }
-                                                                    onClick={() =>
-                                                                        setOpenCreateAlertModal(
-                                                                            true
-                                                                        )
-                                                                    }
-                                                                >
-                                                                    {t(
-                                                                        alert.id
-                                                                            ? "label.update-alert"
-                                                                            : "label.create-alert"
-                                                                    )}
-                                                                </Button>
-                                                            </Box>
-                                                        </Grid>
+                                                                {t(
+                                                                    "label.cancel"
+                                                                )}
+                                                            </Button>
+                                                            <Button
+                                                                color="primary"
+                                                                disabled={
+                                                                    isCreateButtonDisabled
+                                                                }
+                                                                onClick={() =>
+                                                                    setOpenCreateAlertModal(
+                                                                        true
+                                                                    )
+                                                                }
+                                                            >
+                                                                {t(
+                                                                    alert.id
+                                                                        ? "label.update-alert"
+                                                                        : "label.create-alert"
+                                                                )}
+                                                            </Button>
+                                                        </Box>
                                                     </Grid>
                                                 </Grid>
                                             </Grid>
-                                        )}
-                                    </Grid>
-                                </Box>
-                            </Grid>
+                                        </Grid>
+                                    )}
+                                </Grid>
+                            </Box>
                         </Grid>
-                        {openCompositeFilterModal && (
-                            <AlertCompositeFiltersModal
-                                onCancel={() =>
-                                    setOpenCompositeFilterModal(false)
-                                }
-                                onUpdateCompositeFiltersChange={
-                                    onUpdateCompositeFiltersChange
-                                }
-                            />
-                        )}
-                        {openCreateAlertModal && (
-                            <CreateAlertModal
-                                onCancel={() => setOpenCreateAlertModal(false)}
-                            />
-                        )}
-                        {!isNil(selectedTable?.dataset?.id) && (
-                            <ColumnsDrawer
-                                datasetId={selectedTable?.dataset.id}
-                                isOpen={openViewColumnsListDrawer}
-                                selectedDataset={selectedTable}
-                                onClose={() =>
-                                    setOpenViewColumnsListDrawer(
-                                        (prev) => !prev
-                                    )
-                                }
-                            />
-                        )}
-                    </PageContentsCardV1>
-                </Grid>
-            </ThemeProvider>
+                    </Grid>
+                    {openCompositeFilterModal && (
+                        <AlertCompositeFiltersModal
+                            onCancel={() => setOpenCompositeFilterModal(false)}
+                            onUpdateCompositeFiltersChange={
+                                onUpdateCompositeFiltersChange
+                            }
+                        />
+                    )}
+                    {openCreateAlertModal && (
+                        <CreateAlertModal
+                            onCancel={() => setOpenCreateAlertModal(false)}
+                        />
+                    )}
+                    {!isNil(selectedTable?.dataset?.id) && (
+                        <ColumnsDrawer
+                            datasetId={selectedTable?.dataset.id}
+                            isOpen={openViewColumnsListDrawer}
+                            selectedDataset={selectedTable}
+                            onClose={() =>
+                                setOpenViewColumnsListDrawer((prev) => !prev)
+                            }
+                        />
+                    )}
+                </PageContentsCardV1>
+            </Grid>
         </>
     );
 };

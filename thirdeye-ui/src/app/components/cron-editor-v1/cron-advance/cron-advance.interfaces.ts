@@ -16,5 +16,4 @@
 export interface CronAdvanceProps {
     cron: string;
     onCronChange: (newCron: string) => void;
-    fullWidth?: boolean;
 }

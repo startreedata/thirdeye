@@ -46,7 +46,7 @@ describe("AppBar", () => {
             render(<AppBar />);
         });
 
-        expect(screen.getByText("label.overview")).toBeInTheDocument();
+        expect(screen.getByText("label.home")).toBeInTheDocument();
         expect(screen.getByText("label.alerts")).toBeInTheDocument();
         expect(screen.getByText("label.anomalies")).toBeInTheDocument();
         expect(screen.getByText("label.configuration")).toBeInTheDocument();

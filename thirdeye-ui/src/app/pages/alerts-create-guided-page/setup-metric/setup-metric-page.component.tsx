@@ -30,7 +30,7 @@ import {
 import { createNewStartingAlert } from "../../../components/alert-wizard-v2/alert-template/alert-template.utils";
 import { NavigateAlertCreationFlowsDropdown } from "../../../components/alert-wizard-v3/navigate-alert-creation-flows-dropdown/navigate-alert-creation-flows-dropdown";
 import { ChartContent } from "../../../components/alert-wizard-v3/preview-chart/chart-content/chart-content.component";
-import { PreviewChartHeader } from "../../../components/alert-wizard-v3/preview-chart/header/preview-chart-header-v2.component";
+import { PreviewChartHeader } from "../../../components/alert-wizard-v3/preview-chart/header/preview-chart-header.component";
 import { SelectMetric } from "../../../components/alert-wizard-v3/select-metric/select-metric.component";
 import {
     generateTemplateProperties,

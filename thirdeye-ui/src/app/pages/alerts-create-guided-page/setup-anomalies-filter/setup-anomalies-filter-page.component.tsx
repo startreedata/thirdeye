@@ -44,7 +44,7 @@ import { AnomaliesFilterConfiguratorRenderConfigs } from "../../../components/al
 import { getAvailableFilterOptions } from "../../../components/alert-wizard-v3/anomalies-filter-panel/anomalies-filter-panel.utils";
 import { NavigateAlertCreationFlowsDropdown } from "../../../components/alert-wizard-v3/navigate-alert-creation-flows-dropdown/navigate-alert-creation-flows-dropdown";
 import { ChartContent } from "../../../components/alert-wizard-v3/preview-chart/chart-content/chart-content.component";
-import { PreviewChartHeader } from "../../../components/alert-wizard-v3/preview-chart/header/preview-chart-header-v2.component";
+import { PreviewChartHeader } from "../../../components/alert-wizard-v3/preview-chart/header/preview-chart-header.component";
 import { EmptyStateSwitch } from "../../../components/page-states/empty-state-switch/empty-state-switch.component";
 import { LoadingErrorStateSwitch } from "../../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { Portal } from "../../../components/portal/portal.component";

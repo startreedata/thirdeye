@@ -16,7 +16,7 @@ import { Grid } from "@material-ui/core";
 import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Outlet, useLocation, useParams } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import { PageHeaderProps } from "../../components/page-header/page-header.interfaces";
@@ -61,10 +61,8 @@ export const SubscriptionGroupsWizardPage: FunctionComponent<SubscriptionGroupsW
     }) => {
         const { t } = useTranslation();
         const { notify } = useNotificationProviderV1();
-        const params = useParams();
 
         const { alerts, getAlerts, status: alertsStatus } = useGetAlerts();
-
         const {
             enumerationItems,
             getEnumerationItems,
@@ -85,11 +83,6 @@ export const SubscriptionGroupsWizardPage: FunctionComponent<SubscriptionGroupsW
             // the new values will need the corresponding entities to be displayed
             getAlerts();
             getEnumerationItems();
-            if (params.id) {
-                setEditedAssociations([
-                    { alertId: Number(params.id), id: params.id },
-                ]);
-            }
         }, []);
 
         useEffect(() => {

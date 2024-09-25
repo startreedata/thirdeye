@@ -38,7 +38,6 @@ import {
 } from "../../../platform/components";
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { EnumerationItemConfig } from "../../../rest/dto/alert.interfaces";
-import { Dataset } from "../../../rest/dto/dataset.interfaces";
 import { MetricAggFunction } from "../../../rest/dto/metric.interfaces";
 import { CohortResult } from "../../../rest/dto/rca.interfaces";
 import { useGetCohort } from "../../../rest/rca/rca.actions";
@@ -209,9 +208,9 @@ export const SetupDimensionGroupsPage: FunctionComponent = () => {
                         )}
                         title={t("label.dimensions-recommender")}
                         onMetricSelect={(
-                            metric: string,
-                            dataset: Dataset,
-                            aggregationFunction: string
+                            metric,
+                            dataset,
+                            aggregationFunction
                         ) => {
                             onAlertPropertyChange({
                                 templateProperties: {

@@ -46,7 +46,6 @@ module.exports = {
     setupFilesAfterEnv: ["@testing-library/jest-dom/extend-expect"],
     clearMocks: true,
     moduleNameMapper: {
-        "\\.(jpg|jpeg|png|gif)$": "<rootDir>/src/test/unit/mocks/font.mock.js", // Mock PNG imports
         "\\.ttf$": "<rootDir>/src/test/unit/mocks/font.mock.js", // Mock font imports
         "\\.svg$": "<rootDir>/src/test/unit/mocks/svg.mock.js", // Mock SVG imports
         "\\.(css|scss)$": "identity-obj-proxy", // Mock style imports

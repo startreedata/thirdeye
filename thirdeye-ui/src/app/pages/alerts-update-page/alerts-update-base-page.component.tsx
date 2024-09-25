@@ -47,11 +47,8 @@ import {
     createEmptySubscriptionGroup,
     getSubscriptionGroupAlertsList,
 } from "../../utils/subscription-groups/subscription-groups.util";
-import { AlertsEditCreateBasePageComponent } from "../alerts-edit-create-common/alerts-edit-create-base-page-v2.component";
-import {
-    QUERY_PARAM_KEY_ALERT_TYPE,
-    QUERY_PARAM_KEY_ANOMALIES_RETRY,
-} from "../alerts-view-page/alerts-view-page.utils";
+import { AlertsEditCreateBasePageComponent } from "../alerts-edit-create-common/alerts-edit-create-base-page.component";
+import { QUERY_PARAM_KEY_ANOMALIES_RETRY } from "../alerts-view-page/alerts-view-page.utils";
 import { AlertsUpdatePageParams } from "./alerts-update-page.interfaces";
 
 export const AlertsUpdateBasePage: FunctionComponent = () => {
@@ -189,9 +186,7 @@ export const AlertsUpdateBasePage: FunctionComponent = () => {
         let copiedCurrentlySelectedSubscriptionGroups = [
             ...currentlySelectedSubscriptionGroups,
         ];
-        const searchParams = new URLSearchParams([
-            [QUERY_PARAM_KEY_ALERT_TYPE, "update"],
-        ]);
+        const searchParams = new URLSearchParams();
         if (alertWasReset) {
             searchParams.set(QUERY_PARAM_KEY_ANOMALIES_RETRY, "true");
         }

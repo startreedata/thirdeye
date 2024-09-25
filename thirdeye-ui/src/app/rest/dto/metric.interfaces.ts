@@ -58,13 +58,3 @@ export enum MetricAggFunction {
     PCT95 = "PCT95",
     PCT99 = "PCT99",
 }
-
-export enum AnomalyDetectionOptions {
-    SINGLE = "Single metric",
-    COMPOSITE = "Multiple dimensions",
-}
-
-export enum SelectDimensionsOptions {
-    ENUMERATORS = "Enumerators",
-    DIMENSION_RECOMMENDER = "Dimension recommender",
-}

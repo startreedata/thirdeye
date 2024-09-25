@@ -178,6 +178,7 @@ accessControl:
 config:
   description: placeholder for common configs accross coordinator and worker
   jdbcParameters: allowPublicKeyRetrieval=true&sslMode=DISABLED
+  loadCalendarEvents: true
 
 # Section for dynamic secret generation
 secrets:

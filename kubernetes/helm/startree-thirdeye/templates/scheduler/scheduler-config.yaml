@@ -156,6 +156,7 @@ data:
       detectionAlert: true
 
       holidayEvents:
+        {{- if .Values.config.loadCalendarEvents }}
         enabled: {{ not .Values.secrets.holidayLoaderKey | ternary "false" "true" }}
         calendars:
         {{- if .Values.config.calendars }}
@@ -201,4 +202,9 @@ data:
         {{- end }}
         holidayLoadRange: 2592000000
         runFrequency: 1  # in Days
+        {{- else }}
+        enabled: false
+        calendars: []
+        {{- end }}
+
 {{ end }}

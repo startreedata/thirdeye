@@ -399,18 +399,23 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
       }
       // we cannot get the children from existingAnomaly.getChildren() - getChildren child anomalies objects are not the same as child anomalies objects from the persistenceAnomalies list
       // so the mutation done in the previous loop does not affect existingAnomaly.getChildren() - hence we get the ids from the parent and get the anomalies from idToPersistedAnomaly
-      // eventually we may not event want to populated children when fetching existing anomalies for this use case - it's making things slow - we should only rely on childIds - TODO CYRIL  
+      // eventually we may not event want to populated children when fetching existing anomalies for this use case - it's making things slow - we should only rely on childIds - TODO CYRIL
       final Set<AnomalyDTO> children = existingAnomaly.getChildIds()
           .stream()
           .map(idToPersistedAnomaly::get)
-          // to catch potential bugs early 
-          .peek(Objects::requireNonNull)
+          // some children may not be found - eg if the parent anomaly is on [t1 - t9] but replay happens on [t7 - t10]  
+          .filter(Objects::nonNull)
           .collect(Collectors.toSet());
-      final int numChildrenOutdated = children.stream() // this is getting children from the wrong place - it does not correspond to the children modified above  
+      if (children.size() != existingAnomaly.getChildIds().size()) {
+        // not all children are available - don't update the parent
+        // FIXME CYRIL - based on the detection interval, it is possible to do better. 
+        continue;
+      }
+      final int numChildrenOutdated = children.stream()  
           .map(AnomalyMergerPostProcessor::hasOutdatedLabel)
           .mapToInt(o -> o ? 1 : 0)
           .sum();
-      if (numChildrenOutdated == children.size()) {
+      if (numChildrenOutdated == existingAnomaly.getChildIds().size()) {
         // parent is fully outdated
         addReplayLabel(existingAnomaly, newOutdatedLabel());
         vanishedAnomalies.add(existingAnomaly);

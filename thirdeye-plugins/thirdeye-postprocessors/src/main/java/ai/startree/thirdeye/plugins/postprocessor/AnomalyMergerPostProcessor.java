@@ -407,11 +407,11 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
           .filter(Objects::nonNull)
           .collect(Collectors.toSet());
       if (children.size() != existingAnomaly.getChildIds().size()) {
-        // not all children are available - don't update the parent
         if (detectionInterval.getStart().getMillis() <= existingAnomaly.getStartTime() && detectionInterval.getEnd().getMillis() >= existingAnomaly.getEndTime()) {
           // not expected - all children should be available in this case - catch bug
           throw new RuntimeException("Could not find all children of a parent during anomaly merger. Please reach out to StarTree support.");
         }
+        // not all children are available - don't update the parent
         continue;
       }
       final int numChildrenOutdated = children.stream()  

@@ -54,7 +54,7 @@ import org.testng.annotations.Test;
 public class AnomalyResolutionTest {
 
   private static final ZoneOffset UTC = ZoneOffset.UTC;
-  private static final long TEST_IMEOUT = 6000000L;
+  private static final long TEST_IMEOUT = 60_000L;
   private static final AlertApi ALERT_API;
   private static final SubscriptionGroupApi SUBSCRIPTION_GROUP_API;
   private static final TimeProvider CLOCK = TimeProvider.instance();

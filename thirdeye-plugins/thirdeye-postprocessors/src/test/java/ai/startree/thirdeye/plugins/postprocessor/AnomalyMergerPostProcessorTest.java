@@ -17,6 +17,7 @@ import static ai.startree.thirdeye.plugins.postprocessor.AnomalyMergerPostProces
 import static ai.startree.thirdeye.plugins.postprocessor.AnomalyMergerPostProcessor.OUTDATED_AFTER_REPLAY_LABEL_NAME;
 import static ai.startree.thirdeye.plugins.postprocessor.AnomalyMergerPostProcessor.newAfterReplayLabel;
 import static ai.startree.thirdeye.plugins.postprocessor.AnomalyMergerPostProcessor.newOutdatedLabel;
+import static ai.startree.thirdeye.spi.Constants.VANILLA_OBJECT_MAPPER;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -31,6 +32,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.detection.DetectionPipelineUsage;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -578,7 +580,8 @@ public class AnomalyMergerPostProcessorTest {
         .setAvgBaselineVal(12)
         .setScore(1)
         .setChild(true);
-    e1.setChildren(Set.of(e2));
+    e1.setChildren(Set.of(copy(e2)));
+    e1.setChildIds(Set.of(e2.getId()));
     existingAnomalies = listOf(e1, e2);
     detectionSpec.setMergeMaxGap("PT1H");
     detectionMerger = new AnomalyMergerPostProcessor(detectionSpec);
@@ -591,7 +594,8 @@ public class AnomalyMergerPostProcessorTest {
     final Set<AnomalyDTO> output = detectionMerger.merge(listOf(n1), detectionInterval);
 
     assertThat(output).isEqualTo(Set.of(e2, e1));
-    assertThat(e1.getChildren().iterator().next()).isEqualTo(e2);
+    assertThat(e1.getChildren().iterator().next().getId()).isEqualTo(e2.getId());
+    assertThat(e1.getChildIds().iterator().next()).isEqualTo(e2.getId());
     assertThat(e2.isChild()).isTrue();
     assertThat(e2.getAnomalyLabels()).isNull();
     assertThat(e2.getAvgCurrentVal()).isEqualTo(23);
@@ -738,7 +742,8 @@ public class AnomalyMergerPostProcessorTest {
         .setAvgBaselineVal(12)
         .setScore(1)
         .setChild(true);
-    e1.setChildren(new HashSet<>(Set.of(e2)));
+    e1.setChildren(new HashSet<>(Set.of(copy(e2))));
+    e1.setChildIds(new HashSet<>(Set.of(e2.getId())));
     existingAnomalies = listOf(e1, e2);
     detectionSpec.setMergeMaxGap("PT1H");
     detectionSpec.setReNotifyAbsoluteThreshold(renotifyAbsoluteThreshold);
@@ -753,7 +758,8 @@ public class AnomalyMergerPostProcessorTest {
     final Set<AnomalyDTO> output = detectionMerger.merge(listOf(n1), detectionInterval);
 
     assertThat(output).isEqualTo(Set.of(e2, e1));
-    assertThat(e1.getChildren().iterator().next()).isEqualTo(e2);
+    assertThat(e1.getChildIds().iterator().next()).isEqualTo(e2.getId());
+    assertThat(e1.getChildren().iterator().next().getId()).isEqualTo(e2.getId());
     assertThat(e2.isChild()).isTrue();
     assertThat(e2.getAnomalyLabels()).isNull();
     assertThat(e2.getAvgCurrentVal()).isEqualTo(23);
@@ -837,7 +843,8 @@ public class AnomalyMergerPostProcessorTest {
         .setScore(1)
         .setAnomalyLabels(listOf(label))
         .setChild(true);
-    e1.setChildren(new HashSet<>(Set.of(e2)));
+    e1.setChildren(new HashSet<>(Set.of(copy(e2))));
+    e1.setChildIds(new HashSet<>(Set.of(e2.getId())));
     existingAnomalies = listOf(e1, e2);
     detectionSpec.setMergeMaxGap("PT30M");
     detectionSpec.setReNotifyAbsoluteThreshold(renotifyAbsoluteThreshold);
@@ -859,7 +866,8 @@ public class AnomalyMergerPostProcessorTest {
     assertThat(e1.getAnomalyLabels().size()).isEqualTo(1);
     assertThat(e1.getAnomalyLabels()).isEqualTo(List.of(label));
     assertThat(e1.getChildren().size()).isEqualTo(1);
-    assertThat(e1.getChildren().iterator().next()).isEqualTo(e2);
+    assertThat(e1.getChildren().iterator().next().getId()).isEqualTo(e2.getId());
+    assertThat(e1.getChildIds().iterator().next()).isEqualTo(e2.getId());
 
     assertThat(e2.getAnomalyLabels().size()).isEqualTo(2);
     assertThat(e2.getAnomalyLabels()).isEqualTo(List.of(label, newOutdatedLabel()));
@@ -903,7 +911,8 @@ public class AnomalyMergerPostProcessorTest {
     final AnomalyDTO parent = existingAnomaly(JANUARY_1_2021_03H, JANUARY_1_2021_05H);
     final AnomalyDTO e1 = existingAnomaly(JANUARY_1_2021_03H, JANUARY_1_2021_04H).setChild(true);
     final AnomalyDTO e2 = existingAnomaly(JANUARY_1_2021_04H, JANUARY_1_2021_05H).setChild(true);
-    parent.setChildren(new HashSet<>(Set.of(e1, e2)));
+    parent.setChildren(new HashSet<>(Set.of(copy(e1), copy(e2))));
+    parent.setChildIds(new HashSet<>(Set.of(e1.getId(), e2.getId())));
     existingAnomalies = listOf(parent, e1, e2);
     detectionSpec.setMergeMaxGap("PT30M");
     detectionMerger = new AnomalyMergerPostProcessor(detectionSpec);
@@ -935,7 +944,8 @@ public class AnomalyMergerPostProcessorTest {
         .setAvgBaselineVal(10)
         .setAvgCurrentVal(20)
         .setScore(1);
-    parent.setChildren(new HashSet<>(Set.of(e1, e2)));
+    parent.setChildren(new HashSet<>(Set.of(copy(e1), copy(e2))));
+    parent.setChildIds(new HashSet<>(Set.of(e1.getId(), e2.getId())));
     existingAnomalies = listOf(parent, e1, e2);
     detectionSpec.setMergeMaxGap("PT30M");
     detectionMerger = new AnomalyMergerPostProcessor(detectionSpec);
@@ -960,7 +970,8 @@ public class AnomalyMergerPostProcessorTest {
     final AnomalyDTO parent = existingAnomaly(JANUARY_1_2021_03H, JANUARY_1_2021_05H);
     final AnomalyDTO e1 = existingAnomaly(JANUARY_1_2021_03H, JANUARY_1_2021_04H).setChild(true);
     final AnomalyDTO e2 = existingAnomaly(JANUARY_1_2021_04H, JANUARY_1_2021_05H).setChild(true);
-    parent.setChildren(new HashSet<>(Set.of(e1, e2)));
+    parent.setChildren(new HashSet<>(Set.of(copy(e1), copy(e2))));
+    parent.setChildIds(new HashSet<>(Set.of(e1.getId(), e2.getId())));
     existingAnomalies = listOf(parent, e1, e2);
     detectionSpec.setMergeMaxGap("PT30M");
     detectionMerger = new AnomalyMergerPostProcessor(detectionSpec);
@@ -975,6 +986,15 @@ public class AnomalyMergerPostProcessorTest {
     assertThat(parent.getAnomalyLabels()).isNull();
     // parent startTime and values are updated
     assertThat(parent.getEndTime()).isEqualTo(JANUARY_1_2021_04H);
+  }
+
+
+  private static AnomalyDTO copy(final AnomalyDTO e1)  {
+    try {
+      return VANILLA_OBJECT_MAPPER.readValue(VANILLA_OBJECT_MAPPER.writeValueAsString(e1), AnomalyDTO.class);
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(e);
+    }
   }
 }
 

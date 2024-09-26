@@ -78,6 +78,7 @@ public class ThirdEyeOAuthThirdEyeAuthenticator implements ThirdEyeAuthenticator
       @Override
       public OAuthThirdEyePrincipal load(final AuthTokenAndNamespace authTokenAndNamespace)
           throws Exception {
+        // FIXME CYRIL - throws NPE if authTokenAndNamespace.authToken() is null
         final SignedJWT jwt = SignedJWT.parse(authTokenAndNamespace.authToken());
         final JWTClaimsSet claims = processor.process(jwt, oidcContext);
         return new OAuthThirdEyePrincipal(getName(claims), authTokenAndNamespace.namespace());

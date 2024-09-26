@@ -25,6 +25,7 @@ import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyLabelDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
@@ -44,6 +45,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -372,8 +374,8 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
         .collect(Collectors.toSet());
     for (final AnomalyDTO existingAnomaly : persistenceAnomalies) {
       final boolean isUnitaryAnomaly = existingAnomaly.isChild()
-          || existingAnomaly.getChildren() == null
-          || existingAnomaly.getChildren().isEmpty();
+          || existingAnomaly.getChildIds() == null
+          || existingAnomaly.getChildIds().isEmpty();
       final boolean isInDetectionInterval =
           existingAnomaly.getStartTime() >= detectionInterval.getStartMillis()
               && existingAnomaly.getEndTime() <= detectionInterval.getEndMillis();
@@ -385,36 +387,57 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
         vanishedAnomalies.add(existingAnomaly);
       }
     }
+    
+    final Map<Long, AnomalyDTO> idToPersistedAnomaly = persistenceAnomalies.stream()
+        .collect(Collectors.toMap(AbstractDTO::getId, e -> e));
+
     // second loop looks at the parents with children
     // if a parent has all its children tagged as outdated, it is tagged as outdated
     for (final AnomalyDTO existingAnomaly : persistenceAnomalies) {
-      final Set<AnomalyDTO> children = existingAnomaly.getChildren();
-      if (children != null && !children.isEmpty()) {
-        final int numChildrenOutdated = children.stream()
-            .map(AnomalyMergerPostProcessor::hasOutdatedLabel)
-            .mapToInt(o -> o ? 1 : 0)
-            .sum();
-        if (numChildrenOutdated == children.size()) {
-          // parent is fully outdated
-          addReplayLabel(existingAnomaly, newOutdatedLabel());
-          vanishedAnomalies.add(existingAnomaly);
-        } else if (numChildrenOutdated > 0) {
-          // parent is partially outdated - updated bounds
-          final List<AnomalyDTO> sortedNotOutdatedChildren = children.stream()
-              .filter(a -> !hasOutdatedLabel(a))
-              .sorted(COMPARATOR)
-              .toList();
-          final AnomalyDTO firstChildren = sortedNotOutdatedChildren.get(0);
-          final AnomalyDTO lastChildren = sortedNotOutdatedChildren.get(
-              sortedNotOutdatedChildren.size() - 1);
-          existingAnomaly.setStartTime(firstChildren.getStartTime());
-          updateAnomalyWithNewValues(existingAnomaly, firstChildren);
-          final List<List<AnomalyLabelDTO>> notOutdatedLabels = sortedNotOutdatedChildren.stream()
-              .map(AnomalyDTO::getAnomalyLabels).toList();
-          existingAnomaly.setAnomalyLabels(mergeAnomalyLabels(notOutdatedLabels));
-          existingAnomaly.setEndTime(lastChildren.getEndTime());
-          // not vanished - can still be used for merging
+      if (existingAnomaly.getChildIds() == null || existingAnomaly.getChildIds().isEmpty()) {
+        continue;
+      }
+      // we cannot get the children from existingAnomaly.getChildren() - getChildren child anomalies objects are not the same as child anomalies objects from the persistenceAnomalies list
+      // so the mutation done in the previous loop does not affect existingAnomaly.getChildren() - hence we get the ids from the parent and get the anomalies from idToPersistedAnomaly
+      // eventually we may not event want to populate children when fetching existing anomalies for this use case - it's making things slow - we should only rely on childIds - TODO CYRIL
+      final Set<AnomalyDTO> children = existingAnomaly.getChildIds()
+          .stream()
+          .map(idToPersistedAnomaly::get)
+          // some children may not be found - eg if the parent anomaly is on [t1 - t9] but replay happens on [t7 - t10]  
+          .filter(Objects::nonNull)
+          .collect(Collectors.toSet());
+      if (children.size() != existingAnomaly.getChildIds().size()) {
+        if (detectionInterval.getStart().getMillis() <= existingAnomaly.getStartTime() && detectionInterval.getEnd().getMillis() >= existingAnomaly.getEndTime()) {
+          // not expected - all children should be available in this case - catch bug
+          throw new RuntimeException("Could not find all children of a parent during anomaly merger. Please reach out to StarTree support.");
         }
+        // not all children are available - don't update the parent - some child anomalies are on a time period that was not on the detection interval
+        continue;
+      }
+      final int numChildrenOutdated = children.stream()  
+          .map(AnomalyMergerPostProcessor::hasOutdatedLabel)
+          .mapToInt(o -> o ? 1 : 0)
+          .sum();
+      if (numChildrenOutdated == existingAnomaly.getChildIds().size()) {
+        // parent is fully outdated
+        addReplayLabel(existingAnomaly, newOutdatedLabel());
+        vanishedAnomalies.add(existingAnomaly);
+      } else if (numChildrenOutdated > 0) {
+        // parent is partially outdated - updated bounds
+        final List<AnomalyDTO> sortedNotOutdatedChildren = children.stream()
+            .filter(a -> !hasOutdatedLabel(a))
+            .sorted(COMPARATOR)
+            .toList();
+        final AnomalyDTO firstChildren = sortedNotOutdatedChildren.get(0);
+        final AnomalyDTO lastChildren = sortedNotOutdatedChildren.get(
+            sortedNotOutdatedChildren.size() - 1);
+        existingAnomaly.setStartTime(firstChildren.getStartTime());
+        updateAnomalyWithNewValues(existingAnomaly, firstChildren);
+        final List<List<AnomalyLabelDTO>> notOutdatedLabels = sortedNotOutdatedChildren.stream()
+            .map(AnomalyDTO::getAnomalyLabels).toList();
+        existingAnomaly.setAnomalyLabels(mergeAnomalyLabels(notOutdatedLabels));
+        existingAnomaly.setEndTime(lastChildren.getEndTime());
+        // not vanished - can still be used for merging
       }
     }
     return vanishedAnomalies;

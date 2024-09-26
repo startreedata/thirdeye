@@ -299,6 +299,12 @@ export const getAlertsCreateNewSimplePath = (): string => {
     );
 };
 
+export const getAlertsCreateAdvancePath = (): string => {
+    return createPathWithRecognizedQueryString(
+        AppRoute.ALERTS_CREATE_NEW_ADVANCED
+    );
+};
+
 export const getAlertsCreateNewJsonEditorPath = (): string => {
     return createPathWithRecognizedQueryString(
         AppRoute.ALERTS_CREATE_NEW_JSON_EDITOR

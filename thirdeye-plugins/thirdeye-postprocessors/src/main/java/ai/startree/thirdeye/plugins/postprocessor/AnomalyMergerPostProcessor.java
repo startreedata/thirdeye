@@ -411,7 +411,7 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
           // not expected - all children should be available in this case - catch bug
           throw new RuntimeException("Could not find all children of a parent during anomaly merger. Please reach out to StarTree support.");
         }
-        // not all children are available - don't update the parent
+        // not all children are available - don't update the parent - some child anomalies are on a time period that was not on the detection interval
         continue;
       }
       final int numChildrenOutdated = children.stream()  

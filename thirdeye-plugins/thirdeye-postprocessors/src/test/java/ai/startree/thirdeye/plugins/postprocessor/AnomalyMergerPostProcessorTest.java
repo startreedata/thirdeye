@@ -21,6 +21,7 @@ import static ai.startree.thirdeye.spi.Constants.VANILLA_OBJECT_MAPPER;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.joda.time.DateTimeZone.UTC;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -963,6 +964,57 @@ public class AnomalyMergerPostProcessorTest {
     assertThat(parent.getAvgBaselineVal()).isEqualTo(10);
     assertThat(parent.getAvgCurrentVal()).isEqualTo(20);
     assertThat(parent.getScore()).isEqualTo(1);
+  }
+
+  @Test
+  public void testReplayRule4ParentLeftBoundIsNotUpdatedIfFirstChildDoesNotExistAnymoreButDetectionIntervalDoesNotIncludeEveryChild() {
+    final AnomalyDTO parent = existingAnomaly(JANUARY_1_2021_03H, JANUARY_1_2021_05H);
+    final AnomalyDTO e1 = existingAnomaly(JANUARY_1_2021_03H, JANUARY_1_2021_04H).setChild(true);
+    final AnomalyDTO e2 = existingAnomaly(JANUARY_1_2021_04H, JANUARY_1_2021_05H).setChild(true)
+        .setAvgBaselineVal(10)
+        .setAvgCurrentVal(20)
+        .setScore(1);
+    final AnomalyDTO e1Copy = copy(e1);
+    parent.setChildren(new HashSet<>(Set.of(e1Copy, copy(e2))));
+    parent.setChildIds(new HashSet<>(Set.of(e1.getId(), e2.getId())));
+    final AnomalyDTO originalParent = copy(parent);
+    existingAnomalies = listOf(parent, e1, e2);
+    detectionSpec.setMergeMaxGap("PT30M");
+    detectionMerger = new AnomalyMergerPostProcessor(detectionSpec);
+    final AnomalyDTO n1 = newAnomaly(JANUARY_1_2021_04H, JANUARY_1_2021_05H);
+    // the detection interval is bigger than the parent start time 
+    final Interval detectionInterval = new Interval(JANUARY_1_2021_04H, JANUARY_1_2021_06H, UTC);
+    final Set<AnomalyDTO> output = detectionMerger.merge(listOf(n1), detectionInterval);
+
+    assertThat(output).isEqualTo(Set.of(e2, parent));
+    assertThat(e1.getAnomalyLabels()).isNull();
+    assertThat(e1Copy.getAnomalyLabels()).isNull();
+    assertThat(e2.getAnomalyLabels()).isNull();
+    assertThat(parent.getAnomalyLabels()).isNull();
+    // parent is not updated
+    assertThat(parent).isEqualTo(originalParent);
+  }
+
+
+  @Test
+  public void testReplayRule4ParentThrowsIfNotEveryChildrenAreAvailableInExpectedTimeframe() {
+    final AnomalyDTO parent = existingAnomaly(JANUARY_1_2021_03H, JANUARY_1_2021_05H);
+    final AnomalyDTO e1 = existingAnomaly(JANUARY_1_2021_03H, JANUARY_1_2021_04H).setChild(true);
+    final AnomalyDTO e2 = existingAnomaly(JANUARY_1_2021_04H, JANUARY_1_2021_05H).setChild(true)
+        .setAvgBaselineVal(10)
+        .setAvgCurrentVal(20)
+        .setScore(1);
+    final AnomalyDTO e1Copy = copy(e1);
+    parent.setChildren(new HashSet<>(Set.of(e1Copy, copy(e2))));
+    parent.setChildIds(new HashSet<>(Set.of(e1.getId(), e2.getId())));
+    final AnomalyDTO originalParent = copy(parent);
+    existingAnomalies = listOf(parent, e2);
+    detectionSpec.setMergeMaxGap("PT30M");
+    detectionMerger = new AnomalyMergerPostProcessor(detectionSpec);
+    final AnomalyDTO n1 = newAnomaly(JANUARY_1_2021_04H, JANUARY_1_2021_05H);
+    // the detection interval is bigger than the parent start time 
+    final Interval detectionInterval = new Interval(JANUARY_1_2021_03H, JANUARY_1_2021_06H, UTC);
+    assertThatThrownBy(() -> detectionMerger.merge(listOf(n1), detectionInterval)).isInstanceOf(RuntimeException.class);
   }
 
   @Test

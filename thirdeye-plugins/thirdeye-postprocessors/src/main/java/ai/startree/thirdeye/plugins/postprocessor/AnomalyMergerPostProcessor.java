@@ -399,7 +399,7 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
       }
       // we cannot get the children from existingAnomaly.getChildren() - getChildren child anomalies objects are not the same as child anomalies objects from the persistenceAnomalies list
       // so the mutation done in the previous loop does not affect existingAnomaly.getChildren() - hence we get the ids from the parent and get the anomalies from idToPersistedAnomaly
-      // eventually we may not event want to populated children when fetching existing anomalies for this use case - it's making things slow - we should only rely on childIds - TODO CYRIL
+      // eventually we may not event want to populate children when fetching existing anomalies for this use case - it's making things slow - we should only rely on childIds - TODO CYRIL
       final Set<AnomalyDTO> children = existingAnomaly.getChildIds()
           .stream()
           .map(idToPersistedAnomaly::get)

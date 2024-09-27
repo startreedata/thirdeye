@@ -308,7 +308,9 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
      * with subscription groups. This is taken care automatically after the reset when the pipeline
      * is executed and the enumerator operator cleans the existing enumeration items
      */
+    deleteAssociatedRcaInvestigations(dto.getId());
     deleteAssociatedAnomalies(dto.getId());
+
     // reset lastTimestamp
     dto.setLastTimestamp(minimumLastTimestamp(principal, dto));
     dtoManager.update(dto);

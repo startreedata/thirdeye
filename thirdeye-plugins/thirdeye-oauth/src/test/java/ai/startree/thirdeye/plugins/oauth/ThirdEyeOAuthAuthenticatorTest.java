@@ -13,12 +13,11 @@
  */
 package ai.startree.thirdeye.plugins.oauth;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.expectThrows;
 
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthenticator.AuthTokenAndNamespace;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
@@ -33,13 +32,15 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import java.text.ParseException;
+import java.util.Optional;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class ThirdEyeOAuthAuthenticatorTest {
 
-  private CacheLoader<AuthTokenAndNamespace, ThirdEyePrincipal> cache;
+  private CacheLoader<AuthTokenAndNamespace, Optional<ThirdEyePrincipal>> cache;
 
   public static JWK getJWK(String kid) throws JOSEException {
     return new RSAKeyGenerator(2048)
@@ -72,19 +73,20 @@ public class ThirdEyeOAuthAuthenticatorTest {
 
   @Test
   public void cachedEntriesTest() throws Exception {
-    ThirdEyePrincipal principal = cache.load(
+    Optional<ThirdEyePrincipal> principal = cache.load(
         new AuthTokenAndNamespace(
         getToken(getJWK(
             RandomStringUtils.randomAlphanumeric(16)),
         new JWTClaimsSet.Builder().build()),
             null
         ));
-    assertNotNull(principal);
-    assertEquals(principal.getName(), "test");
+    assertThat(principal).isNotEmpty();
+    assertThat(principal.get().getName()).isEqualTo("test");
   }
 
   @Test
   public void invalidJwtTokenTest() {
-    expectThrows(Exception.class, () -> cache.load(new AuthTokenAndNamespace("invalid-token", null)));
+    assertThatThrownBy(() -> cache.load(new AuthTokenAndNamespace("invalid-token", null)))
+        .isInstanceOf(ParseException.class);
   }
 }

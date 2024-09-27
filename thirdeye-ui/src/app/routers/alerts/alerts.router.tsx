@@ -87,6 +87,12 @@ const AlertsUpdateAdvancedPage = lazy(() =>
     ).then((module) => ({ default: module.AlertsUpdateAdvancedPage }))
 );
 
+const AlertsUpdateAdvancedPageV2 = lazy(() =>
+    import(
+        /* webpackChunkName: "alerts-update-advanced-page" */ "../../pages/alerts-update-page/alerts-update-advanced-page-v2.component"
+    ).then((module) => ({ default: module.AlertsUpdateAdvancedPage }))
+);
+
 const PageNotFoundPage = lazy(() =>
     import(
         /* webpackChunkName: "page-not-found-page" */ "../../pages/page-not-found-page/page-not-found-page.component"
@@ -341,6 +347,10 @@ export const AlertsRouter: FunctionComponent = () => {
                         <Route
                             element={<AlertsUpdateAdvancedPage />}
                             path={AppRouteRelative.ALERTS_UPDATE_ADVANCED}
+                        />
+                        <Route
+                            element={<AlertsUpdateAdvancedPageV2 />}
+                            path={AppRouteRelative.ALERTS_UPDATE_ADVANCED_V2}
                         />
                         <Route
                             element={<AlertsUpdateJSONPage />}

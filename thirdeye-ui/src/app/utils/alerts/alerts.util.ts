@@ -475,6 +475,16 @@ export const extendablePropertyStepNameMap: Record<string, string> = {
     RCA: "Root Cause Analysis",
     OTHER: "Other",
 };
+export const extendablePropertyStepNameMapV2: Record<string, string> = {
+    DATA: "Sample data",
+    PREPROCESS: "Preprocessing",
+    DETECTION: "Detection",
+    DIMENSION_EXPLORATION: "Dimension Exploration",
+    FILTER: "Filtering",
+    POSTPROCESS: "Postprocessing",
+    RCA: "Root Cause Analysis",
+    OTHER: "Other",
+};
 
 export enum ALERT_PROPERTIES_DEFAULT_STEP {
     STEP = "OTHER",

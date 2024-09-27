@@ -12,13 +12,9 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { makeStyles } from "@material-ui/core";
+import { EditableAlert } from "../../../../rest/dto/alert.interfaces";
 
-export const useCronAdvanceStyles = makeStyles((theme) => ({
-    label: {
-        color: theme.palette.text.primary,
-    },
-    label2: {
-        color: "#4B6D93",
-    },
-}));
+export interface AlertFrequencyProps<NewOrExistingAlert> {
+    alert: NewOrExistingAlert;
+    onAlertPropertyChange: (contents: Partial<EditableAlert>) => void;
+}

@@ -23,6 +23,10 @@ export const easyAlertStyles = makeStyles(() => ({
         margin: "10px 0",
         color: "#0097A9",
     },
+    backgroundContainer: {
+        backgroundColor: ColorV1.White1,
+        padding: "30px",
+    },
     card: {
         borderRadius: "8px",
         border: "1px solid #B4CDE0",
@@ -43,6 +47,8 @@ export const easyAlertStyles = makeStyles(() => ({
     infoButton: {
         height: "36px",
         backgroundColor: "#f3f9ff",
+        textWrap: "nowrap",
+        textTransform: "none",
     },
     footer: {
         border: `1px solid ${ColorV1.Grey10}`,

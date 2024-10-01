@@ -38,6 +38,7 @@ import ai.startree.thirdeye.datalayer.bao.AlertManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.TaskManagerImpl;
 import ai.startree.thirdeye.datalayer.core.EnumerationItemMaintainer;
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
+import ai.startree.thirdeye.datalayer.dao.NamespaceConfigurationDao;
 import ai.startree.thirdeye.datalayer.dao.TaskDao;
 import ai.startree.thirdeye.datasource.DataSourceOnboarder;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
@@ -67,6 +68,7 @@ import ai.startree.thirdeye.service.NamespaceService;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer.ThirdEyeAuthorizerFactory;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.spi.config.NamespaceServerConfigurationManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AbstractManager;
 import ai.startree.thirdeye.worker.task.TaskDriver;
 import ai.startree.thirdeye.worker.task.TaskDriverRunnable;
@@ -122,6 +124,7 @@ public class ArchitectureTest {
       assignableTo(AbstractManager.class),
       assignableTo(GenericPojoDao.class),
       assignableTo(TaskDao.class),
+      assignableTo(NamespaceConfigurationDao.class),
       assignableTo(DatabaseOrm.class),
       assignableTo(DatabaseClient.class));
 
@@ -189,7 +192,8 @@ public class ArchitectureTest {
         DataSourceOnboarder.class, // OK - REVIEWED ON APRIL 12 2024
         EvaluationContextProcessor.class,
         AlertTemplateRenderer.class,
-        AuthorizationManager.class // OK - REVIEW ON MAY 6 2024
+        AuthorizationManager.class, // OK - REVIEW ON MAY 6 2024
+        NamespaceServerConfigurationManager.class
     };
     final ArchRule rule = noClasses().that(
             doNot(

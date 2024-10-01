@@ -67,9 +67,6 @@ public class ThirdEyeServerConfiguration extends Configuration {
   @JsonProperty("sentry")
   private BackendSentryConfiguration sentryConfiguration = new BackendSentryConfiguration();
 
-  @JsonProperty("time")
-  private TimeConfiguration timeConfiguration = new TimeConfiguration();
-
   @JsonProperty("accessControl")
   private AccessControlConfiguration accessControlConfiguration = new AccessControlConfiguration();
 
@@ -221,16 +218,6 @@ public class ThirdEyeServerConfiguration extends Configuration {
   public ThirdEyeServerConfiguration setPrometheusConfiguration(
       final PrometheusConfiguration prometheusConfiguration) {
     this.prometheusConfiguration = prometheusConfiguration;
-    return this;
-  }
-
-  public TimeConfiguration getTimeConfiguration() {
-    return timeConfiguration;
-  }
-
-  public ThirdEyeServerConfiguration setTimeConfiguration(
-      final TimeConfiguration timeConfiguration) {
-    this.timeConfiguration = timeConfiguration;
     return this;
   }
 

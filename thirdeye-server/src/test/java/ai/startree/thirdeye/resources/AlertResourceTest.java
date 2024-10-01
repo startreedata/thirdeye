@@ -24,7 +24,7 @@ import ai.startree.thirdeye.alert.AlertEvaluator;
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyeAuthorizerProvider;
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
-import ai.startree.thirdeye.config.TimeConfiguration;
+import ai.startree.thirdeye.spi.config.NamespaceServerConfigurationManager;
 import ai.startree.thirdeye.resources.testutils.SingleNamespaceAuthorizer;
 import ai.startree.thirdeye.resources.testutils.SingleResourceAuthorizer;
 import ai.startree.thirdeye.service.AlertService;
@@ -90,7 +90,7 @@ public class AlertResourceTest {
         mock(EnumerationItemManager.class),
         mock(RcaInvestigationManager.class),
         mock(TaskManager.class),
-        new TimeConfiguration(),
+        mock(NamespaceServerConfigurationManager.class),
         authorizationManager
     );
   }
@@ -268,7 +268,7 @@ public class AlertResourceTest {
         mock(EnumerationItemManager.class),
         mock(RcaInvestigationManager.class),
         mock(TaskManager.class),
-        new TimeConfiguration(),
+        mock(NamespaceServerConfigurationManager.class),
         newAuthorizationManager(mock(AlertTemplateManager.class),
             SingleNamespaceAuthorizer.of("allowedNamespace"))
     )).evaluate(nobody(), alertEvaluationApi);
@@ -305,7 +305,7 @@ public class AlertResourceTest {
         mock(EnumerationItemManager.class),
         mock(RcaInvestigationManager.class),
         mock(TaskManager.class),
-        new TimeConfiguration(),
+        mock(NamespaceServerConfigurationManager.class),
         newAuthorizationManager(mock(AlertTemplateManager.class),
             SingleNamespaceAuthorizer.of("readonlyNamespace", AccessType.READ)))
     ).evaluate(nobody(), alertEvaluationApi);

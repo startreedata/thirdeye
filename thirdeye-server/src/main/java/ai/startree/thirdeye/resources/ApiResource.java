@@ -35,6 +35,7 @@ public class ApiResource {
   private final UiResource uiResource;
   private final EnumerationItemResource enumerationItemResource;
   private final NamespaceResource namespaceResource;
+  private final NamespaceConfigurationResource namespaceConfigurationResource;
 
   @Inject
   public ApiResource(final AppAnalyticsResource appAnalyticsResource,
@@ -53,7 +54,8 @@ public class ApiResource {
       final TaskResource taskResource,
       final UiResource uiResource,
       final EnumerationItemResource enumerationItemResource,
-      final NamespaceResource namespaceResource) {
+      final NamespaceResource namespaceResource,
+      final NamespaceConfigurationResource namespaceConfigurationResource) {
     this.appAnalyticsResource = appAnalyticsResource;
     this.authResource = authResource;
     this.authInfoResource = authInfoResource;
@@ -71,6 +73,7 @@ public class ApiResource {
     this.uiResource = uiResource;
     this.enumerationItemResource = enumerationItemResource;
     this.namespaceResource = namespaceResource;
+    this.namespaceConfigurationResource = namespaceConfigurationResource;
   }
 
   @Path("app-analytics")
@@ -157,5 +160,10 @@ public class ApiResource {
   @Path("ui")
   public UiResource getUIResource() {
     return uiResource;
+  }
+
+  @Path("namespace-configuration")
+  public NamespaceConfigurationResource getNamespaceConfigurationResource() {
+    return namespaceConfigurationResource;
   }
 }

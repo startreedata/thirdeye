@@ -18,7 +18,6 @@ import static ai.startree.thirdeye.notification.AnomalyReportHelper.getTimezoneS
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.config.TimeConfiguration;
 import ai.startree.thirdeye.config.UiConfiguration;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.notification.anomalyfilter.DummyAnomalyFilter;
@@ -28,12 +27,14 @@ import ai.startree.thirdeye.spi.api.AnomalyReportDataApi;
 import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
 import ai.startree.thirdeye.spi.api.EnumerationItemApi;
 import ai.startree.thirdeye.spi.api.NotificationReportApi;
+import ai.startree.thirdeye.spi.config.NamespaceServerConfigurationManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.TimeConfigurationDTO;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedback;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
@@ -43,6 +44,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
@@ -62,24 +64,28 @@ public class NotificationReportBuilder {
   private final UiConfiguration uiConfiguration;
   private final EnumerationItemManager enumerationItemManager;
 
-  private final DateTimeFormatter dateTimeFormatter;
+  private final NamespaceServerConfigurationManager namespaceServerConfigurationManager;
 
   @Inject
   public NotificationReportBuilder(final AlertManager alertManager,
       final UiConfiguration uiConfiguration,
       final EnumerationItemManager enumerationItemManager,
-      final TimeConfiguration timeConfiguration) {
+      final NamespaceServerConfigurationManager namespaceServerConfigurationManager) {
     this.alertManager = alertManager;
     this.uiConfiguration = uiConfiguration;
     this.enumerationItemManager = enumerationItemManager;
-
-    dateTimeFormatter = DateTimeFormat.forPattern(timeConfiguration.getDateTimePattern())
-        .withZone(timeConfiguration.getTimezone());
+    this.namespaceServerConfigurationManager = namespaceServerConfigurationManager;
   }
 
   public NotificationReportApi buildNotificationReportApi(
       final SubscriptionGroupDTO notificationConfig,
       final Collection<AnomalyDTO> anomalies) {
+
+    final String currentNamespace = notificationConfig.namespace();
+    final TimeConfigurationDTO timeConfiguration = namespaceServerConfigurationManager
+        .currentNamespaceServerConfig(currentNamespace).getTimeConfiguration();
+    final DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern(timeConfiguration.getDateTimePattern())
+        .withZone(timeConfiguration.getTimezone());
 
     final List<AnomalyDTO> mergedAnomalyResults = new ArrayList<>();
 
@@ -149,6 +155,13 @@ public class NotificationReportBuilder {
   }
 
   private AnomalyReportDataApi toAnomalyReportDataApi(final AnomalyDTO anomaly) {
+
+    final String currentNamespace = anomaly.namespace();
+    final TimeConfigurationDTO timeConfiguration = namespaceServerConfigurationManager
+        .currentNamespaceServerConfig(currentNamespace).getTimeConfiguration();
+    final DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern(timeConfiguration.getDateTimePattern())
+        .withZone(timeConfiguration.getTimezone());
+
     final AnomalyFeedback feedback = anomaly.getFeedback();
     final String feedbackVal = getFeedbackValue(feedback);
 

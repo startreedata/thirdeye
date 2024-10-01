@@ -10,7 +10,6 @@ CREATE TABLE IF NOT EXISTS namespace_configuration_entity
     update_time                    timestamp DEFAULT CURRENT_TIMESTAMP,
     json_val                       text
     ) ENGINE = InnoDB;
+ALTER TABLE namespace_configuration_entity ADD UNIQUE unique_namespace (namespace);
 CREATE INDEX namespace_configuration_id_idx ON namespace_configuration_entity (id);
 CREATE INDEX namespace_configuration_namespace_idx ON namespace_configuration_entity (namespace);
-CREATE INDEX namespace_configuration_create_time_idx ON namespace_configuration_entity (create_time);
-CREATE INDEX namespace_configuration_update_time_idx ON namespace_configuration_entity (update_time);

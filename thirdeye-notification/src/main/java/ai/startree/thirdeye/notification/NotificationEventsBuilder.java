@@ -66,9 +66,8 @@ public class NotificationEventsBuilder {
   /**
    * TODO cyril - logic is duplicated (and not iso) with what RcaRelatedService#getRelatedEvents provides
    */
-  public List<EventApi> getRelatedEvents(final Collection<AnomalyDTO> anomalies,
-      SubscriptionGroupDTO subscriptionGroup) {
-    final String currentNamespace = subscriptionGroup.namespace();
+  public List<EventApi> getRelatedEvents(final Collection<AnomalyDTO> anomalies) {
+    final String currentNamespace = deduceNamespace(anomalies);
     final DateTimeZone dateTimeZone = namespaceConfigurationManager
         .getNamespaceConfiguration(currentNamespace).getTimeConfiguration()
         .getTimezone();
@@ -132,5 +131,12 @@ public class NotificationEventsBuilder {
     LOG.info("Fetched {} {} events between {} and {}", allEventsBetweenTimeRange.size(),
         EventType.HOLIDAY.name(), startTimeWithOffsetMillis, endTimeWithOffsetMillis);
     return allEventsBetweenTimeRange;
+  }
+
+  private String deduceNamespace(Collection<AnomalyDTO> anomalies) {
+    if (anomalies.isEmpty()) {
+      return null;
+    }
+    return anomalies.iterator().next().namespace();
   }
 }

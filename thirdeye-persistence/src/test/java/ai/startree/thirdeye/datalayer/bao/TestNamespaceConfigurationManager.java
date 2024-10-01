@@ -21,6 +21,7 @@ import ai.startree.thirdeye.spi.datalayer.bao.NamespaceConfigurationManager;
 import ai.startree.thirdeye.spi.datalayer.dto.NamespaceConfigurationDTO;
 import java.util.Arrays;
 import java.util.Collections;
+import org.aspectj.lang.annotation.After;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -46,28 +47,28 @@ public class TestNamespaceConfigurationManager {
 
   @Test
   public void testGetNamespaceConfiguration() {
-    final NamespaceConfigurationDTO expectedDtoNull = buildNamespaceConfiguration(null);
-    expectedDtoNull.setId(1L);
-    final NamespaceConfigurationDTO expectedDto1 = buildNamespaceConfiguration(namespace1);
-    expectedDto1.setId(2L);
-    final NamespaceConfigurationDTO expectedDto2 = buildNamespaceConfiguration(namespace2);
-    expectedDto2.setId(3L);
-
     // fetch namespace configurations for different namespaces
-    assertThat(namespaceConfigurationDao.getNamespaceConfiguration(null))
-        .isEqualTo(expectedDtoNull);
-    assertThat(namespaceConfigurationDao.getNamespaceConfiguration(namespace1))
-        .isEqualTo(expectedDto1);
-    assertThat(namespaceConfigurationDao.getNamespaceConfiguration(namespace2))
-        .isEqualTo(expectedDto2);
+    final NamespaceConfigurationDTO dto = namespaceConfigurationDao.getNamespaceConfiguration(null);
+    assertThat(dto.getTimeConfiguration()).isNotNull();
+    assertThat(dto.namespace()).isNull();
+
+    final NamespaceConfigurationDTO dto1 = namespaceConfigurationDao
+        .getNamespaceConfiguration(namespace1);
+    assertThat(dto1.getTimeConfiguration()).isNotNull();
+    assertThat(dto1.namespace()).isEqualTo(namespace1);
+
+    final NamespaceConfigurationDTO dto2 = namespaceConfigurationDao
+        .getNamespaceConfiguration(namespace2);
+    assertThat(dto2.getTimeConfiguration()).isNotNull();
+    assertThat(dto2.namespace()).isEqualTo(namespace2);
 
     // fetch again (this time already config values will be returned)
-    assertThat(namespaceConfigurationDao.getNamespaceConfiguration(null))
-        .isEqualTo(expectedDtoNull);
-    assertThat(namespaceConfigurationDao.getNamespaceConfiguration(namespace1))
-        .isEqualTo(expectedDto1);
-    assertThat(namespaceConfigurationDao.getNamespaceConfiguration(namespace2))
-        .isEqualTo(expectedDto2);
+    assertThat(namespaceConfigurationDao.getNamespaceConfiguration(null)).isEqualTo(dto);
+    assertThat(namespaceConfigurationDao.getNamespaceConfiguration(namespace1)).isEqualTo(dto1);
+    assertThat(namespaceConfigurationDao.getNamespaceConfiguration(namespace2)).isEqualTo(dto2);
+
+    // cleanup because namespace field is unique
+    namespaceConfigurationDao.findAll().forEach(namespaceConfigurationDao::delete);
   }
 
   @Test

@@ -18,6 +18,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import ai.startree.thirdeye.datalayer.dao.NamespaceConfigurationDao;
 import ai.startree.thirdeye.spi.Constants;
+import ai.startree.thirdeye.spi.config.TimeConfiguration;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.NamespaceConfigurationManager;
@@ -38,10 +39,13 @@ import org.joda.time.DateTimeZone;
 public class NamespaceConfigurationManagerImpl implements NamespaceConfigurationManager {
 
   private final NamespaceConfigurationDao dao;
+  private final TimeConfiguration timeConfiguration;
 
   @Inject
-  public NamespaceConfigurationManagerImpl(final NamespaceConfigurationDao dao) {
+  public NamespaceConfigurationManagerImpl(final NamespaceConfigurationDao dao,
+      final TimeConfiguration timeConfiguration) {
     this.dao = dao;
+    this.timeConfiguration = timeConfiguration;
   }
 
   public @NonNull NamespaceConfigurationDTO getNamespaceConfiguration(final String namespace) {
@@ -52,7 +56,7 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
     if (results != null && !results.isEmpty()) {
       NamespaceConfigurationDTO existingNamespaceConfigurationDTO = results.get(0);
       if (existingNamespaceConfigurationDTO.getTimeConfiguration() == null) {
-        existingNamespaceConfigurationDTO.setTimeConfiguration(getDefaultTimeConfiguration());
+        existingNamespaceConfigurationDTO.setTimeConfiguration(getTimeConfigurationFromServerConfig());
         final Long namespaceConfigurationId = save(existingNamespaceConfigurationDTO);
         checkState(namespaceConfigurationId != null,
             "Failed to update namespace configuration for namespace %s",
@@ -63,7 +67,7 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
 
     // create new namespace configuration
     NamespaceConfigurationDTO namespaceConfigurationDTO = new NamespaceConfigurationDTO();
-    namespaceConfigurationDTO.setTimeConfiguration(getDefaultTimeConfiguration())
+    namespaceConfigurationDTO.setTimeConfiguration(getTimeConfigurationFromServerConfig())
         .setAuth(new AuthorizationConfigurationDTO().setNamespace(namespace));
     final Long namespaceConfigurationId = save(namespaceConfigurationDTO);
     checkState(namespaceConfigurationId != null,
@@ -186,10 +190,10 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
     return dao.count(predicate);
   }
 
-  private TimeConfigurationDTO getDefaultTimeConfiguration() {
+  private TimeConfigurationDTO getTimeConfigurationFromServerConfig() {
     return new TimeConfigurationDTO()
-        .setDateTimePattern(Constants.NOTIFICATIONS_DEFAULT_DATE_PATTERN)
-        .setTimezone(DEFAULT_CHRONOLOGY.getZone())
-        .setMinimumOnboardingStartTime(946684800000L);
+        .setDateTimePattern(timeConfiguration.getDateTimePattern())
+        .setTimezone(timeConfiguration.getTimezone())
+        .setMinimumOnboardingStartTime(timeConfiguration.getMinimumOnboardingStartTime());
   }
 }

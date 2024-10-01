@@ -18,7 +18,7 @@ public class NamespaceConfigurationApi implements ThirdEyeCrudApi<NamespaceConfi
   private Long id;
   private AuthorizationConfigurationApi auth;
 
-  TimeConfigurationApi timeConfiguration;
+  private TimeConfigurationApi timeConfiguration;
 
   public TimeConfigurationApi getTimeConfiguration() {
     return timeConfiguration;

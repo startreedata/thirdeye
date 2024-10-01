@@ -55,7 +55,7 @@ public class NotificationPayloadBuilder {
 
     final NotificationReportApi report = notificationReportBuilder
         .buildNotificationReportApi(subscriptionGroup, anomalies)
-        .setRelatedEvents(notificationEventsBuilder.getRelatedEvents(anomalies, subscriptionGroup));
+        .setRelatedEvents(notificationEventsBuilder.getRelatedEvents(anomalies));
 
     return new NotificationPayloadApi()
         .setSubscriptionGroup(ApiBeanMapper.toApi(subscriptionGroup))

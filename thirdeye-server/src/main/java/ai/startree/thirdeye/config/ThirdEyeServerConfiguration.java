@@ -21,6 +21,7 @@ import ai.startree.thirdeye.notification.NotificationConfiguration;
 import ai.startree.thirdeye.rootcause.configuration.RcaConfiguration;
 import ai.startree.thirdeye.scheduler.ThirdEyeSchedulerConfiguration;
 import ai.startree.thirdeye.scheduler.events.MockEventsConfiguration;
+import ai.startree.thirdeye.spi.config.TimeConfiguration;
 import ai.startree.thirdeye.worker.task.TaskDriverConfiguration;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -66,6 +67,9 @@ public class ThirdEyeServerConfiguration extends Configuration {
   
   @JsonProperty("sentry")
   private BackendSentryConfiguration sentryConfiguration = new BackendSentryConfiguration();
+
+  @JsonProperty("time")
+  private TimeConfiguration timeConfiguration = new TimeConfiguration();
 
   @JsonProperty("accessControl")
   private AccessControlConfiguration accessControlConfiguration = new AccessControlConfiguration();
@@ -218,6 +222,16 @@ public class ThirdEyeServerConfiguration extends Configuration {
   public ThirdEyeServerConfiguration setPrometheusConfiguration(
       final PrometheusConfiguration prometheusConfiguration) {
     this.prometheusConfiguration = prometheusConfiguration;
+    return this;
+  }
+
+  public TimeConfiguration getTimeConfiguration() {
+    return timeConfiguration;
+  }
+
+  public ThirdEyeServerConfiguration setTimeConfiguration(
+      final TimeConfiguration timeConfiguration) {
+    this.timeConfiguration = timeConfiguration;
     return this;
   }
 

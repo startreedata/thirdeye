@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye;
 
+import ai.startree.thirdeye.spi.config.TimeConfiguration;
 import ai.startree.thirdeye.config.UiConfiguration;
 import ai.startree.thirdeye.datalayer.ThirdEyePersistenceModule;
 import ai.startree.thirdeye.datasource.loader.DefaultAggregationLoader;
@@ -29,14 +30,17 @@ public class ThirdEyeCoreModule extends AbstractModule {
   private final DataSource dataSource;
   private final RcaConfiguration rcaConfiguration;
   private final UiConfiguration uiConfiguration;
+  private final TimeConfiguration timeConfiguration;
 
   public ThirdEyeCoreModule(final DataSource dataSource,
       final RcaConfiguration rcaConfiguration,
-      final UiConfiguration uiConfiguration) {
+      final UiConfiguration uiConfiguration,
+      final TimeConfiguration timeConfiguration) {
     this.dataSource = dataSource;
 
     this.rcaConfiguration = rcaConfiguration;
     this.uiConfiguration = uiConfiguration;
+    this.timeConfiguration = timeConfiguration;
   }
 
   @Override
@@ -48,5 +52,6 @@ public class ThirdEyeCoreModule extends AbstractModule {
 
     bind(RcaConfiguration.class).toInstance(rcaConfiguration);
     bind(UiConfiguration.class).toInstance(uiConfiguration);
+    bind(TimeConfiguration.class).toInstance(timeConfiguration);
   }
 }

@@ -13,15 +13,12 @@
  */
 package ai.startree.thirdeye.datalayer.dao;
 
-import static ai.startree.thirdeye.spi.Constants.DEFAULT_CHRONOLOGY;
+import static ai.startree.thirdeye.datalayer.DatalayerTestUtils.buildNamespaceConfiguration;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
-import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
-import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.NamespaceConfigurationDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.TimeConfigurationDTO;
 import com.google.inject.Injector;
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,6 +29,9 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class TestNamespaceConfigurationDao {
+
+  private static final String namespace1 = "my-namespace";
+  private static final String namespace2 = "my-namespace-2";
 
   private NamespaceConfigurationDao dao;
 
@@ -48,20 +48,19 @@ public class TestNamespaceConfigurationDao {
 
   @Test
   public void saveTest() {
-    final NamespaceConfigurationDTO dto1 = buildNamespaceConfiguration();
-    final NamespaceConfigurationDTO dto2 = buildNamespaceConfiguration();
-    dto2.setAuth(new AuthorizationConfigurationDTO().setNamespace("my-namespace-2"));
+    final NamespaceConfigurationDTO dto1 = buildNamespaceConfiguration(namespace1);
+    final NamespaceConfigurationDTO dto2 = buildNamespaceConfiguration(namespace2);
 
-    final Long id = dao.put(dto1);
-    assertThat(id).isGreaterThan(0L);
-    dto1.setId(id);
+    final Long namespaceConfigurationId1 = dao.put(dto1);
+    assertThat(namespaceConfigurationId1).isGreaterThan(0L);
+    dto1.setId(namespaceConfigurationId1);
 
-    final Long id2 = dao.put(dto2);
-    assertThat(id2).isGreaterThan(0L);
-    dto2.setId(id2);
+    final Long namespaceConfigurationId2 = dao.put(dto2);
+    assertThat(namespaceConfigurationId2).isGreaterThan(0L);
+    dto2.setId(namespaceConfigurationId2);
 
-    assertThat(dao.get(id)).isEqualTo(dto1);
-    assertThat(dao.get(id2)).isEqualTo(dto2);
+    assertThat(dao.get(namespaceConfigurationId1)).isEqualTo(dto1);
+    assertThat(dao.get(namespaceConfigurationId2)).isEqualTo(dto2);
   }
 
   @Test(dependsOnMethods = {"saveTest"})
@@ -75,7 +74,7 @@ public class TestNamespaceConfigurationDao {
 
   @Test(dependsOnMethods = {"saveTest"})
   public void updateWithNilIDTest() {
-    final NamespaceConfigurationDTO dto = buildNamespaceConfiguration();
+    final NamespaceConfigurationDTO dto = buildNamespaceConfiguration(namespace1);
 
     try {
       dao.update(dto);
@@ -108,7 +107,7 @@ public class TestNamespaceConfigurationDao {
 
     assertThat(dao.update(dto, Predicate.EQ("namespace", "some-other-namespace")))
         .isEqualTo(0);
-    assertThat(dao.update(dto, Predicate.EQ("namespace", "my-namespace")))
+    assertThat(dao.update(dto, Predicate.EQ("namespace", namespace1)))
         .isEqualTo(1);
   }
 
@@ -121,9 +120,9 @@ public class TestNamespaceConfigurationDao {
   public void countPredicateTest() {
     assertThat(dao.count(Predicate.EQ("namespace", null)))
         .isEqualTo(0);
-    assertThat(dao.count(Predicate.EQ("namespace", "my-namespace")))
+    assertThat(dao.count(Predicate.EQ("namespace", namespace1)))
         .isEqualTo(1);
-    assertThat(dao.count(Predicate.EQ("namespace", "my-namespace-2")))
+    assertThat(dao.count(Predicate.EQ("namespace", namespace2)))
         .isEqualTo(1);
   }
 
@@ -141,23 +140,10 @@ public class TestNamespaceConfigurationDao {
 
   @Test
   public void deleteByPredicateTest() {
-    final NamespaceConfigurationDTO dto = buildNamespaceConfiguration();
-    dto.setAuth(new AuthorizationConfigurationDTO().setNamespace("test-namespace"));
-
+    final NamespaceConfigurationDTO dto = buildNamespaceConfiguration(namespace1);
     dao.put(dto);
     assertThat(dao.deleteByPredicate(Predicate.EQ("namespace", dto.namespace())))
         .isEqualTo(1);
     assertThat(dao.get(dto.getId())).isNull();
-  }
-
-  private NamespaceConfigurationDTO buildNamespaceConfiguration() {
-    final NamespaceConfigurationDTO dto = new NamespaceConfigurationDTO();
-    dto.setTimeConfiguration(new TimeConfigurationDTO()
-        .setDateTimePattern(Constants.NOTIFICATIONS_DEFAULT_DATE_PATTERN)
-        .setTimezone(DEFAULT_CHRONOLOGY.getZone())
-        .setMinimumOnboardingStartTime(946684800000L));
-    dto.setAuth(new AuthorizationConfigurationDTO()
-        .setNamespace("my-namespace"));
-    return dto;
   }
 }

@@ -32,8 +32,12 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -74,6 +78,19 @@ public class NamespaceConfigurationResource extends CrudResource<NamespaceConfig
 
   // Overridden to disable endpoint
   @Override
+  @GET
+  @Path("{id}")
+  @Operation(summary = "", hidden = true)
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response get(
+      @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
+      @PathParam("id") Long id) {
+    throw new UnsupportedOperationException();
+  }
+
+  // Overridden to disable endpoint
+  @Override
   @PUT
   @Operation(summary = "", hidden = true)
   @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
@@ -81,6 +98,30 @@ public class NamespaceConfigurationResource extends CrudResource<NamespaceConfig
   public Response editMultiple(
       @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
       final List<NamespaceConfigurationApi> list) {
+    throw new UnsupportedOperationException();
+  }
+
+  // Overridden to disable endpoint
+  @Override
+  @DELETE
+  @Path("{id}")
+  @Operation(summary = "", hidden = true)
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response delete(
+      @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
+      @PathParam("id") Long id) {
+    throw new UnsupportedOperationException();
+  }
+
+  // Overridden to disable endpoint
+  @Override
+  @DELETE
+  @Path("/all")
+  @Operation(summary = "", hidden = true)
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response deleteAll(@Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal) {
     throw new UnsupportedOperationException();
   }
 }

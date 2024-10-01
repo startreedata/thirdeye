@@ -52,8 +52,7 @@ public class ResourcesBootstrapService {
     // loading templates may take some time - putting a timer to see if this should be optimized - see comment below
     final Timer.Sample templateLoadSample = Timer.start(Metrics.globalRegistry);
     authorizationManager.ensureHasRootAccess(principal);
-    // update templates in all known namespaces 
-    // for new namespaces we will need to create templates manually or as part as the namespace creation - design is yet to define todo authz
+    // update templates in all known namespaces
     final HashSet<String> distinctNamespaces = templateDao.findAll()
         .stream()
         .map(AbstractDTO::namespace)

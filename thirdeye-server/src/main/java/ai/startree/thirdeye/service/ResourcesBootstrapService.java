@@ -52,15 +52,16 @@ public class ResourcesBootstrapService {
     // loading templates may take some time - putting a timer to see if this should be optimized - see comment below
     final Timer.Sample templateLoadSample = Timer.start(Metrics.globalRegistry);
     authorizationManager.ensureHasRootAccess(principal);
-    // update templates in all known namespaces
+    // get all known namespaces - (very inefficient way - need to rewrite the orm layer distinct namespace would be enough)  
     final HashSet<String> distinctNamespaces = templateDao.findAll()
         .stream()
         .map(AbstractDTO::namespace)
         .collect(Collectors.toCollection(HashSet::new));
-    // continue to install in the unset namespace for the moment
+    // add the null namespace to continue maintenance in the unset namespace for the moment
     distinctNamespaces.add(null);
-    // todo cyril - this may be slow because the loadRecommendedTemplates load templates from disk, performs some template generation, then write them - only the write part should be in the loop
-    //  check timer - it's not trivial to implement (input template api are mutated in loadRecommendedTemplates)
+    
+    // load templates in all namespaces
+    // if the recommendedTemplatesLoadingTimer is too big, consider threading this (good candidate for structured concurrency) - but note that the persistence layer has other issues that make writing to the db slow.
     for (final String namespace: distinctNamespaces) {
       alertTemplateService.loadRecommendedTemplates(principal, true, namespace); 
     }

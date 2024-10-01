@@ -66,6 +66,7 @@ because some templates are generated on the fly. Assumption is it would still be
 
 Conclusion:  
 The update for all namespaces should be multi-threaded to reduce the db write bottleneck. 
+This won't be done right now because the persistence layer has other bottlenecks that should be solved before.
 No need to optimize the read of templates.
 
 

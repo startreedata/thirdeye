@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS namespace_configuration_entity
     date_time_pattern              varchar(100) NOT NULL,
     minimum_onboarding_start_time  bigint(20)   NOT NULL,
     create_time                    timestamp,
+    version                        int(10),
     update_time                    timestamp DEFAULT CURRENT_TIMESTAMP,
     json_val                       text
     ) ENGINE = InnoDB;

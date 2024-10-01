@@ -39,13 +39,13 @@ import ai.startree.thirdeye.spi.api.AnomalyStatsApi;
 import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
 import ai.startree.thirdeye.spi.api.UserApi;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
-import ai.startree.thirdeye.spi.config.NamespaceServerConfigurationManager;
 import ai.startree.thirdeye.spi.datalayer.AnomalyFilter;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
+import ai.startree.thirdeye.spi.datalayer.bao.NamespaceConfigurationManager;
 import ai.startree.thirdeye.spi.datalayer.bao.RcaInvestigationManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
@@ -85,7 +85,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
   private final SubscriptionGroupManager subscriptionGroupManager;
   private final EnumerationItemManager enumerationItemManager;
   private final RcaInvestigationManager rcaInvestigationManager;
-  private final NamespaceServerConfigurationManager namespaceServerConfigurationManager;
+  private final NamespaceConfigurationManager namespaceConfigurationManager;
 
   @Inject
   public AlertService(
@@ -97,7 +97,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
       final EnumerationItemManager enumerationItemManager,
       final RcaInvestigationManager rcaInvestigationManager,
       final TaskManager taskManager,
-      final NamespaceServerConfigurationManager namespaceServerConfigurationManager,
+      final NamespaceConfigurationManager namespaceConfigurationManager,
       final AuthorizationManager authorizationManager) {
     super(authorizationManager, alertManager, ImmutableMap.of());
     this.alertEvaluator = alertEvaluator;
@@ -107,7 +107,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     this.enumerationItemManager = enumerationItemManager;
     this.rcaInvestigationManager = rcaInvestigationManager;
     this.taskManager = taskManager;
-    this.namespaceServerConfigurationManager = namespaceServerConfigurationManager;
+    this.namespaceConfigurationManager = namespaceConfigurationManager;
   }
 
   @Override
@@ -125,8 +125,8 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
   @Override
   protected void prepareCreatedDto(final ThirdEyePrincipal principal, final AlertDTO dto) {
     final String currentNamespace = authorizationManager.currentNamespace(principal);
-    final long minimumOnboardingStartTime = namespaceServerConfigurationManager
-        .currentNamespaceServerConfig(currentNamespace).getTimeConfiguration()
+    final long minimumOnboardingStartTime = namespaceConfigurationManager
+        .getNamespaceConfiguration(currentNamespace).getTimeConfiguration()
         .getMinimumOnboardingStartTime();
 
     if (dto.getLastTimestamp() < minimumOnboardingStartTime) {
@@ -391,8 +391,8 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
 
   private long minimumLastTimestamp(final ThirdEyePrincipal principal, final AlertDTO dto) {
     final String currentNamespace = authorizationManager.currentNamespace(principal);
-    final long minimumOnboardingStartTime = namespaceServerConfigurationManager
-        .currentNamespaceServerConfig(currentNamespace).getTimeConfiguration()
+    final long minimumOnboardingStartTime = namespaceConfigurationManager
+        .getNamespaceConfiguration(currentNamespace).getTimeConfiguration()
         .getMinimumOnboardingStartTime();
 
     try {

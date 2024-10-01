@@ -44,7 +44,7 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
     this.dao = dao;
   }
 
-  public @NonNull NamespaceConfigurationDTO onboardNamespaceConfiguration(final String namespace) {
+  public @NonNull NamespaceConfigurationDTO getNamespaceConfiguration(final String namespace) {
     final DaoFilter daoFilter = new DaoFilter().setPredicate(Predicate.EQ("namespace", namespace));
     final List<NamespaceConfigurationDTO> results = filter(daoFilter);
 

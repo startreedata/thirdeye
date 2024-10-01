@@ -18,6 +18,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 public interface NamespaceConfigurationManager extends AbstractManager<NamespaceConfigurationDTO> {
 
-  @NonNull NamespaceConfigurationDTO onboardNamespaceConfiguration(final String namespace);
+  @NonNull NamespaceConfigurationDTO getNamespaceConfiguration(final String namespace);
 }
 

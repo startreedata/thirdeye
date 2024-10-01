@@ -68,7 +68,6 @@ import ai.startree.thirdeye.service.NamespaceService;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer.ThirdEyeAuthorizerFactory;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
-import ai.startree.thirdeye.spi.config.NamespaceServerConfigurationManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AbstractManager;
 import ai.startree.thirdeye.worker.task.TaskDriver;
 import ai.startree.thirdeye.worker.task.TaskDriverRunnable;
@@ -193,7 +192,6 @@ public class ArchitectureTest {
         EvaluationContextProcessor.class,
         AlertTemplateRenderer.class,
         AuthorizationManager.class, // OK - REVIEW ON MAY 6 2024
-        NamespaceServerConfigurationManager.class
     };
     final ArchRule rule = noClasses().that(
             doNot(

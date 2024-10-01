@@ -255,25 +255,6 @@ public class NamespaceConfigurationDao {
     }
   }
 
-  /**
-   * @param parameterizedSQL second part of the sql (omit select from table section)
-   */
-  public List<NamespaceConfigurationDTO> executeParameterizedSQL(final String parameterizedSQL,
-      final Map<String, Object> parameterMap) {
-    try {
-      final List<NamespaceConfigurationEntity> entities = databaseClient.executeTransaction(
-          (connection) -> databaseOrm.runSQL(
-              parameterizedSQL,
-              parameterMap,
-              NamespaceConfigurationEntity.class,
-              connection), Collections.emptyList());
-      return toDto(entities);
-    } catch (JsonProcessingException | SQLException e) {
-      LOG.error(e.getMessage(), e);
-      return Collections.emptyList();
-    }
-  }
-
   public int delete(final Long id) {
     return delete(List.of(id));
   }

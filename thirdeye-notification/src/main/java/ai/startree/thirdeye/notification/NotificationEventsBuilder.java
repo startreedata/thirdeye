@@ -18,8 +18,8 @@ import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.EventApi;
-import ai.startree.thirdeye.spi.config.NamespaceServerConfigurationManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
+import ai.startree.thirdeye.spi.datalayer.bao.NamespaceConfigurationManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
@@ -50,13 +50,13 @@ public class NotificationEventsBuilder {
   private final Period preEventCrawlOffset;
   private final Period postEventCrawlOffset;
 
-  private final NamespaceServerConfigurationManager namespaceServerConfigurationManager;
+  private final NamespaceConfigurationManager namespaceConfigurationManager;
 
   @Inject
   public NotificationEventsBuilder(final EventManager eventDao,
-      final NamespaceServerConfigurationManager namespaceServerConfigurationManager) {
+      final NamespaceConfigurationManager namespaceConfigurationManager) {
     this.eventDao = eventDao;
-    this.namespaceServerConfigurationManager = namespaceServerConfigurationManager;
+    this.namespaceConfigurationManager = namespaceConfigurationManager;
 
     final Period defaultPeriod = isoPeriod(Constants.NOTIFICATIONS_DEFAULT_EVENT_CRAWL_OFFSET);
     preEventCrawlOffset = defaultPeriod;
@@ -69,8 +69,8 @@ public class NotificationEventsBuilder {
   public List<EventApi> getRelatedEvents(final Collection<AnomalyDTO> anomalies,
       SubscriptionGroupDTO subscriptionGroup) {
     final String currentNamespace = subscriptionGroup.namespace();
-    final DateTimeZone dateTimeZone = namespaceServerConfigurationManager
-        .currentNamespaceServerConfig(currentNamespace).getTimeConfiguration()
+    final DateTimeZone dateTimeZone = namespaceConfigurationManager
+        .getNamespaceConfiguration(currentNamespace).getTimeConfiguration()
         .getTimezone();
 
     DateTime windowStart = DateTime.now(dateTimeZone);

@@ -27,9 +27,9 @@ import ai.startree.thirdeye.spi.api.AnomalyReportDataApi;
 import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
 import ai.startree.thirdeye.spi.api.EnumerationItemApi;
 import ai.startree.thirdeye.spi.api.NotificationReportApi;
-import ai.startree.thirdeye.spi.config.NamespaceServerConfigurationManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
+import ai.startree.thirdeye.spi.datalayer.bao.NamespaceConfigurationManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
@@ -44,7 +44,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
@@ -64,17 +63,17 @@ public class NotificationReportBuilder {
   private final UiConfiguration uiConfiguration;
   private final EnumerationItemManager enumerationItemManager;
 
-  private final NamespaceServerConfigurationManager namespaceServerConfigurationManager;
+  private final NamespaceConfigurationManager namespaceConfigurationManager;
 
   @Inject
   public NotificationReportBuilder(final AlertManager alertManager,
       final UiConfiguration uiConfiguration,
       final EnumerationItemManager enumerationItemManager,
-      final NamespaceServerConfigurationManager namespaceServerConfigurationManager) {
+      final NamespaceConfigurationManager namespaceConfigurationManager) {
     this.alertManager = alertManager;
     this.uiConfiguration = uiConfiguration;
     this.enumerationItemManager = enumerationItemManager;
-    this.namespaceServerConfigurationManager = namespaceServerConfigurationManager;
+    this.namespaceConfigurationManager = namespaceConfigurationManager;
   }
 
   public NotificationReportApi buildNotificationReportApi(
@@ -82,8 +81,8 @@ public class NotificationReportBuilder {
       final Collection<AnomalyDTO> anomalies) {
 
     final String currentNamespace = notificationConfig.namespace();
-    final TimeConfigurationDTO timeConfiguration = namespaceServerConfigurationManager
-        .currentNamespaceServerConfig(currentNamespace).getTimeConfiguration();
+    final TimeConfigurationDTO timeConfiguration = namespaceConfigurationManager
+        .getNamespaceConfiguration(currentNamespace).getTimeConfiguration();
     final DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern(timeConfiguration.getDateTimePattern())
         .withZone(timeConfiguration.getTimezone());
 
@@ -157,8 +156,8 @@ public class NotificationReportBuilder {
   private AnomalyReportDataApi toAnomalyReportDataApi(final AnomalyDTO anomaly) {
 
     final String currentNamespace = anomaly.namespace();
-    final TimeConfigurationDTO timeConfiguration = namespaceServerConfigurationManager
-        .currentNamespaceServerConfig(currentNamespace).getTimeConfiguration();
+    final TimeConfigurationDTO timeConfiguration = namespaceConfigurationManager
+        .getNamespaceConfiguration(currentNamespace).getTimeConfiguration();
     final DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern(timeConfiguration.getDateTimePattern())
         .withZone(timeConfiguration.getTimezone());
 

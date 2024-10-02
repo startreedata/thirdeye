@@ -137,7 +137,9 @@ public class NotificationTaskFilter {
         .map(AnomalyDTO::getId)
         .collect(toSet());
 
-    // remove anomalies that are already being notified
+    // remove anomalies that are already being notified - 
+    // TODO - we only need the completed anomalies if they are used by notification plugins downstream 
+    //    if at this point this was known, we could avoid this second call see notifyResolvedAnomalies in enterprise repo
     final Set<AnomalyDTO> completedAnomalies = filterCompletedAnomalies(sg);
     completedAnomalies.removeIf(a -> ids.contains(a.getId()));
 

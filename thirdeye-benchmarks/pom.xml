@@ -19,7 +19,7 @@
   <parent>
     <groupId>ai.startree.thirdeye</groupId>
     <artifactId>thirdeye</artifactId>
-    <version>1.331.0-SNAPSHOT</version>
+    <version>1.332.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>thirdeye-benchmarks</artifactId>
@@ -39,6 +39,10 @@
     <dependency>
       <groupId>ai.startree.thirdeye</groupId>
       <artifactId>thirdeye-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ai.startree.thirdeye.plugins</groupId>
+      <artifactId>thirdeye-bootstrap-open-core</artifactId>
     </dependency>
     
     <dependency>

@@ -59,7 +59,7 @@ public class BootstrapResourcesRegistry {
   }
 
   public List<AlertTemplateApi> getAlertTemplates() {
-    List<AlertTemplateApi> allTemplates = new ArrayList<>();
+    final List<AlertTemplateApi> allTemplates = new ArrayList<>();
     for (String name : factoryMap.keySet()) {
       final BootstrapResourcesProvider bootstrapResourcesProvider = get(name);
       allTemplates.addAll(bootstrapResourcesProvider.getAlertTemplates());

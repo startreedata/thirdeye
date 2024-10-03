@@ -6,6 +6,10 @@ List links to the issues being addressed.
 
 Describe the changes being introduced.
 
+#### Checklist
+
+- [ ] if queries to the database are changed: think about query performance and indexes
+
 #### Screenshots
 
 Attach screenshots of UI/UX changes, if applicable.

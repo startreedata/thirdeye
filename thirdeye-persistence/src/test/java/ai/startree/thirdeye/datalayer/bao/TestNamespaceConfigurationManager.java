@@ -21,7 +21,6 @@ import ai.startree.thirdeye.spi.datalayer.bao.NamespaceConfigurationManager;
 import ai.startree.thirdeye.spi.datalayer.dto.NamespaceConfigurationDTO;
 import java.util.Arrays;
 import java.util.Collections;
-import org.aspectj.lang.annotation.After;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -30,6 +29,11 @@ public class TestNamespaceConfigurationManager {
 
   private static final String namespace1 = "my-namespace";
   private static final String namespace2 = "my-namespace-2";
+  private static final String namespace3 = "my-namespace-3";
+  private static final String namespace4 = "my-namespace-4";
+  private static final String namespace5 = "my-namespace-5";
+  private static final String namespace6 = "my-namespace-6";
+  private static final String namespace7 = "my-namespace-7";
   private Long namespaceConfigurationId1;
   private Long namespaceConfigurationId2;
   private NamespaceConfigurationManager namespaceConfigurationDao;
@@ -48,27 +52,90 @@ public class TestNamespaceConfigurationManager {
   @Test
   public void testGetNamespaceConfiguration() {
     // fetch namespace configurations for different namespaces
-    final NamespaceConfigurationDTO dto = namespaceConfigurationDao.getNamespaceConfiguration(null);
+    final NamespaceConfigurationDTO dto = namespaceConfigurationDao
+        .getNamespaceConfiguration(namespace3);
     assertThat(dto.getTimeConfiguration()).isNotNull();
-    assertThat(dto.namespace()).isNull();
+    assertThat(dto.namespace()).isEqualTo(namespace3);
 
     final NamespaceConfigurationDTO dto1 = namespaceConfigurationDao
-        .getNamespaceConfiguration(namespace1);
+        .getNamespaceConfiguration(namespace4);
     assertThat(dto1.getTimeConfiguration()).isNotNull();
-    assertThat(dto1.namespace()).isEqualTo(namespace1);
-
-    final NamespaceConfigurationDTO dto2 = namespaceConfigurationDao
-        .getNamespaceConfiguration(namespace2);
-    assertThat(dto2.getTimeConfiguration()).isNotNull();
-    assertThat(dto2.namespace()).isEqualTo(namespace2);
+    assertThat(dto1.namespace()).isEqualTo(namespace4);
 
     // fetch again (this time already config values will be returned)
-    assertThat(namespaceConfigurationDao.getNamespaceConfiguration(null)).isEqualTo(dto);
-    assertThat(namespaceConfigurationDao.getNamespaceConfiguration(namespace1)).isEqualTo(dto1);
-    assertThat(namespaceConfigurationDao.getNamespaceConfiguration(namespace2)).isEqualTo(dto2);
+    assertThat(namespaceConfigurationDao.getNamespaceConfiguration(namespace3)).isEqualTo(dto);
+    assertThat(namespaceConfigurationDao.getNamespaceConfiguration(namespace4)).isEqualTo(dto1);
+  }
 
-    // cleanup because namespace field is unique
-    namespaceConfigurationDao.findAll().forEach(namespaceConfigurationDao::delete);
+  @Test
+  public void testUpdateNamespaceConfiguration() {
+    // fetch/create new namespace configuration
+    final NamespaceConfigurationDTO dto = namespaceConfigurationDao
+        .getNamespaceConfiguration(namespace5);
+    assertThat(dto.getTimeConfiguration()).isNotNull();
+    assertThat(dto.namespace()).isEqualTo(namespace5);
+
+    // update configuration
+    dto.setTimeConfiguration(dto.getTimeConfiguration().setMinimumOnboardingStartTime(0L));
+    final NamespaceConfigurationDTO updatedDto = namespaceConfigurationDao
+        .updateNamespaceConfiguration(dto);
+    compareDtos(updatedDto, dto);
+
+    // fetch again (this time already updated config will be returned)
+    assertThat(namespaceConfigurationDao.getNamespaceConfiguration(namespace5))
+        .isEqualTo(updatedDto);
+  }
+
+  @Test
+  public void testUpdateNamespaceConfigurationWhenExistingConfigDoesntExist() {
+    try {
+      // try updating config which doesn't exist
+      namespaceConfigurationDao.updateNamespaceConfiguration(buildNamespaceConfiguration(null));
+    } catch (IllegalStateException expected) {
+      // left blank
+    }
+  }
+
+  @Test
+  public void testResetNamespaceConfigurationIfExists() {
+    // fetch/create new namespace configuration
+    final NamespaceConfigurationDTO dto = namespaceConfigurationDao
+        .getNamespaceConfiguration(namespace6);
+    assertThat(dto.getTimeConfiguration()).isNotNull();
+    assertThat(dto.namespace()).isEqualTo(namespace6);
+
+    // update configuration
+    dto.setTimeConfiguration(dto.getTimeConfiguration().setMinimumOnboardingStartTime(0L));
+    final NamespaceConfigurationDTO updatedDto = namespaceConfigurationDao
+        .updateNamespaceConfiguration(dto);
+    compareDtos(updatedDto, dto);
+
+    // fetch again (this time already updated config will be returned)
+    assertThat(namespaceConfigurationDao.getNamespaceConfiguration(namespace6))
+        .isEqualTo(updatedDto);
+
+    // reset configuration
+    final NamespaceConfigurationDTO resettedDto = namespaceConfigurationDao
+        .resetNamespaceConfiguration(namespace6);
+    dto.setTimeConfiguration(buildNamespaceConfiguration(namespace6).getTimeConfiguration());
+    compareDtos(resettedDto, dto);
+
+    // fetch again
+    assertThat(namespaceConfigurationDao.getNamespaceConfiguration(namespace6)).isEqualTo(dto);
+  }
+
+  @Test
+  public void testResetNamespaceConfigurationIfDoesntExists() {
+    // reset configuration directly for namespace which doesn't have existing config
+    final NamespaceConfigurationDTO dto = buildNamespaceConfiguration(namespace7);
+    final NamespaceConfigurationDTO resettedDto = namespaceConfigurationDao
+        .resetNamespaceConfiguration(namespace7);
+    dto.setId(resettedDto.getId());
+    compareDtos(resettedDto, dto);
+
+    // fetch again
+    assertThat(namespaceConfigurationDao.getNamespaceConfiguration(namespace7))
+        .isEqualTo(resettedDto);
   }
 
   @Test
@@ -135,5 +202,16 @@ public class TestNamespaceConfigurationManager {
 
     namespaceConfigurationDao.deleteById(namespaceConfigurationId2);
     assertThat(namespaceConfigurationDao.findById(namespaceConfigurationId2)).isNull();
+  }
+
+  private void compareDtos(NamespaceConfigurationDTO dto1, NamespaceConfigurationDTO dto2) {
+    assertThat(dto1.getId()).isEqualTo(dto2.getId());
+    assertThat(dto1.getAuth().getNamespace()).isEqualTo(dto2.getAuth().getNamespace());
+    assertThat(dto1.getTimeConfiguration().getDateTimePattern())
+        .isEqualTo(dto2.getTimeConfiguration().getDateTimePattern());
+    assertThat(dto1.getTimeConfiguration().getTimezone())
+        .isEqualTo(dto2.getTimeConfiguration().getTimezone());
+    assertThat(dto1.getTimeConfiguration().getMinimumOnboardingStartTime())
+        .isEqualTo(dto2.getTimeConfiguration().getMinimumOnboardingStartTime());
   }
 }

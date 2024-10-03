@@ -25,11 +25,6 @@ import org.mapstruct.factory.Mappers;
 public interface NamespaceConfigurationEntityMapper {
   NamespaceConfigurationEntityMapper INSTANCE = Mappers.getMapper(NamespaceConfigurationEntityMapper.class);
 
-  @Mapping(source = "timeConfiguration.timezone", target = "timezone",
-      qualifiedByName = "dateTimeZoneMapper")
-  @Mapping(source = "timeConfiguration.dateTimePattern", target = "dateTimePattern")
-  @Mapping(source = "timeConfiguration.minimumOnboardingStartTime",
-      target = "minimumOnboardingStartTime")
   @Mapping(target = "jsonVal", ignore = true)
   @Mapping(source = "auth.namespace", target = "namespace")
   NamespaceConfigurationEntity toNamespaceConfigurationEntity(NamespaceConfigurationDTO dto);

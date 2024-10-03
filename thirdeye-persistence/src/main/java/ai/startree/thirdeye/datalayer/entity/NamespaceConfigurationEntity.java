@@ -18,10 +18,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public class NamespaceConfigurationEntity extends AbstractEntity
     implements HasJsonVal<NamespaceConfigurationEntity> {
 
-  private String timezone;
-  private String dateTimePattern;
-  private long minimumOnboardingStartTime;
-
   private String jsonVal;
 
   private @Nullable String namespace;
@@ -35,26 +31,6 @@ public class NamespaceConfigurationEntity extends AbstractEntity
   public NamespaceConfigurationEntity setJsonVal(final String jsonVal) {
     this.jsonVal = jsonVal;
     return this;
-  }
-
-  public String getTimezone() {
-    return timezone;
-  }
-
-  public void setTimezone(String timezone) {
-    this.timezone = timezone;
-  }
-
-  public String getDateTimePattern() { return dateTimePattern; }
-
-  public void setDateTimePattern(String dateTimePattern) {
-    this.dateTimePattern = dateTimePattern;
-  }
-
-  public long getMinimumOnboardingStartTime() { return minimumOnboardingStartTime; }
-
-  public void setMinimumOnboardingStartTime(long minimumOnboardingStartTime) {
-    this.minimumOnboardingStartTime = minimumOnboardingStartTime;
   }
 
   public @Nullable String getNamespace() {

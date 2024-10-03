@@ -13,6 +13,8 @@
  */
 package ai.startree.thirdeye.resources;
 
+import static ai.startree.thirdeye.ResourceUtils.respondOk;
+
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.service.NamespaceConfigurationService;
 import ai.startree.thirdeye.spi.Constants;
@@ -39,9 +41,11 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
 @Tag(name = "Namespace Configuration")
 @SecurityRequirement(name="oauth")
@@ -58,22 +62,24 @@ import javax.ws.rs.core.Response;
 public class NamespaceConfigurationResource extends CrudResource<NamespaceConfigurationApi,
     NamespaceConfigurationDTO> {
 
+  private final NamespaceConfigurationService namespaceConfigurationService;
+
   @Inject
   public NamespaceConfigurationResource(
       final NamespaceConfigurationService namespaceConfigurationService) {
     super(namespaceConfigurationService);
+    this.namespaceConfigurationService = namespaceConfigurationService;
   }
 
-  // Overridden to disable endpoint
   @Override
-  @POST
-  @Operation(summary = "", hidden = true)
+  @GET
   @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
-  public Response createMultiple(
-      @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
-      final List<NamespaceConfigurationApi> list) {
-    throw new UnsupportedOperationException();
+  public Response list(
+      @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
+      @Context UriInfo uriInfo
+  ) {
+    return respondOk(namespaceConfigurationService.getNamespaceConfiguration(principal));
   }
 
   // Overridden to disable endpoint
@@ -86,6 +92,18 @@ public class NamespaceConfigurationResource extends CrudResource<NamespaceConfig
   public Response get(
       @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
       @PathParam("id") Long id) {
+    throw new UnsupportedOperationException();
+  }
+
+  // Overridden to disable endpoint
+  @Override
+  @POST
+  @Operation(summary = "", hidden = true)
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response createMultiple(
+      @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
+      final List<NamespaceConfigurationApi> list) {
     throw new UnsupportedOperationException();
   }
 

@@ -13,24 +13,40 @@
  */
 package ai.startree.thirdeye.service;
 
+import ai.startree.thirdeye.DaoFilterUtils;
 import ai.startree.thirdeye.auth.AuthorizationManager;
+import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.api.NamespaceConfigurationApi;
+import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.bao.NamespaceConfigurationManager;
 import ai.startree.thirdeye.spi.datalayer.dto.NamespaceConfigurationDTO;
 import com.google.common.collect.ImmutableMap;
+import java.util.List;
+import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.ws.rs.core.MultivaluedMap;
 
 @Singleton
 public class NamespaceConfigurationService extends CrudService<NamespaceConfigurationApi,
     NamespaceConfigurationDTO> {
+
+  private final NamespaceConfigurationManager namespaceConfigurationManager;
 
   @Inject
   public NamespaceConfigurationService(
       final NamespaceConfigurationManager namespaceConfigurationManager,
       final AuthorizationManager authorizationManager) {
     super(authorizationManager, namespaceConfigurationManager, ImmutableMap.of());
+    this.namespaceConfigurationManager = namespaceConfigurationManager;
+  }
+
+  public NamespaceConfigurationApi getNamespaceConfiguration(
+      final ThirdEyeServerPrincipal principal
+  ) {
+    final String namespace = authorizationManager.currentNamespace(principal);
+    return toApi(namespaceConfigurationManager.getNamespaceConfiguration(namespace));
   }
 
   @Override

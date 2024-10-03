@@ -13,11 +13,9 @@
  */
 package ai.startree.thirdeye.datalayer.bao;
 
-import static ai.startree.thirdeye.spi.Constants.DEFAULT_CHRONOLOGY;
 import static com.google.common.base.Preconditions.checkState;
 
 import ai.startree.thirdeye.datalayer.dao.NamespaceConfigurationDao;
-import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.config.TimeConfiguration;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
@@ -30,8 +28,10 @@ import com.google.inject.Singleton;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.units.qual.N;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
@@ -49,43 +49,31 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
   }
 
   public @NonNull NamespaceConfigurationDTO getNamespaceConfiguration(final String namespace) {
-    final DaoFilter daoFilter = new DaoFilter().setPredicate(Predicate.EQ(
-        "namespace", namespace));
-    final List<NamespaceConfigurationDTO> results = filter(daoFilter);
+    final NamespaceConfigurationDTO existingNamespaceConfig = fetchExistingNamespaceConfiguration(
+        namespace);
 
     // namespace config exists, update if components are empty
-    if (results != null && !results.isEmpty()) {
-      NamespaceConfigurationDTO existingNamespaceConfigurationDTO = results.get(0);
-      if (existingNamespaceConfigurationDTO.getTimeConfiguration() == null) {
-        existingNamespaceConfigurationDTO.setTimeConfiguration(getTimeConfigurationFromServerConfig());
-        final Long namespaceConfigurationId = save(existingNamespaceConfigurationDTO);
+    if (existingNamespaceConfig != null) {
+      if (existingNamespaceConfig.getTimeConfiguration() == null) {
+        existingNamespaceConfig.setTimeConfiguration(
+            getDefaultTimeConfigurationFromServerConfig());
+        final Long namespaceConfigurationId = save(existingNamespaceConfig);
         checkState(namespaceConfigurationId != null,
             "Failed to update namespace configuration for namespace %s",
-            existingNamespaceConfigurationDTO.namespace());
+            existingNamespaceConfig.namespace());
       }
-      return existingNamespaceConfigurationDTO;
+      return existingNamespaceConfig;
     }
 
-    // create new namespace configuration
-    NamespaceConfigurationDTO namespaceConfigurationDTO = new NamespaceConfigurationDTO();
-    namespaceConfigurationDTO.setTimeConfiguration(getTimeConfigurationFromServerConfig())
-        .setAuth(new AuthorizationConfigurationDTO().setNamespace(namespace));
-    final Long namespaceConfigurationId = save(namespaceConfigurationDTO);
-    checkState(namespaceConfigurationId != null,
-        "Failed to create namespace configuration for namespace %s",
-        namespaceConfigurationDTO.namespace());
-
-    return namespaceConfigurationDTO;
+    return createNewNamespaceConfiguration(namespace);
   }
 
   public @NonNull NamespaceConfigurationDTO updateNamespaceConfiguration(
       NamespaceConfigurationDTO updatedNamespaceConfiguration) {
-    final String namespace = updatedNamespaceConfiguration.namespace();
-
-    final DaoFilter daoFilter = new DaoFilter().setPredicate(Predicate.EQ(
-        "namespace", namespace));
-    final List<NamespaceConfigurationDTO> results = filter(daoFilter);
-    checkState(results != null && !results.isEmpty(),
+    String namespace = updatedNamespaceConfiguration.namespace();
+    final NamespaceConfigurationDTO existingNamespaceConfig = fetchExistingNamespaceConfiguration(
+        namespace);
+    checkState(existingNamespaceConfig != null,
         "Trying to update non-existent namespace configuration for namespace %s",
         namespace);
 
@@ -95,6 +83,45 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
         namespace);
 
     return updatedNamespaceConfiguration;
+  }
+
+  public @NonNull NamespaceConfigurationDTO resetNamespaceConfiguration(final String namespace) {
+    final NamespaceConfigurationDTO existingNamespaceConfig = fetchExistingNamespaceConfiguration(
+        namespace);
+
+    // namespace config exists, update values to default
+    if (existingNamespaceConfig != null) {
+      existingNamespaceConfig.setTimeConfiguration(
+          getDefaultTimeConfigurationFromServerConfig());
+      final Long namespaceConfigurationId = save(existingNamespaceConfig);
+      checkState(namespaceConfigurationId != null,
+          "Failed to rollback namespace configuration for namespace %s",
+          existingNamespaceConfig.namespace());
+      return existingNamespaceConfig;
+    }
+
+    return createNewNamespaceConfiguration(namespace);
+  }
+
+  private NamespaceConfigurationDTO fetchExistingNamespaceConfiguration(String namespace) {
+    final DaoFilter daoFilter = new DaoFilter().setPredicate(Predicate.EQ(
+        "namespace", namespace));
+    final List<NamespaceConfigurationDTO> results = filter(daoFilter);
+    if (results != null && !results.isEmpty()) {
+      return results.get(0);
+    }
+    return null;
+  }
+
+  private @NonNull NamespaceConfigurationDTO createNewNamespaceConfiguration(String namespace) {
+    NamespaceConfigurationDTO namespaceConfigurationDTO = new NamespaceConfigurationDTO();
+    namespaceConfigurationDTO.setTimeConfiguration(getDefaultTimeConfigurationFromServerConfig())
+        .setAuth(new AuthorizationConfigurationDTO().setNamespace(namespace));
+    final Long namespaceConfigurationId = save(namespaceConfigurationDTO);
+    checkState(namespaceConfigurationId != null,
+        "Failed to create namespace configuration for namespace %s",
+        namespaceConfigurationDTO.namespace());
+    return namespaceConfigurationDTO;
   }
 
   @Override
@@ -210,7 +237,7 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
     return dao.count(predicate);
   }
 
-  private TimeConfigurationDTO getTimeConfigurationFromServerConfig() {
+  private TimeConfigurationDTO getDefaultTimeConfigurationFromServerConfig() {
     return new TimeConfigurationDTO()
         .setDateTimePattern(timeConfiguration.getDateTimePattern())
         .setTimezone(timeConfiguration.getTimezone())

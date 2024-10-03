@@ -22,5 +22,7 @@ public interface NamespaceConfigurationManager extends AbstractManager<Namespace
 
   @NonNull NamespaceConfigurationDTO updateNamespaceConfiguration(
       NamespaceConfigurationDTO updatedNamespaceConfiguration);
+
+  @NonNull NamespaceConfigurationDTO resetNamespaceConfiguration(final String namespace);
 }
 

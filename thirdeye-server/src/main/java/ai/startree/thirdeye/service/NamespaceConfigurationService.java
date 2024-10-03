@@ -64,6 +64,13 @@ public class NamespaceConfigurationService {
         toDto(updatedNamespaceConfiguration)));
   }
 
+  public NamespaceConfigurationApi resetNamespaceConfiguration(
+      final ThirdEyeServerPrincipal principal
+  ) {
+    final String namespace = authorizationManager.currentNamespace(principal);
+    return toApi(namespaceConfigurationManager.resetNamespaceConfiguration(namespace));
+  }
+
   protected NamespaceConfigurationDTO toDto(final NamespaceConfigurationApi api) {
     return ApiBeanMapper.toNamespaceConfigurationDTO(api);
   }

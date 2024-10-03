@@ -22,6 +22,7 @@ import ai.startree.thirdeye.spi.api.NamespaceConfigurationApi;
 import io.dropwizard.auth.Auth;
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
@@ -33,6 +34,8 @@ import javax.inject.Singleton;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
@@ -65,10 +68,7 @@ public class NamespaceConfigurationResource {
   @GET
   @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
-  public Response get(
-      @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
-      @Context UriInfo uriInfo
-  ) {
+  public Response get(@Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal) {
     return respondOk(namespaceConfigurationService.getNamespaceConfiguration(principal));
   }
 
@@ -78,7 +78,15 @@ public class NamespaceConfigurationResource {
   public Response edit(
       @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
       NamespaceConfigurationApi dto) {
-    return respondOk(namespaceConfigurationService.updateNamespaceConfiguration(principal,
-        dto));
+    return respondOk(namespaceConfigurationService.updateNamespaceConfiguration(principal, dto));
+  }
+
+  @POST
+  @Path("/reset")
+  @Operation(summary = "Resets namespace configuration to default values")
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response reset(@Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal) {
+    return respondOk(namespaceConfigurationService.resetNamespaceConfiguration(principal));
   }
 }

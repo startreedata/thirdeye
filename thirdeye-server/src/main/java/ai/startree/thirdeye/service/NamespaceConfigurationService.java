@@ -53,8 +53,8 @@ public class NamespaceConfigurationService {
       final NamespaceConfigurationApi updatedNamespaceConfiguration
   ) {
     final String namespace = authorizationManager.currentNamespace(principal);
-    final @NonNull NamespaceConfigurationDTO existing = namespaceConfigurationManager.
-        getNamespaceConfiguration(namespace);
+    final @NonNull NamespaceConfigurationDTO existing = namespaceConfigurationManager
+        .getNamespaceConfiguration(namespace);
     final @NonNull NamespaceConfigurationDTO updated = toDto(updatedNamespaceConfiguration);
 
     validateUpdate(toApi(existing), updatedNamespaceConfiguration);

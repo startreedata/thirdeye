@@ -19,27 +19,20 @@ import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.service.NamespaceConfigurationService;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.NamespaceConfigurationApi;
-import ai.startree.thirdeye.spi.datalayer.dto.NamespaceConfigurationDTO;
 import io.dropwizard.auth.Auth;
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
@@ -59,87 +52,33 @@ import javax.ws.rs.core.UriInfo;
 @Singleton
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class NamespaceConfigurationResource extends CrudResource<NamespaceConfigurationApi,
-    NamespaceConfigurationDTO> {
+public class NamespaceConfigurationResource {
 
   private final NamespaceConfigurationService namespaceConfigurationService;
 
   @Inject
   public NamespaceConfigurationResource(
       final NamespaceConfigurationService namespaceConfigurationService) {
-    super(namespaceConfigurationService);
     this.namespaceConfigurationService = namespaceConfigurationService;
   }
 
-  @Override
   @GET
   @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
-  public Response list(
+  public Response get(
       @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
       @Context UriInfo uriInfo
   ) {
     return respondOk(namespaceConfigurationService.getNamespaceConfiguration(principal));
   }
 
-  // Overridden to disable endpoint
-  @Override
-  @GET
-  @Path("{id}")
-  @Operation(summary = "", hidden = true)
-  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
-  @Produces(MediaType.APPLICATION_JSON)
-  public Response get(
-      @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
-      @PathParam("id") Long id) {
-    throw new UnsupportedOperationException();
-  }
-
-  // Overridden to disable endpoint
-  @Override
-  @POST
-  @Operation(summary = "", hidden = true)
-  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
-  @Produces(MediaType.APPLICATION_JSON)
-  public Response createMultiple(
-      @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
-      final List<NamespaceConfigurationApi> list) {
-    throw new UnsupportedOperationException();
-  }
-
-  // Overridden to disable endpoint
-  @Override
   @PUT
-  @Operation(summary = "", hidden = true)
   @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
   @Produces(MediaType.APPLICATION_JSON)
-  public Response editMultiple(
-      @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
-      final List<NamespaceConfigurationApi> list) {
-    throw new UnsupportedOperationException();
-  }
-
-  // Overridden to disable endpoint
-  @Override
-  @DELETE
-  @Path("{id}")
-  @Operation(summary = "", hidden = true)
-  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
-  @Produces(MediaType.APPLICATION_JSON)
-  public Response delete(
+  public Response edit(
       @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
-      @PathParam("id") Long id) {
-    throw new UnsupportedOperationException();
-  }
-
-  // Overridden to disable endpoint
-  @Override
-  @DELETE
-  @Path("/all")
-  @Operation(summary = "", hidden = true)
-  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
-  @Produces(MediaType.APPLICATION_JSON)
-  public Response deleteAll(@Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal) {
-    throw new UnsupportedOperationException();
+      NamespaceConfigurationApi dto) {
+    return respondOk(namespaceConfigurationService.updateNamespaceConfiguration(principal,
+        dto));
   }
 }

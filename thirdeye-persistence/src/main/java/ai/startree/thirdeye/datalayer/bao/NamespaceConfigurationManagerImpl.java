@@ -49,7 +49,8 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
   }
 
   public @NonNull NamespaceConfigurationDTO getNamespaceConfiguration(final String namespace) {
-    final DaoFilter daoFilter = new DaoFilter().setPredicate(Predicate.EQ("namespace", namespace));
+    final DaoFilter daoFilter = new DaoFilter().setPredicate(Predicate.EQ(
+        "namespace", namespace));
     final List<NamespaceConfigurationDTO> results = filter(daoFilter);
 
     // namespace config exists, update if components are empty
@@ -75,6 +76,25 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
         namespaceConfigurationDTO.namespace());
 
     return namespaceConfigurationDTO;
+  }
+
+  public @NonNull NamespaceConfigurationDTO updateNamespaceConfiguration(
+      NamespaceConfigurationDTO updatedNamespaceConfiguration) {
+    final String namespace = updatedNamespaceConfiguration.namespace();
+
+    final DaoFilter daoFilter = new DaoFilter().setPredicate(Predicate.EQ(
+        "namespace", namespace));
+    final List<NamespaceConfigurationDTO> results = filter(daoFilter);
+    checkState(results != null && !results.isEmpty(),
+        "Trying to update non-existent namespace configuration for namespace %s",
+        namespace);
+
+    final Long namespaceConfigurationId = save(updatedNamespaceConfiguration);
+    checkState(namespaceConfigurationId != null,
+        "Failed to update namespace configuration for namespace %s",
+        namespace);
+
+    return updatedNamespaceConfiguration;
   }
 
   @Override

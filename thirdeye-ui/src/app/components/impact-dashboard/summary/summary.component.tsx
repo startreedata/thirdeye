@@ -181,16 +181,16 @@ export const Summary = ({
                 </div>
                 <div ref={summaryRef}>
                     <div>
-                        In the last <b>{verboseSummaryItems.weeks} weeks</b>,
+                        In the last <b>{verboseSummaryItems.weeks} weeks</b>,&nbsp;
                         <b>
-                            {summaryData.anomalies.detected.count} anomlaies
+                            {summaryData.anomalies.detected.count} anomalies
                             were detected
                         </b>
                         , which is <b>{verboseSummaryItems.percentageChange}</b>{" "}
                         than the previous {verboseSummaryItems.weeks} weeks.{" "}
                         {summaryData.anomalies.detected.count > 0 && (
                             <>
-                                Notifications about anomallies were sent via
+                                Notifications about anomalies were sent via
                                 Slack and Email.
                             </>
                         )}

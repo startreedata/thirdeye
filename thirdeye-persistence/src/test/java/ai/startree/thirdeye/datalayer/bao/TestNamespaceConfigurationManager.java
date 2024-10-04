@@ -166,7 +166,7 @@ public class TestNamespaceConfigurationManager {
     assertThat(updatedDto.getVersion()).isEqualTo(dto.getVersion());
   }
 
-  @Test(dependsOnMethods = {"testUpdateMultiple"})
+  @Test(dependsOnMethods = {"testUpdate"})
   public void testDelete() {
     final NamespaceConfigurationDTO dto1 = namespaceConfigurationDao
         .findById(namespaceConfigurationId1);

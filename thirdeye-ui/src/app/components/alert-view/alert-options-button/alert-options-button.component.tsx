@@ -64,7 +64,7 @@ export const AlertOptionsButton: FunctionComponent<AlertOptionsButtonProps> = ({
             return rerunAnomalyDetectionForAlert({
                 id: alertId,
                 start: insights.datasetStartTime,
-                end: insights.defaultStartTime,
+                end: insights.datasetEndTime,
             });
         },
     });

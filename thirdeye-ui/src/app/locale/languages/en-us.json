@@ -643,6 +643,7 @@
         "anomalies-are-detected-within-the-date-range": "Anomalies are detected within the date range selected on the chart",
         "anomalies-with-feedback": "Anomalies with feedback",
         "anomaly-confirmed-to-be-a": "This anomaly was confirmed to be a {{status}}",
+        "anomaly-detection-task-ran-successfully": "Anomaly detection rerun task created successfully. Completion may take a few minutes.",
         "anomaly-filter-search": "Add a dimension filter (Type to Search)",
         "anomaly-helper-description": "An anomaly is the system flagging the recorded behavior of the system deviating from the expected behaviour. Anomalies are created by an alert that is configured to used a specific flagging criteria to determine if the system has shown unexpected behavior within a bound period of time. <br /><br /> Anomalies form the basis of further investigations to determine the impact of various factors on the system, which may be helpful in determining the cause behind the unexpected behaviour of the system in the past, or to even predict/prevent similar behaviour in the future.",
         "anomaly-precision-tooltip": "(Anomalies labeled as anomalies) / (Anomalies with feedback)",

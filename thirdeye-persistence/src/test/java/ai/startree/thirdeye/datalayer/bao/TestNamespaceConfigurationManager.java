@@ -19,8 +19,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.spi.datalayer.bao.NamespaceConfigurationManager;
 import ai.startree.thirdeye.spi.datalayer.dto.NamespaceConfigurationDTO;
-import java.util.Arrays;
-import java.util.Collections;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;

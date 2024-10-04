@@ -44,6 +44,7 @@ import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
+import ai.startree.thirdeye.spi.datalayer.bao.RcaInvestigationManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
@@ -87,6 +88,7 @@ public class AlertResourceTest {
         mock(AlertInsightsProvider.class),
         mock(SubscriptionGroupManager.class),
         mock(EnumerationItemManager.class),
+        mock(RcaInvestigationManager.class),
         mock(TaskManager.class),
         new TimeConfiguration(),
         authorizationManager
@@ -264,6 +266,7 @@ public class AlertResourceTest {
         mock(AlertInsightsProvider.class),
         mock(SubscriptionGroupManager.class),
         mock(EnumerationItemManager.class),
+        mock(RcaInvestigationManager.class),
         mock(TaskManager.class),
         new TimeConfiguration(),
         newAuthorizationManager(mock(AlertTemplateManager.class),
@@ -300,6 +303,7 @@ public class AlertResourceTest {
         mock(AlertInsightsProvider.class),
         mock(SubscriptionGroupManager.class),
         mock(EnumerationItemManager.class),
+        mock(RcaInvestigationManager.class),
         mock(TaskManager.class),
         new TimeConfiguration(),
         newAuthorizationManager(mock(AlertTemplateManager.class),

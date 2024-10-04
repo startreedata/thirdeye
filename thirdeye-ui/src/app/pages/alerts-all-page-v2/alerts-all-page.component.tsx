@@ -44,6 +44,8 @@ import { UiAlert } from "../../rest/dto/ui-alert.interfaces";
 import { getUiAlerts } from "../../utils/alerts/alerts.util";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import {
+    getAlertsCreateAdvancePath,
+    getAlertsCreateNewJsonEditorPath,
     getAlertsCreatePath,
     getAlertsEasyCreatePath,
 } from "../../utils/routes/routes.util";
@@ -215,11 +217,17 @@ export const AlertsAllPage: FunctionComponent = () => {
             id: "jsonAlert",
             text: t("label.json-alert"),
         },
-        {
-            id: "alertRecipes",
-            text: t("label.alert-recipes"),
-        },
     ];
+
+    const handleAlertRedirect = (alertType: string | number): void => {
+        if (alertType === "easyAlert") {
+            navigate(getAlertsCreatePath());
+        } else if (alertType === "advancedAlert") {
+            navigate(getAlertsCreateAdvancePath());
+        } else if (alertType === "jsonAlert") {
+            navigate(getAlertsCreateNewJsonEditorPath());
+        }
+    };
 
     const loadingErrorStateParams = {
         isError: isGetAlertError,
@@ -303,12 +311,7 @@ export const AlertsAllPage: FunctionComponent = () => {
                             data-testid="create-menu-button"
                             dropdownMenuItems={createMenuItems}
                             type={DropdownButtonTypeV1.Regular}
-                            onClick={(id) => {
-                                if (id === "easyAlert") {
-                                    navigate(getAlertsCreatePath());
-                                    // setCreateId(id as string);
-                                }
-                            }}
+                            onClick={handleAlertRedirect}
                         >
                             {t("label.create")}
                         </DropdownButtonV1>

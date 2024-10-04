@@ -82,6 +82,9 @@ data:
     #    cache:
     #      size: 64
     #      ttl: 60000
+    
+    accessControl:
+      enabled: false
 
     database:
       # If internal MySQL is disabled, connection will be made to the provided 'mysql.url' on port 'mysql.port'

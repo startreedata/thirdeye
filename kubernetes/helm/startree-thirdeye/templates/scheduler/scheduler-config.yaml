@@ -82,6 +82,9 @@ data:
     #    cache:
     #      size: 64
     #      ttl: 60000
+    
+    accessControl:
+      enabled: false
 
     database:
       # If internal MySQL is disabled, connection will be made to the provided 'mysql.url' on port 'mysql.port'
@@ -153,6 +156,7 @@ data:
       detectionAlert: true
 
       holidayEvents:
+        {{- if .Values.config.loadCalendarEvents }}
         enabled: {{ not .Values.secrets.holidayLoaderKey | ternary "false" "true" }}
         calendars:
         {{- if .Values.config.calendars }}
@@ -198,4 +202,9 @@ data:
         {{- end }}
         holidayLoadRange: 2592000000
         runFrequency: 1  # in Days
+        {{- else }}
+        enabled: false
+        calendars: []
+        {{- end }}
+
 {{ end }}

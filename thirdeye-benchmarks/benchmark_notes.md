@@ -25,6 +25,7 @@ Benchmark                                  Mode  Cnt     Score    Error  Units
 StringTemplateUtilsBenchmark.applyContext  avgt    7  1480.610 ± 56.571  us/op
 ```
 
+After:
 ```
 Benchmark                                  Mode  Cnt   Score   Error  Units
 StringTemplateUtilsBenchmark.applyContext  avgt    7  55.539 ± 0.272  us/op
@@ -36,3 +37,38 @@ For an alert with 1000 enumeration items:
 
 Please make sure this does not get slower.
 I think there is still a 10x speed improvement opportunity here but this should be fast enough for the moment.
+
+
+### 2 - LoadTemplatesBenchmark - Caching default templates or not ? 
+Problem: when the scheduler starts, it updates templates for all namespaces. See ResourcesBootstrapService#bootstrap.
+When the number of namespaces is big, the question is whether reading templates from file (the "file" will actually be in the jar) for each namespace will be slow.  
+
+We compare two approaches:
+`loadWithNoCache`: reload from "file" every time.
+`loadWithCacheAndCopy`: load from "file" once, then copy with ObjectMapper.
+
+```
+Benchmark                                    (numNamespaces)  Mode  Cnt      Score     Error  Units
+LoadTemplatesBenchmark.loadWithNoCache                 10     avgt    7   7861.987 ± 118.917  us/op
+LoadTemplatesBenchmark.loadWithCacheAndCopy            10     avgt    7   4679.431 ±   8.247  us/op
+
+LoadTemplatesBenchmark.loadWithNoCache                100     avgt    7  75868.979 ± 618.079  us/op
+LoadTemplatesBenchmark.loadWithCacheAndCopy           100     avgt    7  41180.665 ± 233.718  us/op
+```
+
+Analysis:   
+Reading from file or performing a copy with an ObjectMapper is the same order of magnitude in terms of speed.
+The speed boost with caching is not worth it and introduces complexity.
+The bottleneck will most likely be the writes to the db.
+
+Note that it's likely the difference would be bigger in the enterprise ThirdEye case, 
+because some templates are generated on the fly. Assumption is it would still be the same order of magnitude. 
+
+Conclusion:  
+The update for all namespaces should be multi-threaded to reduce the db write bottleneck. 
+This won't be done right now because the persistence layer has other bottlenecks that should be solved before.
+No need to optimize the read of templates.
+
+
+
+

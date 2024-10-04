@@ -22,6 +22,7 @@ import {
     useAuthProviderV1,
 } from "../../platform/components";
 import { AppRoute } from "../../utils/routes/routes.util";
+import { ImpactDashboardPage } from "../../pages/impact-dashboard-page/impact-dashboard-page.component";
 
 const AlertsRouter = lazy(() =>
     import(
@@ -82,6 +83,10 @@ export const AppRouter: FunctionComponent = () => {
                     <Route
                         element={<AnomaliesRouter />}
                         path={`${AppRoute.ANOMALIES}/*`}
+                    />
+                    <Route
+                        element={<ImpactDashboardPage />}
+                        path={`${AppRoute.IMPACT_DASHBOARD}/*`}
                     />
 
                     {/* Direct all configuration paths to configuration router */}

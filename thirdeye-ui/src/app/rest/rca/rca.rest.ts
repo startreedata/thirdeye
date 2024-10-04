@@ -73,7 +73,8 @@ export const getDimensionAnalysisForAnomaly = async (
 };
 
 export const getInvestigations = async (
-    anomalyId?: number
+    anomalyId?: number,
+    created?: number
 ): Promise<Investigation[]> => {
     const queryParams = new URLSearchParams();
     let queryString = "";
@@ -83,6 +84,16 @@ export const getInvestigations = async (
             ANOMALY_ID_FILTER_QUERY_PARAM_KEY,
             anomalyId.toString()
         );
+    }
+
+    if (created) {
+        queryParams.set("created", `[gte]${created}`);
+    }
+
+    if (
+        queryParams.has("created") ||
+        queryParams.has(ANOMALY_ID_FILTER_QUERY_PARAM_KEY)
+    ) {
         queryString = `?${queryParams.toString()}`;
     }
 

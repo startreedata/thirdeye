@@ -43,7 +43,8 @@ export interface GetAnomalyDimensionAnalysis extends ActionHook {
 export interface GetInvestigations extends ActionHook {
     investigations: Investigation[] | null;
     getInvestigations: (
-        alertId?: number
+        alertId?: number,
+        created?: number
     ) => Promise<Investigation[] | undefined>;
 }
 

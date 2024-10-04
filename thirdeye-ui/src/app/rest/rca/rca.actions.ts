@@ -85,9 +85,10 @@ export const useGetInvestigations = (): GetInvestigations => {
         useHTTPAction<Investigation[]>(getInvestigationsRest);
 
     const getInvestigations = (
-        anomalyId?: number
+        anomalyId?: number,
+        created?: number
     ): Promise<Investigation[] | undefined> => {
-        return makeRequest(anomalyId);
+        return makeRequest(anomalyId, created);
     };
 
     return {

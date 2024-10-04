@@ -115,6 +115,7 @@
         "alert-wizard": "Alert wizard",
         "alerts": "Alerts",
         "alerts-and-dimensions": "Alerts & dimensions",
+        "alerts-count": "Alerts count",
         "all": "All",
         "all-entity": "All {{entity}}",
         "am": "AM",
@@ -195,6 +196,7 @@
         "create-notifications": "Create notifications",
         "create-sample-alert": "Create sample alert",
         "created": "Created",
+        "created-at": "Created At",
         "created-by": "Created by",
         "creating": "Creating",
         "cron": "Cron",
@@ -646,6 +648,7 @@
         "anomalies-are-detected-within-the-date-range": "Anomalies are detected within the date range selected on the chart",
         "anomalies-with-feedback": "Anomalies with feedback",
         "anomaly-confirmed-to-be-a": "This anomaly was confirmed to be a {{status}}",
+        "anomaly-detection-task-ran-successfully": "Anomaly detection rerun task created successfully. Completion may take a few minutes.",
         "anomaly-filter-search": "Add a dimension filter (Type to Search)",
         "anomaly-helper-description": "An anomaly is the system flagging the recorded behavior of the system deviating from the expected behaviour. Anomalies are created by an alert that is configured to used a specific flagging criteria to determine if the system has shown unexpected behavior within a bound period of time. <br /><br /> Anomalies form the basis of further investigations to determine the impact of various factors on the system, which may be helpful in determining the cause behind the unexpected behaviour of the system in the past, or to even predict/prevent similar behaviour in the future.",
         "anomaly-precision-tooltip": "(Anomalies labeled as anomalies) / (Anomalies with feedback)",
@@ -965,6 +968,68 @@
         "you-can-now-start-using-thirdeye": "You can now start using ThirdEye",
         "you-can-use-our": "You can use our sample configurations as reference to build your own: ",
         "your-changes-wont-save": "Your changes won’t be saved."
+    },
+    "pages": {
+        "impact-dashboard": {
+            "common": {
+                "current-period": "Current Period",
+                "date-range": "Date range",
+                "previous-period": "Previous Period"
+            },
+            "sections": {
+                "detection-performance": {
+                    "heading": "Detection performance",
+                    "total-anomalies-graph-title": "Total # of anomalies detected",
+                    "total-anomalies-weekly-graph-title": "Weekly anomalies detected",
+                    "total-notifications-graph-title": "Total # of notifications sent",
+                    "total-notifications-weekly-graph-title": "Weekly notifcations sent"
+                },
+                "investigations": {
+                    "heading": "Recent investigations",
+                    "labels": {
+                        "anomaly-confirmation": "Anomaly confirmation",
+                        "created-by": "Created by",
+                        "created-date": "Created date",
+                        "invalid-anomaly-text": "No, this is not an anomaly",
+                        "investigation-name": "Investigation name",
+                        "no-feedback-text": "No feedback present",
+                        "related-event": "Anomaly was related to",
+                        "valid-anomaly-text": "Yes, this is a valid anomaly"
+                    }
+                },
+                "summary": {
+                    "cards": {
+                        "alerts": "Alerts",
+                        "anomalies": "Anomalies",
+                        "notifications": "Notifications"
+                    },
+                    "heading": "System stats",
+                    "verbose-summary-heading": "Summary"
+                },
+                "usage-insights": {
+                    "anomaly-table": {
+                        "columns": {
+                            "alert-name": "Alert name",
+                            "anomalies-detected": "Anomalies detected",
+                            "dimensions-within-alert": "Dimensions within alert"
+                        },
+                        "emptyState": "No anomalies detected in the selected period",
+                        "title": "Top anomaly alerts"
+                    },
+                    "heading": "Usage insights",
+                    "notification-group-table": {
+                        "columns": {
+                            "anomalies": "Anomalies",
+                            "subscription-group": "Subscription group"
+                        },
+                        "emptyState": "Detected anomalies were not subscribed to any group",
+                        "title": "Top anomaly notification groups"
+                    }
+                }
+            },
+            "subHeading": "Overview of system statistics, anomaly detection performance, and usage insights.",
+            "title": "Impact dashboard"
+        }
     },
     "server": {},
     "url": {

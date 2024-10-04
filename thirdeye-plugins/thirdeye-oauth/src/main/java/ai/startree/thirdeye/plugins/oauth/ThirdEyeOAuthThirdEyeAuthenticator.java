@@ -19,6 +19,7 @@ import static java.util.Objects.requireNonNull;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthenticator;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthenticator.AuthTokenAndNamespace;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -38,7 +39,7 @@ public class ThirdEyeOAuthThirdEyeAuthenticator implements ThirdEyeAuthenticator
 
   private final OidcJWTProcessor processor;
   private final OidcContext oidcContext;
-  private final LoadingCache<AuthTokenAndNamespace, ThirdEyePrincipal> tokenPrincipalCache;
+  private final LoadingCache<AuthTokenAndNamespace, Optional<ThirdEyePrincipal>> tokenPrincipalCache;
 
   @Inject
   public ThirdEyeOAuthThirdEyeAuthenticator(final OidcJWTProcessor processor,
@@ -53,7 +54,7 @@ public class ThirdEyeOAuthThirdEyeAuthenticator implements ThirdEyeAuthenticator
         .build(getCacheLoader());
   }
 
-  public static String getName(final JWTClaimsSet claims) {
+  private static String getName(final JWTClaimsSet claims) {
     try {
       return claims.getStringClaim(NAME_CLAIM);
     } catch (ParseException e) {
@@ -65,22 +66,26 @@ public class ThirdEyeOAuthThirdEyeAuthenticator implements ThirdEyeAuthenticator
   @Override
   public Optional<ThirdEyePrincipal> authenticate(final AuthTokenAndNamespace authTokenAndNamespace) {
     try {
-      return optional(tokenPrincipalCache.get(authTokenAndNamespace));
+      return tokenPrincipalCache.get(authTokenAndNamespace);
     } catch (final Exception exception) {
       LOG.error("Authentication failed.", exception);
       return Optional.empty();
     }
   }
 
-  CacheLoader<AuthTokenAndNamespace, ThirdEyePrincipal> getCacheLoader() {
+  @VisibleForTesting
+  protected CacheLoader<AuthTokenAndNamespace, Optional<ThirdEyePrincipal>> getCacheLoader() {
     return new CacheLoader<>() {
 
       @Override
-      public OAuthThirdEyePrincipal load(final AuthTokenAndNamespace authTokenAndNamespace)
+      public Optional<ThirdEyePrincipal> load(final AuthTokenAndNamespace authTokenAndNamespace)
           throws Exception {
+        if (authTokenAndNamespace.authToken() == null) {
+          return Optional.empty();
+        }
         final SignedJWT jwt = SignedJWT.parse(authTokenAndNamespace.authToken());
         final JWTClaimsSet claims = processor.process(jwt, oidcContext);
-        return new OAuthThirdEyePrincipal(getName(claims), authTokenAndNamespace.namespace());
+        return optional(new OAuthThirdEyePrincipal(getName(claims), authTokenAndNamespace.namespace()));
       }
     };
   }

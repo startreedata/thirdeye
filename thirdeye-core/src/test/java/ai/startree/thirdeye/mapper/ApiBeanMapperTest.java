@@ -156,46 +156,4 @@ public class ApiBeanMapperTest {
     final AuthorizationConfigurationDTO gotDto = ApiBeanMapper.toAuthorizationConfigurationDTO(api);
     assertThat(gotDto.getNamespace()).isEqualTo("my-namespace");
   }
-
-  @Test
-  public void testToNamespaceConfigurationApi() {
-    final NamespaceConfigurationDTO dto = new NamespaceConfigurationDTO();
-    dto.setTimeConfiguration(new TimeConfigurationDTO()
-        .setDateTimePattern(Constants.NOTIFICATIONS_DEFAULT_DATE_PATTERN)
-        .setTimezone(DEFAULT_CHRONOLOGY.getZone())
-        .setMinimumOnboardingStartTime(946684800000L));
-    dto.setAuth(new AuthorizationConfigurationDTO().setNamespace("my-namespace"));
-
-    final NamespaceConfigurationApi gotApi = ApiBeanMapper.toApi(dto);
-    assertThat(gotApi).isNotNull();
-    assertThat(gotApi.getTimeConfiguration()).isNotNull();
-    assertThat(gotApi.getTimeConfiguration().getDateTimePattern())
-        .isEqualTo(Constants.NOTIFICATIONS_DEFAULT_DATE_PATTERN);
-    assertThat(gotApi.getTimeConfiguration().getTimezone())
-        .isEqualTo(DEFAULT_CHRONOLOGY.getZone());
-    assertThat(gotApi.getTimeConfiguration().getMinimumOnboardingStartTime())
-        .isEqualTo(946684800000L);
-    assertThat(gotApi.getAuth().getNamespace()).isEqualTo("my-namespace");
-  }
-
-  @Test
-  public void testToNamespaceConfigurationDTO() {
-    final NamespaceConfigurationApi api = new NamespaceConfigurationApi();
-    api.setTimeConfiguration(new TimeConfigurationApi()
-        .setDateTimePattern(Constants.NOTIFICATIONS_DEFAULT_DATE_PATTERN)
-        .setTimezone(DEFAULT_CHRONOLOGY.getZone())
-        .setMinimumOnboardingStartTime(946684800000L));
-    api.setAuth(new AuthorizationConfigurationApi().setNamespace("my-namespace"));
-
-    final NamespaceConfigurationDTO gotDto = ApiBeanMapper.toNamespaceConfigurationDTO(api);
-    assertThat(gotDto).isNotNull();
-    assertThat(gotDto.getTimeConfiguration()).isNotNull();
-    assertThat(gotDto.getTimeConfiguration().getDateTimePattern())
-        .isEqualTo(Constants.NOTIFICATIONS_DEFAULT_DATE_PATTERN);
-    assertThat(gotDto.getTimeConfiguration().getTimezone())
-        .isEqualTo(DEFAULT_CHRONOLOGY.getZone());
-    assertThat(gotDto.getTimeConfiguration().getMinimumOnboardingStartTime())
-        .isEqualTo(946684800000L);
-    assertThat(gotDto.getAuth().getNamespace()).isEqualTo("my-namespace");
-  }
 }

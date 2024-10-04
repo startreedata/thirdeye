@@ -27,6 +27,7 @@ import ai.startree.thirdeye.spi.events.EventType;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -67,7 +68,10 @@ public class NotificationEventsBuilder {
    * TODO cyril - logic is duplicated (and not iso) with what RcaRelatedService#getRelatedEvents provides
    */
   public List<EventApi> getRelatedEvents(final Collection<AnomalyDTO> anomalies) {
-    final String currentNamespace = deduceNamespace(anomalies);
+    if (anomalies.isEmpty()) {
+      return Collections.emptyList();
+    }
+    final String currentNamespace = anomalies.iterator().next().namespace();
     final DateTimeZone dateTimeZone = namespaceConfigurationManager
         .getNamespaceConfiguration(currentNamespace).getTimeConfiguration()
         .getTimezone();
@@ -131,12 +135,5 @@ public class NotificationEventsBuilder {
     LOG.info("Fetched {} {} events between {} and {}", allEventsBetweenTimeRange.size(),
         EventType.HOLIDAY.name(), startTimeWithOffsetMillis, endTimeWithOffsetMillis);
     return allEventsBetweenTimeRange;
-  }
-
-  private String deduceNamespace(Collection<AnomalyDTO> anomalies) {
-    if (anomalies.isEmpty()) {
-      return null;
-    }
-    return anomalies.iterator().next().namespace();
   }
 }

@@ -41,7 +41,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-@Tag(name = "Namespace Configuration")
+@Tag(name = "Workspace Configuration")
 @SecurityRequirement(name="oauth")
 @SecurityRequirement(name = Constants.NAMESPACE_SECURITY)
 @OpenAPIDefinition(security = {

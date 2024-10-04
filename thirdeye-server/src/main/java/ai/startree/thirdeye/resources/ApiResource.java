@@ -162,7 +162,7 @@ public class ApiResource {
     return uiResource;
   }
 
-  @Path("namespace-configuration")
+  @Path("workspace-configuration")
   public NamespaceConfigurationResource getNamespaceConfigurationResource() {
     return namespaceConfigurationResource;
   }

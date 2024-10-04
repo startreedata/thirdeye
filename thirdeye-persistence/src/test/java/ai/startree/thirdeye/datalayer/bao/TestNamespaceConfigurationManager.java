@@ -166,26 +166,6 @@ public class TestNamespaceConfigurationManager {
     assertThat(updatedDto.getVersion()).isEqualTo(dto.getVersion());
   }
 
-  @Test(dependsOnMethods = {"testUpdate"})
-  public void testUpdateMultiple() {
-    final NamespaceConfigurationDTO dto1 = namespaceConfigurationDao
-        .findById(namespaceConfigurationId1);
-    dto1.setTimeConfiguration(dto1.getTimeConfiguration()
-        .setMinimumOnboardingStartTime(996684800000L));
-
-    final NamespaceConfigurationDTO dto2 = namespaceConfigurationDao
-        .findById(namespaceConfigurationId2);
-    dto2.setVersion(dto2.getVersion()+1);
-
-    assertThat(namespaceConfigurationDao.update(Collections.emptyList())).isEqualTo(0);
-    assertThat(namespaceConfigurationDao.update(Arrays.asList(dto1, dto2))).isEqualTo(2);
-    assertThat(namespaceConfigurationDao.findById(namespaceConfigurationId1)
-        .getTimeConfiguration().getMinimumOnboardingStartTime())
-        .isEqualTo(dto1.getTimeConfiguration().getMinimumOnboardingStartTime());
-    assertThat(namespaceConfigurationDao.findById(namespaceConfigurationId2)
-        .getVersion()).isEqualTo(dto2.getVersion());
-  }
-
   @Test(dependsOnMethods = {"testUpdateMultiple"})
   public void testDelete() {
     final NamespaceConfigurationDTO dto1 = namespaceConfigurationDao

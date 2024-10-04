@@ -13,10 +13,12 @@
  */
 package ai.startree.thirdeye.spi.datalayer.bao;
 
+import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.dto.NamespaceConfigurationDTO;
+import java.util.List;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public interface NamespaceConfigurationManager extends AbstractManager<NamespaceConfigurationDTO> {
+public interface NamespaceConfigurationManager {
 
   @NonNull NamespaceConfigurationDTO getNamespaceConfiguration(final String namespace);
 
@@ -24,5 +26,19 @@ public interface NamespaceConfigurationManager extends AbstractManager<Namespace
       NamespaceConfigurationDTO updatedNamespaceConfiguration);
 
   @NonNull NamespaceConfigurationDTO resetNamespaceConfiguration(final String namespace);
+
+  Long save(final NamespaceConfigurationDTO entity);
+
+  List<NamespaceConfigurationDTO> findAll();
+
+  NamespaceConfigurationDTO findById(final Long id);
+
+  int update(final NamespaceConfigurationDTO entity);
+
+  int delete(final NamespaceConfigurationDTO entity);
+
+  int deleteById(final Long id);
+
+  List<NamespaceConfigurationDTO> filter(final DaoFilter daoFilter);
 }
 

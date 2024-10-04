@@ -35,6 +35,7 @@ import ai.startree.thirdeye.datalayer.DatabaseClient;
 import ai.startree.thirdeye.datalayer.DatabaseOrm;
 import ai.startree.thirdeye.datalayer.ThirdEyePersistenceModule;
 import ai.startree.thirdeye.datalayer.bao.AlertManagerImpl;
+import ai.startree.thirdeye.datalayer.bao.NamespaceConfigurationManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.TaskManagerImpl;
 import ai.startree.thirdeye.datalayer.core.EnumerationItemMaintainer;
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
@@ -187,6 +188,7 @@ public class ArchitectureTest {
         DataSourceCache.class,
         EnumerationItemMaintainer.class,
         TaskManagerImpl.class,
+        NamespaceConfigurationManagerImpl.class,
         AlertManagerImpl.class,
         DataSourceOnboarder.class, // OK - REVIEWED ON APRIL 12 2024
         EvaluationContextProcessor.class,

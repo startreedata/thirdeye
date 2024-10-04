@@ -15,12 +15,23 @@
 import { Button, Grid } from "@material-ui/core";
 import RefreshIcon from "@material-ui/icons/Refresh";
 import { Alert } from "@material-ui/lab";
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { ActionStatus } from "../../../../rest/actions.interfaces";
 import { determineTimezoneFromAlertInEvaluation } from "../../../../utils/alerts/alerts.util";
-import { TimeRangeButtonWithContext } from "../../../time-range/time-range-button-with-context/time-range-button.component";
+// import {
+//     TimeRangeButtonWithContext
+// } from "../../../time-range/time-range-button-with-context/time-range-button.component";
 import { PreviewChartHeaderProps } from "./preview-chart-header.interfaces";
+import { DateTimeRangePopover } from "../../../v2/date-time-range-popover";
+import { useTimeRange } from "../../../time-range/time-range-provider/time-range-provider.component";
+import {
+    TimeRange,
+    TimeRangeQueryStringKey,
+} from "../../../time-range/time-range-provider/time-range-provider.interfaces";
+
+import { useSearchParams } from "react-router-dom";
+import { TimeRangeDuration } from "../../../v2/date-time-range/quick-select";
 
 export const PreviewChartHeader: FunctionComponent<PreviewChartHeaderProps> = ({
     alertInsight,
@@ -31,6 +42,45 @@ export const PreviewChartHeader: FunctionComponent<PreviewChartHeaderProps> = ({
     showConfigurationNotReflective,
 }) => {
     const { t } = useTranslation();
+    const { recentCustomTimeRangeDurations, setTimeRangeDuration } =
+        useTimeRange();
+    const [searchParams, setSearchParams] = useSearchParams();
+    const timeRangeDuration = useMemo(() => {
+        return {
+            [TimeRangeQueryStringKey.TIME_RANGE]: TimeRange.CUSTOM,
+            [TimeRangeQueryStringKey.START_TIME]: Number(
+                searchParams.get(TimeRangeQueryStringKey.START_TIME)
+            ),
+            [TimeRangeQueryStringKey.END_TIME]: Number(
+                searchParams.get(TimeRangeQueryStringKey.END_TIME)
+            ),
+        };
+    }, [searchParams]);
+
+    const onHandleTimeRangeChange = (
+        timeRangeDuration: TimeRangeDuration
+    ): void => {
+        setTimeRangeDuration(timeRangeDuration);
+        searchParams.set(
+            TimeRangeQueryStringKey.TIME_RANGE,
+            timeRangeDuration.timeRange
+        );
+        searchParams.set(
+            TimeRangeQueryStringKey.START_TIME,
+            timeRangeDuration.startTime.toString()
+        );
+        searchParams.set(
+            TimeRangeQueryStringKey.END_TIME,
+            timeRangeDuration.endTime.toString()
+        );
+        setSearchParams(searchParams);
+        if (onStartEndChange) {
+            onStartEndChange(
+                timeRangeDuration.startTime,
+                timeRangeDuration.endTime
+            );
+        }
+    };
 
     return (
         <>
@@ -60,7 +110,7 @@ export const PreviewChartHeader: FunctionComponent<PreviewChartHeaderProps> = ({
                             </Grid>
                         )}
                     <Grid item>
-                        <TimeRangeButtonWithContext
+                        {/* <TimeRangeButtonWithContext
                             hideQuickExtend
                             btnGroupColor="primary"
                             maxDate={alertInsight?.datasetEndTime}
@@ -69,6 +119,21 @@ export const PreviewChartHeader: FunctionComponent<PreviewChartHeaderProps> = ({
                                 alertInsight?.templateWithProperties
                             )}
                             onTimeRangeChange={onStartEndChange}
+                        /> */}
+                        <DateTimeRangePopover
+                            hideRefresh
+                            hideTimeRangeSelectorButton
+                            maxDate={alertInsight?.datasetEndTime}
+                            minDate={alertInsight?.datasetStartTime}
+                            recentCustomTimeRangeDurations={
+                                recentCustomTimeRangeDurations
+                            }
+                            showQuickExtend={false}
+                            timeRangeDuration={timeRangeDuration}
+                            timezone={determineTimezoneFromAlertInEvaluation(
+                                alertInsight?.templateWithProperties
+                            )}
+                            onChange={onHandleTimeRangeChange}
                         />
                     </Grid>
                 </Grid>

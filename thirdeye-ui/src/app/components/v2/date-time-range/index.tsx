@@ -35,9 +35,11 @@ type DateTimeRangeProps = {
         endTime: number;
         startTime: number;
     }) => void;
-    onCancel?: () => void;
+    onCancel?: (e: React.FormEvent) => void;
     recentCustomTimeRangeDurations?: TimeRangeDuration[];
     selectedRange?: TimeRange;
+    minDate?: number;
+    maxDate?: number;
 };
 
 export const DateTimeRange = ({
@@ -47,6 +49,8 @@ export const DateTimeRange = ({
     onCancel,
     recentCustomTimeRangeDurations,
     selectedRange,
+    minDate,
+    maxDate,
 }: DateTimeRangeProps): JSX.Element => {
     const componentStyles = useDateTimeRangeStyles();
     const [fromDate, setFromDate] = useState(from.date);
@@ -99,6 +103,7 @@ export const DateTimeRange = ({
                         <DateTimeUi
                             date={fromDate}
                             label={from.label}
+                            minDate={minDate}
                             onDateTimeChange={onFromDateSelect}
                         />
                     </div>
@@ -113,6 +118,7 @@ export const DateTimeRange = ({
                             disableFuture
                             date={toDate}
                             label={to.label}
+                            maxDate={maxDate}
                             minDate={from.date}
                             onDateTimeChange={onToDateSelect}
                         />

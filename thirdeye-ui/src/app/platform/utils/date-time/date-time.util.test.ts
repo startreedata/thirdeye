@@ -147,7 +147,7 @@ describe("Date Time Util", () => {
 
     it("formatDateAndTimeV1 should return appropriate string for date", () => {
         expect(formatDateAndTimeV1(1577865600000)).toEqual(
-            "Jan 01, 2020, 12:00 AM"
+            "Jan 01, 2020, 00:00"
         );
     });
 

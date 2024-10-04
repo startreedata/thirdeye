@@ -137,10 +137,10 @@ export const formatDateAndTimeV1 = (
         return "";
     }
 
-    let dateTime = DateTime.fromMillis(date);
+    const dateTime = DateTime.fromMillis(date);
 
     if (timezoneOverride) {
-        dateTime = dateTime.setZone(timezoneOverride);
+        // dateTime = dateTime.setZone(timezoneOverride);
     }
 
     return dateTime.toLocaleString({

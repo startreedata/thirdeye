@@ -21,7 +21,7 @@ export const useTimeRangeSelectorStyles = makeStyles((theme) => ({
     },
     timeRangeDisplay: {
         border: "1px solid #00A3DE",
-        padding: "4px 8px",
+        padding: "2px 8px",
         borderRadius: "4px",
     },
 }));

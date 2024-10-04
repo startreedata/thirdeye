@@ -20,20 +20,27 @@ import {
     formatTimeRange,
     formatTimeRangeDuration,
 } from "../../../utils/time-range/time-range.util";
-import { timezoneStringShort } from "../../../utils/time/time.util";
+import {
+    WEEK_IN_MILLISECONDS,
+    timezoneStringShort,
+} from "../../../utils/time/time.util";
 import { DateTimeRange } from "../date-time-range";
 import { useTimeRangeSelectorStyles } from "./styles";
 import { TimeRangeDuration } from "../date-time-range/quick-select";
+import { Direction, QuickExtend } from "./quick-extend";
 
 interface TimeRangeSelectorProps {
     hideRefresh?: boolean;
     showTimeRangeLabel?: boolean;
     hideTimeRangeSelectorButton?: boolean;
-    timeRangeDuration: TimeRangeDuration;
+    timeRangeDuration?: TimeRangeDuration;
     recentCustomTimeRangeDurations?: TimeRangeDuration[];
     onChange: (timeRangeDuration: TimeRangeDuration) => void;
     onRefresh?: () => void;
     timezone?: string;
+    minDate?: number;
+    maxDate?: number;
+    showQuickExtend?: boolean;
 }
 
 const TIME_SELECTOR_TEST_IDS = {
@@ -55,6 +62,9 @@ export const DateTimeRangePopover: FunctionComponent<TimeRangeSelectorProps> =
         onRefresh,
         onChange,
         timezone,
+        minDate,
+        maxDate,
+        showQuickExtend,
     }) => {
         const timeRangeSelectorClasses = useTimeRangeSelectorStyles();
         const [
@@ -68,9 +78,51 @@ export const DateTimeRangePopover: FunctionComponent<TimeRangeSelectorProps> =
             setTimeRangeSelectorAnchorElement(event.currentTarget);
         };
 
-        const handleTimeRangeSelectorClose = (): void => {
+        const handleTimeRangeSelectorClose = (
+            e: React.SyntheticEvent
+        ): void => {
+            e.stopPropagation();
             setTimeRangeSelectorAnchorElement(null);
         };
+
+        const handleQuickExtend = (direction: Direction): void => {
+            if (timeRangeDuration) {
+                const copiedTimeRange = { ...timeRangeDuration };
+                if (direction === "backward") {
+                    copiedTimeRange.startTime =
+                        copiedTimeRange.startTime - WEEK_IN_MILLISECONDS;
+                } else {
+                    copiedTimeRange.endTime = Math.min(
+                        copiedTimeRange.endTime + WEEK_IN_MILLISECONDS,
+                        Date.now()
+                    );
+                }
+                onChange && onChange(copiedTimeRange);
+            }
+        };
+
+        const isDateEndExtendable = (function () {
+            if (showQuickExtend) {
+                return maxDate
+                    ? timeRangeDuration!.endTime + WEEK_IN_MILLISECONDS <=
+                          maxDate
+                    : timeRangeDuration!.endTime + WEEK_IN_MILLISECONDS <
+                          Date.now();
+            } else {
+                return false;
+            }
+        })();
+
+        const isDateStartExtendable = (function () {
+            if (showQuickExtend) {
+                return minDate
+                    ? timeRangeDuration!.startTime - WEEK_IN_MILLISECONDS >=
+                          minDate
+                    : true;
+            } else {
+                return false;
+            }
+        })();
 
         return (
             <Grid
@@ -79,16 +131,16 @@ export const DateTimeRangePopover: FunctionComponent<TimeRangeSelectorProps> =
                 data-testid={TIME_SELECTOR_TEST_IDS.TIME_RANGE_SELECTOR}
                 justifyContent="flex-end"
             >
+                {showQuickExtend && (
+                    <QuickExtend
+                        direction="backward"
+                        disabled={!isDateStartExtendable}
+                        handleQuickExtend={handleQuickExtend}
+                    />
+                )}
                 {/* Time range */}
                 {timeRangeDuration && (
-                    <Grid
-                        item
-                        className={
-                            !showTimeRangeLabel
-                                ? timeRangeSelectorClasses.timeRangeDisplay
-                                : ""
-                        }
-                    >
+                    <Grid item>
                         {/* Time range label */}
                         {showTimeRangeLabel && (
                             <Typography variant="overline">
@@ -98,6 +150,9 @@ export const DateTimeRangePopover: FunctionComponent<TimeRangeSelectorProps> =
 
                         {/* Time range duration */}
                         <Typography
+                            className={
+                                timeRangeSelectorClasses.timeRangeDisplay
+                            }
                             variant="body2"
                             onClick={handleTimeRangeSelectorClick}
                         >
@@ -106,8 +161,39 @@ export const DateTimeRangePopover: FunctionComponent<TimeRangeSelectorProps> =
                                 timezone
                             )}{" "}
                             ({timezoneStringShort(timezone)})
+                            <Popover
+                                anchorEl={timeRangeSelectorAnchorElement}
+                                open={Boolean(timeRangeSelectorAnchorElement)}
+                                onClose={handleTimeRangeSelectorClose}
+                            >
+                                <DateTimeRange
+                                    from={{
+                                        label: "From",
+                                        date: timeRangeDuration?.startTime,
+                                    }}
+                                    maxDate={maxDate}
+                                    minDate={minDate}
+                                    recentCustomTimeRangeDurations={
+                                        recentCustomTimeRangeDurations
+                                    }
+                                    selectedRange={timeRangeDuration?.timeRange}
+                                    to={{
+                                        label: "To",
+                                        date: timeRangeDuration?.endTime,
+                                    }}
+                                    onCancel={handleTimeRangeSelectorClose}
+                                    onDateApply={onChange}
+                                />
+                            </Popover>
                         </Typography>
                     </Grid>
+                )}
+                {showQuickExtend && (
+                    <QuickExtend
+                        direction="forward"
+                        disabled={!isDateEndExtendable}
+                        handleQuickExtend={handleQuickExtend}
+                    />
                 )}
 
                 {!hideTimeRangeSelectorButton && (
@@ -124,30 +210,6 @@ export const DateTimeRangePopover: FunctionComponent<TimeRangeSelectorProps> =
                         >
                             <CalendarTodayIcon />
                         </Button>
-
-                        {/* Time range selector */}
-                        <Popover
-                            anchorEl={timeRangeSelectorAnchorElement}
-                            open={Boolean(timeRangeSelectorAnchorElement)}
-                            onClose={handleTimeRangeSelectorClose}
-                        >
-                            <DateTimeRange
-                                from={{
-                                    label: "From",
-                                    date: timeRangeDuration?.startTime,
-                                }}
-                                recentCustomTimeRangeDurations={
-                                    recentCustomTimeRangeDurations
-                                }
-                                selectedRange={timeRangeDuration?.timeRange}
-                                to={{
-                                    label: "To",
-                                    date: timeRangeDuration?.endTime,
-                                }}
-                                onCancel={handleTimeRangeSelectorClose}
-                                onDateApply={onChange}
-                            />
-                        </Popover>
                     </Grid>
                 )}
 

@@ -25,12 +25,15 @@ type DateTimeProps = {
     onDateTimeChange?: (date: DateTime | null) => void;
     disableFuture?: boolean;
     minDate?: number;
+    maxDate?: number;
 };
 
 export const DateTimeUi = ({
     date,
     onDateTimeChange,
     disableFuture = true,
+    minDate,
+    maxDate,
 }: DateTimeProps): JSX.Element => {
     const [view, setView] = useState<any>("day");
 
@@ -58,9 +61,11 @@ export const DateTimeUi = ({
                 ampm={false}
                 disableFuture={disableFuture}
                 displayStaticWrapperAs="desktop"
+                maxDate={maxDate ? DateTime.fromMillis(maxDate) : undefined}
+                minDate={minDate ? DateTime.fromMillis(minDate) : undefined} // Use 24-hour format (digital clock)
                 slots={{
                     actionBar: ActionButton,
-                }}
+                }} // Ensures the tabs are hidden
                 sx={{
                     "& .MuiTabs-root": { display: "none" },
                     "& .MuiPickersLayout-contentWrapper": {
@@ -70,8 +75,8 @@ export const DateTimeUi = ({
                     },
                     "& .MuiTextField-root": { width: "40%", margin: "auto" },
                     "& .MuiOutlinedInput-root": { height: "40px" },
-                }} // Use 24-hour format (digital clock)
-                value={DateTime.fromMillis(date)} // Ensures the tabs are hidden
+                }}
+                value={DateTime.fromMillis(date)}
                 view={view}
                 onChange={onDateTimeChange}
                 onViewChange={onViewChange}

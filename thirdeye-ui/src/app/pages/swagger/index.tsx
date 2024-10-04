@@ -53,7 +53,7 @@ export const SwaggerDocs = (): JSX.Element => {
 
     return (
         <div>
-            <SwaggerUI url="/openapi.json" {...swaggerOptions} />
+            <SwaggerUI url="/openapi.json" docExpansion={"none"} {...swaggerOptions} />
         </div>
     );
 };

@@ -23,7 +23,7 @@ public interface NamespaceConfigurationManager {
   @NonNull NamespaceConfigurationDTO getNamespaceConfiguration(final String namespace);
 
   @NonNull NamespaceConfigurationDTO updateNamespaceConfiguration(
-      NamespaceConfigurationDTO updatedNamespaceConfiguration);
+      final NamespaceConfigurationDTO updatedNamespaceConfiguration);
 
   @NonNull NamespaceConfigurationDTO resetNamespaceConfiguration(final String namespace);
 

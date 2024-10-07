@@ -62,8 +62,8 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
   }
 
   public @NonNull NamespaceConfigurationDTO updateNamespaceConfiguration(
-      NamespaceConfigurationDTO updatedNamespaceConfiguration) {
-    String namespace = updatedNamespaceConfiguration.namespace();
+      final NamespaceConfigurationDTO updatedNamespaceConfiguration) {
+    final String namespace = updatedNamespaceConfiguration.namespace();
     final NamespaceConfigurationDTO existingNamespaceConfig = fetchExistingNamespaceConfiguration(
         namespace);
     checkState(existingNamespaceConfig != null,

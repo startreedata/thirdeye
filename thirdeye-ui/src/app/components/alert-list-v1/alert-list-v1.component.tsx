@@ -23,7 +23,6 @@ import { useTranslation } from "react-i18next";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import {
     DataGridColumnV1,
-    DataGridScrollV1,
     DataGridSelectionModelV1,
     DataGridSortOrderV1,
     DataGridV1,

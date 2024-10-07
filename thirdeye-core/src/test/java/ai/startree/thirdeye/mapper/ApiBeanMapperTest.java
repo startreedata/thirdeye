@@ -13,26 +13,20 @@
  */
 package ai.startree.thirdeye.mapper;
 
-import static ai.startree.thirdeye.spi.Constants.DEFAULT_CHRONOLOGY;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
 import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
 import ai.startree.thirdeye.spi.api.DatasetApi;
 import ai.startree.thirdeye.spi.api.EnumerationItemApi;
-import ai.startree.thirdeye.spi.api.NamespaceConfigurationApi;
-import ai.startree.thirdeye.spi.api.TimeConfigurationApi;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.NamespaceConfigurationDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.TimeConfigurationDTO;
 import org.testng.annotations.Test;
 
 // This test validates the mapping between api <-> dto objects.

@@ -99,7 +99,7 @@ export const AlertTemplateSectionedProperties: FunctionComponent<AlertTemplateSe
                                     )
                                 )}
                                 {Object.keys(subStepMap)
-                                    .slice(1)
+                                    .filter((subStep) => subStep !== "DIRECT")
                                     .filter((cs) => subStepMap[cs].length > 0)
                                     .map((currentSubStep) => (
                                         <Grid

@@ -18,5 +18,6 @@ export const alertJsonPageStyles = makeStyles(() => ({
     button: {
         borderRadius: "8px",
         height: "32px",
+        textTransform: "none",
     },
 }));

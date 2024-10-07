@@ -12,10 +12,11 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { Icon } from "@iconify/react";
 import { Box, Button, Divider, Grid, ThemeProvider } from "@material-ui/core";
 import React, { FunctionComponent, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, useOutletContext } from "react-router-dom";
-import { Icon } from "@iconify/react";
 import { AlertJson } from "../../../components/alert-wizard-v2/alert-json-v2/alert-json.component";
 import {
     determinePropertyFieldConfiguration,
@@ -26,11 +27,10 @@ import {
     PageContentsCardV1,
     PageContentsGridV1,
 } from "../../../platform/components";
-import { AlertsSimpleAdvancedJsonContainerPageOutletContextProps } from "../../alerts-edit-create-common/alerts-edit-create-common-page.interfaces";
-import { useTranslation } from "react-i18next";
-import { crateAlertPageTheme } from "../alerts-create-easy-page/alerts-create-easy-page.styles";
-import { alertJsonPageStyles } from "./alerts-create-json-page-v2.styles";
 import { getAlertsAllPath } from "../../../utils/routes/routes.util";
+import { AlertsSimpleAdvancedJsonContainerPageOutletContextProps } from "../../alerts-edit-create-common/alerts-edit-create-common-page.interfaces";
+import { createAlertPageTheme } from "../alerts-create-easy-page/alerts-create-easy-page.styles";
+import { alertJsonPageStyles } from "./alerts-create-json-page-v2.styles";
 
 export const AlertsCreateJSONPage: FunctionComponent = () => {
     const { t } = useTranslation();
@@ -66,7 +66,7 @@ export const AlertsCreateJSONPage: FunctionComponent = () => {
 
     return (
         <>
-            <ThemeProvider theme={crateAlertPageTheme}>
+            <ThemeProvider theme={createAlertPageTheme}>
                 <PageContentsGridV1>
                     <Grid item xs={12}>
                         <PageContentsCardV1>

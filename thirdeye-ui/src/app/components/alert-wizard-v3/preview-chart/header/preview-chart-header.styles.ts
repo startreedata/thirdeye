@@ -20,5 +20,6 @@ export const previewChartHeaderStyles = makeStyles(() => ({
         height: "36px",
         backgroundColor: "#E0F7FA",
         borderRadius: "8px",
+        textTransform: "none",
     },
 }));

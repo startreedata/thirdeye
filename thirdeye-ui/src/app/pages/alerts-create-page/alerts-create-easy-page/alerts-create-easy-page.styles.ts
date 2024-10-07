@@ -50,6 +50,11 @@ export const easyAlertStyles = makeStyles(() => ({
         textWrap: "nowrap",
         textTransform: "none",
     },
+    button: {
+        borderRadius: "8px",
+        height: "32px",
+        textTransform: "none",
+    },
     footer: {
         border: `1px solid ${ColorV1.Grey10}`,
         borderRadius: "0 0 8px 8px",
@@ -76,7 +81,7 @@ export const easyAlertStyles = makeStyles(() => ({
     },
 }));
 
-export const crateAlertPageTheme = createTheme({
+export const createAlertPageTheme = createTheme({
     ...lightV1,
     palette: {
         ...paletteOptionsV1,

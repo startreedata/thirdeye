@@ -15,6 +15,7 @@ package ai.startree.thirdeye.datalayer.bao;
 
 import static ai.startree.thirdeye.datalayer.DatalayerTestUtils.buildNamespaceConfiguration;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.spi.datalayer.bao.NamespaceConfigurationManager;
@@ -86,12 +87,8 @@ public class TestNamespaceConfigurationManager {
 
   @Test
   public void testUpdateNamespaceConfigurationWhenExistingConfigDoesntExist() {
-    try {
-      // try updating config which doesn't exist
-      namespaceConfigurationDao.updateNamespaceConfiguration(buildNamespaceConfiguration(null));
-    } catch (IllegalStateException expected) {
-      // left blank
-    }
+    assertThatThrownBy(() -> namespaceConfigurationDao.updateNamespaceConfiguration(buildNamespaceConfiguration(null)))
+        .isInstanceOf(IllegalStateException.class);
   }
 
   @Test

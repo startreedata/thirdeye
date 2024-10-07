@@ -28,9 +28,4 @@ public interface NamespaceConfigurationEntityMapper {
   @Mapping(target = "jsonVal", ignore = true)
   @Mapping(source = "auth.namespace", target = "namespace")
   NamespaceConfigurationEntity toNamespaceConfigurationEntity(NamespaceConfigurationDTO dto);
-
-  @Named("dateTimeZoneMapper")
-  static String dateTimeZoneMapper(final DateTimeZone value) {
-    return value.toString();
-  }
 }

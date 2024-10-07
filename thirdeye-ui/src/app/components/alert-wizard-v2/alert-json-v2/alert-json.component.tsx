@@ -21,7 +21,7 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { easyAlertStyles } from "../../../pages/alerts-create-page/alerts-create-easy-page/alerts-create-easy-page.styles";
 import {
-    JSONEditorV1,
+    JSONEditorV2,
     PageHeaderActionsV1,
 } from "../../../platform/components";
 import { EditableAlert } from "../../../rest/dto/alert.interfaces";
@@ -120,8 +120,9 @@ export const AlertJson: FunctionComponent<AlertJsonProps> = ({
             </Grid>
 
             <Grid item xs={12}>
-                <JSONEditorV1<EditableAlert>
+                <JSONEditorV2<EditableAlert>
                     hideValidationSuccessIcon
+                    actions={[]}
                     value={initialAlert}
                     onChange={handleJSONChange}
                 />

@@ -223,7 +223,6 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = ({
                             order: DataGridSortOrderV1.DESC,
                         }}
                         rowKey="id"
-                        scroll={DataGridScrollV1.Body}
                         searchPlaceholder={t("label.search-entity", {
                             entity: t("label.alerts"),
                         })}

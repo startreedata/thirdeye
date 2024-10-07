@@ -15,6 +15,7 @@ package ai.startree.thirdeye.datalayer.dao;
 
 import static ai.startree.thirdeye.datalayer.DatalayerTestUtils.buildNamespaceConfiguration;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
@@ -75,13 +76,7 @@ public class TestNamespaceConfigurationDao {
   @Test(dependsOnMethods = {"saveTest"})
   public void updateWithNilIDTest() {
     final NamespaceConfigurationDTO dto = buildNamespaceConfiguration(namespace1);
-
-    try {
-      dao.update(dto);
-      Assert.fail();
-    } catch (IllegalArgumentException expected) {
-      // left blank
-    }
+    assertThatThrownBy(() -> dao.update(dto)).isInstanceOf(IllegalArgumentException.class);
   }
 
   @Test(dependsOnMethods = {"saveTest"})

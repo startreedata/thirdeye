@@ -75,8 +75,8 @@ public class NamespaceConfigurationResource {
   @Produces(MediaType.APPLICATION_JSON)
   public Response edit(
       @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
-      NamespaceConfigurationApi dto) {
-    return respondOk(namespaceConfigurationService.updateNamespaceConfiguration(principal, dto));
+      NamespaceConfigurationApi api) {
+    return respondOk(namespaceConfigurationService.updateNamespaceConfiguration(principal, api));
   }
 
   @POST

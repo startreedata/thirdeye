@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.spi.auth;
 
 import ai.startree.thirdeye.spi.PluginServiceFactory;
+import ai.startree.thirdeye.spi.api.DataSourceApi;
 import java.util.List;
 import java.util.Map;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -36,6 +37,14 @@ public interface ThirdEyeAuthorizer {
 
   // if the implementation does not support multiple namespace, please return a list with the value null Collections.singletonList(null)
   @NonNull List<String> listNamespaces(final ThirdEyePrincipal principal);
+
+  /**
+   * Generates the datasource connection configuration given principal
+   *
+   * @param principal the principal to generate datasource for
+   * @return DataSourceApi
+   */
+  DataSourceApi generateDatasourceConnection(final ThirdEyePrincipal principal);
 
   interface ThirdEyeAuthorizerFactory extends
       PluginServiceFactory<ThirdEyeAuthorizer, Map<String, Object>> {}

@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.resources.testutils;
 
+import ai.startree.thirdeye.spi.api.DataSourceApi;
 import ai.startree.thirdeye.spi.auth.AccessType;
 import ai.startree.thirdeye.spi.auth.ResourceIdentifier;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
@@ -38,5 +39,10 @@ public class SingleResourceAuthorizer implements ThirdEyeAuthorizer {
   @Override
   public @NonNull List<String> listNamespaces(final ThirdEyePrincipal principal) {
     return Collections.singletonList(null);
+  }
+
+  @Override
+  public DataSourceApi generateDatasourceConnection(final ThirdEyePrincipal principal) {
+    return null;
   }
 }

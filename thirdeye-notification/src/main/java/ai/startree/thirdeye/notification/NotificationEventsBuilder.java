@@ -72,7 +72,7 @@ public class NotificationEventsBuilder {
     }
     final String currentNamespace = anomalies.iterator().next().namespace();
     final DateTimeZone dateTimeZone = namespaceConfigurationManager
-        .getNamespaceConfiguration(currentNamespace).getTimeConfiguration()
+        .findByNamespace(currentNamespace).getTimeConfiguration()
         .getTimezone();
 
     DateTime windowStart = DateTime.now(dateTimeZone);

@@ -21,6 +21,7 @@ import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.api.NamespaceConfigurationApi;
 import ai.startree.thirdeye.spi.datalayer.bao.NamespaceConfigurationManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.NamespaceConfigurationDTO;
 import java.util.Objects;
 import javax.inject.Inject;
@@ -45,7 +46,9 @@ public class NamespaceConfigurationService {
       final ThirdEyeServerPrincipal principal
   ) {
     final String namespace = authorizationManager.currentNamespace(principal);
-    return toApi(namespaceConfigurationManager.getNamespaceConfiguration(namespace));
+    // todo cyril authz usage of dummy entity for access check - avoid this
+    authorizationManager.ensureCanRead(principal, new NamespaceConfigurationDTO().setAuth(new AuthorizationConfigurationDTO().setNamespace(namespace)));
+    return toApi(namespaceConfigurationManager.findByNamespace(namespace));
   }
 
   public NamespaceConfigurationApi updateNamespaceConfiguration(
@@ -54,21 +57,19 @@ public class NamespaceConfigurationService {
   ) {
     final String namespace = authorizationManager.currentNamespace(principal);
     final @NonNull NamespaceConfigurationDTO existing = namespaceConfigurationManager
-        .getNamespaceConfiguration(namespace);
+        .findByNamespace(namespace);
     final @NonNull NamespaceConfigurationDTO updated = toDto(updatedNamespaceConfiguration);
 
-    validateUpdate(toApi(existing), updatedNamespaceConfiguration);
-    authorizationManager.ensureNamespace(principal, existing);
-    authorizationManager.ensureNamespace(principal, updated);
-    return toApi(namespaceConfigurationManager.updateNamespaceConfiguration(
-        toDto(updatedNamespaceConfiguration)));
+    validateUpdate(existing, updated);
+    authorizationManager.ensureCanEdit(principal, existing, updated);
+    return toApi(namespaceConfigurationManager.update(updated));
   }
 
   public NamespaceConfigurationApi resetNamespaceConfiguration(
       final ThirdEyeServerPrincipal principal
   ) {
     final String namespace = authorizationManager.currentNamespace(principal);
-    return toApi(namespaceConfigurationManager.resetNamespaceConfiguration(namespace));
+    return toApi(namespaceConfigurationManager.resetByNamespace(namespace));
   }
 
   protected NamespaceConfigurationDTO toDto(final NamespaceConfigurationApi api) {
@@ -79,8 +80,8 @@ public class NamespaceConfigurationService {
     return ApiBeanMapper.toApi(dto);
   }
 
-  protected void validateUpdate(NamespaceConfigurationApi existing,
-      NamespaceConfigurationApi updated) {
+  protected void validateUpdate(NamespaceConfigurationDTO existing,
+      @NonNull NamespaceConfigurationDTO updated) {
     if (!Objects.equals(existing.getId(), updated.getId()) ||
         !Objects.equals(existing.getAuth().getNamespace(), updated.getAuth().getNamespace())) {
       throw badRequest(

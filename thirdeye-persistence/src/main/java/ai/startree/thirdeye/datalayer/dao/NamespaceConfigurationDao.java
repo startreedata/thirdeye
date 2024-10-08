@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.datalayer.dao;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.datalayer.DatabaseClient;
@@ -96,18 +97,17 @@ public class NamespaceConfigurationDao {
     return Constants.TEMPLATABLE_OBJECT_MAPPER.writeValueAsString(dto);
   }
 
-  public Long put(final NamespaceConfigurationDTO pojo) {
-    if(pojo.getId() != null) {
-      return null;
-    }
+  public long put(final NamespaceConfigurationDTO pojo) {
+    checkArgument(pojo.getId() == null, "Cannot create namespace configuration: the object to create was passed with a non null  id value.");
     try {
       final NamespaceConfigurationEntity entity = toEntity(pojo);
-      return databaseClient.executeTransaction(
+      final Long res = databaseClient.executeTransaction(
           (connection) -> databaseOrm.save(entity, connection),
           null);
+      return res == null ? 0 : res;
     } catch (JsonProcessingException | SQLException e) {
       LOG.error(e.getMessage(), e);
-      return null;
+      return 0;
     }
   }
 

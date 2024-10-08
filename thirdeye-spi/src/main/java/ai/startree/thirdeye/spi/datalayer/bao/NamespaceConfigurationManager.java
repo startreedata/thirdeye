@@ -20,23 +20,30 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 public interface NamespaceConfigurationManager {
 
-  @NonNull NamespaceConfigurationDTO getNamespaceConfiguration(final String namespace);
+  /**
+   * There is no create method. This find operation takes care of creating a default configuration
+   * if necessary.
+   * There is no getById because the namespace should be a unique identifier for this entity.
+   */
+  @NonNull
+  NamespaceConfigurationDTO findByNamespace(final String namespace);
 
-  @NonNull NamespaceConfigurationDTO updateNamespaceConfiguration(
-      final NamespaceConfigurationDTO updatedNamespaceConfiguration);
+  @NonNull
+  NamespaceConfigurationDTO update(final NamespaceConfigurationDTO updatedNamespaceConfiguration);
 
-  @NonNull NamespaceConfigurationDTO resetNamespaceConfiguration(final String namespace);
+  @NonNull
+  NamespaceConfigurationDTO resetByNamespace(final String namespace);
 
-  Long save(final NamespaceConfigurationDTO entity);
-
+  /**
+   * For internal stats use only.
+   */
   List<NamespaceConfigurationDTO> findAll();
-
-  NamespaceConfigurationDTO findById(final Long id);
-
-  int update(final NamespaceConfigurationDTO entity);
 
   int delete(final NamespaceConfigurationDTO entity);
 
+  /**
+   * For internal use only.
+   */
   int deleteById(final Long id);
 
   List<NamespaceConfigurationDTO> filter(final DaoFilter daoFilter);

@@ -125,7 +125,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
   @Override
   protected void prepareCreatedDto(final ThirdEyePrincipal principal, final AlertDTO dto) {
     final long minimumOnboardingStartTime = namespaceConfigurationManager
-        .getNamespaceConfiguration(dto.namespace()).getTimeConfiguration()
+        .findByNamespace(dto.namespace()).getTimeConfiguration()
         .getMinimumOnboardingStartTime();
 
     if (dto.getLastTimestamp() < minimumOnboardingStartTime) {
@@ -390,7 +390,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
 
   private long minimumLastTimestamp(final ThirdEyePrincipal principal, final AlertDTO dto) {
     final long minimumOnboardingStartTime = namespaceConfigurationManager
-        .getNamespaceConfiguration(dto.namespace()).getTimeConfiguration()
+        .findByNamespace(dto.namespace()).getTimeConfiguration()
         .getMinimumOnboardingStartTime();
 
     try {

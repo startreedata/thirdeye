@@ -49,87 +49,87 @@ public class TestNamespaceConfigurationManager {
   }
 
   @Test
-  public void testGetNamespaceConfiguration() {
+  public void testFindByNamespace() {
     // fetch namespace configurations for different namespaces
     final NamespaceConfigurationDTO dto = namespaceConfigurationDao
-        .getNamespaceConfiguration(namespace3);
+        .findByNamespace(namespace3);
     assertThat(dto.getTimeConfiguration()).isNotNull();
     assertThat(dto.namespace()).isEqualTo(namespace3);
 
     final NamespaceConfigurationDTO dto1 = namespaceConfigurationDao
-        .getNamespaceConfiguration(namespace4);
+        .findByNamespace(namespace4);
     assertThat(dto1.getTimeConfiguration()).isNotNull();
     assertThat(dto1.namespace()).isEqualTo(namespace4);
 
     // fetch again (this time already config values will be returned)
-    assertThat(namespaceConfigurationDao.getNamespaceConfiguration(namespace3)).isEqualTo(dto);
-    assertThat(namespaceConfigurationDao.getNamespaceConfiguration(namespace4)).isEqualTo(dto1);
+    assertThat(namespaceConfigurationDao.findByNamespace(namespace3)).isEqualTo(dto);
+    assertThat(namespaceConfigurationDao.findByNamespace(namespace4)).isEqualTo(dto1);
   }
 
   @Test
-  public void testUpdateNamespaceConfiguration() {
+  public void testUpdate() {
     // fetch/create new namespace configuration
     final NamespaceConfigurationDTO dto = namespaceConfigurationDao
-        .getNamespaceConfiguration(namespace5);
+        .findByNamespace(namespace5);
     assertThat(dto.getTimeConfiguration()).isNotNull();
     assertThat(dto.namespace()).isEqualTo(namespace5);
 
     // update configuration
     dto.setTimeConfiguration(dto.getTimeConfiguration().setMinimumOnboardingStartTime(0L));
     final NamespaceConfigurationDTO updatedDto = namespaceConfigurationDao
-        .updateNamespaceConfiguration(dto);
+        .update(dto);
     compareDtos(updatedDto, dto);
 
     // fetch again (this time already updated config will be returned)
-    assertThat(namespaceConfigurationDao.getNamespaceConfiguration(namespace5))
+    assertThat(namespaceConfigurationDao.findByNamespace(namespace5))
         .isEqualTo(updatedDto);
   }
 
   @Test
-  public void testUpdateNamespaceConfigurationWhenExistingConfigDoesntExist() {
-    assertThatThrownBy(() -> namespaceConfigurationDao.updateNamespaceConfiguration(buildNamespaceConfiguration(null)))
+  public void testUpdateWhenExistingConfigDoesntExist() {
+    assertThatThrownBy(() -> namespaceConfigurationDao.update(buildNamespaceConfiguration(null)))
         .isInstanceOf(IllegalStateException.class);
   }
 
   @Test
-  public void testResetNamespaceConfigurationIfExists() {
+  public void testResetByNamespaceIfExists() {
     // fetch/create new namespace configuration
     final NamespaceConfigurationDTO dto = namespaceConfigurationDao
-        .getNamespaceConfiguration(namespace6);
+        .findByNamespace(namespace6);
     assertThat(dto.getTimeConfiguration()).isNotNull();
     assertThat(dto.namespace()).isEqualTo(namespace6);
 
     // update configuration
     dto.setTimeConfiguration(dto.getTimeConfiguration().setMinimumOnboardingStartTime(0L));
     final NamespaceConfigurationDTO updatedDto = namespaceConfigurationDao
-        .updateNamespaceConfiguration(dto);
+        .update(dto);
     compareDtos(updatedDto, dto);
 
     // fetch again (this time already updated config will be returned)
-    assertThat(namespaceConfigurationDao.getNamespaceConfiguration(namespace6))
+    assertThat(namespaceConfigurationDao.findByNamespace(namespace6))
         .isEqualTo(updatedDto);
 
     // reset configuration
     final NamespaceConfigurationDTO resettedDto = namespaceConfigurationDao
-        .resetNamespaceConfiguration(namespace6);
+        .resetByNamespace(namespace6);
     dto.setTimeConfiguration(buildNamespaceConfiguration(namespace6).getTimeConfiguration());
     compareDtos(resettedDto, dto);
 
     // fetch again
-    assertThat(namespaceConfigurationDao.getNamespaceConfiguration(namespace6)).isEqualTo(dto);
+    assertThat(namespaceConfigurationDao.findByNamespace(namespace6)).isEqualTo(dto);
   }
 
   @Test
-  public void testResetNamespaceConfigurationIfDoesntExists() {
+  public void testResetByNamespaceIfDoesntExists() {
     // reset configuration directly for namespace which doesn't have existing config
     final NamespaceConfigurationDTO dto = buildNamespaceConfiguration(namespace7);
     final NamespaceConfigurationDTO resettedDto = namespaceConfigurationDao
-        .resetNamespaceConfiguration(namespace7);
+        .resetByNamespace(namespace7);
     dto.setId(resettedDto.getId());
     compareDtos(resettedDto, dto);
 
     // fetch again
-    assertThat(namespaceConfigurationDao.getNamespaceConfiguration(namespace7))
+    assertThat(namespaceConfigurationDao.findByNamespace(namespace7))
         .isEqualTo(resettedDto);
   }
 
@@ -138,11 +138,11 @@ public class TestNamespaceConfigurationManager {
     final NamespaceConfigurationDTO dto1 = buildNamespaceConfiguration(namespace1);
     final NamespaceConfigurationDTO dto2 = buildNamespaceConfiguration(namespace2);
 
-    namespaceConfigurationId1 = namespaceConfigurationDao.save(dto1);
+    namespaceConfigurationId1 = namespaceConfigurationDao.create(dto1);
     assertThat(namespaceConfigurationId1).isGreaterThan(0L);
     assertThat(dto1).isNotNull();
 
-    namespaceConfigurationId2 = namespaceConfigurationDao.save(dto2);
+    namespaceConfigurationId2 = namespaceConfigurationDao.create(dto2);
     assertThat(namespaceConfigurationId1).isGreaterThan(0L);
     assertThat(dto2).isNotNull();
   }

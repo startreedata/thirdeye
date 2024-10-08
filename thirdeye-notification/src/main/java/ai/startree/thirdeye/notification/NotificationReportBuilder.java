@@ -82,7 +82,7 @@ public class NotificationReportBuilder {
 
     final String currentNamespace = notificationConfig.namespace();
     final TimeConfigurationDTO timeConfiguration = namespaceConfigurationManager
-        .getNamespaceConfiguration(currentNamespace).getTimeConfiguration();
+        .findByNamespace(currentNamespace).getTimeConfiguration();
     final DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern(timeConfiguration.getDateTimePattern())
         .withZone(timeConfiguration.getTimezone());
 
@@ -157,7 +157,7 @@ public class NotificationReportBuilder {
 
     final String currentNamespace = anomaly.namespace();
     final TimeConfigurationDTO timeConfiguration = namespaceConfigurationManager
-        .getNamespaceConfiguration(currentNamespace).getTimeConfiguration();
+        .findByNamespace(currentNamespace).getTimeConfiguration();
     final DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern(timeConfiguration.getDateTimePattern())
         .withZone(timeConfiguration.getTimezone());
 

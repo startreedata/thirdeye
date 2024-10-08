@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.datalayer.bao;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
 import ai.startree.thirdeye.datalayer.dao.NamespaceConfigurationDao;
@@ -26,6 +27,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.TimeConfigurationDTO;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
+import java.util.Objects;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 @Singleton
@@ -41,7 +43,7 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
     this.timeConfiguration = timeConfiguration;
   }
 
-  public @NonNull NamespaceConfigurationDTO getNamespaceConfiguration(final String namespace) {
+  public @NonNull NamespaceConfigurationDTO findByNamespace(final String namespace) {
     final NamespaceConfigurationDTO existingNamespaceConfig = fetchExistingNamespaceConfiguration(
         namespace);
 
@@ -50,8 +52,8 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
       if (existingNamespaceConfig.getTimeConfiguration() == null) {
         existingNamespaceConfig.setTimeConfiguration(
             getDefaultTimeConfigurationFromServerConfig());
-        final Long namespaceConfigurationId = save(existingNamespaceConfig);
-        checkState(namespaceConfigurationId != null,
+        final int namespaceConfigurationId = update(existingNamespaceConfig);
+        checkState(namespaceConfigurationId > 0,
             "Failed to update namespace configuration for namespace %s",
             existingNamespaceConfig.namespace());
       }
@@ -61,34 +63,36 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
     return createNewNamespaceConfiguration(namespace);
   }
 
-  public @NonNull NamespaceConfigurationDTO updateNamespaceConfiguration(
-      final NamespaceConfigurationDTO updatedNamespaceConfiguration) {
-    final String namespace = updatedNamespaceConfiguration.namespace();
+  public @NonNull NamespaceConfigurationDTO update(
+      final NamespaceConfigurationDTO updateNamespacedConfig) {
+    final String namespace = updateNamespacedConfig.namespace();
     final NamespaceConfigurationDTO existingNamespaceConfig = fetchExistingNamespaceConfiguration(
         namespace);
     checkState(existingNamespaceConfig != null,
         "Trying to update non-existent namespace configuration for namespace %s",
         namespace);
+    checkArgument(Objects.equals(existingNamespaceConfig.getId(), updateNamespacedConfig.getId()), "");
 
-    final Long namespaceConfigurationId = save(updatedNamespaceConfiguration);
-    checkState(namespaceConfigurationId != null,
+    final int namespaceConfigurationId = update(updateNamespacedConfig);
+    checkState(namespaceConfigurationId != 0,
         "Failed to update namespace configuration for namespace %s",
         namespace);
 
-    return updatedNamespaceConfiguration;
+    return updateNamespacedConfig;
   }
 
-  public @NonNull NamespaceConfigurationDTO resetNamespaceConfiguration(final String namespace) {
+  public @NonNull NamespaceConfigurationDTO resetByNamespace(final String namespace) {
     final NamespaceConfigurationDTO existingNamespaceConfig = fetchExistingNamespaceConfiguration(
         namespace);
 
     // namespace config exists, update values to default
     if (existingNamespaceConfig != null) {
+      // fixme make a function dedicated to reset - it will change   
       existingNamespaceConfig.setTimeConfiguration(
           getDefaultTimeConfigurationFromServerConfig());
-      final Long namespaceConfigurationId = save(existingNamespaceConfig);
-      checkState(namespaceConfigurationId != null,
-          "Failed to rollback namespace configuration for namespace %s",
+      final int namespaceConfigurationId = update(existingNamespaceConfig);
+      checkState(namespaceConfigurationId != 0,
+          "Failed to reset namespace configuration for namespace %s",
           existingNamespaceConfig.namespace());
       return existingNamespaceConfig;
     }
@@ -113,26 +117,21 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
     NamespaceConfigurationDTO namespaceConfigurationDTO = new NamespaceConfigurationDTO();
     namespaceConfigurationDTO.setTimeConfiguration(getDefaultTimeConfigurationFromServerConfig())
         .setAuth(new AuthorizationConfigurationDTO().setNamespace(namespace));
-    final Long namespaceConfigurationId = save(namespaceConfigurationDTO);
-    checkState(namespaceConfigurationId != null,
+    final long namespaceConfigurationId = create(namespaceConfigurationDTO);
+    checkState(namespaceConfigurationId != 0,
         "Failed to create namespace configuration for namespace %s",
         namespaceConfigurationDTO.namespace());
     return namespaceConfigurationDTO;
   }
-
-  public Long save(final NamespaceConfigurationDTO entity) {
-    if (entity.getId() != null) {
-      final int id = update(entity);
-      checkState(id != 0, "failed to update namespace configuration entity");
-      return entity.getId();
-    }
-    final Long id = dao.put(entity);
-    checkState(id != null, "failed to save namespace configuration entity");
+  
+  private long create(final NamespaceConfigurationDTO entity) {
+    final long id = dao.put(entity);
+    checkState(id != 0, "failed to save namespace configuration entity");
     entity.setId(id);
     return id;
   }
 
-  public int update(final NamespaceConfigurationDTO entity) {
+  private int update(final NamespaceConfigurationDTO entity) {
     return dao.update(entity);
   }
 

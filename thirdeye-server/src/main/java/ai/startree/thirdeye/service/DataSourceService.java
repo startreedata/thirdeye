@@ -33,6 +33,7 @@ import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
@@ -179,6 +180,13 @@ public class DataSourceService extends CrudService<DataSourceApi, DataSourceDTO>
   }
 
   public DataSourceApi recommend(final ThirdEyePrincipal principal) {
+    final String namespace = authorizationManager.currentNamespace(principal);
+
+    // verify that user has read access to data sources in given namespace
+    DataSourceDTO sampleDataset = new DataSourceDTO();
+    sampleDataset.setAuth(new AuthorizationConfigurationDTO().setNamespace(namespace));
+    authorizationManager.ensureCanRead(principal, sampleDataset);
+
     return authorizationManager.generateDatasourceConnection(principal);
   }
 }

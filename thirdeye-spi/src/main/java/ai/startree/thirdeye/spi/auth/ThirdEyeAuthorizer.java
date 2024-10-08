@@ -18,6 +18,7 @@ import ai.startree.thirdeye.spi.api.DataSourceApi;
 import java.util.List;
 import java.util.Map;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface ThirdEyeAuthorizer {
 
@@ -39,12 +40,17 @@ public interface ThirdEyeAuthorizer {
   @NonNull List<String> listNamespaces(final ThirdEyePrincipal principal);
 
   /**
-   * Generates the datasource connection configuration given principal
+   * Generates a recommended datasource configuration to use in the ThirdEye instance.
+   * Does not create the datasource.
+   *
+   * Example: an authorizer plugin could:
+   * 1. set up a service account to connect to Pinot
+   * 2. return a valid datasource configuration that uses the service account just created.
    *
    * @param principal the principal to generate datasource for
-   * @return DataSourceApi
+   * @return DataSourceApi -> Returns null if there is no recommended datasource configuration
    */
-  DataSourceApi generateDatasourceConnection(final ThirdEyePrincipal principal);
+  @Nullable DataSourceApi generateDatasourceConnection(final ThirdEyePrincipal principal);
 
   interface ThirdEyeAuthorizerFactory extends
       PluginServiceFactory<ThirdEyeAuthorizer, Map<String, Object>> {}

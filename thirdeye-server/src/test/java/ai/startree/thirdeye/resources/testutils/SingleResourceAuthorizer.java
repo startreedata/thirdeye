@@ -21,6 +21,7 @@ import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import java.util.Collections;
 import java.util.List;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class SingleResourceAuthorizer implements ThirdEyeAuthorizer {
 
@@ -42,7 +43,7 @@ public class SingleResourceAuthorizer implements ThirdEyeAuthorizer {
   }
 
   @Override
-  public DataSourceApi generateDatasourceConnection(final ThirdEyePrincipal principal) {
+  public @Nullable DataSourceApi generateDatasourceConnection(final ThirdEyePrincipal principal) {
     return null;
   }
 }

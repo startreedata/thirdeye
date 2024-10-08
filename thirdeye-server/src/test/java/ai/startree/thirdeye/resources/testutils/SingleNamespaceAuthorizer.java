@@ -57,7 +57,7 @@ public class SingleNamespaceAuthorizer implements ThirdEyeAuthorizer {
   }
 
   @Override
-  public DataSourceApi generateDatasourceConnection(final ThirdEyePrincipal principal) {
+  public @Nullable DataSourceApi generateDatasourceConnection(final ThirdEyePrincipal principal) {
     return null;
   }
 }

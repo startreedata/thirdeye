@@ -91,7 +91,7 @@ public class ThirdEyeAuthorizerProvider implements ThirdEyeAuthorizer {
   }
 
   @Override
-  public DataSourceApi generateDatasourceConnection(final ThirdEyePrincipal principal) {
+  public @Nullable DataSourceApi generateDatasourceConnection(final ThirdEyePrincipal principal) {
     return getAccessControl().generateDatasourceConnection(principal);
   }
 
@@ -128,7 +128,7 @@ public class ThirdEyeAuthorizerProvider implements ThirdEyeAuthorizer {
     }
 
     @Override
-    public DataSourceApi generateDatasourceConnection(final ThirdEyePrincipal principal) {
+    public @Nullable DataSourceApi generateDatasourceConnection(final ThirdEyePrincipal principal) {
       return null;
     }
   }
@@ -147,7 +147,7 @@ public class ThirdEyeAuthorizerProvider implements ThirdEyeAuthorizer {
     }
 
     @Override
-    public DataSourceApi generateDatasourceConnection(final ThirdEyePrincipal principal) {
+    public @Nullable DataSourceApi generateDatasourceConnection(final ThirdEyePrincipal principal) {
       return null;
     }
   }

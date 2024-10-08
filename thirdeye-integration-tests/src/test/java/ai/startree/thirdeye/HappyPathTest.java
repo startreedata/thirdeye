@@ -135,6 +135,7 @@ public class HappyPathTest {
   private long anomalyId;
   private long alertLastUpdateTime;
   private long alertId;
+  private long namespaceConfigurationId;
 
   @BeforeClass
   public void beforeClass() throws Exception {
@@ -647,6 +648,7 @@ public class HappyPathTest {
 
     final NamespaceConfigurationApi gotCfgApi = response.readEntity(
         NamespaceConfigurationApi.class);
+    namespaceConfigurationId = gotCfgApi.getId();
     assertThat(gotCfgApi.getAuth().getNamespace()).isNull();
     assertThat(gotCfgApi.getTimeConfiguration().getTimezone().toString()).isEqualTo("UTC");
     assertThat(gotCfgApi.getTimeConfiguration().getDateTimePattern()).isEqualTo(
@@ -671,7 +673,7 @@ public class HappyPathTest {
             .setDateTimePattern("MMM dd, yyyy HH:mm")
             .setMinimumOnboardingStartTime(996684800000L));
     updatedCfg.setAuth(new AuthorizationConfigurationApi());
-    updatedCfg.setId(1L);
+    updatedCfg.setId(namespaceConfigurationId);
     final Response response = request("api/workspace-configuration").put(
         Entity.json(updatedCfg));
     assertThat(response.getStatus()).isEqualTo(200);
@@ -696,6 +698,7 @@ public class HappyPathTest {
 
     final NamespaceConfigurationApi gotCfgApi = response.readEntity(
         NamespaceConfigurationApi.class);
+    assertThat(gotCfgApi.getId()).isEqualTo(namespaceConfigurationId);
     assertThat(gotCfgApi.getAuth().getNamespace()).isNull();
     assertThat(gotCfgApi.getTimeConfiguration().getTimezone().toString()).isEqualTo("UTC");
     assertThat(gotCfgApi.getTimeConfiguration().getDateTimePattern()).isEqualTo(

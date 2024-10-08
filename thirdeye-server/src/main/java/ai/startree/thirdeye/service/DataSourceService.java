@@ -49,6 +49,7 @@ public class DataSourceService extends CrudService<DataSourceApi, DataSourceDTO>
   private final DataSourceCache dataSourceCache;
   private final DataSourceOnboarder dataSourceOnboarder;
   private final DatasetConfigManager datasetConfigDAO;
+  private final AuthorizationManager authorizationManager;
 
   @Inject
   public DataSourceService(
@@ -61,6 +62,7 @@ public class DataSourceService extends CrudService<DataSourceApi, DataSourceDTO>
     this.dataSourceCache = dataSourceCache;
     this.dataSourceOnboarder = dataSourceOnboarder;
     this.datasetConfigDAO = datasetConfigDAO;
+    this.authorizationManager = authorizationManager;
   }
 
   @Override
@@ -174,5 +176,9 @@ public class DataSourceService extends CrudService<DataSourceApi, DataSourceDTO>
     checkArgument(dataSourceDto != null, "Could not find datasource with id %s", id);
     authorizationManager.ensureCanRead(principal, dataSourceDto);
     return dataSourceCache.getDataSource(dataSourceDto).validate();
+  }
+
+  public DataSourceApi recommend(final ThirdEyePrincipal principal) {
+    return authorizationManager.generateDatasourceConnection(principal);
   }
 }

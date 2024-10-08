@@ -25,6 +25,7 @@ import ai.startree.thirdeye.datasource.DataSourceOnboarder;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
 import ai.startree.thirdeye.service.DataSourceService;
 import ai.startree.thirdeye.spi.ThirdEyeStatus;
+import ai.startree.thirdeye.spi.api.DataSourceApi;
 import ai.startree.thirdeye.spi.api.StatusApi;
 import ai.startree.thirdeye.spi.api.StatusListApi;
 import ai.startree.thirdeye.spi.auth.AuthenticationType;
@@ -106,5 +107,12 @@ public class DataSourceResourceTest {
 
     final StatusApi statusApi = entity.getList().get(0);
     assertThat(statusApi.getCode()).isEqualTo(ThirdEyeStatus.ERR_DATASOURCE_VALIDATION_FAILED);
+  }
+
+  @Test
+  public void testRecommend() {
+    final Response response = dataSourceResource.recommendConfiguration(principal);
+    assertThat(response.getStatus()).isEqualTo(200);
+    assertThat((DataSourceApi) response.getEntity()).isNull();
   }
 }

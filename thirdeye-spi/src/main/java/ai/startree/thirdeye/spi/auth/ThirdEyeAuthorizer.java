@@ -50,7 +50,9 @@ public interface ThirdEyeAuthorizer {
    * @param principal the principal to generate datasource for
    * @return DataSourceApi -> Returns null if there is no recommended datasource configuration
    */
-  @Nullable DataSourceApi generateDatasourceConnection(final ThirdEyePrincipal principal);
+  default @Nullable DataSourceApi generateDatasourceConnection(final ThirdEyePrincipal principal) {
+    return null;
+  }
 
   interface ThirdEyeAuthorizerFactory extends
       PluginServiceFactory<ThirdEyeAuthorizer, Map<String, Object>> {}

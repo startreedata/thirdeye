@@ -29,8 +29,6 @@ import static java.util.Collections.singleton;
 import ai.startree.thirdeye.alert.AlertEvaluator;
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
-import ai.startree.thirdeye.config.TimeConfiguration;
-import ai.startree.thirdeye.datalayer.bao.RcaInvestigationManagerImpl;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.service.alert.AlertInsightsProvider;
 import ai.startree.thirdeye.spi.api.AlertApi;
@@ -47,6 +45,7 @@ import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
+import ai.startree.thirdeye.spi.datalayer.bao.NamespaceConfigurationManager;
 import ai.startree.thirdeye.spi.datalayer.bao.RcaInvestigationManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
@@ -86,8 +85,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
   private final SubscriptionGroupManager subscriptionGroupManager;
   private final EnumerationItemManager enumerationItemManager;
   private final RcaInvestigationManager rcaInvestigationManager;
-
-  private final long minimumOnboardingStartTime;
+  private final NamespaceConfigurationManager namespaceConfigurationManager;
 
   @Inject
   public AlertService(
@@ -99,7 +97,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
       final EnumerationItemManager enumerationItemManager,
       final RcaInvestigationManager rcaInvestigationManager,
       final TaskManager taskManager,
-      final TimeConfiguration timeConfiguration,
+      final NamespaceConfigurationManager namespaceConfigurationManager,
       final AuthorizationManager authorizationManager) {
     super(authorizationManager, alertManager, ImmutableMap.of());
     this.alertEvaluator = alertEvaluator;
@@ -109,8 +107,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     this.enumerationItemManager = enumerationItemManager;
     this.rcaInvestigationManager = rcaInvestigationManager;
     this.taskManager = taskManager;
-
-    minimumOnboardingStartTime = timeConfiguration.getMinimumOnboardingStartTime();
+    this.namespaceConfigurationManager = namespaceConfigurationManager;
   }
 
   @Override
@@ -127,6 +124,10 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
 
   @Override
   protected void prepareCreatedDto(final ThirdEyePrincipal principal, final AlertDTO dto) {
+    final long minimumOnboardingStartTime = namespaceConfigurationManager
+        .getNamespaceConfiguration(dto.namespace()).getTimeConfiguration()
+        .getMinimumOnboardingStartTime();
+
     if (dto.getLastTimestamp() < minimumOnboardingStartTime) {
       dto.setLastTimestamp(minimumLastTimestamp(principal, dto));
     }
@@ -388,6 +389,10 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
   }
 
   private long minimumLastTimestamp(final ThirdEyePrincipal principal, final AlertDTO dto) {
+    final long minimumOnboardingStartTime = namespaceConfigurationManager
+        .getNamespaceConfiguration(dto.namespace()).getTimeConfiguration()
+        .getMinimumOnboardingStartTime();
+
     try {
       final AlertInsightsApi insights = alertInsightsProvider.getInsights(principal, dto);
       final Long datasetStartTime = insights.getDatasetStartTime();

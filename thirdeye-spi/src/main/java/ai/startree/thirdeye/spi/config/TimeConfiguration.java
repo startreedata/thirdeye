@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.config;
+package ai.startree.thirdeye.spi.config;
 
 import static ai.startree.thirdeye.spi.Constants.DEFAULT_CHRONOLOGY;
 
@@ -34,7 +34,7 @@ public class TimeConfiguration {
    * See pattern specification here
    * https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html
    * It is recommended to not put the timezone it this pattern.
-   * The timezone is appended in the notification text by ThirdEye, but not in all datetime strings 
+   * The timezone is appended in the notification text by ThirdEye, but not in all datetime strings
    * to avoid repetition.
    */
   private @NonNull String dateTimePattern = Constants.NOTIFICATIONS_DEFAULT_DATE_PATTERN;

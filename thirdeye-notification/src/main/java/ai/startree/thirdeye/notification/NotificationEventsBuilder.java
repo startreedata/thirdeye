@@ -15,17 +15,18 @@ package ai.startree.thirdeye.notification;
 
 import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 
-import ai.startree.thirdeye.config.TimeConfiguration;
 import ai.startree.thirdeye.mapper.ApiBeanMapper;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.EventApi;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
+import ai.startree.thirdeye.spi.datalayer.bao.NamespaceConfigurationManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import ai.startree.thirdeye.spi.events.EventType;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,15 +47,16 @@ public class NotificationEventsBuilder {
 
   private final EventManager eventDao;
 
-  private final DateTimeZone dateTimeZone;
   private final Period preEventCrawlOffset;
   private final Period postEventCrawlOffset;
 
+  private final NamespaceConfigurationManager namespaceConfigurationManager;
+
   @Inject
   public NotificationEventsBuilder(final EventManager eventDao,
-      final TimeConfiguration timeConfiguration) {
+      final NamespaceConfigurationManager namespaceConfigurationManager) {
     this.eventDao = eventDao;
-    dateTimeZone = timeConfiguration.getTimezone();
+    this.namespaceConfigurationManager = namespaceConfigurationManager;
 
     final Period defaultPeriod = isoPeriod(Constants.NOTIFICATIONS_DEFAULT_EVENT_CRAWL_OFFSET);
     preEventCrawlOffset = defaultPeriod;
@@ -65,6 +67,14 @@ public class NotificationEventsBuilder {
    * TODO cyril - logic is duplicated (and not iso) with what RcaRelatedService#getRelatedEvents provides
    */
   public List<EventApi> getRelatedEvents(final Collection<AnomalyDTO> anomalies) {
+    if (anomalies.isEmpty()) {
+      return Collections.emptyList();
+    }
+    final String currentNamespace = anomalies.iterator().next().namespace();
+    final DateTimeZone dateTimeZone = namespaceConfigurationManager
+        .getNamespaceConfiguration(currentNamespace).getTimeConfiguration()
+        .getTimezone();
+
     DateTime windowStart = DateTime.now(dateTimeZone);
     DateTime windowEnd = new DateTime(0, dateTimeZone);
 

@@ -24,6 +24,7 @@ import ai.startree.thirdeye.datalayer.bao.DatasetConfigManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.EnumerationItemManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.EventManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.MetricConfigManagerImpl;
+import ai.startree.thirdeye.datalayer.bao.NamespaceConfigurationManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.RcaInvestigationManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.SubscriptionGroupManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.TaskManagerImpl;
@@ -39,6 +40,7 @@ import ai.startree.thirdeye.datalayer.entity.EventIndex;
 import ai.startree.thirdeye.datalayer.entity.GenericJsonEntity;
 import ai.startree.thirdeye.datalayer.entity.MergedAnomalyResultIndex;
 import ai.startree.thirdeye.datalayer.entity.MetricConfigIndex;
+import ai.startree.thirdeye.datalayer.entity.NamespaceConfigurationEntity;
 import ai.startree.thirdeye.datalayer.entity.RcaInvestigationIndex;
 import ai.startree.thirdeye.datalayer.entity.TaskEntity;
 import ai.startree.thirdeye.datalayer.util.EntityMappingHolder;
@@ -50,6 +52,7 @@ import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EventManager;
 import ai.startree.thirdeye.spi.datalayer.bao.MetricConfigManager;
+import ai.startree.thirdeye.spi.datalayer.bao.NamespaceConfigurationManager;
 import ai.startree.thirdeye.spi.datalayer.bao.RcaInvestigationManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
@@ -79,6 +82,7 @@ public class ThirdEyePersistenceModule extends AbstractModule {
       EventIndex.class,
       MergedAnomalyResultIndex.class,
       MetricConfigIndex.class,
+      NamespaceConfigurationEntity.class,
       RcaInvestigationIndex.class,
       TaskEntity.class
   );
@@ -110,6 +114,8 @@ public class ThirdEyePersistenceModule extends AbstractModule {
     bind(AlertManager.class).to(AlertManagerImpl.class).in(Scopes.SINGLETON);
     bind(AlertTemplateManager.class).to(AlertTemplateManagerImpl.class).in(Scopes.SINGLETON);
     bind(SubscriptionGroupManager.class).to(SubscriptionGroupManagerImpl.class).in(
+        Scopes.SINGLETON);
+    bind(NamespaceConfigurationManager.class).to(NamespaceConfigurationManagerImpl.class).in(
         Scopes.SINGLETON);
   }
 

@@ -41,6 +41,8 @@ public enum ThirdEyeStatus {
       "Multiple datasets found based on the dataset's display name %s, candidates: %s"),
   ERR_MULTIPLE_DATASOURCES_FOUND(
       "Multiple data sources found with the same name: %s"),
+  ERR_NAMESPACE_CONFIGURATION_VALIDATION_FAILED(
+      "Namespace Configuration validation failed! namespace: %s. %s"),
   ERR_NOTIFICATION_DISPATCH("%s"),
   ERR_NOT_ENOUGH_DATA_FOR_RCA("Not enough data for RCA algorithm: %s"),
   ERR_OBJECT_DOES_NOT_EXIST("Object does not exist! %s"),

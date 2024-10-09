@@ -19,6 +19,7 @@ import ai.startree.thirdeye.spi.json.ApiTemplatableSerializer;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.datatype.joda.JodaModule;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.time.Duration;
@@ -48,7 +49,9 @@ public interface Constants {
   Module TEMPLATABLE = new SimpleModule()
       .addSerializer(Templatable.class, new ApiTemplatableSerializer())
       .addDeserializer(Templatable.class, new ApiTemplatableDeserializer());
-  ObjectMapper TEMPLATABLE_OBJECT_MAPPER = new ObjectMapper().registerModule(TEMPLATABLE);
+  ObjectMapper TEMPLATABLE_OBJECT_MAPPER = new ObjectMapper()
+      .registerModule(TEMPLATABLE)
+      .registerModule(new JodaModule());
   
   Locale DEFAULT_LOCALE = Locale.ENGLISH;
 

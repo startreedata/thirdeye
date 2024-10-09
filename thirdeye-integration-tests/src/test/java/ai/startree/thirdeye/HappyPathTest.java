@@ -20,6 +20,7 @@ import static ai.startree.thirdeye.DropwizardTestUtils.loadAlertApi;
 import static ai.startree.thirdeye.IntegrationTestUtils.NODE_NAME_CHILD_ROOT;
 import static ai.startree.thirdeye.IntegrationTestUtils.NODE_NAME_ROOT;
 import static ai.startree.thirdeye.IntegrationTestUtils.assertAnomalyAreTheSame;
+import static ai.startree.thirdeye.IntegrationTestUtils.assertNamespaceConfigurationAreSame;
 import static ai.startree.thirdeye.IntegrationTestUtils.combinerNode;
 import static ai.startree.thirdeye.IntegrationTestUtils.enumeratorNode;
 import static ai.startree.thirdeye.IntegrationTestUtils.forkJoinNode;
@@ -49,10 +50,12 @@ import ai.startree.thirdeye.spi.api.DetectionEvaluationApi;
 import ai.startree.thirdeye.spi.api.DimensionAnalysisResultApi;
 import ai.startree.thirdeye.spi.api.EmailSchemeApi;
 import ai.startree.thirdeye.spi.api.HeatMapResponseApi;
+import ai.startree.thirdeye.spi.api.NamespaceConfigurationApi;
 import ai.startree.thirdeye.spi.api.NotificationSchemesApi;
 import ai.startree.thirdeye.spi.api.PlanNodeApi;
 import ai.startree.thirdeye.spi.api.RcaInvestigationApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
+import ai.startree.thirdeye.spi.api.TimeConfigurationApi;
 import ai.startree.thirdeye.spi.detection.AnomalyCause;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedbackType;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -61,8 +64,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.dropwizard.testing.DropwizardTestSupport;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 import javax.ws.rs.client.Client;
@@ -72,6 +77,7 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import org.joda.time.DateTimeZone;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -129,6 +135,7 @@ public class HappyPathTest {
   private long anomalyId;
   private long alertLastUpdateTime;
   private long alertId;
+  private long namespaceConfigurationId;
 
   @BeforeClass
   public void beforeClass() throws Exception {
@@ -632,6 +639,79 @@ public class HappyPathTest {
 
     gotSgs.stream().map(SubscriptionGroupApi::getName)
         .forEach(name -> assertThat(name).isIn(sg.getName(), sgWithHistoricalAnomalies.getName()));
+  }
+
+  @Test
+  public void testGetNamespaceConfiguration() {
+    final Response response = request("api/workspace-configuration").get();
+    assertThat(response.getStatus()).isEqualTo(200);
+
+    final NamespaceConfigurationApi gotCfgApi = response.readEntity(
+        NamespaceConfigurationApi.class);
+    namespaceConfigurationId = gotCfgApi.getId();
+    assertThat(gotCfgApi.getAuth().getNamespace()).isNull();
+    assertThat(gotCfgApi.getTimeConfiguration().getTimezone().toString()).isEqualTo("UTC");
+    assertThat(gotCfgApi.getTimeConfiguration().getDateTimePattern()).isEqualTo(
+        "MMM dd, yyyy HH:mm");
+    assertThat(gotCfgApi.getTimeConfiguration().getMinimumOnboardingStartTime()).isEqualTo(
+        946684800000L);
+
+    // fetch again - should return same config
+    final Response response2 = request("api/workspace-configuration").get();
+    assertThat(response2.getStatus()).isEqualTo(200);
+    final NamespaceConfigurationApi gotCfgApi2 = response2.readEntity(
+        NamespaceConfigurationApi.class);
+    assertNamespaceConfigurationAreSame(gotCfgApi2, gotCfgApi);
+  }
+
+  @Test(dependsOnMethods = "testGetNamespaceConfiguration")
+  public void testUpdateNamespaceConfiguration() {
+    NamespaceConfigurationApi updatedCfg = new NamespaceConfigurationApi();
+    updatedCfg.setTimeConfiguration(
+        new TimeConfigurationApi()
+            .setTimezone(DateTimeZone.forTimeZone(TimeZone.getTimeZone("Asia/Kolkata")))
+            .setDateTimePattern("MMM dd, yyyy HH:mm")
+            .setMinimumOnboardingStartTime(996684800000L));
+    updatedCfg.setAuth(new AuthorizationConfigurationApi());
+    updatedCfg.setId(namespaceConfigurationId);
+    final Response response = request("api/workspace-configuration").put(
+        Entity.json(updatedCfg));
+    assertThat(response.getStatus()).isEqualTo(200);
+
+    final NamespaceConfigurationApi gotCfgApi = response.readEntity(
+        NamespaceConfigurationApi.class);
+    assertNamespaceConfigurationAreSame(gotCfgApi, updatedCfg);
+
+    // fetch again after update - should return updated config
+    final Response response2 = request("api/workspace-configuration").get();
+    assertThat(response2.getStatus()).isEqualTo(200);
+    final NamespaceConfigurationApi gotCfgApi2 = response2.readEntity(
+        NamespaceConfigurationApi.class);
+    assertNamespaceConfigurationAreSame(gotCfgApi2, gotCfgApi);
+  }
+
+  @Test(dependsOnMethods = "testUpdateNamespaceConfiguration")
+  public void testResetNamespaceConfiguration() {
+    final Response response = request("api/workspace-configuration/reset").post(
+        Entity.json(Collections.emptyList()));
+    assertThat(response.getStatus()).isEqualTo(200);
+
+    final NamespaceConfigurationApi gotCfgApi = response.readEntity(
+        NamespaceConfigurationApi.class);
+    assertThat(gotCfgApi.getId()).isEqualTo(namespaceConfigurationId);
+    assertThat(gotCfgApi.getAuth().getNamespace()).isNull();
+    assertThat(gotCfgApi.getTimeConfiguration().getTimezone().toString()).isEqualTo("UTC");
+    assertThat(gotCfgApi.getTimeConfiguration().getDateTimePattern()).isEqualTo(
+        "MMM dd, yyyy HH:mm");
+    assertThat(gotCfgApi.getTimeConfiguration().getMinimumOnboardingStartTime()).isEqualTo(
+        946684800000L);
+
+    // fetch again after reset - should return resetted config
+    final Response response2 = request("api/workspace-configuration").get();
+    assertThat(response2.getStatus()).isEqualTo(200);
+    final NamespaceConfigurationApi gotCfgApi2 = response2.readEntity(
+        NamespaceConfigurationApi.class);
+    assertNamespaceConfigurationAreSame(gotCfgApi2, gotCfgApi);
   }
 
   private Builder request(final String urlFragment) {

@@ -29,4 +29,5 @@ export interface GetEnumerationItem extends ActionHook {
 export interface GetEnumerationItemsProps {
     ids?: number[];
     alertId?: number;
+    alertIds?: number[];
 }

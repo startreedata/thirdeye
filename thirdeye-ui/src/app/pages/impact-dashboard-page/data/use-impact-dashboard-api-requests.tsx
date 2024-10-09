@@ -39,6 +39,7 @@ import { useGetAlerts } from "../../../rest/alerts/alerts.actions";
 import { useNotificationProviderV1 } from "../../../platform/components";
 import { useTranslation } from "react-i18next";
 import { isEmpty } from "lodash";
+import { useGetEnumerationItems } from "../../../rest/enumeration-items/enumeration-items.actions";
 
 export const useImpactDashBoardApiRequests = ({
     selectedAnalysisPeriod,
@@ -87,6 +88,24 @@ export const useImpactDashBoardApiRequests = ({
         status: investigationStatus,
         errorMessages: investigationErrorMessages,
     } = useGetInvestigations();
+
+    const {
+        enumerationItems,
+        getEnumerationItems,
+        status: enumerationItemsStatus,
+        errorMessages: enumerationItemsMessages,
+    } = useGetEnumerationItems();
+
+    useEffect(() => {
+        notifyIfErrors(
+            enumerationItemsStatus,
+            enumerationItemsMessages,
+            notify,
+            t("message.error-while-fetching", {
+                entity: t("label.enumeration-items"),
+            })
+        );
+    }, [anomalyStatus]);
 
     useEffect(() => {
         notifyIfErrors(
@@ -188,12 +207,22 @@ export const useImpactDashBoardApiRequests = ({
         }
     }, [recentAnomalyInvestigatedId]);
 
+    useEffect(() => {
+        if (alerts) {
+            const activeAlertIds = alerts
+                .filter((alert) => alert.active)
+                .map((alert) => alert.id);
+            getEnumerationItems({ alertIds: activeAlertIds });
+        }
+    }, [alerts]);
+
     return {
         anomalies,
         previousPeriodAnomalies,
         investigations,
-        alerts,
+        alerts: alerts?.filter((alert) => alert.active) || null,
         subscriptionGroups,
+        enumerationItems,
         mostRecentlyInvestigatedAnomalyAlert:
             mostRecentlyInvestigatedAnomaly?.alert,
     };

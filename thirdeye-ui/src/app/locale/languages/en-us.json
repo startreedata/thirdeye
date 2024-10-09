@@ -1003,8 +1003,8 @@
                     "anomaly-table": {
                         "columns": {
                             "alert-name": "Alert name",
-                            "anomalies-detected": "Anomalies detected",
-                            "dimensions-within-alert": "Dimensions within alert"
+                            "anomalies-detected": "Anomalies",
+                            "dimensions-within-alert": "Dimensions"
                         },
                         "emptyState": "No anomalies detected in the selected period",
                         "title": "Top anomaly alerts"

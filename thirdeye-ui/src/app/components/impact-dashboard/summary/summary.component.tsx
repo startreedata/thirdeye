@@ -38,6 +38,7 @@ import { useSummaryData } from "./use-summary-data";
 // Interfaces
 import { SummaryProps } from "./summary.interfaces";
 import { useTranslation } from "react-i18next";
+import { SpecType } from "../../../rest/dto/subscription-group.interfaces";
 
 export const Summary = ({
     alerts,
@@ -50,6 +51,7 @@ export const Summary = ({
     selectedAnalysisPeriod,
     onAnalysisPeriodChange,
     analysisPeriods,
+    activeEnumerationItems,
 }: SummaryProps): JSX.Element => {
     const { t } = useTranslation();
     const summaryRef = useRef<HTMLDivElement>(null);
@@ -63,6 +65,7 @@ export const Summary = ({
         investigations,
         subscriptionGroups,
         mostRecentlyInvestigatedAnomalyAlert,
+        activeEnumerationItems,
     });
 
     const summaryCardsData = [
@@ -181,7 +184,8 @@ export const Summary = ({
                 </div>
                 <div ref={summaryRef}>
                     <div>
-                        In the last <b>{verboseSummaryItems.weeks} weeks</b>,&nbsp;
+                        In the last <b>{verboseSummaryItems.weeks} weeks</b>
+                        ,&nbsp;
                         <b>
                             {summaryData.anomalies.detected.count} anomalies
                             were detected
@@ -190,8 +194,16 @@ export const Summary = ({
                         than the previous {verboseSummaryItems.weeks} weeks.{" "}
                         {summaryData.anomalies.detected.count > 0 && (
                             <>
-                                Notifications about anomalies were sent via
-                                Slack and Email.
+                                Notifications about anomalies were sent via{" "}
+                                {verboseSummaryItems.notificationChannelsUsed
+                                    ?.map((notificationChannel) =>
+                                        notificationChannel ===
+                                        SpecType.EmailSendgrid
+                                            ? "email"
+                                            : notificationChannel
+                                    )
+                                    .join(", ")}
+                                .
                             </>
                         )}
                     </div>

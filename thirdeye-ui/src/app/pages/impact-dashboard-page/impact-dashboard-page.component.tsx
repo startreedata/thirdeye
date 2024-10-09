@@ -33,13 +33,12 @@ import { useTranslation } from "react-i18next";
 import { isEmpty } from "lodash";
 
 // APIs
-import { getDatasetByName } from "../../rest/datasets/datasets.rest";
 import { useImpactDashBoardApiRequests } from "./data/use-impact-dashboard-api-requests";
 
 // Interfaces
-import { Dataset } from "../../rest/dto/dataset.interfaces";
 import { Anomaly } from "../../rest/dto/anomaly.interfaces";
 import { AlertEffectivnessData } from "./impact-dashboard-page.interfaces";
+import { EnumerationItem } from "../../rest/dto/enumeration-item.interfaces";
 
 const anaylysisPeriods = ["4w", "13w", "26w"];
 
@@ -51,7 +50,7 @@ export const ImpactDashboardPage: FunctionComponent = () => {
     const [anomalyGroupByAlertId, setAnomalyGroupByAlertId] =
         useState<[string, Anomaly[]][]>();
     const [activeAlertsDimensions, setActiveAlertsDimensions] =
-        useState<{ [key: string]: string[] }>();
+        useState<{ [key: string]: EnumerationItem[] }>();
 
     /* Making all the API requests that we need for the entire page and results of which are being
     used in different sections */
@@ -62,6 +61,7 @@ export const ImpactDashboardPage: FunctionComponent = () => {
         alerts,
         subscriptionGroups,
         mostRecentlyInvestigatedAnomalyAlert,
+        enumerationItems,
     } = useImpactDashBoardApiRequests({ selectedAnalysisPeriod });
 
     useEffect(() => {
@@ -86,24 +86,24 @@ export const ImpactDashboardPage: FunctionComponent = () => {
         }
     }, [anomalies, previousPeriodAnomalies]);
 
-    // For the alerts, we fetch the dimensions for those alerts
     useEffect(() => {
         if (!isEmpty(anomalyGroupByAlertId)) {
-            const dimensionPromises: Promise<Dataset>[] = [];
-            anomalyGroupByAlertId!.forEach((group) => {
-                group[1][1];
-                dimensionPromises.push(
-                    getDatasetByName(group[1][0].metadata.dataset!.name)
-                );
+            const alertEnumerationItemMapping: {
+                [key: number]: EnumerationItem[];
+            } = {};
+            enumerationItems?.forEach((enumerationItem) => {
+                const alertId = enumerationItem.alert?.id;
+                if (alertId) {
+                    alertEnumerationItemMapping[alertId] =
+                        alertEnumerationItemMapping[alertId]
+                            ? [
+                                  enumerationItem,
+                                  ...alertEnumerationItemMapping[alertId],
+                              ]
+                            : [enumerationItem];
+                }
             });
-            Promise.all(dimensionPromises).then((data) => {
-                const alertDimensionMapping: { [key: string]: string[] } = {};
-                data.forEach((d, idx) => {
-                    alertDimensionMapping[anomalyGroupByAlertId![idx][0]] =
-                        d.dimensions;
-                });
-                setActiveAlertsDimensions(alertDimensionMapping);
-            });
+            setActiveAlertsDimensions(alertEnumerationItemMapping);
         }
     }, [anomalyGroupByAlertId]);
 
@@ -118,8 +118,8 @@ export const ImpactDashboardPage: FunctionComponent = () => {
                         ?.name || "",
                 anomaliesCount: group[1].length,
                 dimensionsCount: activeAlertsDimensions
-                    ? activeAlertsDimensions[group[0]]?.length
-                    : 0,
+                    ? activeAlertsDimensions[group[0]]?.length || 1
+                    : 1,
             });
         });
 
@@ -161,6 +161,7 @@ export const ImpactDashboardPage: FunctionComponent = () => {
                 subHeading={t("pages.impact-dashboard.subHeading")}
             />
             <Summary
+                activeEnumerationItems={enumerationItems}
                 alerts={alerts}
                 analysisPeriods={anaylysisPeriods}
                 anomalies={anomalies}

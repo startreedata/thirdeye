@@ -183,7 +183,7 @@ public class DataSourceService extends CrudService<DataSourceApi, DataSourceDTO>
     final String namespace = authorizationManager.currentNamespace(principal);
 
     // verify that user has read access to data sources in given namespace
-    DataSourceDTO sampleDataset = new DataSourceDTO();
+    final DataSourceDTO sampleDataset = new DataSourceDTO();
     sampleDataset.setAuth(new AuthorizationConfigurationDTO().setNamespace(namespace));
     authorizationManager.ensureCanRead(principal, sampleDataset);
 

@@ -43,6 +43,7 @@ module.exports = {
 
     // Test Environment
     testEnvironment: "jsdom",
+    setupFiles: ["<rootDir>/jest.setup.js"],
     setupFilesAfterEnv: ["@testing-library/jest-dom/extend-expect"],
     clearMocks: true,
     moduleNameMapper: {

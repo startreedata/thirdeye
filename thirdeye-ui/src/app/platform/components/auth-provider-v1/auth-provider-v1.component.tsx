@@ -367,6 +367,16 @@ export const AuthProviderV1: FunctionComponent<AuthProviderV1Props> = ({
             return;
         }
 
+        if (VERCEL_ACCESS_TOKEN) {
+            // Access token available via vercel deployment
+            setAccessToken(VERCEL_ACCESS_TOKEN);
+
+            // Redirect to the app
+            redirectToApp();
+
+            return;
+        }
+
         if (accessToken) {
             // Access token available, continue loading the app
             setAuthProviderLoading(false);

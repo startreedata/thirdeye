@@ -117,6 +117,9 @@ module.exports = {
             VERCEL_DEPLOYMENT_API_URL: JSON.stringify(
                 process.env.VERCEL_DEPLOYMENT_API_URL || ""
             ),
+            VERCEL_ACCESS_TOKEN: JSON.stringify(
+                process.env.VERCEL_ACCESS_TOKEN || ""
+            ),
         }),
         /**
          * Clean webpack output directory

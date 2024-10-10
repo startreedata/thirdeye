@@ -2,7 +2,7 @@
     "rewrites": [
         {
             "source": "/(.*)",
-            "destination": "/#access_token=process.env.ACCESS_TOKEN"
+            "destination": "/"
         }
     ]
 }

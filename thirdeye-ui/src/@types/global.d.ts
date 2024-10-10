@@ -14,3 +14,4 @@
  */
 declare const VERCEL_ENV: string;
 declare const VERCEL_DEPLOYMENT_API_URL: string;
+declare const VERCEL_ACCESS_TOKEN: string;

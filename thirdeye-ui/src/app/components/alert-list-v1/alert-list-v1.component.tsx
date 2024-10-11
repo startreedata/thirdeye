@@ -23,7 +23,6 @@ import { useTranslation } from "react-i18next";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import {
     DataGridColumnV1,
-    DataGridScrollV1,
     DataGridSelectionModelV1,
     DataGridSortOrderV1,
     DataGridV1,
@@ -223,7 +222,6 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = ({
                             order: DataGridSortOrderV1.DESC,
                         }}
                         rowKey="id"
-                        scroll={DataGridScrollV1.Body}
                         searchPlaceholder={t("label.search-entity", {
                             entity: t("label.alerts"),
                         })}

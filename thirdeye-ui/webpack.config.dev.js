@@ -21,7 +21,7 @@ const { RetryChunkLoadPlugin } = require("webpack-retry-chunk-load-plugin");
 const WebpackBar = require("webpackbar");
 const ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin");
 const ReactRefreshTypeScript = require("react-refresh-typescript");
-
+const webpack = require("webpack");
 const outputPath = path.join(__dirname, "dist");
 
 module.exports = {
@@ -114,7 +114,15 @@ module.exports = {
     },
 
     plugins: [
-        // Clean webpack output directory
+        new webpack.DefinePlugin({
+            VERCEL_ENV: JSON.stringify(process.env.VERCEL_ENV || ""),
+            VERCEL_DEPLOYMENT_API_URL: JSON.stringify(
+                process.env.VERCEL_DEPLOYMENT_API_URL || ""
+            ),
+            VERCEL_ACCESS_TOKEN: JSON.stringify(
+                process.env.VERCEL_ACCESS_TOKEN || ""
+            ),
+        }),
         new CleanWebpackPlugin({
             verbose: true,
         }),

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 StarTree Inc
+ * Copyright 2024 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -12,16 +12,6 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import axios from "axios";
-import { AppConfiguration } from "../dto/app-config.interface";
-
-const URL_CONFIG = "/api/ui/config";
-
-export const getAppConfiguration = async (): Promise<AppConfiguration> => {
-    if (VERCEL_DEPLOYMENT_API_URL) {
-        axios.defaults.baseURL = VERCEL_DEPLOYMENT_API_URL;
-    }
-    const response = await axios.get(URL_CONFIG);
-
-    return response.data;
-};
+global.VERCEL_DEPLOYMENT_API_URL = "";
+global.VERCEL_ENV = "";
+global.VERCEL_ACCESS_TOKEN = "";

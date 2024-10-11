@@ -172,7 +172,7 @@ public class AlertDetectionIntervalCalculatorTest {
         TimeUtils.floorByPeriod(inputTaskEnd.minus(completenessDelay), granularity));
 
     assertThat(output).isEqualTo(expected);
-    // end is in the future because completenessDelay is negative
+    // end is in the future because completenessDelay is negative -24
     assertThat(output.getEnd()).isGreaterThan(DateTime.now());
   }
 

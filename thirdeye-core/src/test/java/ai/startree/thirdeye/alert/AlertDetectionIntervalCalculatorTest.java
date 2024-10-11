@@ -148,6 +148,35 @@ public class AlertDetectionIntervalCalculatorTest {
   }
 
   @Test
+  public void testGetCorrectedIntervalWithNegativeDelayAppliedAndGranularity() {
+    // test that timeframe is changed when there is a negative delay
+    final DateTime inputTaskEnd = new DateTime(Constants.DEFAULT_CHRONOLOGY);
+    final DateTime inputTaskStart = inputTaskEnd.minus(Period.days(1));
+    final Period granularity = isoPeriod("P1D");
+    final Period completenessDelay = isoPeriod("PT-24H");
+
+    final DatasetConfigDTO datasetConfigDTO = new DatasetConfigDTO()
+        .setDataset(DATASET_NAME)
+        // delay of -6 hours  will be applied
+        .setCompletenessDelay(completenessDelay.toString());
+    final AlertTemplateDTO inputAlertTemplate = new AlertTemplateDTO()
+        .setMetadata(new AlertMetadataDTO()
+            .setDataset(datasetConfigDTO)
+            .setGranularity(granularity.toString())  // granularity of 1 day
+        );
+    final Interval output = computeCorrectedInterval(ALERT_ID,
+        inputTaskStart.getMillis(), inputTaskEnd.getMillis(), inputAlertTemplate);
+
+    final Interval expected = new Interval(
+        TimeUtils.floorByPeriod(inputTaskStart, granularity),
+        TimeUtils.floorByPeriod(inputTaskEnd.minus(completenessDelay), granularity));
+
+    assertThat(output).isEqualTo(expected);
+    // end is in the future because completenessDelay is negative
+    assertThat(output.getEnd()).isGreaterThan(DateTime.now());
+  }
+
+  @Test
   public void testGetCorrectedIntervalWithStartTimeGreaterThanEndTimeMinusDelay() {
     // test that both start and endTime are changed when end-delay < start
     // this can happen if delay value is increased

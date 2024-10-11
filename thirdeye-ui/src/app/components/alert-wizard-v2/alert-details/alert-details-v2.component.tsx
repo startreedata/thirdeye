@@ -22,7 +22,6 @@ import {
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { easyAlertStyles } from "../../../pages/alerts-create-page/alerts-create-easy-page/alerts-create-easy-page.styles";
-import { NavigateAlertCreationFlowsDropdown } from "../../alert-wizard-v3/navigate-alert-creation-flows-dropdown/navigate-alert-creation-flows-dropdown";
 import { InputSectionV2 } from "../../form-basics/input-section-v2/input-section-v2.component";
 import { AlertDetailsProps } from "./alert-details.interfaces";
 import { AlertFrequency } from "./alert-frequency-v2/alert-frequency.component";
@@ -76,9 +75,6 @@ function AlertDetails({
                                 )}
                             </Typography>
                         </Grid>
-                        <Grid item>
-                            <NavigateAlertCreationFlowsDropdown />
-                        </Grid>
                     </Grid>
                 </Box>
             </Grid>
@@ -101,7 +97,7 @@ function AlertDetails({
                             )}
                         </>
                     }
-                    label={t("label.dataset-name")}
+                    label={t("label.name-of-your-alert")}
                 />
             </Grid>
             <Grid item xs={4}>

@@ -35,9 +35,11 @@ import ai.startree.thirdeye.datalayer.DatabaseClient;
 import ai.startree.thirdeye.datalayer.DatabaseOrm;
 import ai.startree.thirdeye.datalayer.ThirdEyePersistenceModule;
 import ai.startree.thirdeye.datalayer.bao.AlertManagerImpl;
+import ai.startree.thirdeye.datalayer.bao.NamespaceConfigurationManagerImpl;
 import ai.startree.thirdeye.datalayer.bao.TaskManagerImpl;
 import ai.startree.thirdeye.datalayer.core.EnumerationItemMaintainer;
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
+import ai.startree.thirdeye.datalayer.dao.NamespaceConfigurationDao;
 import ai.startree.thirdeye.datalayer.dao.TaskDao;
 import ai.startree.thirdeye.datasource.DataSourceOnboarder;
 import ai.startree.thirdeye.datasource.cache.DataSourceCache;
@@ -122,6 +124,7 @@ public class ArchitectureTest {
       assignableTo(AbstractManager.class),
       assignableTo(GenericPojoDao.class),
       assignableTo(TaskDao.class),
+      assignableTo(NamespaceConfigurationDao.class),
       assignableTo(DatabaseOrm.class),
       assignableTo(DatabaseClient.class));
 
@@ -185,11 +188,12 @@ public class ArchitectureTest {
         DataSourceCache.class,
         EnumerationItemMaintainer.class,
         TaskManagerImpl.class,
+        NamespaceConfigurationManagerImpl.class,
         AlertManagerImpl.class,
         DataSourceOnboarder.class, // OK - REVIEWED ON APRIL 12 2024
         EvaluationContextProcessor.class,
         AlertTemplateRenderer.class,
-        AuthorizationManager.class // OK - REVIEW ON MAY 6 2024
+        AuthorizationManager.class, // OK - REVIEW ON MAY 6 2024
     };
     final ArchRule rule = noClasses().that(
             doNot(

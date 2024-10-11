@@ -20,6 +20,7 @@ import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.spi.api.AnomalyApi;
+import ai.startree.thirdeye.spi.api.NamespaceConfigurationApi;
 import ai.startree.thirdeye.spi.api.PlanNodeApi;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -122,5 +123,17 @@ public class IntegrationTestUtils {
     if (expected.getAnomalyLabels() != null) {
       assertThat(actual.getAnomalyLabels()).hasSize(expected.getAnomalyLabels().size());
     }
+  }
+
+  public static void assertNamespaceConfigurationAreSame(final NamespaceConfigurationApi actual,
+      final NamespaceConfigurationApi expected) {
+    assertThat(actual.getAuth().getNamespace()).isEqualTo(
+        expected.getAuth().getNamespace());
+    assertThat(actual.getTimeConfiguration().getTimezone().toString()).isEqualTo(
+        expected.getTimeConfiguration().getTimezone().toString());
+    assertThat(actual.getTimeConfiguration().getDateTimePattern()).isEqualTo(
+        expected.getTimeConfiguration().getDateTimePattern());
+    assertThat(actual.getTimeConfiguration().getMinimumOnboardingStartTime()).isEqualTo(
+        expected.getTimeConfiguration().getMinimumOnboardingStartTime());
   }
 }

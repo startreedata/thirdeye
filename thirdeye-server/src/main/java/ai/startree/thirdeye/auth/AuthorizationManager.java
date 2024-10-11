@@ -207,6 +207,10 @@ public class AuthorizationManager {
         relatedId -> ensureCanAccess(principal, relatedId, AccessType.READ));
   }
 
+  public DataSourceApi generateDatasourceConnection(final ThirdEyePrincipal principal) {
+    return thirdEyeAuthorizer.generateDatasourceConnection(principal);
+  }
+
   private void ensureCanAccess(final ThirdEyePrincipal principal,
       final ResourceIdentifier identifier, final AccessType accessType) {
     if (!canAccess(principal, identifier, accessType)) {

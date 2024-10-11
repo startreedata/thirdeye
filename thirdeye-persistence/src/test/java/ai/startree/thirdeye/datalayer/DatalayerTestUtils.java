@@ -13,13 +13,17 @@
  */
 package ai.startree.thirdeye.datalayer;
 
+import static ai.startree.thirdeye.spi.Constants.DEFAULT_CHRONOLOGY;
 import static java.util.stream.Collectors.toSet;
 
+import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.NamespaceConfigurationDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.TimeConfigurationDTO;
 import ai.startree.thirdeye.spi.metric.MetricType;
 import ai.startree.thirdeye.spi.util.SpiUtils;
 import com.google.common.collect.Lists;
@@ -58,5 +62,16 @@ public class DatalayerTestUtils {
         .setActive(true)
         .setDataSource("PinotThirdEyeDataSource")
         .setLastRefreshTime(System.currentTimeMillis());
+  }
+
+  public static NamespaceConfigurationDTO buildNamespaceConfiguration(String namespace) {
+    final NamespaceConfigurationDTO dto = new NamespaceConfigurationDTO();
+    dto.setTimeConfiguration(new TimeConfigurationDTO()
+        .setDateTimePattern(Constants.NOTIFICATIONS_DEFAULT_DATE_PATTERN)
+        .setTimezone(DEFAULT_CHRONOLOGY.getZone())
+        .setMinimumOnboardingStartTime(946684800000L));
+    dto.setAuth(new AuthorizationConfigurationDTO()
+        .setNamespace(namespace));
+    return dto;
   }
 }

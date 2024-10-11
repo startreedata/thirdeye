@@ -133,6 +133,15 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
     return respondOk(onboarded);
   }
 
+  @POST
+  @Path("recommend")
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response recommendConfiguration(
+      @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal) {
+    return respondOk(dataSourceService.recommend(principal));
+  }
+
   @DELETE
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Path("offboard-all")

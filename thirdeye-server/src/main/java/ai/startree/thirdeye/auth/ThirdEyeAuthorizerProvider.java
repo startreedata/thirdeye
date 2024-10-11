@@ -15,6 +15,7 @@ package ai.startree.thirdeye.auth;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import ai.startree.thirdeye.spi.api.DataSourceApi;
 import ai.startree.thirdeye.spi.auth.AccessType;
 import ai.startree.thirdeye.spi.auth.ResourceIdentifier;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
@@ -89,6 +90,11 @@ public class ThirdEyeAuthorizerProvider implements ThirdEyeAuthorizer {
     return getAccessControl().listNamespaces(principal);
   }
 
+  @Override
+  public @Nullable DataSourceApi generateDatasourceConnection(final ThirdEyePrincipal principal) {
+    return getAccessControl().generateDatasourceConnection(principal);
+  }
+
   @VisibleForTesting
   public static class AlwaysAllowAuthorizer implements ThirdEyeAuthorizer {
 
@@ -120,6 +126,11 @@ public class ThirdEyeAuthorizerProvider implements ThirdEyeAuthorizer {
       }
       return LIST_OF_NULL;
     }
+
+    @Override
+    public @Nullable DataSourceApi generateDatasourceConnection(final ThirdEyePrincipal principal) {
+      return null;
+    }
   }
 
   private static class AlwaysDenyAuthorizer implements ThirdEyeAuthorizer {
@@ -133,6 +144,11 @@ public class ThirdEyeAuthorizerProvider implements ThirdEyeAuthorizer {
     @Override
     public @NonNull List<String> listNamespaces(final ThirdEyePrincipal principal) {
       return List.of();
+    }
+
+    @Override
+    public @Nullable DataSourceApi generateDatasourceConnection(final ThirdEyePrincipal principal) {
+      return null;
     }
   }
 }

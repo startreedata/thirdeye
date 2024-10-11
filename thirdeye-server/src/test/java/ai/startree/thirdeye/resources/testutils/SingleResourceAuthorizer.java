@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.resources.testutils;
 
+import ai.startree.thirdeye.spi.api.DataSourceApi;
 import ai.startree.thirdeye.spi.auth.AccessType;
 import ai.startree.thirdeye.spi.auth.ResourceIdentifier;
 import ai.startree.thirdeye.spi.auth.ThirdEyeAuthorizer;
@@ -20,6 +21,7 @@ import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import java.util.Collections;
 import java.util.List;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class SingleResourceAuthorizer implements ThirdEyeAuthorizer {
 
@@ -38,5 +40,10 @@ public class SingleResourceAuthorizer implements ThirdEyeAuthorizer {
   @Override
   public @NonNull List<String> listNamespaces(final ThirdEyePrincipal principal) {
     return Collections.singletonList(null);
+  }
+
+  @Override
+  public @Nullable DataSourceApi generateDatasourceConnection(final ThirdEyePrincipal principal) {
+    return null;
   }
 }

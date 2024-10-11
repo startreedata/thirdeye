@@ -271,7 +271,7 @@ public class AlertInsightsProvider {
     long completenessMinutes = completenessDuration.getStandardMinutes() % 60;
     long completenessSeconds = completenessDuration.getStandardSeconds() % 60;
     final boolean allNegative = completenessHours <= 0 && completenessMinutes <= 0 && completenessSeconds <= 0;
-    // either all fields are positive, either all fields are negative - mix of negative and positive values is not allowed
+    // either all fields are positive, either all fields are negative - mix of negative and positive values should not happen
     checkState(completenessHours >= 0 && completenessMinutes >= 0 && completenessSeconds >= 0 || allNegative);
     if (allNegative) {
       if (completenessSeconds < 0) {

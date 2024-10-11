@@ -19,7 +19,7 @@
   <parent>
     <groupId>ai.startree.thirdeye</groupId>
     <artifactId>thirdeye</artifactId>
-    <version>1.332.0-SNAPSHOT</version>
+    <version>1.335.0-SNAPSHOT</version>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
@@ -97,6 +97,10 @@
       <groupId>org.checkerframework</groupId>
       <artifactId>checker-qual</artifactId>
       <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-joda</artifactId>
     </dependency>
   </dependencies>
 

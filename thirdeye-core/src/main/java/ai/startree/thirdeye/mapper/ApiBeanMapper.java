@@ -26,6 +26,7 @@ import ai.startree.thirdeye.spi.api.DatasetApi;
 import ai.startree.thirdeye.spi.api.EnumerationItemApi;
 import ai.startree.thirdeye.spi.api.EventApi;
 import ai.startree.thirdeye.spi.api.MetricApi;
+import ai.startree.thirdeye.spi.api.NamespaceConfigurationApi;
 import ai.startree.thirdeye.spi.api.NotificationSchemesApi;
 import ai.startree.thirdeye.spi.api.NotificationSpecApi;
 import ai.startree.thirdeye.spi.api.RcaInvestigationApi;
@@ -42,6 +43,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.NamespaceConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.NotificationSchemesDto;
 import ai.startree.thirdeye.spi.datalayer.dto.NotificationSpecDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.RcaInvestigationDTO;
@@ -178,5 +180,14 @@ public abstract class ApiBeanMapper {
 
   public static AuthorizationConfigurationApi toApi(final AuthorizationConfigurationDTO dto) {
     return AuthorizationConfigurationMapper.INSTANCE.toApi(dto);
+  }
+
+  public static NamespaceConfigurationDTO toNamespaceConfigurationDTO(
+      final NamespaceConfigurationApi api) {
+    return NamespaceConfigurationMapper.INSTANCE.toDto(api);
+  }
+
+  public static NamespaceConfigurationApi toApi(final NamespaceConfigurationDTO dto) {
+    return NamespaceConfigurationMapper.INSTANCE.toApi(dto);
   }
 }

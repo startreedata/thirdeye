@@ -24,7 +24,6 @@ import ai.startree.thirdeye.alert.AlertEvaluator;
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyeAuthorizerProvider;
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
-import ai.startree.thirdeye.config.TimeConfiguration;
 import ai.startree.thirdeye.resources.testutils.SingleNamespaceAuthorizer;
 import ai.startree.thirdeye.resources.testutils.SingleResourceAuthorizer;
 import ai.startree.thirdeye.service.AlertService;
@@ -44,6 +43,7 @@ import ai.startree.thirdeye.spi.datalayer.bao.AnomalyManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.bao.EnumerationItemManager;
+import ai.startree.thirdeye.spi.datalayer.bao.NamespaceConfigurationManager;
 import ai.startree.thirdeye.spi.datalayer.bao.RcaInvestigationManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
@@ -90,7 +90,7 @@ public class AlertResourceTest {
         mock(EnumerationItemManager.class),
         mock(RcaInvestigationManager.class),
         mock(TaskManager.class),
-        new TimeConfiguration(),
+        mock(NamespaceConfigurationManager.class),
         authorizationManager
     );
   }
@@ -268,7 +268,7 @@ public class AlertResourceTest {
         mock(EnumerationItemManager.class),
         mock(RcaInvestigationManager.class),
         mock(TaskManager.class),
-        new TimeConfiguration(),
+        mock(NamespaceConfigurationManager.class),
         newAuthorizationManager(mock(AlertTemplateManager.class),
             SingleNamespaceAuthorizer.of("allowedNamespace"))
     )).evaluate(nobody(), alertEvaluationApi);
@@ -305,7 +305,7 @@ public class AlertResourceTest {
         mock(EnumerationItemManager.class),
         mock(RcaInvestigationManager.class),
         mock(TaskManager.class),
-        new TimeConfiguration(),
+        mock(NamespaceConfigurationManager.class),
         newAuthorizationManager(mock(AlertTemplateManager.class),
             SingleNamespaceAuthorizer.of("readonlyNamespace", AccessType.READ)))
     ).evaluate(nobody(), alertEvaluationApi);

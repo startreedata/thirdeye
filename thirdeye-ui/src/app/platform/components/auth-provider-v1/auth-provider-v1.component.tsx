@@ -367,6 +367,16 @@ export const AuthProviderV1: FunctionComponent<AuthProviderV1Props> = ({
             return;
         }
 
+        if (VERCEL_ACCESS_TOKEN) {
+            // Access token available via vercel deployment
+            setAccessToken(VERCEL_ACCESS_TOKEN);
+
+            // Redirect to the app
+            redirectToApp();
+
+            return;
+        }
+
         if (accessToken) {
             // Access token available, continue loading the app
             setAuthProviderLoading(false);
@@ -445,6 +455,10 @@ export const AuthProviderV1: FunctionComponent<AuthProviderV1Props> = ({
     };
 
     const initAxios = (): void => {
+        if (VERCEL_DEPLOYMENT_API_URL) {
+            axios.defaults.baseURL = VERCEL_DEPLOYMENT_API_URL;
+        }
+
         // Clear existing interceptors
         axios.interceptors.request.eject(axiosRequestInterceptorId);
         axios.interceptors.response.eject(axiosResponseInterceptorId);

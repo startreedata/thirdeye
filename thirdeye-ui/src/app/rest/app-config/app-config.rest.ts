@@ -18,6 +18,9 @@ import { AppConfiguration } from "../dto/app-config.interface";
 const URL_CONFIG = "/api/ui/config";
 
 export const getAppConfiguration = async (): Promise<AppConfiguration> => {
+    if (VERCEL_DEPLOYMENT_API_URL) {
+        axios.defaults.baseURL = VERCEL_DEPLOYMENT_API_URL;
+    }
     const response = await axios.get(URL_CONFIG);
 
     return response.data;

@@ -13,12 +13,12 @@
  */
 package ai.startree.thirdeye;
 
-import ai.startree.thirdeye.config.TimeConfiguration;
 import ai.startree.thirdeye.config.UiConfiguration;
 import ai.startree.thirdeye.datalayer.ThirdEyePersistenceModule;
 import ai.startree.thirdeye.datasource.loader.DefaultAggregationLoader;
 import ai.startree.thirdeye.datasource.loader.DefaultMinMaxTimeLoader;
 import ai.startree.thirdeye.rootcause.configuration.RcaConfiguration;
+import ai.startree.thirdeye.spi.config.TimeConfiguration;
 import ai.startree.thirdeye.spi.datasource.loader.AggregationLoader;
 import ai.startree.thirdeye.spi.datasource.loader.MinMaxTimeLoader;
 import com.google.inject.AbstractModule;

@@ -83,7 +83,7 @@ public class DetectionIntervalUtils {
       if (correctedEnd.isBefore(dataWatermark)) {
         correctedEnd = dataWatermark;
         LOG.info(
-            "Applied delay correction of {} for id {} between {} and {}. Corrected end time is {}",
+            "Applied NEGATIVE delay correction of {} for id {} between {} and {}. Corrected end time is {}",
             delay, alertId, taskStart, taskEnd, correctedEnd);
       } else {
         LOG.error("Task end is after the data watermark, even if the data watermark is in the future because the completenessDelay is negative. This should not happen, except for detection tasks created manually. Please reach out to support.");

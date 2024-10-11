@@ -25,6 +25,7 @@ import static ai.startree.thirdeye.spi.util.AlertMetadataUtils.getDelay;
 import static ai.startree.thirdeye.spi.util.AlertMetadataUtils.getGranularity;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.spi.util.TimeUtils.timezonesAreEquivalent;
+import static com.google.common.base.Preconditions.checkState;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
@@ -258,15 +259,32 @@ public class AlertInsightsProvider {
   protected static @Nullable String defaultCronFor(final String granularity,
       final Chronology chronology, final Period completenessDelay) {
     Period roundedCompletenessDelay = completenessDelay;
-    if (completenessDelay.getMillis() != 0) {
+    if (completenessDelay.getMillis() > 0) {
       // ceil to the nearest second
-      roundedCompletenessDelay = completenessDelay.withMillis(0)
-          .withSeconds(completenessDelay.getSeconds() + 1);
+      roundedCompletenessDelay = completenessDelay.withMillis(0).withSeconds(completenessDelay.getSeconds() + 1);
+    } else if (completenessDelay.getMillis() < 0) {
+      // floor to the nearest second
+      roundedCompletenessDelay = completenessDelay.withMillis(0);
     }
     final Duration completenessDuration = roundedCompletenessDelay.toStandardDuration();
     long completenessHours = completenessDuration.getStandardHours() % 24;
     long completenessMinutes = completenessDuration.getStandardMinutes() % 60;
     long completenessSeconds = completenessDuration.getStandardSeconds() % 60;
+    final boolean allNegative = completenessHours <= 0 && completenessMinutes <= 0 && completenessSeconds <= 0;
+    // either all fields are positive, either all fields are negative - mix of negative and positive values is not allowed
+    checkState(completenessHours >= 0 && completenessMinutes >= 0 && completenessSeconds >= 0 || allNegative);
+    if (allNegative) {
+      if (completenessSeconds < 0) {
+        completenessMinutes -= 1;
+      }
+      completenessSeconds = (completenessSeconds + 60) % 60;
+      if (completenessMinutes < 0) {
+        completenessHours -= 1;
+      }
+      completenessMinutes = (completenessMinutes + 60) % 60;
+      completenessHours = (completenessHours + 24) % 24;
+    }
+    
 
     switch (granularity) {
       case "PT1M":

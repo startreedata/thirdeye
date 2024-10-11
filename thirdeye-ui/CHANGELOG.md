@@ -1,3 +1,11 @@
+### [2.51.4](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.51.3...thirdeye-ui-2.51.4) (2024-10-11)
+
+
+### Bug Fixes
+
+* [TE-2473](https://cortexdata.atlassian.net/browse/TE-2473) fix scroll in aler list ([f0674c718](https://github.com/startreedata/thirdeye/commit/f0674c718e42fda6a15727964f60c73e787edef0))
+* [TE-2474](https://cortexdata.atlassian.net/browse/TE-2474) show all template properties in advance create mode ([0794e438a](https://github.com/startreedata/thirdeye/commit/0794e438accf3e6f65ec7e434a42d085a6491158))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

@@ -802,6 +802,7 @@
         "no-data-for-entity": "No {{entity}} for the date range.",
         "no-data-for-entity-for-date-range": "No {{entity}} for the date range. Please try a different date range.",
         "no-datasets-available": "No dataset available",
+        "no-datasets-available-in-datasource": "No datasets were found in this datasource. Please create a table in Pinot. Once the table in Pinot is ready, refresh this page to continue.",
         "no-dimensions-selected-yet": "No dimensions selected yet",
         "no-entity-created": "No {{entity}} created.",
         "no-entity-data": "No {{entity}} data available",

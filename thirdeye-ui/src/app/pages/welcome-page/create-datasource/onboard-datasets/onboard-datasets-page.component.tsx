@@ -22,7 +22,7 @@ import {
     Typography,
 } from "@material-ui/core";
 import type { AxiosError } from "axios";
-import { capitalize } from "lodash";
+import { capitalize, isEmpty } from "lodash";
 import React, {
     FunctionComponent,
     useCallback,
@@ -54,6 +54,8 @@ import {
     getWelcomeLandingPath,
 } from "../../../../utils/routes/routes.util";
 import { ONBOARD_DATASETS_TEST_IDS } from "./onboard-datasets-page.interface";
+import { Alert } from "@material-ui/lab";
+import InfoOutlined from "@material-ui/icons/InfoOutlined";
 
 export const WelcomeSelectDatasets: FunctionComponent = () => {
     const [selectedDatasets, setSelectedDatasets] = useState<string[]>([]);
@@ -187,6 +189,9 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
         });
     }, [selectedDatasets, datasourceId]);
 
+    const isNextButtonDisabled =
+        tables?.length === 0 || isEmpty(selectedDatasets);
+
     return (
         <>
             <PageContentsGridV1>
@@ -228,66 +233,75 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
                                     <EmptyStateSwitch
                                         emptyState={
                                             <Box p={5}>
-                                                {t(
-                                                    "message.no-datasets-available"
-                                                )}
+                                                <Alert
+                                                    icon={<InfoOutlined />}
+                                                    severity="info"
+                                                    variant="outlined"
+                                                >
+                                                    {t(
+                                                        "message.no-datasets-available-in-datasource"
+                                                    )}
+                                                </Alert>
                                             </Box>
                                         }
                                         isEmpty={tables?.length === 0}
                                     >
-                                        <Box
-                                            alignItems="flexStart"
-                                            data-testid={
-                                                ONBOARD_DATASETS_TEST_IDS.DATASETS_OPTIONS_CONTAINER
-                                            }
-                                            display="flex"
-                                            id="datasets-options-container"
-                                            mt={2}
-                                        >
-                                            <FormGroup>
-                                                <Button
-                                                    color="primary"
-                                                    variant="text"
-                                                    onClick={() => {
-                                                        tables &&
-                                                            setSelectedDatasets(
-                                                                tables.map(
-                                                                    ({
-                                                                        name,
-                                                                    }) => name
-                                                                )
-                                                            );
-                                                    }}
-                                                >
-                                                    {t("label.select-all")}
-                                                </Button>
-                                                <Divider />
+                                        {!isEmpty(tables) && (
+                                            <Box
+                                                alignItems="flexStart"
+                                                data-testid={
+                                                    ONBOARD_DATASETS_TEST_IDS.DATASETS_OPTIONS_CONTAINER
+                                                }
+                                                display="flex"
+                                                id="datasets-options-container"
+                                                mt={2}
+                                            >
+                                                <FormGroup>
+                                                    <Button
+                                                        color="primary"
+                                                        variant="text"
+                                                        onClick={() => {
+                                                            tables &&
+                                                                setSelectedDatasets(
+                                                                    tables.map(
+                                                                        ({
+                                                                            name,
+                                                                        }) =>
+                                                                            name
+                                                                    )
+                                                                );
+                                                        }}
+                                                    >
+                                                        {t("label.select-all")}
+                                                    </Button>
+                                                    <Divider />
 
-                                                {tables?.map((dataset) => (
-                                                    <SelectDatasetOption
-                                                        checked={selectedDatasets.includes(
-                                                            dataset.name
-                                                        )}
-                                                        key={dataset.name}
-                                                        labelPrimaryText={
-                                                            dataset.name
-                                                        }
-                                                        labelSecondaryText={t(
-                                                            "label.num-dimensions",
-                                                            {
-                                                                num: dataset
-                                                                    .dimensions
-                                                                    .length,
+                                                    {tables?.map((dataset) => (
+                                                        <SelectDatasetOption
+                                                            checked={selectedDatasets.includes(
+                                                                dataset.name
+                                                            )}
+                                                            key={dataset.name}
+                                                            labelPrimaryText={
+                                                                dataset.name
                                                             }
-                                                        )}
-                                                        name={dataset.name}
-                                                        onChange={
-                                                            handleToggleCheckbox
-                                                        }
-                                                    />
-                                                ))}
-                                            </FormGroup>
-                                        </Box>
+                                                            labelSecondaryText={t(
+                                                                "label.num-dimensions",
+                                                                {
+                                                                    num: dataset
+                                                                        .dimensions
+                                                                        .length,
+                                                                }
+                                                            )}
+                                                            name={dataset.name}
+                                                            onChange={
+                                                                handleToggleCheckbox
+                                                            }
+                                                        />
+                                                    ))}
+                                                </FormGroup>
+                                            </Box>
+                                        )}
                                     </EmptyStateSwitch>
                                 </LoadingErrorStateSwitch>
                             </Box>
@@ -298,6 +312,7 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
             <WizardBottomBar
                 backBtnLink={AppRoute.WELCOME_ONBOARD_DATASOURCE}
                 handleNextClick={handleNext}
+                nextButtonIsDisabled={isNextButtonDisabled}
                 nextButtonLabel={t("label.onboard-entity", {
                     entity: t("label.datasets"),
                 })}

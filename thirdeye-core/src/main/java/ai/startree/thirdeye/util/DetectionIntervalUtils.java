@@ -16,6 +16,7 @@ package ai.startree.thirdeye.util;
 import static ai.startree.thirdeye.spi.util.AlertMetadataUtils.getDateTimeZone;
 import static ai.startree.thirdeye.spi.util.AlertMetadataUtils.getDelay;
 import static ai.startree.thirdeye.spi.util.AlertMetadataUtils.getGranularity;
+import static com.google.common.base.Preconditions.checkState;
 
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
@@ -60,20 +61,37 @@ public class DetectionIntervalUtils {
     // apply delay correction
     final Period delay = getDelay(metadata);
     final DateTime dataWatermark = DateTime.now(chronology).minus(delay);
-    if (correctedEnd.isAfter(dataWatermark)) {
-      correctedEnd = dataWatermark;
-      LOG.info(
-          "Applied delay correction of {} for id {} between {} and {}. Corrected end time is {}",
-          delay, alertId, taskStart, taskEnd, correctedEnd);
+    final boolean completenessDelayIsPositive = delay.toStandardDuration().getMillis() >= 0;
+    if (completenessDelayIsPositive) {
+      if (correctedEnd.isAfter(dataWatermark)) {
+        correctedEnd = dataWatermark;
+        LOG.info(
+            "Applied delay correction of {} for id {} between {} and {}. Corrected end time is {}",
+            delay, alertId, taskStart, taskEnd, correctedEnd);
+      }
+      if (correctedEnd.isBefore(correctedStart)) {
+        correctedStart = correctedStart.minus(delay);
+        LOG.warn(
+            "EndTime with delay correction {} is before startTime {}. This can happen if delay configuration is changed to a bigger value. "
+                + "Applied delay correction to startTime. Detection may rerun on a timeframe on which it already run with a different config",
+            correctedEnd,
+            correctedStart);
+      }  
+    } else {
+      // use case: completenessDelay is negative: -6 hours. Cron runs at 18:00. DataWatermark is 18 - -6=24 --> the day can be considered complete 
+      // useful if we know the data is ready to analyze at 6pm and the rest of the data is not relevant 
+      if (correctedEnd.isBefore(dataWatermark)) {
+        correctedEnd = dataWatermark;
+        LOG.info(
+            "Applied NEGATIVE delay correction of {} for id {} between {} and {}. Corrected end time is {}",
+            delay, alertId, taskStart, taskEnd, correctedEnd);
+      } else {
+        LOG.error("Task end is after the data watermark, even if the data watermark is in the future because the completenessDelay is negative. This should not happen, except for detection tasks created manually. Please reach out to support.");
+      }
+      // should always be true because correctedEnd can only get bigger with the logic above
+      checkState(correctedStart.isBefore(correctedEnd));
     }
-    if (correctedEnd.isBefore(correctedStart)) {
-      correctedStart = correctedStart.minus(delay);
-      LOG.warn(
-          "EndTime with delay correction {} is before startTime {}. This can happen if delay configuration is changed to a bigger value. "
-              + "Applied delay correction to startTime. Detection may rerun on a timeframe on which it already run with a different config",
-          correctedEnd,
-          correctedStart);
-    }
+    
 
     // apply granularity correction
     final Period granularity = getGranularity(metadata);

@@ -178,12 +178,14 @@ export const LineGraph = ({
             },
         },
     ];
+    const colorPallete = ["#006CA7", "#F37B0E"];
 
     return (
         <>
             <TitleCard
                 content={
                     <TimeSeriesChart
+                        colorPalette={colorPallete}
                         height={500}
                         series={seriesData}
                         yAxis={{ position: Orientation.right }}

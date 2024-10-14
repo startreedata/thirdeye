@@ -21,7 +21,7 @@ export const useAnalysisPeriodStyles = makeStyles({
         alignItems: "center",
         gap: "8px",
         color: "#3D5F82",
-        fontSize: "12px",
+        fontSize: "14px",
     },
     rangeContainer: {
         display: "flex",

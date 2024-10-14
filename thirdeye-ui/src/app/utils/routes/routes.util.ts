@@ -37,6 +37,7 @@ export const AppRouteRelative = {
     ALERTS_ALERT: `${PLACEHOLDER_ROUTE_ID}`,
     ALERTS_ANOMALIES: `anomalies`,
     ALERTS_VIEW: `view`,
+    ALERTS_VIEW_V2: `view-v2`,
     ALERTS_CREATE: "create",
     ALERTS_CREATE_NEW: "new",
     ALERTS_CREATE_COPY: `copy/${PLACEHOLDER_ROUTE_ID}`,

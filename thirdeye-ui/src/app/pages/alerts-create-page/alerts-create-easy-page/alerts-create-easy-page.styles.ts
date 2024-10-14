@@ -15,9 +15,12 @@
 import { createTheme, makeStyles } from "@material-ui/core";
 import { lightV1 } from "../../../platform/utils";
 import { ColorV1 } from "../../../platform/utils/material-ui/color.util";
-import { paletteOptionsV1 } from "../../../platform/utils/material-ui/palette.util";
+import {
+    paletteOptionsV1,
+    PaletteV1,
+} from "../../../platform/utils/material-ui/palette.util";
 
-export const easyAlertStyles = makeStyles(() => ({
+export const easyAlertStyles = makeStyles((theme) => ({
     sqlButton: {
         padding: 0,
         margin: "10px 0",
@@ -73,6 +76,7 @@ export const easyAlertStyles = makeStyles(() => ({
         width: "100%",
         borderRadius: "8px 8px 0 0",
         paddingTop: "5px",
+        paddingLeft: theme.spacing(1),
     },
     textAreaContainer: {
         gap: 0,
@@ -83,6 +87,25 @@ export const easyAlertStyles = makeStyles(() => ({
 
 export const createAlertPageTheme = createTheme({
     ...lightV1,
+    overrides: {
+        ...lightV1.overrides,
+        MuiCard: {
+            ...lightV1.overrides?.MuiCard,
+            root: {
+                ...lightV1.overrides?.MuiCard?.root,
+                borderRadius: "8px",
+                border: `1px solid ${PaletteV1.BorderColorGrey}`,
+            },
+        },
+        MuiButton: {
+            ...lightV1.overrides?.MuiButton,
+            root: {
+                ...lightV1.overrides?.MuiButton?.root,
+                borderRadius: "8px",
+                textTransform: "none",
+            },
+        },
+    },
     palette: {
         ...paletteOptionsV1,
         primary: {
@@ -90,6 +113,33 @@ export const createAlertPageTheme = createTheme({
             main: "#003D86",
             dark: ColorV1.Blue3,
             contrastText: ColorV1.White1,
+        },
+    },
+    typography: {
+        ...lightV1.typography,
+        h1: {
+            ...lightV1.typography.h1,
+            fontWeight: 700,
+        },
+        h2: {
+            ...lightV1.typography.h2,
+            fontWeight: 700,
+        },
+        h3: {
+            ...lightV1.typography.h3,
+            fontWeight: 700,
+        },
+        h4: {
+            ...lightV1.typography.h4,
+            fontWeight: 700,
+        },
+        h5: {
+            ...lightV1.typography.h5,
+            fontWeight: 700,
+        },
+        h6: {
+            ...lightV1.typography.h6,
+            fontWeight: 700,
         },
     },
 });

@@ -39,6 +39,12 @@ const AlertsViewPage = lazy(() =>
     ).then((module) => ({ default: module.AlertsViewPage }))
 );
 
+const AlertsViewPageV2 = lazy(() =>
+    import(
+        /* webpackChunkName: "alerts-view-page" */ "../../pages/alerts-view-page-v2/alerts-view-page-v2.component"
+    ).then((module) => ({ default: module.AlertsViewPageV2 }))
+);
+
 const AlertsAnomaliesPage = lazy(() =>
     import(
         /* webpackChunkName: "alerts-view-page" */ "../../pages/alerts-anomalies-page/alerts-anomalies-page.component"
@@ -316,6 +322,20 @@ export const AlertsRouter: FunctionComponent = () => {
                             </RedirectValidation>
                         }
                         path={AppRouteRelative.ALERTS_VIEW}
+                    />
+                    <Route
+                        element={
+                            <RedirectValidation
+                                queryParams={[
+                                    TimeRangeQueryStringKey.START_TIME,
+                                    TimeRangeQueryStringKey.END_TIME,
+                                ]}
+                                to=".."
+                            >
+                                <AlertsViewPageV2 />
+                            </RedirectValidation>
+                        }
+                        path={AppRouteRelative.ALERTS_VIEW_V2}
                     />
 
                     <Route

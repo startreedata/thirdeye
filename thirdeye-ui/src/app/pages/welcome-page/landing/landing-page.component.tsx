@@ -14,7 +14,7 @@
  */
 
 import { Box, Grid, Typography } from "@material-ui/core";
-import { capitalize } from "lodash";
+import { capitalize, isEmpty } from "lodash";
 import React, { FunctionComponent, useEffect } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { IframeVideoPlayerContainer } from "../../../components/iframe-video-player-container/iframe-video-player-container.component";
@@ -37,6 +37,8 @@ import {
 import { useGetAlertsCount } from "../../../rest/alerts/alerts.actions";
 import { useNavigate } from "react-router-dom";
 import { useAppBarConfigProvider } from "../../../components/app-bar/app-bar-config-provider/app-bar-config-provider.component";
+import { useGetAlertTemplates } from "../../../rest/alert-templates/alert-templates.actions";
+import { createDefaultAlertTemplates } from "../../../rest/alert-templates/alert-templates.rest";
 
 export const WelcomeLandingPage: FunctionComponent = () => {
     const { t } = useTranslation();
@@ -45,12 +47,14 @@ export const WelcomeLandingPage: FunctionComponent = () => {
 
     const { status, datasets, getDatasets } = useGetDatasets();
     const { alertsCount, getAlertsCount } = useGetAlertsCount();
+    const { alertTemplates, getAlertTemplates } = useGetAlertTemplates();
 
     const hasDatasets = !!(datasets && datasets.length > 0);
 
     useEffect(() => {
         getDatasets();
         getAlertsCount();
+        getAlertTemplates();
     }, []);
 
     useEffect(() => {
@@ -61,6 +65,12 @@ export const WelcomeLandingPage: FunctionComponent = () => {
             return;
         }
     }, [alertsCount?.count]);
+
+    useEffect(() => {
+        if (isEmpty(alertTemplates)) {
+            createDefaultAlertTemplates();
+        }
+    }, [alertTemplates]);
 
     return (
         <PageV1>

@@ -13,7 +13,7 @@
  * the License.
  */
 import React, { ReactElement } from "react";
-
+import { Orientation } from "@visx/axis";
 // Interfaces
 import { AnomaliesGraphProps } from "./detection-performance.interfaces";
 
@@ -178,11 +178,19 @@ export const LineGraph = ({
             },
         },
     ];
+    const colorPallete = ["#006CA7", "#F37B0E"];
 
     return (
         <>
             <TitleCard
-                content={<TimeSeriesChart height={500} series={seriesData} />}
+                content={
+                    <TimeSeriesChart
+                        colorPalette={colorPallete}
+                        height={500}
+                        series={seriesData}
+                        yAxis={{ position: Orientation.right }}
+                    />
+                }
                 title={
                     <TitleRenderer
                         notificationText={notificationText}

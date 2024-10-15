@@ -46,7 +46,7 @@ export default withTooltip(
         const keys = Object.keys(keysColorMapping);
         const barColors = Object.values(keysColorMapping);
         const xMax = width! - margins!.left - margins!.right;
-        const yMax = height! - margins!.top - margins!.bottom;
+        const yMax = height! - margins!.top - margins!.bottom - 1;
 
         const getDate = (d: BarData): string => d.date;
 
@@ -93,8 +93,10 @@ export default withTooltip(
             const domain = scale.domain();
             const [min, max] = domain;
             const ticks = [];
-            for (let i = Math.ceil(min); i <= Math.floor(max); i++) {
+            const incrementBy = Math.ceil(Math.floor(max) / 10) || 1;
+            for (let i = Math.ceil(min); i <= Math.floor(max); ) {
                 ticks.push(i);
+                i = i + incrementBy;
             }
 
             return ticks;

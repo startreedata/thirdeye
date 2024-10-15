@@ -38,6 +38,7 @@ import { useSummaryData } from "./use-summary-data";
 // Interfaces
 import { SummaryProps } from "./summary.interfaces";
 import { useTranslation } from "react-i18next";
+import { SpecType } from "../../../rest/dto/subscription-group.interfaces";
 
 export const Summary = ({
     alerts,
@@ -50,6 +51,7 @@ export const Summary = ({
     selectedAnalysisPeriod,
     onAnalysisPeriodChange,
     analysisPeriods,
+    activeEnumerationItems,
 }: SummaryProps): JSX.Element => {
     const { t } = useTranslation();
     const summaryRef = useRef<HTMLDivElement>(null);
@@ -63,6 +65,7 @@ export const Summary = ({
         investigations,
         subscriptionGroups,
         mostRecentlyInvestigatedAnomalyAlert,
+        activeEnumerationItems,
     });
 
     const summaryCardsData = [
@@ -140,6 +143,82 @@ export const Summary = ({
         return summaryRef.current?.textContent || "";
     };
 
+    const renderAnomalySummary = (): JSX.Element => {
+        return (
+            <div>
+                In the last <b>{verboseSummaryItems.weeks} weeks</b>
+                ,&nbsp;
+                <b>
+                    {summaryData.anomalies.detected.count} anomalies were
+                    detected
+                </b>
+                , which is <b>{verboseSummaryItems.percentageChange}</b> than
+                the previous {verboseSummaryItems.weeks} weeks.{" "}
+                {summaryData.anomalies.detected.count > 0 && (
+                    <>
+                        Notifications about anomalies were sent via{" "}
+                        {verboseSummaryItems.notificationChannelsUsed
+                            ?.map((notificationChannel) =>
+                                notificationChannel === SpecType.EmailSendgrid
+                                    ? "email"
+                                    : notificationChannel
+                            )
+                            .join(", ")}
+                        .
+                    </>
+                )}
+            </div>
+        );
+    };
+
+    const renderTopAlertInfo = (): JSX.Element => {
+        return (
+            <div>
+                The alert with the most anomalies is{" "}
+                <Link
+                    component={RouterLink}
+                    to={getAlertsAlertPath(
+                        Number(verboseSummaryItems.topAlert.id)
+                    )}
+                >
+                    {verboseSummaryItems.topAlert.name}.
+                </Link>{" "}
+                In the{" "}
+                <b>
+                    last {verboseSummaryItems.weeks} weeks,
+                    {verboseSummaryItems.topAlert.anomaliesCount} anomalies were
+                    detected on this metric.
+                </b>
+            </div>
+        );
+    };
+
+    const renderInvestigationInfo = (): JSX.Element => {
+        return (
+            <div>
+                <b>{verboseSummaryItems.investigation.count} investigations</b>{" "}
+                were performed in the last {verboseSummaryItems.weeks} weeks.{" "}
+                {verboseSummaryItems.investigation.count > 0 && (
+                    <span>
+                        The most recent investigation was performed for an
+                        anomaly that happened on{" "}
+                        <b>{verboseSummaryItems.investigation.date}</b> on alert{" "}
+                        <Link
+                            component={RouterLink}
+                            to={getAlertsAlertPath(
+                                Number(
+                                    verboseSummaryItems.investigation.alert.id
+                                )
+                            )}
+                        >
+                            {verboseSummaryItems.investigation.alert.name}.
+                        </Link>
+                    </span>
+                )}
+            </div>
+        );
+    };
+
     return (
         <>
             <div className={componentStyles.sectionHeading}>
@@ -180,73 +259,9 @@ export const Summary = ({
                     </div>
                 </div>
                 <div ref={summaryRef}>
-                    <div>
-                        In the last <b>{verboseSummaryItems.weeks} weeks</b>,&nbsp;
-                        <b>
-                            {summaryData.anomalies.detected.count} anomalies
-                            were detected
-                        </b>
-                        , which is <b>{verboseSummaryItems.percentageChange}</b>{" "}
-                        than the previous {verboseSummaryItems.weeks} weeks.{" "}
-                        {summaryData.anomalies.detected.count > 0 && (
-                            <>
-                                Notifications about anomalies were sent via
-                                Slack and Email.
-                            </>
-                        )}
-                    </div>
-                    {verboseSummaryItems.topAlert.id && (
-                        <div>
-                            The alert with the most anomalies is{" "}
-                            <Link
-                                component={RouterLink}
-                                to={getAlertsAlertPath(
-                                    Number(verboseSummaryItems.topAlert.id)
-                                )}
-                            >
-                                {verboseSummaryItems.topAlert.name}.
-                            </Link>
-                            In the{" "}
-                            <b>
-                                last {verboseSummaryItems.weeks} weeks,
-                                {
-                                    verboseSummaryItems.topAlert.anomaliesCount
-                                }{" "}
-                                anomalies were detected on this metric.
-                            </b>
-                        </div>
-                    )}
-                    <div>
-                        <b>
-                            {verboseSummaryItems.investigation.count}{" "}
-                            investigations
-                        </b>{" "}
-                        were performed in the last {verboseSummaryItems.weeks}{" "}
-                        weeks.{" "}
-                        {verboseSummaryItems.investigation.count > 0 && (
-                            <span>
-                                The most recent investigation was performed for
-                                an anomaly that happened on{" "}
-                                <b>{verboseSummaryItems.investigation.date}</b>{" "}
-                                on alert{" "}
-                                <Link
-                                    component={RouterLink}
-                                    to={getAlertsAlertPath(
-                                        Number(
-                                            verboseSummaryItems.investigation
-                                                .alert.id
-                                        )
-                                    )}
-                                >
-                                    {
-                                        verboseSummaryItems.investigation.alert
-                                            .name
-                                    }
-                                    .
-                                </Link>
-                            </span>
-                        )}
-                    </div>
+                    {renderAnomalySummary()}
+                    {verboseSummaryItems.topAlert.id && renderTopAlertInfo()}
+                    {renderInvestigationInfo()}
                 </div>
             </div>
         </>

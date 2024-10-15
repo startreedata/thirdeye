@@ -144,6 +144,7 @@ export const TimeSeriesChartInternal: FunctionComponent<TimeSeriesChartInternalP
         zoomOverride,
         tooltipPositionOverride,
         legendsPlacement = LegendPlacement.BOTTOM,
+        colorPalette,
     }) => {
         const { t } = useTranslation();
         const [currentZoom, setCurrentZoom] = useState<ZoomDomain | undefined>(
@@ -232,7 +233,7 @@ export const TimeSeriesChartInternal: FunctionComponent<TimeSeriesChartInternalP
         const colorScale = useMemo(() => {
             return scaleOrdinal({
                 domain: series.map((x) => x.name) as string[],
-                range: COLOR_PALETTE,
+                range: colorPalette || COLOR_PALETTE,
             });
         }, [series]);
 

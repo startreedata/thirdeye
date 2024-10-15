@@ -29,7 +29,7 @@ import {
     getSubscriptionGroupsAllPath,
 } from "../../../utils/routes/routes.util";
 import { epochToDate } from "../detection-performance/util";
-import { isEmpty } from "lodash";
+import { isEmpty, uniq } from "lodash";
 
 export const useSummaryData = ({
     alerts,
@@ -40,6 +40,7 @@ export const useSummaryData = ({
     investigations,
     subscriptionGroups,
     selectedAnalysisPeriod,
+    activeEnumerationItems,
 }: SummaryDataProps): Summary => {
     const selectedAnalysisPeriodDisplayText = selectedAnalysisPeriod.substring(
         0,
@@ -77,7 +78,52 @@ export const useSummaryData = ({
                     name: "",
                 },
             },
+            notificationChannelsUsed: [],
         });
+
+    useEffect(() => {
+        const allAlertIds = anomalies?.map((anomaly) => anomaly.alert.id);
+        const allChannels: VerboseSummary["notificationChannelsUsed"] = [];
+        subscriptionGroups?.forEach((subscriptionGroup) => {
+            const assoaciatedAlerts = subscriptionGroup.alertAssociations?.map(
+                (alertAssociation) => alertAssociation.alert.id
+            );
+            if (
+                assoaciatedAlerts?.some((assoaciatedAlert) =>
+                    allAlertIds?.includes(assoaciatedAlert)
+                )
+            ) {
+                allChannels.push(
+                    ...subscriptionGroup.specs.map((spec) => spec.type)
+                );
+            }
+        });
+        if (!isEmpty(allChannels)) {
+            setVerboseSummaryItems((prevState) => {
+                return {
+                    ...prevState,
+                    notificationChannelsUsed: uniq(allChannels),
+                };
+            });
+        }
+    }, [anomalies, alerts, subscriptionGroups]);
+
+    useEffect(() => {
+        if (activeEnumerationItems) {
+            setSummaryData((prevState) => {
+                return {
+                    ...prevState,
+                    alerts: {
+                        activeAlerts: prevState.alerts.activeAlerts,
+                        activeDimensions: {
+                            count: activeEnumerationItems.length,
+                            href: "",
+                        },
+                    },
+                };
+            });
+        }
+    }, [activeEnumerationItems]);
 
     useEffect(() => {
         if (isEmpty(anomalies) && isEmpty(previousPeriodAnomalies)) {

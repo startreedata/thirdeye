@@ -14,6 +14,7 @@
  */
 import { Alert } from "../../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
+import { EnumerationItem } from "../../../rest/dto/enumeration-item.interfaces";
 import { Investigation } from "../../../rest/dto/rca.interfaces";
 import { SubscriptionGroup } from "../../../rest/dto/subscription-group.interfaces";
 
@@ -29,4 +30,5 @@ export interface APIRequestData {
     subscriptionGroups: SubscriptionGroup[] | null;
     mostRecentlyInvestigatedAnomalyAlert?: Pick<Alert, "id" | "name">;
     alerts: Alert[] | null;
+    enumerationItems: EnumerationItem[] | null;
 }

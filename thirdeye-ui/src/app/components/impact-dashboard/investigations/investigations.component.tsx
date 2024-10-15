@@ -115,128 +115,162 @@ export const RecentInvestigations = ({
                     onClick={onAnalysisPeriodChange}
                 />
             </div>
-            <Box border={1} borderColor="grey.500" borderRadius={16}>
-                {investigations
-                    ?.sort((a, b) => b.created - a.created)
-                    .map((investigation, idx) => {
-                        return (
-                            <Box
-                                borderBottom={
-                                    idx !== investigations.length - 1 ? 1 : 0
-                                }
-                                borderColor="grey.500"
-                                key={investigation.id}
-                                padding={2}
-                            >
-                                <Grid container key={investigation.id}>
-                                    <Grid item sm={3}>
-                                        {investigation.anomaly?.id ? (
-                                            <Link
-                                                component={RouterLink}
-                                                to={getRootCauseAnalysisForAnomalyInvestigateV2StepsPath(
-                                                    investigation.anomaly?.id,
-                                                    "what-where-page"
-                                                )}
-                                            >
-                                                {investigation.name}
-                                            </Link>
-                                        ) : (
-                                            <div>{investigation.name}</div>
-                                        )}
-                                        <Typography
-                                            className={componentStyles.label}
-                                            variant="body2"
-                                        >
-                                            {t(
-                                                "pages.impact-dashboard.sections.investigations.labels.investigation-name"
+            {isEmpty(investigations) && (
+                <Box
+                    border={1}
+                    borderColor="grey.500"
+                    padding={2}
+                    sx={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                    }}
+                >
+                    No Investigations conducted in the given period.
+                </Box>
+            )}
+            {!isEmpty(investigations) && (
+                <Box border={1} borderColor="grey.500" borderRadius={16}>
+                    {investigations
+                        ?.sort((a, b) => b.created - a.created)
+                        .map((investigation, idx) => {
+                            return (
+                                <Box
+                                    borderBottom={
+                                        idx !== investigations.length - 1
+                                            ? 1
+                                            : 0
+                                    }
+                                    borderColor="grey.500"
+                                    key={investigation.id}
+                                    padding={2}
+                                >
+                                    <Grid container key={investigation.id}>
+                                        <Grid item sm={3}>
+                                            {investigation.anomaly?.id ? (
+                                                <Link
+                                                    component={RouterLink}
+                                                    to={getRootCauseAnalysisForAnomalyInvestigateV2StepsPath(
+                                                        investigation.anomaly
+                                                            ?.id,
+                                                        "what-where-page"
+                                                    )}
+                                                >
+                                                    {investigation.name}
+                                                </Link>
+                                            ) : (
+                                                <div>{investigation.name}</div>
                                             )}
-                                        </Typography>
-                                    </Grid>
-                                    <Grid item sm={3}>
-                                        <div>
-                                            {epochToDate(investigation.created)}
-                                        </div>
-                                        <Typography
-                                            className={componentStyles.label}
-                                            variant="body2"
-                                        >
-                                            {t(
-                                                "pages.impact-dashboard.sections.investigations.labels.created-date"
-                                            )}
-                                        </Typography>
-                                    </Grid>
-                                    <Grid item sm={3}>
-                                        <div>
-                                            {investigation.createdBy.principal}
-                                        </div>
-                                        <Typography
-                                            className={componentStyles.label}
-                                            variant="body2"
-                                        >
-                                            {t(
-                                                "pages.impact-dashboard.sections.investigations.labels.created-by"
-                                            )}
-                                        </Typography>
-                                    </Grid>
-                                    <Grid item sm={3}>
-                                        <div
-                                            className={
-                                                investigation.anomaly?.id
-                                                    ? componentStyles[
-                                                          getFeedbackClass(
-                                                              anomaliesFeedback[
-                                                                  investigation
-                                                                      .anomaly
-                                                                      ?.id
-                                                              ]
-                                                          )
-                                                      ]
-                                                    : ""
-                                            }
-                                        >
-                                            {investigation.anomaly?.id
-                                                ? getFeedbackText(
-                                                      anomaliesFeedback[
-                                                          investigation.anomaly
-                                                              ?.id
-                                                      ]
-                                                  )
-                                                : ""}
-                                        </div>
-                                        <Typography
-                                            className={componentStyles.label}
-                                            variant="body2"
-                                        >
-                                            {t(
-                                                "pages.impact-dashboard.sections.investigations.labels.anomaly-confirmation"
-                                            )}
-                                        </Typography>
-                                    </Grid>
-                                    <Grid item sm={3}>
-                                        <div>
-                                            {investigation.uiMetadata
-                                                ?.eventSet &&
-                                                t(
-                                                    "pages.impact-dashboard.sections.investigations.labels.related-event"
-                                                )}
-                                        </div>
-                                        <ul>
-                                            {investigation.uiMetadata?.eventSet?.map(
-                                                (event) => {
-                                                    return (
-                                                        <li key={event.name}>
-                                                            {event.name}
-                                                        </li>
-                                                    );
+                                            <Typography
+                                                className={
+                                                    componentStyles.label
                                                 }
-                                            )}
-                                        </ul>
+                                                variant="body2"
+                                            >
+                                                {t(
+                                                    "pages.impact-dashboard.sections.investigations.labels.investigation-name"
+                                                )}
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item sm={3}>
+                                            <div>
+                                                {epochToDate(
+                                                    investigation.created
+                                                )}
+                                            </div>
+                                            <Typography
+                                                className={
+                                                    componentStyles.label
+                                                }
+                                                variant="body2"
+                                            >
+                                                {t(
+                                                    "pages.impact-dashboard.sections.investigations.labels.created-date"
+                                                )}
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item sm={3}>
+                                            <div>
+                                                {
+                                                    investigation.createdBy
+                                                        .principal
+                                                }
+                                            </div>
+                                            <Typography
+                                                className={
+                                                    componentStyles.label
+                                                }
+                                                variant="body2"
+                                            >
+                                                {t(
+                                                    "pages.impact-dashboard.sections.investigations.labels.created-by"
+                                                )}
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item sm={3}>
+                                            <div
+                                                className={
+                                                    investigation.anomaly?.id
+                                                        ? componentStyles[
+                                                              getFeedbackClass(
+                                                                  anomaliesFeedback[
+                                                                      investigation
+                                                                          .anomaly
+                                                                          ?.id
+                                                                  ]
+                                                              )
+                                                          ]
+                                                        : ""
+                                                }
+                                            >
+                                                {investigation.anomaly?.id
+                                                    ? getFeedbackText(
+                                                          anomaliesFeedback[
+                                                              investigation
+                                                                  .anomaly?.id
+                                                          ]
+                                                      )
+                                                    : ""}
+                                            </div>
+                                            <Typography
+                                                className={
+                                                    componentStyles.label
+                                                }
+                                                variant="body2"
+                                            >
+                                                {t(
+                                                    "pages.impact-dashboard.sections.investigations.labels.anomaly-confirmation"
+                                                )}
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item sm={3}>
+                                            <div>
+                                                {investigation.uiMetadata
+                                                    ?.eventSet &&
+                                                    t(
+                                                        "pages.impact-dashboard.sections.investigations.labels.related-event"
+                                                    )}
+                                            </div>
+                                            <ul>
+                                                {investigation.uiMetadata?.eventSet?.map(
+                                                    (event) => {
+                                                        return (
+                                                            <li
+                                                                key={event.name}
+                                                            >
+                                                                {event.name}
+                                                            </li>
+                                                        );
+                                                    }
+                                                )}
+                                            </ul>
+                                        </Grid>
                                     </Grid>
-                                </Grid>
-                            </Box>
-                        );
-                    })}
-            </Box>
+                                </Box>
+                            );
+                        })}
+                </Box>
+            )}
         </>
     );
 };

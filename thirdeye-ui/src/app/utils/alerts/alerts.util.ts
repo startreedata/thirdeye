@@ -15,7 +15,6 @@
 import i18n from "i18next";
 import { cloneDeep, isEmpty, kebabCase, omit } from "lodash";
 import { PropertyRenderConfig } from "../../components/alert-wizard-v2/alert-template/alert-template-properties-builder/alert-template-properties-builder.interfaces";
-import { GranularityValue } from "../../components/alert-wizard-v3/select-metric/select-metric.utils";
 import { GetAlertEvaluationPayload } from "../../rest/alerts/alerts.interfaces";
 import {
     Alert,
@@ -531,17 +530,17 @@ export const groupPropertyByStepAndSubStep = (
 
 export const getGranularityLabelFromValue = (granularity: string): string => {
     switch (granularity) {
-        case GranularityValue.WEEKLY:
+        case "P7D":
             return i18n.t("label.weekly");
-        case GranularityValue.DAILY:
+        case "P1D":
             return i18n.t("label.daily");
-        case GranularityValue.HOURLY:
+        case "PT1H":
             return i18n.t("label.hourly");
-        case GranularityValue.FIFTEEN_MINUTES:
+        case "PT15M":
             return i18n.t("label.15-minutes");
-        case GranularityValue.FIVE_MINUTES:
+        case "PT5M":
             return i18n.t("label.5-minutes");
-        case GranularityValue.ONE_MINUTE:
+        case "PT1M":
             return i18n.t("label.1-minute");
         default:
             return granularity;

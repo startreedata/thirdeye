@@ -263,14 +263,19 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         ]
     );
     const alertTemplateForEvaluate = useMemo(() => {
-        const alertTemplateToFind = isMultiDimensionAlert
-            ? ALERT_TEMPLATE_FOR_EVALUATE_DX
-            : ALERT_TEMPLATE_FOR_EVALUATE;
+        let alertTemplateToFind = isMultiDimensionAlert
+            ? algorithmOption?.algorithmOption.alertTemplateForMultidimension
+            : algorithmOption?.algorithmOption.alertTemplate;
+        if (!algorithmOption) {
+            alertTemplateToFind = isMultiDimensionAlert
+                ? ALERT_TEMPLATE_FOR_EVALUATE_DX
+                : ALERT_TEMPLATE_FOR_EVALUATE;
+        }
 
         return alertTemplates.find((alertTemplateCandidate) => {
             return alertTemplateCandidate.name === alertTemplateToFind;
         });
-    }, [alertTemplates, alert, isMultiDimensionAlert]);
+    }, [alertTemplates, alert, algorithmOption, isMultiDimensionAlert]);
 
     const availableConfigurations = useMemo(() => {
         if (!alertTemplateForEvaluate) {

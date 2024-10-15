@@ -27,7 +27,6 @@ import AddCircleOutline from "@material-ui/icons/AddCircleOutline";
 import DoneAllIcon from "@material-ui/icons/DoneAll";
 import { Alert, AlertTitle, Autocomplete } from "@material-ui/lab";
 import { isNil, toLower } from "lodash";
-import { DateTime, Duration } from "luxon";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -43,11 +42,12 @@ import { AvailableAlgorithmOption } from "../../../components/alert-wizard-v3/al
 import { generateAvailableAlgorithmOptions } from "../../../components/alert-wizard-v3/alert-type-selection/alert-type-selection.utils";
 import { AnomaliesFilterConfiguratorRenderConfigs } from "../../../components/alert-wizard-v3/anomalies-filter-panel/anomalies-filter-panel.interfaces";
 import { getAvailableFilterOptions } from "../../../components/alert-wizard-v3/anomalies-filter-panel/anomalies-filter-panel.utils";
+import { ChartContent } from "../../../components/alert-wizard-v3/preview-chart/chart-content/chart-content.component";
 import {
     generateTemplateProperties,
     GranularityValue,
 } from "../../../components/alert-wizard-v3/select-metric/select-metric.utils";
-import { ThresholdSetup } from "../../../components/alert-wizard-v3/threshold-setup/threshold-setup-v2.component";
+import { ThresholdSetup } from "../../../components/alert-wizard-v3/threshold-setup/threshold-setup.component";
 import { ColumnsDrawer } from "../../../components/columns-drawer/columns-drawer.component";
 import { CreateAlertModal } from "../../../components/create-alert-modal/create-alert-modal.component";
 import { InputSectionV2 } from "../../../components/form-basics/input-section-v2/input-section-v2.component";
@@ -150,6 +150,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         alertTemplates,
         isMultiDimensionAlert,
         alertInsight,
+        getAlertInsight,
         alertRecommendations,
         alert,
         getAlertRecommendation,
@@ -170,7 +171,6 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
     const [anomalyDetection, setAnomalyDetection] = useState<string | null>(
         null
     );
-    const [editedDatasource, setEditedDatasource] = useState("");
     const [editedDatasourceFieldValue, setEditedDatasourceFieldValue] =
         useState("");
 
@@ -203,7 +203,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                     )?.name || t("label.custom-metric-aggregation");
                 setSelectedTable(dataSource);
                 setSelectedMetric(metrics || null);
-                setEditedDatasource(
+                setEditedDatasourceFieldValue(
                     String(alert.templateProperties?.aggregationColumn)
                 );
                 setEditedDatasourceFieldValue(
@@ -285,40 +285,75 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         return getAvailableFilterOptions(alertTemplateForEvaluate, t);
     }, [alertTemplateForEvaluate]);
 
-    const handleGranularityChange = (
+    const handleGranularityChange = async (
         _: unknown,
         item: { label: string; value: GranularityValue }
-    ): void => {
-        const prevGranularity = granularity;
+    ): Promise<void> => {
+        const existingGranularity = granularity;
         setGranularity(item.value);
         if (
-            prevGranularity &&
-            granularity &&
-            !Duration.fromISO(granularity).equals(
-                Duration.fromISO(prevGranularity)
-            )
+            item.value &&
+            (editedDatasourceFieldValue || selectedMetric) &&
+            selectedTable
         ) {
-            const newStartTime = startTime;
-            let newEndTime = DateTime.fromMillis(newStartTime)
-                .plus({
-                    milliseconds: Duration.fromISO(granularity).toMillis() * 30,
-                })
-                .toMillis();
-
-            if (alertInsight?.datasetEndTime) {
-                newEndTime = Math.min(newEndTime, alertInsight?.datasetEndTime);
+            try {
+                let isCustomMetrics = false;
+                if (selectedMetric === t("label.custom-metric-aggregation")) {
+                    isCustomMetrics = true;
+                }
+                const workingAlert: Partial<EditableAlert> = existingGranularity
+                    ? {
+                          ...alert,
+                          templateProperties: {
+                              ...alert.templateProperties,
+                              monitoringGranularity: item.value,
+                          },
+                      }
+                    : {
+                          template: {
+                              name:
+                                  (isMultiDimensionAlert
+                                      ? algorithmOption?.algorithmOption
+                                            .alertTemplateForMultidimension
+                                      : algorithmOption?.algorithmOption
+                                            ?.alertTemplate) ||
+                                  createNewStartingAlert().template?.name,
+                          },
+                          templateProperties: {
+                              ...alert.templateProperties,
+                              ...generateTemplateProperties(
+                                  isCustomMetrics
+                                      ? editedDatasourceFieldValue
+                                      : (selectedMetric as string),
+                                  selectedTable?.dataset,
+                                  aggregationFunction || "",
+                                  item.value
+                              ),
+                              queryFilters: queryFilters,
+                              enumeratoryQuery:
+                                  dimension ===
+                                  SelectDimensionsOptions.ENUMERATORS
+                                      ? enumerators
+                                      : null,
+                          },
+                      };
+                const newAlertInsight = await getAlertInsight({
+                    alert: workingAlert as EditableAlert,
+                });
+                if (newAlertInsight) {
+                    searchParams.set(
+                        TimeRangeQueryStringKey.START_TIME,
+                        newAlertInsight.defaultStartTime.toString()
+                    );
+                    searchParams.set(
+                        TimeRangeQueryStringKey.END_TIME,
+                        newAlertInsight.defaultEndTime.toString()
+                    );
+                    setSearchParams(searchParams);
+                }
+            } catch (error) {
+                console.error("Error fetching alert insight:", error);
             }
-
-            searchParams.set(
-                TimeRangeQueryStringKey.START_TIME,
-                newStartTime.toString()
-            );
-            searchParams.set(
-                TimeRangeQueryStringKey.END_TIME,
-                newEndTime.toString()
-            );
-
-            setSearchParams(searchParams);
         }
     };
 
@@ -432,7 +467,8 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
             selectedMetric &&
             selectedTable &&
             granularity &&
-            (aggregationFunction || (isCustomMetrics && editedDatasource))
+            (aggregationFunction ||
+                (isCustomMetrics && editedDatasourceFieldValue))
         ) {
             const workingAlert = {
                 template: {
@@ -447,7 +483,9 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                 templateProperties: {
                     ...alert.templateProperties,
                     ...generateTemplateProperties(
-                        isCustomMetrics ? editedDatasource : selectedMetric,
+                        isCustomMetrics
+                            ? editedDatasourceFieldValue
+                            : (selectedMetric as string),
                         selectedTable?.dataset,
                         aggregationFunction || "",
                         granularity
@@ -461,7 +499,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
             };
             onAlertPropertyChange(workingAlert);
             getAlertRecommendation({ ...alert, ...workingAlert });
-            handleReloadPreviewClick();
+            handleReloadPreviewClick(workingAlert);
         }
     }, [
         selectedMetric,
@@ -474,7 +512,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         enumerators,
     ]);
 
-    const { getEvaluation } = useGetEvaluation();
+    const { getEvaluation, evaluation } = useGetEvaluation();
 
     const [alertConfigForPreview, setAlertConfigForPreview] =
         useState<EditableAlert>(() => {
@@ -510,8 +548,12 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         setShowAdvancedOptions(false);
     };
 
-    const fetchAlertEvaluation = (start: number, end: number): void => {
-        const copiedAlert = { ...alertConfigForPreview };
+    const fetchAlertEvaluation = (
+        start: number,
+        end: number,
+        alert?: Partial<EditableAlert>
+    ): void => {
+        const copiedAlert = { ...alertConfigForPreview, ...(alert ?? {}) };
         delete copiedAlert.id;
         getEvaluation(createAlertEvaluation(copiedAlert, start, end));
     };
@@ -525,7 +567,8 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
             !selectedTable ||
             !selectedMetric ||
             !granularity ||
-            (!aggregationFunction && !(isCustomMetrics && editedDatasource))
+            (!aggregationFunction &&
+                !(isCustomMetrics && editedDatasourceFieldValue))
         ) {
             return;
         }
@@ -541,7 +584,9 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
             copied.templateProperties = {
                 ...copied.templateProperties,
                 ...generateTemplateProperties(
-                    isCustomMetrics ? editedDatasource : selectedMetric,
+                    isCustomMetrics
+                        ? editedDatasourceFieldValue
+                        : (selectedMetric as string),
                     selectedTable?.dataset,
                     aggregationFunction || "",
                     granularity
@@ -568,15 +613,16 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         enumerators,
     ]);
 
-    const handleReloadPreviewClick = (): void => {
+    const handleReloadPreviewClick = (alert?: Partial<EditableAlert>): void => {
         if ((!startTime || !endTime) && alertInsight) {
             // If start or end is missing and there exists an alert insight
             fetchAlertEvaluation(
                 alertInsight.defaultStartTime,
-                alertInsight.defaultEndTime
+                alertInsight.defaultEndTime,
+                alert
             );
         } else {
-            fetchAlertEvaluation(startTime, endTime);
+            fetchAlertEvaluation(startTime, endTime, alert);
         }
     };
     const recommendedAlertConfigMatchingTemplate = useMemo(() => {
@@ -1326,7 +1372,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                         anomalyDetection &&
                                                         granularity &&
                                                         (aggregationFunction ||
-                                                            editedDatasource) && (
+                                                            editedDatasourceFieldValue) && (
                                                             <Grid
                                                                 container
                                                                 alignItems="center"
@@ -1614,7 +1660,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                             </Grid>
                                                                         )}
 
-                                                                        {algorithmOption && (
+                                                                        {algorithmOption ? (
                                                                             <Grid
                                                                                 item
                                                                                 xs={
@@ -1655,6 +1701,32 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                         )}
                                                                                 </ThresholdSetup>
                                                                             </Grid>
+                                                                        ) : (
+                                                                            <ChartContent
+                                                                                showLoadButton
+                                                                                showOnlyActivity
+                                                                                alert={
+                                                                                    alert
+                                                                                }
+                                                                                alertEvaluation={
+                                                                                    evaluation
+                                                                                }
+                                                                                evaluationTimeRange={{
+                                                                                    startTime:
+                                                                                        startTime,
+                                                                                    endTime:
+                                                                                        endTime,
+                                                                                }}
+                                                                                hideCallToActionPrompt={
+                                                                                    false
+                                                                                }
+                                                                                onAlertPropertyChange={
+                                                                                    onAlertPropertyChange
+                                                                                }
+                                                                                onReloadClick={
+                                                                                    handleReloadPreviewClick
+                                                                                }
+                                                                            />
                                                                         )}
                                                                     </Box>
                                                                 ) : (

@@ -181,7 +181,8 @@ export const Summary = ({
                 </div>
                 <div ref={summaryRef}>
                     <div>
-                        In the last <b>{verboseSummaryItems.weeks} weeks</b>,&nbsp;
+                        In the last <b>{verboseSummaryItems.weeks} weeks</b>
+                        ,&nbsp;
                         <b>
                             {summaryData.anomalies.detected.count} anomalies
                             were detected

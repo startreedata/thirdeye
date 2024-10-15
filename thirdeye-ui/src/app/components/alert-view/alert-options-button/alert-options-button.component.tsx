@@ -38,9 +38,9 @@ import {
 } from "../../../utils/routes/routes.util";
 import { Modal } from "../../modal/modal.component";
 import { TimeRangeQueryStringKey } from "../../time-range/time-range-provider/time-range-provider.interfaces";
-import { AlertOptionsButtonProps } from "./alert-options-button.interfaces";
-import { TasksTable } from "../tasks-table/tasks-table.component";
 import { SubscriptionGroupsTable } from "../subscription-groups-table/subscription-groups-table.component";
+import { TasksTable } from "../tasks-table/tasks-table.component";
+import { AlertOptionsButtonProps } from "./alert-options-button.interfaces";
 
 export const AlertOptionsButton: FunctionComponent<AlertOptionsButtonProps> = ({
     alert,

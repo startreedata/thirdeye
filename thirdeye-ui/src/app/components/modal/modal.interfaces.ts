@@ -26,6 +26,9 @@ export interface ModalProps {
     title?: ReactNode;
     customTitle?: ReactNode;
     children: ReactNode;
+    isOpen?: boolean;
+    setIsOpen?: (isOpen: boolean | string) => void;
+    onClose?: () => void;
     maxWidth?: "xs" | "sm" | "md" | "lg" | "xl" | false;
     dividers?: boolean;
     initiallyOpen?: boolean;

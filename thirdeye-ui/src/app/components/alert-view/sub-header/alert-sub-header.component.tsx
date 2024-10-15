@@ -21,12 +21,12 @@ import { useNavigate } from "react-router-dom";
 import { JSONEditorV1 } from "../../../platform/components";
 import { getAlertInsight } from "../../../rest/alerts/alerts.rest";
 import { Alert } from "../../../rest/dto/alert.interfaces";
+import { useFetchQuery } from "../../../rest/hooks/useFetchQuery";
 import { determineTimezoneFromAlertInEvaluation } from "../../../utils/alerts/alerts.util";
 import { getAlertsUpdatePath } from "../../../utils/routes/routes.util";
 import { Modal } from "../../modal/modal.component";
 import { TimeRangeButtonWithContext } from "../../time-range/time-range-button-with-context/time-range-button.component";
 import { AlertViewSubHeaderProps } from "./alert-sub-header.interfaces";
-import { useFetchQuery } from "../../../rest/hooks/useFetchQuery";
 
 export const AlertViewSubHeader: FunctionComponent<AlertViewSubHeaderProps> = ({
     alert,

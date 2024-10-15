@@ -39,6 +39,12 @@ const AlertsViewPage = lazy(() =>
     ).then((module) => ({ default: module.AlertsViewPage }))
 );
 
+const AlertsViewPageV2 = lazy(() =>
+    import(
+        /* webpackChunkName: "alerts-view-page" */ "../../pages/alerts-view-page-v2/alerts-view-page-v2.component"
+    ).then((module) => ({ default: module.AlertsViewPageV2 }))
+);
+
 const AlertsAnomaliesPage = lazy(() =>
     import(
         /* webpackChunkName: "alerts-view-page" */ "../../pages/alerts-anomalies-page/alerts-anomalies-page.component"
@@ -48,6 +54,12 @@ const AlertsAnomaliesPage = lazy(() =>
 const AlertsCreateJSONPage = lazy(() =>
     import(
         /* webpackChunkName: "alerts-create-json-page" */ "../../pages/alerts-create-page/alerts-create-json-page/alerts-create-json-page.component"
+    ).then((module) => ({ default: module.AlertsCreateJSONPage }))
+);
+
+const AlertsCreateJSONPageV2 = lazy(() =>
+    import(
+        /* webpackChunkName: "alerts-create-json-page" */ "../../pages/alerts-create-page/alerts-create-json-page-v2/alerts-create-json-page-v2.component"
     ).then((module) => ({ default: module.AlertsCreateJSONPage }))
 );
 
@@ -69,6 +81,12 @@ const AlertsCreateAdvancedPage = lazy(() =>
     ).then((module) => ({ default: module.AlertsCreateAdvancedPage }))
 );
 
+const AlertsCreateAdvancedPageV2 = lazy(() =>
+    import(
+        /* webpackChunkName: "alerts-create-advanced-page" */ "../../pages/alerts-create-page/alerts-create-advanced-page-v2/alerts-create-advanced-page.component"
+    ).then((module) => ({ default: module.AlertsCreateAdvancedPage }))
+);
+
 const AlertsUpdateJSONPage = lazy(() =>
     import(
         /* webpackChunkName: "alerts-update-json-page" */ "../../pages/alerts-update-page/alerts-update-json-page.component"
@@ -78,6 +96,12 @@ const AlertsUpdateJSONPage = lazy(() =>
 const AlertsUpdateAdvancedPage = lazy(() =>
     import(
         /* webpackChunkName: "alerts-update-advanced-page" */ "../../pages/alerts-update-page/alerts-update-advanced-page.component"
+    ).then((module) => ({ default: module.AlertsUpdateAdvancedPage }))
+);
+
+const AlertsUpdateAdvancedPageV2 = lazy(() =>
+    import(
+        /* webpackChunkName: "alerts-update-advanced-page" */ "../../pages/alerts-update-page/alerts-update-advanced-page-v2.component"
     ).then((module) => ({ default: module.AlertsUpdateAdvancedPage }))
 );
 
@@ -186,9 +210,18 @@ export const AlertsRouter: FunctionComponent = () => {
                             element={<AlertsCreateAdvancedPage />}
                             path={AppRouteRelative.ALERTS_CREATE_ADVANCED}
                         />
+
+                        <Route
+                            element={<AlertsCreateAdvancedPageV2 />}
+                            path={AppRouteRelative.ALERTS_CREATE_ADVANCED_V2}
+                        />
                         <Route
                             element={<AlertsCreateJSONPage />}
                             path={AppRouteRelative.ALERTS_CREATE_JSON_EDITOR}
+                        />
+                        <Route
+                            element={<AlertsCreateJSONPageV2 />}
+                            path={AppRouteRelative.ALERTS_CREATE_JSON_EDITOR_V2}
                         />
                     </Route>
 
@@ -227,8 +260,16 @@ export const AlertsRouter: FunctionComponent = () => {
                             path={AppRouteRelative.ALERTS_CREATE_ADVANCED}
                         />
                         <Route
+                            element={<AlertsCreateAdvancedPageV2 />}
+                            path={AppRouteRelative.ALERTS_CREATE_ADVANCED_V2}
+                        />
+                        <Route
                             element={<AlertsCreateJSONPage />}
                             path={AppRouteRelative.ALERTS_CREATE_JSON_EDITOR}
+                        />
+                        <Route
+                            element={<AlertsCreateJSONPageV2 />}
+                            path={AppRouteRelative.ALERTS_CREATE_JSON_EDITOR_V2}
                         />
                     </Route>
 
@@ -282,6 +323,20 @@ export const AlertsRouter: FunctionComponent = () => {
                         }
                         path={AppRouteRelative.ALERTS_VIEW}
                     />
+                    <Route
+                        element={
+                            <RedirectValidation
+                                queryParams={[
+                                    TimeRangeQueryStringKey.START_TIME,
+                                    TimeRangeQueryStringKey.END_TIME,
+                                ]}
+                                to=".."
+                            >
+                                <AlertsViewPageV2 />
+                            </RedirectValidation>
+                        }
+                        path={AppRouteRelative.ALERTS_VIEW_V2}
+                    />
 
                     <Route
                         element={<AlertsUpdateBasePage />}
@@ -327,6 +382,10 @@ export const AlertsRouter: FunctionComponent = () => {
                         <Route
                             element={<AlertsUpdateAdvancedPage />}
                             path={AppRouteRelative.ALERTS_UPDATE_ADVANCED}
+                        />
+                        <Route
+                            element={<AlertsUpdateAdvancedPageV2 />}
+                            path={AppRouteRelative.ALERTS_UPDATE_ADVANCED_V2}
                         />
                         <Route
                             element={<AlertsUpdateJSONPage />}

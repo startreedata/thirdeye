@@ -16,12 +16,10 @@ import { Icon } from "@iconify/react";
 import {
     Box,
     Button,
-    Chip,
     Divider,
     Grid,
     TextareaAutosize,
     TextField,
-    Tooltip,
     Typography,
 } from "@material-ui/core";
 import { KeyboardArrowDown, KeyboardArrowUp } from "@material-ui/icons";
@@ -48,8 +46,6 @@ import { getAvailableFilterOptions } from "../../../components/alert-wizard-v3/a
 import {
     generateTemplateProperties,
     GranularityValue,
-    GRANULARITY_OPTIONS,
-    GRANULARITY_OPTIONS_TOOLTIP,
 } from "../../../components/alert-wizard-v3/select-metric/select-metric.utils";
 import { ThresholdSetup } from "../../../components/alert-wizard-v3/threshold-setup/threshold-setup-v2.component";
 import { ColumnsDrawer } from "../../../components/columns-drawer/columns-drawer.component";
@@ -117,6 +113,29 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
     const [showSQLWhere, setShowSQLWhere] = useState(false);
     const [enumerations, setEnumerations] = useState(false);
     const [dimension, setDimension] = useState<string | null>(null);
+
+    const GRANULARITY_OPTIONS = [
+        {
+            label: t("label.daily"),
+            value: GranularityValue.DAILY,
+        },
+        {
+            label: t("label.hourly"),
+            value: GranularityValue.HOURLY,
+        },
+        {
+            label: t("label.15-minutes"),
+            value: GranularityValue.FIFTEEN_MINUTES,
+        },
+        {
+            label: t("label.5-minutes"),
+            value: GranularityValue.FIVE_MINUTES,
+        },
+        {
+            label: t("label.1-minute"),
+            value: GranularityValue.ONE_MINUTE,
+        },
+    ];
 
     const [startTime, endTime] = useMemo(
         () => [
@@ -244,14 +263,19 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         ]
     );
     const alertTemplateForEvaluate = useMemo(() => {
-        const alertTemplateToFind = isMultiDimensionAlert
-            ? ALERT_TEMPLATE_FOR_EVALUATE_DX
-            : ALERT_TEMPLATE_FOR_EVALUATE;
+        let alertTemplateToFind = isMultiDimensionAlert
+            ? algorithmOption?.algorithmOption.alertTemplateForMultidimension
+            : algorithmOption?.algorithmOption.alertTemplate;
+        if (!algorithmOption) {
+            alertTemplateToFind = isMultiDimensionAlert
+                ? ALERT_TEMPLATE_FOR_EVALUATE_DX
+                : ALERT_TEMPLATE_FOR_EVALUATE;
+        }
 
         return alertTemplates.find((alertTemplateCandidate) => {
             return alertTemplateCandidate.name === alertTemplateToFind;
         });
-    }, [alertTemplates, alert, isMultiDimensionAlert]);
+    }, [alertTemplates, alert, algorithmOption, isMultiDimensionAlert]);
 
     const availableConfigurations = useMemo(() => {
         if (!alertTemplateForEvaluate) {
@@ -1058,22 +1082,8 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                     className={
                                                                         classes.footer
                                                                     }
-                                                                    justifyContent="space-between"
+                                                                    justifyContent="flex-end"
                                                                 >
-                                                                    <Button
-                                                                        size="small"
-                                                                        variant="contained"
-                                                                        onClick={() =>
-                                                                            setEditedDatasource(
-                                                                                editedDatasourceFieldValue
-                                                                            )
-                                                                        }
-                                                                    >
-                                                                        {t(
-                                                                            "label.apply-custom-metric"
-                                                                        )}
-                                                                    </Button>
-
                                                                     <Button
                                                                         size="small"
                                                                         variant="contained"
@@ -1160,7 +1170,6 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                             />
                                                                         )}
                                                                         renderOption={({
-                                                                            value,
                                                                             label,
                                                                         }) => (
                                                                             <Box
@@ -1172,27 +1181,6 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                 {
                                                                                     label
                                                                                 }
-                                                                                {GRANULARITY_OPTIONS_TOOLTIP[
-                                                                                    value
-                                                                                ] && (
-                                                                                    <Tooltip
-                                                                                        arrow
-                                                                                        placement="top"
-                                                                                        title={
-                                                                                            GRANULARITY_OPTIONS_TOOLTIP[
-                                                                                                value
-                                                                                            ]
-                                                                                        }
-                                                                                    >
-                                                                                        <Chip
-                                                                                            color="primary"
-                                                                                            label={t(
-                                                                                                "label.beta"
-                                                                                            )}
-                                                                                            size="small"
-                                                                                        />
-                                                                                    </Tooltip>
-                                                                                )}
                                                                             </Box>
                                                                         )}
                                                                         value={
@@ -1474,7 +1462,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                             6
                                                                                         }
                                                                                     >
-                                                                                        <>
+                                                                                        <Box>
                                                                                             <Typography
                                                                                                 className={
                                                                                                     classes.inputHeader
@@ -1487,7 +1475,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
 
                                                                                                 :
                                                                                             </Typography>
-                                                                                        </>
+                                                                                        </Box>
                                                                                         <TimeRangeButtonWithContext
                                                                                             hideQuickExtend
                                                                                             btnGroupColor="default"

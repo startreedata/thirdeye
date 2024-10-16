@@ -13,21 +13,21 @@
  * the License.
  */
 import { Box, Button, Grid, Typography } from "@material-ui/core";
+import ControlPointOutlinedIcon from "@material-ui/icons/ControlPointOutlined";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
-import ControlPointOutlinedIcon from "@material-ui/icons/ControlPointOutlined";
-import { Modal } from "../modal/modal.component";
-import { AlertAddConfigrationModalProps } from "./alert-add-configration-modal.interfaces";
+import { useSearchParams } from "react-router-dom";
 import Image from "../../../assets/images/alert-type-examples/configuration.png";
+import { QUERY_PARAM_KEY_ALERT_TYPE } from "../../pages/alerts-view-page/alerts-view-page.utils";
 import {
     getSubscriptionGroupsCreatePathWithAlertId,
     getSubscriptionGroupsPath,
 } from "../../utils/routes/routes.util";
+import { Modal } from "../modal/modal.component";
+import { AlertAddConfigrationModalProps } from "./alert-add-configration-modal.interfaces";
 import { boxCardStyles } from "./alert-add-configration-modal.styles";
-import { useSearchParams } from "react-router-dom";
-import { QUERY_PARAM_KEY_ALERT_TYPE } from "../../pages/alerts-view-page/alerts-view-page.utils";
 
-export const AlertAddConfigrationModal: FunctionComponent<AlertAddConfigrationModalProps> =
+export const AlertAddConfigurationModal: FunctionComponent<AlertAddConfigrationModalProps> =
     ({ alertId }) => {
         const { t } = useTranslation();
         const classes = boxCardStyles();

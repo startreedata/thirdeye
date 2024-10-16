@@ -53,6 +53,9 @@ export const easyAlertStyles = makeStyles((theme) => ({
         textWrap: "nowrap",
         textTransform: "none",
     },
+    algorithmContainer: {
+        marginBottom: theme.spacing(2),
+    },
     button: {
         borderRadius: "8px",
         height: "32px",
@@ -82,6 +85,33 @@ export const easyAlertStyles = makeStyles((theme) => ({
         gap: 0,
         display: "flex",
         flexDirection: "column",
+    },
+    recommendedAlgorithmContainer: {
+        display: "flex",
+        alignItems: "center",
+        gap: 1,
+    },
+    checkCircleIcon: {
+        color: ColorV1.Green2,
+        marginRight: theme.spacing(1),
+        fontSize: "12px",
+    },
+    recommendedAlgorithmText: {
+        fontWeight: 700,
+    },
+    cancelIcon: {
+        color: ColorV1.Red2,
+        marginRight: theme.spacing(1),
+        fontSize: "12px",
+    },
+    detectionRecommendationsContainer: {
+        marginLeft: theme.spacing(1),
+    },
+    detectionRecommendationsReadyText: {
+        color: ColorV1.Green2,
+    },
+    detectionRecommendationsFailedText: {
+        color: ColorV1.Red2,
     },
 }));
 

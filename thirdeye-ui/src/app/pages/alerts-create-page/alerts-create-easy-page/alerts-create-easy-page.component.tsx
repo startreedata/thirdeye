@@ -22,10 +22,14 @@ import {
     TextField,
     Typography,
 } from "@material-ui/core";
-import { KeyboardArrowDown, KeyboardArrowUp } from "@material-ui/icons";
+import {
+    Cancel,
+    CheckCircle,
+    KeyboardArrowDown,
+    KeyboardArrowUp,
+} from "@material-ui/icons";
 import AddCircleOutline from "@material-ui/icons/AddCircleOutline";
-import DoneAllIcon from "@material-ui/icons/DoneAll";
-import { Alert, AlertTitle, Autocomplete } from "@material-ui/lab";
+import { Autocomplete } from "@material-ui/lab";
 import { isNil, toLower } from "lodash";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -39,10 +43,13 @@ import { AdditonalFiltersDrawer } from "../../../components/additional-filters-d
 import { AlertCompositeFiltersModal } from "../../../components/alert-composite-filters-modal/alert-composite-filters-modal.component";
 import { createNewStartingAlert } from "../../../components/alert-wizard-v2/alert-template/alert-template.utils";
 import { AvailableAlgorithmOption } from "../../../components/alert-wizard-v3/alert-type-selection/alert-type-selection.interfaces";
-import { generateAvailableAlgorithmOptions } from "../../../components/alert-wizard-v3/alert-type-selection/alert-type-selection.utils";
+import {
+    generateAvailableAlgorithmOptions,
+    generateAvailableAlgorithmOptionsForRecommendations,
+} from "../../../components/alert-wizard-v3/alert-type-selection/alert-type-selection.utils";
 import { AnomaliesFilterConfiguratorRenderConfigs } from "../../../components/alert-wizard-v3/anomalies-filter-panel/anomalies-filter-panel.interfaces";
 import { getAvailableFilterOptions } from "../../../components/alert-wizard-v3/anomalies-filter-panel/anomalies-filter-panel.utils";
-import { ChartContent } from "../../../components/alert-wizard-v3/preview-chart/chart-content/chart-content.component";
+import { ChartContentV2 } from "../../../components/alert-wizard-v3/preview-chart/chart-content-v2/chart-content-v2.component";
 import {
     generateTemplateProperties,
     GranularityValue,
@@ -62,7 +69,6 @@ import {
     PageContentsCardV1,
     PageHeaderActionsV1,
 } from "../../../platform/components";
-import { ColorV1 } from "../../../platform/utils/material-ui/color.util";
 import { useGetEvaluation } from "../../../rest/alerts/alerts.actions";
 import { AlertTemplate } from "../../../rest/dto/alert-template.interfaces";
 import {
@@ -99,6 +105,7 @@ const PROPERTIES_TO_COPY = [
 
 const ALERT_TEMPLATE_FOR_EVALUATE = "startree-threshold";
 const ALERT_TEMPLATE_FOR_EVALUATE_DX = "startree-threshold-dx";
+const ALERT_TEMPLATE_FOR_EVALUATE_QUERY_DX = "startree-threshold-query-dx";
 
 export const AlertsCreateEasyPage: FunctionComponent = () => {
     const classes = easyAlertStyles();
@@ -152,7 +159,9 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         alertInsight,
         getAlertInsight,
         alertRecommendations,
+        getAlertRecommendationIsLoading,
         alert,
+        setIsMultiDimensionAlert,
         getAlertRecommendation,
         setShouldShowStepper,
     } = useOutletContext<AlertCreatedGuidedPageOutletContext>();
@@ -186,6 +195,10 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
     const [openViewColumnsListDrawer, setOpenViewColumnsListDrawer] =
         useState(false);
 
+    const isGetAlertRecommendationLoading = useMemo(() => {
+        return getAlertRecommendationIsLoading;
+    }, [getAlertRecommendationIsLoading]);
+
     useEffect(() => {
         setShouldShowStepper(false);
         if (alert.templateProperties?.dataset && datasetsInfo) {
@@ -217,7 +230,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                         .monitoringGranularity as GranularityValue
                 );
                 setAlgorithmOption(
-                    recommendedAlertTemplateFirst.find((item) => {
+                    alertTemplateOptions.find((item) => {
                         const name = isMultiDimensionAlert
                             ? item.algorithmOption
                                   .alertTemplateForMultidimension
@@ -378,6 +391,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         delete copied.templateProperties?.queryFilters;
         delete copied.templateProperties?.enumerationItems;
         setCompositeFilters(null);
+        setIsMultiDimensionAlert(item === AnomalyDetectionOptions.COMPOSITE);
         setAlertConfigForPreview(copied);
         onAlertPropertyChange(copied);
         setAnomalyDetection(item);
@@ -407,7 +421,16 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
             options.push({
                 value: item,
                 label: item,
-                onClick: () => setDimension(item),
+                onClick: () => {
+                    setDimension(() => {
+                        if (item === SelectDimensionsOptions.ENUMERATORS) {
+                            setEnumerators("");
+                            setEnumerations(false);
+                        }
+
+                        return item;
+                    });
+                },
                 tooltipText: item,
             })
         );
@@ -415,48 +438,22 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         return options;
     };
 
-    const recommendedAlertTemplate = useMemo(() => {
-        if (alertRecommendations && alertRecommendations.length > 0) {
-            return alertRecommendations[0]?.alert.template?.name;
-        }
-
-        return undefined;
-    }, [alertRecommendations]);
-
     const alertTemplateOptions = useMemo(() => {
-        return generateAvailableAlgorithmOptions(
+        const availableAlgorithmOptions = generateAvailableAlgorithmOptions(
             alertTemplates.map((a: AlertTemplate) => a.name)
         ).filter((option) =>
             isMultiDimensionAlert
                 ? option.hasMultidimension
                 : option.hasAlertTemplate
         );
-    }, [alertTemplates]);
+        const recommendedAlgorithmOptions =
+            generateAvailableAlgorithmOptionsForRecommendations(
+                alertRecommendations ?? [],
+                isMultiDimensionAlert
+            );
 
-    const recommendedAlertTemplateFirst = useMemo(() => {
-        const cloned = alertTemplateOptions.filter((c) => {
-            return isMultiDimensionAlert
-                ? c.algorithmOption.alertTemplateForMultidimension !==
-                      recommendedAlertTemplate
-                : c.algorithmOption.alertTemplate !== recommendedAlertTemplate;
-        });
-
-        const recommendedAlertTemplateOption = alertTemplateOptions.find(
-            (c) => {
-                return isMultiDimensionAlert
-                    ? c.algorithmOption.alertTemplateForMultidimension ===
-                          recommendedAlertTemplate
-                    : c.algorithmOption.alertTemplate ===
-                          recommendedAlertTemplate;
-            }
-        );
-
-        if (recommendedAlertTemplateOption) {
-            cloned.unshift(recommendedAlertTemplateOption);
-        }
-
-        return cloned;
-    }, [alertTemplates, recommendedAlertTemplate]);
+        return [...recommendedAlgorithmOptions, ...availableAlgorithmOptions];
+    }, [alertTemplates, alertRecommendations]);
 
     useEffect(() => {
         let isCustomMetrics = false;
@@ -470,18 +467,35 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
             (aggregationFunction ||
                 (isCustomMetrics && editedDatasourceFieldValue))
         ) {
+            const isAnomalyDetectionComposite =
+                anomalyDetection === AnomalyDetectionOptions.COMPOSITE;
+            const isRecommendation =
+                algorithmOption?.recommendationLabel ===
+                t("label.recommended-configuration");
+            const recommendedTemplate = isRecommendation
+                ? alertRecommendations.find(
+                      (rec, index) =>
+                          `${rec.alert.template?.name}-${index}` ===
+                          algorithmOption?.recommendationId
+                  )
+                : null;
             const workingAlert = {
                 template: {
                     name:
-                        (isMultiDimensionAlert
+                        (isAnomalyDetectionComposite
                             ? algorithmOption?.algorithmOption
                                   .alertTemplateForMultidimension
                             : algorithmOption?.algorithmOption
                                   ?.alertTemplate) ||
-                        createNewStartingAlert().template?.name,
+                        (!isAnomalyDetectionComposite
+                            ? createNewStartingAlert().template?.name
+                            : dimension === SelectDimensionsOptions.ENUMERATORS
+                            ? ALERT_TEMPLATE_FOR_EVALUATE_QUERY_DX
+                            : ALERT_TEMPLATE_FOR_EVALUATE_DX),
                 },
                 templateProperties: {
                     ...alert.templateProperties,
+                    ...(recommendedTemplate?.alert.templateProperties ?? {}),
                     ...generateTemplateProperties(
                         isCustomMetrics
                             ? editedDatasourceFieldValue
@@ -498,7 +512,12 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                 },
             };
             onAlertPropertyChange(workingAlert);
-            getAlertRecommendation({ ...alert, ...workingAlert });
+            if (
+                !algorithmOption &&
+                (!isAnomalyDetectionComposite || !!compositeFilters)
+            ) {
+                getAlertRecommendation({ ...alert, ...workingAlert });
+            }
             handleReloadPreviewClick(workingAlert);
         }
     }, [
@@ -507,9 +526,10 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         granularity,
         aggregationFunction,
         algorithmOption,
+        compositeFilters,
         queryFilters,
         anomalyDetection,
-        enumerators,
+        enumerations,
     ]);
 
     const { getEvaluation, evaluation } = useGetEvaluation();
@@ -624,49 +644,6 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         } else {
             fetchAlertEvaluation(startTime, endTime, alert);
         }
-    };
-    const recommendedAlertConfigMatchingTemplate = useMemo(() => {
-        if (alertRecommendations && alert.template?.name) {
-            return alertRecommendations.find(
-                (candidate) =>
-                    candidate.alert.template?.name === alert.template?.name
-            );
-        }
-
-        return undefined;
-    }, [alertRecommendations, alert]);
-
-    const doesAlertHaveRecommendedValues = useMemo(() => {
-        let hasValues = true;
-
-        if (!recommendedAlertConfigMatchingTemplate) {
-            return false;
-        }
-
-        Object.keys(
-            recommendedAlertConfigMatchingTemplate.alert.templateProperties
-        ).forEach((k) => {
-            hasValues =
-                hasValues &&
-                recommendedAlertConfigMatchingTemplate.alert.templateProperties[
-                    k
-                ] === alert.templateProperties[k];
-        });
-
-        return hasValues;
-    }, [recommendedAlertConfigMatchingTemplate, alert]);
-
-    const handleTuneAlertClick = (): void => {
-        if (!recommendedAlertConfigMatchingTemplate) {
-            return;
-        }
-        onAlertPropertyChange({
-            templateProperties: {
-                ...alert.templateProperties,
-                ...recommendedAlertConfigMatchingTemplate.alert
-                    .templateProperties,
-            },
-        });
     };
 
     const selectedAlertTemplate = useMemo(() => {
@@ -1389,11 +1366,13 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                     >
                                                                         <Grid
                                                                             item
+                                                                            className={
+                                                                                classes.algorithmContainer
+                                                                            }
                                                                             xs={
                                                                                 12
                                                                             }
                                                                         >
-                                                                            {" "}
                                                                             <Grid
                                                                                 container
                                                                                 alignItems="center"
@@ -1432,6 +1411,12 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                                             .algorithmOption
                                                                                                             .title as string
                                                                                                     }
+                                                                                                    groupBy={(
+                                                                                                        option
+                                                                                                    ) =>
+                                                                                                        option.recommendationLabel ||
+                                                                                                        ""
+                                                                                                    }
                                                                                                     noOptionsText={t(
                                                                                                         "message.no-options-available-entity",
                                                                                                         {
@@ -1441,7 +1426,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                                         }
                                                                                                     )}
                                                                                                     options={
-                                                                                                        recommendedAlertTemplateFirst ||
+                                                                                                        alertTemplateOptions ||
                                                                                                         []
                                                                                                     }
                                                                                                     renderInput={(
@@ -1497,11 +1482,83 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                                     }}
                                                                                                 />
                                                                                             }
-                                                                                            label={t(
-                                                                                                "label.recommended-algorithm"
-                                                                                            )}
+                                                                                            labelComponent={
+                                                                                                <Box
+                                                                                                    className={
+                                                                                                        classes.recommendedAlgorithmContainer
+                                                                                                    }
+                                                                                                >
+                                                                                                    <Typography
+                                                                                                        className={
+                                                                                                            classes.recommendedAlgorithmText
+                                                                                                        }
+                                                                                                        variant="caption"
+                                                                                                    >
+                                                                                                        {t(
+                                                                                                            "label.recommended-algorithm"
+                                                                                                        )}
+                                                                                                    </Typography>
+                                                                                                    <Box
+                                                                                                        className={
+                                                                                                            classes.detectionRecommendationsContainer
+                                                                                                        }
+                                                                                                    >
+                                                                                                        {isGetAlertRecommendationLoading ? (
+                                                                                                            <Typography variant="caption">
+                                                                                                                {t(
+                                                                                                                    "label.computing-detection-recommendations"
+                                                                                                                )}
+                                                                                                            </Typography>
+                                                                                                        ) : alertRecommendations?.length >
+                                                                                                          0 ? (
+                                                                                                            <Box
+                                                                                                                alignItems="center"
+                                                                                                                display="flex"
+                                                                                                            >
+                                                                                                                <CheckCircle
+                                                                                                                    className={
+                                                                                                                        classes.checkCircleIcon
+                                                                                                                    }
+                                                                                                                />
+                                                                                                                <Typography
+                                                                                                                    className={
+                                                                                                                        classes.detectionRecommendationsReadyText
+                                                                                                                    }
+                                                                                                                    variant="caption"
+                                                                                                                >
+                                                                                                                    {t(
+                                                                                                                        "label.detection-recommendations-ready"
+                                                                                                                    )}
+                                                                                                                </Typography>
+                                                                                                            </Box>
+                                                                                                        ) : (
+                                                                                                            <Box
+                                                                                                                alignItems="center"
+                                                                                                                display="flex"
+                                                                                                            >
+                                                                                                                <Cancel
+                                                                                                                    className={
+                                                                                                                        classes.cancelIcon
+                                                                                                                    }
+                                                                                                                />
+                                                                                                                <Typography
+                                                                                                                    className={
+                                                                                                                        classes.detectionRecommendationsFailedText
+                                                                                                                    }
+                                                                                                                    variant="caption"
+                                                                                                                >
+                                                                                                                    {t(
+                                                                                                                        "message.could-not-compute-detection-recommendations"
+                                                                                                                    )}
+                                                                                                                </Typography>
+                                                                                                            </Box>
+                                                                                                        )}
+                                                                                                    </Box>
+                                                                                                </Box>
+                                                                                            }
                                                                                         />
                                                                                     </Grid>
+
                                                                                     <Grid
                                                                                         item
                                                                                         xs={
@@ -1592,73 +1649,6 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                 </Grid>
                                                                             </Grid>
                                                                         </Grid>
-                                                                        {recommendedAlertConfigMatchingTemplate && (
-                                                                            <Grid
-                                                                                item
-                                                                                xs={
-                                                                                    12
-                                                                                }
-                                                                            >
-                                                                                <Alert
-                                                                                    action={
-                                                                                        <>
-                                                                                            {doesAlertHaveRecommendedValues ? (
-                                                                                                <Box
-                                                                                                    alignContent="center"
-                                                                                                    position="flex"
-                                                                                                    style={{
-                                                                                                        color: ColorV1.Green2,
-                                                                                                    }}
-                                                                                                    textAlign="center"
-                                                                                                >
-                                                                                                    <Box
-                                                                                                        mr={
-                                                                                                            1
-                                                                                                        }
-                                                                                                    >
-                                                                                                        <DoneAllIcon />
-                                                                                                    </Box>
-                                                                                                    <Box
-                                                                                                        pr={
-                                                                                                            2
-                                                                                                        }
-                                                                                                    >
-                                                                                                        Alert
-                                                                                                        Tuned
-                                                                                                    </Box>
-                                                                                                </Box>
-                                                                                            ) : (
-                                                                                                <Button
-                                                                                                    color="primary"
-                                                                                                    onClick={
-                                                                                                        handleTuneAlertClick
-                                                                                                    }
-                                                                                                >
-                                                                                                    {t(
-                                                                                                        "label.tune-my-alert"
-                                                                                                    )}
-                                                                                                </Button>
-                                                                                            )}
-                                                                                        </>
-                                                                                    }
-                                                                                    severity="info"
-                                                                                    style={{
-                                                                                        backgroundColor:
-                                                                                            "#FFF",
-                                                                                    }}
-                                                                                    variant="outlined"
-                                                                                >
-                                                                                    <AlertTitle>
-                                                                                        {t(
-                                                                                            "message.we-can-tune-the-alert-for-you"
-                                                                                        )}
-                                                                                    </AlertTitle>
-                                                                                    {t(
-                                                                                        "message.our-new-feature-sets-up-your-alert-with-the-parameters"
-                                                                                    )}
-                                                                                </Alert>
-                                                                            </Grid>
-                                                                        )}
 
                                                                         {algorithmOption ? (
                                                                             <Grid
@@ -1702,7 +1692,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                 </ThresholdSetup>
                                                                             </Grid>
                                                                         ) : (
-                                                                            <ChartContent
+                                                                            <ChartContentV2
                                                                                 showLoadButton
                                                                                 showOnlyActivity
                                                                                 alert={

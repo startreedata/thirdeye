@@ -25,6 +25,7 @@
         "invalid-params-components": "Invalid param components provided.",
         "invalid-query-param-operator": "Invalid operator for query param.",
         "invalid-sql": "Invalid SQL syntax.",
+        "load-alert-templates": "Failed to load alert templates. Please reach out to StarTree support.",
         "missing-configuration-field": "Missing configuration field in alert.",
         "missing-id": "ID is missing.",
         "missing-name": "Name is missing.",

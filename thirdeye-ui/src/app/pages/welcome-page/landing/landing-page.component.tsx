@@ -37,6 +37,9 @@ import {
 import { useGetAlertsCount } from "../../../rest/alerts/alerts.actions";
 import { useNavigate } from "react-router-dom";
 import { useAppBarConfigProvider } from "../../../components/app-bar/app-bar-config-provider/app-bar-config-provider.component";
+import { useGetAlertTemplates } from "../../../rest/alert-templates/alert-templates.actions";
+
+import { useCheckLoadedTemplates } from "../../../hooks/useCheckLoadedTemplates";
 
 export const WelcomeLandingPage: FunctionComponent = () => {
     const { t } = useTranslation();
@@ -45,12 +48,18 @@ export const WelcomeLandingPage: FunctionComponent = () => {
 
     const { status, datasets, getDatasets } = useGetDatasets();
     const { alertsCount, getAlertsCount } = useGetAlertsCount();
+    const {
+        alertTemplates,
+        getAlertTemplates,
+        status: alertTemplatesRequestStatus,
+    } = useGetAlertTemplates();
 
     const hasDatasets = !!(datasets && datasets.length > 0);
 
     useEffect(() => {
         getDatasets();
         getAlertsCount();
+        getAlertTemplates();
     }, []);
 
     useEffect(() => {
@@ -61,6 +70,8 @@ export const WelcomeLandingPage: FunctionComponent = () => {
             return;
         }
     }, [alertsCount?.count]);
+
+    useCheckLoadedTemplates({ alertTemplates, alertTemplatesRequestStatus });
 
     return (
         <PageV1>

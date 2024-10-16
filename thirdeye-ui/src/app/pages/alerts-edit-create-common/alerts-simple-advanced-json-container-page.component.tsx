@@ -29,6 +29,7 @@ import { validateTemplateProperties } from "../../utils/alerts/alerts-configurat
 import { handleAlertPropertyChangeGenerator } from "../../utils/anomalies/anomalies.util";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { AlertsSimpleAdvancedJsonContainerPageProps } from "./alerts-edit-create-common-page.interfaces";
+import { useCheckLoadedTemplates } from "../../hooks/useCheckLoadedTemplates";
 
 export const AlertsSimpleAdvancedJsonContainerPage: FunctionComponent<AlertsSimpleAdvancedJsonContainerPageProps> =
     ({
@@ -53,6 +54,7 @@ export const AlertsSimpleAdvancedJsonContainerPage: FunctionComponent<AlertsSimp
 
         const {
             getAlertTemplates,
+            alertTemplates,
             status: alertTemplatesRequestStatus,
             errorMessages: getAlertTemplatesRequestErrors,
         } = useGetAlertTemplates();
@@ -65,6 +67,11 @@ export const AlertsSimpleAdvancedJsonContainerPage: FunctionComponent<AlertsSimp
         const [alertTemplateOptions, setAlertTemplateOptions] = useState<
             AlertTemplateType[]
         >([]);
+
+        useCheckLoadedTemplates({
+            alertTemplates,
+            alertTemplatesRequestStatus,
+        });
 
         useEffect(() => {
             setAlertTemplateOptions([]);

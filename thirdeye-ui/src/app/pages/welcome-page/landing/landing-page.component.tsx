@@ -14,7 +14,7 @@
  */
 
 import { Box, Grid, Typography } from "@material-ui/core";
-import { capitalize, isEmpty } from "lodash";
+import { capitalize } from "lodash";
 import React, { FunctionComponent, useEffect } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { IframeVideoPlayerContainer } from "../../../components/iframe-video-player-container/iframe-video-player-container.component";
@@ -25,7 +25,6 @@ import {
     LinkV1,
     PageContentsCardV1,
     PageV1,
-    useNotificationProviderV1,
 } from "../../../platform/components";
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { useGetDatasets } from "../../../rest/datasets/datasets.actions";
@@ -38,23 +37,14 @@ import {
 import { useGetAlertsCount } from "../../../rest/alerts/alerts.actions";
 import { useNavigate } from "react-router-dom";
 import { useAppBarConfigProvider } from "../../../components/app-bar/app-bar-config-provider/app-bar-config-provider.component";
-import {
-    useCreateDefaultAlertTemplates,
-    useGetAlertTemplates,
-} from "../../../rest/alert-templates/alert-templates.actions";
-import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
+import { useGetAlertTemplates } from "../../../rest/alert-templates/alert-templates.actions";
+
+import { useCheckLoadedTemplates } from "../../../hooks/useCheckLoadedTemplates";
 
 export const WelcomeLandingPage: FunctionComponent = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const { setShowAppNavBar } = useAppBarConfigProvider();
-    const { notify } = useNotificationProviderV1();
-
-    const {
-        createDefaultAlertTemplates,
-        status: createDefaultAlertTemplatesStatus,
-        errorMessages: createDefaultAlertTemplatesErrors,
-    } = useCreateDefaultAlertTemplates();
 
     const { status, datasets, getDatasets } = useGetDatasets();
     const { alertsCount, getAlertsCount } = useGetAlertsCount();
@@ -81,23 +71,7 @@ export const WelcomeLandingPage: FunctionComponent = () => {
         }
     }, [alertsCount?.count]);
 
-    useEffect(() => {
-        if (
-            alertTemplatesRequestStatus === ActionStatus.Done &&
-            isEmpty(alertTemplates)
-        ) {
-            createDefaultAlertTemplates();
-        }
-    }, [alertTemplates, alertTemplatesRequestStatus]);
-
-    useEffect(() => {
-        notifyIfErrors(
-            createDefaultAlertTemplatesStatus,
-            createDefaultAlertTemplatesErrors,
-            notify,
-            t("error.load-alert-templates")
-        );
-    }, [createDefaultAlertTemplatesStatus, createDefaultAlertTemplatesErrors]);
+    useCheckLoadedTemplates({ alertTemplates, alertTemplatesRequestStatus });
 
     return (
         <PageV1>

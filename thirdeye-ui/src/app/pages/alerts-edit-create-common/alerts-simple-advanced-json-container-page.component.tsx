@@ -21,10 +21,7 @@ import {
     useNotificationProviderV1,
 } from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
-import {
-    useCreateDefaultAlertTemplates,
-    useGetAlertTemplates,
-} from "../../rest/alert-templates/alert-templates.actions";
+import { useGetAlertTemplates } from "../../rest/alert-templates/alert-templates.actions";
 import { useGetAlertInsight } from "../../rest/alerts/alerts.actions";
 import { AlertTemplate as AlertTemplateType } from "../../rest/dto/alert-template.interfaces";
 import { EditableAlert } from "../../rest/dto/alert.interfaces";
@@ -32,7 +29,7 @@ import { validateTemplateProperties } from "../../utils/alerts/alerts-configurat
 import { handleAlertPropertyChangeGenerator } from "../../utils/anomalies/anomalies.util";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { AlertsSimpleAdvancedJsonContainerPageProps } from "./alerts-edit-create-common-page.interfaces";
-import { isEmpty } from "lodash";
+import { useCheckLoadedTemplates } from "../../hooks/useCheckLoadedTemplates";
 
 export const AlertsSimpleAdvancedJsonContainerPage: FunctionComponent<AlertsSimpleAdvancedJsonContainerPageProps> =
     ({
@@ -62,12 +59,6 @@ export const AlertsSimpleAdvancedJsonContainerPage: FunctionComponent<AlertsSimp
             errorMessages: getAlertTemplatesRequestErrors,
         } = useGetAlertTemplates();
 
-        const {
-            createDefaultAlertTemplates,
-            status: createDefaultAlertTemplatesStatus,
-            errorMessages: createDefaultAlertTemplatesErrors,
-        } = useCreateDefaultAlertTemplates();
-
         const [alert, setAlert] = useState<EditableAlert>(
             startingAlertConfiguration
         );
@@ -77,26 +68,10 @@ export const AlertsSimpleAdvancedJsonContainerPage: FunctionComponent<AlertsSimp
             AlertTemplateType[]
         >([]);
 
-        useEffect(() => {
-            if (
-                alertTemplatesRequestStatus === ActionStatus.Done &&
-                isEmpty(alertTemplates)
-            ) {
-                createDefaultAlertTemplates();
-            }
-        }, [alertTemplates, alertTemplatesRequestStatus]);
-
-        useEffect(() => {
-            notifyIfErrors(
-                createDefaultAlertTemplatesStatus,
-                createDefaultAlertTemplatesErrors,
-                notify,
-                t("error.load-alert-templates")
-            );
-        }, [
-            createDefaultAlertTemplatesStatus,
-            createDefaultAlertTemplatesErrors,
-        ]);
+        useCheckLoadedTemplates({
+            alertTemplates,
+            alertTemplatesRequestStatus,
+        });
 
         useEffect(() => {
             setAlertTemplateOptions([]);

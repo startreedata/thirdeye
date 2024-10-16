@@ -18,4 +18,5 @@ export const QUERY_PARAM_KEY_ALERT_TYPE = "alert";
 export const QUERY_PARAM_KEY_FOR_SEARCH = "search";
 export const QUERY_PARAM_KEY_FOR_SORT = "sort";
 export const QUERY_PARAM_KEY_FOR_SORT_KEY = "sortKey";
+export const QUERY_PARAM_KEY_FOR_NOTIFICATION = "showNotificationPopup";
 export const CONCAT_SEPARATOR = "+";

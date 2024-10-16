@@ -71,11 +71,13 @@ import { AlertsViewPageParams } from "./alerts-view-page.interfaces";
 import {
     CONCAT_SEPARATOR,
     QUERY_PARAM_KEY_ANOMALIES_RETRY,
+    QUERY_PARAM_KEY_FOR_NOTIFICATION,
     QUERY_PARAM_KEY_FOR_SEARCH,
     QUERY_PARAM_KEY_FOR_SORT,
     QUERY_PARAM_KEY_FOR_SORT_KEY,
 } from "./alerts-view-page.utils";
 import { useFetchQuery } from "../../rest/hooks/useFetchQuery";
+import { AlertAddConfigrationModal } from "../../components/alert-add-configuration-modal/alert-add-configration-modal.component";
 
 export const AlertsViewPage: FunctionComponent = () => {
     const { t } = useTranslation();
@@ -567,6 +569,9 @@ export const AlertsViewPage: FunctionComponent = () => {
                         )}
                     </LoadingErrorStateSwitch>
                 </Grid>
+                {searchParams.get(QUERY_PARAM_KEY_FOR_NOTIFICATION) && (
+                    <AlertAddConfigrationModal alertId={alertId || ""} />
+                )}
                 {/* {alertId && searchParams.has(QUERY_PARAM_KEY_ALERT_TYPE) && (
                     <AlertAddConfigrationModal alertId={alertId} />
                 )} */}

@@ -25,6 +25,7 @@ import {
     LinkV1,
     PageContentsCardV1,
     PageV1,
+    useNotificationProviderV1,
 } from "../../../platform/components";
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { useGetDatasets } from "../../../rest/datasets/datasets.actions";
@@ -37,17 +38,31 @@ import {
 import { useGetAlertsCount } from "../../../rest/alerts/alerts.actions";
 import { useNavigate } from "react-router-dom";
 import { useAppBarConfigProvider } from "../../../components/app-bar/app-bar-config-provider/app-bar-config-provider.component";
-import { useGetAlertTemplates } from "../../../rest/alert-templates/alert-templates.actions";
-import { createDefaultAlertTemplates } from "../../../rest/alert-templates/alert-templates.rest";
+import {
+    useCreateDefaultAlertTemplates,
+    useGetAlertTemplates,
+} from "../../../rest/alert-templates/alert-templates.actions";
+import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
 
 export const WelcomeLandingPage: FunctionComponent = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const { setShowAppNavBar } = useAppBarConfigProvider();
+    const { notify } = useNotificationProviderV1();
+
+    const {
+        createDefaultAlertTemplates,
+        status: createDefaultAlertTemplatesStatus,
+        errorMessages: createDefaultAlertTemplatesErrors,
+    } = useCreateDefaultAlertTemplates();
 
     const { status, datasets, getDatasets } = useGetDatasets();
     const { alertsCount, getAlertsCount } = useGetAlertsCount();
-    const { alertTemplates, getAlertTemplates } = useGetAlertTemplates();
+    const {
+        alertTemplates,
+        getAlertTemplates,
+        status: alertTemplatesRequestStatus,
+    } = useGetAlertTemplates();
 
     const hasDatasets = !!(datasets && datasets.length > 0);
 
@@ -67,10 +82,22 @@ export const WelcomeLandingPage: FunctionComponent = () => {
     }, [alertsCount?.count]);
 
     useEffect(() => {
-        if (isEmpty(alertTemplates)) {
+        if (
+            alertTemplatesRequestStatus === ActionStatus.Done &&
+            isEmpty(alertTemplates)
+        ) {
             createDefaultAlertTemplates();
         }
-    }, [alertTemplates]);
+    }, [alertTemplates, alertTemplatesRequestStatus]);
+
+    useEffect(() => {
+        notifyIfErrors(
+            createDefaultAlertTemplatesStatus,
+            createDefaultAlertTemplatesErrors,
+            notify,
+            t("error.load-alert-templates")
+        );
+    }, [createDefaultAlertTemplatesStatus, createDefaultAlertTemplatesErrors]);
 
     return (
         <PageV1>

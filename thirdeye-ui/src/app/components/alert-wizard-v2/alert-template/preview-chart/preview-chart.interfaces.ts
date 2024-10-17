@@ -12,13 +12,17 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { EditableAlert } from "../../../../rest/dto/alert.interfaces";
+import {
+    AlertEvaluation,
+    EditableAlert,
+} from "../../../../rest/dto/alert.interfaces";
 
 export interface PreviewChartProps {
     alert: EditableAlert;
     onChartDataLoadSuccess?: () => void;
     hideCallToActionPrompt?: boolean;
     disableReload?: boolean;
+    alertEvaluation?: AlertEvaluation;
     onAlertPropertyChange: (
         contents: Partial<EditableAlert>,
         isTotalReplace?: boolean

@@ -20,6 +20,7 @@ export interface InputSectionProps {
     helperLabel?: ReactNode;
     labelComponent?: ReactElement;
     inputComponent: ReactElement;
+    gridItemProps?: GridProps;
     fullWidth?: boolean;
     gridContainerProps?: GridProps;
 }

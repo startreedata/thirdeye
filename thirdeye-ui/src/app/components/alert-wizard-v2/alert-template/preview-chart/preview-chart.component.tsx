@@ -36,7 +36,7 @@ import {
 } from "../../../../utils/alerts/alerts.util";
 import { generateNameForDetectionResult } from "../../../../utils/enumeration-items/enumeration-items.util";
 import { notifyIfErrors } from "../../../../utils/notifications/notifications.util";
-import { ChartContent } from "../../../alert-wizard-v3/preview-chart/chart-content/chart-content.component";
+import { ChartContentV2 } from "../../../alert-wizard-v3/preview-chart/chart-content-v2/chart-content-v2.component";
 import { PreviewChartHeader } from "../../../alert-wizard-v3/preview-chart/header/preview-chart-header-v2.component";
 import { NoDataIndicator } from "../../../no-data-indicator/no-data-indicator.component";
 import { LoadingErrorStateSwitch } from "../../../page-states/loading-error-state-switch/loading-error-state-switch.component";
@@ -236,7 +236,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                     </Box>
                 }
             >
-                <ChartContent
+                <ChartContentV2
                     showLoadButton
                     alert={alert}
                     alertEvaluation={evaluation}

@@ -15,6 +15,7 @@ package ai.startree.thirdeye.notification;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.bool;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 import static java.util.stream.Collectors.toSet;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
@@ -165,7 +166,7 @@ public class NotificationTaskFilter {
     return alertAssociations.stream()
         .filter(aa -> isAlertActive(aa.getAlert().getId()))
         .map(aa -> buildAnomalyFilter(aa, sg, endTime))
-        .map(f -> filterAnomalies(f, sg.getId(), "anomalies"))
+        .map(f -> filterAnomalies(f, sg, "anomalies"))
         .flatMap(Collection::stream)
         .collect(toSet());
   }
@@ -179,7 +180,7 @@ public class NotificationTaskFilter {
         .filter(aa -> isAlertActive(aa.getAlert().getId()))
         .filter(aa -> aa.getAnomalyCompletionWatermark() != null)
         .map(this::buildAnomalyFilterCompletedAnomalies)
-        .map(f -> filterAnomalies(f, sg.getId(), "completed anomalies"))
+        .map(f -> filterAnomalies(f, sg, "completed anomalies"))
         .flatMap(Collection::stream)
         .collect(toSet());
   }
@@ -249,12 +250,17 @@ public class NotificationTaskFilter {
 
   @VisibleForTesting
   protected Set<AnomalyDTO> filterAnomalies(final AnomalyFilter f,
-      final Long subscriptionGroupId,
+      final SubscriptionGroupDTO subscriptionGroup,
       final String logContext) {
     final List<AnomalyDTO> candidates = anomalyManager.filter(f);
 
+    // FIXME CYRIL - this is not correct around DST 
+    //  eg for an hourly alert where we only care about anomalies that last for more than 1 day, the user would need to think about setting P23H instead of P1D to account for DST - but then it's 23H not 1 day in the standard case
+    //  eg for an daily alert where we only care about anomalies that last for more than 3 days, the user would set to P2DT23H --> this is ok 
+    final long minimumAnomalyLengthMillis = isoPeriod(subscriptionGroup.getMinimumAnomalyLength(), Period.ZERO).toStandardDuration().getMillis();
     final Set<AnomalyDTO> anomaliesToBeNotified = candidates.stream()
         .filter(NotificationTaskFilter::shouldFilter)
+        .filter(a -> a.getEndTime() - a.getStartTime() >= minimumAnomalyLengthMillis)
         .collect(toSet());
 
     String createdMsg = "";
@@ -267,7 +273,7 @@ public class NotificationTaskFilter {
     }
 
     LOG.info("Subscription Group: {} Alert: {} context: {}. {}/{} filtered. {}",
-        subscriptionGroupId,
+        subscriptionGroup.getId(),
         f.getAlertId(),
         logContext,
         anomaliesToBeNotified.size(),

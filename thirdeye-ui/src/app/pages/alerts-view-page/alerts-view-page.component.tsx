@@ -77,7 +77,7 @@ import {
     QUERY_PARAM_KEY_FOR_SORT_KEY,
 } from "./alerts-view-page.utils";
 import { useFetchQuery } from "../../rest/hooks/useFetchQuery";
-import { AlertAddConfigrationModal } from "../../components/alert-add-configuration-modal/alert-add-configration-modal.component";
+import { AlertAddConfigurationModal } from "../../components/alert-add-configuration-modal/alert-add-configration-modal.component";
 
 export const AlertsViewPage: FunctionComponent = () => {
     const { t } = useTranslation();
@@ -570,7 +570,7 @@ export const AlertsViewPage: FunctionComponent = () => {
                     </LoadingErrorStateSwitch>
                 </Grid>
                 {searchParams.get(QUERY_PARAM_KEY_FOR_NOTIFICATION) && (
-                    <AlertAddConfigrationModal alertId={alertId || ""} />
+                    <AlertAddConfigurationModal alertId={alertId || ""} />
                 )}
                 {/* {alertId && searchParams.has(QUERY_PARAM_KEY_ALERT_TYPE) && (
                     <AlertAddConfigrationModal alertId={alertId} />

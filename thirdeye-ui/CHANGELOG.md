@@ -1,3 +1,10 @@
+### [2.51.2](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.51.1...thirdeye-ui-2.51.2) (2024-09-26)
+
+
+### Bug Fixes
+
+* [TE-2458](https://cortexdata.atlassian.net/browse/TE-2458) handle correct redirect on create alert options ([47a6a31c0](https://github.com/startreedata/thirdeye/commit/47a6a31c054dfcbdc3888a4eaabbf13eaa47c478))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

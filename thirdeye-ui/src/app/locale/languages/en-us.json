@@ -885,6 +885,7 @@
         "select-aggregation-function": "Select aggregation function",
         "select-aggregation-function-to-combine-multiple-data-value-into-a-single-result": "Select aggregation function to combine multiple data value into a single result, like finding the total, average, or maximum value.",
         "select-alert-type": "Select alert type",
+        "select-algorithm": "Select an algorithm",
         "select-an-alert-to-generate-the-anomaly-preview": "Select an alert to generate the anomaly preview",
         "select-dataset": "Select dataset",
         "select-dataset-first": "Select a dataset first",

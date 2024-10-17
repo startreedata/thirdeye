@@ -87,9 +87,6 @@ export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
                                         : "",
                             })}
                     </Typography>
-                    <Typography variant="body2">
-                        {t("message.threshold-setup-description")}
-                    </Typography>
                 </Grid>
                 <Grid item>
                     <AlertJsonEditorModal

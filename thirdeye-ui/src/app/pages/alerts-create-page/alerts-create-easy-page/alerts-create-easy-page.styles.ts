@@ -113,6 +113,27 @@ export const easyAlertStyles = makeStyles((theme) => ({
     detectionRecommendationsFailedText: {
         color: ColorV1.Red2,
     },
+    animatedBorder: {
+        "& .MuiOutlinedInput-root": {
+            "& fieldset": {
+                animation: "$pulse 2s infinite",
+            },
+        },
+    },
+    "@keyframes pulse": {
+        "0%": {
+            borderColor: theme.palette.primary.main,
+            borderWidth: "1px",
+        },
+        "50%": {
+            borderColor: theme.palette.error.main,
+            borderWidth: "1px",
+        },
+        "100%": {
+            borderColor: theme.palette.primary.main,
+            borderWidth: "1px",
+        },
+    },
 }));
 
 export const createAlertPageTheme = createTheme({

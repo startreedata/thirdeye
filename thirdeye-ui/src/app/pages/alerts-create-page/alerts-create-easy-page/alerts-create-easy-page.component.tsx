@@ -16,6 +16,7 @@ import { Icon } from "@iconify/react";
 import {
     Box,
     Button,
+    CircularProgress,
     Divider,
     Grid,
     TextareaAutosize,
@@ -1230,16 +1231,13 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                             undefined
                                                         }
                                                         label={t(
-                                                            "label.anomalies-detection-type"
+                                                            "label.detection-type"
                                                         )}
                                                         options={getAnomalyDetectionOptions(
                                                             [
                                                                 AnomalyDetectionOptions.SINGLE,
                                                                 AnomalyDetectionOptions.COMPOSITE,
                                                             ]
-                                                        )}
-                                                        subText={t(
-                                                            "message.select-the-algorithm-that-best-matches-the-data-patterns"
                                                         )}
                                                     />
                                                 </Grid>
@@ -1392,17 +1390,12 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                         }
                                                                                     >
                                                                                         <InputSectionV2
-                                                                                            description={t(
-                                                                                                "message.for-additional-algorithms-go-to",
-                                                                                                {
-                                                                                                    entity: t(
-                                                                                                        "label.advanced-mode"
-                                                                                                    ),
-                                                                                                }
-                                                                                            )}
                                                                                             inputComponent={
                                                                                                 <Autocomplete<AvailableAlgorithmOption>
                                                                                                     fullWidth
+                                                                                                    className={
+                                                                                                        classes.animatedBorder
+                                                                                                    }
                                                                                                     data-testId="datasource-select"
                                                                                                     getOptionLabel={(
                                                                                                         option
@@ -1438,7 +1431,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                                                 ...params.InputProps,
                                                                                                             }}
                                                                                                             placeholder={t(
-                                                                                                                "message.select-dataset"
+                                                                                                                "message.select-algorithm"
                                                                                                             )}
                                                                                                             variant="outlined"
                                                                                                         />
@@ -1504,11 +1497,26 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                                         }
                                                                                                     >
                                                                                                         {isGetAlertRecommendationLoading ? (
-                                                                                                            <Typography variant="caption">
-                                                                                                                {t(
-                                                                                                                    "label.computing-detection-recommendations"
-                                                                                                                )}
-                                                                                                            </Typography>
+                                                                                                            <Box display="flex">
+                                                                                                                <CircularProgress
+                                                                                                                    color="primary"
+                                                                                                                    size={
+                                                                                                                        15
+                                                                                                                    }
+                                                                                                                />
+
+                                                                                                                <Typography
+                                                                                                                    style={{
+                                                                                                                        marginLeft:
+                                                                                                                            "4px",
+                                                                                                                    }}
+                                                                                                                    variant="caption"
+                                                                                                                >
+                                                                                                                    {t(
+                                                                                                                        "label.computing-detection-recommendations"
+                                                                                                                    )}
+                                                                                                                </Typography>
+                                                                                                            </Box>
                                                                                                         ) : alertRecommendations?.length >
                                                                                                           0 ? (
                                                                                                             <Box
@@ -1548,7 +1556,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                                                     variant="caption"
                                                                                                                 >
                                                                                                                     {t(
-                                                                                                                        "message.could-not-compute-detection-recommendations"
+                                                                                                                        "errors.could-not-compute-detection-recommendations"
                                                                                                                     )}
                                                                                                                 </Typography>
                                                                                                             </Box>

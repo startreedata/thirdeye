@@ -41,8 +41,10 @@ export const ColumnsDrawer: FunctionComponent<ColumnsDrawerProps> = ({
             return [];
         }
 
-        const filteredMetrics = selectedDataset.metrics.filter((metric) =>
-            metric.name.toLowerCase().includes(searchQuery.toLowerCase())
+        const filteredMetrics = selectedDataset.metrics.filter(
+            (metric) =>
+                metric.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+                metric.name !== "*"
         );
 
         const filteredDimensions = selectedDataset.dimensions.filter(

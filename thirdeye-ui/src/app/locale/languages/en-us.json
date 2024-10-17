@@ -39,6 +39,7 @@
         "object-unexpected": "Unexpected object encountered.",
         "offset-without-limit": "'Offset' value provided without 'limit' value.",
         "operation-unsupported": "Operation is not supported.",
+        "pinot-instance-not-created": "Failed to create a Pinot connection. Please provide a Pinot datasource configuration. Please reach out to support if you think this is an error",
         "pipeline-execution-failed": "Pipeline execution failed.",
         "template-missing-property": "Template property is missing.",
         "timeout": "Operation timed out.",
@@ -47,7 +48,8 @@
         "unknown-rca-algorithm": "Unknown error running the RCA algorithm."
     },
     "info": {
-        "notifyHistoricalAnomalies": "By default, notifications are only sent for anomalies detected on times greater than the alert creation time. If enabled, notifications will also be sent for anomalies detected on times less than the alert creation time."
+        "notifyHistoricalAnomalies": "By default, notifications are only sent for anomalies detected on times greater than the alert creation time. If enabled, notifications will also be sent for anomalies detected on times less than the alert creation time.",
+        "pinot-instance-not-detected": "Could not detect a Pinot instance automatically. Please provide a Pinot datasource configuration."
     },
     "label": {
         "1-minute": "1 Minute",
@@ -448,6 +450,7 @@
         "recent-task-statuses-for-subscription-group": "Recent task statuses for subscription group",
         "recipient-details": "Recipient Details",
         "recommended-algorithm": "Recommended algorithm",
+        "recommended-datasources": "Recommended datasources",
         "recommended-documentation": "Recommended Documentation",
         "recommended-type": "Recommended type",
         "reload": "Reload",

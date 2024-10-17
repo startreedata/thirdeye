@@ -20,6 +20,7 @@ import {
     GetDatasourceByName,
     GetDatasources,
     GetDatasourceStatus,
+    GetRecommendedDatasources,
     GetStatusResponse,
     GetTablesForDatasourceByName,
 } from "./datasources.interfaces";
@@ -27,6 +28,7 @@ import {
     getAllDatasources,
     getDatasourceByName as getDatasourceByNameREST,
     getDatasource as getDatasourceREST,
+    getRecommenedDatasources as getRecommenedDatasourcesREST,
     getStatusForDatasource,
     getTablesForDatasource,
 } from "./datasources.rest";
@@ -117,6 +119,23 @@ export const useGetTablesForDatasourceID = (): GetTablesForDatasourceByName => {
     return {
         tables: data,
         getTableForDatasourceID,
+        status,
+        errorMessages,
+        resetData,
+    };
+};
+
+export const useGetRecommendedDatasources = (): GetRecommendedDatasources => {
+    const { data, makeRequest, status, errorMessages, resetData } =
+        useHTTPAction<Datasource[]>(getRecommenedDatasourcesREST);
+
+    const getRecommendedDatasources = (): Promise<Datasource[] | undefined> => {
+        return makeRequest(name);
+    };
+
+    return {
+        recommendedDatasources: data,
+        getRecommendedDatasources,
         status,
         errorMessages,
         resetData,

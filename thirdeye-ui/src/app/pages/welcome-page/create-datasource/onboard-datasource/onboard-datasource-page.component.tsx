@@ -24,7 +24,7 @@ import {
     Typography,
 } from "@material-ui/core";
 import { AxiosError } from "axios";
-import { capitalize } from "lodash";
+import { capitalize, isEmpty } from "lodash";
 import React, {
     FunctionComponent,
     useCallback,
@@ -44,7 +44,10 @@ import {
     useNotificationProviderV1,
 } from "../../../../platform/components";
 import { ActionStatus } from "../../../../rest/actions.interfaces";
-import { useGetDatasources } from "../../../../rest/datasources/datasources.actions";
+import {
+    useGetDatasources,
+    useGetRecommendedDatasources,
+} from "../../../../rest/datasources/datasources.actions";
 import { createDatasource } from "../../../../rest/datasources/datasources.rest";
 import type { Datasource } from "../../../../rest/dto/datasource.interfaces";
 import { createDefaultDatasource } from "../../../../utils/datasources/datasources.util";
@@ -86,32 +89,78 @@ export const WelcomeSelectDatasource: FunctionComponent = () => {
         setSelectedDatasourceValue(value as SelectedDatasource);
     };
 
-    const { datasources, getDatasources, status, errorMessages } =
-        useGetDatasources();
+    const {
+        datasources,
+        getDatasources,
+        status: datasourcesStatus,
+        errorMessages: datasourcesErrormessage,
+    } = useGetDatasources();
+
+    const {
+        recommendedDatasources,
+        getRecommendedDatasources,
+        status: recommendedDatasourcesStatus,
+        errorMessages: recommendedDatasourcesErrormessage,
+    } = useGetRecommendedDatasources();
 
     const datasourceGroups = useMemo<DatasourceOptionGroups[]>(
-        () => getDatasourceGroups(datasources || [], t),
-        [datasources]
+        () =>
+            getDatasourceGroups(datasources || recommendedDatasources || [], t),
+        [datasources, recommendedDatasources]
     );
 
     useEffect(() => {
-        getDatasources().then((data) => {
-            data &&
-                data.length === 0 &&
-                setSelectedDatasourceValue(ADD_NEW_DATASOURCE);
-        });
+        getDatasources();
     }, []);
 
     useEffect(() => {
+        if (datasourcesStatus === ActionStatus.Done && isEmpty(datasources)) {
+            getRecommendedDatasources();
+        }
+    }, [datasourcesStatus, datasources]);
+
+    useEffect(() => {
+        if (
+            datasourcesStatus === ActionStatus.Done &&
+            recommendedDatasourcesStatus === ActionStatus.Done
+        ) {
+            if (isEmpty(datasources) && isEmpty(recommendedDatasources)) {
+                notify(
+                    NotificationTypeV1.Info,
+                    t("info.pinot-instance-not-detected")
+                );
+                setSelectedDatasourceValue(ADD_NEW_DATASOURCE);
+            }
+        }
+    }, [
+        datasourcesStatus,
+        recommendedDatasources,
+        datasources,
+        recommendedDatasources,
+    ]);
+
+    useEffect(() => {
         notifyIfErrors(
-            status,
-            errorMessages,
+            datasourcesStatus,
+            datasourcesErrormessage,
             notify,
             t("message.error-while-fetching", {
                 entity: t("label.datasources"),
             })
         );
-    }, [status]);
+    }, [datasourcesStatus]);
+
+    useEffect(() => {
+        notifyIfErrors(
+            recommendedDatasourcesStatus,
+            recommendedDatasourcesErrormessage,
+            notify,
+            t("errors.pinot-instance-not-created")
+        );
+        if (recommendedDatasourcesStatus === ActionStatus.Error) {
+            setSelectedDatasourceValue(ADD_NEW_DATASOURCE);
+        }
+    }, [recommendedDatasourcesStatus]);
 
     const goToDatasetPage = useCallback(
         (datasourceId: number) =>
@@ -196,10 +245,12 @@ export const WelcomeSelectDatasource: FunctionComponent = () => {
                         <LoadingErrorStateSwitch
                             wrapInCard
                             wrapInGrid
-                            isError={status === ActionStatus.Error}
+                            isError={datasourcesStatus === ActionStatus.Error}
                             isLoading={
-                                status === ActionStatus.Working ||
-                                status === ActionStatus.Initial
+                                datasourcesStatus === ActionStatus.Working ||
+                                datasourcesStatus === ActionStatus.Initial ||
+                                recommendedDatasourcesStatus ===
+                                    ActionStatus.Working
                             }
                         >
                             {datasourceGroups.map((datasourceGroup) => (

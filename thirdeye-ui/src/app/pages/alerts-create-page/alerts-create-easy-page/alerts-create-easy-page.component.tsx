@@ -54,7 +54,7 @@ import {
     generateTemplateProperties,
     GranularityValue,
 } from "../../../components/alert-wizard-v3/select-metric/select-metric.utils";
-import { ThresholdSetup } from "../../../components/alert-wizard-v3/threshold-setup/threshold-setup.component";
+import { ThresholdSetupV3 } from "../../../components/alert-wizard-v3/threshold-setup/threshold-setup-v3.component";
 import { ColumnsDrawer } from "../../../components/columns-drawer/columns-drawer.component";
 import { CreateAlertModal } from "../../../components/create-alert-modal/create-alert-modal.component";
 import { InputSectionV2 } from "../../../components/form-basics/input-section-v2/input-section-v2.component";
@@ -104,7 +104,7 @@ const PROPERTIES_TO_COPY = [
 ];
 
 const ALERT_TEMPLATE_FOR_EVALUATE = "startree-threshold";
-const ALERT_TEMPLATE_FOR_EVALUATE_DX = "startree-threshold-dx";
+const ALERT_TEMPLATE_FOR_EVALUATE_DX = "startree-mean-variance-dx";
 const ALERT_TEMPLATE_FOR_EVALUATE_QUERY_DX = "startree-threshold-query-dx";
 
 export const AlertsCreateEasyPage: FunctionComponent = () => {
@@ -248,9 +248,9 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                 setQueryFilters(
                     String(alert.templateProperties?.queryFilters) || ""
                 );
-                if (alert.templateProperties?.enumeratoryQuery) {
+                if (alert.templateProperties?.enumeratorQuery) {
                     setEnumerators(
-                        String(alert.templateProperties?.enumeratoryQuery)
+                        String(alert.templateProperties?.enumeratorQuery)
                     );
                     setDimension(SelectDimensionsOptions.ENUMERATORS);
                 }
@@ -343,7 +343,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                   item.value
                               ),
                               queryFilters: queryFilters,
-                              enumeratoryQuery:
+                              enumeratorQuery:
                                   dimension ===
                                   SelectDimensionsOptions.ENUMERATORS
                                       ? enumerators
@@ -387,14 +387,82 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
     };
 
     const handleAnomalyDetectionChange = (item: string): void => {
-        const copied = { ...alert };
-        delete copied.templateProperties?.queryFilters;
-        delete copied.templateProperties?.enumerationItems;
-        setCompositeFilters(null);
-        setIsMultiDimensionAlert(item === AnomalyDetectionOptions.COMPOSITE);
-        setAlertConfigForPreview(copied);
-        onAlertPropertyChange(copied);
+        setEnumerations(false);
+        setEnumerators("");
+        setDimension(null);
         setAnomalyDetection(item);
+        setAlgorithmOption(null);
+        let isCustomMetrics = false;
+        if (selectedMetric === t("label.custom-metric-aggregation")) {
+            isCustomMetrics = true;
+        }
+        if (
+            !selectedTable ||
+            !selectedMetric ||
+            !aggregationFunction ||
+            !granularity
+        ) {
+            return;
+        }
+        if (item === AnomalyDetectionOptions.SINGLE) {
+            const workingAlert = {
+                template: {
+                    name: createNewStartingAlert().template?.name,
+                },
+                templateProperties: {
+                    ...createNewStartingAlert().templateProperties,
+                    ...generateTemplateProperties(
+                        isCustomMetrics
+                            ? editedDatasourceFieldValue
+                            : (selectedMetric as string),
+                        selectedTable?.dataset,
+                        aggregationFunction || "",
+                        granularity
+                    ),
+                    queryFilters: queryFilters ? queryFilters : "",
+                },
+            };
+            onAlertPropertyChange(workingAlert);
+            getAlertRecommendation({ ...alert, ...workingAlert });
+            handleReloadPreviewClick(workingAlert);
+        } else if (item === AnomalyDetectionOptions.COMPOSITE) {
+            setCompositeFilters(null);
+            setIsMultiDimensionAlert(true);
+        }
+    };
+
+    const handleRunEnumerations = (): void => {
+        if (
+            !selectedTable ||
+            !selectedMetric ||
+            !aggregationFunction ||
+            !granularity
+        ) {
+            return;
+        }
+        setEnumerations(true);
+        setAlgorithmOption(null);
+        setAlgorithmOption(null);
+        const workingAlert = {
+            template: {
+                name: ALERT_TEMPLATE_FOR_EVALUATE_QUERY_DX,
+            },
+            templateProperties: {
+                ...generateTemplateProperties(
+                    selectedMetric as string,
+                    selectedTable?.dataset,
+                    aggregationFunction || "",
+                    granularity
+                ),
+                min: 0,
+                max: 1,
+                queryFilters: "${queryFilters}",
+                enumeratorQuery: enumerators,
+            },
+        };
+        onAlertPropertyChange(workingAlert);
+        getAlertRecommendation({ ...alert, ...workingAlert });
+        handleReloadPreviewClick(workingAlert);
     };
 
     const getAnomalyDetectionOptions = (
@@ -423,9 +491,31 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                 label: item,
                 onClick: () => {
                     setDimension(() => {
-                        if (item === SelectDimensionsOptions.ENUMERATORS) {
-                            setEnumerators("");
-                            setEnumerations(false);
+                        setEnumerators("");
+                        setEnumerations(false);
+                        setCompositeFilters(null);
+                        if (
+                            selectedTable?.dataset &&
+                            selectedMetric &&
+                            aggregationFunction &&
+                            granularity
+                        ) {
+                            const workingAlert = {
+                                template: {
+                                    name: ALERT_TEMPLATE_FOR_EVALUATE_QUERY_DX,
+                                },
+                                templateProperties: {
+                                    ...createNewStartingAlert()
+                                        .templateProperties,
+                                    ...generateTemplateProperties(
+                                        selectedMetric as string,
+                                        selectedTable?.dataset,
+                                        aggregationFunction || "",
+                                        granularity
+                                    ),
+                                },
+                            };
+                            onAlertPropertyChange(workingAlert);
                         }
 
                         return item;
@@ -454,83 +544,6 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
 
         return [...recommendedAlgorithmOptions, ...availableAlgorithmOptions];
     }, [alertTemplates, alertRecommendations]);
-
-    useEffect(() => {
-        let isCustomMetrics = false;
-        if (selectedMetric === t("label.custom-metric-aggregation")) {
-            isCustomMetrics = true;
-        }
-        if (
-            selectedMetric &&
-            selectedTable &&
-            granularity &&
-            (aggregationFunction ||
-                (isCustomMetrics && editedDatasourceFieldValue))
-        ) {
-            const isAnomalyDetectionComposite =
-                anomalyDetection === AnomalyDetectionOptions.COMPOSITE;
-            const isRecommendation =
-                algorithmOption?.recommendationLabel ===
-                t("label.recommended-configuration");
-            const recommendedTemplate = isRecommendation
-                ? alertRecommendations.find(
-                      (rec, index) =>
-                          `${rec.alert.template?.name}-${index}` ===
-                          algorithmOption?.recommendationId
-                  )
-                : null;
-            const workingAlert = {
-                template: {
-                    name:
-                        (isAnomalyDetectionComposite
-                            ? algorithmOption?.algorithmOption
-                                  .alertTemplateForMultidimension
-                            : algorithmOption?.algorithmOption
-                                  ?.alertTemplate) ||
-                        (!isAnomalyDetectionComposite
-                            ? createNewStartingAlert().template?.name
-                            : dimension === SelectDimensionsOptions.ENUMERATORS
-                            ? ALERT_TEMPLATE_FOR_EVALUATE_QUERY_DX
-                            : ALERT_TEMPLATE_FOR_EVALUATE_DX),
-                },
-                templateProperties: {
-                    ...alert.templateProperties,
-                    ...(recommendedTemplate?.alert.templateProperties ?? {}),
-                    ...generateTemplateProperties(
-                        isCustomMetrics
-                            ? editedDatasourceFieldValue
-                            : (selectedMetric as string),
-                        selectedTable?.dataset,
-                        aggregationFunction || "",
-                        granularity
-                    ),
-                    queryFilters: queryFilters,
-                    enumeratoryQuery:
-                        dimension === SelectDimensionsOptions.ENUMERATORS
-                            ? enumerators
-                            : null,
-                },
-            };
-            onAlertPropertyChange(workingAlert);
-            if (
-                !algorithmOption &&
-                (!isAnomalyDetectionComposite || !!compositeFilters)
-            ) {
-                getAlertRecommendation({ ...alert, ...workingAlert });
-            }
-            handleReloadPreviewClick(workingAlert);
-        }
-    }, [
-        selectedMetric,
-        selectedTable,
-        granularity,
-        aggregationFunction,
-        algorithmOption,
-        compositeFilters,
-        queryFilters,
-        anomalyDetection,
-        enumerations,
-    ]);
 
     const { getEvaluation, evaluation } = useGetEvaluation();
 
@@ -612,7 +625,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                     granularity
                 ),
                 queryFilters: queryFilters,
-                enumeratoryQuery:
+                enumeratorQuery:
                     dimension === SelectDimensionsOptions.ENUMERATORS
                         ? enumerators
                         : null,
@@ -655,6 +668,27 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
     const onUpdateCompositeFiltersChange = (
         template: TemplatePropertiesObject
     ): void => {
+        if (
+            !selectedTable ||
+            !selectedMetric ||
+            !aggregationFunction ||
+            !granularity
+        ) {
+            return;
+        }
+        setEnumerations(false);
+        setEnumerators("");
+        const workingAlert = {
+            template: {
+                name: ALERT_TEMPLATE_FOR_EVALUATE_DX,
+            },
+            templateProperties: {
+                ...template,
+            },
+        };
+        onAlertPropertyChange(workingAlert);
+        getAlertRecommendation({ ...alert, ...workingAlert });
+        handleReloadPreviewClick(workingAlert);
         setCompositeFilters(template);
     };
 
@@ -1122,25 +1156,6 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                     </Button>
                                                                 </Box>
                                                             </Grid>
-                                                            {/* <Grid
-                                                                    item
-                                                                    xs={4}
-                                                                >
-                                                                    <Button
-                                                                        color="primary"
-                                                                        startIcon={
-                                                                            <InfoOutlinedIcon />
-                                                                        }
-                                                                        variant="outlined"
-                                                                        onClick={() => {
-                                                                            // TODO Add guide link
-                                                                        }}
-                                                                    >
-                                                                        {t(
-                                "label.aggregation-functions-guide-write-custom"
-                                                                        )}
-                                                                    </Button>
-                                                                </Grid> */}
                                                         </Grid>
                                                     </Grid>
                                                 )}
@@ -1306,9 +1321,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                             size="small"
                                                                             variant="contained"
                                                                             onClick={() =>
-                                                                                setEnumerations(
-                                                                                    true
-                                                                                )
+                                                                                handleRunEnumerations()
                                                                             }
                                                                         >
                                                                             {t(
@@ -1548,7 +1561,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                                                     variant="caption"
                                                                                                                 >
                                                                                                                     {t(
-                                                                                                                        "message.could-not-compute-detection-recommendations"
+                                                                                                                        "errors.could-not-compute-detection-recommendations"
                                                                                                                     )}
                                                                                                                 </Typography>
                                                                                                             </Box>
@@ -1657,9 +1670,13 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                     12
                                                                                 }
                                                                             >
-                                                                                <ThresholdSetup
+                                                                                <ThresholdSetupV3
                                                                                     alert={
                                                                                         alert
+                                                                                    }
+                                                                                    alertEvaluation={
+                                                                                        evaluation ||
+                                                                                        undefined
                                                                                     }
                                                                                     alertTemplate={
                                                                                         selectedAlertTemplate
@@ -1689,7 +1706,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                                 )}
                                                                                             </Button>
                                                                                         )}
-                                                                                </ThresholdSetup>
+                                                                                </ThresholdSetupV3>
                                                                             </Grid>
                                                                         ) : (
                                                                             <ChartContentV2

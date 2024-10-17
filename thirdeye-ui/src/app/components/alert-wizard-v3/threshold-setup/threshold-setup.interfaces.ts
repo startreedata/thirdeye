@@ -13,12 +13,16 @@
  * the License.
  */
 import { AlertTemplate } from "../../../rest/dto/alert-template.interfaces";
-import { EditableAlert } from "../../../rest/dto/alert.interfaces";
+import {
+    AlertEvaluation,
+    EditableAlert,
+} from "../../../rest/dto/alert.interfaces";
 import { AvailableAlgorithmOption } from "../alert-type-selection/alert-type-selection.interfaces";
 
 export interface ThresholdSetupProps {
     alert: EditableAlert;
     alertTemplate: AlertTemplate | undefined;
+    alertEvaluation?: AlertEvaluation;
     onAlertPropertyChange: (
         contents: Partial<EditableAlert>,
         isTotalReplace?: boolean

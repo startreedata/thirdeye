@@ -23,9 +23,10 @@ export const InputSection: FunctionComponent<InputSectionProps> = ({
     inputComponent,
     fullWidth,
     gridContainerProps,
+    gridItemProps,
 }) => {
     return (
-        <Grid item xs={12}>
+        <Grid item xs={12} {...(gridItemProps ?? {})}>
             <Grid container alignItems="center" {...gridContainerProps}>
                 <Grid item lg={2} md={4} sm={12} xs={12}>
                     {!!labelComponent && labelComponent}

@@ -1,3 +1,10 @@
+### [2.51.1](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.51.0...thirdeye-ui-2.51.1) (2024-09-26)
+
+
+### Bug Fixes
+
+* TE-XX fixed create alert issues ([fb3ecf9db](https://github.com/startreedata/thirdeye/commit/fb3ecf9db6a55549d64b87cb9940164fb374c2ab))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

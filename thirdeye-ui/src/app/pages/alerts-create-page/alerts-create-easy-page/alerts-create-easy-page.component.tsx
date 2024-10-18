@@ -693,6 +693,60 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         setCompositeFilters(template);
     };
 
+    const handleAlgorithmChange = (
+        algorithm: AvailableAlgorithmOption
+    ): void => {
+        if (
+            !algorithm ||
+            !selectedTable ||
+            !selectedMetric ||
+            !aggregationFunction ||
+            !granularity
+        ) {
+            return;
+        }
+        setAlgorithmOption(algorithm);
+        const isCompositeAlert =
+            anomalyDetection === AnomalyDetectionOptions.COMPOSITE;
+        const isRecommendation =
+            algorithm?.recommendationLabel ===
+            t("label.recommended-configuration");
+        const recommendedTemplate = isRecommendation
+            ? alertRecommendations.find(
+                  (rec, index) =>
+                      `${rec.alert.template?.name}-${index}` ===
+                      algorithm?.recommendationId
+              )
+            : null;
+        const workingAlert = {
+            template: {
+                name: isCompositeAlert
+                    ? algorithm?.algorithmOption?.alertTemplateForMultidimension
+                    : algorithm?.algorithmOption?.alertTemplate,
+            },
+            templateProperties: {
+                ...createNewStartingAlert().templateProperties,
+                ...generateTemplateProperties(
+                    selectedMetric as string,
+                    selectedTable?.dataset,
+                    aggregationFunction || "",
+                    granularity
+                ),
+                ...(isCompositeAlert ? { ...compositeFilters } : {}),
+                queryFilters: queryFilters
+                    ? queryFilters
+                    : isCompositeAlert
+                    ? "${queryFilters}"
+                    : "",
+                ...(dimension === SelectDimensionsOptions.ENUMERATORS
+                    ? { enumeratorQuery: enumerators }
+                    : {}),
+                ...(recommendedTemplate?.alert.templateProperties ?? {}),
+            },
+        };
+        onAlertPropertyChange(workingAlert);
+    };
+
     return (
         <>
             <Grid item xs={12}>
@@ -1482,7 +1536,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                                         ) {
                                                                                                             return;
                                                                                                         }
-                                                                                                        setAlgorithmOption(
+                                                                                                        handleAlgorithmChange(
                                                                                                             value
                                                                                                         );
                                                                                                     }}

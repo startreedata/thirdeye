@@ -1,3 +1,10 @@
+## [2.52.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.51.4...thirdeye-ui-2.52.0) (2024-10-18)
+
+
+### Features
+
+* [TE-2442](https://cortexdata.atlassian.net/browse/TE-2442) show recommended datasources during onboarding ([6c049f738](https://github.com/startreedata/thirdeye/commit/6c049f738e2217c7f233102b6d331a136baf01b1))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

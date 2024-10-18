@@ -175,6 +175,7 @@ export interface TimeSeriesChartProps {
     svgContainerUseAuto?: boolean;
     tooltipPositionOverride?: [number, number];
     legendsPlacement?: `${LegendPlacement}`;
+    colorPalette?: string[];
 }
 export interface ZoomDomain {
     x0: number;

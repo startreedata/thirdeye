@@ -52,7 +52,7 @@ module.exports = {
                         release: "minor",
                     },
                     {
-                        type: "fix",
+                        type: ["fix", "chore", "refactor", "test", "wip"],
                         scope: projectScope,
                         release: "patch",
                     },
@@ -60,12 +60,6 @@ module.exports = {
                     // Pull request scopes that do not belong to this project and will not trigger a release
                     {
                         scope: `!${projectScope}`,
-                        release: false,
-                    },
-
-                    // Pull request types that do not trigger a release
-                    {
-                        type: ["chore", "refactor", "test", "wip"],
                         release: false,
                     },
                 ],

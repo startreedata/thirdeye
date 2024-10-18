@@ -140,8 +140,8 @@ export const WeeklyGraph = ({
     };
 
     const keysColorMapping = {
-        currentPeriod: "#F37B0E",
-        previousPeriod: "#006CA7",
+        currentPeriod: "#006CA7",
+        previousPeriod: "#F37B0E",
     };
 
     const graphLegend = [

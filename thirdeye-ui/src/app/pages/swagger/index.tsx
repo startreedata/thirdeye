@@ -34,26 +34,18 @@ export const SwaggerDocs = (): JSX.Element => {
             return req;
         },
         onComplete: (): void => {
-            const authButton = document.querySelector(".auth-wrapper > button");
-            authButton?.addEventListener("click", (): void => {
-                setTimeout((): void => {
-                    const inputs = document.querySelectorAll<HTMLInputElement>(
-                        ".modal-ux-content input"
-                    );
-                    if (workspace.id) {
-                        inputs[0].value = workspace.id;
-                    }
-                    if (accessToken) {
-                        inputs[1].value = `Bearer ${accessToken}`;
-                    }
-                });
-            });
+            const authSection = document.querySelector(".scheme-container");
+            authSection?.remove();
         },
     };
 
     return (
         <div>
-            <SwaggerUI url="/openapi.json" docExpansion={"none"} {...swaggerOptions} />
+            <SwaggerUI
+                docExpansion="none"
+                url="/openapi.json"
+                {...swaggerOptions}
+            />
         </div>
     );
 };

@@ -16,8 +16,12 @@
 import { AlertEffectivnessData } from "../../../pages/impact-dashboard-page/impact-dashboard-page.interfaces";
 import { Alert } from "../../../rest/dto/alert.interfaces";
 import { Anomaly } from "../../../rest/dto/anomaly.interfaces";
+import { EnumerationItem } from "../../../rest/dto/enumeration-item.interfaces";
 import { Investigation } from "../../../rest/dto/rca.interfaces";
-import { SubscriptionGroup } from "../../../rest/dto/subscription-group.interfaces";
+import {
+    SpecType,
+    SubscriptionGroup,
+} from "../../../rest/dto/subscription-group.interfaces";
 
 export interface SummaryDataProps {
     alerts: Alert[] | null;
@@ -28,6 +32,7 @@ export interface SummaryDataProps {
     investigations: Investigation[] | null;
     subscriptionGroups: SubscriptionGroup[] | null;
     selectedAnalysisPeriod: string;
+    activeEnumerationItems: EnumerationItem[] | null;
 }
 
 export interface SummaryProps extends SummaryDataProps {
@@ -66,6 +71,7 @@ export type VerboseSummary = {
             name: string | undefined;
         };
     };
+    notificationChannelsUsed: SpecType[];
 };
 
 export type Summary = {

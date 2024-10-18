@@ -15,10 +15,12 @@
 import { useHTTPAction } from "../create-rest-action";
 import { AlertTemplate } from "../dto/alert-template.interfaces";
 import {
+    CreateAlertTemplates,
     GetAlertTemplate,
     GetAlertTemplates,
 } from "./alert-templates.interfaces";
 import {
+    createDefaultAlertTemplates as createDefaultAlertTemplatesREST,
     getAlertTemplate as getAlertTemplateREST,
     getAlertTemplates as getAlertTemplatesREST,
 } from "./alert-templates.rest";
@@ -53,6 +55,25 @@ export const useGetAlertTemplates = (): GetAlertTemplates => {
     return {
         alertTemplates: data,
         getAlertTemplates,
+        status,
+        errorMessages,
+        resetData,
+    };
+};
+
+export const useCreateDefaultAlertTemplates = (): CreateAlertTemplates => {
+    const { data, makeRequest, status, errorMessages, resetData } =
+        useHTTPAction<AlertTemplate[]>(createDefaultAlertTemplatesREST);
+
+    const createDefaultAlertTemplates = (): Promise<
+        AlertTemplate[] | undefined
+    > => {
+        return makeRequest();
+    };
+
+    return {
+        alertTemplates: data,
+        createDefaultAlertTemplates,
         status,
         errorMessages,
         resetData,

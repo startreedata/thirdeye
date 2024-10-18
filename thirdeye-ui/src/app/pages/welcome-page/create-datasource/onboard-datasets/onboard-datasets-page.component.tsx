@@ -22,7 +22,7 @@ import {
     Typography,
 } from "@material-ui/core";
 import type { AxiosError } from "axios";
-import { capitalize } from "lodash";
+import { capitalize, isEmpty } from "lodash";
 import React, {
     FunctionComponent,
     useCallback,
@@ -54,6 +54,8 @@ import {
     getWelcomeLandingPath,
 } from "../../../../utils/routes/routes.util";
 import { ONBOARD_DATASETS_TEST_IDS } from "./onboard-datasets-page.interface";
+import { Alert } from "@material-ui/lab";
+import InfoOutlined from "@material-ui/icons/InfoOutlined";
 
 export const WelcomeSelectDatasets: FunctionComponent = () => {
     const [selectedDatasets, setSelectedDatasets] = useState<string[]>([]);
@@ -187,6 +189,9 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
         });
     }, [selectedDatasets, datasourceId]);
 
+    const isNextButtonDisabled =
+        tables?.length === 0 || isEmpty(selectedDatasets);
+
     return (
         <>
             <PageContentsGridV1>
@@ -228,12 +233,18 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
                                     <EmptyStateSwitch
                                         emptyState={
                                             <Box p={5}>
-                                                {t(
-                                                    "message.no-datasets-available"
-                                                )}
+                                                <Alert
+                                                    icon={<InfoOutlined />}
+                                                    severity="info"
+                                                    variant="outlined"
+                                                >
+                                                    {t(
+                                                        "message.no-datasets-available-in-datasource"
+                                                    )}
+                                                </Alert>
                                             </Box>
                                         }
-                                        isEmpty={tables?.length === 0}
+                                        isEmpty={isEmpty(tables)}
                                     >
                                         <Box
                                             alignItems="flexStart"
@@ -298,6 +309,7 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
             <WizardBottomBar
                 backBtnLink={AppRoute.WELCOME_ONBOARD_DATASOURCE}
                 handleNextClick={handleNext}
+                nextButtonIsDisabled={isNextButtonDisabled}
                 nextButtonLabel={t("label.onboard-entity", {
                     entity: t("label.datasets"),
                 })}

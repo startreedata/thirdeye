@@ -24,3 +24,8 @@ export interface GetAlertTemplates extends ActionHook {
     alertTemplates: AlertTemplate[] | null;
     getAlertTemplates: () => Promise<AlertTemplate[] | undefined>;
 }
+
+export interface CreateAlertTemplates extends ActionHook {
+    alertTemplates: AlertTemplate[] | null;
+    createDefaultAlertTemplates: () => Promise<AlertTemplate[] | undefined>;
+}

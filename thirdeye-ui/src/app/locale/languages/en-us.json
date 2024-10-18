@@ -26,6 +26,7 @@
         "invalid-params-components": "Invalid param components provided.",
         "invalid-query-param-operator": "Invalid operator for query param.",
         "invalid-sql": "Invalid SQL syntax.",
+        "load-alert-templates": "Failed to load alert templates. Please reach out to StarTree support.",
         "missing-configuration-field": "Missing configuration field in alert.",
         "missing-id": "ID is missing.",
         "missing-name": "Name is missing.",
@@ -820,6 +821,7 @@
         "no-data-for-entity": "No {{entity}} for the date range.",
         "no-data-for-entity-for-date-range": "No {{entity}} for the date range. Please try a different date range.",
         "no-datasets-available": "No dataset available",
+        "no-datasets-available-in-datasource": "No datasets were found in this datasource. Please create a table in Pinot. Once the table in Pinot is ready, refresh this page to continue.",
         "no-dimensions-selected-yet": "No dimensions selected yet",
         "no-entity-created": "No {{entity}} created.",
         "no-entity-data": "No {{entity}} data available",
@@ -1023,8 +1025,8 @@
                     "anomaly-table": {
                         "columns": {
                             "alert-name": "Alert name",
-                            "anomalies-detected": "Anomalies detected",
-                            "dimensions-within-alert": "Dimensions within alert"
+                            "anomalies-detected": "Anomalies",
+                            "dimensions-within-alert": "Dimensions"
                         },
                         "emptyState": "No anomalies detected in the selected period",
                         "title": "Top anomaly alerts"

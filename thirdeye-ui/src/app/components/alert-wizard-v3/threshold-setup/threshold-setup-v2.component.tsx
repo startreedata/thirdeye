@@ -17,12 +17,12 @@ import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { easyAlertStyles } from "../../../pages/alerts-create-page/alerts-create-easy-page/alerts-create-easy-page.styles";
 import { TemplatePropertiesObject } from "../../../rest/dto/alert.interfaces";
 import { PreviewChart } from "../../alert-wizard-v2/alert-template/preview-chart/preview-chart.component";
+import { LegendPlacement } from "../../alert-wizard-v2/alert-template/preview-chart/preview-chart.interfaces";
 import { InputSectionV2 } from "../../form-basics/input-section-v2/input-section-v2.component";
 import { ParseMarkdown } from "../../parse-markdown/parse-markdown.component";
 import { SpecificPropertiesRenderer } from "./specific-properties-renderer/specific-properties-renderer-v2.component";
 import { ThresholdSetupProps } from "./threshold-setup.interfaces";
 import { generateInputFieldConfigsForAlertTemplate } from "./threshold-setup.utils";
-import { LegendPlacement } from "../../alert-wizard-v2/alert-template/preview-chart/preview-chart.interfaces";
 
 export const ThresholdSetup: FunctionComponent<ThresholdSetupProps> = ({
     onAlertPropertyChange,

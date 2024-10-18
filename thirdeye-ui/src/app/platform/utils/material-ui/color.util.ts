@@ -34,6 +34,7 @@ export const ColorV1 = {
     Grey8: "#bed3e4",
     Grey9: "#f3f9ff",
     Grey10: "#b4cde0",
+    Grey11: "#4b6d93",
     Red1: "#E37475",
     Red2: "#F2453D",
     Red3: "#D13135",

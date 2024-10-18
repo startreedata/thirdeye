@@ -475,6 +475,16 @@ export const extendablePropertyStepNameMap: Record<string, string> = {
     RCA: "Root Cause Analysis",
     OTHER: "Other",
 };
+export const extendablePropertyStepNameMapV2: Record<string, string> = {
+    DATA: "Sample data",
+    PREPROCESS: "Preprocessing",
+    DETECTION: "Detection",
+    DIMENSION_EXPLORATION: "Dimension Exploration",
+    FILTER: "Filtering",
+    POSTPROCESS: "Postprocessing",
+    RCA: "Root Cause Analysis",
+    OTHER: "Other",
+};
 
 export enum ALERT_PROPERTIES_DEFAULT_STEP {
     STEP = "OTHER",
@@ -516,4 +526,23 @@ export const groupPropertyByStepAndSubStep = (
     }
 
     return groupedProperties;
+};
+
+export const getGranularityLabelFromValue = (granularity: string): string => {
+    switch (granularity) {
+        case "P7D":
+            return i18n.t("label.weekly");
+        case "P1D":
+            return i18n.t("label.daily");
+        case "PT1H":
+            return i18n.t("label.hourly");
+        case "PT15M":
+            return i18n.t("label.15-minutes");
+        case "PT5M":
+            return i18n.t("label.5-minutes");
+        case "PT1M":
+            return i18n.t("label.1-minute");
+        default:
+            return granularity;
+    }
 };

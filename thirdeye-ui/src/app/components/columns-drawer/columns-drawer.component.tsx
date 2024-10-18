@@ -19,9 +19,9 @@ import React, { FunctionComponent, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { SearchInputV1 } from "../../platform/components";
 import { ColorV1 } from "../../platform/utils/material-ui/color.util";
+import { CopyButtonV2 } from "../copy-button-v2/copy-button-v2.component";
 import { ColumnsDrawerProps } from "./columns-drawer.interfaces";
 import { useColumnsDrawerStyles } from "./columns-drawer.styles";
-import { CopyButtonV2 } from "../copy-button-v2/copy-button-v2.component";
 
 /**
  * Convenience wrapper on top of HelpDrawerCoreV1 so consumers do not have
@@ -36,13 +36,24 @@ export const ColumnsDrawer: FunctionComponent<ColumnsDrawerProps> = ({
     const { t } = useTranslation();
     const [searchQuery, setSearchQuery] = useState("");
 
-    const filteredDimensions = useMemo(
-        () =>
-            selectedDataset?.metrics.filter((dimension) =>
-                dimension.name.toLowerCase().includes(searchQuery.toLowerCase())
-            ) || [],
-        [selectedDataset, searchQuery]
-    );
+    const filteredColumns = useMemo(() => {
+        if (!selectedDataset) {
+            return [];
+        }
+
+        const filteredMetrics = selectedDataset.metrics.filter(
+            (metric) =>
+                metric.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+                metric.name !== "*"
+        );
+
+        const filteredDimensions = selectedDataset.dimensions.filter(
+            (dimension) =>
+                dimension.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+
+        return [...filteredMetrics, ...filteredDimensions];
+    }, [selectedDataset, searchQuery]);
 
     return (
         <>
@@ -90,22 +101,29 @@ export const ColumnsDrawer: FunctionComponent<ColumnsDrawerProps> = ({
                                 onChangeDelay={0}
                             />
                             <Box className={classes.listContainer}>
-                                {filteredDimensions.map((dimension) => (
-                                    <Box
-                                        alignItems="center"
-                                        className={classes.listItem}
-                                        display="flex"
-                                        justifyContent="space-between"
-                                        key={dimension.id}
-                                    >
-                                        <Typography variant="body2">
-                                            {dimension.name}
-                                        </Typography>
-                                        <CopyButtonV2
-                                            content={dimension.name}
-                                        />
-                                    </Box>
-                                ))}
+                                {filteredColumns.map((column) => {
+                                    const currentDimension =
+                                        typeof column === "string"
+                                            ? column
+                                            : column.name;
+
+                                    return (
+                                        <Box
+                                            alignItems="center"
+                                            className={classes.listItem}
+                                            display="flex"
+                                            justifyContent="space-between"
+                                            key={currentDimension}
+                                        >
+                                            <Typography variant="body2">
+                                                {currentDimension}
+                                            </Typography>
+                                            <CopyButtonV2
+                                                content={currentDimension}
+                                            />
+                                        </Box>
+                                    );
+                                })}
                             </Box>
                         </Box>
                     </Box>

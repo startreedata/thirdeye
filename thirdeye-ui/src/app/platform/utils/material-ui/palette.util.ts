@@ -22,6 +22,7 @@ export const PaletteV1 = {
     SecondaryColorMain: ColorV1.Grey2,
     ActionColorLight: ColorV1.White1,
     WhiteColor: ColorV1.White1,
+    TextColorGrey: ColorV1.Grey11,
     HoverOpacityLight: 0.06,
     HoverOverlayLight: alpha(ColorV1.White1, 0.06),
     FocusOpacityLight: 0.09,

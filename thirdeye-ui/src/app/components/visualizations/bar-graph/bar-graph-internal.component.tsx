@@ -12,14 +12,14 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import React from "react";
-import { Group } from "@visx/group";
-import { BarGroup } from "@visx/shape";
 import { AxisBottom, AxisRight } from "@visx/axis";
+import { Group } from "@visx/group";
 import { scaleBand, scaleLinear, scaleOrdinal } from "@visx/scale";
-import { withTooltip, Tooltip, defaultStyles } from "@visx/tooltip";
-import { BarData, BarGraphProps, TooltipProps } from "./bar-graph.interfaces";
+import { BarGroup } from "@visx/shape";
+import { defaultStyles, Tooltip, withTooltip } from "@visx/tooltip";
 import { ScaleLinear } from "d3-scale";
+import React from "react";
+import { BarData, BarGraphProps, TooltipProps } from "./bar-graph.interfaces";
 
 const tooltipStyles = {
     ...defaultStyles,
@@ -49,9 +49,6 @@ export default withTooltip(
         const yMax = height! - margins!.top - margins!.bottom - 1;
 
         const getDate = (d: BarData): string => d.date;
-
-        // Note: The below functions can be passed as props to component if any customizations are needed.
-
         /* This scales the x-axis based on date or whatever range of
   x-axis values are provided within xMax Range */
         const dateScale = scaleBand<string>({

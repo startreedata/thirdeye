@@ -117,6 +117,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
     const [queryFilters, setQueryFilters] = useState("");
+    const [inputValue, setInputValue] = useState("");
 
     const [showSQLWhere, setShowSQLWhere] = useState(false);
     const [enumerations, setEnumerations] = useState(false);
@@ -301,10 +302,23 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
 
     const handleGranularityChange = async (
         _: unknown,
-        item: { label: string; value: GranularityValue }
+        item: { label: string; value: GranularityValue } | null
     ): Promise<void> => {
         const existingGranularity = granularity;
+        if (!item) {
+            if (aggregationFunction) {
+                handleAggregationChange(aggregationFunction);
+            }
+
+            return;
+        }
         setGranularity(item.value);
+        setDimension(null);
+        setCompositeFilters(null);
+        setAlgorithmOption(null);
+        setEnumerations(false);
+        setEnumerators("");
+        setAnomalyDetection(null);
         if (
             item.value &&
             (editedDatasourceFieldValue || selectedMetric) &&
@@ -379,7 +393,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
             options.push({
                 value: item,
                 label: item,
-                onClick: () => setAggregationFunction(item),
+                onClick: () => handleAggregationChange(item),
                 tooltipText: item,
             })
         );
@@ -495,6 +509,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                         setEnumerators("");
                         setEnumerations(false);
                         setCompositeFilters(null);
+                        setAlgorithmOption(null);
                         if (
                             selectedTable?.dataset &&
                             selectedMetric &&
@@ -647,6 +662,60 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         enumerators,
     ]);
 
+    const handleDatasetChange = (dataset: DatasetInfo): void => {
+        setSelectedTable(dataset);
+        setSelectedMetric(null);
+        setAggregationFunction(null);
+        setGranularity(null);
+        setQueryFilters("");
+        setInputValue("");
+        setAlgorithmOption(null);
+        setCompositeFilters(null);
+        setAnomalyDetection(null);
+        setEnumerations(false);
+        setEnumerators("");
+        setDimension(null);
+    };
+
+    const handleMetricChange = (metric: string): void => {
+        setSelectedMetric(metric);
+        setAggregationFunction(null);
+        setGranularity(null);
+        setAlgorithmOption(null);
+        setCompositeFilters(null);
+        setQueryFilters("");
+        setInputValue("");
+        setAnomalyDetection(null);
+        setEditedDatasourceFieldValue("");
+        setEnumerations(false);
+        setEnumerators("");
+        setDimension(null);
+    };
+
+    const handleAggregationChange = (aggregation: string): void => {
+        setAggregationFunction(aggregation);
+        setGranularity(null);
+        setAlgorithmOption(null);
+        setCompositeFilters(null);
+        setAnomalyDetection(null);
+        setEnumerations(false);
+        setQueryFilters("");
+        setInputValue("");
+        setEnumerators("");
+        setDimension(null);
+    };
+
+    const handleSqlChange = (sql: string): void => {
+        setQueryFilters(sql);
+        setGranularity(null);
+        setAlgorithmOption(null);
+        setCompositeFilters(null);
+        setAnomalyDetection(null);
+        setEnumerations(false);
+        setEnumerators("");
+        setDimension(null);
+    };
+
     const handleReloadPreviewClick = (alert?: Partial<EditableAlert>): void => {
         if ((!startTime || !endTime) && alertInsight) {
             // If start or end is missing and there exists an alert insight
@@ -718,31 +787,44 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                       algorithm?.recommendationId
               )
             : null;
+        const isEnumeratorQuery =
+            dimension === SelectDimensionsOptions.ENUMERATORS;
         const workingAlert = {
             template: {
                 name: isCompositeAlert
                     ? algorithm?.algorithmOption?.alertTemplateForMultidimension
                     : algorithm?.algorithmOption?.alertTemplate,
             },
-            templateProperties: {
-                ...createNewStartingAlert().templateProperties,
-                ...generateTemplateProperties(
-                    selectedMetric as string,
-                    selectedTable?.dataset,
-                    aggregationFunction || "",
-                    granularity
-                ),
-                ...(isCompositeAlert ? { ...compositeFilters } : {}),
-                queryFilters: queryFilters
-                    ? queryFilters
-                    : isCompositeAlert
-                    ? "${queryFilters}"
-                    : "",
-                ...(dimension === SelectDimensionsOptions.ENUMERATORS
-                    ? { enumeratorQuery: enumerators }
-                    : {}),
-                ...(recommendedTemplate?.alert.templateProperties ?? {}),
-            },
+            templateProperties: recommendedTemplate?.alert.templateProperties
+                ? {
+                      ...recommendedTemplate.alert.templateProperties,
+                  }
+                : {
+                      ...(isEnumeratorQuery
+                          ? {}
+                          : createNewStartingAlert().templateProperties),
+                      ...generateTemplateProperties(
+                          selectedMetric as string,
+                          selectedTable?.dataset,
+                          aggregationFunction || "",
+                          granularity
+                      ),
+                      ...(isCompositeAlert ? { ...compositeFilters } : {}),
+                      queryFilters: queryFilters
+                          ? queryFilters
+                          : isCompositeAlert
+                          ? "${queryFilters}"
+                          : "",
+                      ...(isEnumeratorQuery
+                          ? { enumeratorQuery: enumerators }
+                          : {}),
+                      ...(isEnumeratorQuery
+                          ? {
+                                min: 0,
+                                max: 1,
+                            }
+                          : {}),
+                  },
         };
         onAlertPropertyChange(workingAlert);
     };
@@ -902,11 +984,8 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                 ) {
                                                                     return;
                                                                 }
-                                                                setSelectedTable(
+                                                                handleDatasetChange(
                                                                     selectedTableInfo
-                                                                );
-                                                                setSelectedMetric(
-                                                                    null
                                                                 );
                                                             }}
                                                         />
@@ -1004,7 +1083,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                 metric
                                                             ) => {
                                                                 metric &&
-                                                                    setSelectedMetric(
+                                                                    handleMetricChange(
                                                                         metric
                                                                     );
                                                             }}
@@ -1024,10 +1103,6 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                 ) ? (
                                                     <Grid item xs={12}>
                                                         <RadioSection
-                                                            defaultValue={
-                                                                aggregationFunction ||
-                                                                undefined
-                                                            }
                                                             label={t(
                                                                 "label.aggregation-function"
                                                             )}
@@ -1052,6 +1127,10 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                             subText={t(
                                                                 "message.select-aggregation-function-to-combine-multiple-data-value-into-a-single-result"
                                                             )}
+                                                            value={
+                                                                aggregationFunction ||
+                                                                undefined
+                                                            }
                                                         />
                                                         <Button
                                                             className={
@@ -1120,7 +1199,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                         onChange={(
                                                                             e
                                                                         ) =>
-                                                                            setQueryFilters(
+                                                                            handleSqlChange(
                                                                                 e
                                                                                     .target
                                                                                     .value
@@ -1238,30 +1317,38 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                             inputComponent={
                                                                 <>
                                                                     <Autocomplete
-                                                                        disableClearable
                                                                         fullWidth
                                                                         getOptionLabel={(
                                                                             option
                                                                         ) =>
                                                                             option.label
                                                                         }
+                                                                        getOptionSelected={(
+                                                                            option,
+                                                                            value
+                                                                        ) =>
+                                                                            option.value ===
+                                                                            value.value
+                                                                        }
+                                                                        inputValue={
+                                                                            inputValue
+                                                                        }
                                                                         options={
                                                                             GRANULARITY_OPTIONS
                                                                         }
                                                                         renderInput={(
                                                                             params
-                                                                        ) => (
-                                                                            <TextField
-                                                                                {...params}
-                                                                                InputProps={{
-                                                                                    ...params.InputProps,
-                                                                                }}
-                                                                                placeholder={t(
-                                                                                    "label.select-granularity"
-                                                                                )}
-                                                                                variant="outlined"
-                                                                            />
-                                                                        )}
+                                                                        ) => {
+                                                                            return (
+                                                                                <TextField
+                                                                                    {...params}
+                                                                                    placeholder={t(
+                                                                                        "label.select-granularity"
+                                                                                    )}
+                                                                                    variant="outlined"
+                                                                                />
+                                                                            );
+                                                                        }}
                                                                         renderOption={({
                                                                             label,
                                                                         }) => (
@@ -1278,15 +1365,26 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                         )}
                                                                         value={
                                                                             granularity
-                                                                                ? {
-                                                                                      value: granularity,
-                                                                                      label: granularity,
-                                                                                  }
+                                                                                ? GRANULARITY_OPTIONS.find(
+                                                                                      (
+                                                                                          g
+                                                                                      ) =>
+                                                                                          g.value ===
+                                                                                          granularity
+                                                                                  )
                                                                                 : undefined
                                                                         }
                                                                         onChange={
                                                                             handleGranularityChange
                                                                         }
+                                                                        onInputChange={(
+                                                                            _event,
+                                                                            newInputValue
+                                                                        ) => {
+                                                                            setInputValue(
+                                                                                newInputValue
+                                                                            );
+                                                                        }}
                                                                     />
                                                                 </>
                                                             }
@@ -1295,10 +1393,6 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                 </Grid>
                                                 <Grid item xs={12}>
                                                     <RadioSection
-                                                        defaultValue={
-                                                            anomalyDetection ||
-                                                            undefined
-                                                        }
                                                         label={t(
                                                             "label.detection-type"
                                                         )}
@@ -1308,16 +1402,16 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                 AnomalyDetectionOptions.COMPOSITE,
                                                             ]
                                                         )}
+                                                        value={
+                                                            anomalyDetection ||
+                                                            undefined
+                                                        }
                                                     />
                                                 </Grid>
                                                 {anomalyDetection ===
                                                     AnomalyDetectionOptions.COMPOSITE && (
                                                     <Grid item xs={12}>
                                                         <RadioSection
-                                                            defaultValue={
-                                                                dimension ||
-                                                                undefined
-                                                            }
                                                             label={t(
                                                                 "message.select-dimensions"
                                                             )}
@@ -1327,6 +1421,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                     SelectDimensionsOptions.DIMENSION_RECOMMENDER,
                                                                 ]
                                                             )}
+                                                            value={dimension}
                                                         />
                                                     </Grid>
                                                 )}

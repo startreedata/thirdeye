@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { Icon } from "@iconify/react";
 import {
     Box,
     FormControl,
@@ -22,7 +23,6 @@ import {
     Tooltip,
     Typography,
 } from "@material-ui/core";
-import { Icon } from "@iconify/react";
 import React, { FunctionComponent } from "react";
 import { RadioSectionProps } from "./radio-section.interfaces";
 import { radioInputStyles } from "./radio-section.styles";
@@ -31,7 +31,7 @@ export const RadioSection: FunctionComponent<RadioSectionProps> = ({
     label,
     options,
     subText,
-    defaultValue,
+    value,
 }) => {
     const classes = radioInputStyles();
 
@@ -49,8 +49,7 @@ export const RadioSection: FunctionComponent<RadioSectionProps> = ({
                 <RadioGroup
                     row
                     aria-labelledby="demo-row-radio-buttons-group-label"
-                    defaultValue={defaultValue}
-                    name="row-radio-buttons-group"
+                    value={value || undefined}
                 >
                     {options.map((item) => (
                         <Box
@@ -67,6 +66,7 @@ export const RadioSection: FunctionComponent<RadioSectionProps> = ({
                             padding="2px 12px 2px 5px"
                         >
                             <FormControlLabel
+                                checked={value === item.value}
                                 control={<Radio />}
                                 disabled={item.disabled}
                                 label={item.label}

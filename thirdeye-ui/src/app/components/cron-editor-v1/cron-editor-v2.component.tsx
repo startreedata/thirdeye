@@ -38,15 +38,17 @@ interface CronEditorProps {
     cron: string;
     handleUpdateCron: (value: string) => void;
     fullWidth?: boolean;
+    defaultCron?: string;
 }
 
 export const CronEditor: FunctionComponent<CronEditorProps> = ({
     cron,
     handleUpdateCron,
     fullWidth = false,
+    defaultCron = "",
 }) => {
     const { showDialog } = useDialogProviderV1();
-    const [currentCron, setCurrentCron] = useState<string>(cron);
+    const [currentCron, setCurrentCron] = useState<string>(defaultCron || cron);
 
     const { t } = useTranslation();
 

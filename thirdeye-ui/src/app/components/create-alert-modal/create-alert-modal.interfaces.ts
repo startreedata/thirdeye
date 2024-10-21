@@ -15,4 +15,5 @@
 
 export interface CreateAlertModalModalProps {
     onCancel: () => void;
+    defaultCron?: string;
 }

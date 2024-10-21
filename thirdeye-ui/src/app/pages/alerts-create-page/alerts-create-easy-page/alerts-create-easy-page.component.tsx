@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Icon } from "@iconify/react";
 import {
     Box,
     Button,
@@ -61,15 +60,10 @@ import { CreateAlertModal } from "../../../components/create-alert-modal/create-
 import { InputSectionV2 } from "../../../components/form-basics/input-section-v2/input-section-v2.component";
 import { RadioSection } from "../../../components/form-basics/radio-section-v2/radio-section.component";
 import { RadioSectionOptions } from "../../../components/form-basics/radio-section-v2/radio-section.interfaces";
-import { alertsBasicHelpCards } from "../../../components/help-drawer-v1/help-drawer-card-contents.utils";
-import { HelpDrawerV1 } from "../../../components/help-drawer-v1/help-drawer-v1.component";
 import { TimeRangeButtonWithContext } from "../../../components/time-range/time-range-button-with-context-v2/time-range-button.component";
 import { TimeRangeQueryStringKey } from "../../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { ReactComponent as FilterListRoundedIcon } from "../../../platform/assets/images/filter-icon.svg";
-import {
-    PageContentsCardV1,
-    PageHeaderActionsV1,
-} from "../../../platform/components";
+import { PageContentsCardV1 } from "../../../platform/components";
 import { useGetEvaluation } from "../../../rest/alerts/alerts.actions";
 import { AlertTemplate } from "../../../rest/dto/alert-template.interfaces";
 import {
@@ -792,7 +786,13 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         const workingAlert = {
             template: {
                 name: isCompositeAlert
-                    ? algorithm?.algorithmOption?.alertTemplateForMultidimension
+                    ? isEnumeratorQuery
+                        ? algorithm?.algorithmOption?.alertTemplateForMultidimension?.replace(
+                              "-dx",
+                              "-query-dx"
+                          )
+                        : algorithm?.algorithmOption
+                              ?.alertTemplateForMultidimension
                     : algorithm?.algorithmOption?.alertTemplate,
             },
             templateProperties: recommendedTemplate?.alert.templateProperties
@@ -849,45 +849,6 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                             >
                                                 {t("label.alert-wizard")}
                                             </Typography>
-                                            <PageHeaderActionsV1>
-                                                <HelpDrawerV1
-                                                    cards={alertsBasicHelpCards}
-                                                    title={`${t(
-                                                        "label.need-help"
-                                                    )}?`}
-                                                    trigger={(handleOpen) => (
-                                                        <Button
-                                                            className={
-                                                                classes.infoButton
-                                                            }
-                                                            color="primary"
-                                                            size="small"
-                                                            variant="outlined"
-                                                            onClick={handleOpen}
-                                                        >
-                                                            <Box
-                                                                component="span"
-                                                                mr={1}
-                                                            >
-                                                                {t(
-                                                                    "label.need-help"
-                                                                )}
-                                                            </Box>
-                                                            <Box
-                                                                component="span"
-                                                                display="flex"
-                                                            >
-                                                                <Icon
-                                                                    fontSize={
-                                                                        24
-                                                                    }
-                                                                    icon="mdi:question-mark-circle-outline"
-                                                                />
-                                                            </Box>
-                                                        </Button>
-                                                    )}
-                                                />
-                                            </PageHeaderActionsV1>
                                         </Box>
                                         <Box>
                                             <Typography variant="body2">
@@ -1556,7 +1517,9 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                                 <Autocomplete<AvailableAlgorithmOption>
                                                                                                     fullWidth
                                                                                                     className={
-                                                                                                        classes.animatedBorder
+                                                                                                        isGetAlertRecommendationLoading
+                                                                                                            ? classes.animatedBorder
+                                                                                                            : ""
                                                                                                     }
                                                                                                     data-testId="datasource-select"
                                                                                                     getOptionLabel={(
@@ -2001,6 +1964,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                     )}
                     {openCreateAlertModal && (
                         <CreateAlertModal
+                            defaultCron={alertInsight?.defaultCron}
                             onCancel={() => setOpenCreateAlertModal(false)}
                         />
                     )}

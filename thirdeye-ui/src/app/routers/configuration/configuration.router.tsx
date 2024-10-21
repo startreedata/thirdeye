@@ -54,6 +54,12 @@ const EventsRouter = lazy(() =>
     ).then((module) => ({ default: module.EventRouter }))
 );
 
+const NamespaceConfiguration = lazy(() =>
+    import(
+        /* webpackChunkName: "metrics-router" */ "../../pages/namespace-configuration"
+    ).then((module) => ({ default: module.NamespaceConfiguration }))
+);
+
 const PageNotFoundPage = lazy(() =>
     import(
         /* webpackChunkName: "page-not-found-page" */ "../../pages/page-not-found-page/page-not-found-page.component"
@@ -141,6 +147,16 @@ export const ConfigurationRouter: FunctionComponent = () => {
                         </CancelAPICallsOnPageUnload>
                     }
                     path={`${AppRouteRelative.EVENTS}/*`}
+                />
+                <Route
+                    element={
+                        <CancelAPICallsOnPageUnload
+                            key={`${AppRouteRelative.NAMESPACE}/*`}
+                        >
+                            <NamespaceConfiguration />
+                        </CancelAPICallsOnPageUnload>
+                    }
+                    path={`${AppRouteRelative.NAMESPACE}/*`}
                 />
 
                 {/* No match found, render page not found */}

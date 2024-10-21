@@ -26,6 +26,10 @@ export const usePreviewChartStyles = makeStyles((theme) => ({
         width: "100%",
         height: "100%",
     },
+    chartContainer: {
+        border: "1px solid #B4CDE0",
+        borderRadius: "8px",
+    },
     selected: {
         color: theme.palette.primary.main,
     },

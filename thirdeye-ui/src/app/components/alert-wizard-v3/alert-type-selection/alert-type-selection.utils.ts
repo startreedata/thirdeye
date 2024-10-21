@@ -20,6 +20,7 @@ import MatrixProfileScreenshot from "../../../../assets/images/alert-type-exampl
 import MeanVarianceScreenshot from "../../../../assets/images/alert-type-examples/mean_variance.png";
 import PercentageRuleScreenshot from "../../../../assets/images/alert-type-examples/percentage_change.png";
 import ThresholdScreenshot from "../../../../assets/images/alert-type-examples/threshold.png";
+import { EditableAlert } from "../../../rest/dto/alert.interfaces";
 import {
     AlgorithmOption,
     AvailableAlgorithmOption,
@@ -112,6 +113,44 @@ export const generateAvailableAlgorithmOptions = (
             hasMultidimension: availableTemplateNames.includes(
                 option.alertTemplateForMultidimension
             ),
+            recommendationLabel: i18n.t("label.manual-configuration"),
         };
     });
+};
+
+export const generateAvailableAlgorithmOptionsForRecommendations = (
+    alertRecommendations: { alert: EditableAlert }[],
+    isMultiDimensional?: boolean
+): AvailableAlgorithmOption[] => {
+    const availableOptions = generateOptions();
+
+    const availableAlgorithmOptions = alertRecommendations.map((rec, index) => {
+        const algorithmOption = availableOptions.find(
+            (option) =>
+                option.alertTemplate === rec.alert.template?.name ||
+                (isMultiDimensional &&
+                    option.alertTemplateForMultidimension ===
+                        rec.alert.template?.name)
+        );
+
+        if (!algorithmOption) {
+            return null;
+        }
+
+        return {
+            algorithmOption: {
+                ...algorithmOption,
+                title: `${algorithmOption.title} option ${index + 1}`,
+            },
+            hasAlertTemplate: true,
+            hasPercentile: true,
+            hasMultidimension: true,
+            recommendationLabel: i18n.t("label.recommended-configuration"),
+            recommendationId: `${rec.alert.template?.name}-${index}`,
+        };
+    });
+
+    return availableAlgorithmOptions.filter(
+        (option) => option !== null
+    ) as AvailableAlgorithmOption[];
 };

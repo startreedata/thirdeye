@@ -124,7 +124,12 @@ export const AlertAccuracyColored: FunctionComponent<AlertAccuracyColoredProps> 
                     <Typography
                         color="secondary"
                         innerRef={ref}
-                        style={typographyColor}
+                        style={{
+                            ...typographyColor,
+                            ...(typographyProps?.color
+                                ? { color: typographyProps.color }
+                                : {}),
+                        }}
                         variant="body1"
                         {...typographyProps}
                     >

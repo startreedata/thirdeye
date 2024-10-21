@@ -1,3 +1,11 @@
+### [2.52.1](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.52.0...thirdeye-ui-2.52.1) (2024-10-21)
+
+
+### Bug Fixes
+
+* [TE-2442](https://cortexdata.atlassian.net/browse/TE-2442) fixed incorrect api url ([0456253de](https://github.com/startreedata/thirdeye/commit/0456253dedd1cf54aec5536731a0797772a3c124))
+* [TE-2483](https://cortexdata.atlassian.net/browse/TE-2483) fix homepage title copy ([bcf1f5902](https://github.com/startreedata/thirdeye/commit/bcf1f5902d9dd75b02f1314b8a931431ca2d6ca6))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

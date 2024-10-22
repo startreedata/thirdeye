@@ -298,7 +298,7 @@ public class NotificationTaskFilterIntegrationTest {
     assertThat(instance.filterAnomalies(sg, POINT_IN_TIME).isEmpty()).isTrue();
 
     // this anomaly should be notified - long enough
-    final AnomalyDTO anomaly2 = persist(anomalyWithCreateTime(minutesAgo(4))
+    final AnomalyDTO anomaly0 = persist(anomalyWithCreateTime(minutesAgo(4))
         .setDetectionConfigId(alert.getId())
         // 3 days
         .setStartTime(minutesAgo(60 * 24 * 4))
@@ -314,15 +314,17 @@ public class NotificationTaskFilterIntegrationTest {
     );
 
     assertThat(collectIds(instance.filterAnomalies(sg, System.currentTimeMillis())))
-        .isEqualTo(collectIds(Set.of(anomaly2)));
+        .isEqualTo(collectIds(Set.of(anomaly0)));
 
-    watermarkManager.updateWatermarks(sg, List.of(anomaly2));
-    assertThat(sg.getVectorClocks().get(alert.getId())).isEqualTo(anomaly2.getCreateTime().getTime());
+    watermarkManager.updateWatermarks(sg, List.of(anomaly0));
+    assertThat(sg.getVectorClocks().get(alert.getId())).isEqualTo(anomaly0.getCreateTime().getTime());
 
     // anomaly 1 is now of length >=3 days
     anomaly1.setEndTime(minutesAgo(0));
     persist(anomaly1);
     assertThat(collectIds(instance.filterAnomalies(sg, System.currentTimeMillis())))
         .isEqualTo(collectIds(Set.of(anomaly1)));
+    watermarkManager.updateWatermarks(sg, List.of(anomaly1));
+    assertThat(sg.getVectorClocks().get(alert.getId())).isEqualTo(anomaly1.getCreateTime().getTime());
   }
 }

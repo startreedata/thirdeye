@@ -195,8 +195,8 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
     } catch (ThirdEyeException e) {
       return respondOk(statusResponse(e));
     } catch (Exception e) {
-      return respondOk(statusResponse(ERR_DATASOURCE_VALIDATION_FAILED, name, e.getMessage()));
+      return respondOk(statusResponse(ERR_DATASOURCE_VALIDATION_FAILED, id, e.getMessage()));
     }
-    return respondOk(statusResponse(ERR_DATASOURCE_VALIDATION_FAILED, name, "Unknown error"));
+    return respondOk(statusResponse(ERR_DATASOURCE_VALIDATION_FAILED, id, "Unknown error"));
   }
 }

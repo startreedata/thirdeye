@@ -144,7 +144,7 @@
         "anomaly-start": "Anomaly start",
         "app-header": {
             "null-mapped-name": "Default(Not set)",
-            "startree-cloud": "Startree Cloud",
+            "startree-cloud": "StarTree Cloud",
             "workspace": "Workspace"
         },
         "apply": "Apply",
@@ -613,7 +613,7 @@
         "view-columns-list": "View columns list",
         "view-configuration-docs": "View configuration documentation",
         "view-details": "View Details",
-        "view-detection-tasks-dashboard": "View Detection Tasks Dashboard",
+        "view-detection-failures": "View Detection Failures",
         "view-entity": "View {{entity}}",
         "view-investigation": "View Investigation",
         "view-logs": "View Logs",
@@ -734,7 +734,6 @@
         "drag-on-chart-to-select-anomaly-date-range": "Drag on chart to select anomaly date range",
         "drag-on-chart-to-zoom": "Drag on chart to zoom",
         "edit-the-subscription-group-to-add-alerts": "Edit the subscription group to add alerts",
-        "effortless-alert-configuration": "Effortless Alert Configuration for Proactive Anomaly Detection and Rapid Resolution",
         "email-required": "Email is required",
         "empty-selection-means-all-is-selected": "An empty selection means all are selected",
         "enter-value-to-override-defaults": "Fields with default values, enter a value to override the defaults",
@@ -930,6 +929,7 @@
         "skipped-creating-a-new-subscription-group-error": "Skipped creating a new subscription group since an error was experienced while creating a new one",
         "startree-cloud-sources": "StarTree cloud sources",
         "startree-ets-algorithm-description": "Compares current value to the value predicted combining a regression model and an ETS forecasting algorithm.",
+        "startree-thirdeye": "StarTree ThirdEye",
         "statistical-anomaly-detection-description": "Statistical anomaly detection, an anomaly only triggers if a data point falls outside of expected trends.",
         "statistical-forecasting-advanced-description": "Compares current value to the value predicted. Good for daily data and hourly data.",
         "subscription-group-name-required": "Subscription Group name is required",

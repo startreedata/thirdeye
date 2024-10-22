@@ -97,16 +97,15 @@ export const WelcomeSelectDatasource: FunctionComponent = () => {
     } = useGetDatasources();
 
     const {
-        recommendedDatasources,
-        getRecommendedDatasources,
+        recommendedDatasource,
+        getRecommendedDatasource,
         status: recommendedDatasourcesStatus,
         errorMessages: recommendedDatasourcesErrormessage,
     } = useGetRecommendedDatasources();
 
     const datasourceGroups = useMemo<DatasourceOptionGroups[]>(
-        () =>
-            getDatasourceGroups(datasources || recommendedDatasources || [], t),
-        [datasources, recommendedDatasources]
+        () => getDatasourceGroups(datasources || [], t),
+        [datasources]
     );
 
     useEffect(() => {
@@ -115,16 +114,35 @@ export const WelcomeSelectDatasource: FunctionComponent = () => {
 
     useEffect(() => {
         if (datasourcesStatus === ActionStatus.Done && isEmpty(datasources)) {
-            getRecommendedDatasources();
+            getRecommendedDatasource();
         }
     }, [datasourcesStatus, datasources]);
+
+    useEffect(() => {
+        if (!isEmpty(recommendedDatasource) && isEmpty(datasources)) {
+            createDatasource(recommendedDatasource!)
+                .then(() => {
+                    getDatasources();
+                })
+                .catch((error: AxiosError): void => {
+                    notifyIfErrors(
+                        ActionStatus.Error,
+                        getErrorMessages(error),
+                        notify,
+                        t("message.create-error", {
+                            entity: t("label.datasource"),
+                        })
+                    );
+                });
+        }
+    }, [recommendedDatasource, datasources]);
 
     useEffect(() => {
         if (
             datasourcesStatus === ActionStatus.Done &&
             recommendedDatasourcesStatus === ActionStatus.Done
         ) {
-            if (isEmpty(datasources) && isEmpty(recommendedDatasources)) {
+            if (isEmpty(datasources) && isEmpty(recommendedDatasource)) {
                 notify(
                     NotificationTypeV1.Info,
                     t("info.pinot-instance-not-detected")
@@ -134,9 +152,9 @@ export const WelcomeSelectDatasource: FunctionComponent = () => {
         }
     }, [
         datasourcesStatus,
-        recommendedDatasources,
+        recommendedDatasource,
         datasources,
-        recommendedDatasources,
+        recommendedDatasource,
     ]);
 
     useEffect(() => {

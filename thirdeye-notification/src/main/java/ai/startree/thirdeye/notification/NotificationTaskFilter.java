@@ -132,7 +132,11 @@ public class NotificationTaskFilter {
    *     subscription group, anomalies, completed anomalies and other metadata
    */
   public NotificationTaskFilterResult filter(final SubscriptionGroupDTO sg, final long endTime) {
-    final Set<AnomalyDTO> anomalies = filterAnomalies(sg, endTime);
+    // hack to support minimum anomaly length --> assuming endTime is always System.now(), if the minimum anomaly length is 2 days,
+    // then the endTime - which corresponds to to a createTime<endTime filter must be <now-2 days  
+    // TODO cyril redesign vector clocks to maintain enumeration item in all cases to rewrite this  
+    final long correctedEndTime = endTime - isoPeriod(sg.getMinimumAnomalyLength(), Period.ZERO).toStandardDuration().getMillis();
+    final Set<AnomalyDTO> anomalies = filterAnomalies(sg, correctedEndTime);
 
     final var ids = anomalies.stream()
         .map(AnomalyDTO::getId)
@@ -253,13 +257,15 @@ public class NotificationTaskFilter {
       final SubscriptionGroupDTO subscriptionGroup,
       final String logContext) {
     final List<AnomalyDTO> candidates = anomalyManager.filter(f);
-
-    // FIXME CYRIL - this is not correct around DST 
-    //  eg for an hourly alert where we only care about anomalies that last for more than 1 day, the user would need to think about setting P23H instead of P1D to account for DST - but then it's 23H not 1 day in the standard case
-    //  eg for an daily alert where we only care about anomalies that last for more than 3 days, the user would set to P2DT23H --> this is ok 
+    
     final long minimumAnomalyLengthMillis = isoPeriod(subscriptionGroup.getMinimumAnomalyLength(), Period.ZERO).toStandardDuration().getMillis();
     final Set<AnomalyDTO> anomaliesToBeNotified = candidates.stream()
         .filter(NotificationTaskFilter::shouldFilter)
+        // apply anomaly minimum length filter
+        // Note: this may be confusing around DST 
+        // here we just use standard durations: a P1D period is 24 hours. On a DST change, a day can be 23 hours or 25 hours.
+        // An anomaly that lasts exactly a full day of 23 hours will be filtered by a value of P1D, even though it is a full day in timezone-aware period.
+        // keeping this filter in memory instead of in SQL to be able to add DST logic if necessary
         .filter(a -> a.getEndTime() - a.getStartTime() >= minimumAnomalyLengthMillis)
         .collect(toSet());
 

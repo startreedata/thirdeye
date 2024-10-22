@@ -281,4 +281,47 @@ public class NotificationTaskFilterIntegrationTest {
     assertThat(collectIds(instance.filterAnomalies(sg, POINT_IN_TIME)))
         .isEqualTo(collectIds(Set.of(anomaly3)));
   }
+
+  @Test
+  public void testFilterWithHistoricalAnomaliesWithMinimumAnomalyLength() {
+    final AlertDTO alert = persist(new AlertDTO().setName("alert1").setActive(true));
+
+    final SubscriptionGroupDTO sg = persist(new SubscriptionGroupDTO()
+        .setName("name1")
+        .setMinimumAnomalyLength("P1D")
+        .setAlertAssociations(List.of(aaRef(alert.getId())))
+        .setCronExpression(CRON)
+        .setNotifyHistoricalAnomalies(true));
+    persist(sg);
+
+    // base case - no anomaly in db yet
+    assertThat(instance.filterAnomalies(sg, POINT_IN_TIME).isEmpty()).isTrue();
+
+    // this anomaly should be filtered - too short
+    final AnomalyDTO anomaly1 = persist(anomalyWithCreateTime(minutesAgo(2))
+        .setDetectionConfigId(alert.getId())
+        // length of 14 hours
+        .setStartTime(minutesAgo(60 * 24 + 60*14))
+        .setEndTime(minutesAgo(60 * 24))
+    );
+
+    // this anomaly should be notified - long enough
+    final AnomalyDTO anomaly2 = persist(anomalyWithCreateTime(minutesAgo(4))
+        .setDetectionConfigId(alert.getId())
+        // length of 27 hours
+        .setStartTime(minutesAgo(60 * 48 + 60*27))
+        .setEndTime(minutesAgo(60 * 48))
+    );
+
+    assertThat(collectIds(instance.filterAnomalies(sg, POINT_IN_TIME)))
+        .isEqualTo(collectIds(Set.of(anomaly2)));
+
+    watermarkManager.updateWatermarks(sg, List.of(anomaly2));
+
+    // anomaly 1 is now of length 28 hours
+    anomaly1.setEndTime(60 * 10);
+    persist(anomaly1);
+    assertThat(collectIds(instance.filterAnomalies(sg, POINT_IN_TIME)))
+        .isEqualTo(collectIds(Set.of(anomaly2)));
+  }
 }

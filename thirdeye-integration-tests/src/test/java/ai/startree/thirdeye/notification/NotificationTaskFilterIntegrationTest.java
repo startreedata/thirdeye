@@ -288,7 +288,7 @@ public class NotificationTaskFilterIntegrationTest {
 
     final SubscriptionGroupDTO sg = persist(new SubscriptionGroupDTO()
         .setName("name1")
-        .setMinimumAnomalyLength("P1D")
+        .setMinimumAnomalyLength("P3D")
         .setAlertAssociations(List.of(aaRef(alert.getId())))
         .setCronExpression(CRON)
         .setNotifyHistoricalAnomalies(true));
@@ -297,31 +297,32 @@ public class NotificationTaskFilterIntegrationTest {
     // base case - no anomaly in db yet
     assertThat(instance.filterAnomalies(sg, POINT_IN_TIME).isEmpty()).isTrue();
 
-    // this anomaly should be filtered - too short
-    final AnomalyDTO anomaly1 = persist(anomalyWithCreateTime(minutesAgo(2))
-        .setDetectionConfigId(alert.getId())
-        // length of 14 hours
-        .setStartTime(minutesAgo(60 * 24 + 60*14))
-        .setEndTime(minutesAgo(60 * 24))
-    );
-
     // this anomaly should be notified - long enough
     final AnomalyDTO anomaly2 = persist(anomalyWithCreateTime(minutesAgo(4))
         .setDetectionConfigId(alert.getId())
-        // length of 27 hours
-        .setStartTime(minutesAgo(60 * 48 + 60*27))
-        .setEndTime(minutesAgo(60 * 48))
+        // 3 days
+        .setStartTime(minutesAgo(60 * 24 * 4))
+        .setEndTime(minutesAgo(60 * 24))
     );
 
-    assertThat(collectIds(instance.filterAnomalies(sg, POINT_IN_TIME)))
+    // this anomaly should be filtered - too short for the moment
+    final AnomalyDTO anomaly1 = persist(anomalyWithCreateTime(minutesAgo(2))
+        .setDetectionConfigId(alert.getId())
+        // length of 2 days
+        .setStartTime(minutesAgo(60 * 24 * 3))
+        .setEndTime(minutesAgo(60 * 24))
+    );
+
+    assertThat(collectIds(instance.filterAnomalies(sg, System.currentTimeMillis())))
         .isEqualTo(collectIds(Set.of(anomaly2)));
 
     watermarkManager.updateWatermarks(sg, List.of(anomaly2));
+    assertThat(sg.getVectorClocks().get(alert.getId())).isEqualTo(anomaly2.getCreateTime().getTime());
 
-    // anomaly 1 is now of length 28 hours
-    anomaly1.setEndTime(60 * 10);
+    // anomaly 1 is now of length >=3 days
+    anomaly1.setEndTime(minutesAgo(0));
     persist(anomaly1);
-    assertThat(collectIds(instance.filterAnomalies(sg, POINT_IN_TIME)))
-        .isEqualTo(collectIds(Set.of(anomaly2)));
+    assertThat(collectIds(instance.filterAnomalies(sg, System.currentTimeMillis())))
+        .isEqualTo(collectIds(Set.of(anomaly1)));
   }
 }

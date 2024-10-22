@@ -132,11 +132,7 @@ public class NotificationTaskFilter {
    *     subscription group, anomalies, completed anomalies and other metadata
    */
   public NotificationTaskFilterResult filter(final SubscriptionGroupDTO sg, final long endTime) {
-    // hack to support minimum anomaly length --> assuming endTime is always System.now(), if the minimum anomaly length is 2 days,
-    // then the endTime - which corresponds to to a createTime<endTime filter must be <now-2 days  
-    // TODO cyril redesign vector clocks to maintain enumeration item in all cases to rewrite this  
-    final long correctedEndTime = endTime - isoPeriod(sg.getMinimumAnomalyLength(), Period.ZERO).toStandardDuration().getMillis();
-    final Set<AnomalyDTO> anomalies = filterAnomalies(sg, correctedEndTime);
+    final Set<AnomalyDTO> anomalies = filterAnomalies(sg, endTime);
 
     final var ids = anomalies.stream()
         .map(AnomalyDTO::getId)

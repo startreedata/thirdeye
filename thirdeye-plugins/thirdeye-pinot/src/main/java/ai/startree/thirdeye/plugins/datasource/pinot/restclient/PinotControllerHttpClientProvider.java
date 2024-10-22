@@ -46,18 +46,16 @@ import org.apache.http.ssl.TrustStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Singleton
-public class PinotControllerHttpClientSupplier {
+public class PinotControllerHttpClientProvider {
 
-  private static final Logger LOG = LoggerFactory.getLogger(PinotControllerHttpClientSupplier.class);
+  private static final Logger LOG = LoggerFactory.getLogger(PinotControllerHttpClientProvider.class);
   private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+  
   private final PinotThirdEyeDataSourceConfig config;
-
   private CloseableHttpClient pinotControllerClient = null;
   private String prevToken = null;
 
-  @Inject
-  public PinotControllerHttpClientSupplier(final PinotThirdEyeDataSourceConfig config) {
+  public PinotControllerHttpClientProvider(final PinotThirdEyeDataSourceConfig config) {
     this.config = config;
   }
 

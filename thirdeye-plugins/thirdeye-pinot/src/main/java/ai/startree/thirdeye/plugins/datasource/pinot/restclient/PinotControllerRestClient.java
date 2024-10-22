@@ -46,16 +46,15 @@ public class PinotControllerRestClient {
   private static final String PINOT_TABLE_CONFIG_ENDPOINT_TEMPLATE = "/tables/%s/schema";
 
   private final HttpHost pinotControllerHost;
-  private final PinotControllerHttpClientSupplier pinotControllerRestClientSupplier;
+  private final PinotControllerHttpClientProvider pinotControllerRestClientSupplier;
 
   @Inject
-  public PinotControllerRestClient(final PinotThirdEyeDataSourceConfig config,
-      final PinotControllerHttpClientSupplier pinotControllerRestClientSupplier) {
+  public PinotControllerRestClient(final PinotThirdEyeDataSourceConfig config) {
 
     pinotControllerHost = new HttpHost(config.getControllerHost(),
         config.getControllerPort(),
         config.getControllerConnectionScheme());
-    this.pinotControllerRestClientSupplier = pinotControllerRestClientSupplier;
+    this.pinotControllerRestClientSupplier = new PinotControllerHttpClientProvider(config);
   }
 
   public List<String> getAllTablesFromPinot() throws IOException {

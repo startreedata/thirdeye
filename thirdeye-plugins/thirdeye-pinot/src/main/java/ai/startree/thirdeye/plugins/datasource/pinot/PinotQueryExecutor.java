@@ -48,8 +48,8 @@ public class PinotQueryExecutor extends CacheLoader<PinotQuery, ThirdEyeResultSe
   private final PinotConnectionProvider pinotConnectionProvider;
 
   @Inject
-  public PinotQueryExecutor(final PinotConnectionProvider pinotConnectionProvider) {
-    this.pinotConnectionProvider = pinotConnectionProvider;
+  public PinotQueryExecutor(final PinotThirdEyeDataSourceConfig config) {
+    this.pinotConnectionProvider = new PinotConnectionProvider(config);
   }
 
   /**

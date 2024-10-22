@@ -21,8 +21,6 @@ import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import org.apache.http.HttpHeaders;
 import org.apache.pinot.client.Connection;
 import org.apache.pinot.client.PinotClientException;
@@ -30,7 +28,6 @@ import org.apache.pinot.client.PinotConnectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Singleton
 public class PinotConnectionProvider {
 
   private static final Logger LOG = LoggerFactory.getLogger(PinotConnectionProvider.class);
@@ -40,8 +37,7 @@ public class PinotConnectionProvider {
   private final PinotThirdEyeDataSourceConfig config;
   private Connection connection;
   private String currentToken;
-
-  @Inject
+  
   public PinotConnectionProvider(final PinotThirdEyeDataSourceConfig config) {
     this.config = config;
   }

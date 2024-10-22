@@ -21,17 +21,24 @@ import {
     PropertyConfigValueTypes,
     TemplatePropertiesObject,
 } from "../../rest/dto/alert.interfaces";
-import { AdditonalFiltersDrawerProps } from "./additional-filters-drawer.interfaces";
-import { useAdditonalFiltersDrawerStyles } from "./additional-filters-drawer.styles";
 import { FormComponentForTemplateField } from "../alert-wizard-v2/alert-template/alert-template-form-field/form-component-for-template-field/form-component-for-template-field.component";
 import { LabelForTemplateFieldV2 } from "../alert-wizard-v2/alert-template/alert-template-form-field/label-for-template-field-v2/label-for-template-field-v2.component";
+import { AdditonalFiltersDrawerProps } from "./additional-filters-drawer.interfaces";
+import { useAdditonalFiltersDrawerStyles } from "./additional-filters-drawer.styles";
 
 /**
  * Convenience wrapper on top of HelpDrawerCoreV1 so consumers do not have
  * to maintain isOpen state
  */
 export const AdditonalFiltersDrawer: FunctionComponent<AdditonalFiltersDrawerProps> =
-    ({ defaultValues, onApply, isOpen, onClose, availableConfigurations }) => {
+    ({
+        defaultValues,
+        onApply,
+        isOpen,
+        onClose,
+        availableConfigurations,
+        emptyMessage,
+    }) => {
         const classes = useAdditonalFiltersDrawerStyles();
         const { t } = useTranslation();
         const [localCopyOfProperties, setLocalCopyOfProperties] =
@@ -79,88 +86,103 @@ export const AdditonalFiltersDrawer: FunctionComponent<AdditonalFiltersDrawerPro
                             onClick={onClose}
                         />
                     </Box>
-                    <Box className={classes.content} flex={1}>
-                        <Box>
-                            {availableConfigurations.map((config) => (
-                                <Box
-                                    className={classes.configItem}
-                                    key={config.name}
-                                    mb={3}
-                                    width="100%"
-                                >
-                                    <Typography color="inherit" variant="h6">
-                                        {config.name}
-                                    </Typography>
-                                    <Box className={classes.configItemFields}>
-                                        {config.requiredPropertiesWithMetadata.map(
-                                            (propertyMetadata) => (
-                                                <Box
-                                                    key={propertyMetadata.name}
-                                                >
-                                                    <LabelForTemplateFieldV2
-                                                        className={
-                                                            classes.formLabel
-                                                        }
-                                                        name={
-                                                            propertyMetadata.name
-                                                        }
-                                                        tooltipText={
-                                                            propertyMetadata.description
-                                                        }
-                                                    />
-                                                    <FormComponentForTemplateField
-                                                        propertyKey={
-                                                            propertyMetadata.name
-                                                        }
-                                                        templateFieldProperty={
-                                                            propertyMetadata
-                                                        }
-                                                        value={
-                                                            localCopyOfProperties[
-                                                                propertyMetadata
-                                                                    .name
-                                                            ]
-                                                        }
-                                                        onChange={(
-                                                            newValue
-                                                        ) => {
-                                                            handleOnChange(
-                                                                propertyMetadata.name,
-                                                                newValue
-                                                            );
-                                                        }}
-                                                    />
-                                                </Box>
-                                            )
-                                        )}
-                                    </Box>
+                    {emptyMessage ? (
+                        emptyMessage
+                    ) : (
+                        <>
+                            <Box className={classes.content} flex={1}>
+                                <Box>
+                                    {availableConfigurations.map((config) => (
+                                        <Box
+                                            className={classes.configItem}
+                                            key={config.name}
+                                            mb={3}
+                                            width="100%"
+                                        >
+                                            <Typography
+                                                color="inherit"
+                                                variant="h6"
+                                            >
+                                                {config.name}
+                                            </Typography>
+                                            <Box
+                                                className={
+                                                    classes.configItemFields
+                                                }
+                                            >
+                                                {config.requiredPropertiesWithMetadata.map(
+                                                    (propertyMetadata) => (
+                                                        <Box
+                                                            key={
+                                                                propertyMetadata.name
+                                                            }
+                                                        >
+                                                            <LabelForTemplateFieldV2
+                                                                className={
+                                                                    classes.formLabel
+                                                                }
+                                                                name={
+                                                                    propertyMetadata.name
+                                                                }
+                                                                tooltipText={
+                                                                    propertyMetadata.description
+                                                                }
+                                                            />
+                                                            <FormComponentForTemplateField
+                                                                propertyKey={
+                                                                    propertyMetadata.name
+                                                                }
+                                                                templateFieldProperty={
+                                                                    propertyMetadata
+                                                                }
+                                                                value={
+                                                                    localCopyOfProperties[
+                                                                        propertyMetadata
+                                                                            .name
+                                                                    ]
+                                                                }
+                                                                onChange={(
+                                                                    newValue
+                                                                ) => {
+                                                                    handleOnChange(
+                                                                        propertyMetadata.name,
+                                                                        newValue
+                                                                    );
+                                                                }}
+                                                            />
+                                                        </Box>
+                                                    )
+                                                )}
+                                            </Box>
+                                        </Box>
+                                    ))}
                                 </Box>
-                            ))}
-                        </Box>
-                    </Box>
-                    <Box
-                        className={classes.footer}
-                        display="flex"
-                        justifyContent="space-between"
-                    >
-                        <Button
-                            className={classes.actionSecondary}
-                            size="medium"
-                            variant="contained"
-                            onClick={onClose}
-                        >
-                            {t("label.close")}
-                        </Button>
-                        <Button
-                            className={classes.actionPrimary}
-                            color="primary"
-                            size="medium"
-                            type="submit"
-                            variant="contained"
-                        >
-                            {t("label.apply-filter")}
-                        </Button>
-                    </Box>
+                            </Box>
+                            <Box
+                                className={classes.footer}
+                                display="flex"
+                                justifyContent="space-between"
+                            >
+                                <Button
+                                    className={classes.actionSecondary}
+                                    size="medium"
+                                    variant="contained"
+                                    onClick={onClose}
+                                >
+                                    {t("label.close")}
+                                </Button>
+                                <Button
+                                    className={classes.actionPrimary}
+                                    color="primary"
+                                    size="medium"
+                                    type="submit"
+                                    variant="contained"
+                                >
+                                    {t("label.apply-filter")}
+                                </Button>
+                            </Box>
+                        </>
+                    )}
                 </form>
             </Drawer>
         );

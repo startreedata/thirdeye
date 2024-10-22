@@ -20,6 +20,7 @@ export interface AdditonalFiltersDrawerProps {
     defaultValues: TemplatePropertiesObject;
     isOpen: boolean;
     onApply: (fieldData: TemplatePropertiesObject) => void;
+    emptyMessage?: React.ReactNode;
     onClose: () => void;
     availableConfigurations: AnomaliesFilterConfiguratorRenderConfigs[];
 }

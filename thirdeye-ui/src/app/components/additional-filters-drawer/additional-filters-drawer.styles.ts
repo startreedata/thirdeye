@@ -13,8 +13,8 @@
  * the License.
  */
 import { makeStyles } from "@material-ui/core";
-import { ColorV1 } from "../../platform/utils/material-ui/color.util";
 import { PaletteV1 } from "../../platform/utils";
+import { ColorV1 } from "../../platform/utils/material-ui/color.util";
 
 export const useAdditonalFiltersDrawerStyles = makeStyles((theme) => ({
     drawerPaper: {
@@ -30,6 +30,7 @@ export const useAdditonalFiltersDrawerStyles = makeStyles((theme) => ({
     },
     header: {
         padding: "10px 12px",
+        marginTop: theme.spacing(6),
 
         "& h6": {
             color: PaletteV1.NavBarBackgroundColor,

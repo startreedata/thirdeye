@@ -29,7 +29,7 @@ import {
     KeyboardArrowUp,
 } from "@material-ui/icons";
 import AddCircleOutline from "@material-ui/icons/AddCircleOutline";
-import { Autocomplete } from "@material-ui/lab";
+import { Alert, Autocomplete } from "@material-ui/lab";
 import { isNil, toLower } from "lodash";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -116,6 +116,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
     const [showSQLWhere, setShowSQLWhere] = useState(false);
     const [enumerations, setEnumerations] = useState(false);
     const [dimension, setDimension] = useState<string | null>(null);
+    const [alertInsightLoading, setAlertInsightLoading] = useState(false);
 
     const GRANULARITY_OPTIONS = [
         {
@@ -359,6 +360,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                       : null,
                           },
                       };
+                setAlertInsightLoading(true);
                 const newAlertInsight = await getAlertInsight({
                     alert: workingAlert as EditableAlert,
                 });
@@ -375,6 +377,8 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                 }
             } catch (error) {
                 console.error("Error fetching alert insight:", error);
+            } finally {
+                setAlertInsightLoading(false);
             }
         }
     };
@@ -408,7 +412,10 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         if (
             !selectedTable ||
             !selectedMetric ||
-            !aggregationFunction ||
+            !(
+                aggregationFunction ||
+                (isCustomMetrics && editedDatasourceFieldValue)
+            ) ||
             !granularity
         ) {
             return;
@@ -482,6 +489,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
             options.push({
                 value: item,
                 label: item,
+                disabled: alertInsightLoading,
                 onClick: () => handleAnomalyDetectionChange(item),
                 tooltipText: item,
             })
@@ -706,6 +714,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         setCompositeFilters(null);
         setAnomalyDetection(null);
         setEnumerations(false);
+        setInputValue("");
         setEnumerators("");
         setDimension(null);
     };
@@ -1368,6 +1377,28 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                             undefined
                                                         }
                                                     />
+                                                    {alertInsightLoading && (
+                                                        <Box
+                                                            alignItems="center"
+                                                            display="flex"
+                                                        >
+                                                            <CircularProgress
+                                                                color="primary"
+                                                                size={12}
+                                                            />
+                                                            <Typography
+                                                                style={{
+                                                                    marginLeft:
+                                                                        "4px",
+                                                                }}
+                                                                variant="caption"
+                                                            >
+                                                                {t(
+                                                                    "label.loading-insights"
+                                                                )}
+                                                            </Typography>
+                                                        </Box>
+                                                    )}
                                                 </Grid>
                                                 {anomalyDetection ===
                                                     AnomalyDetectionOptions.COMPOSITE && (
@@ -1406,6 +1437,19 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                         minRows={
                                                                             3
                                                                         }
+                                                                        placeholder={t(
+                                                                            "label.select-distinct-dimension-from-dataset",
+                                                                            {
+                                                                                dimension:
+                                                                                    selectedTable
+                                                                                        ?.dimensions?.[0] ??
+                                                                                    "someColumn",
+                                                                                dataset:
+                                                                                    selectedTable
+                                                                                        ?.dataset
+                                                                                        ?.name,
+                                                                            }
+                                                                        )}
                                                                         value={
                                                                             enumerators
                                                                         }
@@ -1613,7 +1657,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                                         variant="caption"
                                                                                                     >
                                                                                                         {t(
-                                                                                                            "label.recommended-algorithm"
+                                                                                                            "label.detection-algorithm"
                                                                                                         )}
                                                                                                     </Typography>
                                                                                                     <Box
@@ -1765,6 +1809,21 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                             }
                                                                                             defaultValues={
                                                                                                 alert.templateProperties
+                                                                                            }
+                                                                                            emptyMessage={
+                                                                                                !algorithmOption ? (
+                                                                                                    <Alert
+                                                                                                        severity="info"
+                                                                                                        style={{
+                                                                                                            marginTop:
+                                                                                                                "40px",
+                                                                                                        }}
+                                                                                                    >
+                                                                                                        {t(
+                                                                                                            "message.please-select-a-detection-algorithm-first"
+                                                                                                        )}
+                                                                                                    </Alert>
+                                                                                                ) : null
                                                                                             }
                                                                                             isOpen={
                                                                                                 showAdvancedOptions

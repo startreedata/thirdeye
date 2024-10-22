@@ -65,6 +65,6 @@ export enum AnomalyDetectionOptions {
 }
 
 export enum SelectDimensionsOptions {
-    ENUMERATORS = "Enumerators",
+    ENUMERATORS = "SQL Query",
     DIMENSION_RECOMMENDER = "Dimension recommender",
 }

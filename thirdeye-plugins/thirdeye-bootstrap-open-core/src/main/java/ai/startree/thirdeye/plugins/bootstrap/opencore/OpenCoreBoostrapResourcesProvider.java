@@ -17,16 +17,18 @@ import static ai.startree.thirdeye.spi.util.FileUtils.readJsonObjectsFromResourc
 
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
 import ai.startree.thirdeye.spi.bootstrap.BootstrapResourcesProvider;
+import ai.startree.thirdeye.spi.datalayer.dto.TemplateConfigurationDTO;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class OpenCoreBoostrapResourcesProvider implements BootstrapResourcesProvider {
 
   public static final String RESOURCES_TEMPLATES_PATH = "alert-templates";
 
   @Override
-  public List<AlertTemplateApi> getAlertTemplates() {
+  public List<AlertTemplateApi> getAlertTemplates(final @NonNull TemplateConfigurationDTO templateConfiguration) {
     final List<AlertTemplateApi> templates = readJsonObjectsFromResourcesFolder(
         RESOURCES_TEMPLATES_PATH,
         this.getClass(),

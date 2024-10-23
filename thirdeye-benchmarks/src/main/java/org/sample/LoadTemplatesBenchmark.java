@@ -16,6 +16,7 @@ package org.sample;
 import ai.startree.thirdeye.plugins.bootstrap.opencore.OpenCoreBoostrapResourcesProvider;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
+import ai.startree.thirdeye.spi.datalayer.dto.TemplateConfigurationDTO;
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.io.IOException;
 import java.util.List;
@@ -49,22 +50,25 @@ public class LoadTemplatesBenchmark {
   int numNamespaces;
 
   OpenCoreBoostrapResourcesProvider openCoreBoostrapResourcesProvider;
+  
+  TemplateConfigurationDTO templateConfiguration;
 
   @Setup
   public void setup() {
     openCoreBoostrapResourcesProvider = new OpenCoreBoostrapResourcesProvider();
+    templateConfiguration = new TemplateConfigurationDTO();
   }
 
   @Benchmark
   public void loadWithNoCache(Blackhole blackhole) throws IOException {
     for (int i = 0; i < numNamespaces; i++) {
-      blackhole.consume(openCoreBoostrapResourcesProvider.getAlertTemplates());
+      blackhole.consume(openCoreBoostrapResourcesProvider.getAlertTemplates(templateConfiguration));
     }
   }
 
   @Benchmark
   public void loadWithCacheAndCopy(Blackhole blackhole) throws IOException {
-    final List<AlertTemplateApi> alertTemplates = openCoreBoostrapResourcesProvider.getAlertTemplates();
+    final List<AlertTemplateApi> alertTemplates = openCoreBoostrapResourcesProvider.getAlertTemplates(templateConfiguration);
     for (int i = 0; i < numNamespaces; i++) {
       blackhole.consume(copy((alertTemplates)));
     }

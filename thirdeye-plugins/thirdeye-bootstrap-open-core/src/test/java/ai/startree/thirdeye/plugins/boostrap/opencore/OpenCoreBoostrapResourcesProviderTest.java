@@ -17,6 +17,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import ai.startree.thirdeye.plugins.bootstrap.opencore.OpenCoreBoostrapResourcesProvider;
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
+import ai.startree.thirdeye.spi.datalayer.dto.TemplateConfigurationDTO;
 import java.util.List;
 import org.testng.annotations.Test;
 
@@ -27,7 +28,8 @@ public class OpenCoreBoostrapResourcesProviderTest {
   @Test
   public void testNumberOfTemplates() {
     final OpenCoreBoostrapResourcesProvider provider = new OpenCoreBoostrapResourcesProvider();
-    final List<AlertTemplateApi> templates = provider.getAlertTemplates();
+    final TemplateConfigurationDTO templateConfiguration = new TemplateConfigurationDTO();
+    final List<AlertTemplateApi> templates = provider.getAlertTemplates(templateConfiguration);
     assertThat(templates.size()).isEqualTo(8);
     assertThat(
         templates.stream().filter(t -> t.getName().contains("-percentile")).count()).isEqualTo(4);

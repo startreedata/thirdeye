@@ -22,6 +22,7 @@ import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.NamespaceConfigurationManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.NamespaceConfigurationDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.TemplateConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TimeConfigurationDTO;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -47,10 +48,10 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
 
     // namespace config exists, update if components are empty
     if (existingNamespaceConfig != null) {
-      if (existingNamespaceConfig.getTimeConfiguration() == null) {
-        existingNamespaceConfig.setTimeConfiguration(
-            getDefaultTimeConfigurationFromServerConfig());
+      final boolean updateIsRequired = updateDefaults(existingNamespaceConfig);
+      if (updateIsRequired) {
         final Long namespaceConfigurationId = save(existingNamespaceConfig);
+        // FIXME CYRIL ANSHUL - THIS STATEMENT IS USELESS ? save will throw already ?  
         checkState(namespaceConfigurationId != null,
             "Failed to update namespace configuration for namespace %s",
             existingNamespaceConfig.namespace());
@@ -59,6 +60,26 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
     }
 
     return createNewNamespaceConfiguration(namespace);
+  }
+
+  /*
+   * New fields may be added to the NamespaceConfiguration.
+   * We need to ensure all NamespaceConfiguration objects have the latest fields.
+   * This function takes care of migrating and updating fields.
+   * It returns true if the input configuration was mutated.
+   * It is the caller responsibility to persist the changes in the database if necessary.
+   * */
+  private boolean updateDefaults(final NamespaceConfigurationDTO existingNamespaceConfig) {
+    boolean updated = false;
+    if (existingNamespaceConfig.getTimeConfiguration() == null) {
+      existingNamespaceConfig.setTimeConfiguration(getDefaultTimeConfigurationFromServerConfig());
+      updated = true;
+    }
+    if (existingNamespaceConfig.getTemplateConfiguration() == null) {
+      existingNamespaceConfig.setTemplateConfiguration(new TemplateConfigurationDTO());
+      updated = true;
+    }
+    return updated;
   }
 
   public @NonNull NamespaceConfigurationDTO updateNamespaceConfiguration(
@@ -109,14 +130,24 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
     return null;
   }
 
-  private @NonNull NamespaceConfigurationDTO createNewNamespaceConfiguration(String namespace) {
-    NamespaceConfigurationDTO namespaceConfigurationDTO = new NamespaceConfigurationDTO();
-    namespaceConfigurationDTO.setTimeConfiguration(getDefaultTimeConfigurationFromServerConfig())
-        .setAuth(new AuthorizationConfigurationDTO().setNamespace(namespace));
+  private @NonNull NamespaceConfigurationDTO createNewNamespaceConfiguration(
+      final String namespace) {
+    final NamespaceConfigurationDTO namespaceConfigurationDTO = defaultNamespaceConfiguration(
+        namespace);
+
     final Long namespaceConfigurationId = save(namespaceConfigurationDTO);
     checkState(namespaceConfigurationId != null,
         "Failed to create namespace configuration for namespace %s",
         namespaceConfigurationDTO.namespace());
+    return namespaceConfigurationDTO;
+  }
+
+  private NamespaceConfigurationDTO defaultNamespaceConfiguration(final String namespace) {
+    final NamespaceConfigurationDTO namespaceConfigurationDTO = new NamespaceConfigurationDTO();
+    namespaceConfigurationDTO
+        .setTimeConfiguration(getDefaultTimeConfigurationFromServerConfig())
+        .setTemplateConfiguration(new TemplateConfigurationDTO())
+        .setAuth(new AuthorizationConfigurationDTO().setNamespace(namespace));
     return namespaceConfigurationDTO;
   }
 

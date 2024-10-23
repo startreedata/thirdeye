@@ -21,10 +21,15 @@ import ai.startree.thirdeye.notification.NotificationConfiguration;
 import ai.startree.thirdeye.rootcause.configuration.RcaConfiguration;
 import ai.startree.thirdeye.scheduler.ThirdEyeSchedulerConfiguration;
 import ai.startree.thirdeye.scheduler.events.MockEventsConfiguration;
+import ai.startree.thirdeye.spi.api.NamespaceConfigurationApi;
+import ai.startree.thirdeye.spi.api.TemplateConfigurationApi;
+import ai.startree.thirdeye.spi.api.TimeConfigurationApi;
 import ai.startree.thirdeye.spi.config.TimeConfiguration;
+import ai.startree.thirdeye.spi.datalayer.dto.NamespaceConfigurationDTO;
 import ai.startree.thirdeye.worker.task.TaskDriverConfiguration;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import freemarker.core.TemplateConfiguration;
 import io.dropwizard.core.Configuration;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import java.util.List;
@@ -68,8 +73,13 @@ public class ThirdEyeServerConfiguration extends Configuration {
   @JsonProperty("sentry")
   private BackendSentryConfiguration sentryConfiguration = new BackendSentryConfiguration();
 
+  @Deprecated // use defaultWorkspaceConfiguration instead
   @JsonProperty("time")
-  private TimeConfiguration timeConfiguration = new TimeConfiguration();
+  private TimeConfiguration timeConfiguration = null;
+
+  // see discussion https://github.com/startreedata/thirdeye/pull/1612 on why it is ok to use a DTO - we can introduce a Configuration later
+  @JsonProperty("defaultWorkspaceConfiguration")
+  private NamespaceConfigurationDTO namespaceConfiguration = new NamespaceConfigurationDTO();
 
   @JsonProperty("accessControl")
   private AccessControlConfiguration accessControlConfiguration = new AccessControlConfiguration();
@@ -261,6 +271,16 @@ public class ThirdEyeServerConfiguration extends Configuration {
   public ThirdEyeServerConfiguration setSentryConfiguration(
       final BackendSentryConfiguration sentryConfiguration) {
     this.sentryConfiguration = sentryConfiguration;
+    return this;
+  }
+
+  public NamespaceConfigurationDTO getNamespaceConfiguration() {
+    return namespaceConfiguration;
+  }
+
+  public ThirdEyeServerConfiguration setNamespaceConfiguration(
+      final NamespaceConfigurationDTO namespaceConfiguration) {
+    this.namespaceConfiguration = namespaceConfiguration;
     return this;
   }
 }

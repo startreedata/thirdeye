@@ -19,6 +19,9 @@ public class NamespaceConfigurationApi implements ThirdEyeCrudApi<NamespaceConfi
   private AuthorizationConfigurationApi auth;
 
   private TimeConfigurationApi timeConfiguration;
+  
+  private TemplateConfigurationApi templateConfiguration;
+  
 
   public TimeConfigurationApi getTimeConfiguration() {
     return timeConfiguration;
@@ -45,6 +48,16 @@ public class NamespaceConfigurationApi implements ThirdEyeCrudApi<NamespaceConfi
 
   public NamespaceConfigurationApi setAuth(final AuthorizationConfigurationApi auth) {
     this.auth = auth;
+    return this;
+  }
+
+  public TemplateConfigurationApi getTemplateConfiguration() {
+    return templateConfiguration;
+  }
+
+  public NamespaceConfigurationApi setTemplateConfiguration(
+      final TemplateConfigurationApi templateConfiguration) {
+    this.templateConfiguration = templateConfiguration;
     return this;
   }
 }

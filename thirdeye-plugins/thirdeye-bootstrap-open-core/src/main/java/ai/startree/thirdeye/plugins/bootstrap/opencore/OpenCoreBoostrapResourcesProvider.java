@@ -28,7 +28,8 @@ public class OpenCoreBoostrapResourcesProvider implements BootstrapResourcesProv
   public static final String RESOURCES_TEMPLATES_PATH = "alert-templates";
 
   @Override
-  public List<AlertTemplateApi> getAlertTemplates(final @NonNull TemplateConfigurationDTO templateConfiguration) {
+  public List<AlertTemplateApi> getAlertTemplates(
+      final @NonNull TemplateConfigurationDTO templateConfiguration) {
     final List<AlertTemplateApi> templates = readJsonObjectsFromResourcesFolder(
         RESOURCES_TEMPLATES_PATH,
         this.getClass(),
@@ -42,6 +43,20 @@ public class OpenCoreBoostrapResourcesProvider implements BootstrapResourcesProv
 
     new CommonProperties().enrichCommonProperties(templates);
 
+    applyTemplateConfiguration(templates, templateConfiguration);
+
     return templates;
+  }
+
+  private static void applyTemplateConfiguration(final List<AlertTemplateApi> templates,
+      final @NonNull TemplateConfigurationDTO templateConfiguration) {
+    // apply default SQL LIMIT statement value 
+    for (final AlertTemplateApi alertTemplateApi : templates) {
+      alertTemplateApi.getProperties()
+          .stream()
+          // WARNING: match on property name directly - ensure this naming convention is followed in new templates 
+          .filter(p -> "queryLimit".equals(p.getName()))
+          .forEach(p -> p.setDefaultValue(templateConfiguration.getSqlLimitStatement()));
+    }
   }
 }

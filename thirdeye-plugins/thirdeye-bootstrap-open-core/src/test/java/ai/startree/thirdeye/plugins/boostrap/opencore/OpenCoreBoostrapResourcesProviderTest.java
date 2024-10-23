@@ -18,7 +18,10 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import ai.startree.thirdeye.plugins.bootstrap.opencore.OpenCoreBoostrapResourcesProvider;
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
 import ai.startree.thirdeye.spi.datalayer.dto.TemplateConfigurationDTO;
+import ai.startree.thirdeye.spi.template.TemplatePropertyMetadata;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import org.testng.annotations.Test;
 
 public class OpenCoreBoostrapResourcesProviderTest {
@@ -28,10 +31,18 @@ public class OpenCoreBoostrapResourcesProviderTest {
   @Test
   public void testNumberOfTemplates() {
     final OpenCoreBoostrapResourcesProvider provider = new OpenCoreBoostrapResourcesProvider();
-    final TemplateConfigurationDTO templateConfiguration = new TemplateConfigurationDTO();
+    int queryLimitStatement = 200_000; 
+    final TemplateConfigurationDTO templateConfiguration = new TemplateConfigurationDTO().setSqlLimitStatement(queryLimitStatement);
     final List<AlertTemplateApi> templates = provider.getAlertTemplates(templateConfiguration);
     assertThat(templates.size()).isEqualTo(8);
     assertThat(
         templates.stream().filter(t -> t.getName().contains("-percentile")).count()).isEqualTo(4);
+    for (final AlertTemplateApi t: templates) {
+      final Optional<TemplatePropertyMetadata> queryLimit = t.getProperties().stream()
+          .filter(p -> "queryLimit".equals(p.getName()))
+          .findFirst();
+      assertThat(queryLimit).isPresent();
+      assertThat(queryLimit.get().getDefaultValue()).isEqualTo(queryLimitStatement);
+    }
   }
 }

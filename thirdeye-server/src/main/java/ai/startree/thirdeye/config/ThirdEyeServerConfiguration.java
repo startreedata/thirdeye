@@ -77,6 +77,7 @@ public class ThirdEyeServerConfiguration extends Configuration {
   @JsonProperty("time")
   private TimeConfiguration timeConfiguration = null;
 
+  // see discussion https://github.com/startreedata/thirdeye/pull/1612 on why it is ok to use a DTO - we can introduce a Configuration later
   @JsonProperty("defaultWorkspaceConfiguration")
   private NamespaceConfigurationDTO namespaceConfiguration = new NamespaceConfigurationDTO();
 

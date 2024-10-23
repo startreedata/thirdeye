@@ -13,7 +13,9 @@
  */
 package ai.startree.thirdeye.datalayer.bao;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.datalayer.dao.NamespaceConfigurationDao;
 import ai.startree.thirdeye.spi.config.TimeConfiguration;
@@ -34,12 +36,15 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
 
   private final NamespaceConfigurationDao dao;
   private final TimeConfiguration timeConfiguration;
+  private final NamespaceConfigurationDTO defaultNamespaceConfiguration;
 
   @Inject
   public NamespaceConfigurationManagerImpl(final NamespaceConfigurationDao dao,
-      final TimeConfiguration timeConfiguration) {
+      final TimeConfiguration timeConfiguration,
+      final NamespaceConfigurationDTO defaultNamespaceConfiguration) {
     this.dao = dao;
     this.timeConfiguration = timeConfiguration;
+    this.defaultNamespaceConfiguration = defaultNamespaceConfiguration;
   }
 
   public @NonNull NamespaceConfigurationDTO getNamespaceConfiguration(final String namespace) {
@@ -48,7 +53,7 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
 
     // namespace config exists, update if components are empty
     if (existingNamespaceConfig != null) {
-      final boolean updateIsRequired = updateDefaults(existingNamespaceConfig);
+      final boolean updateIsRequired = updateDefaults(existingNamespaceConfig, false);
       if (updateIsRequired) {
         final Long namespaceConfigurationId = save(existingNamespaceConfig);
         // FIXME CYRIL ANSHUL - THIS STATEMENT IS USELESS ? save will throw already ?  
@@ -69,14 +74,14 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
    * It returns true if the input configuration was mutated.
    * It is the caller responsibility to persist the changes in the database if necessary.
    * */
-  private boolean updateDefaults(final NamespaceConfigurationDTO existingNamespaceConfig) {
+  private boolean updateDefaults(final NamespaceConfigurationDTO existingNamespaceConfig, final boolean force) {
     boolean updated = false;
-    if (existingNamespaceConfig.getTimeConfiguration() == null) {
-      existingNamespaceConfig.setTimeConfiguration(getDefaultTimeConfigurationFromServerConfig());
+    if (force || existingNamespaceConfig.getTimeConfiguration() == null) {
+      existingNamespaceConfig.setTimeConfiguration(defaultTimeConfiguration());
       updated = true;
     }
-    if (existingNamespaceConfig.getTemplateConfiguration() == null) {
-      existingNamespaceConfig.setTemplateConfiguration(new TemplateConfigurationDTO());
+    if (force || existingNamespaceConfig.getTemplateConfiguration() == null) {
+      existingNamespaceConfig.setTemplateConfiguration(defaultTemplateConfiguration());
       updated = true;
     }
     return updated;
@@ -105,8 +110,7 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
 
     // namespace config exists, update values to default
     if (existingNamespaceConfig != null) {
-      existingNamespaceConfig.setTimeConfiguration(
-          getDefaultTimeConfigurationFromServerConfig());
+      updateDefaults(existingNamespaceConfig, true);
       final Long namespaceConfigurationId = save(existingNamespaceConfig);
       checkState(namespaceConfigurationId != null,
           "Failed to rollback namespace configuration for namespace %s",
@@ -145,8 +149,8 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
   private NamespaceConfigurationDTO defaultNamespaceConfiguration(final String namespace) {
     final NamespaceConfigurationDTO namespaceConfigurationDTO = new NamespaceConfigurationDTO();
     namespaceConfigurationDTO
-        .setTimeConfiguration(getDefaultTimeConfigurationFromServerConfig())
-        .setTemplateConfiguration(new TemplateConfigurationDTO())
+        .setTimeConfiguration(defaultTimeConfiguration())
+        .setTemplateConfiguration(defaultTemplateConfiguration())
         .setAuth(new AuthorizationConfigurationDTO().setNamespace(namespace));
     return namespaceConfigurationDTO;
   }
@@ -187,10 +191,21 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
     return dao.filter(daoFilter);
   }
 
-  private TimeConfigurationDTO getDefaultTimeConfigurationFromServerConfig() {
-    return new TimeConfigurationDTO()
-        .setDateTimePattern(timeConfiguration.getDateTimePattern())
-        .setTimezone(timeConfiguration.getTimezone())
-        .setMinimumOnboardingStartTime(timeConfiguration.getMinimumOnboardingStartTime());
+  private TimeConfigurationDTO defaultTimeConfiguration() {
+    if (timeConfiguration != null) {
+      // timeConfiguration is deprecated - users should use the defaultNamespaceConfiguration 
+      return new TimeConfigurationDTO()
+          .setDateTimePattern(timeConfiguration.getDateTimePattern())
+          .setTimezone(timeConfiguration.getTimezone())
+          .setMinimumOnboardingStartTime(timeConfiguration.getMinimumOnboardingStartTime());  
+    } else {
+      return optional(defaultNamespaceConfiguration.getTimeConfiguration())
+          .orElse(new TimeConfigurationDTO());
+    }
+  }
+
+  private TemplateConfigurationDTO defaultTemplateConfiguration() {
+    return optional(defaultNamespaceConfiguration.getTemplateConfiguration())
+        .orElse(new TemplateConfigurationDTO());
   }
 }

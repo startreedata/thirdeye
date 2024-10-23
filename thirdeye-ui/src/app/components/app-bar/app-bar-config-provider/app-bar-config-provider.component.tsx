@@ -33,10 +33,7 @@ import { useAuthV1 } from "../../../platform/stores/auth-v1/auth-v1.store";
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
 import { useTranslation } from "react-i18next";
-import {
-    useAuthProviderV1,
-    useNotificationProviderV1,
-} from "../../../platform/components";
+import { useNotificationProviderV1 } from "../../../platform/components";
 import { useUserPreferences } from "../../../utils/user-preferences/user-preferences";
 import { UserPreferencesKeys } from "../../../utils/user-preferences/user-preferences.interfaces";
 
@@ -45,7 +42,6 @@ export const AppBarConfigProvider: FunctionComponent<AppBarConfigProviderProps> 
         const { t } = useTranslation();
         const { notify } = useNotificationProviderV1();
         const { setWorkspace, workspace } = useAuthV1();
-        const { authenticated, authDisabled } = useAuthProviderV1();
         const { setPreference, localPreferences } = useUserPreferences();
         const [showAppNavBar, setShowAppNavBar] = useState(true);
         const [okToRender, setOkToRender] = useState(false);
@@ -147,20 +143,17 @@ export const AppBarConfigProvider: FunctionComponent<AppBarConfigProviderProps> 
         }
 
         const showNavbar = okToRender && showAppNavBar;
-        const showAuthBasedView = authDisabled || authenticated;
 
         return (
             <AppBarConfigProviderContext.Provider value={{ setShowAppNavBar }}>
-                {showNavbar && showAuthBasedView && <AppBar />}
+                {showNavbar && <AppBar />}
                 <div className={compoenentStyles.rightView}>
-                    {showAuthBasedView && (
-                        <Appheader
-                            isFullScreen={!showNavbar}
-                            selectedWorkspace={mappedSelectedWorkspace}
-                            workspaces={mappedWorkspaces}
-                            onWorkspaceChange={handleWorkspaceChange}
-                        />
-                    )}
+                    <Appheader
+                        isFullScreen={!showNavbar}
+                        selectedWorkspace={mappedSelectedWorkspace}
+                        workspaces={mappedWorkspaces}
+                        onWorkspaceChange={handleWorkspaceChange}
+                    />
                     <div
                         className={compoenentStyles.mainContent}
                         key={mainViewKey}

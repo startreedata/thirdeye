@@ -30,17 +30,18 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Singleton
 public class NamespaceConfigurationManagerImpl implements NamespaceConfigurationManager {
 
   private final NamespaceConfigurationDao dao;
-  private final TimeConfiguration timeConfiguration;
+  private final @Nullable TimeConfiguration timeConfiguration;
   private final NamespaceConfigurationDTO defaultNamespaceConfiguration;
 
   @Inject
   public NamespaceConfigurationManagerImpl(final NamespaceConfigurationDao dao,
-      final TimeConfiguration timeConfiguration,
+      final @Nullable TimeConfiguration timeConfiguration,
       final NamespaceConfigurationDTO defaultNamespaceConfiguration) {
     this.dao = dao;
     this.timeConfiguration = timeConfiguration;

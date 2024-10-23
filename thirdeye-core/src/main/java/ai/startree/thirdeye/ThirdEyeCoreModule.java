@@ -25,9 +25,15 @@ import ai.startree.thirdeye.spi.datasource.loader.AggregationLoader;
 import ai.startree.thirdeye.spi.datasource.loader.MinMaxTimeLoader;
 import com.google.inject.AbstractModule;
 import com.google.inject.Scopes;
+import com.google.inject.util.Providers;
+import java.security.Provider;
 import org.apache.tomcat.jdbc.pool.DataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ThirdEyeCoreModule extends AbstractModule {
+  
+  private static final Logger LOG = LoggerFactory.getLogger(ThirdEyeCoreModule.class);
 
   private final DataSource dataSource;
   private final RcaConfiguration rcaConfiguration;
@@ -57,7 +63,12 @@ public class ThirdEyeCoreModule extends AbstractModule {
 
     bind(RcaConfiguration.class).toInstance(rcaConfiguration);
     bind(UiConfiguration.class).toInstance(uiConfiguration);
-    bind(TimeConfiguration.class).toInstance(timeConfiguration);
+    if (timeConfiguration != null) {
+      LOG.warn("Using the time configuration. This is deprecated. Please use defaultWorkspaceConfiguration.timeConfiguration instead.");
+      bind(TimeConfiguration.class).toInstance(timeConfiguration);
+    } else {
+      bind(TimeConfiguration.class).toProvider(Providers.of(null));
+    }
     bind(NamespaceConfigurationDTO.class).toInstance(defaultNamespaceConfiguration);
   }
 }

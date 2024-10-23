@@ -45,7 +45,7 @@ export const AppBarConfigProvider: FunctionComponent<AppBarConfigProviderProps> 
         const { t } = useTranslation();
         const { notify } = useNotificationProviderV1();
         const { setWorkspace, workspace } = useAuthV1();
-        const { authenticated } = useAuthProviderV1();
+        const { authenticated, authDisabled } = useAuthProviderV1();
         const { setPreference, localPreferences } = useUserPreferences();
         const [showAppNavBar, setShowAppNavBar] = useState(true);
         const [okToRender, setOkToRender] = useState(false);
@@ -147,12 +147,13 @@ export const AppBarConfigProvider: FunctionComponent<AppBarConfigProviderProps> 
         }
 
         const showNavbar = okToRender && showAppNavBar;
+        const showAuthBasedView = authDisabled || authenticated;
 
         return (
             <AppBarConfigProviderContext.Provider value={{ setShowAppNavBar }}>
-                {showNavbar && authenticated && <AppBar />}
+                {showNavbar && showAuthBasedView && <AppBar />}
                 <div className={compoenentStyles.rightView}>
-                    {authenticated && (
+                    {showAuthBasedView && (
                         <Appheader
                             isFullScreen={!showNavbar}
                             selectedWorkspace={mappedSelectedWorkspace}

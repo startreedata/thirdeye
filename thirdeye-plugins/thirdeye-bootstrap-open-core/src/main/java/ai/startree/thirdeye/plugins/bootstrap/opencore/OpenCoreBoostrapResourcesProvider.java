@@ -47,8 +47,9 @@ public class OpenCoreBoostrapResourcesProvider implements BootstrapResourcesProv
 
     return templates;
   }
-
-  private static void applyTemplateConfiguration(final List<AlertTemplateApi> templates,
+  
+  // public to be reused by other template plugins 
+  public static void applyTemplateConfiguration(final List<AlertTemplateApi> templates,
       final @NonNull TemplateConfigurationDTO templateConfiguration) {
     // apply default SQL LIMIT statement value 
     for (final AlertTemplateApi alertTemplateApi : templates) {

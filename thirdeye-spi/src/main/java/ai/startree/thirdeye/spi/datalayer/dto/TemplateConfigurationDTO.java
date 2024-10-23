@@ -17,7 +17,7 @@ public class TemplateConfigurationDTO {
 
   /**
    * Template generate queries. 
-   * Templates should generate queries with by default a statement LIMIT ${sqlLimitStatement} by default.
+   * Templates should generate queries with by default a statement LIMIT ${sqlLimitStatement}.
    */
   private int sqlLimitStatement = 100_000_000;
 

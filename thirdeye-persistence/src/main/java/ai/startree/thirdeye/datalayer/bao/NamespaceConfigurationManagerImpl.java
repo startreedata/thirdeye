@@ -15,7 +15,6 @@ package ai.startree.thirdeye.datalayer.bao;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkState;
-import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.datalayer.dao.NamespaceConfigurationDao;
 import ai.startree.thirdeye.spi.config.TimeConfiguration;

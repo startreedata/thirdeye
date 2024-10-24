@@ -83,6 +83,7 @@ export const ActiveAlertsCountV2: FunctionComponent<ActiveAlertsCountProps> = ({
                         entity: t("label.alert"),
                     })}
                     route={getAlertsEasyCreatePath()}
+                    // route={getAlertsCreatePath()}
                 />
             </Grid>
         </Grid>

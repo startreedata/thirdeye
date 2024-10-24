@@ -222,6 +222,7 @@ export const AlertsAllPage: FunctionComponent = () => {
     const handleAlertRedirect = (alertType: string | number): void => {
         if (alertType === "easyAlert") {
             navigate(getAlertsEasyCreatePath());
+            // navigate(getAlertsCreatePath());
         } else if (alertType === "advancedAlert") {
             navigate(getAlertsCreateAdvancePath());
         } else if (alertType === "jsonAlert") {

@@ -181,10 +181,14 @@ export const useImpactDashBoardApiRequests = ({
                 anaylysisPeriodPreviousWindowTimeMapping[
                     selectedAnalysisPeriod
                 ];
-            getAnomalies({ startTime: currentPeriod.startTime });
+            getAnomalies({
+                startTime: currentPeriod.startTime,
+                filterIgnoredAnomalies: true,
+            });
             getPreviousPeriodAnomalies({
                 startTime: previousPeriod.startTime,
                 endTime: previousPeriod.endTime,
+                filterIgnoredAnomalies: true,
             });
             getInvestigations(undefined, currentPeriod.startTime);
             getAlerts();

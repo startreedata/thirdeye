@@ -106,6 +106,7 @@ rca:
     algorithm: simple
     params: {}
 
+## DEPRECATED - please use defaultWorkspaceConfiguration below
 time:
   # notification timezone
   timezone: UTC
@@ -113,6 +114,18 @@ time:
   dateTimePattern: "MMM dd, yyyy HH:mm"
   # Limit onboarding alert replay back to JAN_1_2000_UTC
   minimumOnboardingStartTime: 946684800000
+  
+defaultWorkspaceConfiguration:
+  timeConfiguration:
+    # notification timezone
+    timezone: UTC
+    # notification time format pattern - see https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html 
+    dateTimePattern: "MMM dd, yyyy HH:mm"
+    # Limit onboarding alert replay back to JAN_1_2000_UTC
+    minimumOnboardingStartTime: 946684800000
+  templateConfiguration:
+    # alert templates generate queries with a LIMIT statement - this is the default value of the limit statement
+    sqlLimitStatement: 100_000_001
 
 mockEvents:
   enabled: false

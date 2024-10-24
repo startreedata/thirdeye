@@ -37,8 +37,8 @@ export interface GetDatasources extends ActionHook {
 }
 
 export interface GetRecommendedDatasources extends ActionHook {
-    recommendedDatasources: Datasource[] | null;
-    getRecommendedDatasources: () => Promise<Datasource[] | undefined>;
+    recommendedDatasource: Datasource | null;
+    getRecommendedDatasource: () => Promise<Datasource | undefined>;
 }
 
 export interface GetDatasource extends ActionHook {

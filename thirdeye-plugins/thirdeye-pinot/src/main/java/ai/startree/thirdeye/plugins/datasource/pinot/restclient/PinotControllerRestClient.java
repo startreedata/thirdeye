@@ -46,23 +46,23 @@ public class PinotControllerRestClient {
   private static final String PINOT_TABLE_CONFIG_ENDPOINT_TEMPLATE = "/tables/%s/schema";
 
   private final HttpHost pinotControllerHost;
-  private final PinotControllerHttpClientSupplier pinotControllerRestClientSupplier;
+  private final PinotControllerHttpClientProvider pinotControllerRestClientSupplier;
 
   @Inject
-  public PinotControllerRestClient(final PinotThirdEyeDataSourceConfig config,
-      final PinotControllerHttpClientSupplier pinotControllerRestClientSupplier) {
+  public PinotControllerRestClient(final PinotThirdEyeDataSourceConfig config) {
 
     pinotControllerHost = new HttpHost(config.getControllerHost(),
         config.getControllerPort(),
         config.getControllerConnectionScheme());
-    this.pinotControllerRestClientSupplier = pinotControllerRestClientSupplier;
+    this.pinotControllerRestClientSupplier = new PinotControllerHttpClientProvider(config);
   }
 
   public List<String> getAllTablesFromPinot() throws IOException {
     final HttpGet tablesReq = new HttpGet(PINOT_TABLES_ENDPOINT);
     LOG.info("Retrieving datasets: {}", tablesReq);
-    try (final CloseableHttpResponse tablesRes = pinotControllerRestClientSupplier.get()
-        .execute(pinotControllerHost, tablesReq)) {
+    CloseableHttpResponse tablesRes = null;
+    try {
+      tablesRes = pinotControllerRestClientSupplier.get().execute(pinotControllerHost, tablesReq);
       if (tablesRes.getStatusLine().getStatusCode() != 200) {
         throw new IllegalStateException(tablesRes.getStatusLine().toString());
       }
@@ -72,6 +72,13 @@ public class PinotControllerRestClient {
       return optional(api)
           .map(GetTablesResponseApi::getTables)
           .orElse(Collections.emptyList());
+    } finally {
+      if (tablesRes != null) {
+        if (tablesRes.getEntity() != null) {
+          EntityUtils.consume(tablesRes.getEntity());
+        }
+        tablesRes.close();
+      }
     }
   }
 
@@ -94,9 +101,9 @@ public class PinotControllerRestClient {
     Schema schema = null;
     final HttpGet schemaReq = new HttpGet(
         String.format(endpointTemplate, URLEncoder.encode(dataset, StandardCharsets.UTF_8)));
-    final CloseableHttpResponse schemaRes = pinotControllerRestClientSupplier.get()
-        .execute(pinotControllerHost, schemaReq);
+    CloseableHttpResponse schemaRes = null;
     try {
+      schemaRes = pinotControllerRestClientSupplier.get().execute(pinotControllerHost, schemaReq);
       if (schemaRes.getStatusLine().getStatusCode() != 200) {
         LOG.error("Schema {} not found, {}", dataset, schemaRes.getStatusLine().toString());
       } else {
@@ -106,22 +113,23 @@ public class PinotControllerRestClient {
     } catch (final Exception e) {
       LOG.error("Exception in retrieving schema collections, skipping {}", dataset);
     } finally {
-      if (schemaRes.getEntity() != null) {
-        EntityUtils.consume(schemaRes.getEntity());
+      if (schemaRes != null) {
+        if (schemaRes.getEntity() != null) {
+          EntityUtils.consume(schemaRes.getEntity());
+        }
+        schemaRes.close();
       }
-      schemaRes.close();
     }
     return schema;
   }
 
   public JsonNode getTableConfigFromPinotEndpoint(final String dataset) throws IOException {
     final HttpGet request = new HttpGet(String.format(PINOT_TABLES_ENDPOINT_TEMPLATE, dataset));
-    final CloseableHttpResponse response = pinotControllerRestClientSupplier.get()
-        .execute(pinotControllerHost, request);
-
+    CloseableHttpResponse response = null;
     // Retrieve table config
     JsonNode tables = null;
     try {
+      response = pinotControllerRestClientSupplier.get().execute(pinotControllerHost, request);
       if (response.getStatusLine().getStatusCode() != 200) {
         throw new IllegalStateException(response.getStatusLine().toString());
       }
@@ -130,10 +138,12 @@ public class PinotControllerRestClient {
     } catch (final Exception e) {
       LOG.error("Exception in loading dataset {}", dataset, e);
     } finally {
-      if (response.getEntity() != null) {
-        EntityUtils.consume(response.getEntity());
+      if (response != null) {
+        if (response.getEntity() != null) {
+          EntityUtils.consume(response.getEntity());
+        }
+        response.close();
       }
-      response.close();
     }
 
     JsonNode tableJson = null;

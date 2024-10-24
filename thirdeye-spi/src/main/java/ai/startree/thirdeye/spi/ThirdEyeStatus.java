@@ -26,7 +26,7 @@ public enum ThirdEyeStatus {
   ERR_DATASOURCE_NOT_FOUND("Data Source not found: %s. Data Source is not created?"),
   ERR_DATASOURCE_NOT_FOUND_IN_NAMESPACE("Data Source not found: %s in namespace %s. Data Source is not created?"),
   ERR_DATASOURCE_NOT_LOADED("Data source cannot be instantiated! %s"),
-  ERR_DATASOURCE_VALIDATION_FAILED("Data source validation failed! name: %s. %s"),
+  ERR_DATASOURCE_VALIDATION_FAILED("Data source validation failed! name or id: %s. %s"),
   ERR_DATA_UNAVAILABLE("Data not available! %s"),
   ERR_DETECTION_INTERVAL_COMPUTATION("Failed to compute detection interval. Error caused by : %s"),
   ERR_DUPLICATE_NAME("Please provide a unique name. '%s' already exists."),

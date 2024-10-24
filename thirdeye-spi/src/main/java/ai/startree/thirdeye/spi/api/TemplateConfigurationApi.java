@@ -11,17 +11,19 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.spi.bootstrap;
+package ai.startree.thirdeye.spi.api;
 
-import ai.startree.thirdeye.spi.api.AlertTemplateApi;
-import ai.startree.thirdeye.spi.datalayer.dto.TemplateConfigurationDTO;
-import java.util.List;
-import org.checkerframework.checker.nullness.qual.NonNull;
+public class TemplateConfigurationApi {
+  
+  
+  private int sqlLimitStatement = 100_000_000;
 
-/**
- * BootstrapResourcesProvider provide resources to bootstrap ThirdEye installation and configuration.
- */
-public interface BootstrapResourcesProvider {
+  public int getSqlLimitStatement() {
+    return sqlLimitStatement;
+  }
 
-  List<AlertTemplateApi> getAlertTemplates(final @NonNull TemplateConfigurationDTO templateConfiguration);
+  public TemplateConfigurationApi setSqlLimitStatement(final int sqlLimitStatement) {
+    this.sqlLimitStatement = sqlLimitStatement;
+    return this;
+  }
 }

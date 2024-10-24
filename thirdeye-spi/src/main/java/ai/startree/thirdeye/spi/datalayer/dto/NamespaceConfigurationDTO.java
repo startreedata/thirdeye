@@ -22,6 +22,8 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 public class NamespaceConfigurationDTO extends AbstractDTO {
 
   TimeConfigurationDTO timeConfiguration;
+  
+  private TemplateConfigurationDTO templateConfiguration; 
 
   public TimeConfigurationDTO getTimeConfiguration() {
     return timeConfiguration;
@@ -30,6 +32,16 @@ public class NamespaceConfigurationDTO extends AbstractDTO {
   public NamespaceConfigurationDTO setTimeConfiguration(
       final TimeConfigurationDTO timeConfiguration) {
     this.timeConfiguration = timeConfiguration;
+    return this;
+  }
+
+  public TemplateConfigurationDTO getTemplateConfiguration() {
+    return templateConfiguration;
+  }
+
+  public NamespaceConfigurationDTO setTemplateConfiguration(
+      final TemplateConfigurationDTO templateConfiguration) {
+    this.templateConfiguration = templateConfiguration;
     return this;
   }
 }

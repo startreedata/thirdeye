@@ -19,6 +19,7 @@ import static com.google.common.base.Preconditions.checkState;
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
 import ai.startree.thirdeye.spi.bootstrap.BootstrapResourcesProvider;
 import ai.startree.thirdeye.spi.bootstrap.BootstrapResourcesProviderFactory;
+import ai.startree.thirdeye.spi.datalayer.dto.TemplateConfigurationDTO;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
@@ -58,11 +59,11 @@ public class BootstrapResourcesRegistry {
     return bootstrapResourcesProviderFactory.build();
   }
 
-  public List<AlertTemplateApi> getAlertTemplates() {
+  public List<AlertTemplateApi> getAlertTemplates(final @NonNull TemplateConfigurationDTO templateConfiguration) {
     final List<AlertTemplateApi> allTemplates = new ArrayList<>();
     for (String name : factoryMap.keySet()) {
       final BootstrapResourcesProvider bootstrapResourcesProvider = get(name);
-      allTemplates.addAll(bootstrapResourcesProvider.getAlertTemplates());
+      allTemplates.addAll(bootstrapResourcesProvider.getAlertTemplates(templateConfiguration));
     }
 
     return allTemplates;

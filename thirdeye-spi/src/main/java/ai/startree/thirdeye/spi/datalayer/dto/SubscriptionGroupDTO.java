@@ -18,6 +18,7 @@ import com.google.common.base.Objects;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
+import org.joda.time.Period;
 
 public class SubscriptionGroupDTO extends AbstractDTO {
 
@@ -52,6 +53,11 @@ public class SubscriptionGroupDTO extends AbstractDTO {
    * before the association with the alert was created will not be notified.
    */
   private Boolean notifyHistoricalAnomalies;
+
+  /**
+   * If set, don't notify the anomalies of length < minimumAnomalyLength.
+   */
+  private String minimumAnomalyLength;
 
   public boolean isActive() {
     return active;
@@ -243,6 +249,15 @@ public class SubscriptionGroupDTO extends AbstractDTO {
   @Override
   public SubscriptionGroupDTO setId(final Long id) {
     super.setId(id);
+    return this;
+  }
+
+  public String getMinimumAnomalyLength() {
+    return minimumAnomalyLength;
+  }
+
+  public SubscriptionGroupDTO setMinimumAnomalyLength(final String minimumAnomalyLength) {
+    this.minimumAnomalyLength = minimumAnomalyLength;
     return this;
   }
 }

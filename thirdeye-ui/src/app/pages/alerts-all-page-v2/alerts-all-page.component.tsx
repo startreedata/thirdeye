@@ -14,10 +14,12 @@
  */
 import { Icon } from "@iconify/react";
 import { Box, Button, Card, CardContent, Grid, Link } from "@material-ui/core";
+import { AxiosError } from "axios";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { AlertListV1 } from "../../components/alert-list-v1/alert-list-v1.component";
+import { EasyAlertModal } from "../../components/easy-alert-modal/easy-alert-modal.component";
 import { alertsBasicHelpCards } from "../../components/help-drawer-v1/help-drawer-card-contents.utils";
 import { HelpDrawerV1 } from "../../components/help-drawer-v1/help-drawer-v1.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
@@ -40,21 +42,19 @@ import { ActionStatus } from "../../rest/actions.interfaces";
 import { useResetAlert } from "../../rest/alerts/alerts.actions";
 import { deleteAlert, getAllAlerts } from "../../rest/alerts/alerts.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
+import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import { UiAlert } from "../../rest/dto/ui-alert.interfaces";
+import { useFetchQuery } from "../../rest/hooks/useFetchQuery";
+import { getAllSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.rest";
 import { getUiAlerts } from "../../utils/alerts/alerts.util";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
+import { getErrorMessages } from "../../utils/rest/rest.util";
 import {
     getAlertsCreateAdvancePath,
     getAlertsCreateNewJsonEditorPath,
     getAlertsCreatePath,
     getAlertsEasyCreatePath,
 } from "../../utils/routes/routes.util";
-import { getAllSubscriptionGroups } from "../../rest/subscription-groups/subscription-groups.rest";
-import { getErrorMessages } from "../../utils/rest/rest.util";
-import { AxiosError } from "axios";
-import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
-import { EasyAlertModal } from "../../components/easy-alert-modal/easy-alert-modal.component";
-import { useFetchQuery } from "../../rest/hooks/useFetchQuery";
 
 export const AlertsAllPage: FunctionComponent = () => {
     const [uiAlerts, setUiAlerts] = useState<UiAlert[]>([]);
@@ -221,7 +221,8 @@ export const AlertsAllPage: FunctionComponent = () => {
 
     const handleAlertRedirect = (alertType: string | number): void => {
         if (alertType === "easyAlert") {
-            navigate(getAlertsCreatePath());
+            navigate(getAlertsEasyCreatePath());
+            // navigate(getAlertsCreatePath());
         } else if (alertType === "advancedAlert") {
             navigate(getAlertsCreateAdvancePath());
         } else if (alertType === "jsonAlert") {

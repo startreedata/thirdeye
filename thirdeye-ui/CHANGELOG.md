@@ -1,3 +1,10 @@
+### [2.52.7](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.52.6...thirdeye-ui-2.52.7) (2024-10-24)
+
+
+### Bug Fixes
+
+* [TE-2493](https://cortexdata.atlassian.net/browse/TE-2493) show side nav on view alert page ([0919f3aa3](https://github.com/startreedata/thirdeye/commit/0919f3aa3e30e6626c20f2fbebe23befb0fa62f0))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

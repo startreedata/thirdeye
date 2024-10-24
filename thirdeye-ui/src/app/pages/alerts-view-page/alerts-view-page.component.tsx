@@ -78,11 +78,17 @@ import {
 } from "./alerts-view-page.utils";
 import { useFetchQuery } from "../../rest/hooks/useFetchQuery";
 import { AlertAddConfigurationModal } from "../../components/alert-add-configuration-modal/alert-add-configration-modal.component";
+import { useAppBarConfigProvider } from "../../components/app-bar/app-bar-config-provider/app-bar-config-provider.component";
 
 export const AlertsViewPage: FunctionComponent = () => {
     const { t } = useTranslation();
     const { notify, remove: removeNotification } = useNotificationProviderV1();
     const { id: alertId } = useParams<AlertsViewPageParams>();
+    const { setShowAppNavBar } = useAppBarConfigProvider();
+
+    useEffect(() => {
+        setShowAppNavBar(true);
+    }, []);
 
     // Used for the scenario when user first creates an alert but no anomalies generated yet
     const [refreshAttempts, setRefreshAttempts] = useState(0);

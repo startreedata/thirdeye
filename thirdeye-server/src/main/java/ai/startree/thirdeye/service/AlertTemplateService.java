@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.service;
 
 import static ai.startree.thirdeye.ResourceUtils.ensure;
+import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
@@ -23,7 +24,10 @@ import ai.startree.thirdeye.spi.api.AlertTemplateApi;
 import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertTemplateManager;
+import ai.startree.thirdeye.spi.datalayer.bao.NamespaceConfigurationManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.NamespaceConfigurationDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.TemplateConfigurationDTO;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -41,13 +45,16 @@ public class AlertTemplateService extends CrudService<AlertTemplateApi, AlertTem
   private static final Logger LOG = LoggerFactory.getLogger(AlertTemplateService.class);
 
   private final BootstrapResourcesRegistry bootstrapResourcesRegistry;
+  private final NamespaceConfigurationManager namespaceConfigurationDao;
 
   @Inject
   public AlertTemplateService(final AlertTemplateManager alertTemplateManager,
       final AuthorizationManager authorizationManager,
-      final BootstrapResourcesRegistry bootstrapResourcesRegistry) {
+      final BootstrapResourcesRegistry bootstrapResourcesRegistry,
+      final NamespaceConfigurationManager namespaceConfigurationDao) {
     super(authorizationManager, alertTemplateManager, ImmutableMap.of());
     this.bootstrapResourcesRegistry = bootstrapResourcesRegistry;
+    this.namespaceConfigurationDao = namespaceConfigurationDao;
   }
 
   @Override
@@ -85,7 +92,10 @@ public class AlertTemplateService extends CrudService<AlertTemplateApi, AlertTem
   protected List<AlertTemplateApi> loadRecommendedTemplates(final ThirdEyeServerPrincipal principal,
       final boolean updateExisting, final String explicitNamespace) {
     LOG.info("Loading recommended templates in namespace {}: START.", explicitNamespace);
-    final List<AlertTemplateApi> alertTemplates = bootstrapResourcesRegistry.getAlertTemplates();
+    final NamespaceConfigurationDTO namespaceConfiguration = namespaceConfigurationDao.getNamespaceConfiguration(explicitNamespace);
+    final TemplateConfigurationDTO templateConfiguration = requireNonNull(namespaceConfiguration.getTemplateConfiguration(), "Invalid namespace configuration: template configuration is not set.");
+    final List<AlertTemplateApi> alertTemplates = bootstrapResourcesRegistry.getAlertTemplates(
+        templateConfiguration);
     LOG.info("Loading recommended templates in namespace {}: templates to load: {}",
         explicitNamespace,
         alertTemplates.stream().map(AlertTemplateApi::getName).collect(Collectors.toList()));

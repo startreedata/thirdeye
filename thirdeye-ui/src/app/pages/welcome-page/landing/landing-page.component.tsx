@@ -32,7 +32,8 @@ import {
     getConfigurationPath,
     getDataConfigurationCreatePath,
     getHomePath,
-    getWelcomeCreateAlert,
+    // getWelcomeCreateAlert,
+    getAlertsEasyCreatePath,
 } from "../../../utils/routes/routes.util";
 import { useGetAlertsCount } from "../../../rest/alerts/alerts.actions";
 import { useNavigate } from "react-router-dom";
@@ -161,7 +162,8 @@ export const WelcomeLandingPage: FunctionComponent = () => {
                                         entity: t("label.alert"),
                                     })}
                                     disabled={!hasDatasets}
-                                    link={getWelcomeCreateAlert()}
+                                    // link={getWelcomeCreateAlert()}
+                                    link={getAlertsEasyCreatePath()}
                                     subtitle={t(
                                         "message.explore-startree-thirdeye-in-one-click"
                                     )}

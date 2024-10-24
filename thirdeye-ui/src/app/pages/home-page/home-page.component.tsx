@@ -74,10 +74,19 @@ export const HomePage: FunctionComponent = () => {
     });
 
     useEffect(() => {
-        if (getAlertsQuery.data && getAlertsQuery.data.length === 0) {
+        if (
+            getAlertsQuery.isFetching === false &&
+            getAlertsQuery.isSuccess &&
+            getAlertsQuery.data &&
+            getAlertsQuery.data.length === 0
+        ) {
             navigate(AppRoute.WELCOME);
         }
-    }, [getAlertsQuery.data]);
+    }, [
+        getAlertsQuery.data,
+        getAlertsQuery.isSuccess,
+        getAlertsQuery.isFetching,
+    ]);
 
     useEffect(() => {
         if (

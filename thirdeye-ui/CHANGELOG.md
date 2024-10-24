@@ -1,3 +1,10 @@
+### [2.52.6](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.52.5...thirdeye-ui-2.52.6) (2024-10-24)
+
+
+### Bug Fixes
+
+* [TE-2493](https://cortexdata.atlassian.net/browse/TE-2493) use new alert flow from onboarding page ([a5b08970a](https://github.com/startreedata/thirdeye/commit/a5b08970acdcae8bfca9d021f6c1691eeba6f442))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

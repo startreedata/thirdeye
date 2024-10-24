@@ -23,13 +23,13 @@ import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-
 import { generateGenericNameForAlert } from "../../utils/alerts/alerts.util";
 import { AppRouteRelative } from "../../utils/routes/routes.util";
 import { GranularityValue } from "../alert-wizard-v3/select-metric/select-metric.utils";
-import { CronEditor } from "../cron-editor-v1/cron-editor-v1.component";
+import { CronEditor } from "../cron-editor-v1/cron-editor-v2.component";
 import { InputSectionV2 } from "../form-basics/input-section-v2/input-section-v2.component";
 import { Modal } from "../modal/modal.component";
 import { CreateAlertModalModalProps } from "./create-alert-modal.interfaces";
 
 export const CreateAlertModal: FunctionComponent<CreateAlertModalModalProps> =
-    ({ onCancel }) => {
+    ({ onCancel, defaultCron }) => {
         const { t } = useTranslation();
 
         const navigate = useNavigate();
@@ -164,6 +164,7 @@ export const CreateAlertModal: FunctionComponent<CreateAlertModalModalProps> =
                     <CronEditor
                         fullWidth
                         cron={alert.cron}
+                        defaultCron={defaultCron}
                         handleUpdateCron={handleCronChange}
                     />
                 </Grid>

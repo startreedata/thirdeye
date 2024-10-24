@@ -15,7 +15,7 @@
 import { AxiosError } from "axios/index";
 import React, { FunctionComponent, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { validateSubscriptionGroup } from "../../components/subscription-group-wizard/subscription-group-wizard.utils";
 import { useNotificationProviderV1 } from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
@@ -31,6 +31,7 @@ import { AlertsEditCreateBasePageComponent } from "../alerts-edit-create-common/
 import {
     QUERY_PARAM_KEY_ALERT_TYPE,
     QUERY_PARAM_KEY_ANOMALIES_RETRY,
+    QUERY_PARAM_KEY_FOR_NOTIFICATION,
 } from "../alerts-view-page/alerts-view-page.utils";
 import { AlertsCreatePageProps } from "./alerts-create-page.interfaces";
 
@@ -39,6 +40,7 @@ export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
 }) => {
     const { t } = useTranslation();
     const navigate = useNavigate();
+    const location = useLocation();
     const { notify } = useNotificationProviderV1();
     const [subscriptionGroups, setSubscriptionGroups] = useState<
         SubscriptionGroup[]
@@ -54,6 +56,11 @@ export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
                 [QUERY_PARAM_KEY_ANOMALIES_RETRY, "true"],
                 [QUERY_PARAM_KEY_ALERT_TYPE, "create"],
             ]);
+            const isNewCreateEasyAlert =
+                location.pathname.includes("easy-alert");
+            if (isNewCreateEasyAlert) {
+                searchParams.set(QUERY_PARAM_KEY_FOR_NOTIFICATION, "true");
+            }
             navigate(getAlertsAlertPath(savedAlert.id, searchParams));
         });
     }, [navigate, notify, t]);

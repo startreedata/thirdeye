@@ -18,4 +18,7 @@ export const useCronAdvanceStyles = makeStyles((theme) => ({
     label: {
         color: theme.palette.text.primary,
     },
+    label2: {
+        color: "#4B6D93",
+    },
 }));

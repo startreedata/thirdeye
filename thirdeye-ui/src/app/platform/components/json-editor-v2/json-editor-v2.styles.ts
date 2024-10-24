@@ -44,6 +44,15 @@ export const useJSONEditorV2Styles = makeStyles((theme) => ({
             color: `${theme.palette.primary.main} !important`,
             fontWeight: "bold",
         },
+        "& .CodeMirror-gutter-elt": {
+            backgroundColor: "#F3F9FF",
+            color: "#0B263E",
+            border: "none",
+        },
+        "& .cm-string": {
+            color: "#0B263E !important",
+            border: "none",
+        },
     },
     codeMirrorError: {
         borderColor: theme.palette.error.main,
@@ -63,10 +72,10 @@ export const useJSONEditorV2Styles = makeStyles((theme) => ({
         display: "flex",
         justifyContent: "space-between",
 
-        '& > button': {
+        "& > button": {
             backgroundColor: ColorV1.White1,
             border: `1px solid ${ColorV1.Grey10}`,
-            borderRadius: 8
-        }
+            borderRadius: 8,
+        },
     },
 }));

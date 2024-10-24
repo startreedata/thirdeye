@@ -12,24 +12,25 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Icon } from "@iconify/react";
 import {
     Box,
     Button,
-    Chip,
+    CircularProgress,
     Divider,
     Grid,
     TextareaAutosize,
     TextField,
-    Tooltip,
     Typography,
 } from "@material-ui/core";
-import { KeyboardArrowDown, KeyboardArrowUp } from "@material-ui/icons";
+import {
+    Cancel,
+    CheckCircle,
+    KeyboardArrowDown,
+    KeyboardArrowUp,
+} from "@material-ui/icons";
 import AddCircleOutline from "@material-ui/icons/AddCircleOutline";
-import DoneAllIcon from "@material-ui/icons/DoneAll";
-import { Alert, AlertTitle, Autocomplete } from "@material-ui/lab";
+import { Alert, Autocomplete } from "@material-ui/lab";
 import { isNil, toLower } from "lodash";
-import { DateTime, Duration } from "luxon";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -42,31 +43,27 @@ import { AdditonalFiltersDrawer } from "../../../components/additional-filters-d
 import { AlertCompositeFiltersModal } from "../../../components/alert-composite-filters-modal/alert-composite-filters-modal.component";
 import { createNewStartingAlert } from "../../../components/alert-wizard-v2/alert-template/alert-template.utils";
 import { AvailableAlgorithmOption } from "../../../components/alert-wizard-v3/alert-type-selection/alert-type-selection.interfaces";
-import { generateAvailableAlgorithmOptions } from "../../../components/alert-wizard-v3/alert-type-selection/alert-type-selection.utils";
+import {
+    generateAvailableAlgorithmOptions,
+    generateAvailableAlgorithmOptionsForRecommendations,
+} from "../../../components/alert-wizard-v3/alert-type-selection/alert-type-selection.utils";
 import { AnomaliesFilterConfiguratorRenderConfigs } from "../../../components/alert-wizard-v3/anomalies-filter-panel/anomalies-filter-panel.interfaces";
 import { getAvailableFilterOptions } from "../../../components/alert-wizard-v3/anomalies-filter-panel/anomalies-filter-panel.utils";
+import { ChartContentV2 } from "../../../components/alert-wizard-v3/preview-chart/chart-content-v2/chart-content-v2.component";
 import {
     generateTemplateProperties,
     GranularityValue,
-    GRANULARITY_OPTIONS,
-    GRANULARITY_OPTIONS_TOOLTIP,
 } from "../../../components/alert-wizard-v3/select-metric/select-metric.utils";
-import { ThresholdSetup } from "../../../components/alert-wizard-v3/threshold-setup/threshold-setup-v2.component";
+import { ThresholdSetupV3 } from "../../../components/alert-wizard-v3/threshold-setup/threshold-setup-v3.component";
 import { ColumnsDrawer } from "../../../components/columns-drawer/columns-drawer.component";
 import { CreateAlertModal } from "../../../components/create-alert-modal/create-alert-modal.component";
 import { InputSectionV2 } from "../../../components/form-basics/input-section-v2/input-section-v2.component";
 import { RadioSection } from "../../../components/form-basics/radio-section-v2/radio-section.component";
 import { RadioSectionOptions } from "../../../components/form-basics/radio-section-v2/radio-section.interfaces";
-import { alertsBasicHelpCards } from "../../../components/help-drawer-v1/help-drawer-card-contents.utils";
-import { HelpDrawerV1 } from "../../../components/help-drawer-v1/help-drawer-v1.component";
 import { TimeRangeButtonWithContext } from "../../../components/time-range/time-range-button-with-context-v2/time-range-button.component";
 import { TimeRangeQueryStringKey } from "../../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { ReactComponent as FilterListRoundedIcon } from "../../../platform/assets/images/filter-icon.svg";
-import {
-    PageContentsCardV1,
-    PageHeaderActionsV1,
-} from "../../../platform/components";
-import { ColorV1 } from "../../../platform/utils/material-ui/color.util";
+import { PageContentsCardV1 } from "../../../platform/components";
 import { useGetEvaluation } from "../../../rest/alerts/alerts.actions";
 import { AlertTemplate } from "../../../rest/dto/alert-template.interfaces";
 import {
@@ -102,7 +99,8 @@ const PROPERTIES_TO_COPY = [
 ];
 
 const ALERT_TEMPLATE_FOR_EVALUATE = "startree-threshold";
-const ALERT_TEMPLATE_FOR_EVALUATE_DX = "startree-threshold-dx";
+const ALERT_TEMPLATE_FOR_EVALUATE_DX = "startree-mean-variance-dx";
+const ALERT_TEMPLATE_FOR_EVALUATE_QUERY_DX = "startree-threshold-query-dx";
 
 export const AlertsCreateEasyPage: FunctionComponent = () => {
     const classes = easyAlertStyles();
@@ -113,10 +111,35 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
     const [queryFilters, setQueryFilters] = useState("");
+    const [inputValue, setInputValue] = useState("");
 
     const [showSQLWhere, setShowSQLWhere] = useState(false);
     const [enumerations, setEnumerations] = useState(false);
     const [dimension, setDimension] = useState<string | null>(null);
+    const [alertInsightLoading, setAlertInsightLoading] = useState(false);
+
+    const GRANULARITY_OPTIONS = [
+        {
+            label: t("label.daily"),
+            value: GranularityValue.DAILY,
+        },
+        {
+            label: t("label.hourly"),
+            value: GranularityValue.HOURLY,
+        },
+        {
+            label: t("label.15-minutes"),
+            value: GranularityValue.FIFTEEN_MINUTES,
+        },
+        {
+            label: t("label.5-minutes"),
+            value: GranularityValue.FIVE_MINUTES,
+        },
+        {
+            label: t("label.1-minute"),
+            value: GranularityValue.ONE_MINUTE,
+        },
+    ];
 
     const [startTime, endTime] = useMemo(
         () => [
@@ -131,8 +154,11 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         alertTemplates,
         isMultiDimensionAlert,
         alertInsight,
+        getAlertInsight,
         alertRecommendations,
+        getAlertRecommendationIsLoading,
         alert,
+        setIsMultiDimensionAlert,
         getAlertRecommendation,
         setShouldShowStepper,
     } = useOutletContext<AlertCreatedGuidedPageOutletContext>();
@@ -151,7 +177,6 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
     const [anomalyDetection, setAnomalyDetection] = useState<string | null>(
         null
     );
-    const [editedDatasource, setEditedDatasource] = useState("");
     const [editedDatasourceFieldValue, setEditedDatasourceFieldValue] =
         useState("");
 
@@ -166,6 +191,10 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
     const [openCreateAlertModal, setOpenCreateAlertModal] = useState(false);
     const [openViewColumnsListDrawer, setOpenViewColumnsListDrawer] =
         useState(false);
+
+    const isGetAlertRecommendationLoading = useMemo(() => {
+        return getAlertRecommendationIsLoading;
+    }, [getAlertRecommendationIsLoading]);
 
     useEffect(() => {
         setShouldShowStepper(false);
@@ -184,7 +213,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                     )?.name || t("label.custom-metric-aggregation");
                 setSelectedTable(dataSource);
                 setSelectedMetric(metrics || null);
-                setEditedDatasource(
+                setEditedDatasourceFieldValue(
                     String(alert.templateProperties?.aggregationColumn)
                 );
                 setEditedDatasourceFieldValue(
@@ -198,7 +227,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                         .monitoringGranularity as GranularityValue
                 );
                 setAlgorithmOption(
-                    recommendedAlertTemplateFirst.find((item) => {
+                    alertTemplateOptions.find((item) => {
                         const name = isMultiDimensionAlert
                             ? item.algorithmOption
                                   .alertTemplateForMultidimension
@@ -216,9 +245,9 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                 setQueryFilters(
                     String(alert.templateProperties?.queryFilters) || ""
                 );
-                if (alert.templateProperties?.enumeratoryQuery) {
+                if (alert.templateProperties?.enumeratorQuery) {
                     setEnumerators(
-                        String(alert.templateProperties?.enumeratoryQuery)
+                        String(alert.templateProperties?.enumeratorQuery)
                     );
                     setDimension(SelectDimensionsOptions.ENUMERATORS);
                 }
@@ -244,14 +273,19 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         ]
     );
     const alertTemplateForEvaluate = useMemo(() => {
-        const alertTemplateToFind = isMultiDimensionAlert
-            ? ALERT_TEMPLATE_FOR_EVALUATE_DX
-            : ALERT_TEMPLATE_FOR_EVALUATE;
+        let alertTemplateToFind = isMultiDimensionAlert
+            ? algorithmOption?.algorithmOption.alertTemplateForMultidimension
+            : algorithmOption?.algorithmOption.alertTemplate;
+        if (!algorithmOption) {
+            alertTemplateToFind = isMultiDimensionAlert
+                ? ALERT_TEMPLATE_FOR_EVALUATE_DX
+                : ALERT_TEMPLATE_FOR_EVALUATE;
+        }
 
         return alertTemplates.find((alertTemplateCandidate) => {
             return alertTemplateCandidate.name === alertTemplateToFind;
         });
-    }, [alertTemplates, alert, isMultiDimensionAlert]);
+    }, [alertTemplates, alert, algorithmOption, isMultiDimensionAlert]);
 
     const availableConfigurations = useMemo(() => {
         if (!alertTemplateForEvaluate) {
@@ -261,40 +295,91 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         return getAvailableFilterOptions(alertTemplateForEvaluate, t);
     }, [alertTemplateForEvaluate]);
 
-    const handleGranularityChange = (
+    const handleGranularityChange = async (
         _: unknown,
-        item: { label: string; value: GranularityValue }
-    ): void => {
-        const prevGranularity = granularity;
-        setGranularity(item.value);
-        if (
-            prevGranularity &&
-            granularity &&
-            !Duration.fromISO(granularity).equals(
-                Duration.fromISO(prevGranularity)
-            )
-        ) {
-            const newStartTime = startTime;
-            let newEndTime = DateTime.fromMillis(newStartTime)
-                .plus({
-                    milliseconds: Duration.fromISO(granularity).toMillis() * 30,
-                })
-                .toMillis();
-
-            if (alertInsight?.datasetEndTime) {
-                newEndTime = Math.min(newEndTime, alertInsight?.datasetEndTime);
+        item: { label: string; value: GranularityValue } | null
+    ): Promise<void> => {
+        const existingGranularity = granularity;
+        if (!item) {
+            if (aggregationFunction) {
+                handleAggregationChange(aggregationFunction);
             }
 
-            searchParams.set(
-                TimeRangeQueryStringKey.START_TIME,
-                newStartTime.toString()
-            );
-            searchParams.set(
-                TimeRangeQueryStringKey.END_TIME,
-                newEndTime.toString()
-            );
-
-            setSearchParams(searchParams);
+            return;
+        }
+        setGranularity(item.value);
+        setDimension(null);
+        setCompositeFilters(null);
+        setAlgorithmOption(null);
+        setEnumerations(false);
+        setEnumerators("");
+        setAnomalyDetection(null);
+        if (
+            item.value &&
+            (editedDatasourceFieldValue || selectedMetric) &&
+            selectedTable
+        ) {
+            try {
+                let isCustomMetrics = false;
+                if (selectedMetric === t("label.custom-metric-aggregation")) {
+                    isCustomMetrics = true;
+                }
+                const workingAlert: Partial<EditableAlert> = existingGranularity
+                    ? {
+                          ...alert,
+                          templateProperties: {
+                              ...alert.templateProperties,
+                              monitoringGranularity: item.value,
+                          },
+                      }
+                    : {
+                          template: {
+                              name:
+                                  (isMultiDimensionAlert
+                                      ? algorithmOption?.algorithmOption
+                                            .alertTemplateForMultidimension
+                                      : algorithmOption?.algorithmOption
+                                            ?.alertTemplate) ||
+                                  createNewStartingAlert().template?.name,
+                          },
+                          templateProperties: {
+                              ...alert.templateProperties,
+                              ...generateTemplateProperties(
+                                  isCustomMetrics
+                                      ? editedDatasourceFieldValue
+                                      : (selectedMetric as string),
+                                  selectedTable?.dataset,
+                                  aggregationFunction || "",
+                                  item.value
+                              ),
+                              queryFilters: queryFilters,
+                              enumeratorQuery:
+                                  dimension ===
+                                  SelectDimensionsOptions.ENUMERATORS
+                                      ? enumerators
+                                      : null,
+                          },
+                      };
+                setAlertInsightLoading(true);
+                const newAlertInsight = await getAlertInsight({
+                    alert: workingAlert as EditableAlert,
+                });
+                if (newAlertInsight) {
+                    searchParams.set(
+                        TimeRangeQueryStringKey.START_TIME,
+                        newAlertInsight.defaultStartTime.toString()
+                    );
+                    searchParams.set(
+                        TimeRangeQueryStringKey.END_TIME,
+                        newAlertInsight.defaultEndTime.toString()
+                    );
+                    setSearchParams(searchParams);
+                }
+            } catch (error) {
+                console.error("Error fetching alert insight:", error);
+            } finally {
+                setAlertInsightLoading(false);
+            }
         }
     };
 
@@ -306,7 +391,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
             options.push({
                 value: item,
                 label: item,
-                onClick: () => setAggregationFunction(item),
+                onClick: () => handleAggregationChange(item),
                 tooltipText: item,
             })
         );
@@ -315,13 +400,85 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
     };
 
     const handleAnomalyDetectionChange = (item: string): void => {
-        const copied = { ...alert };
-        delete copied.templateProperties?.queryFilters;
-        delete copied.templateProperties?.enumerationItems;
-        setCompositeFilters(null);
-        setAlertConfigForPreview(copied);
-        onAlertPropertyChange(copied);
+        setEnumerations(false);
+        setEnumerators("");
+        setDimension(null);
         setAnomalyDetection(item);
+        setAlgorithmOption(null);
+        let isCustomMetrics = false;
+        if (selectedMetric === t("label.custom-metric-aggregation")) {
+            isCustomMetrics = true;
+        }
+        if (
+            !selectedTable ||
+            !selectedMetric ||
+            !(
+                aggregationFunction ||
+                (isCustomMetrics && editedDatasourceFieldValue)
+            ) ||
+            !granularity
+        ) {
+            return;
+        }
+        if (item === AnomalyDetectionOptions.SINGLE) {
+            const workingAlert = {
+                template: {
+                    name: createNewStartingAlert().template?.name,
+                },
+                templateProperties: {
+                    ...createNewStartingAlert().templateProperties,
+                    ...generateTemplateProperties(
+                        isCustomMetrics
+                            ? editedDatasourceFieldValue
+                            : (selectedMetric as string),
+                        selectedTable?.dataset,
+                        aggregationFunction || "",
+                        granularity
+                    ),
+                    queryFilters: queryFilters ? queryFilters : "",
+                },
+            };
+            onAlertPropertyChange(workingAlert);
+            getAlertRecommendation({ ...alert, ...workingAlert });
+            handleReloadPreviewClick(workingAlert);
+        } else if (item === AnomalyDetectionOptions.COMPOSITE) {
+            setCompositeFilters(null);
+            setIsMultiDimensionAlert(true);
+        }
+    };
+
+    const handleRunEnumerations = (): void => {
+        if (
+            !selectedTable ||
+            !selectedMetric ||
+            !aggregationFunction ||
+            !granularity
+        ) {
+            return;
+        }
+        setEnumerations(true);
+        setAlgorithmOption(null);
+        setAlgorithmOption(null);
+        const workingAlert = {
+            template: {
+                name: ALERT_TEMPLATE_FOR_EVALUATE_QUERY_DX,
+            },
+            templateProperties: {
+                ...generateTemplateProperties(
+                    selectedMetric as string,
+                    selectedTable?.dataset,
+                    aggregationFunction || "",
+                    granularity
+                ),
+                min: 0,
+                max: 1,
+                queryFilters: "${queryFilters}",
+                enumeratorQuery: enumerators,
+            },
+        };
+        onAlertPropertyChange(workingAlert);
+        getAlertRecommendation({ ...alert, ...workingAlert });
+        handleReloadPreviewClick(workingAlert);
     };
 
     const getAnomalyDetectionOptions = (
@@ -332,6 +489,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
             options.push({
                 value: item,
                 label: item,
+                disabled: alertInsightLoading,
                 onClick: () => handleAnomalyDetectionChange(item),
                 tooltipText: item,
             })
@@ -348,7 +506,39 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
             options.push({
                 value: item,
                 label: item,
-                onClick: () => setDimension(item),
+                onClick: () => {
+                    setDimension(() => {
+                        setEnumerators("");
+                        setEnumerations(false);
+                        setCompositeFilters(null);
+                        setAlgorithmOption(null);
+                        if (
+                            selectedTable?.dataset &&
+                            selectedMetric &&
+                            aggregationFunction &&
+                            granularity
+                        ) {
+                            const workingAlert = {
+                                template: {
+                                    name: ALERT_TEMPLATE_FOR_EVALUATE_QUERY_DX,
+                                },
+                                templateProperties: {
+                                    ...createNewStartingAlert()
+                                        .templateProperties,
+                                    ...generateTemplateProperties(
+                                        selectedMetric as string,
+                                        selectedTable?.dataset,
+                                        aggregationFunction || "",
+                                        granularity
+                                    ),
+                                },
+                            };
+                            onAlertPropertyChange(workingAlert);
+                        }
+
+                        return item;
+                    });
+                },
                 tooltipText: item,
             })
         );
@@ -356,101 +546,24 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         return options;
     };
 
-    const recommendedAlertTemplate = useMemo(() => {
-        if (alertRecommendations && alertRecommendations.length > 0) {
-            return alertRecommendations[0]?.alert.template?.name;
-        }
-
-        return undefined;
-    }, [alertRecommendations]);
-
     const alertTemplateOptions = useMemo(() => {
-        return generateAvailableAlgorithmOptions(
+        const availableAlgorithmOptions = generateAvailableAlgorithmOptions(
             alertTemplates.map((a: AlertTemplate) => a.name)
         ).filter((option) =>
             isMultiDimensionAlert
                 ? option.hasMultidimension
                 : option.hasAlertTemplate
         );
-    }, [alertTemplates]);
+        const recommendedAlgorithmOptions =
+            generateAvailableAlgorithmOptionsForRecommendations(
+                alertRecommendations ?? [],
+                isMultiDimensionAlert
+            );
 
-    const recommendedAlertTemplateFirst = useMemo(() => {
-        const cloned = alertTemplateOptions.filter((c) => {
-            return isMultiDimensionAlert
-                ? c.algorithmOption.alertTemplateForMultidimension !==
-                      recommendedAlertTemplate
-                : c.algorithmOption.alertTemplate !== recommendedAlertTemplate;
-        });
+        return [...recommendedAlgorithmOptions, ...availableAlgorithmOptions];
+    }, [alertTemplates, alertRecommendations]);
 
-        const recommendedAlertTemplateOption = alertTemplateOptions.find(
-            (c) => {
-                return isMultiDimensionAlert
-                    ? c.algorithmOption.alertTemplateForMultidimension ===
-                          recommendedAlertTemplate
-                    : c.algorithmOption.alertTemplate ===
-                          recommendedAlertTemplate;
-            }
-        );
-
-        if (recommendedAlertTemplateOption) {
-            cloned.unshift(recommendedAlertTemplateOption);
-        }
-
-        return cloned;
-    }, [alertTemplates, recommendedAlertTemplate]);
-
-    useEffect(() => {
-        let isCustomMetrics = false;
-        if (selectedMetric === t("label.custom-metric-aggregation")) {
-            isCustomMetrics = true;
-        }
-        if (
-            selectedMetric &&
-            selectedTable &&
-            granularity &&
-            (aggregationFunction || (isCustomMetrics && editedDatasource))
-        ) {
-            const workingAlert = {
-                template: {
-                    name:
-                        (isMultiDimensionAlert
-                            ? algorithmOption?.algorithmOption
-                                  .alertTemplateForMultidimension
-                            : algorithmOption?.algorithmOption
-                                  ?.alertTemplate) ||
-                        createNewStartingAlert().template?.name,
-                },
-                templateProperties: {
-                    ...alert.templateProperties,
-                    ...generateTemplateProperties(
-                        isCustomMetrics ? editedDatasource : selectedMetric,
-                        selectedTable?.dataset,
-                        aggregationFunction || "",
-                        granularity
-                    ),
-                    queryFilters: queryFilters,
-                    enumeratoryQuery:
-                        dimension === SelectDimensionsOptions.ENUMERATORS
-                            ? enumerators
-                            : null,
-                },
-            };
-            onAlertPropertyChange(workingAlert);
-            getAlertRecommendation({ ...alert, ...workingAlert });
-            handleReloadPreviewClick();
-        }
-    }, [
-        selectedMetric,
-        selectedTable,
-        granularity,
-        aggregationFunction,
-        algorithmOption,
-        queryFilters,
-        anomalyDetection,
-        enumerators,
-    ]);
-
-    const { getEvaluation } = useGetEvaluation();
+    const { getEvaluation, evaluation } = useGetEvaluation();
 
     const [alertConfigForPreview, setAlertConfigForPreview] =
         useState<EditableAlert>(() => {
@@ -486,8 +599,12 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         setShowAdvancedOptions(false);
     };
 
-    const fetchAlertEvaluation = (start: number, end: number): void => {
-        const copiedAlert = { ...alertConfigForPreview };
+    const fetchAlertEvaluation = (
+        start: number,
+        end: number,
+        alert?: Partial<EditableAlert>
+    ): void => {
+        const copiedAlert = { ...alertConfigForPreview, ...(alert ?? {}) };
         delete copiedAlert.id;
         getEvaluation(createAlertEvaluation(copiedAlert, start, end));
     };
@@ -501,7 +618,8 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
             !selectedTable ||
             !selectedMetric ||
             !granularity ||
-            (!aggregationFunction && !(isCustomMetrics && editedDatasource))
+            (!aggregationFunction &&
+                !(isCustomMetrics && editedDatasourceFieldValue))
         ) {
             return;
         }
@@ -517,13 +635,15 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
             copied.templateProperties = {
                 ...copied.templateProperties,
                 ...generateTemplateProperties(
-                    isCustomMetrics ? editedDatasource : selectedMetric,
+                    isCustomMetrics
+                        ? editedDatasourceFieldValue
+                        : (selectedMetric as string),
                     selectedTable?.dataset,
                     aggregationFunction || "",
                     granularity
                 ),
                 queryFilters: queryFilters,
-                enumeratoryQuery:
+                enumeratorQuery:
                     dimension === SelectDimensionsOptions.ENUMERATORS
                         ? enumerators
                         : null,
@@ -544,59 +664,72 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         enumerators,
     ]);
 
-    const handleReloadPreviewClick = (): void => {
+    const handleDatasetChange = (dataset: DatasetInfo): void => {
+        setSelectedTable(dataset);
+        setSelectedMetric(null);
+        setAggregationFunction(null);
+        setGranularity(null);
+        setQueryFilters("");
+        setInputValue("");
+        setAlgorithmOption(null);
+        setCompositeFilters(null);
+        setAnomalyDetection(null);
+        setEnumerations(false);
+        setEnumerators("");
+        setDimension(null);
+    };
+
+    const handleMetricChange = (metric: string): void => {
+        setSelectedMetric(metric);
+        setAggregationFunction(null);
+        setGranularity(null);
+        setAlgorithmOption(null);
+        setCompositeFilters(null);
+        setQueryFilters("");
+        setInputValue("");
+        setAnomalyDetection(null);
+        setEditedDatasourceFieldValue("");
+        setEnumerations(false);
+        setEnumerators("");
+        setDimension(null);
+    };
+
+    const handleAggregationChange = (aggregation: string): void => {
+        setAggregationFunction(aggregation);
+        setGranularity(null);
+        setAlgorithmOption(null);
+        setCompositeFilters(null);
+        setAnomalyDetection(null);
+        setEnumerations(false);
+        setQueryFilters("");
+        setInputValue("");
+        setEnumerators("");
+        setDimension(null);
+    };
+
+    const handleSqlChange = (sql: string): void => {
+        setQueryFilters(sql);
+        setGranularity(null);
+        setAlgorithmOption(null);
+        setCompositeFilters(null);
+        setAnomalyDetection(null);
+        setEnumerations(false);
+        setInputValue("");
+        setEnumerators("");
+        setDimension(null);
+    };
+
+    const handleReloadPreviewClick = (alert?: Partial<EditableAlert>): void => {
         if ((!startTime || !endTime) && alertInsight) {
             // If start or end is missing and there exists an alert insight
             fetchAlertEvaluation(
                 alertInsight.defaultStartTime,
-                alertInsight.defaultEndTime
+                alertInsight.defaultEndTime,
+                alert
             );
         } else {
-            fetchAlertEvaluation(startTime, endTime);
+            fetchAlertEvaluation(startTime, endTime, alert);
         }
-    };
-    const recommendedAlertConfigMatchingTemplate = useMemo(() => {
-        if (alertRecommendations && alert.template?.name) {
-            return alertRecommendations.find(
-                (candidate) =>
-                    candidate.alert.template?.name === alert.template?.name
-            );
-        }
-
-        return undefined;
-    }, [alertRecommendations, alert]);
-
-    const doesAlertHaveRecommendedValues = useMemo(() => {
-        let hasValues = true;
-
-        if (!recommendedAlertConfigMatchingTemplate) {
-            return false;
-        }
-
-        Object.keys(
-            recommendedAlertConfigMatchingTemplate.alert.templateProperties
-        ).forEach((k) => {
-            hasValues =
-                hasValues &&
-                recommendedAlertConfigMatchingTemplate.alert.templateProperties[
-                    k
-                ] === alert.templateProperties[k];
-        });
-
-        return hasValues;
-    }, [recommendedAlertConfigMatchingTemplate, alert]);
-
-    const handleTuneAlertClick = (): void => {
-        if (!recommendedAlertConfigMatchingTemplate) {
-            return;
-        }
-        onAlertPropertyChange({
-            templateProperties: {
-                ...alert.templateProperties,
-                ...recommendedAlertConfigMatchingTemplate.alert
-                    .templateProperties,
-            },
-        });
     };
 
     const selectedAlertTemplate = useMemo(() => {
@@ -608,7 +741,101 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
     const onUpdateCompositeFiltersChange = (
         template: TemplatePropertiesObject
     ): void => {
+        if (
+            !selectedTable ||
+            !selectedMetric ||
+            !aggregationFunction ||
+            !granularity
+        ) {
+            return;
+        }
+        setEnumerations(false);
+        setEnumerators("");
+        const workingAlert = {
+            template: {
+                name: ALERT_TEMPLATE_FOR_EVALUATE_DX,
+            },
+            templateProperties: {
+                ...template,
+            },
+        };
+        onAlertPropertyChange(workingAlert);
+        getAlertRecommendation({ ...alert, ...workingAlert });
+        handleReloadPreviewClick(workingAlert);
         setCompositeFilters(template);
+    };
+
+    const handleAlgorithmChange = (
+        algorithm: AvailableAlgorithmOption
+    ): void => {
+        if (
+            !algorithm ||
+            !selectedTable ||
+            !selectedMetric ||
+            !aggregationFunction ||
+            !granularity
+        ) {
+            return;
+        }
+        setAlgorithmOption(algorithm);
+        const isCompositeAlert =
+            anomalyDetection === AnomalyDetectionOptions.COMPOSITE;
+        const isRecommendation =
+            algorithm?.recommendationLabel ===
+            t("label.recommended-configuration");
+        const recommendedTemplate = isRecommendation
+            ? alertRecommendations.find(
+                  (rec, index) =>
+                      `${rec.alert.template?.name}-${index}` ===
+                      algorithm?.recommendationId
+              )
+            : null;
+        const isEnumeratorQuery =
+            dimension === SelectDimensionsOptions.ENUMERATORS;
+        const workingAlert = {
+            template: {
+                name: isCompositeAlert
+                    ? isEnumeratorQuery
+                        ? algorithm?.algorithmOption?.alertTemplateForMultidimension?.replace(
+                              "-dx",
+                              "-query-dx"
+                          )
+                        : algorithm?.algorithmOption
+                              ?.alertTemplateForMultidimension
+                    : algorithm?.algorithmOption?.alertTemplate,
+            },
+            templateProperties: recommendedTemplate?.alert.templateProperties
+                ? {
+                      ...recommendedTemplate.alert.templateProperties,
+                  }
+                : {
+                      ...(isEnumeratorQuery
+                          ? {}
+                          : createNewStartingAlert().templateProperties),
+                      ...generateTemplateProperties(
+                          selectedMetric as string,
+                          selectedTable?.dataset,
+                          aggregationFunction || "",
+                          granularity
+                      ),
+                      ...(isCompositeAlert ? { ...compositeFilters } : {}),
+                      queryFilters: queryFilters
+                          ? queryFilters
+                          : isCompositeAlert
+                          ? "${queryFilters}"
+                          : "",
+                      ...(isEnumeratorQuery
+                          ? { enumeratorQuery: enumerators }
+                          : {}),
+                      ...(isEnumeratorQuery
+                          ? {
+                                min: 0,
+                                max: 1,
+                            }
+                          : {}),
+                  },
+        };
+        onAlertPropertyChange(workingAlert);
     };
 
     return (
@@ -631,45 +858,6 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                             >
                                                 {t("label.alert-wizard")}
                                             </Typography>
-                                            <PageHeaderActionsV1>
-                                                <HelpDrawerV1
-                                                    cards={alertsBasicHelpCards}
-                                                    title={`${t(
-                                                        "label.need-help"
-                                                    )}?`}
-                                                    trigger={(handleOpen) => (
-                                                        <Button
-                                                            className={
-                                                                classes.infoButton
-                                                            }
-                                                            color="primary"
-                                                            size="small"
-                                                            variant="outlined"
-                                                            onClick={handleOpen}
-                                                        >
-                                                            <Box
-                                                                component="span"
-                                                                mr={1}
-                                                            >
-                                                                {t(
-                                                                    "label.need-help"
-                                                                )}
-                                                            </Box>
-                                                            <Box
-                                                                component="span"
-                                                                display="flex"
-                                                            >
-                                                                <Icon
-                                                                    fontSize={
-                                                                        24
-                                                                    }
-                                                                    icon="mdi:question-mark-circle-outline"
-                                                                />
-                                                            </Box>
-                                                        </Button>
-                                                    )}
-                                                />
-                                            </PageHeaderActionsV1>
                                         </Box>
                                         <Box>
                                             <Typography variant="body2">
@@ -766,11 +954,8 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                 ) {
                                                                     return;
                                                                 }
-                                                                setSelectedTable(
+                                                                handleDatasetChange(
                                                                     selectedTableInfo
-                                                                );
-                                                                setSelectedMetric(
-                                                                    null
                                                                 );
                                                             }}
                                                         />
@@ -868,7 +1053,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                 metric
                                                             ) => {
                                                                 metric &&
-                                                                    setSelectedMetric(
+                                                                    handleMetricChange(
                                                                         metric
                                                                     );
                                                             }}
@@ -888,10 +1073,6 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                 ) ? (
                                                     <Grid item xs={12}>
                                                         <RadioSection
-                                                            defaultValue={
-                                                                aggregationFunction ||
-                                                                undefined
-                                                            }
                                                             label={t(
                                                                 "label.aggregation-function"
                                                             )}
@@ -916,6 +1097,10 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                             subText={t(
                                                                 "message.select-aggregation-function-to-combine-multiple-data-value-into-a-single-result"
                                                             )}
+                                                            value={
+                                                                aggregationFunction ||
+                                                                undefined
+                                                            }
                                                         />
                                                         <Button
                                                             className={
@@ -984,7 +1169,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                         onChange={(
                                                                             e
                                                                         ) =>
-                                                                            setQueryFilters(
+                                                                            handleSqlChange(
                                                                                 e
                                                                                     .target
                                                                                     .value
@@ -1058,22 +1243,8 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                     className={
                                                                         classes.footer
                                                                     }
-                                                                    justifyContent="space-between"
+                                                                    justifyContent="flex-end"
                                                                 >
-                                                                    <Button
-                                                                        size="small"
-                                                                        variant="contained"
-                                                                        onClick={() =>
-                                                                            setEditedDatasource(
-                                                                                editedDatasourceFieldValue
-                                                                            )
-                                                                        }
-                                                                    >
-                                                                        {t(
-                                                                            "label.apply-custom-metric"
-                                                                        )}
-                                                                    </Button>
-
                                                                     <Button
                                                                         size="small"
                                                                         variant="contained"
@@ -1089,25 +1260,6 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                     </Button>
                                                                 </Box>
                                                             </Grid>
-                                                            {/* <Grid
-                                                                    item
-                                                                    xs={4}
-                                                                >
-                                                                    <Button
-                                                                        color="primary"
-                                                                        startIcon={
-                                                                            <InfoOutlinedIcon />
-                                                                        }
-                                                                        variant="outlined"
-                                                                        onClick={() => {
-                                                                            // TODO Add guide link
-                                                                        }}
-                                                                    >
-                                                                        {t(
-                                "label.aggregation-functions-guide-write-custom"
-                                                                        )}
-                                                                    </Button>
-                                                                </Grid> */}
                                                         </Grid>
                                                     </Grid>
                                                 )}
@@ -1135,32 +1287,39 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                             inputComponent={
                                                                 <>
                                                                     <Autocomplete
-                                                                        disableClearable
                                                                         fullWidth
                                                                         getOptionLabel={(
                                                                             option
                                                                         ) =>
                                                                             option.label
                                                                         }
+                                                                        getOptionSelected={(
+                                                                            option,
+                                                                            value
+                                                                        ) =>
+                                                                            option.value ===
+                                                                            value.value
+                                                                        }
+                                                                        inputValue={
+                                                                            inputValue
+                                                                        }
                                                                         options={
                                                                             GRANULARITY_OPTIONS
                                                                         }
                                                                         renderInput={(
                                                                             params
-                                                                        ) => (
-                                                                            <TextField
-                                                                                {...params}
-                                                                                InputProps={{
-                                                                                    ...params.InputProps,
-                                                                                }}
-                                                                                placeholder={t(
-                                                                                    "label.select-granularity"
-                                                                                )}
-                                                                                variant="outlined"
-                                                                            />
-                                                                        )}
+                                                                        ) => {
+                                                                            return (
+                                                                                <TextField
+                                                                                    {...params}
+                                                                                    placeholder={t(
+                                                                                        "label.select-granularity"
+                                                                                    )}
+                                                                                    variant="outlined"
+                                                                                />
+                                                                            );
+                                                                        }}
                                                                         renderOption={({
-                                                                            value,
                                                                             label,
                                                                         }) => (
                                                                             <Box
@@ -1172,40 +1331,30 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                 {
                                                                                     label
                                                                                 }
-                                                                                {GRANULARITY_OPTIONS_TOOLTIP[
-                                                                                    value
-                                                                                ] && (
-                                                                                    <Tooltip
-                                                                                        arrow
-                                                                                        placement="top"
-                                                                                        title={
-                                                                                            GRANULARITY_OPTIONS_TOOLTIP[
-                                                                                                value
-                                                                                            ]
-                                                                                        }
-                                                                                    >
-                                                                                        <Chip
-                                                                                            color="primary"
-                                                                                            label={t(
-                                                                                                "label.beta"
-                                                                                            )}
-                                                                                            size="small"
-                                                                                        />
-                                                                                    </Tooltip>
-                                                                                )}
                                                                             </Box>
                                                                         )}
                                                                         value={
                                                                             granularity
-                                                                                ? {
-                                                                                      value: granularity,
-                                                                                      label: granularity,
-                                                                                  }
+                                                                                ? GRANULARITY_OPTIONS.find(
+                                                                                      (
+                                                                                          g
+                                                                                      ) =>
+                                                                                          g.value ===
+                                                                                          granularity
+                                                                                  )
                                                                                 : undefined
                                                                         }
                                                                         onChange={
                                                                             handleGranularityChange
                                                                         }
+                                                                        onInputChange={(
+                                                                            _event,
+                                                                            newInputValue
+                                                                        ) => {
+                                                                            setInputValue(
+                                                                                newInputValue
+                                                                            );
+                                                                        }}
                                                                     />
                                                                 </>
                                                             }
@@ -1214,12 +1363,8 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                 </Grid>
                                                 <Grid item xs={12}>
                                                     <RadioSection
-                                                        defaultValue={
-                                                            anomalyDetection ||
-                                                            undefined
-                                                        }
                                                         label={t(
-                                                            "label.anomalies-detection-type"
+                                                            "label.detection-type"
                                                         )}
                                                         options={getAnomalyDetectionOptions(
                                                             [
@@ -1227,19 +1372,38 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                 AnomalyDetectionOptions.COMPOSITE,
                                                             ]
                                                         )}
-                                                        subText={t(
-                                                            "message.select-the-algorithm-that-best-matches-the-data-patterns"
-                                                        )}
+                                                        value={
+                                                            anomalyDetection ||
+                                                            undefined
+                                                        }
                                                     />
+                                                    {alertInsightLoading && (
+                                                        <Box
+                                                            alignItems="center"
+                                                            display="flex"
+                                                        >
+                                                            <CircularProgress
+                                                                color="primary"
+                                                                size={12}
+                                                            />
+                                                            <Typography
+                                                                style={{
+                                                                    marginLeft:
+                                                                        "4px",
+                                                                }}
+                                                                variant="caption"
+                                                            >
+                                                                {t(
+                                                                    "label.loading-insights"
+                                                                )}
+                                                            </Typography>
+                                                        </Box>
+                                                    )}
                                                 </Grid>
                                                 {anomalyDetection ===
                                                     AnomalyDetectionOptions.COMPOSITE && (
                                                     <Grid item xs={12}>
                                                         <RadioSection
-                                                            defaultValue={
-                                                                dimension ||
-                                                                undefined
-                                                            }
                                                             label={t(
                                                                 "message.select-dimensions"
                                                             )}
@@ -1249,6 +1413,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                     SelectDimensionsOptions.DIMENSION_RECOMMENDER,
                                                                 ]
                                                             )}
+                                                            value={dimension}
                                                         />
                                                     </Grid>
                                                 )}
@@ -1272,6 +1437,19 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                         minRows={
                                                                             3
                                                                         }
+                                                                        placeholder={t(
+                                                                            "label.select-distinct-dimension-from-dataset",
+                                                                            {
+                                                                                dimension:
+                                                                                    selectedTable
+                                                                                        ?.dimensions?.[0] ??
+                                                                                    "someColumn",
+                                                                                dataset:
+                                                                                    selectedTable
+                                                                                        ?.dataset
+                                                                                        ?.name,
+                                                                            }
+                                                                        )}
                                                                         value={
                                                                             enumerators
                                                                         }
@@ -1295,9 +1473,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                             size="small"
                                                                             variant="contained"
                                                                             onClick={() =>
-                                                                                setEnumerations(
-                                                                                    true
-                                                                                )
+                                                                                handleRunEnumerations()
                                                                             }
                                                                         >
                                                                             {t(
@@ -1338,7 +1514,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                         anomalyDetection &&
                                                         granularity &&
                                                         (aggregationFunction ||
-                                                            editedDatasource) && (
+                                                            editedDatasourceFieldValue) && (
                                                             <Grid
                                                                 container
                                                                 alignItems="center"
@@ -1355,11 +1531,13 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                     >
                                                                         <Grid
                                                                             item
+                                                                            className={
+                                                                                classes.algorithmContainer
+                                                                            }
                                                                             xs={
                                                                                 12
                                                                             }
                                                                         >
-                                                                            {" "}
                                                                             <Grid
                                                                                 container
                                                                                 alignItems="center"
@@ -1379,17 +1557,14 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                         }
                                                                                     >
                                                                                         <InputSectionV2
-                                                                                            description={t(
-                                                                                                "message.for-additional-algorithms-go-to",
-                                                                                                {
-                                                                                                    entity: t(
-                                                                                                        "label.advanced-mode"
-                                                                                                    ),
-                                                                                                }
-                                                                                            )}
                                                                                             inputComponent={
                                                                                                 <Autocomplete<AvailableAlgorithmOption>
                                                                                                     fullWidth
+                                                                                                    className={
+                                                                                                        isGetAlertRecommendationLoading
+                                                                                                            ? classes.animatedBorder
+                                                                                                            : ""
+                                                                                                    }
                                                                                                     data-testId="datasource-select"
                                                                                                     getOptionLabel={(
                                                                                                         option
@@ -1397,6 +1572,12 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                                         option
                                                                                                             .algorithmOption
                                                                                                             .title as string
+                                                                                                    }
+                                                                                                    groupBy={(
+                                                                                                        option
+                                                                                                    ) =>
+                                                                                                        option.recommendationLabel ||
+                                                                                                        ""
                                                                                                     }
                                                                                                     noOptionsText={t(
                                                                                                         "message.no-options-available-entity",
@@ -1407,7 +1588,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                                         }
                                                                                                     )}
                                                                                                     options={
-                                                                                                        recommendedAlertTemplateFirst ||
+                                                                                                        alertTemplateOptions ||
                                                                                                         []
                                                                                                     }
                                                                                                     renderInput={(
@@ -1419,7 +1600,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                                                 ...params.InputProps,
                                                                                                             }}
                                                                                                             placeholder={t(
-                                                                                                                "message.select-dataset"
+                                                                                                                "message.select-algorithm"
                                                                                                             )}
                                                                                                             variant="outlined"
                                                                                                         />
@@ -1457,24 +1638,111 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                                         ) {
                                                                                                             return;
                                                                                                         }
-                                                                                                        setAlgorithmOption(
+                                                                                                        handleAlgorithmChange(
                                                                                                             value
                                                                                                         );
                                                                                                     }}
                                                                                                 />
                                                                                             }
-                                                                                            label={t(
-                                                                                                "label.recommended-algorithm"
-                                                                                            )}
+                                                                                            labelComponent={
+                                                                                                <Box
+                                                                                                    className={
+                                                                                                        classes.recommendedAlgorithmContainer
+                                                                                                    }
+                                                                                                >
+                                                                                                    <Typography
+                                                                                                        className={
+                                                                                                            classes.recommendedAlgorithmText
+                                                                                                        }
+                                                                                                        variant="caption"
+                                                                                                    >
+                                                                                                        {t(
+                                                                                                            "label.detection-algorithm"
+                                                                                                        )}
+                                                                                                    </Typography>
+                                                                                                    <Box
+                                                                                                        className={
+                                                                                                            classes.detectionRecommendationsContainer
+                                                                                                        }
+                                                                                                    >
+                                                                                                        {isGetAlertRecommendationLoading ? (
+                                                                                                            <Box display="flex">
+                                                                                                                <CircularProgress
+                                                                                                                    color="primary"
+                                                                                                                    size={
+                                                                                                                        15
+                                                                                                                    }
+                                                                                                                />
+
+                                                                                                                <Typography
+                                                                                                                    style={{
+                                                                                                                        marginLeft:
+                                                                                                                            "4px",
+                                                                                                                    }}
+                                                                                                                    variant="caption"
+                                                                                                                >
+                                                                                                                    {t(
+                                                                                                                        "label.computing-detection-recommendations"
+                                                                                                                    )}
+                                                                                                                </Typography>
+                                                                                                            </Box>
+                                                                                                        ) : alertRecommendations?.length >
+                                                                                                          0 ? (
+                                                                                                            <Box
+                                                                                                                alignItems="center"
+                                                                                                                display="flex"
+                                                                                                            >
+                                                                                                                <CheckCircle
+                                                                                                                    className={
+                                                                                                                        classes.checkCircleIcon
+                                                                                                                    }
+                                                                                                                />
+                                                                                                                <Typography
+                                                                                                                    className={
+                                                                                                                        classes.detectionRecommendationsReadyText
+                                                                                                                    }
+                                                                                                                    variant="caption"
+                                                                                                                >
+                                                                                                                    {t(
+                                                                                                                        "label.detection-recommendations-ready"
+                                                                                                                    )}
+                                                                                                                </Typography>
+                                                                                                            </Box>
+                                                                                                        ) : (
+                                                                                                            <Box
+                                                                                                                alignItems="center"
+                                                                                                                display="flex"
+                                                                                                            >
+                                                                                                                <Cancel
+                                                                                                                    className={
+                                                                                                                        classes.cancelIcon
+                                                                                                                    }
+                                                                                                                />
+                                                                                                                <Typography
+                                                                                                                    className={
+                                                                                                                        classes.detectionRecommendationsFailedText
+                                                                                                                    }
+                                                                                                                    variant="caption"
+                                                                                                                >
+                                                                                                                    {t(
+                                                                                                                        "errors.could-not-compute-detection-recommendations"
+                                                                                                                    )}
+                                                                                                                </Typography>
+                                                                                                            </Box>
+                                                                                                        )}
+                                                                                                    </Box>
+                                                                                                </Box>
+                                                                                            }
                                                                                         />
                                                                                     </Grid>
+
                                                                                     <Grid
                                                                                         item
                                                                                         xs={
                                                                                             6
                                                                                         }
                                                                                     >
-                                                                                        <>
+                                                                                        <Box>
                                                                                             <Typography
                                                                                                 className={
                                                                                                     classes.inputHeader
@@ -1487,7 +1755,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
 
                                                                                                 :
                                                                                             </Typography>
-                                                                                        </>
+                                                                                        </Box>
                                                                                         <TimeRangeButtonWithContext
                                                                                             hideQuickExtend
                                                                                             btnGroupColor="default"
@@ -1542,6 +1810,21 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                             defaultValues={
                                                                                                 alert.templateProperties
                                                                                             }
+                                                                                            emptyMessage={
+                                                                                                !algorithmOption ? (
+                                                                                                    <Alert
+                                                                                                        severity="info"
+                                                                                                        style={{
+                                                                                                            marginTop:
+                                                                                                                "40px",
+                                                                                                        }}
+                                                                                                    >
+                                                                                                        {t(
+                                                                                                            "message.please-select-a-detection-algorithm-first"
+                                                                                                        )}
+                                                                                                    </Alert>
+                                                                                                ) : null
+                                                                                            }
                                                                                             isOpen={
                                                                                                 showAdvancedOptions
                                                                                             }
@@ -1558,84 +1841,21 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                 </Grid>
                                                                             </Grid>
                                                                         </Grid>
-                                                                        {recommendedAlertConfigMatchingTemplate && (
-                                                                            <Grid
-                                                                                item
-                                                                                xs={
-                                                                                    12
-                                                                                }
-                                                                            >
-                                                                                <Alert
-                                                                                    action={
-                                                                                        <>
-                                                                                            {doesAlertHaveRecommendedValues ? (
-                                                                                                <Box
-                                                                                                    alignContent="center"
-                                                                                                    position="flex"
-                                                                                                    style={{
-                                                                                                        color: ColorV1.Green2,
-                                                                                                    }}
-                                                                                                    textAlign="center"
-                                                                                                >
-                                                                                                    <Box
-                                                                                                        mr={
-                                                                                                            1
-                                                                                                        }
-                                                                                                    >
-                                                                                                        <DoneAllIcon />
-                                                                                                    </Box>
-                                                                                                    <Box
-                                                                                                        pr={
-                                                                                                            2
-                                                                                                        }
-                                                                                                    >
-                                                                                                        Alert
-                                                                                                        Tuned
-                                                                                                    </Box>
-                                                                                                </Box>
-                                                                                            ) : (
-                                                                                                <Button
-                                                                                                    color="primary"
-                                                                                                    onClick={
-                                                                                                        handleTuneAlertClick
-                                                                                                    }
-                                                                                                >
-                                                                                                    {t(
-                                                                                                        "label.tune-my-alert"
-                                                                                                    )}
-                                                                                                </Button>
-                                                                                            )}
-                                                                                        </>
-                                                                                    }
-                                                                                    severity="info"
-                                                                                    style={{
-                                                                                        backgroundColor:
-                                                                                            "#FFF",
-                                                                                    }}
-                                                                                    variant="outlined"
-                                                                                >
-                                                                                    <AlertTitle>
-                                                                                        {t(
-                                                                                            "message.we-can-tune-the-alert-for-you"
-                                                                                        )}
-                                                                                    </AlertTitle>
-                                                                                    {t(
-                                                                                        "message.our-new-feature-sets-up-your-alert-with-the-parameters"
-                                                                                    )}
-                                                                                </Alert>
-                                                                            </Grid>
-                                                                        )}
 
-                                                                        {algorithmOption && (
+                                                                        {algorithmOption ? (
                                                                             <Grid
                                                                                 item
                                                                                 xs={
                                                                                     12
                                                                                 }
                                                                             >
-                                                                                <ThresholdSetup
+                                                                                <ThresholdSetupV3
                                                                                     alert={
                                                                                         alert
+                                                                                    }
+                                                                                    alertEvaluation={
+                                                                                        evaluation ||
+                                                                                        undefined
                                                                                     }
                                                                                     alertTemplate={
                                                                                         selectedAlertTemplate
@@ -1665,8 +1885,34 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                                 )}
                                                                                             </Button>
                                                                                         )}
-                                                                                </ThresholdSetup>
+                                                                                </ThresholdSetupV3>
                                                                             </Grid>
+                                                                        ) : (
+                                                                            <ChartContentV2
+                                                                                showLoadButton
+                                                                                showOnlyActivity
+                                                                                alert={
+                                                                                    alert
+                                                                                }
+                                                                                alertEvaluation={
+                                                                                    evaluation
+                                                                                }
+                                                                                evaluationTimeRange={{
+                                                                                    startTime:
+                                                                                        startTime,
+                                                                                    endTime:
+                                                                                        endTime,
+                                                                                }}
+                                                                                hideCallToActionPrompt={
+                                                                                    false
+                                                                                }
+                                                                                onAlertPropertyChange={
+                                                                                    onAlertPropertyChange
+                                                                                }
+                                                                                onReloadClick={
+                                                                                    handleReloadPreviewClick
+                                                                                }
+                                                                            />
                                                                         )}
                                                                     </Box>
                                                                 ) : (
@@ -1777,6 +2023,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                     )}
                     {openCreateAlertModal && (
                         <CreateAlertModal
+                            defaultCron={alertInsight?.defaultCron}
                             onCancel={() => setOpenCreateAlertModal(false)}
                         />
                     )}

@@ -34,6 +34,8 @@ export const Modal: FunctionComponent<ModalProps> = ({
     customTitle,
     children,
     maxWidth,
+    isOpen: isOpenProp,
+    setIsOpen: setIsOpenProp,
     footerActions,
     onOpen,
     initiallyOpen = false,
@@ -42,7 +44,9 @@ export const Modal: FunctionComponent<ModalProps> = ({
     disableSubmitButton,
 }) => {
     const { t } = useTranslation();
-    const [isOpen, setIsOpen] = useState(initiallyOpen);
+    const [isOpenState, setIsOpenState] = useState(initiallyOpen);
+    const isOpen = isOpenProp ?? isOpenState;
+    const setIsOpen = setIsOpenProp ?? setIsOpenState;
 
     const handleCancelClick = (): void => {
         setIsOpen(false);

@@ -34,7 +34,9 @@ export interface AlgorithmOption {
 
 export interface AvailableAlgorithmOption {
     algorithmOption: AlgorithmOption;
+    recommendationLabel?: string;
     hasAlertTemplate: boolean;
     hasPercentile: boolean;
     hasMultidimension: boolean;
+    recommendationId?: string;
 }

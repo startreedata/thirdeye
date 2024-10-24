@@ -25,5 +25,5 @@ export interface RadioSectionProps {
     label: string;
     options: RadioSectionOptions[];
     subText?: string;
-    defaultValue?: string;
+    value?: string | null;
 }

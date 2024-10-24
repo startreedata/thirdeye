@@ -33,4 +33,7 @@ export const useAlertWizardV2Styles = makeStyles((theme) => ({
     alertPropertyLabelDescription: {
         color: theme.palette.text.hint,
     },
+    header: {
+        fontWeight: 700,
+    },
 }));

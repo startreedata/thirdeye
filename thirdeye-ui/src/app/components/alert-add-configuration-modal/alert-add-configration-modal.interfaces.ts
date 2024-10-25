@@ -15,4 +15,6 @@
 
 export interface AlertAddConfigrationModalProps {
     alertId: string;
+    open: boolean;
+    onClose: () => void;
 }

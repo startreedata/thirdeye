@@ -33,10 +33,12 @@ import React, {
 import { useTranslation } from "react-i18next";
 import { useParams, useSearchParams } from "react-router-dom";
 import { AlertAccuracyColored } from "../../components/alert-accuracy-colored/alert-accuracy-colored.component";
+import { AlertAddConfigurationModal } from "../../components/alert-add-configuration-modal/alert-add-configration-modal.component";
 import { AlertChart } from "../../components/alert-view/alert-chart/alert-chart.component";
 import { AlertOptionsButton } from "../../components/alert-view/alert-options-button/alert-options-button.component";
 import { EnumerationItemsTable } from "../../components/alert-view/enumeration-items-table/enumeration-items-table.component";
 import { AlertViewSubHeader } from "../../components/alert-view/sub-header/alert-sub-header.component";
+import { useAppBarConfigProvider } from "../../components/app-bar/app-bar-config-provider/app-bar-config-provider.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
@@ -63,6 +65,7 @@ import {
 import { getAnomalies } from "../../rest/anomalies/anomalies.rest";
 import { Alert } from "../../rest/dto/alert.interfaces";
 import { getEnumerationItems } from "../../rest/enumeration-items/enumeration-items.rest";
+import { useFetchQuery } from "../../rest/hooks/useFetchQuery";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { QUERY_PARAM_KEY_FOR_EXPANDED } from "../../utils/params/params.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
@@ -76,9 +79,6 @@ import {
     QUERY_PARAM_KEY_FOR_SORT,
     QUERY_PARAM_KEY_FOR_SORT_KEY,
 } from "./alerts-view-page.utils";
-import { useFetchQuery } from "../../rest/hooks/useFetchQuery";
-import { AlertAddConfigurationModal } from "../../components/alert-add-configuration-modal/alert-add-configration-modal.component";
-import { useAppBarConfigProvider } from "../../components/app-bar/app-bar-config-provider/app-bar-config-provider.component";
 
 export const AlertsViewPage: FunctionComponent = () => {
     const { t } = useTranslation();
@@ -99,6 +99,9 @@ export const AlertsViewPage: FunctionComponent = () => {
     const { alertInsight, getAlertInsight } = useGetAlertInsight();
 
     const [searchParams, setSearchParams] = useSearchParams();
+
+    const [openAlertAddConfigurationModal, setOpenAlertAddConfigurationModal] =
+        useState(!!searchParams.get(QUERY_PARAM_KEY_FOR_NOTIFICATION));
 
     const [expanded, setExpanded] = useState<string[]>(
         searchParams.has(QUERY_PARAM_KEY_FOR_EXPANDED)
@@ -575,9 +578,13 @@ export const AlertsViewPage: FunctionComponent = () => {
                         )}
                     </LoadingErrorStateSwitch>
                 </Grid>
-                {searchParams.get(QUERY_PARAM_KEY_FOR_NOTIFICATION) && (
-                    <AlertAddConfigurationModal alertId={alertId || ""} />
-                )}
+                <AlertAddConfigurationModal
+                    alertId={alertId || ""}
+                    open={openAlertAddConfigurationModal}
+                    onClose={() => {
+                        setOpenAlertAddConfigurationModal(false);
+                    }}
+                />
                 {/* {alertId && searchParams.has(QUERY_PARAM_KEY_ALERT_TYPE) && (
                     <AlertAddConfigrationModal alertId={alertId} />
                 )} */}

@@ -15,10 +15,10 @@
 import { Grid, Typography } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
+import Image2 from "../../../assets/images/alert-type-examples/easy_alert_statistical.png";
+import Image from "../../../assets/images/alert-type-examples/easy_alert_threshold.png";
 import { Modal } from "../modal/modal.component";
 import { EasyAlertModalProps } from "./easy-alert-modal.interfaces";
-import Image from "../../../assets/images/alert-type-examples/easy_alert_threshold.png";
-import Image2 from "../../../assets/images/alert-type-examples/easy_alert_statistical.png";
 
 export const EasyAlertModal: FunctionComponent<EasyAlertModalProps> = ({
     onGotItClick,

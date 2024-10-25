@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Button, Grid, Typography } from "@material-ui/core";
+import { Box, Button, Grid, IconButton, Typography } from "@material-ui/core";
+import { Cancel } from "@material-ui/icons";
 import ControlPointOutlinedIcon from "@material-ui/icons/ControlPointOutlined";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
@@ -28,17 +29,27 @@ import { AlertAddConfigrationModalProps } from "./alert-add-configration-modal.i
 import { boxCardStyles } from "./alert-add-configration-modal.styles";
 
 export const AlertAddConfigurationModal: FunctionComponent<AlertAddConfigrationModalProps> =
-    ({ alertId }) => {
+    ({ alertId, open, onClose }) => {
         const { t } = useTranslation();
         const classes = boxCardStyles();
         const [searchParams] = useSearchParams();
 
         return (
             <Modal
-                initiallyOpen
+                customTitle={
+                    <Box className={classes.dialogTitle}>
+                        <Typography variant="h6">
+                            {t("label.alert-completed")}
+                        </Typography>
+                        <IconButton onClick={onClose}>
+                            <Cancel color="secondary" />
+                        </IconButton>
+                    </Box>
+                }
+                isOpen={open}
                 showFooter={false}
                 submitButtonLabel={t("label.got-it")}
-                title={t("label.alert-completed")}
+                onClose={onClose}
             >
                 <Box className={classes.card}>
                     <Grid container>

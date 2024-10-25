@@ -293,8 +293,13 @@ export const getAlertsCreatePath = (): string => {
     return createPathWithRecognizedQueryString(AppRoute.ALERTS_CREATE);
 };
 
-export const getAlertsEasyCreatePath = (): string => {
-    return createPathWithRecognizedQueryString(AppRoute.ALERTS_CREATE_EASY);
+export const getAlertsEasyCreatePath = (
+    additionalParams?: URLSearchParams
+): string => {
+    return createPathWithRecognizedQueryString(
+        AppRoute.ALERTS_CREATE_EASY,
+        additionalParams
+    );
 };
 
 export const getAlertsCreateNewSimplePath = (): string => {

@@ -62,6 +62,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotFoundException;
@@ -98,11 +100,11 @@ public class AuthorizationManager {
   // todo cyril authz - no eviction so can grow indefinitely with the number of namespace - it should be ok to begin with, the number of namespace will be small (<100)
   // there is one cache per namespace so that the caching can be managed per namespace independently
   // also, it limits potential security issues of DDOS by cache flooding
-  private final Map<String, LoadingCache<String, Optional<DataSourceDTO>>> namespaceToDatasourceCache = new HashMap<>();
-  private final Map<String, LoadingCache<String, Optional<DatasetConfigDTO>>> namespaceToDatasetCache = new HashMap<>();
-  private final Map<String, LoadingCache<AlertTemplateDTO, Optional<AlertTemplateDTO>>> namespaceToTemplateCache = new HashMap<>();
-  private final Map<String, LoadingCache<Long, Optional<AlertDTO>>> namespaceToAlertCache = new HashMap<>();
-  private final Map<String, LoadingCache<Long, Optional<AnomalyDTO>>> namespaceToAnomalyCache = new HashMap<>();
+  private final ConcurrentMap<String, LoadingCache<String, Optional<DataSourceDTO>>> namespaceToDatasourceCache = new ConcurrentHashMap<>();
+  private final ConcurrentMap<String, LoadingCache<String, Optional<DatasetConfigDTO>>> namespaceToDatasetCache = new ConcurrentHashMap<>();
+  private final ConcurrentMap<String, LoadingCache<AlertTemplateDTO, Optional<AlertTemplateDTO>>> namespaceToTemplateCache = new ConcurrentHashMap<>();
+  private final ConcurrentMap<String, LoadingCache<Long, Optional<AlertDTO>>> namespaceToAlertCache = new ConcurrentHashMap<>();
+  private final ConcurrentMap<String, LoadingCache<Long, Optional<AnomalyDTO>>> namespaceToAnomalyCache = new ConcurrentHashMap<>();
 
   private record NameNamespace(String name, @Nullable String namespace) {}
 

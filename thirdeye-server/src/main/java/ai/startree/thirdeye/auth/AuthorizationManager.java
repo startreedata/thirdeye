@@ -100,15 +100,19 @@ public class AuthorizationManager {
   // todo cyril authz - no eviction so can grow indefinitely with the number of namespace - it should be ok to begin with, the number of namespace will be small (<100)
   // there is one cache per namespace so that the caching can be managed per namespace independently
   // also, it limits potential security issues of DDOS by cache flooding
+  // note: ConcurrentMap is not compatible with null key - we replace null with a randomly generated key that should never be used as a namespace name (random to prevent explicit attacks) - see nullSafeKey 
+  private static final String NULL_NAMESPACE_KEY = "__NULL_NAMESPACE_" + RandomStringUtils.randomAlphanumeric(10).toUpperCase();
   private final ConcurrentMap<String, LoadingCache<String, Optional<DataSourceDTO>>> namespaceToDatasourceCache = new ConcurrentHashMap<>();
   private final ConcurrentMap<String, LoadingCache<String, Optional<DatasetConfigDTO>>> namespaceToDatasetCache = new ConcurrentHashMap<>();
   private final ConcurrentMap<String, LoadingCache<AlertTemplateDTO, Optional<AlertTemplateDTO>>> namespaceToTemplateCache = new ConcurrentHashMap<>();
   private final ConcurrentMap<String, LoadingCache<Long, Optional<AlertDTO>>> namespaceToAlertCache = new ConcurrentHashMap<>();
   private final ConcurrentMap<String, LoadingCache<Long, Optional<AnomalyDTO>>> namespaceToAnomalyCache = new ConcurrentHashMap<>();
 
-  private record NameNamespace(String name, @Nullable String namespace) {}
-
   private final static Map<Class<? extends AbstractDTO>, SubEntityType> DTO_TO_ENTITY_TYPE;
+  
+  private static @NonNull String nullSafeKey(@Nullable String namespace) {
+    return namespace == null ? NULL_NAMESPACE_KEY : namespace;
+  }
 
   static {
     // could be independent of BEAN_TYPE_MAP but for the moment the code is the same
@@ -247,15 +251,15 @@ public class AuthorizationManager {
   public void invalidateCache(final @Nullable String namespace, Class<?> clazz) {
     final LoadingCache<?, ?> c;
     if (clazz.equals(DatasetConfigDTO.class) || clazz.equals(DatasetApi.class)) {
-      c = namespaceToDatasetCache.get(namespace);
+      c = namespaceToDatasetCache.get(nullSafeKey(namespace));
     } else if (clazz.equals(DataSourceDTO.class) || clazz.equals(DataSourceApi.class)) {
-      c = namespaceToDatasourceCache.get(namespace);
+      c = namespaceToDatasourceCache.get(nullSafeKey(namespace));
     } else if (clazz.equals(AlertDTO.class) || clazz.equals(AlertApi.class)) {
-      c = namespaceToAlertCache.get(namespace);
+      c = namespaceToAlertCache.get(nullSafeKey(namespace));
     } else if (clazz.equals(AnomalyDTO.class) || clazz.equals(AnomalyApi.class)) {
-      c = namespaceToAnomalyCache.get(namespace);
+      c = namespaceToAnomalyCache.get(nullSafeKey(namespace));
     } else if (clazz.equals(AlertTemplateDTO.class) || clazz.equals(AlertTemplateApi.class)) {
-      c = namespaceToTemplateCache.get(namespace);
+      c = namespaceToTemplateCache.get(nullSafeKey(namespace));
     } else {
       c = null;
     }
@@ -301,7 +305,7 @@ public class AuthorizationManager {
     // the only reason to expire cache is for cache misses and avoiding memory usage - but in the context of hierarchically related entities this should never happen
     // first way to make things faster would be to stop fetching the whole object just to check the class, id and namespace
     final LoadingCache<Long, Optional<AnomalyDTO>> anomalyCache = namespaceToAnomalyCache.computeIfAbsent(
-        entity.namespace(), notUsed -> CacheBuilder.newBuilder()
+        nullSafeKey(entity.namespace()), notUsed -> CacheBuilder.newBuilder()
             .maximumSize(2048)
             .expireAfterWrite(Duration.ofSeconds(60))
             .build(new CacheLoader<>() {
@@ -311,7 +315,7 @@ public class AuthorizationManager {
               }
             }));
     final LoadingCache<AlertTemplateDTO, Optional<AlertTemplateDTO>> templateCache = namespaceToTemplateCache.computeIfAbsent(
-        entity.namespace(), namespace -> CacheBuilder.newBuilder()
+        nullSafeKey(entity.namespace()), namespace -> CacheBuilder.newBuilder()
             .maximumSize(200)
             .expireAfterWrite(Duration.ofSeconds(60))
             .build(new CacheLoader<>() {
@@ -322,7 +326,7 @@ public class AuthorizationManager {
               }
             }));
     final LoadingCache<String, Optional<DataSourceDTO>> datasourceCache = namespaceToDatasourceCache.computeIfAbsent(
-        entity.namespace(), namespace -> CacheBuilder.newBuilder()
+        nullSafeKey(entity.namespace()), namespace -> CacheBuilder.newBuilder()
             .maximumSize(30)
             .expireAfterWrite(Duration.ofSeconds(60))
             .build(new CacheLoader<>() {
@@ -333,7 +337,7 @@ public class AuthorizationManager {
               }
             }));
     final LoadingCache<Long, Optional<AlertDTO>> alertCache = namespaceToAlertCache.computeIfAbsent(
-        entity.namespace(), notUsed -> CacheBuilder.newBuilder()
+        nullSafeKey(entity.namespace()), notUsed -> CacheBuilder.newBuilder()
             .maximumSize(500)
             .expireAfterWrite(Duration.ofSeconds(60))
             .build(new CacheLoader<>() {
@@ -343,7 +347,7 @@ public class AuthorizationManager {
               }
             }));
     final LoadingCache<String, Optional<DatasetConfigDTO>> datasetCache = namespaceToDatasetCache.computeIfAbsent(
-        entity.namespace(), namespace -> CacheBuilder.newBuilder()
+        nullSafeKey(entity.namespace()), namespace -> CacheBuilder.newBuilder()
             .maximumSize(200)
             .expireAfterWrite(Duration.ofSeconds(60))
             .build(new CacheLoader<>() {

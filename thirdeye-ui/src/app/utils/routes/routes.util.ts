@@ -147,7 +147,9 @@ export const AppRoute = {
     ALERTS_CREATE_NEW: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/${AppRouteRelative.ALERTS_CREATE_NEW}`,
     ALERTS_CREATE_EXISTING: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/${AppRouteRelative.ALERTS_CREATE_COPY}`,
     ALERTS_CREATE_NEW_ADVANCED: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/${AppRouteRelative.ALERTS_CREATE_NEW}/${AppRouteRelative.ALERTS_CREATE_ADVANCED}`,
+    ALERTS_CREATE_NEW_ADVANCED_V2: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/${AppRouteRelative.ALERTS_CREATE_NEW}/${AppRouteRelative.ALERTS_CREATE_ADVANCED_V2}`,
     ALERTS_CREATE_NEW_JSON_EDITOR: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/${AppRouteRelative.ALERTS_CREATE_NEW}/${AppRouteRelative.ALERTS_CREATE_JSON_EDITOR}`,
+    ALERTS_CREATE_NEW_JSON_EDITOR_V2: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/${AppRouteRelative.ALERTS_CREATE_NEW}/${AppRouteRelative.ALERTS_CREATE_JSON_EDITOR_V2}`,
     ALERTS_CREATE_EXISTING_ADVANCED: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/${AppRouteRelative.ALERTS_CREATE_COPY}/${AppRouteRelative.ALERTS_CREATE_ADVANCED}`,
     ALERTS_CREATE_EXISTING_JSON_EDITOR: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/${AppRouteRelative.ALERTS_CREATE_COPY}/${AppRouteRelative.ALERTS_CREATE_JSON_EDITOR}`,
     ALERTS_ALERT: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_ALERT}`,
@@ -314,9 +316,21 @@ export const getAlertsCreateAdvancePath = (): string => {
     );
 };
 
+export const getAlertsCreateAdvanceV2Path = (): string => {
+    return createPathWithRecognizedQueryString(
+        AppRoute.ALERTS_CREATE_NEW_ADVANCED_V2
+    );
+};
+
 export const getAlertsCreateNewJsonEditorPath = (): string => {
     return createPathWithRecognizedQueryString(
         AppRoute.ALERTS_CREATE_NEW_JSON_EDITOR
+    );
+};
+
+export const getAlertsCreateNewJsonEditorV2Path = (): string => {
+    return createPathWithRecognizedQueryString(
+        AppRoute.ALERTS_CREATE_NEW_JSON_EDITOR_V2
     );
 };
 

@@ -41,6 +41,7 @@ import { useAppBarConfigProvider } from "../../../components/app-bar/app-bar-con
 import { useGetAlertTemplates } from "../../../rest/alert-templates/alert-templates.actions";
 
 import { useCheckLoadedTemplates } from "../../../hooks/useCheckLoadedTemplates";
+import { QUERY_PARAM_KEYS } from "../../../utils/constants/constants.util";
 
 export const WelcomeLandingPage: FunctionComponent = () => {
     const { t } = useTranslation();
@@ -163,7 +164,14 @@ export const WelcomeLandingPage: FunctionComponent = () => {
                                     })}
                                     disabled={!hasDatasets}
                                     // link={getWelcomeCreateAlert()}
-                                    link={getAlertsEasyCreatePath()}
+                                    link={getAlertsEasyCreatePath(
+                                        new URLSearchParams([
+                                            [
+                                                QUERY_PARAM_KEYS.IS_FIRST_ALERT,
+                                                "true",
+                                            ],
+                                        ])
+                                    )}
                                     subtitle={t(
                                         "message.explore-startree-thirdeye-in-one-click"
                                     )}

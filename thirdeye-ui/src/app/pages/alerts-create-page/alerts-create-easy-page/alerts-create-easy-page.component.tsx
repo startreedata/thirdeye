@@ -1841,6 +1841,38 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                 </Grid>
                                                                             </Grid>
                                                                         </Grid>
+                                                                        {compositeFilters &&
+                                                                        dimension ===
+                                                                            SelectDimensionsOptions.DIMENSION_RECOMMENDER ? (
+                                                                            <Grid
+                                                                                item
+                                                                                xs={
+                                                                                    12
+                                                                                }
+                                                                            >
+                                                                                <Button
+                                                                                    color="primary"
+                                                                                    startIcon={
+                                                                                        <AddCircleOutline />
+                                                                                    }
+                                                                                    variant="outlined"
+                                                                                    onClick={() =>
+                                                                                        setOpenCompositeFilterModal(
+                                                                                            true
+                                                                                        )
+                                                                                    }
+                                                                                >
+                                                                                    {t(
+                                                                                        "label.edit-entity",
+                                                                                        {
+                                                                                            entity: t(
+                                                                                                "label.dimensions"
+                                                                                            ),
+                                                                                        }
+                                                                                    )}
+                                                                                </Button>
+                                                                            </Grid>
+                                                                        ) : null}
 
                                                                         {algorithmOption ? (
                                                                             <Grid

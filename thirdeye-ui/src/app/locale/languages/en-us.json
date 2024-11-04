@@ -1003,7 +1003,7 @@
                     "total-anomalies-graph-title": "Total # of anomalies detected",
                     "total-anomalies-weekly-graph-title": "Weekly anomalies detected",
                     "total-notifications-graph-title": "Total # of notifications sent",
-                    "total-notifications-weekly-graph-title": "Weekly notifcations sent"
+                    "total-notifications-weekly-graph-title": "Weekly notifications sent"
                 },
                 "investigations": {
                     "heading": "Recent investigations",
@@ -1049,7 +1049,7 @@
                 }
             },
             "subHeading": "Overview of system statistics, anomaly detection performance, and usage insights.",
-            "title": "Impact dashboard"
+            "title": "Impact Dashboard"
         }
     },
     "server": {},

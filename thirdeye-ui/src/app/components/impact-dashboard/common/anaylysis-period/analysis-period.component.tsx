@@ -20,6 +20,8 @@ import { AnalysisPeriodProps } from "./analysis-period.interaces";
 
 // Styles
 import { useAnalysisPeriodStyles } from "./analysis-period.styles";
+import { epochToDate } from "../../detection-performance/util";
+import { anaylysisPeriodStartTimeMapping } from "../../../../platform/utils";
 
 export const AnalysisPeriod = ({
     selectedPeriod,
@@ -29,8 +31,21 @@ export const AnalysisPeriod = ({
     const componentStyles = useAnalysisPeriodStyles();
     const { t } = useTranslation();
 
+    const selectedPeriodReadableDate = {
+        startTime: epochToDate(
+            anaylysisPeriodStartTimeMapping[selectedPeriod].startTime
+        ),
+        endTime: epochToDate(
+            anaylysisPeriodStartTimeMapping[selectedPeriod].endTime
+        ),
+    };
+
     return (
         <div className={componentStyles.container}>
+            <>
+                ({selectedPeriodReadableDate.startTime}-
+                {selectedPeriodReadableDate.endTime})
+            </>
             <div>{`${t("pages.impact-dashboard.common.date-range")}`}:</div>
             <div className={componentStyles.rangeContainer}>
                 {analysisPeriods.map((analysisPeriod) => {

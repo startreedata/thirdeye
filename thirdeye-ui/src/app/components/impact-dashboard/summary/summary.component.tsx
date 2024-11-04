@@ -39,6 +39,11 @@ import { useSummaryData } from "./use-summary-data";
 import { useTranslation } from "react-i18next";
 import { SpecType } from "../../../rest/dto/subscription-group.interfaces";
 import { SummaryProps } from "./summary.interfaces";
+import { epochToDate } from "../detection-performance/util";
+import {
+    anaylysisPeriodPreviousWindowTimeMapping,
+    anaylysisPeriodStartTimeMapping,
+} from "../../../platform/utils";
 
 export const Summary = ({
     alerts,
@@ -143,17 +148,44 @@ export const Summary = ({
         return summaryRef.current?.textContent || "";
     };
 
+    const currentPeriodReadableDate = {
+        startTime: epochToDate(
+            anaylysisPeriodStartTimeMapping[selectedAnalysisPeriod].startTime
+        ),
+        endTime: epochToDate(
+            anaylysisPeriodStartTimeMapping[selectedAnalysisPeriod].endTime
+        ),
+    };
+    const previousPeriodReadableDate = {
+        startTime: epochToDate(
+            anaylysisPeriodPreviousWindowTimeMapping[selectedAnalysisPeriod]
+                .startTime
+        ),
+        endTime: epochToDate(
+            anaylysisPeriodPreviousWindowTimeMapping[selectedAnalysisPeriod]
+                .endTime
+        ),
+    };
+
     const renderAnomalySummary = (): JSX.Element => {
         return (
             <div>
-                In the last <b>{verboseSummaryItems.weeks} weeks</b>
+                In the last{" "}
+                <b>
+                    {verboseSummaryItems.weeks}
+                    weeks({currentPeriodReadableDate.startTime} -{" "}
+                    {currentPeriodReadableDate.endTime})
+                </b>
                 ,&nbsp;
                 <b>
                     {summaryData.anomalies.detected.count} anomalies were
                     detected
                 </b>
                 , which is <b>{verboseSummaryItems.percentageChange}</b> than
-                the previous {verboseSummaryItems.weeks} weeks.{" "}
+                the previous
+                {verboseSummaryItems.weeks}
+                weeks({previousPeriodReadableDate.startTime} -{" "}
+                {previousPeriodReadableDate.endTime}).{" "}
                 {summaryData.anomalies.detected.count > 0 && (
                     <>
                         Notifications about anomalies were sent via{" "}

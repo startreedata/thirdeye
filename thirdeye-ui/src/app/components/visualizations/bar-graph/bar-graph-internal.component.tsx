@@ -14,7 +14,7 @@
  */
 import { AxisBottom, AxisRight } from "@visx/axis";
 import { Group } from "@visx/group";
-import { scaleBand, scaleLinear, scaleOrdinal } from "@visx/scale";
+import { scaleBand, scaleLinear, scaleOrdinal, scaleTime } from "@visx/scale";
 import { BarGroup } from "@visx/shape";
 import { defaultStyles, Tooltip, withTooltip } from "@visx/tooltip";
 import { ScaleLinear } from "d3-scale";
@@ -56,7 +56,18 @@ export default withTooltip(
             padding: 0.1,
         });
         dateScale.rangeRound([0, xMax]);
-
+        const dateScale1 = scaleTime({
+            domain: [
+                new Date(
+                    Math.min(...data.map((d) => new Date(d.date).getTime()))
+                ), // Start date
+                new Date(
+                    Math.max(...data.map((d) => new Date(d.date).getTime()))
+                ), // End date
+            ],
+            range: [0, width], // specify the width of your chart
+        });
+        dateScale1.rangeRound([0, xMax]);
         /* This scales the individual group of bars on x-axis based on individual
   bandwidth(pixels in simple terms) reserved for that group */
         const barGroupScale = scaleBand<string>({
@@ -161,13 +172,14 @@ export default withTooltip(
                     </Group>
                     <AxisBottom
                         left={margins!.right}
-                        scale={dateScale}
+                        scale={dateScale1}
                         stroke="black"
                         tickLabelProps={{
                             fill: "black",
                             fontSize: 10,
                             textAnchor: "middle",
                         }}
+                        tickValues={dateScale1.ticks(7)}
                         top={yMax + margins!.top}
                     />
                     <AxisRight

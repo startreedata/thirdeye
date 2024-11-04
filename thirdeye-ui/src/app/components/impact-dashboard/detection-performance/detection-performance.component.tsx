@@ -149,7 +149,7 @@ export const DetectionPerformance = ({
                     anomalies={
                         anomalies?.filter((anomaly) => anomaly.notified) || null
                     }
-                    notificationText="notification"
+                    // notificationText="notification"
                     previousPeriodAnomalies={
                         previousPeriodAnomalies?.filter(
                             (anomaly) => anomaly.notified
@@ -164,7 +164,7 @@ export const DetectionPerformance = ({
                     anomalies={
                         anomalies?.filter((anomaly) => anomaly.notified) || null
                     }
-                    notificationText="notification"
+                    // notificationText="notification"
                     previousPeriodAnomalies={
                         previousPeriodAnomalies?.filter(
                             (anomaly) => anomaly.notified

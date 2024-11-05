@@ -341,6 +341,16 @@ export const getAlertsUpdatePath = (id: number): string => {
     return createPathWithRecognizedQueryString(path);
 };
 
+export const getAlertsUpdateV2Path = (
+    id: number,
+    relativePath: string
+): string => {
+    let path: string = AppRoute.ALERTS_UPDATE;
+    path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`) + relativePath;
+
+    return path;
+};
+
 export const getAnomaliesPath = (): string => {
     return createPathWithRecognizedQueryString(AppRoute.ANOMALIES);
 };

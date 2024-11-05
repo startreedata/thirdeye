@@ -63,7 +63,7 @@ public class PinotControllerRestClient {
   public List<String> getAllTablesFromPinot() throws IOException {
     final String endpoint = getPinotAllTablesEndpoint();
     final HttpGet tablesReq = new HttpGet(endpoint);
-    LOG.info("Retrieving datasets: {}", tablesReq);
+    LOG.debug("Retrieving datasets: {}", tablesReq);
     CloseableHttpResponse tablesRes = null;
     try {
       tablesRes = pinotControllerRestClientSupplier.get().execute(pinotControllerHost, tablesReq);

@@ -29,8 +29,10 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.apache.http.HttpHost;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpHead;
 import org.apache.http.util.EntityUtils;
 import org.apache.pinot.spi.data.Schema;
 import org.slf4j.Logger;
@@ -41,6 +43,7 @@ public class PinotControllerRestClient {
 
   private static final Logger LOG = LoggerFactory.getLogger(PinotControllerRestClient.class);
   private static final String PINOT_TABLES_ENDPOINT = "/tables/";
+  private static final String PINOT_MY_TABLES_ENDPOINT = "/mytables";
   private static final String PINOT_TABLES_ENDPOINT_TEMPLATE = "/tables/%s";
   private static final String PINOT_SCHEMA_ENDPOINT_TEMPLATE = "/schemas/%s";
   private static final String PINOT_TABLE_CONFIG_ENDPOINT_TEMPLATE = "/tables/%s/schema";
@@ -58,7 +61,8 @@ public class PinotControllerRestClient {
   }
 
   public List<String> getAllTablesFromPinot() throws IOException {
-    final HttpGet tablesReq = new HttpGet(PINOT_TABLES_ENDPOINT);
+    final String endpoint = getPinotAllTablesEndpoint();
+    final HttpGet tablesReq = new HttpGet(endpoint);
     LOG.info("Retrieving datasets: {}", tablesReq);
     CloseableHttpResponse tablesRes = null;
     try {
@@ -78,6 +82,29 @@ public class PinotControllerRestClient {
           EntityUtils.consume(tablesRes.getEntity());
         }
         tablesRes.close();
+      }
+    }
+  }
+
+  /**
+   * Checks if /mytables endpoint is available
+   * else falls back to /tables endpoint
+   */
+  private String getPinotAllTablesEndpoint() throws IOException  {
+    final HttpHead mytablesReq = new HttpHead(PINOT_MY_TABLES_ENDPOINT);
+    CloseableHttpResponse mytablesRes = null;
+    try {
+      mytablesRes = pinotControllerRestClientSupplier.get().execute(pinotControllerHost, mytablesReq);
+      if (mytablesRes.getStatusLine().getStatusCode() != HttpStatus.SC_NOT_FOUND) {
+        return PINOT_MY_TABLES_ENDPOINT;
+      }
+      return PINOT_TABLES_ENDPOINT;
+    } finally {
+      if (mytablesRes != null) {
+        if (mytablesRes.getEntity() != null) {
+          EntityUtils.consume(mytablesRes.getEntity());
+        }
+        mytablesRes.close();
       }
     }
   }

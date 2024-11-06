@@ -44,6 +44,7 @@ public interface DatasetMapper {
         .setRcaExcludedDimensions(api.getRcaExcludedDimensions())
         .setTimeColumns(api.getTimeColumns())
         ;
+    dto.setId(api.getId());
     optional(api.getTimeColumn()).ifPresent(timeColumn -> {
       dto.setTimeColumn(timeColumn.getName());
       updateTimeSpecOnDataset(dto, timeColumn);

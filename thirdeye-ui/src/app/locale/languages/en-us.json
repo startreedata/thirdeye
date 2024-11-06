@@ -1000,9 +1000,9 @@
             "sections": {
                 "detection-performance": {
                     "heading": "Detection performance",
-                    "total-anomalies-graph-title": "Total # of anomalies detected",
+                    "total-anomalies-graph-title": "Total anomalies detected",
                     "total-anomalies-weekly-graph-title": "Weekly anomalies detected",
-                    "total-notifications-graph-title": "Total # of notifications sent",
+                    "total-notifications-graph-title": "Total notifications sent",
                     "total-notifications-weekly-graph-title": "Weekly notifications sent"
                 },
                 "investigations": {

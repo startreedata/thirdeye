@@ -186,6 +186,7 @@ export default withTooltip(
                         left={xMax + margins!.right}
                         scale={yAxisScale}
                         stroke="black"
+                        tickFormat={yAxisScale.tickFormat(1)}
                         tickLabelProps={{
                             fill: "black",
                             fontSize: 10,

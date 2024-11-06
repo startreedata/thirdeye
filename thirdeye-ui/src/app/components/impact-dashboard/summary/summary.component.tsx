@@ -226,11 +226,16 @@ export const Summary = ({
     };
 
     const renderInvestigationInfo = (): JSX.Element => {
+        const investigationCount = verboseSummaryItems.investigation.count;
+
         return (
             <div>
-                <b>{verboseSummaryItems.investigation.count} investigations</b>{" "}
+                <b>
+                    {investigationCount} investigation
+                    {investigationCount > 1 ? "s" : ""}
+                </b>{" "}
                 were performed in the last {verboseSummaryItems.weeks} weeks.{" "}
-                {verboseSummaryItems.investigation.count > 0 && (
+                {investigationCount > 0 && (
                     <span>
                         The most recent investigation was performed for an
                         anomaly that happened on{" "}

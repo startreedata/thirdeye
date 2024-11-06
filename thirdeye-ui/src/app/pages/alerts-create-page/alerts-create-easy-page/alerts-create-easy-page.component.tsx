@@ -18,6 +18,7 @@ import {
     CircularProgress,
     Divider,
     Grid,
+    Switch,
     TextareaAutosize,
     TextField,
     Typography,
@@ -87,6 +88,8 @@ import { useGetDatasourcesTree } from "../../../utils/datasources/use-get-dataso
 import { getAlertsAllPath } from "../../../utils/routes/routes.util";
 import { AlertCreatedGuidedPageOutletContext } from "../../alerts-create-guided-page/alerts-create-guided-page.interfaces";
 import { easyAlertStyles } from "./alerts-create-easy-page.styles";
+import { NotificationConfiguration } from "../../../components/alert-wizard-v3/notification-configuration/notification-configuration.component";
+import { SETUP_DETAILS_TEST_IDS } from "../../alerts-create-guided-page/setup-details/setup-details-page.interface";
 
 const PROPERTIES_TO_COPY = [
     "dataSource",
@@ -117,6 +120,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
     const [enumerations, setEnumerations] = useState(false);
     const [dimension, setDimension] = useState<string | null>(null);
     const [alertInsightLoading, setAlertInsightLoading] = useState(false);
+    const [isNotificationsOn, setIsNotificationsOn] = useState(false);
 
     const GRANULARITY_OPTIONS = [
         {
@@ -161,6 +165,10 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         setIsMultiDimensionAlert,
         getAlertRecommendation,
         setShouldShowStepper,
+        selectedSubscriptionGroups,
+        handleSubscriptionGroupChange,
+        newSubscriptionGroup,
+        onNewSubscriptionGroupChange,
     } = useOutletContext<AlertCreatedGuidedPageOutletContext>();
     const { datasetsInfo } = useGetDatasourcesTree();
 
@@ -838,6 +846,58 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         onAlertPropertyChange(workingAlert);
     };
 
+    const renderNotificationView = (): JSX.Element => {
+        return (
+            <Grid item xs={12}>
+                <PageContentsCardV1>
+                    <Grid container>
+                        <Grid item lg={3} md={5} sm={10} xs={10}>
+                            <Box marginBottom={2}>
+                                <Typography variant="h5">
+                                    {t("label.configure-notifications")}
+                                </Typography>
+                                <Typography variant="body2">
+                                    {t(
+                                        "message.select-who-to-notify-when-finding-anomalies"
+                                    )}
+                                </Typography>
+                            </Box>
+                        </Grid>
+                        <Grid item lg={9} md={7} sm={2} xs={2}>
+                            <Switch
+                                checked={isNotificationsOn}
+                                color="primary"
+                                data-testid={
+                                    SETUP_DETAILS_TEST_IDS.CONFIGURATION_SWITCH
+                                }
+                                name="checked"
+                                onChange={() =>
+                                    setIsNotificationsOn(!isNotificationsOn)
+                                }
+                            />
+                        </Grid>
+
+                        {isNotificationsOn && (
+                            <NotificationConfiguration
+                                alert={alert}
+                                initiallySelectedSubscriptionGroups={
+                                    selectedSubscriptionGroups
+                                }
+                                newSubscriptionGroup={newSubscriptionGroup}
+                                onNewSubscriptionGroupChange={
+                                    onNewSubscriptionGroupChange
+                                }
+                                onSubscriptionGroupsChange={
+                                    handleSubscriptionGroupChange
+                                }
+                            />
+                        )}
+                    </Grid>
+                </PageContentsCardV1>
+            </Grid>
+        );
+    };
+
     return (
         <>
             <Grid item xs={12}>
@@ -1419,85 +1479,88 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                 )}
                                                 {dimension ===
                                                     SelectDimensionsOptions.ENUMERATORS && (
-                                                    <Grid item xs={12}>
+                                                    <>
                                                         <Grid item xs={12}>
-                                                            <Grid container>
-                                                                <Grid
-                                                                    item
-                                                                    className={
-                                                                        classes.textAreaContainer
-                                                                    }
-                                                                    xs={12}
-                                                                >
-                                                                    <TextareaAutosize
-                                                                        aria-label="minimum height"
+                                                            <Grid item xs={12}>
+                                                                <Grid container>
+                                                                    <Grid
+                                                                        item
                                                                         className={
-                                                                            classes.textArea
+                                                                            classes.textAreaContainer
                                                                         }
-                                                                        minRows={
-                                                                            3
-                                                                        }
-                                                                        placeholder={t(
-                                                                            "label.select-distinct-dimension-from-dataset",
-                                                                            {
-                                                                                dimension:
-                                                                                    selectedTable
-                                                                                        ?.dimensions?.[0] ??
-                                                                                    "someColumn",
-                                                                                dataset:
-                                                                                    selectedTable
-                                                                                        ?.dataset
-                                                                                        ?.name,
-                                                                            }
-                                                                        )}
-                                                                        value={
-                                                                            enumerators
-                                                                        }
-                                                                        onChange={(
-                                                                            e
-                                                                        ) =>
-                                                                            setEnumerators(
-                                                                                e
-                                                                                    .target
-                                                                                    .value
-                                                                            )
-                                                                        }
-                                                                    />
-                                                                    <Box
-                                                                        className={
-                                                                            classes.footer
-                                                                        }
-                                                                        justifyContent="space-between"
+                                                                        xs={12}
                                                                     >
-                                                                        <Button
-                                                                            size="small"
-                                                                            variant="contained"
-                                                                            onClick={() =>
-                                                                                handleRunEnumerations()
+                                                                        <TextareaAutosize
+                                                                            aria-label="minimum height"
+                                                                            className={
+                                                                                classes.textArea
                                                                             }
-                                                                        >
-                                                                            {t(
-                                                                                "label.run-enumeration"
+                                                                            minRows={
+                                                                                3
+                                                                            }
+                                                                            placeholder={t(
+                                                                                "label.select-distinct-dimension-from-dataset",
+                                                                                {
+                                                                                    dimension:
+                                                                                        selectedTable
+                                                                                            ?.dimensions?.[0] ??
+                                                                                        "someColumn",
+                                                                                    dataset:
+                                                                                        selectedTable
+                                                                                            ?.dataset
+                                                                                            ?.name,
+                                                                                }
                                                                             )}
-                                                                        </Button>
-                                                                        <Button
-                                                                            size="small"
-                                                                            variant="contained"
-                                                                            onClick={() =>
-                                                                                setOpenViewColumnsListDrawer(
-                                                                                    true
+                                                                            value={
+                                                                                enumerators
+                                                                            }
+                                                                            onChange={(
+                                                                                e
+                                                                            ) =>
+                                                                                setEnumerators(
+                                                                                    e
+                                                                                        .target
+                                                                                        .value
                                                                                 )
                                                                             }
+                                                                        />
+                                                                        <Box
+                                                                            className={
+                                                                                classes.footer
+                                                                            }
+                                                                            justifyContent="space-between"
                                                                         >
-                                                                            {t(
-                                                                                "label.view-columns-list"
-                                                                            )}
-                                                                        </Button>
-                                                                    </Box>
+                                                                            <Button
+                                                                                size="small"
+                                                                                variant="contained"
+                                                                                onClick={() =>
+                                                                                    handleRunEnumerations()
+                                                                                }
+                                                                            >
+                                                                                {t(
+                                                                                    "label.run-enumeration"
+                                                                                )}
+                                                                            </Button>
+                                                                            <Button
+                                                                                size="small"
+                                                                                variant="contained"
+                                                                                onClick={() =>
+                                                                                    setOpenViewColumnsListDrawer(
+                                                                                        true
+                                                                                    )
+                                                                                }
+                                                                            >
+                                                                                {t(
+                                                                                    "label.view-columns-list"
+                                                                                )}
+                                                                            </Button>
+                                                                        </Box>
+                                                                    </Grid>
                                                                 </Grid>
                                                             </Grid>
                                                         </Grid>
-                                                    </Grid>
+                                                        {renderNotificationView()}
+                                                    </>
                                                 )}
                                                 <Grid item xs={12}>
                                                     {((anomalyDetection ===
@@ -1966,6 +2029,16 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                 )}
                                                             </Grid>
                                                         )}
+                                                    {algorithmOption && (
+                                                        <Grid container>
+                                                            <Box
+                                                                marginTop={2}
+                                                                width="100%"
+                                                            >
+                                                                {renderNotificationView()}
+                                                            </Box>
+                                                        </Grid>
+                                                    )}
 
                                                     <Grid item xs={12}>
                                                         <Box

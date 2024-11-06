@@ -1,3 +1,10 @@
+### [2.52.10](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.52.9...thirdeye-ui-2.52.10) (2024-11-05)
+
+
+### Bug Fixes
+
+* TE-XX added close button to the alert subscription group popup ([54bfb0a20](https://github.com/startreedata/thirdeye/commit/54bfb0a2015fa51ffd65a9258ceb2d7c408ca99a))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

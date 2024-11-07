@@ -34,7 +34,6 @@ import { AlertsEditCreateBasePageComponent } from "../alerts-edit-create-common/
 import {
     QUERY_PARAM_KEY_ALERT_TYPE,
     QUERY_PARAM_KEY_ANOMALIES_RETRY,
-    // QUERY_PARAM_KEY_FOR_NOTIFICATION,
 } from "../alerts-view-page/alerts-view-page.utils";
 import { AlertsCreatePageProps } from "./alerts-create-page.interfaces";
 import { QUERY_PARAM_KEYS } from "../../utils/constants/constants.util";
@@ -75,12 +74,6 @@ export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
                     [QUERY_PARAM_KEY_ANOMALIES_RETRY, "true"],
                     [QUERY_PARAM_KEY_ALERT_TYPE, "create"],
                 ]);
-                // if (isNewCreateEasyAlert) {
-                //     searchParamsToSet.set(
-                //         QUERY_PARAM_KEY_FOR_NOTIFICATION,
-                //         "true"
-                //     );
-                // }
                 navigate(getAlertsAlertPath(savedAlert.id, searchParamsToSet));
             }
         });

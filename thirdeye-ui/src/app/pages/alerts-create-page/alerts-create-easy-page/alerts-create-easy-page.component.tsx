@@ -849,7 +849,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
     const renderNotificationView = (): JSX.Element => {
         return (
             <Grid item xs={12}>
-                <PageContentsCardV1 className={classes.notifcationContainer}>
+                <PageContentsCardV1 className={classes.notificationContainer}>
                     <Grid container>
                         <Grid item lg={3} md={5} sm={10} xs={10}>
                             <Box marginBottom={2}>

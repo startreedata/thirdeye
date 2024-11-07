@@ -134,6 +134,10 @@ export const easyAlertStyles = makeStyles((theme) => ({
             borderWidth: "1px",
         },
     },
+    notifcationContainer: {
+        borderColor: "#B4CDE0",
+        borderRadius: "8px",
+    },
 }));
 
 export const createAlertPageTheme = createTheme({

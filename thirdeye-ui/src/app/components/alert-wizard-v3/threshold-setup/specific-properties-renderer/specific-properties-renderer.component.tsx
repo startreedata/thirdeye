@@ -76,7 +76,7 @@ export const SpecificPropertiesRenderer: FunctionComponent<SpecificPropertiesRen
                 fullWidth
                 data-testid={`${inputFieldConfig.templatePropertyName}-container`}
                 type={inputFieldConfig.type}
-                value={existingValue ?? undefined}
+                value={existingValue ?? ""}
                 variant="outlined"
                 onChange={(e) => {
                     handlePropertyChange(

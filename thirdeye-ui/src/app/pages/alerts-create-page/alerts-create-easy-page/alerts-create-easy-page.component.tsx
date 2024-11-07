@@ -64,7 +64,10 @@ import { RadioSectionOptions } from "../../../components/form-basics/radio-secti
 import { TimeRangeButtonWithContext } from "../../../components/time-range/time-range-button-with-context-v2/time-range-button.component";
 import { TimeRangeQueryStringKey } from "../../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { ReactComponent as FilterListRoundedIcon } from "../../../platform/assets/images/filter-icon.svg";
-import { PageContentsCardV1 } from "../../../platform/components";
+import {
+    PageContentsCardV1,
+    useNotificationProviderV1,
+} from "../../../platform/components";
 import { useGetEvaluation } from "../../../rest/alerts/alerts.actions";
 import { AlertTemplate } from "../../../rest/dto/alert-template.interfaces";
 import {
@@ -90,6 +93,8 @@ import { AlertCreatedGuidedPageOutletContext } from "../../alerts-create-guided-
 import { easyAlertStyles } from "./alerts-create-easy-page.styles";
 import { NotificationConfiguration } from "../../../components/alert-wizard-v3/notification-configuration/notification-configuration.component";
 import { SETUP_DETAILS_TEST_IDS } from "../../alerts-create-guided-page/setup-details/setup-details-page.interface";
+import { ActionStatus } from "../../../rest/actions.interfaces";
+import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
 
 const PROPERTIES_TO_COPY = [
     "dataSource",
@@ -121,6 +126,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
     const [dimension, setDimension] = useState<string | null>(null);
     const [alertInsightLoading, setAlertInsightLoading] = useState(false);
     const [isNotificationsOn, setIsNotificationsOn] = useState(false);
+    const { notify } = useNotificationProviderV1();
 
     const GRANULARITY_OPTIONS = [
         {
@@ -571,7 +577,23 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         return [...recommendedAlgorithmOptions, ...availableAlgorithmOptions];
     }, [alertTemplates, alertRecommendations]);
 
-    const { getEvaluation, evaluation } = useGetEvaluation();
+    const {
+        getEvaluation,
+        evaluation,
+        status: AlertEvaluationStatus,
+        errorMessages,
+    } = useGetEvaluation();
+
+    useEffect(() => {
+        notifyIfErrors(
+            AlertEvaluationStatus,
+            errorMessages,
+            notify,
+            t("message.error-while-fetching", {
+                entity: t("label.subscription-groups"),
+            })
+        );
+    }, [AlertEvaluationStatus]);
 
     const [alertConfigForPreview, setAlertConfigForPreview] =
         useState<EditableAlert>(() => {
@@ -1828,9 +1850,14 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                             minDate={
                                                                                                 alertInsight?.datasetStartTime
                                                                                             }
-                                                                                            timezone={determineTimezoneFromAlertInEvaluation(
-                                                                                                alertInsight?.templateWithProperties
-                                                                                            )}
+                                                                                            timezone={
+                                                                                                (alert
+                                                                                                    .templateProperties
+                                                                                                    ?.timezone as string) ||
+                                                                                                determineTimezoneFromAlertInEvaluation(
+                                                                                                    alertInsight?.templateWithProperties
+                                                                                                )
+                                                                                            }
                                                                                             onTimeRangeChange={(
                                                                                                 newStart,
                                                                                                 newEnd
@@ -1958,7 +1985,10 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                     alert
                                                                                 }
                                                                                 alertEvaluation={
-                                                                                    evaluation
+                                                                                    AlertEvaluationStatus ===
+                                                                                    ActionStatus.Working
+                                                                                        ? null
+                                                                                        : evaluation
                                                                                 }
                                                                                 evaluationTimeRange={{
                                                                                     startTime:

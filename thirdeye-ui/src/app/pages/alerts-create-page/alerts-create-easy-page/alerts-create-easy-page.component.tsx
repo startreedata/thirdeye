@@ -42,7 +42,8 @@ import {
 import DimensionImage from "../../../../assets/images/dimensions.png";
 import { AdditonalFiltersDrawer } from "../../../components/additional-filters-drawer/additional-filters-drawer.component";
 import { AlertCompositeFiltersModal } from "../../../components/alert-composite-filters-modal/alert-composite-filters-modal.component";
-import { createNewStartingAlert } from "../../../components/alert-wizard-v2/alert-template/alert-template.utils";
+// Remove "createNewStartingAlertThreshold as" for fallback
+import { createNewStartingAlertThreshold as createNewStartingAlert } from "../../../components/alert-wizard-v2/alert-template/alert-template.utils";
 import { AvailableAlgorithmOption } from "../../../components/alert-wizard-v3/alert-type-selection/alert-type-selection.interfaces";
 import {
     generateAvailableAlgorithmOptions,
@@ -107,7 +108,7 @@ const PROPERTIES_TO_COPY = [
 ];
 
 const ALERT_TEMPLATE_FOR_EVALUATE = "startree-threshold";
-const ALERT_TEMPLATE_FOR_EVALUATE_DX = "startree-mean-variance-dx";
+const ALERT_TEMPLATE_FOR_EVALUATE_DX = "startree-threshold-dx";
 const ALERT_TEMPLATE_FOR_EVALUATE_QUERY_DX = "startree-threshold-query-dx";
 
 export const AlertsCreateEasyPage: FunctionComponent = () => {
@@ -357,7 +358,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                   createNewStartingAlert().template?.name,
                           },
                           templateProperties: {
-                              ...alert.templateProperties,
+                              ...createNewStartingAlert().templateProperties,
                               ...generateTemplateProperties(
                                   isCustomMetrics
                                       ? editedDatasourceFieldValue

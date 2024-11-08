@@ -85,7 +85,7 @@ export const useWorkspaceApiRequests = (): WorkspaceApiReques => {
             workspaceErrorMessages,
             notify,
             t("message.error-while-fetching", {
-                entity: t("label.workspace-config"),
+                entity: t("label.settings"),
             })
         );
     }, [workspaceStatus]);
@@ -99,7 +99,7 @@ export const useWorkspaceApiRequests = (): WorkspaceApiReques => {
             resetErrorMessages,
             notify,
             t("message.update-error", {
-                entity: t("label.workspace-config"),
+                entity: t("label.settings"),
             })
         );
     }, [resetStaus]);
@@ -113,7 +113,7 @@ export const useWorkspaceApiRequests = (): WorkspaceApiReques => {
             updateErrorMessages,
             notify,
             t("message.update-error", {
-                entity: t("label.workspace-config"),
+                entity: t("label.settings"),
             })
         );
     }, [updateStatus]);

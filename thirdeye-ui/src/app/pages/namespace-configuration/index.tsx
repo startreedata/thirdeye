@@ -32,7 +32,6 @@ export const NamespaceConfiguration = (): JSX.Element => {
         isUpdateDisabled,
         namespaceConfig,
         setNamespaceConfig,
-        workspaceConfiguration,
         resetWorkspaceConfiguration,
         updateWorkspaceConfiguration,
     } = useWorkspaceApiRequests();
@@ -44,17 +43,7 @@ export const NamespaceConfiguration = (): JSX.Element => {
         resetWorkspaceConfiguration();
     };
     const handleUpdate = async (): Promise<void> => {
-        const updatedNamespaceConfig = {
-            ...workspaceConfiguration,
-            timeConfiguration: {
-                ...workspaceConfiguration?.templateConfiguration,
-                timezone: namespaceConfig.timezone,
-                dateTimePattern: namespaceConfig.dateTimePattern,
-            },
-        };
-        updateWorkspaceConfiguration(
-            updatedNamespaceConfig as WorkspaceConfiguration
-        );
+        updateWorkspaceConfiguration(namespaceConfig as WorkspaceConfiguration);
     };
 
     return (

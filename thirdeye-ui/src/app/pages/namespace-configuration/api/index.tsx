@@ -25,18 +25,13 @@ import { useNotificationProviderV1 } from "../../../platform/components";
 import { useTranslation } from "react-i18next";
 import { WorkspaceConfiguration } from "../../../rest/dto/workspace.interfaces";
 
-type namespaceConfig = {
-    timezone: string | undefined;
-    dateTimePattern: string | undefined;
-};
-
 type WorkspaceApiReques = {
     isError: boolean;
     isLoading: boolean;
     isUpdateDisabled: boolean;
-    namespaceConfig: namespaceConfig;
+    namespaceConfig: WorkspaceConfiguration | null;
     workspaceConfiguration: WorkspaceConfiguration | null;
-    setNamespaceConfig: (config: namespaceConfig) => void;
+    setNamespaceConfig: (config: WorkspaceConfiguration) => void;
     getWorkspaceConfiguration: () => Promise<
         WorkspaceConfiguration | undefined
     >;
@@ -49,10 +44,8 @@ type WorkspaceApiReques = {
 };
 
 export const useWorkspaceApiRequests = (): WorkspaceApiReques => {
-    const [namespaceConfig, setNamespaceConfig] = useState<namespaceConfig>({
-        timezone: "",
-        dateTimePattern: "",
-    });
+    const [namespaceConfig, setNamespaceConfig] =
+        useState<WorkspaceConfiguration | null>(null);
 
     const { notify } = useNotificationProviderV1();
     const { t } = useTranslation();
@@ -82,11 +75,7 @@ export const useWorkspaceApiRequests = (): WorkspaceApiReques => {
 
     useEffect(() => {
         if (!isEmpty(workspaceConfiguration)) {
-            setNamespaceConfig({
-                timezone: workspaceConfiguration?.timeConfiguration.timezone,
-                dateTimePattern:
-                    workspaceConfiguration?.timeConfiguration.dateTimePattern,
-            });
+            setNamespaceConfig(workspaceConfiguration);
         }
     }, [workspaceConfiguration]);
 
@@ -136,11 +125,7 @@ export const useWorkspaceApiRequests = (): WorkspaceApiReques => {
         updateStatus === ActionStatus.Working ||
         resetStaus === ActionStatus.Working;
 
-    const isUpdateDisabled = isEqual(namespaceConfig, {
-        dateTimePattern:
-            workspaceConfiguration?.timeConfiguration.dateTimePattern,
-        timezone: workspaceConfiguration?.timeConfiguration.timezone,
-    });
+    const isUpdateDisabled = isEqual(namespaceConfig, workspaceConfiguration);
 
     return {
         isError,

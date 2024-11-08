@@ -159,6 +159,25 @@ export function hasRequiredPropertyValuesSet(
     });
 }
 
+export function createNewStartingAlertThreshold(): EditableAlert {
+    return {
+        name: "",
+        description: "",
+        cron: DEFAULT_CRON,
+        template: {
+            name: "startree-threshold",
+        },
+        templateProperties: {
+            dataSource: "sample_datasource",
+            dataset: "sample_dataset",
+            aggregationColumn: "sample_column_name",
+            aggregationFunction: "SUM",
+            min: 0,
+            max: 1,
+        },
+    };
+}
+
 export function createNewStartingAlert(): EditableAlert {
     return {
         name: "",

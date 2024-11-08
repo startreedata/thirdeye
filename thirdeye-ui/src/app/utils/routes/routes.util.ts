@@ -96,6 +96,7 @@ export const AppRouteRelative = {
     METRICS_VIEW: `view/id/${PLACEHOLDER_ROUTE_ID}`,
     METRICS_CREATE: `create`,
     METRICS_UPDATE: `update/id/${PLACEHOLDER_ROUTE_ID}`,
+    NAMESPACE: "namespace",
     ROOT_CAUSE_ANALYSIS: `root-cause-analysis`,
     ROOT_CAUSE_ANALYSIS_FOR_ANOMALY: `anomaly/${PLACEHOLDER_ROUTE_ID}`,
     ROOT_CAUSE_ANALYSIS_FOR_ANOMALY_V2: `v2/anomaly/${PLACEHOLDER_ROUTE_ID}`,
@@ -234,6 +235,7 @@ export const AppRoute = {
         `/${AppRouteRelative.WELCOME}/${AppRouteRelative.WELCOME_CREATE_ALERT}` +
         `/${AppRouteRelative.WELCOME_CREATE_ALERT_TUNE_ALERT}`,
     IMPACT_DASHBOARD: `/${AppRouteRelative.IMPACT_DASHBOARD}`,
+    NAMESPACE_CONFIGURATION: `/${AppRouteRelative.CONFIGURATION}/${AppRouteRelative.NAMESPACE}`,
 } as const;
 
 export const getBasePath = (): string => {
@@ -572,6 +574,10 @@ export const getAlertsCreateCopyPath = (id: number): string => {
 
 export const getEventsPath = (): string => {
     return createPathWithRecognizedQueryString(AppRoute.EVENTS);
+};
+
+export const getNamespaceConfigPath = (): string => {
+    return AppRoute.NAMESPACE_CONFIGURATION;
 };
 
 export const getEventsAllPath = (searchTerm?: string): string => {

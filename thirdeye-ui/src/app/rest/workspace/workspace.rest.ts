@@ -13,12 +13,34 @@
  * the License.
  */
 import axios from "axios";
-import { Workspace } from "../dto/workspace.interfaces";
+import { Workspace, WorkspaceConfiguration } from "../dto/workspace.interfaces";
 
 const BASE_URL_WORKSPACES = "/api/workspaces";
 
 export const getWorkspaces = async (): Promise<Workspace[]> => {
     const response = await axios.get(`${BASE_URL_WORKSPACES}/`);
+
+    return response.data;
+};
+
+export const getWorkspaceConfiguration =
+    async (): Promise<WorkspaceConfiguration> => {
+        const response = await axios.get("/api/workspace-configuration");
+
+        return response.data;
+    };
+
+export const resetWorkspaceConfiguration =
+    async (): Promise<WorkspaceConfiguration> => {
+        const response = await axios.post("/api/workspace-configuration/reset");
+
+        return response.data;
+    };
+
+export const updateWorkspaceConfiguration = async (
+    config: WorkspaceConfiguration
+): Promise<WorkspaceConfiguration> => {
+    const response = await axios.put("/api/workspace-configuration", config);
 
     return response.data;
 };

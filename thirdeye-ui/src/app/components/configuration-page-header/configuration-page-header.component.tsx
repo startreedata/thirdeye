@@ -21,6 +21,7 @@ import {
     getEventsAllPath,
     getMetricsPath,
     getSubscriptionGroupsPath,
+    getNamespaceConfigPath,
 } from "../../utils/routes/routes.util";
 import { PageHeader } from "../page-header/page-header.component";
 import { ConfigurationPageHeaderProps } from "./configuration-page-header.interfaces";
@@ -56,6 +57,10 @@ export const ConfigurationPageHeader: FunctionComponent<ConfigurationPageHeaderP
                     {
                         link: getEventsAllPath(),
                         label: t("label.events"),
+                    },
+                    {
+                        link: getNamespaceConfigPath(),
+                        label: t("label.settings"),
                     },
                 ]}
                 subNavigationSelected={selectedIndex}

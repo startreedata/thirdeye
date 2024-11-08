@@ -13,6 +13,7 @@
  * the License.
  */
 import { Box, Divider, Grid, Typography } from "@material-ui/core";
+import { Alert } from "@material-ui/lab";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { PageContentsCardV1 } from "../../../platform/components";
@@ -70,6 +71,12 @@ export const ThresholdSetupV3: FunctionComponent<ThresholdSetupProps> = ({
         );
         onAlertPropertyChange(newTemplateProperties);
     };
+
+    const areAllPropertiesSet = useMemo(() => {
+        return inputFieldConfigs.every((config) => {
+            return !!localAlertTemplateProperties[config.templatePropertyName];
+        });
+    }, [inputFieldConfigs, localAlertTemplateProperties]);
 
     return (
         <PageContentsCardV1>
@@ -157,10 +164,18 @@ export const ThresholdSetupV3: FunctionComponent<ThresholdSetupProps> = ({
                 </Box>
             </Grid>
 
+            {!areAllPropertiesSet ? (
+                <Alert severity="warning" variant="outlined">
+                    {t("message.all-properties-required")}
+                </Alert>
+            ) : null}
+
             <PreviewChart
                 hideCallToActionPrompt
                 alert={alert}
-                alertEvaluation={alertEvaluation}
+                alertEvaluation={
+                    areAllPropertiesSet ? alertEvaluation : undefined
+                }
                 onAlertPropertyChange={onAlertPropertyChange}
             />
         </PageContentsCardV1>

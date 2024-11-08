@@ -50,6 +50,7 @@ import {
 } from "../../../components/alert-wizard-v3/alert-type-selection/alert-type-selection.utils";
 import { AnomaliesFilterConfiguratorRenderConfigs } from "../../../components/alert-wizard-v3/anomalies-filter-panel/anomalies-filter-panel.interfaces";
 import { getAvailableFilterOptions } from "../../../components/alert-wizard-v3/anomalies-filter-panel/anomalies-filter-panel.utils";
+import { NotificationConfiguration } from "../../../components/alert-wizard-v3/notification-configuration/notification-configuration.component";
 import { ChartContentV2 } from "../../../components/alert-wizard-v3/preview-chart/chart-content-v2/chart-content-v2.component";
 import {
     generateTemplateProperties,
@@ -68,6 +69,7 @@ import {
     PageContentsCardV1,
     useNotificationProviderV1,
 } from "../../../platform/components";
+import { ActionStatus } from "../../../rest/actions.interfaces";
 import { useGetEvaluation } from "../../../rest/alerts/alerts.actions";
 import { AlertTemplate } from "../../../rest/dto/alert-template.interfaces";
 import {
@@ -88,13 +90,11 @@ import {
     STAR_COLUMN,
 } from "../../../utils/datasources/datasources.util";
 import { useGetDatasourcesTree } from "../../../utils/datasources/use-get-datasources-tree.util";
+import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
 import { getAlertsAllPath } from "../../../utils/routes/routes.util";
 import { AlertCreatedGuidedPageOutletContext } from "../../alerts-create-guided-page/alerts-create-guided-page.interfaces";
-import { easyAlertStyles } from "./alerts-create-easy-page.styles";
-import { NotificationConfiguration } from "../../../components/alert-wizard-v3/notification-configuration/notification-configuration.component";
 import { SETUP_DETAILS_TEST_IDS } from "../../alerts-create-guided-page/setup-details/setup-details-page.interface";
-import { ActionStatus } from "../../../rest/actions.interfaces";
-import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
+import { easyAlertStyles } from "./alerts-create-easy-page.styles";
 
 const PROPERTIES_TO_COPY = [
     "dataSource",
@@ -822,6 +822,9 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
             : null;
         const isEnumeratorQuery =
             dimension === SelectDimensionsOptions.ENUMERATORS;
+        const defaultAlertTemplate =
+            createNewStartingAlert().templateProperties;
+        delete (defaultAlertTemplate as TemplatePropertiesObject).sensitivity;
         const workingAlert = {
             template: {
                 name: isCompositeAlert
@@ -839,9 +842,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                       ...recommendedTemplate.alert.templateProperties,
                   }
                 : {
-                      ...(isEnumeratorQuery
-                          ? {}
-                          : createNewStartingAlert().templateProperties),
+                      ...(isEnumeratorQuery ? {} : defaultAlertTemplate),
                       ...generateTemplateProperties(
                           selectedMetric as string,
                           selectedTable?.dataset,

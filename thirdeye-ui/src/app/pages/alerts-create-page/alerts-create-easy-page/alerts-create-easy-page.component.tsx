@@ -42,7 +42,8 @@ import {
 import DimensionImage from "../../../../assets/images/dimensions.png";
 import { AdditonalFiltersDrawer } from "../../../components/additional-filters-drawer/additional-filters-drawer.component";
 import { AlertCompositeFiltersModal } from "../../../components/alert-composite-filters-modal/alert-composite-filters-modal.component";
-import { createNewStartingAlert } from "../../../components/alert-wizard-v2/alert-template/alert-template.utils";
+// Remove "createNewStartingAlertThreshold as" for fallback
+import { createNewStartingAlertThreshold as createNewStartingAlert } from "../../../components/alert-wizard-v2/alert-template/alert-template.utils";
 import { AvailableAlgorithmOption } from "../../../components/alert-wizard-v3/alert-type-selection/alert-type-selection.interfaces";
 import {
     generateAvailableAlgorithmOptions,
@@ -50,6 +51,7 @@ import {
 } from "../../../components/alert-wizard-v3/alert-type-selection/alert-type-selection.utils";
 import { AnomaliesFilterConfiguratorRenderConfigs } from "../../../components/alert-wizard-v3/anomalies-filter-panel/anomalies-filter-panel.interfaces";
 import { getAvailableFilterOptions } from "../../../components/alert-wizard-v3/anomalies-filter-panel/anomalies-filter-panel.utils";
+import { NotificationConfiguration } from "../../../components/alert-wizard-v3/notification-configuration/notification-configuration.component";
 import { ChartContentV2 } from "../../../components/alert-wizard-v3/preview-chart/chart-content-v2/chart-content-v2.component";
 import {
     generateTemplateProperties,
@@ -68,6 +70,7 @@ import {
     PageContentsCardV1,
     useNotificationProviderV1,
 } from "../../../platform/components";
+import { ActionStatus } from "../../../rest/actions.interfaces";
 import { useGetEvaluation } from "../../../rest/alerts/alerts.actions";
 import { AlertTemplate } from "../../../rest/dto/alert-template.interfaces";
 import {
@@ -88,13 +91,11 @@ import {
     STAR_COLUMN,
 } from "../../../utils/datasources/datasources.util";
 import { useGetDatasourcesTree } from "../../../utils/datasources/use-get-datasources-tree.util";
+import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
 import { getAlertsAllPath } from "../../../utils/routes/routes.util";
 import { AlertCreatedGuidedPageOutletContext } from "../../alerts-create-guided-page/alerts-create-guided-page.interfaces";
-import { easyAlertStyles } from "./alerts-create-easy-page.styles";
-import { NotificationConfiguration } from "../../../components/alert-wizard-v3/notification-configuration/notification-configuration.component";
 import { SETUP_DETAILS_TEST_IDS } from "../../alerts-create-guided-page/setup-details/setup-details-page.interface";
-import { ActionStatus } from "../../../rest/actions.interfaces";
-import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
+import { easyAlertStyles } from "./alerts-create-easy-page.styles";
 
 const PROPERTIES_TO_COPY = [
     "dataSource",
@@ -107,7 +108,7 @@ const PROPERTIES_TO_COPY = [
 ];
 
 const ALERT_TEMPLATE_FOR_EVALUATE = "startree-threshold";
-const ALERT_TEMPLATE_FOR_EVALUATE_DX = "startree-mean-variance-dx";
+const ALERT_TEMPLATE_FOR_EVALUATE_DX = "startree-threshold-dx";
 const ALERT_TEMPLATE_FOR_EVALUATE_QUERY_DX = "startree-threshold-query-dx";
 
 export const AlertsCreateEasyPage: FunctionComponent = () => {
@@ -357,7 +358,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                   createNewStartingAlert().template?.name,
                           },
                           templateProperties: {
-                              ...alert.templateProperties,
+                              ...createNewStartingAlert().templateProperties,
                               ...generateTemplateProperties(
                                   isCustomMetrics
                                       ? editedDatasourceFieldValue

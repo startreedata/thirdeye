@@ -825,7 +825,8 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
             dimension === SelectDimensionsOptions.ENUMERATORS;
         const defaultAlertTemplate =
             createNewStartingAlert().templateProperties;
-        delete (defaultAlertTemplate as TemplatePropertiesObject).sensitivity;
+        delete (defaultAlertTemplate as TemplatePropertiesObject).min;
+        delete (defaultAlertTemplate as TemplatePropertiesObject).max;
         const workingAlert = {
             template: {
                 name: isCompositeAlert

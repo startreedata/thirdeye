@@ -22,7 +22,7 @@ import { AlertJsonEditorModal } from "../../alert-json-editor-modal/alert-json-e
 import { PreviewChart } from "../../alert-wizard-v2/alert-template/preview-chart/preview-chart-v2.component";
 import { InputSection } from "../../form-basics/input-section/input-section.component";
 import { ParseMarkdown } from "../../parse-markdown/parse-markdown.component";
-import { SpecificPropertiesRenderer } from "./specific-properties-renderer/specific-properties-renderer.component";
+import { SpecificPropertiesRendererV3 } from "./specific-properties-renderer/specific-properties-renderer.component-v3";
 import { ThresholdSetupProps } from "./threshold-setup.interfaces";
 import { generateInputFieldConfigsForAlertTemplate } from "./threshold-setup.utils";
 
@@ -124,7 +124,7 @@ export const ThresholdSetupV3: FunctionComponent<ThresholdSetupProps> = ({
                                 gridItemProps={{ xs: 6 }}
                                 inputComponent={
                                     <>
-                                        <SpecificPropertiesRenderer
+                                        <SpecificPropertiesRendererV3
                                             inputFieldConfig={config}
                                             selectedTemplateProperties={
                                                 localAlertTemplateProperties

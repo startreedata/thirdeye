@@ -1,3 +1,15 @@
+## [2.53.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.52.10...thirdeye-ui-2.53.0) (2024-11-08)
+
+
+### Features
+
+* [TE-2506](https://cortexdata.atlassian.net/browse/TE-2506) add notification configuration step in new simple create alert flow ([c665661c2](https://github.com/startreedata/thirdeye/commit/c665661c28861917526f7683adcbdae503c4fb1e))
+
+
+### Bug Fixes
+
+* [TE-2508](https://cortexdata.atlassian.net/browse/TE-2508) create simple alert bug fixes ([a73cdef2d](https://github.com/startreedata/thirdeye/commit/a73cdef2d782757b9142c6ba6d1d6e2d886017e9))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

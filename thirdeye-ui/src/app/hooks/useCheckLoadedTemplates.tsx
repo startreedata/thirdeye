@@ -52,7 +52,7 @@ export const useCheckLoadedTemplates = ({
             createDefaultAlertTemplatesStatus,
             createDefaultAlertTemplatesErrors,
             notify,
-            t("error.load-alert-templates")
+            t("errors.load-alert-templates")
         );
     }, [createDefaultAlertTemplatesStatus, createDefaultAlertTemplatesErrors]);
 };

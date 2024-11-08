@@ -74,10 +74,19 @@ export const HomePage: FunctionComponent = () => {
     });
 
     useEffect(() => {
-        if (getAlertsQuery.data && getAlertsQuery.data.length === 0) {
+        if (
+            getAlertsQuery.isFetching === false &&
+            getAlertsQuery.isSuccess &&
+            getAlertsQuery.data &&
+            getAlertsQuery.data.length === 0
+        ) {
             navigate(AppRoute.WELCOME);
         }
-    }, [getAlertsQuery.data]);
+    }, [
+        getAlertsQuery.data,
+        getAlertsQuery.isSuccess,
+        getAlertsQuery.isFetching,
+    ]);
 
     useEffect(() => {
         if (
@@ -135,13 +144,13 @@ export const HomePage: FunctionComponent = () => {
                     subtitle={
                         <Grid container alignItems="center">
                             <Grid item>
-                                {t("message.effortless-alert-configuration")}
+                                {t(
+                                    "message.automated-metrics-monitoring-and-anomaly-detection"
+                                )}
                             </Grid>
                         </Grid>
                     }
-                    title={t(
-                        "message.automated-metrics-monitoring-and-anomaly-detection"
-                    )}
+                    title={t("message.startree-thirdeye")}
                 />
                 <PageContentsGridV1>
                     <Grid item sm={4} xs={4}>
@@ -223,9 +232,7 @@ export const HomePage: FunctionComponent = () => {
                             content={
                                 <IconLink
                                     icon={<PersonAddIcon />}
-                                    label={t(
-                                        "label.view-detection-tasks-dashboard"
-                                    )}
+                                    label={t("label.view-detection-failures")}
                                     route={getAdminPath()}
                                 />
                             }

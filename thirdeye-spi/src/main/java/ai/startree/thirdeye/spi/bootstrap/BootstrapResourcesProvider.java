@@ -14,12 +14,14 @@
 package ai.startree.thirdeye.spi.bootstrap;
 
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
+import ai.startree.thirdeye.spi.datalayer.dto.TemplateConfigurationDTO;
 import java.util.List;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * BootstrapResourcesProvider provide resources to bootstrap ThirdEye installation and configuration.
  */
 public interface BootstrapResourcesProvider {
 
-  List<AlertTemplateApi> getAlertTemplates();
+  List<AlertTemplateApi> getAlertTemplates(final @NonNull TemplateConfigurationDTO templateConfiguration);
 }

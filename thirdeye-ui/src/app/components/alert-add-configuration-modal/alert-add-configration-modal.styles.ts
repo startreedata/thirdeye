@@ -14,11 +14,20 @@
  */
 import { makeStyles } from "@material-ui/core";
 
-export const boxCardStyles = makeStyles(() => ({
+export const boxCardStyles = makeStyles((theme) => ({
     card: {
         width: "552px",
         borderRadius: "8px",
         border: "1px solid #B4CDE0",
-        padding: "24px",
+        padding: "23px",
+    },
+    dialogTitle: {
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        paddingTop: theme.spacing(2),
+        paddingBottom: theme.spacing(2),
+        paddingLeft: theme.spacing(3),
+        paddingRight: theme.spacing(3),
     },
 }));

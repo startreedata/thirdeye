@@ -116,10 +116,13 @@ data:
       heartbeatInterval: {{ .Values.worker.config.heartbeatInterval | default 30 }}
       activeThresholdMultiplier: {{ .Values.worker.config.activeThresholdMultiplier | default 30 }}
     
-    time:
-      timezone: {{ .Values.time.timezone }}
-      dateTimePattern: "{{ .Values.time.dateTimePattern }}"
-      minimumOnboardingStartTime: {{ .Values.time.minimumOnboardingStartTime }}
+    defaultWorkspaceConfiguration:
+      timeConfiguration:
+        timezone: {{ .Values.defaultWorkspaceConfiguration.timeConfiguration.timezone }}
+        dateTimePattern: "{{ .Values.defaultWorkspaceConfiguration.timeConfiguration.dateTimePattern }}"
+        minimumOnboardingStartTime: {{ .Values.defaultWorkspaceConfiguration.timeConfiguration.minimumOnboardingStartTime }}
+      templateConfiguration:
+        sqlLimitStatement: {{ .Values.defaultWorkspaceConfiguration.templateConfiguration.sqlLimitStatement }}
     
     rca:
       topContributors:
@@ -206,5 +209,5 @@ data:
         enabled: false
         calendars: []
         {{- end }}
-
+        
 {{ end }}

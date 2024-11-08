@@ -112,10 +112,8 @@ export const getTablesForDatasource = async (
     return response.data;
 };
 
-export const getRecommenedDatasources = async (): Promise<Datasource[]> => {
-    const response = await axios.get(
-        `${BASE_URL_DATASOURCES}/data-sources/recommend`
-    );
+export const getRecommenedDatasource = async (): Promise<Datasource> => {
+    const response = await axios.get(`${BASE_URL_DATASOURCES}/recommend`);
 
     return response.data;
 };

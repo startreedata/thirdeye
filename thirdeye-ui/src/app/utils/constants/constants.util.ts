@@ -23,6 +23,7 @@ export const THIRDEYE_DOC_LINK =
 
 export const QUERY_PARAM_KEYS: { [key: string]: string } = {
     SHOW_FIRST_ALERT_SUCCESS: "showFirstAlertSuccess",
+    IS_FIRST_ALERT: "isFirstAlert",
 };
 
 // sensitivity range for ETS and other templates that use confidence-based sensitivity

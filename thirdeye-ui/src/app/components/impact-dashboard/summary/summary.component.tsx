@@ -16,17 +16,17 @@ import React, { ReactElement, useRef } from "react";
 
 // Utils
 import WarningIcon from "@material-ui/icons/Warning";
-import { Link as RouterLink } from "react-router-dom";
 import { startCase } from "lodash";
+import { Link as RouterLink } from "react-router-dom";
 import { getAlertsAlertPath } from "../../../utils/routes/routes.util";
 
 // Components
+import { Grid, Link, Typography } from "@material-ui/core";
 import EventAvailableIcon from "@material-ui/icons/EventAvailable";
 import NotificationsIcon from "@material-ui/icons/Notifications";
-import TitleCard from "../../title-card/title-card.component";
-import { Grid, Link, Typography } from "@material-ui/core";
-import { AnalysisPeriod } from "../common/anaylysis-period/analysis-period.component";
 import { CopyButton } from "../../copy-button/copy-button.component";
+import TitleCard from "../../title-card/title-card.component";
+import { AnalysisPeriod } from "../common/anaylysis-period/analysis-period.component";
 import { SectionHeader } from "../common/section-header/section-header.component";
 
 // Styles
@@ -36,9 +36,9 @@ import { useSummaryStyles } from "./summary.styles";
 import { useSummaryData } from "./use-summary-data";
 
 // Interfaces
-import { SummaryProps } from "./summary.interfaces";
 import { useTranslation } from "react-i18next";
 import { SpecType } from "../../../rest/dto/subscription-group.interfaces";
+import { SummaryProps } from "./summary.interfaces";
 
 export const Summary = ({
     alerts,

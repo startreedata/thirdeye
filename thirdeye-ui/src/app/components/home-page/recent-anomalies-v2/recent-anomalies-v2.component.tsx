@@ -140,7 +140,7 @@ export const RecentAnomaliesV2: FunctionComponent = () => {
                                 <TableCell>{t("label.started")}</TableCell>
                                 <TableCell>{t("label.ended")}</TableCell>
                                 <TableCell>{t("label.deviation")}</TableCell>
-                                <TableCell>{t("label.deviation")}</TableCell>
+                                <TableCell />
                                 <TableCell />
                             </TableRow>
                         </TitleCardTableHead>

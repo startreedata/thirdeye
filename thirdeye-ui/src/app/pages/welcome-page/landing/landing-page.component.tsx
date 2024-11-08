@@ -32,7 +32,8 @@ import {
     getConfigurationPath,
     getDataConfigurationCreatePath,
     getHomePath,
-    getWelcomeCreateAlert,
+    // getWelcomeCreateAlert,
+    getAlertsEasyCreatePath,
 } from "../../../utils/routes/routes.util";
 import { useGetAlertsCount } from "../../../rest/alerts/alerts.actions";
 import { useNavigate } from "react-router-dom";
@@ -40,6 +41,7 @@ import { useAppBarConfigProvider } from "../../../components/app-bar/app-bar-con
 import { useGetAlertTemplates } from "../../../rest/alert-templates/alert-templates.actions";
 
 import { useCheckLoadedTemplates } from "../../../hooks/useCheckLoadedTemplates";
+import { QUERY_PARAM_KEYS } from "../../../utils/constants/constants.util";
 
 export const WelcomeLandingPage: FunctionComponent = () => {
     const { t } = useTranslation();
@@ -161,7 +163,15 @@ export const WelcomeLandingPage: FunctionComponent = () => {
                                         entity: t("label.alert"),
                                     })}
                                     disabled={!hasDatasets}
-                                    link={getWelcomeCreateAlert()}
+                                    // link={getWelcomeCreateAlert()}
+                                    link={getAlertsEasyCreatePath(
+                                        new URLSearchParams([
+                                            [
+                                                QUERY_PARAM_KEYS.IS_FIRST_ALERT,
+                                                "true",
+                                            ],
+                                        ])
+                                    )}
                                     subtitle={t(
                                         "message.explore-startree-thirdeye-in-one-click"
                                     )}

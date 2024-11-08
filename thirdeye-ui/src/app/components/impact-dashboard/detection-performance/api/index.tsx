@@ -49,12 +49,14 @@ export const useDetectionPerformanceApiRequests = ({
     useEffect(() => {
         if (selectedAlert !== defaultAlertDropdownOption) {
             getCurrentPeriodAnomaliesByAlert({
+                filterIgnoredAnomalies: true,
                 alertId: selectedAlert.id,
                 startTime:
                     anaylysisPeriodStartTimeMapping[selectedAnalysisPeriod]
                         .startTime,
             });
             getPreviousPeriodAnomaliesByAlert({
+                filterIgnoredAnomalies: true,
                 alertId: selectedAlert.id,
                 startTime:
                     anaylysisPeriodPreviousWindowTimeMapping[

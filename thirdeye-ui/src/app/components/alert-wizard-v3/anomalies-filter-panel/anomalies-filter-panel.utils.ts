@@ -30,13 +30,33 @@ export const getAvailableFilterOptions = (
 
     const filteringPropertiesBySubStep: { [key: string]: MetadataProperty[] } =
         {};
-
+    const filteringPropertiesByStep: {
+        [key: string]: { [key: string]: MetadataProperty[] };
+    } = {};
     alertTemplate.properties.forEach((property) => {
         if (property.step === "FILTER" && property.subStep) {
             const bucket = filteringPropertiesBySubStep[property.subStep] || [];
             bucket.push(property);
             filteringPropertiesBySubStep[property.subStep] = bucket;
+            filteringPropertiesByStep[property.step] =
+                filteringPropertiesBySubStep;
         }
+        if (property.step === "DATA") {
+            if (
+                property.name === "completenessDelay" ||
+                property.name === "timezone"
+            ) {
+                const bucket = filteringPropertiesBySubStep["Data"] || [];
+                bucket.push(property);
+                filteringPropertiesBySubStep["Data"] = bucket;
+                filteringPropertiesByStep[property.step] =
+                    filteringPropertiesBySubStep;
+            }
+        }
+        // const bucket = filteringPropertiesBySubStep[property.subStep] || [];
+        // bucket.push(property);
+        // filteringPropertiesBySubStep[property.subStep] = bucket;
+        // }
     });
 
     return Object.keys(filteringPropertiesBySubStep).map((filterName) => {
@@ -47,6 +67,7 @@ export const getAvailableFilterOptions = (
         const descriptionLookupResult = translation(descriptionLookupId);
 
         return {
+            section: filteringPropertiesBySubStep[filterName][0].step,
             name: filterName,
             description:
                 descriptionLookupId === descriptionLookupResult

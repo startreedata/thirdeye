@@ -65,14 +65,12 @@ export const useWorkspaceApiRequests = (): WorkspaceApiReques => {
     } = useGetWorkspaceConfiguration();
 
     const {
-        workspaceConfiguration: defaultWorkspaceConfiguration,
         resetWorkspaceConfiguration,
         status: resetStaus,
         errorMessages: resetErrorMessages,
     } = useResetWorkspaceConfiguration();
 
     const {
-        workspaceConfiguration: updatedWorkspaceConfiguration,
         updateWorkspaceConfiguration,
         status: updateStatus,
         errorMessages: updateErrorMessages,
@@ -93,30 +91,6 @@ export const useWorkspaceApiRequests = (): WorkspaceApiReques => {
     }, [workspaceConfiguration]);
 
     useEffect(() => {
-        if (!isEmpty(updatedWorkspaceConfiguration)) {
-            setNamespaceConfig({
-                timezone:
-                    updatedWorkspaceConfiguration?.timeConfiguration.timezone,
-                dateTimePattern:
-                    updatedWorkspaceConfiguration?.timeConfiguration
-                        .dateTimePattern,
-            });
-        }
-    }, [updatedWorkspaceConfiguration]);
-
-    useEffect(() => {
-        if (!isEmpty(defaultWorkspaceConfiguration)) {
-            setNamespaceConfig({
-                timezone:
-                    defaultWorkspaceConfiguration?.timeConfiguration.timezone,
-                dateTimePattern:
-                    defaultWorkspaceConfiguration?.timeConfiguration
-                        .dateTimePattern,
-            });
-        }
-    }, [defaultWorkspaceConfiguration]);
-
-    useEffect(() => {
         notifyIfErrors(
             workspaceStatus,
             workspaceErrorMessages,
@@ -128,6 +102,9 @@ export const useWorkspaceApiRequests = (): WorkspaceApiReques => {
     }, [workspaceStatus]);
 
     useEffect(() => {
+        if (resetStaus === ActionStatus.Done) {
+            getWorkspaceConfiguration();
+        }
         notifyIfErrors(
             resetStaus,
             resetErrorMessages,
@@ -139,6 +116,9 @@ export const useWorkspaceApiRequests = (): WorkspaceApiReques => {
     }, [resetStaus]);
 
     useEffect(() => {
+        if (updateStatus === ActionStatus.Done) {
+            getWorkspaceConfiguration();
+        }
         notifyIfErrors(
             updateStatus,
             updateErrorMessages,

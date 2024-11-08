@@ -15,3 +15,18 @@
 export interface Workspace {
     id: string | null;
 }
+
+export interface WorkspaceConfiguration {
+    id: number;
+    auth: {
+        namespace: string | null;
+    };
+    timeConfiguration: {
+        timezone: string;
+        dateTimePattern: string;
+        minimumOnboardingStartTime: number;
+    };
+    templateConfiguration: {
+        sqlLimitStatement: number;
+    };
+}

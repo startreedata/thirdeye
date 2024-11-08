@@ -13,9 +13,19 @@
  * the License.
  */
 import { useHTTPAction } from "../create-rest-action";
-import { Workspace } from "../dto/workspace.interfaces";
-import { GetWorkspaces } from "./workspace.interface";
-import { getWorkspaces as getWorkspacesREST } from "./workspace.rest";
+import { Workspace, WorkspaceConfiguration } from "../dto/workspace.interfaces";
+import {
+    GetWorkspaceConfiguration,
+    GetWorkspaces,
+    ResetWorkspaceConfiguration,
+    UpdateWorkspaceConfiguration,
+} from "./workspace.interface";
+import {
+    getWorkspaces as getWorkspacesREST,
+    getWorkspaceConfiguration as getWorkspaceConfigurationREST,
+    updateWorkspaceConfiguration as updateWorkspaceConfigurationREST,
+    resetWorkspaceConfiguration as resetWorkspaceConfigurationREST,
+} from "./workspace.rest";
 
 export const useGetWorkspaces = (): GetWorkspaces => {
     const { data, makeRequest, status, errorMessages, resetData } =
@@ -33,3 +43,66 @@ export const useGetWorkspaces = (): GetWorkspaces => {
         resetData,
     };
 };
+
+export const useGetWorkspaceConfiguration = (): GetWorkspaceConfiguration => {
+    const { data, makeRequest, status, errorMessages, resetData } =
+        useHTTPAction<WorkspaceConfiguration>(getWorkspaceConfigurationREST);
+
+    const getWorkspaceConfiguration = (): Promise<
+        WorkspaceConfiguration | undefined
+    > => {
+        return makeRequest();
+    };
+
+    return {
+        workspaceConfiguration: data,
+        getWorkspaceConfiguration,
+        status,
+        errorMessages,
+        resetData,
+    };
+};
+
+export const useUpdateWorkspaceConfiguration =
+    (): UpdateWorkspaceConfiguration => {
+        const { data, makeRequest, status, errorMessages, resetData } =
+            useHTTPAction<WorkspaceConfiguration>(
+                updateWorkspaceConfigurationREST
+            );
+
+        const updateWorkspaceConfiguration = (
+            config: WorkspaceConfiguration
+        ): Promise<WorkspaceConfiguration | undefined> => {
+            return makeRequest(config);
+        };
+
+        return {
+            workspaceConfiguration: data,
+            updateWorkspaceConfiguration,
+            status,
+            errorMessages,
+            resetData,
+        };
+    };
+
+export const useResetWorkspaceConfiguration =
+    (): ResetWorkspaceConfiguration => {
+        const { data, makeRequest, status, errorMessages, resetData } =
+            useHTTPAction<WorkspaceConfiguration>(
+                resetWorkspaceConfigurationREST
+            );
+
+        const resetWorkspaceConfiguration = (): Promise<
+            WorkspaceConfiguration | undefined
+        > => {
+            return makeRequest();
+        };
+
+        return {
+            workspaceConfiguration: data,
+            resetWorkspaceConfiguration,
+            status,
+            errorMessages,
+            resetData,
+        };
+    };

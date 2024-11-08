@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import React, { useState } from "react";
+import React from "react";
 import { ConfigurationPageHeader } from "../../components/configuration-page-header/configuration-page-header.component";
 import {
     JSONEditorV1,
@@ -21,33 +21,81 @@ import {
 } from "../../platform/components";
 import { LoadingErrorStateSwitch } from "../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
 
+import { Box, Button, Grid } from "@material-ui/core";
+import { WorkspaceConfiguration } from "../../rest/dto/workspace.interfaces";
+import { useWorkspaceApiRequests } from "./api";
+
 export const NamespaceConfiguration = (): JSX.Element => {
-    const isLoading = false;
-    const isError = false;
-    const [namespaceConfig, setNamespaceConfig] = useState<any>({
-        timezone: "",
-        format: "",
-    });
+    const {
+        isError,
+        isLoading,
+        isUpdateDisabled,
+        namespaceConfig,
+        setNamespaceConfig,
+        workspaceConfiguration,
+        resetWorkspaceConfiguration,
+        updateWorkspaceConfiguration,
+    } = useWorkspaceApiRequests();
+
     const handleNamespaceConfigChange = (value: string): void => {
         setNamespaceConfig(JSON.parse(value));
+    };
+    const handleReset = (): void => {
+        resetWorkspaceConfiguration();
+    };
+    const handleUpdate = async (): Promise<void> => {
+        const updatedNamespaceConfig = {
+            ...workspaceConfiguration,
+            timeConfiguration: {
+                ...workspaceConfiguration?.templateConfiguration,
+                timezone: namespaceConfig.timezone,
+                dateTimePattern: namespaceConfig.dateTimePattern,
+            },
+        };
+        updateWorkspaceConfiguration(
+            updatedNamespaceConfig as WorkspaceConfiguration
+        );
     };
 
     return (
         <PageV1>
             <ConfigurationPageHeader selectedIndex={6} />
             <PageContentsGridV1 fullHeight>
-                <LoadingErrorStateSwitch
-                    wrapInCard
-                    wrapInGrid
-                    isError={isError}
-                    isLoading={isLoading}
-                >
-                    <JSONEditorV1<any>
-                        hideValidationSuccessIcon
-                        value={namespaceConfig}
-                        onChange={handleNamespaceConfigChange}
-                    />
-                </LoadingErrorStateSwitch>
+                <Grid container justifyContent="flex-end">
+                    <Grid item xs={12}>
+                        <LoadingErrorStateSwitch
+                            wrapInCard
+                            wrapInGrid
+                            isError={isError}
+                            isLoading={isLoading}
+                        >
+                            <JSONEditorV1<any>
+                                hideValidationSuccessIcon
+                                value={namespaceConfig}
+                                onChange={handleNamespaceConfigChange}
+                            />
+                        </LoadingErrorStateSwitch>
+                    </Grid>
+                    <Grid item>
+                        <Box display="flex" gridGap={12}>
+                            <Button
+                                color="primary"
+                                disabled={isUpdateDisabled}
+                                variant="outlined"
+                                onClick={handleUpdate}
+                            >
+                                Update
+                            </Button>
+                            <Button
+                                color="primary"
+                                variant="outlined"
+                                onClick={handleReset}
+                            >
+                                Reset
+                            </Button>
+                        </Box>
+                    </Grid>
+                </Grid>
             </PageContentsGridV1>
         </PageV1>
     );

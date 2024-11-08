@@ -60,7 +60,7 @@ export const ConfigurationPageHeader: FunctionComponent<ConfigurationPageHeaderP
                     },
                     {
                         link: getNamespaceConfigPath(),
-                        label: t("label.namespace"),
+                        label: t("label.settings"),
                     },
                 ]}
                 subNavigationSelected={selectedIndex}

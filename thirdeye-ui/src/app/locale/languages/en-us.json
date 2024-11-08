@@ -522,6 +522,7 @@
         "selected-time-range": "selected time range",
         "sendgrid-api-key": "SendGrid API Key",
         "sensitivity": "Sensitivity",
+        "settings": "Settings",
         "setup-entity": "Setup {{entity}}",
         "show-all": "Show All",
         "show-count-optional-properties": "Show {{count}} optional properties",

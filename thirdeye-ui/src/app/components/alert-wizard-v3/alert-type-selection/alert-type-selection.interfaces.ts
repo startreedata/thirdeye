@@ -28,6 +28,7 @@ export interface AlgorithmOption {
     description: string;
     alertTemplate: string;
     alertTemplateForMultidimension: string;
+    alertTemplateForMultidimensionQuery?: string;
     alertTemplateForPercentile: string;
     exampleImage: string;
 }

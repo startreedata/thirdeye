@@ -72,9 +72,9 @@ export const ThresholdSetupV3: FunctionComponent<ThresholdSetupProps> = ({
         onAlertPropertyChange(newTemplateProperties);
     };
 
-    const areAllPropertiesSet = useMemo(() => {
-        return inputFieldConfigs.every((config) => {
-            return !!localAlertTemplateProperties[config.templatePropertyName];
+    const unsetProperties = useMemo(() => {
+        return inputFieldConfigs.filter((config) => {
+            return !localAlertTemplateProperties[config.templatePropertyName];
         });
     }, [inputFieldConfigs, localAlertTemplateProperties]);
 
@@ -164,9 +164,14 @@ export const ThresholdSetupV3: FunctionComponent<ThresholdSetupProps> = ({
                 </Box>
             </Grid>
 
-            {!areAllPropertiesSet ? (
+            {unsetProperties.length > 0 ? (
                 <Alert severity="warning" variant="outlined">
-                    {t("message.all-properties-required")}
+                    {t("message.all-properties-required")} :{" "}
+                    <Typography style={{ fontWeight: "bold" }} variant="body2">
+                        {unsetProperties
+                            .map((property) => property.label)
+                            .join(", ")}
+                    </Typography>
                 </Alert>
             ) : null}
 
@@ -174,7 +179,7 @@ export const ThresholdSetupV3: FunctionComponent<ThresholdSetupProps> = ({
                 hideCallToActionPrompt
                 alert={alert}
                 alertEvaluation={
-                    areAllPropertiesSet ? alertEvaluation : undefined
+                    unsetProperties.length === 0 ? alertEvaluation : undefined
                 }
                 onAlertPropertyChange={onAlertPropertyChange}
             />

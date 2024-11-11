@@ -134,6 +134,8 @@ export const CreateAlertGuidedPage: FunctionComponent = () => {
                 c.algorithmOption.alertTemplateForPercentile ===
                     alert.template?.name ||
                 c.algorithmOption.alertTemplateForMultidimension ===
+                    alert.template?.name ||
+                c.algorithmOption.alertTemplateForMultidimensionQuery ===
                     alert.template?.name
         );
     }, [alert, alertTypeOptions]);

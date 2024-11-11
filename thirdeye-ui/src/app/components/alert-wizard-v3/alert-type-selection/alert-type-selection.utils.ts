@@ -33,6 +33,7 @@ export const generateOptions = (): AlgorithmOption[] => {
             description: i18n.t("message.threshold-algorithm-description"),
             alertTemplate: "startree-threshold",
             alertTemplateForMultidimension: "startree-threshold-dx",
+            alertTemplateForMultidimensionQuery: "startree-threshold-query-dx",
             alertTemplateForPercentile: "startree-threshold-percentile",
             exampleImage: ThresholdScreenshot,
         },
@@ -43,6 +44,8 @@ export const generateOptions = (): AlgorithmOption[] => {
             ),
             alertTemplate: "startree-mean-variance",
             alertTemplateForMultidimension: "startree-mean-variance-dx",
+            alertTemplateForMultidimensionQuery:
+                "startree-mean-variance-query-dx",
             alertTemplateForPercentile: "startree-mean-variance-percentile",
             exampleImage: MeanVarianceScreenshot,
         },
@@ -53,6 +56,8 @@ export const generateOptions = (): AlgorithmOption[] => {
             ),
             alertTemplate: "startree-percentage-rule",
             alertTemplateForMultidimension: "startree-percentage-rule-dx",
+            alertTemplateForMultidimensionQuery:
+                "startree-percentage-rule-query-dx",
             alertTemplateForPercentile: "startree-percentage-percentile",
             exampleImage: PercentageRuleScreenshot,
         },
@@ -63,6 +68,8 @@ export const generateOptions = (): AlgorithmOption[] => {
             ),
             alertTemplate: "startree-absolute-rule",
             alertTemplateForMultidimension: "startree-absolute-rule-dx",
+            alertTemplateForMultidimensionQuery:
+                "startree-absolute-rule-query-dx",
             alertTemplateForPercentile: "startree-absolute-percentile",
             exampleImage: AbsoluteScreenshot,
         },
@@ -71,6 +78,7 @@ export const generateOptions = (): AlgorithmOption[] => {
             description: i18n.t("message.startree-ets-algorithm-description"),
             alertTemplate: "startree-ets",
             alertTemplateForMultidimension: "startree-ets-dx",
+            alertTemplateForMultidimensionQuery: "startree-ets-query-dx",
             alertTemplateForPercentile: "startree-ets-percentile",
             exampleImage: ETSScreenshot,
         },
@@ -81,6 +89,8 @@ export const generateOptions = (): AlgorithmOption[] => {
             ),
             alertTemplate: "startree-matrix-profile",
             alertTemplateForMultidimension: "startree-matrix-profile-dx",
+            alertTemplateForMultidimensionQuery:
+                "startree-matrix-profile-query-dx",
             alertTemplateForPercentile: "startree-matrix-profile-percentile",
             exampleImage: MatrixProfileScreenshot,
         },
@@ -112,6 +122,9 @@ export const generateAvailableAlgorithmOptions = (
             ),
             hasMultidimension: availableTemplateNames.includes(
                 option.alertTemplateForMultidimension
+            ),
+            hasMultidimensionQuery: availableTemplateNames.includes(
+                option.alertTemplateForMultidimensionQuery!
             ),
             recommendationLabel: i18n.t("label.manual-configuration"),
         };

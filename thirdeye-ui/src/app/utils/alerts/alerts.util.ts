@@ -546,3 +546,20 @@ export const getGranularityLabelFromValue = (granularity: string): string => {
             return granularity;
     }
 };
+
+export const isValidISO8601 = (duration: string): boolean => {
+    // ISO-8601 duration regex pattern
+    const iso8601Pattern =
+        /^P(?!$)(\d+Y)?(\d+M)?(\d+W)?(\d+D)?(T(?=\d)(\d+H)?(\d+M)?(\d+S)?)?$/;
+
+    if (!duration) {
+        return false;
+    }
+
+    try {
+        // Test if the string matches the ISO-8601 duration pattern
+        return iso8601Pattern.test(duration);
+    } catch (error) {
+        return false;
+    }
+};

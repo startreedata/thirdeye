@@ -407,7 +407,6 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                 value: item,
                 label: item,
                 onClick: () => handleAggregationChange(item),
-                tooltipText: item,
             })
         );
 
@@ -506,7 +505,6 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                 label: item,
                 disabled: alertInsightLoading,
                 onClick: () => handleAnomalyDetectionChange(item),
-                tooltipText: item,
             })
         );
 
@@ -946,9 +944,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                         </Box>
                                         <Box>
                                             <Typography variant="body2">
-                                                {t(
-                                                    "message.create-your-first-step-filling-fields"
-                                                )}
+                                                {t("message.lets-get-started")}
                                             </Typography>
                                         </Box>
                                     </Grid>
@@ -958,7 +954,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                             <Grid item xs={4}>
                                                 <InputSectionV2
                                                     description={t(
-                                                        "message.select-dataset-to-monitor-and-detect-anomalies"
+                                                        "message.select-a-dataset-to-monitor"
                                                     )}
                                                     inputComponent={
                                                         <Autocomplete<DatasetInfo>
@@ -991,7 +987,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                         ...params.InputProps,
                                                                     }}
                                                                     placeholder={t(
-                                                                        "message.select-dataset"
+                                                                        "message.select-a-dataset"
                                                                     )}
                                                                     variant="outlined"
                                                                 />
@@ -1051,7 +1047,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                             <Grid item xs={4}>
                                                 <InputSectionV2
                                                     description={t(
-                                                        "message.select-metric-to-identify-unusual-changes-when-it-occurs"
+                                                        "message.select-a-metric-to-detect-anomalies"
                                                     )}
                                                     inputComponent={
                                                         <Autocomplete<string>
@@ -1124,7 +1120,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                   "message.select-dataset-first"
                                                                               )
                                                                             : t(
-                                                                                  "message.select-metric"
+                                                                                  "message.select-a-metric"
                                                                               )
                                                                     }
                                                                     variant="outlined"
@@ -1363,7 +1359,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
 
                                                         <Typography variant="body2">
                                                             {t(
-                                                                "label.select-the-level-of-detail-at-which-data-is-aggregated-or-stored-in-the-time-series-data"
+                                                                "label.select-the-time-increment-that-the-data-is-aggregated-to"
                                                             )}
                                                         </Typography>
                                                     </Box>

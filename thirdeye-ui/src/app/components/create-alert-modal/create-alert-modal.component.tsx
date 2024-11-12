@@ -62,6 +62,12 @@ export const CreateAlertModal: FunctionComponent<CreateAlertModalModalProps> =
             });
         };
 
+        useEffect(() => {
+            if (defaultCron) {
+                handleCronChange(defaultCron);
+            }
+        }, [defaultCron]);
+
         const onCreateAlertClick: () => void = async () => {
             if (
                 alert.templateProperties.monitoringGranularity &&

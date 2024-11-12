@@ -166,7 +166,7 @@ export const ThresholdSetupV3: FunctionComponent<ThresholdSetupProps> = ({
 
             {unsetProperties.length > 0 ? (
                 <Alert severity="warning" variant="outlined">
-                    {t("message.all-properties-required")} :{" "}
+                    {t("message.following-values-must-be-provided")} :{" "}
                     <Typography style={{ fontWeight: "bold" }} variant="body2">
                         {unsetProperties
                             .map((property) => property.label)

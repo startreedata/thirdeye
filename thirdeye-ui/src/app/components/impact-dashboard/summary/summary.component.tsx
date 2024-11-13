@@ -196,8 +196,8 @@ export const Summary = ({
             <div>
                 In the last{" "}
                 <b>
-                    {verboseSummaryItems.weeks}
-                    weeks ({currentPeriodReadableDate.startTime} -{" "}
+                    {verboseSummaryItems.weeks} weeks (
+                    {currentPeriodReadableDate.startTime} -{" "}
                     {currentPeriodReadableDate.endTime})
                 </b>
                 ,&nbsp;

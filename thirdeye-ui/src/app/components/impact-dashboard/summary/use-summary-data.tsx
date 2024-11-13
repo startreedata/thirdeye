@@ -321,7 +321,7 @@ export const useSummaryData = ({
                 },
             };
         });
-    }, [mostRecentlyInvestigatedAnomalyAlert]);
+    }, [mostRecentlyInvestigatedAnomalyAlert, alerts]);
 
     useEffect(() => {
         setVerboseSummaryItems((prevState) => {

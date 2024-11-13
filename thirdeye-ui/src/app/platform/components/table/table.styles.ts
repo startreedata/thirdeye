@@ -22,6 +22,13 @@ export const useStyles = makeStyles({
             padding: "8px 12px",
         },
     },
+    row: {
+        "& tr:last-child": {
+            "& td": {
+                border: "none",
+            },
+        },
+    },
     emptyView: {
         display: "flex",
         justifyContent: "center",

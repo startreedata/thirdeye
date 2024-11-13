@@ -17,18 +17,14 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 // Components
 import { PageHeader } from "../../platform/components/layout/page-header/page-header.component";
 import { MainLayout } from "../../platform/components/layout/main/page.component";
-import { HelpDrawerV1 } from "../../components/help-drawer-v1/help-drawer-v1.component";
 import {
     DetectionPerformance,
     RecentInvestigations,
     Summary,
     UsageInsights,
 } from "../../components/impact-dashboard";
-import { Box, Button } from "@material-ui/core";
-import { Icon } from "@iconify/react";
 
 // Utils
-import { alertsBasicHelpCards } from "../../components/help-drawer-v1/help-drawer-card-contents.utils";
 import { useTranslation } from "react-i18next";
 import { isEmpty } from "lodash";
 
@@ -126,37 +122,9 @@ export const ImpactDashboardPage: FunctionComponent = () => {
         return data;
     };
 
-    const renderActionButtons = (): JSX.Element => {
-        return (
-            <HelpDrawerV1
-                cards={alertsBasicHelpCards}
-                title={`${t("label.need-help")}?`}
-                trigger={(handleOpen) => (
-                    <Button
-                        color="primary"
-                        size="small"
-                        variant="outlined"
-                        onClick={handleOpen}
-                    >
-                        <Box component="span" mr={1}>
-                            {t("label.need-help")}
-                        </Box>
-                        <Box component="span" display="flex">
-                            <Icon
-                                fontSize={24}
-                                icon="mdi:question-mark-circle-outline"
-                            />
-                        </Box>
-                    </Button>
-                )}
-            />
-        );
-    };
-
     return (
         <MainLayout>
             <PageHeader
-                actionButtons={renderActionButtons()}
                 mainHeading={t("pages.impact-dashboard.title")}
                 subHeading={t("pages.impact-dashboard.subHeading")}
             />

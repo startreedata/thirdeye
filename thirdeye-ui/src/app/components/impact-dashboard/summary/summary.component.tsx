@@ -16,7 +16,7 @@ import React, { ReactElement, useRef } from "react";
 
 // Utils
 import WarningIcon from "@material-ui/icons/Warning";
-import { startCase } from "lodash";
+import { isEmpty, startCase } from "lodash";
 import { Link as RouterLink } from "react-router-dom";
 import { getAlertsAlertPath } from "../../../utils/routes/routes.util";
 
@@ -39,6 +39,11 @@ import { useSummaryData } from "./use-summary-data";
 import { useTranslation } from "react-i18next";
 import { SpecType } from "../../../rest/dto/subscription-group.interfaces";
 import { SummaryProps } from "./summary.interfaces";
+import { epochToDate } from "../detection-performance/util";
+import {
+    anaylysisPeriodPreviousWindowTimeMapping,
+    anaylysisPeriodStartTimeMapping,
+} from "../../../platform/utils";
 
 export const Summary = ({
     alerts,
@@ -143,30 +148,68 @@ export const Summary = ({
         return summaryRef.current?.textContent || "";
     };
 
+    const currentPeriodReadableDate = {
+        startTime: epochToDate(
+            anaylysisPeriodStartTimeMapping[selectedAnalysisPeriod].startTime
+        ),
+        endTime: epochToDate(
+            anaylysisPeriodStartTimeMapping[selectedAnalysisPeriod].endTime
+        ),
+    };
+    const previousPeriodReadableDate = {
+        startTime: epochToDate(
+            anaylysisPeriodPreviousWindowTimeMapping[selectedAnalysisPeriod]
+                .startTime
+        ),
+        endTime: epochToDate(
+            anaylysisPeriodPreviousWindowTimeMapping[selectedAnalysisPeriod]
+                .endTime
+        ),
+    };
+
+    const renderNotificationChannelsText = (): string => {
+        const baseText = "Notifications about anomalies were sent via ";
+        const channelsUsed = verboseSummaryItems.notificationChannelsUsed?.map(
+            (notificationChannel) =>
+                notificationChannel === SpecType.EmailSendgrid
+                    ? "email"
+                    : notificationChannel
+        );
+
+        if (isEmpty(channelsUsed)) {
+            return "";
+        } else {
+            if (channelsUsed.length < 3) {
+                return `${baseText} ${channelsUsed.join(" and ")}`;
+            } else {
+                const lastElem = channelsUsed.pop();
+
+                return `${baseText} ${channelsUsed.join(
+                    ", "
+                )}, and ${lastElem}`;
+            }
+        }
+    };
+
     const renderAnomalySummary = (): JSX.Element => {
         return (
             <div>
-                In the last <b>{verboseSummaryItems.weeks} weeks</b>
+                In the last{" "}
+                <b>
+                    {verboseSummaryItems.weeks} weeks (
+                    {currentPeriodReadableDate.startTime} -{" "}
+                    {currentPeriodReadableDate.endTime})
+                </b>
                 ,&nbsp;
                 <b>
                     {summaryData.anomalies.detected.count} anomalies were
                     detected
                 </b>
                 , which is <b>{verboseSummaryItems.percentageChange}</b> than
-                the previous {verboseSummaryItems.weeks} weeks.{" "}
-                {summaryData.anomalies.detected.count > 0 && (
-                    <>
-                        Notifications about anomalies were sent via{" "}
-                        {verboseSummaryItems.notificationChannelsUsed
-                            ?.map((notificationChannel) =>
-                                notificationChannel === SpecType.EmailSendgrid
-                                    ? "email"
-                                    : notificationChannel
-                            )
-                            .join(", ")}
-                        .
-                    </>
-                )}
+                the previous {verboseSummaryItems.weeks} weeks (
+                {previousPeriodReadableDate.startTime} -{" "}
+                {previousPeriodReadableDate.endTime}).{" "}
+                {renderNotificationChannelsText()}
             </div>
         );
     };
@@ -185,7 +228,7 @@ export const Summary = ({
                 </Link>{" "}
                 In the{" "}
                 <b>
-                    last {verboseSummaryItems.weeks} weeks,
+                    last {verboseSummaryItems.weeks} weeks,{" "}
                     {verboseSummaryItems.topAlert.anomaliesCount} anomalies were
                     detected on this metric.
                 </b>
@@ -194,11 +237,17 @@ export const Summary = ({
     };
 
     const renderInvestigationInfo = (): JSX.Element => {
+        const investigationCount = verboseSummaryItems.investigation.count;
+
         return (
             <div>
-                <b>{verboseSummaryItems.investigation.count} investigations</b>{" "}
-                were performed in the last {verboseSummaryItems.weeks} weeks.{" "}
-                {verboseSummaryItems.investigation.count > 0 && (
+                <b>
+                    {investigationCount} investigation
+                    {investigationCount > 1 ? "s" : ""}
+                </b>{" "}
+                {investigationCount > 1 ? "were" : "was"} performed in the last{" "}
+                {verboseSummaryItems.weeks} weeks.{" "}
+                {investigationCount > 0 && (
                     <span>
                         The most recent investigation was performed for an
                         anomaly that happened on{" "}

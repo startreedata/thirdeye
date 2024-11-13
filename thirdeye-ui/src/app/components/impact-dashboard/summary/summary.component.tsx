@@ -206,7 +206,7 @@ export const Summary = ({
                     detected
                 </b>
                 , which is <b>{verboseSummaryItems.percentageChange}</b> than
-                the previous {verboseSummaryItems.weeks} weeks(
+                the previous {verboseSummaryItems.weeks} weeks (
                 {previousPeriodReadableDate.startTime} -{" "}
                 {previousPeriodReadableDate.endTime}).{" "}
                 {renderNotificationChannelsText()}
@@ -245,7 +245,8 @@ export const Summary = ({
                     {investigationCount} investigation
                     {investigationCount > 1 ? "s" : ""}
                 </b>{" "}
-                were performed in the last {verboseSummaryItems.weeks} weeks.{" "}
+                {investigationCount > 1 ? "were" : "was"} performed in the last{" "}
+                {verboseSummaryItems.weeks} weeks.{" "}
                 {investigationCount > 0 && (
                     <span>
                         The most recent investigation was performed for an

@@ -43,7 +43,7 @@ export const AnalysisPeriod = ({
     return (
         <div className={componentStyles.container}>
             <>
-                ({selectedPeriodReadableDate.startTime}-
+                ({selectedPeriodReadableDate.startTime} -{" "}
                 {selectedPeriodReadableDate.endTime})
             </>
             <div>{`${t("pages.impact-dashboard.common.date-range")}`}:</div>

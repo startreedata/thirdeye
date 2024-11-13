@@ -16,7 +16,7 @@ import React, { ReactElement, useRef } from "react";
 
 // Utils
 import WarningIcon from "@material-ui/icons/Warning";
-import { startCase } from "lodash";
+import { isEmpty, startCase } from "lodash";
 import { Link as RouterLink } from "react-router-dom";
 import { getAlertsAlertPath } from "../../../utils/routes/routes.util";
 
@@ -167,13 +167,37 @@ export const Summary = ({
         ),
     };
 
+    const renderNotificationChannelsText = (): string => {
+        const baseText = "Notifications about anomalies were sent via ";
+        const channelsUsed = verboseSummaryItems.notificationChannelsUsed?.map(
+            (notificationChannel) =>
+                notificationChannel === SpecType.EmailSendgrid
+                    ? "email"
+                    : notificationChannel
+        );
+
+        if (isEmpty(channelsUsed)) {
+            return "";
+        } else {
+            if (channelsUsed.length < 3) {
+                return `${baseText} ${channelsUsed.join(" and ")}`;
+            } else {
+                const lastElem = channelsUsed.pop();
+
+                return `${baseText} ${channelsUsed.join(
+                    ", "
+                )}, and ${lastElem}`;
+            }
+        }
+    };
+
     const renderAnomalySummary = (): JSX.Element => {
         return (
             <div>
                 In the last{" "}
                 <b>
                     {verboseSummaryItems.weeks}
-                    weeks({currentPeriodReadableDate.startTime} -{" "}
+                    weeks ({currentPeriodReadableDate.startTime} -{" "}
                     {currentPeriodReadableDate.endTime})
                 </b>
                 ,&nbsp;
@@ -182,23 +206,10 @@ export const Summary = ({
                     detected
                 </b>
                 , which is <b>{verboseSummaryItems.percentageChange}</b> than
-                the previous
-                {verboseSummaryItems.weeks}
-                weeks({previousPeriodReadableDate.startTime} -{" "}
+                the previous {verboseSummaryItems.weeks} weeks(
+                {previousPeriodReadableDate.startTime} -{" "}
                 {previousPeriodReadableDate.endTime}).{" "}
-                {summaryData.anomalies.detected.count > 0 && (
-                    <>
-                        Notifications about anomalies were sent via{" "}
-                        {verboseSummaryItems.notificationChannelsUsed
-                            ?.map((notificationChannel) =>
-                                notificationChannel === SpecType.EmailSendgrid
-                                    ? "email"
-                                    : notificationChannel
-                            )
-                            .join(", ")}
-                        .
-                    </>
-                )}
+                {renderNotificationChannelsText()}
             </div>
         );
     };
@@ -217,7 +228,7 @@ export const Summary = ({
                 </Link>{" "}
                 In the{" "}
                 <b>
-                    last {verboseSummaryItems.weeks} weeks,
+                    last {verboseSummaryItems.weeks} weeks,{" "}
                     {verboseSummaryItems.topAlert.anomaliesCount} anomalies were
                     detected on this metric.
                 </b>

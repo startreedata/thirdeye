@@ -84,7 +84,7 @@ export default withTooltip(
                     ...data.map((d) =>
                         Math.max(...keys.map((key) => Number(d[key])))
                     )
-                ),
+                ) || 1,
             ],
         });
         yAxisScale.range([yMax, 0]);

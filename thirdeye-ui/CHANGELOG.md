@@ -1,3 +1,10 @@
+### [2.54.1](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.54.0...thirdeye-ui-2.54.1) (2024-11-14)
+
+
+### Bug Fixes
+
+* [TE-2501](https://cortexdata.atlassian.net/browse/TE-2501) impact dashaboard bug bash fixes ([4009d8e21](https://github.com/startreedata/thirdeye/commit/4009d8e21f497b7793273e2a9b0189668bb3214b))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

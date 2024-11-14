@@ -52,6 +52,7 @@ export const AppRouteRelative = {
     ALERTS_UPDATE_ADVANCED: "advanced",
     ALERTS_UPDATE_ADVANCED_V2: "advanced-v2",
     ALERTS_UPDATE_JSON_EDITOR: "json-editor",
+    ALERTS_UPDATE_JSON_EDITOR_V2: "json-editor-v2",
     ANOMALIES: "anomalies",
     ANOMALIES_LIST: "anomalies-list",
     ANOMALIES_ALL: "all",

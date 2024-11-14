@@ -491,11 +491,6 @@
       </dependency>
       <dependency>
         <groupId>ai.startree.thirdeye.plugins</groupId>
-        <artifactId>thirdeye-detection-components</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>ai.startree.thirdeye.plugins</groupId>
         <artifactId>thirdeye-detectors</artifactId>
         <version>${project.version}</version>
       </dependency>

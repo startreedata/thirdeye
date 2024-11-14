@@ -30,7 +30,6 @@
     <module>thirdeye-oauth</module>
     <module>thirdeye-contributors-simple</module>
     <module>thirdeye-plugin-example</module>
-    <module>thirdeye-detection-components</module>
     <module>thirdeye-detectors</module>
     <module>thirdeye-pinot</module>
     <module>thirdeye-notification-email</module>

@@ -181,6 +181,7 @@ export const ThresholdSetupV3: FunctionComponent<ThresholdSetupProps> = ({
                 alertEvaluation={
                     unsetProperties.length === 0 ? alertEvaluation : undefined
                 }
+                hasAutoReload={false}
                 onAlertPropertyChange={onAlertPropertyChange}
             />
         </PageContentsCardV1>

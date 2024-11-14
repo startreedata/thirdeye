@@ -54,6 +54,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
     children,
     legendsPlacement,
     alertEvaluation,
+    hasAutoReload = true,
 }) => {
     const classes = usePreviewChartStyles();
     const { t } = useTranslation();
@@ -196,7 +197,7 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
     };
 
     useEffect(() => {
-        if (alertEvaluation) {
+        if (alertEvaluation && hasAutoReload) {
             handleAutoRangeClick();
         }
     }, [alertEvaluation]);

@@ -418,6 +418,7 @@
         "multidimensional-alert": "Multi-dimensional alert",
         "name": "Name",
         "name-of-your-alert": "Name of your alert",
+        "namespace": "Namespace",
         "need-help": "Need help",
         "new-user": "New user",
         "next": "Next",
@@ -521,6 +522,7 @@
         "selected-time-range": "selected time range",
         "sendgrid-api-key": "SendGrid API Key",
         "sensitivity": "Sensitivity",
+        "settings": "Settings",
         "setup-entity": "Setup {{entity}}",
         "show-all": "Show All",
         "show-count-optional-properties": "Show {{count}} optional properties",
@@ -1000,10 +1002,10 @@
             "sections": {
                 "detection-performance": {
                     "heading": "Detection performance",
-                    "total-anomalies-graph-title": "Total # of anomalies detected",
+                    "total-anomalies-graph-title": "Total anomalies detected",
                     "total-anomalies-weekly-graph-title": "Weekly anomalies detected",
-                    "total-notifications-graph-title": "Total # of notifications sent",
-                    "total-notifications-weekly-graph-title": "Weekly notifcations sent"
+                    "total-notifications-graph-title": "Total notifications sent",
+                    "total-notifications-weekly-graph-title": "Weekly notifications sent"
                 },
                 "investigations": {
                     "heading": "Recent investigations",
@@ -1049,7 +1051,7 @@
                 }
             },
             "subHeading": "Overview of system statistics, anomaly detection performance, and usage insights.",
-            "title": "Impact dashboard"
+            "title": "Impact Dashboard"
         }
     },
     "server": {},

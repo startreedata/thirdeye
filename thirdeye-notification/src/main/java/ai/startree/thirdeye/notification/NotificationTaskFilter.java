@@ -15,6 +15,7 @@ package ai.startree.thirdeye.notification;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.bool;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static ai.startree.thirdeye.spi.util.TimeUtils.isoPeriod;
 import static java.util.stream.Collectors.toSet;
 
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
@@ -165,7 +166,7 @@ public class NotificationTaskFilter {
     return alertAssociations.stream()
         .filter(aa -> isAlertActive(aa.getAlert().getId()))
         .map(aa -> buildAnomalyFilter(aa, sg, endTime))
-        .map(f -> filterAnomalies(f, sg.getId(), "anomalies"))
+        .map(f -> filterAnomalies(f, sg, "anomalies"))
         .flatMap(Collection::stream)
         .collect(toSet());
   }
@@ -179,7 +180,7 @@ public class NotificationTaskFilter {
         .filter(aa -> isAlertActive(aa.getAlert().getId()))
         .filter(aa -> aa.getAnomalyCompletionWatermark() != null)
         .map(this::buildAnomalyFilterCompletedAnomalies)
-        .map(f -> filterAnomalies(f, sg.getId(), "completed anomalies"))
+        .map(f -> filterAnomalies(f, sg, "completed anomalies"))
         .flatMap(Collection::stream)
         .collect(toSet());
   }
@@ -249,12 +250,19 @@ public class NotificationTaskFilter {
 
   @VisibleForTesting
   protected Set<AnomalyDTO> filterAnomalies(final AnomalyFilter f,
-      final Long subscriptionGroupId,
+      final SubscriptionGroupDTO subscriptionGroup,
       final String logContext) {
     final List<AnomalyDTO> candidates = anomalyManager.filter(f);
-
+    
+    final long minimumAnomalyLengthMillis = isoPeriod(subscriptionGroup.getMinimumAnomalyLength(), Period.ZERO).toStandardDuration().getMillis();
     final Set<AnomalyDTO> anomaliesToBeNotified = candidates.stream()
         .filter(NotificationTaskFilter::shouldFilter)
+        // apply anomaly minimum length filter
+        // Note: this may be confusing around DST 
+        // here we just use standard durations: a P1D period is 24 hours. On a DST change, a day can be 23 hours or 25 hours.
+        // An anomaly that lasts exactly a full day of 23 hours will be filtered by a value of P1D, even though it is a full day in timezone-aware period.
+        // keeping this filter in memory instead of in SQL to be able to add DST logic if necessary
+        .filter(a -> a.getEndTime() - a.getStartTime() >= minimumAnomalyLengthMillis)
         .collect(toSet());
 
     String createdMsg = "";
@@ -267,7 +275,7 @@ public class NotificationTaskFilter {
     }
 
     LOG.info("Subscription Group: {} Alert: {} context: {}. {}/{} filtered. {}",
-        subscriptionGroupId,
+        subscriptionGroup.getId(),
         f.getAlertId(),
         logContext,
         anomaliesToBeNotified.size(),

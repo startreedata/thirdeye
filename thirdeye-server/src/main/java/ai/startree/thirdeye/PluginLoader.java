@@ -33,7 +33,6 @@ import ai.startree.thirdeye.spi.bootstrap.BootstrapResourcesProviderFactory;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceFactory;
 import ai.startree.thirdeye.spi.detection.AnomalyDetectorFactory;
 import ai.startree.thirdeye.spi.detection.EnumeratorFactory;
-import ai.startree.thirdeye.spi.detection.EventTriggerFactory;
 import ai.startree.thirdeye.spi.detection.postprocessing.AnomalyPostProcessorFactory;
 import ai.startree.thirdeye.spi.notification.NotificationServiceFactory;
 import ai.startree.thirdeye.spi.rca.ContributorsFinderFactory;
@@ -141,9 +140,6 @@ public class PluginLoader {
     }
     for (AnomalyDetectorFactory f : plugin.getAnomalyDetectorFactories()) {
       detectionRegistry.addAnomalyDetectorFactory(f);
-    }
-    for (EventTriggerFactory f : plugin.getEventTriggerFactories()) {
-      detectionRegistry.addEventTriggerFactory(f);
     }
     for (NotificationServiceFactory f : plugin.getNotificationServiceFactories()) {
       notificationServiceRegistry.addNotificationServiceFactory(f);

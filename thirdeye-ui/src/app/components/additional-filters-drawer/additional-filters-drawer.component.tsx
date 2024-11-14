@@ -25,6 +25,7 @@ import { FormComponentForTemplateField } from "../alert-wizard-v2/alert-template
 import { LabelForTemplateFieldV2 } from "../alert-wizard-v2/alert-template/alert-template-form-field/label-for-template-field-v2/label-for-template-field-v2.component";
 import { AdditonalFiltersDrawerProps } from "./additional-filters-drawer.interfaces";
 import { useAdditonalFiltersDrawerStyles } from "./additional-filters-drawer.styles";
+// import { uniq } from "lodash";
 
 /**
  * Convenience wrapper on top of HelpDrawerCoreV1 so consumers do not have
@@ -39,6 +40,7 @@ export const AdditonalFiltersDrawer: FunctionComponent<AdditonalFiltersDrawerPro
         availableConfigurations,
         emptyMessage,
     }) => {
+        // const uniqueSections = uniq(availableConfigurations.map(option => option.section))
         const classes = useAdditonalFiltersDrawerStyles();
         const { t } = useTranslation();
         const [localCopyOfProperties, setLocalCopyOfProperties] =

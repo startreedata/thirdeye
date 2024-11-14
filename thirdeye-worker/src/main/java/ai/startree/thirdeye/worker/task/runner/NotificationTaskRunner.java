@@ -19,6 +19,7 @@ import static java.util.Objects.requireNonNull;
 import ai.startree.thirdeye.notification.NotificationDispatcher;
 import ai.startree.thirdeye.notification.NotificationPayloadBuilder;
 import ai.startree.thirdeye.notification.NotificationTaskFilter;
+import ai.startree.thirdeye.notification.NotificationTaskFilterResult;
 import ai.startree.thirdeye.notification.NotificationTaskPostProcessor;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
@@ -115,7 +116,7 @@ public class NotificationTaskRunner implements TaskRunner {
     requireNonNull(sg, "subscription Group is null");
 
     final long now = System.currentTimeMillis();
-    final var result = notificationTaskFilter.filter(sg, now);
+    final NotificationTaskFilterResult result = notificationTaskFilter.filter(sg, now);
 
     /* Dispatch notifications */
     final NotificationPayloadApi payload = notificationPayloadBuilder.build(result);

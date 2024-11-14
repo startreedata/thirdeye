@@ -22,9 +22,6 @@ import ai.startree.thirdeye.spi.detection.AnomalyDetectorFactory;
 import ai.startree.thirdeye.spi.detection.AnomalyDetectorFactoryContext;
 import ai.startree.thirdeye.spi.detection.Enumerator;
 import ai.startree.thirdeye.spi.detection.EnumeratorFactory;
-import ai.startree.thirdeye.spi.detection.EventTrigger;
-import ai.startree.thirdeye.spi.detection.EventTriggerFactory;
-import ai.startree.thirdeye.spi.detection.EventTriggerFactoryContext;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.HashMap;
@@ -41,7 +38,6 @@ public class DetectionRegistry {
   private static final Logger LOG = LoggerFactory.getLogger(DetectionRegistry.class);
 
   private final Map<String, AnomalyDetectorFactory> anomalyDetectorFactoryMap = new HashMap<>();
-  private final Map<String, EventTriggerFactory> triggerFactoryMap = new HashMap<>();
   private final Map<String, EnumeratorFactory> enumeratorFactoryMap = new HashMap<>();
 
   @Inject
@@ -63,13 +59,6 @@ public class DetectionRegistry {
     anomalyDetectorFactoryMap.put(f.name(), f);
   }
 
-  public void addEventTriggerFactory(final EventTriggerFactory f) {
-    checkState(!triggerFactoryMap.containsKey(f.name()),
-        "Duplicate EventTriggerFactory: " + f.name());
-
-    triggerFactoryMap.put(f.name(), f);
-  }
-
   public void addEnumeratorFactory(final EnumeratorFactory f) {
     checkState(!enumeratorFactoryMap.containsKey(f.name()),
         "Duplicate EnumeratorFactory: " + f.name());
@@ -82,13 +71,6 @@ public class DetectionRegistry {
       final AnomalyDetectorFactoryContext context) {
     validate(factoryName, anomalyDetectorFactoryMap, "Detector");
     return anomalyDetectorFactoryMap.get(factoryName).build(context);
-  }
-
-  public EventTrigger<AbstractSpec> buildTrigger(
-      final String factoryName,
-      final EventTriggerFactoryContext context) {
-    validate(factoryName, triggerFactoryMap, "Trigger");
-    return triggerFactoryMap.get(factoryName).build(context);
   }
 
   public Enumerator buildEnumerator(final String factoryName) {

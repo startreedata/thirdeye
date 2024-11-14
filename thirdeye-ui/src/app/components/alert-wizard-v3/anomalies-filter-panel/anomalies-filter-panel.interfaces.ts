@@ -34,4 +34,5 @@ export interface AnomaliesFilterConfiguratorRenderConfigs {
     name: string;
     requiredPropertiesWithMetadata: MetadataProperty[];
     description: string | null;
+    section?: string;
 }

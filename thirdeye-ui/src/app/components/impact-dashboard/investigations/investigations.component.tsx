@@ -101,6 +101,16 @@ export const RecentInvestigations = ({
         }
     }, [anomaliesInvestigated]);
 
+    const renderLabel = (labelKey: string): JSX.Element => {
+        return (
+            <Typography className={componentStyles.label} variant="body2">
+                {t(
+                    `pages.impact-dashboard.sections.investigations.labels.${labelKey}`
+                )}
+            </Typography>
+        );
+    };
+
     return (
         <>
             <div className={componentStyles.sectionHeading}>
@@ -147,6 +157,7 @@ export const RecentInvestigations = ({
                                 >
                                     <Grid container key={investigation.id}>
                                         <Grid item sm={3}>
+                                            {renderLabel("investigation-name")}
                                             {investigation.anomaly?.id ? (
                                                 <Link
                                                     component={RouterLink}
@@ -161,53 +172,28 @@ export const RecentInvestigations = ({
                                             ) : (
                                                 <div>{investigation.name}</div>
                                             )}
-                                            <Typography
-                                                className={
-                                                    componentStyles.label
-                                                }
-                                                variant="body2"
-                                            >
-                                                {t(
-                                                    "pages.impact-dashboard.sections.investigations.labels.investigation-name"
-                                                )}
-                                            </Typography>
                                         </Grid>
                                         <Grid item sm={3}>
+                                            {renderLabel("created-date")}
                                             <div>
                                                 {epochToDate(
                                                     investigation.created
                                                 )}
                                             </div>
-                                            <Typography
-                                                className={
-                                                    componentStyles.label
-                                                }
-                                                variant="body2"
-                                            >
-                                                {t(
-                                                    "pages.impact-dashboard.sections.investigations.labels.created-date"
-                                                )}
-                                            </Typography>
                                         </Grid>
                                         <Grid item sm={3}>
+                                            {renderLabel("created-by")}
                                             <div>
                                                 {
                                                     investigation.createdBy
                                                         .principal
                                                 }
                                             </div>
-                                            <Typography
-                                                className={
-                                                    componentStyles.label
-                                                }
-                                                variant="body2"
-                                            >
-                                                {t(
-                                                    "pages.impact-dashboard.sections.investigations.labels.created-by"
-                                                )}
-                                            </Typography>
                                         </Grid>
                                         <Grid item sm={3}>
+                                            {renderLabel(
+                                                "anomaly-confirmation"
+                                            )}
                                             <div
                                                 className={
                                                     investigation.anomaly?.id
@@ -232,16 +218,6 @@ export const RecentInvestigations = ({
                                                       )
                                                     : ""}
                                             </div>
-                                            <Typography
-                                                className={
-                                                    componentStyles.label
-                                                }
-                                                variant="body2"
-                                            >
-                                                {t(
-                                                    "pages.impact-dashboard.sections.investigations.labels.anomaly-confirmation"
-                                                )}
-                                            </Typography>
                                         </Grid>
                                         <Grid item sm={3}>
                                             <div>

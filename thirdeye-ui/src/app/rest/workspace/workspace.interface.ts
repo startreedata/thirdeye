@@ -13,9 +13,30 @@
  * the License.
  */
 import { ActionHook } from "../actions.interfaces";
-import { Workspace } from "../dto/workspace.interfaces";
+import { Workspace, WorkspaceConfiguration } from "../dto/workspace.interfaces";
 
 export interface GetWorkspaces extends ActionHook {
     workspaces: Workspace[] | null;
     getWorkspaces: () => Promise<Workspace[] | undefined>;
+}
+
+export interface GetWorkspaceConfiguration extends ActionHook {
+    workspaceConfiguration: WorkspaceConfiguration | null;
+    getWorkspaceConfiguration: () => Promise<
+        WorkspaceConfiguration | undefined
+    >;
+}
+
+export interface UpdateWorkspaceConfiguration extends ActionHook {
+    workspaceConfiguration: WorkspaceConfiguration | null;
+    updateWorkspaceConfiguration: (
+        config: WorkspaceConfiguration
+    ) => Promise<WorkspaceConfiguration | undefined>;
+}
+
+export interface ResetWorkspaceConfiguration extends ActionHook {
+    workspaceConfiguration: WorkspaceConfiguration | null;
+    resetWorkspaceConfiguration: () => Promise<
+        WorkspaceConfiguration | undefined
+    >;
 }

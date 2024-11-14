@@ -19,7 +19,6 @@ import ai.startree.thirdeye.PluginLoader;
 import ai.startree.thirdeye.ThirdEyeServer;
 import ai.startree.thirdeye.plugins.bootstrap.opencore.OpenCoreBoostrapResourcesProviderPlugin;
 import ai.startree.thirdeye.plugins.datasource.pinot.PinotDataSourcePlugin;
-import ai.startree.thirdeye.plugins.detection.components.DetectionComponentsPlugin;
 import ai.startree.thirdeye.plugins.detectors.DetectorsPlugin;
 import ai.startree.thirdeye.plugins.enumerator.ThirdEyeEnumeratorsPlugin;
 import ai.startree.thirdeye.plugins.notification.email.EmailNotificationPlugin;
@@ -51,7 +50,6 @@ public class ThirdEyeServerDebug {
                 new ThirdEyeOAuthPlugin(),
                 new OpenCoreBoostrapResourcesProviderPlugin(),
                 new SimpleContributorsFinderPlugin(),
-                new DetectionComponentsPlugin(),
                 new DetectorsPlugin(),
                 new EmailNotificationPlugin(),
                 new PinotDataSourcePlugin(),

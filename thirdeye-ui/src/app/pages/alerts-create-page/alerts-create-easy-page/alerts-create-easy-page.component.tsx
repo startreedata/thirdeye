@@ -18,6 +18,7 @@ import {
     CircularProgress,
     Divider,
     Grid,
+    Switch,
     TextareaAutosize,
     TextField,
     Typography,
@@ -41,7 +42,8 @@ import {
 import DimensionImage from "../../../../assets/images/dimensions.png";
 import { AdditonalFiltersDrawer } from "../../../components/additional-filters-drawer/additional-filters-drawer.component";
 import { AlertCompositeFiltersModal } from "../../../components/alert-composite-filters-modal/alert-composite-filters-modal.component";
-import { createNewStartingAlert } from "../../../components/alert-wizard-v2/alert-template/alert-template.utils";
+// Remove "createNewStartingAlertThreshold as" for fallback
+import { createNewStartingAlertThreshold as createNewStartingAlert } from "../../../components/alert-wizard-v2/alert-template/alert-template.utils";
 import { AvailableAlgorithmOption } from "../../../components/alert-wizard-v3/alert-type-selection/alert-type-selection.interfaces";
 import {
     generateAvailableAlgorithmOptions,
@@ -49,6 +51,7 @@ import {
 } from "../../../components/alert-wizard-v3/alert-type-selection/alert-type-selection.utils";
 import { AnomaliesFilterConfiguratorRenderConfigs } from "../../../components/alert-wizard-v3/anomalies-filter-panel/anomalies-filter-panel.interfaces";
 import { getAvailableFilterOptions } from "../../../components/alert-wizard-v3/anomalies-filter-panel/anomalies-filter-panel.utils";
+import { NotificationConfiguration } from "../../../components/alert-wizard-v3/notification-configuration/notification-configuration.component";
 import { ChartContentV2 } from "../../../components/alert-wizard-v3/preview-chart/chart-content-v2/chart-content-v2.component";
 import {
     generateTemplateProperties,
@@ -63,7 +66,11 @@ import { RadioSectionOptions } from "../../../components/form-basics/radio-secti
 import { TimeRangeButtonWithContext } from "../../../components/time-range/time-range-button-with-context-v2/time-range-button.component";
 import { TimeRangeQueryStringKey } from "../../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { ReactComponent as FilterListRoundedIcon } from "../../../platform/assets/images/filter-icon.svg";
-import { PageContentsCardV1 } from "../../../platform/components";
+import {
+    PageContentsCardV1,
+    useNotificationProviderV1,
+} from "../../../platform/components";
+import { ActionStatus } from "../../../rest/actions.interfaces";
 import { useGetEvaluation } from "../../../rest/alerts/alerts.actions";
 import { AlertTemplate } from "../../../rest/dto/alert-template.interfaces";
 import {
@@ -84,8 +91,10 @@ import {
     STAR_COLUMN,
 } from "../../../utils/datasources/datasources.util";
 import { useGetDatasourcesTree } from "../../../utils/datasources/use-get-datasources-tree.util";
+import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
 import { getAlertsAllPath } from "../../../utils/routes/routes.util";
 import { AlertCreatedGuidedPageOutletContext } from "../../alerts-create-guided-page/alerts-create-guided-page.interfaces";
+import { SETUP_DETAILS_TEST_IDS } from "../../alerts-create-guided-page/setup-details/setup-details-page.interface";
 import { easyAlertStyles } from "./alerts-create-easy-page.styles";
 
 const PROPERTIES_TO_COPY = [
@@ -99,7 +108,7 @@ const PROPERTIES_TO_COPY = [
 ];
 
 const ALERT_TEMPLATE_FOR_EVALUATE = "startree-threshold";
-const ALERT_TEMPLATE_FOR_EVALUATE_DX = "startree-mean-variance-dx";
+const ALERT_TEMPLATE_FOR_EVALUATE_DX = "startree-threshold-dx";
 const ALERT_TEMPLATE_FOR_EVALUATE_QUERY_DX = "startree-threshold-query-dx";
 
 export const AlertsCreateEasyPage: FunctionComponent = () => {
@@ -117,6 +126,8 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
     const [enumerations, setEnumerations] = useState(false);
     const [dimension, setDimension] = useState<string | null>(null);
     const [alertInsightLoading, setAlertInsightLoading] = useState(false);
+    const [isNotificationsOn, setIsNotificationsOn] = useState(false);
+    const { notify } = useNotificationProviderV1();
 
     const GRANULARITY_OPTIONS = [
         {
@@ -161,6 +172,10 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         setIsMultiDimensionAlert,
         getAlertRecommendation,
         setShouldShowStepper,
+        selectedSubscriptionGroups,
+        handleSubscriptionGroupChange,
+        newSubscriptionGroup,
+        onNewSubscriptionGroupChange,
     } = useOutletContext<AlertCreatedGuidedPageOutletContext>();
     const { datasetsInfo } = useGetDatasourcesTree();
 
@@ -343,7 +358,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                   createNewStartingAlert().template?.name,
                           },
                           templateProperties: {
-                              ...alert.templateProperties,
+                              ...createNewStartingAlert().templateProperties,
                               ...generateTemplateProperties(
                                   isCustomMetrics
                                       ? editedDatasourceFieldValue
@@ -563,7 +578,23 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         return [...recommendedAlgorithmOptions, ...availableAlgorithmOptions];
     }, [alertTemplates, alertRecommendations]);
 
-    const { getEvaluation, evaluation } = useGetEvaluation();
+    const {
+        getEvaluation,
+        evaluation,
+        status: AlertEvaluationStatus,
+        errorMessages,
+    } = useGetEvaluation();
+
+    useEffect(() => {
+        notifyIfErrors(
+            AlertEvaluationStatus,
+            errorMessages,
+            notify,
+            t("message.error-while-fetching", {
+                entity: t("label.subscription-groups"),
+            })
+        );
+    }, [AlertEvaluationStatus]);
 
     const [alertConfigForPreview, setAlertConfigForPreview] =
         useState<EditableAlert>(() => {
@@ -836,6 +867,58 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                   },
         };
         onAlertPropertyChange(workingAlert);
+    };
+
+    const renderNotificationView = (): JSX.Element => {
+        return (
+            <Grid item xs={12}>
+                <PageContentsCardV1 className={classes.notificationContainer}>
+                    <Grid container>
+                        <Grid item lg={3} md={5} sm={10} xs={10}>
+                            <Box marginBottom={2}>
+                                <Typography variant="h5">
+                                    {t("label.configure-notifications")}
+                                </Typography>
+                                <Typography variant="body2">
+                                    {t(
+                                        "message.select-who-to-notify-when-finding-anomalies"
+                                    )}
+                                </Typography>
+                            </Box>
+                        </Grid>
+                        <Grid item lg={9} md={7} sm={2} xs={2}>
+                            <Switch
+                                checked={isNotificationsOn}
+                                color="primary"
+                                data-testid={
+                                    SETUP_DETAILS_TEST_IDS.CONFIGURATION_SWITCH
+                                }
+                                name="checked"
+                                onChange={() =>
+                                    setIsNotificationsOn(!isNotificationsOn)
+                                }
+                            />
+                        </Grid>
+
+                        {isNotificationsOn && (
+                            <NotificationConfiguration
+                                alert={alert}
+                                initiallySelectedSubscriptionGroups={
+                                    selectedSubscriptionGroups
+                                }
+                                newSubscriptionGroup={newSubscriptionGroup}
+                                onNewSubscriptionGroupChange={
+                                    onNewSubscriptionGroupChange
+                                }
+                                onSubscriptionGroupsChange={
+                                    handleSubscriptionGroupChange
+                                }
+                            />
+                        )}
+                    </Grid>
+                </PageContentsCardV1>
+            </Grid>
+        );
     };
 
     return (
@@ -1419,85 +1502,88 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                 )}
                                                 {dimension ===
                                                     SelectDimensionsOptions.ENUMERATORS && (
-                                                    <Grid item xs={12}>
+                                                    <>
                                                         <Grid item xs={12}>
-                                                            <Grid container>
-                                                                <Grid
-                                                                    item
-                                                                    className={
-                                                                        classes.textAreaContainer
-                                                                    }
-                                                                    xs={12}
-                                                                >
-                                                                    <TextareaAutosize
-                                                                        aria-label="minimum height"
+                                                            <Grid item xs={12}>
+                                                                <Grid container>
+                                                                    <Grid
+                                                                        item
                                                                         className={
-                                                                            classes.textArea
+                                                                            classes.textAreaContainer
                                                                         }
-                                                                        minRows={
-                                                                            3
-                                                                        }
-                                                                        placeholder={t(
-                                                                            "label.select-distinct-dimension-from-dataset",
-                                                                            {
-                                                                                dimension:
-                                                                                    selectedTable
-                                                                                        ?.dimensions?.[0] ??
-                                                                                    "someColumn",
-                                                                                dataset:
-                                                                                    selectedTable
-                                                                                        ?.dataset
-                                                                                        ?.name,
-                                                                            }
-                                                                        )}
-                                                                        value={
-                                                                            enumerators
-                                                                        }
-                                                                        onChange={(
-                                                                            e
-                                                                        ) =>
-                                                                            setEnumerators(
-                                                                                e
-                                                                                    .target
-                                                                                    .value
-                                                                            )
-                                                                        }
-                                                                    />
-                                                                    <Box
-                                                                        className={
-                                                                            classes.footer
-                                                                        }
-                                                                        justifyContent="space-between"
+                                                                        xs={12}
                                                                     >
-                                                                        <Button
-                                                                            size="small"
-                                                                            variant="contained"
-                                                                            onClick={() =>
-                                                                                handleRunEnumerations()
+                                                                        <TextareaAutosize
+                                                                            aria-label="minimum height"
+                                                                            className={
+                                                                                classes.textArea
                                                                             }
-                                                                        >
-                                                                            {t(
-                                                                                "label.run-enumeration"
+                                                                            minRows={
+                                                                                3
+                                                                            }
+                                                                            placeholder={t(
+                                                                                "label.select-distinct-dimension-from-dataset",
+                                                                                {
+                                                                                    dimension:
+                                                                                        selectedTable
+                                                                                            ?.dimensions?.[0] ??
+                                                                                        "someColumn",
+                                                                                    dataset:
+                                                                                        selectedTable
+                                                                                            ?.dataset
+                                                                                            ?.name,
+                                                                                }
                                                                             )}
-                                                                        </Button>
-                                                                        <Button
-                                                                            size="small"
-                                                                            variant="contained"
-                                                                            onClick={() =>
-                                                                                setOpenViewColumnsListDrawer(
-                                                                                    true
+                                                                            value={
+                                                                                enumerators
+                                                                            }
+                                                                            onChange={(
+                                                                                e
+                                                                            ) =>
+                                                                                setEnumerators(
+                                                                                    e
+                                                                                        .target
+                                                                                        .value
                                                                                 )
                                                                             }
+                                                                        />
+                                                                        <Box
+                                                                            className={
+                                                                                classes.footer
+                                                                            }
+                                                                            justifyContent="space-between"
                                                                         >
-                                                                            {t(
-                                                                                "label.view-columns-list"
-                                                                            )}
-                                                                        </Button>
-                                                                    </Box>
+                                                                            <Button
+                                                                                size="small"
+                                                                                variant="contained"
+                                                                                onClick={() =>
+                                                                                    handleRunEnumerations()
+                                                                                }
+                                                                            >
+                                                                                {t(
+                                                                                    "label.run-enumeration"
+                                                                                )}
+                                                                            </Button>
+                                                                            <Button
+                                                                                size="small"
+                                                                                variant="contained"
+                                                                                onClick={() =>
+                                                                                    setOpenViewColumnsListDrawer(
+                                                                                        true
+                                                                                    )
+                                                                                }
+                                                                            >
+                                                                                {t(
+                                                                                    "label.view-columns-list"
+                                                                                )}
+                                                                            </Button>
+                                                                        </Box>
+                                                                    </Grid>
                                                                 </Grid>
                                                             </Grid>
                                                         </Grid>
-                                                    </Grid>
+                                                        {renderNotificationView()}
+                                                    </>
                                                 )}
                                                 <Grid item xs={12}>
                                                     {((anomalyDetection ===
@@ -1765,9 +1851,14 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                             minDate={
                                                                                                 alertInsight?.datasetStartTime
                                                                                             }
-                                                                                            timezone={determineTimezoneFromAlertInEvaluation(
-                                                                                                alertInsight?.templateWithProperties
-                                                                                            )}
+                                                                                            timezone={
+                                                                                                (alert
+                                                                                                    .templateProperties
+                                                                                                    ?.timezone as string) ||
+                                                                                                determineTimezoneFromAlertInEvaluation(
+                                                                                                    alertInsight?.templateWithProperties
+                                                                                                )
+                                                                                            }
                                                                                             onTimeRangeChange={(
                                                                                                 newStart,
                                                                                                 newEnd
@@ -1895,7 +1986,10 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                     alert
                                                                                 }
                                                                                 alertEvaluation={
-                                                                                    evaluation
+                                                                                    AlertEvaluationStatus ===
+                                                                                    ActionStatus.Working
+                                                                                        ? null
+                                                                                        : evaluation
                                                                                 }
                                                                                 evaluationTimeRange={{
                                                                                     startTime:
@@ -1966,6 +2060,16 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                 )}
                                                             </Grid>
                                                         )}
+                                                    {algorithmOption && (
+                                                        <Grid container>
+                                                            <Box
+                                                                marginTop={2}
+                                                                width="100%"
+                                                            >
+                                                                {renderNotificationView()}
+                                                            </Box>
+                                                        </Grid>
+                                                    )}
 
                                                     <Grid item xs={12}>
                                                         <Box

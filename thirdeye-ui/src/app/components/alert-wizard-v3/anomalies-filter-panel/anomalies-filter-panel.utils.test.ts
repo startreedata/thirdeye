@@ -22,6 +22,7 @@ describe("Anomalies Filter Panel Utils", () => {
             getAvailableFilterOptions(MOCK_ALERT_TEMPLATE_1, () => "")
         ).toEqual([
             {
+                section: "FILTER",
                 description: "",
                 name: "Threshold",
                 requiredPropertiesWithMetadata: [

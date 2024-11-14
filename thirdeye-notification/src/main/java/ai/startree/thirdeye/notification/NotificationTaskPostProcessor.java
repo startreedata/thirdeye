@@ -66,9 +66,9 @@ public class NotificationTaskPostProcessor {
     this.alertTemplateRenderer = alertTemplateRenderer;
   }
 
-  private static Map<Long, Long> buildVectorClock(final Collection<AnomalyDTO> anomalies) {
+  private static Map<Long, Long> buildVectorClock(final Collection<AnomalyDTO> notifiedAnomalies) {
     final Map<Long, Long> alertIdToAnomalyCreateTimeMax = new HashMap<>();
-    for (final AnomalyDTO a : anomalies) {
+    for (final AnomalyDTO a : notifiedAnomalies) {
       final Long alertId = a.getDetectionConfigId();
       if (alertId == null) {
         continue;
@@ -150,14 +150,15 @@ public class NotificationTaskPostProcessor {
 
   @VisibleForTesting
   protected void updateWatermarks(final SubscriptionGroupDTO sg,
-      final Collection<AnomalyDTO> anomalies) {
-    if (anomalies.isEmpty()) {
+      final Collection<AnomalyDTO> notifiedAnomalies) {
+    if (notifiedAnomalies.isEmpty()) {
       return;
     }
-    final var merged = mergeWatermarks(sg.getVectorClocks(), buildVectorClock(anomalies));
+    final Map<Long, Long> merged = mergeWatermarks(sg.getVectorClocks(), buildVectorClock(notifiedAnomalies));
     sg.setVectorClocks(merged);
 
     LOG.info("Updating watermarks for subscription config : {}", sg.getId());
     subscriptionGroupManager.save(sg);
+    
   }
 }

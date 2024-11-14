@@ -22,7 +22,6 @@ import ai.startree.thirdeye.detectionpipeline.plan.DataFetcherPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.DelayPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.EchoPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.EventFetcherPlanNode;
-import ai.startree.thirdeye.detectionpipeline.plan.EventTriggerPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.IndexFillerPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.PostProcessorPlanNode;
 import ai.startree.thirdeye.detectionpipeline.plan.SqlExecutionPlanNode;
@@ -47,7 +46,6 @@ public class PlanNodeFactory {
       AnomalyDetectorPlanNode.class,
       DataFetcherPlanNode.class,
       EchoPlanNode.class,
-      EventTriggerPlanNode.class,
       EventFetcherPlanNode.class,
       IndexFillerPlanNode.class,
       SqlExecutionPlanNode.class,

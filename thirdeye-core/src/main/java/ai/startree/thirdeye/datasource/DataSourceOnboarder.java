@@ -129,6 +129,11 @@ public class DataSourceOnboarder {
     final List<MetricConfigDTO> metrics = datasetConfigDTO.getMetrics();
     datasetConfigDTO.setAuth(auth);
     datasetConfigDTO.setMetrics(null);
+    final DatasetConfigDTO existingDatasetConfig = datasetConfigManager.findUniqueByNameAndNamespace(
+        datasetConfigDTO.getDataset(), datasetConfigDTO.namespace());
+    checkState(existingDatasetConfig == null,
+        "Dataset with name %s already exists in namespace %s",
+        datasetConfigDTO.getDataset(), datasetConfigDTO.namespace());
     final Long datasetId = datasetConfigManager.save(datasetConfigDTO);
     checkState(datasetId != null, "Failed creating dataset %s", datasetConfigDTO.getDataset());
 

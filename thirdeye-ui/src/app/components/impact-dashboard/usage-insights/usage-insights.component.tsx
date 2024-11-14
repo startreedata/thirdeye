@@ -72,6 +72,7 @@ export const UsageInsights = ({
                     name: group.name,
                     anomaliesCount: anomaliesCount,
                 });
+            data.sort((a, b) => b.anomaliesCount - a.anomaliesCount);
         });
 
         return data;

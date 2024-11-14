@@ -46,9 +46,17 @@ const DataTable = ({
                         })}
                     </TableRow>
                 </TableHead>
-                <TableBody>
+                <TableBody className={tableStyles.row}>
                     {data.map((rowData, idx) => (
-                        <TableRow key={idx}>
+                        <TableRow
+                            key={idx}
+                            style={{
+                                border:
+                                    idx === data.length - 1
+                                        ? "none"
+                                        : "1px solid rgba(224, 224, 224, 1)",
+                            }}
+                        >
                             {columns.map((column) => {
                                 return (
                                     <TableCell align="left" key={column.title}>

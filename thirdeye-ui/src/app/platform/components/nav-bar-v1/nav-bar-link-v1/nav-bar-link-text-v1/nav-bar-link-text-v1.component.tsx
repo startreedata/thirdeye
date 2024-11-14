@@ -50,6 +50,7 @@ export const NavBarLinkTextV1: FunctionComponent<NavBarLinkTextV1Props> = ({
                     primary={children}
                     primaryTypographyProps={{
                         variant: hover || selected ? "subtitle2" : "body2",
+                        style: { whiteSpace: "normal" },
                     }}
                 />
             )}

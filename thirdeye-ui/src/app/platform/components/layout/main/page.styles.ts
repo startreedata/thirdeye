@@ -21,6 +21,6 @@ export const useStyles = makeStyles({
         padding: "24px",
         flexDirection: "column",
         gap: "24px",
-        background: "#fffff",
+        background: "#fff",
     },
 });

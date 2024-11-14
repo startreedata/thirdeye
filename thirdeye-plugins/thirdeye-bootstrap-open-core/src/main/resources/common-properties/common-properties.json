@@ -520,7 +520,7 @@
     "defaultValue": null,
     "min": null,
     "max": null,
-    "description": "The sensitivity of the model. The smaller, the less anomaly are detected.",
+    "description": "The model will detect fewer anomalies with lower sensitivity and more with higher sensitivity.",
     "options": null,
     "multiselect": false,
     "jsonType": "NUMBER",

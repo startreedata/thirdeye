@@ -41,10 +41,10 @@ export const useDetectionPerformanceStyles = makeStyles({
         gap: "10px",
         padding: "8px",
         "& .currentPeriod": {
-            color: "#F37B0E",
+            color: "#006CA7",
         },
         "& .previousPeriod": {
-            color: "#006CA7",
+            color: "#F37B0E",
         },
     },
 });

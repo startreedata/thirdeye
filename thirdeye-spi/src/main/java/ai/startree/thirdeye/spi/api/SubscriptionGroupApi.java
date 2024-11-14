@@ -17,6 +17,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.Date;
 import java.util.List;
+import org.joda.time.Period;
 
 @JsonInclude(Include.NON_NULL)
 public class SubscriptionGroupApi implements ThirdEyeCrudApi<SubscriptionGroupApi> {
@@ -43,6 +44,8 @@ public class SubscriptionGroupApi implements ThirdEyeCrudApi<SubscriptionGroupAp
   private TimeWindowSuppressorApi alertSuppressors;
 
   private Boolean notifyHistoricalAnomalies;
+
+  private String minimumAnomalyLength; 
 
   public Long getId() {
     return id;
@@ -182,6 +185,15 @@ public class SubscriptionGroupApi implements ThirdEyeCrudApi<SubscriptionGroupAp
   public SubscriptionGroupApi setAuth(
       final AuthorizationConfigurationApi auth) {
     this.auth = auth;
+    return this;
+  }
+
+  public String getMinimumAnomalyLength() {
+    return minimumAnomalyLength;
+  }
+
+  public SubscriptionGroupApi setMinimumAnomalyLength(final String minimumAnomalyLength) {
+    this.minimumAnomalyLength = minimumAnomalyLength;
     return this;
   }
 }

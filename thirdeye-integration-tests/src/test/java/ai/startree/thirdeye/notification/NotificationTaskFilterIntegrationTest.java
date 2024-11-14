@@ -281,4 +281,50 @@ public class NotificationTaskFilterIntegrationTest {
     assertThat(collectIds(instance.filterAnomalies(sg, POINT_IN_TIME)))
         .isEqualTo(collectIds(Set.of(anomaly3)));
   }
+
+  @Test
+  public void testFilterWithHistoricalAnomaliesWithMinimumAnomalyLength() {
+    final AlertDTO alert = persist(new AlertDTO().setName("alert1").setActive(true));
+
+    final SubscriptionGroupDTO sg = persist(new SubscriptionGroupDTO()
+        .setName("name1")
+        .setMinimumAnomalyLength("P3D")
+        .setAlertAssociations(List.of(aaRef(alert.getId())))
+        .setCronExpression(CRON)
+        .setNotifyHistoricalAnomalies(true));
+    persist(sg);
+
+    // base case - no anomaly in db yet
+    assertThat(instance.filterAnomalies(sg, POINT_IN_TIME).isEmpty()).isTrue();
+
+    // this anomaly should be notified - long enough
+    final AnomalyDTO anomaly0 = persist(anomalyWithCreateTime(minutesAgo(4))
+        .setDetectionConfigId(alert.getId())
+        // 3 days
+        .setStartTime(minutesAgo(60 * 24 * 4))
+        .setEndTime(minutesAgo(60 * 24))
+    );
+
+    // this anomaly should be filtered - too short for the moment
+    final AnomalyDTO anomaly1 = persist(anomalyWithCreateTime(minutesAgo(2))
+        .setDetectionConfigId(alert.getId())
+        // length of 2 days
+        .setStartTime(minutesAgo(60 * 24 * 3))
+        .setEndTime(minutesAgo(60 * 24))
+    );
+
+    assertThat(collectIds(instance.filterAnomalies(sg, System.currentTimeMillis())))
+        .isEqualTo(collectIds(Set.of(anomaly0)));
+
+    watermarkManager.updateWatermarks(sg, List.of(anomaly0));
+    assertThat(sg.getVectorClocks().get(alert.getId())).isEqualTo(anomaly0.getCreateTime().getTime());
+
+    // anomaly 1 is now of length >=3 days
+    anomaly1.setEndTime(minutesAgo(0));
+    persist(anomaly1);
+    assertThat(collectIds(instance.filterAnomalies(sg, System.currentTimeMillis())))
+        .isEqualTo(collectIds(Set.of(anomaly1)));
+    watermarkManager.updateWatermarks(sg, List.of(anomaly1));
+    assertThat(sg.getVectorClocks().get(alert.getId())).isEqualTo(anomaly1.getCreateTime().getTime());
+  }
 }

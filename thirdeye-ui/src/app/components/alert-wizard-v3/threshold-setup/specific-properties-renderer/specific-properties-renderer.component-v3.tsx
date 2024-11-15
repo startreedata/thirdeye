@@ -13,9 +13,8 @@
  * the License.
  */
 import { Slider, TextField } from "@material-ui/core";
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { isValidISO8601 } from "../../../../utils/alerts/alerts.util";
 import { SliderAlgorithmOptionInputFieldConfig } from "../threshold-setup.interfaces";
 import { SpecificPropertiesRendererProps } from "./specific-properties-renderer.interfaces";
 
@@ -33,18 +32,15 @@ export const SpecificPropertiesRendererV3: FunctionComponent<SpecificPropertiesR
         const [localInputFieldValue, setLocalInputFieldValue] =
             useState<string>(existingValue as string);
 
+        useEffect(() => {
+            setLocalInputFieldValue(existingValue as string);
+        }, [existingValue]);
+
         const handlePropertyChange = (
             propertyName: string,
             newValue: string
         ): void => {
             setLocalInputFieldValue(newValue);
-            if (
-                (propertyName === "lookback" ||
-                    propertyName === "baselineOffset") &&
-                !isValidISO8601(newValue)
-            ) {
-                return;
-            }
             onAlertPropertyChange(propertyName, newValue);
         };
 
@@ -110,7 +106,7 @@ export const SpecificPropertiesRendererV3: FunctionComponent<SpecificPropertiesR
                 fullWidth
                 data-testid={`${inputFieldConfig.templatePropertyName}-container`}
                 type={inputFieldConfig.type}
-                value={localInputFieldValue}
+                value={localInputFieldValue ?? ""}
                 variant="outlined"
                 onChange={(e) =>
                     handlePropertyChange(

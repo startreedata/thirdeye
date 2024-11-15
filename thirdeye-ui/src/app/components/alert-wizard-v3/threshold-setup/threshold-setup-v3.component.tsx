@@ -18,6 +18,7 @@ import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { PageContentsCardV1 } from "../../../platform/components";
 import { TemplatePropertiesObject } from "../../../rest/dto/alert.interfaces";
+import { isValidISO8601 } from "../../../utils/alerts/alerts.util";
 import { AlertJsonEditorModal } from "../../alert-json-editor-modal/alert-json-editor-modal.component";
 import { PreviewChart } from "../../alert-wizard-v2/alert-template/preview-chart/preview-chart-v2.component";
 import { InputSection } from "../../form-basics/input-section/input-section.component";
@@ -75,6 +76,26 @@ export const ThresholdSetupV3: FunctionComponent<ThresholdSetupProps> = ({
     const unsetProperties = useMemo(() => {
         return inputFieldConfigs.filter((config) => {
             return !localAlertTemplateProperties[config.templatePropertyName];
+        });
+    }, [inputFieldConfigs, localAlertTemplateProperties]);
+
+    const invalidProperties = useMemo(() => {
+        return inputFieldConfigs.filter((config) => {
+            if (
+                config.templatePropertyName !== "lookback" &&
+                config.templatePropertyName !== "baselineOffset"
+            ) {
+                return false;
+            }
+            if (!localAlertTemplateProperties[config.templatePropertyName]) {
+                return false;
+            }
+
+            return !isValidISO8601(
+                localAlertTemplateProperties[
+                    config.templatePropertyName
+                ] as string
+            );
         });
     }, [inputFieldConfigs, localAlertTemplateProperties]);
 
@@ -169,6 +190,18 @@ export const ThresholdSetupV3: FunctionComponent<ThresholdSetupProps> = ({
                     {t("message.following-values-must-be-provided")} :{" "}
                     <Typography style={{ fontWeight: "bold" }} variant="body2">
                         {unsetProperties
+                            .map((property) => property.label)
+                            .join(", ")}
+                    </Typography>
+                </Alert>
+            ) : null}
+
+            {invalidProperties.length > 0 ? (
+                <Alert severity="warning" variant="outlined">
+                    {t("message.following-values-dont-follow-expected-format")}{" "}
+                    :{" "}
+                    <Typography style={{ fontWeight: "bold" }} variant="body2">
+                        {invalidProperties
                             .map((property) => property.label)
                             .join(", ")}
                     </Typography>

@@ -766,6 +766,7 @@
         "find-dimensions-that-are": "Find dimensions that impact this much percentage of the metric",
         "find-top-dimension-contributors-to-create-the-alert": "Find top dimension contributors to create the alert.",
         "five-min-monitoring-granularity-beta-tooltip": "5 minutes granularity is in Beta. Please reach out to the StarTree team in case you run into performance issues.",
+        "following-values-dont-follow-expected-format": "The following values don't follow the expected format",
         "following-values-must-be-provided": "The following values must be provided",
         "for-additional-algorithms-go-to": "for additional algorithms go to {{entity}}",
         "for-more-information-on-creating-alert": "for more information on how to create an alert.",

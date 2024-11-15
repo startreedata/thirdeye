@@ -12,7 +12,7 @@
 # the License.
 #
 
-FROM eclipse-temurin:17-jdk-alpine as builder
+FROM eclipse-temurin:21-jdk-alpine as builder
 # build jcmd tools to make them available at runtime
 RUN ${JAVA_HOME}/bin/jlink --module-path jmods --add-modules jdk.jcmd --output /jcmd
 WORKDIR /build
@@ -21,7 +21,7 @@ COPY ./ ./
 # if the disitrbution is provided, do nothing - else build it
 RUN if [[ ! -d thirdeye-distribution/target/thirdeye-distribution-*-dist/thirdeye-distribution-* ]]; then ./mvnw package -U -DskipTests; fi
 
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:21-jre-alpine
 RUN addgroup -g 1000 thirdeye && \
   adduser -u 1000 thirdeye -G thirdeye -D
 

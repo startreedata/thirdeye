@@ -83,7 +83,7 @@ public class AnomalyPaginationTest {
             .setLastTimestamp(new Date())
             .setTemplate(new AlertTemplateApi().setNodes(List.of(new PlanNodeApi()))))))
         .readEntity(new GenericType<List<AlertApi>>() {})
-        .get(0)
+        .getFirst()
         .getId();
 
     final List<AnomalyApi> anomalies = new ArrayList<>();
@@ -144,7 +144,7 @@ public class AnomalyPaginationTest {
     final StatusListApi results = response.readEntity(ERROR_LIST_TYPE);
     assertThat(response.getStatus()).isEqualTo(400);
     assertThat(results.getList()).isNotEmpty();
-    assertThat(results.getList().get(0).getCode()).isEqualTo(ERR_NEGATIVE_LIMIT_VALUE);
+    assertThat(results.getList().getFirst().getCode()).isEqualTo(ERR_NEGATIVE_LIMIT_VALUE);
   }
 
   @Test
@@ -153,7 +153,7 @@ public class AnomalyPaginationTest {
     final StatusListApi results = response.readEntity(ERROR_LIST_TYPE);
     assertThat(response.getStatus()).isEqualTo(400);
     assertThat(results.getList()).isNotEmpty();
-    assertThat(results.getList().get(0).getCode()).isEqualTo(ERR_NEGATIVE_OFFSET_VALUE);
+    assertThat(results.getList().getFirst().getCode()).isEqualTo(ERR_NEGATIVE_OFFSET_VALUE);
   }
 
   @Test
@@ -162,7 +162,7 @@ public class AnomalyPaginationTest {
     final StatusListApi results = response.readEntity(ERROR_LIST_TYPE);
     assertThat(response.getStatus()).isEqualTo(400);
     assertThat(results.getList()).isNotEmpty();
-    assertThat(results.getList().get(0).getCode()).isEqualTo(ERR_OFFSET_WITHOUT_LIMIT);
+    assertThat(results.getList().getFirst().getCode()).isEqualTo(ERR_OFFSET_WITHOUT_LIMIT);
   }
 
   @Test

@@ -135,7 +135,7 @@ public class TaskManagerImpl implements TaskManager {
     if (dtos.isEmpty()) {
       return null;
     }
-    return dtos.get(0);
+    return dtos.getFirst();
   }
 
   /**

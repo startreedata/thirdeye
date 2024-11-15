@@ -112,7 +112,7 @@ public class SchedulingTest {
     response = client.request("api/data-sources")
         .post(Entity.json(List.of(pinotDataSourceApi)));
     assert200(response);
-    final DataSourceApi dataSourceInResponse = response.readEntity(DATASOURCE_LIST_TYPE).get(0);
+    final DataSourceApi dataSourceInResponse = response.readEntity(DATASOURCE_LIST_TYPE).getFirst();
     pinotDataSourceApi.setId(dataSourceInResponse.getId());
 
     // create dataset
@@ -133,7 +133,7 @@ public class SchedulingTest {
         .post(Entity.json(List.of(ALERT_API)));
     assertThat(createResponse.getStatus()).isEqualTo(200);
     final List<AlertApi> alerts = createResponse.readEntity(ALERT_LIST_TYPE);
-    alertId = alerts.get(0).getId();
+    alertId = alerts.getFirst().getId();
 
     // time advancing should not impact lastTimestamp
     CLOCK.tick(5);

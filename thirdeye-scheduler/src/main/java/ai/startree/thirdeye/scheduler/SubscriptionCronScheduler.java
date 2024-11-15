@@ -195,7 +195,7 @@ public class SubscriptionCronScheduler implements Runnable {
       throws SchedulerException {
     final List<? extends Trigger> triggers = scheduler.getTriggersOfJob(jobKey);
     if (!triggers.isEmpty()) {
-      final CronTrigger cronTrigger = (CronTrigger) triggers.get(0);
+      final CronTrigger cronTrigger = (CronTrigger) triggers.getFirst();
       final String currentCron = cronTrigger.getCronExpression();
       if (!currentCron.equals(cron)) {
         stopJob(jobKey);

@@ -176,7 +176,7 @@ public class PinotSqlExpressionBuilder implements SqlExpressionBuilder {
         checkArgument(operands.size() == 1,
             "Incorrect number of operands for percentile sql generation. Expected: 1. Got: %s",
             operands.size());
-        return PERCENTILE_TDIGEST_PREFIX + "(" + operands.get(0) + "," + percentile + ")";
+        return PERCENTILE_TDIGEST_PREFIX + "(" + operands.getFirst() + "," + percentile + ")";
       default:
         throw new UnsupportedOperationException();
     }

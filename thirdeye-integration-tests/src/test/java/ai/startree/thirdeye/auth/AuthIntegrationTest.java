@@ -105,7 +105,7 @@ public class AuthIntegrationTest {
         .issuer(ISSUER)
         .expirationTime(new Date(System.currentTimeMillis() + 36000000))
         .build();
-    oAuthToken = String.format("Bearer %s", getToken(jwks.getKeys().get(0), claimsSet));
+    oAuthToken = String.format("Bearer %s", getToken(jwks.getKeys().getFirst(), claimsSet));
 
     dir = new File(DIR);
     dir.mkdir();

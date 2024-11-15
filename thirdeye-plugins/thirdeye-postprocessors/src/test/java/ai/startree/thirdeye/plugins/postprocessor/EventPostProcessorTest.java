@@ -183,7 +183,7 @@ public class EventPostProcessorTest {
       final List<AnomalyLabelDTO> labels = res1Anomalies.get(i).getAnomalyLabels();
       if (expectedIsLabeled) {
         assertThat(labels).hasSize(1);
-        final AnomalyLabelDTO label = labels.get(0);
+        final AnomalyLabelDTO label = labels.getFirst();
         assertThat(label.isIgnore()).isEqualTo(isIgnore);
         assertThat(label.getName()).isEqualTo("Anomaly happens during " + eventName + " event");
       } else {

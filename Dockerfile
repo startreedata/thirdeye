@@ -12,7 +12,7 @@
 # the License.
 #
 
-FROM eclipse-temurin:21-jdk-alpine as builder
+FROM eclipse-temurin:21-jdk-alpine AS builder
 # build jcmd tools to make them available at runtime
 RUN ${JAVA_HOME}/bin/jlink --module-path jmods --add-modules jdk.jcmd --output /jcmd
 WORKDIR /build

@@ -19,15 +19,19 @@ import ai.startree.thirdeye.datalayer.DatabaseClient;
 import ai.startree.thirdeye.datalayer.DatabaseOrm;
 import ai.startree.thirdeye.datalayer.entity.TaskEntity;
 import ai.startree.thirdeye.datalayer.mapper.TaskEntityMapper;
+import ai.startree.thirdeye.datalayer.util.GenericResultSetMapper;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
+import ai.startree.thirdeye.spi.task.TaskStatus;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,17 +45,39 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class TaskDao {
 
+  // WARNING - this query is more tricky than it seems
+  // the resolution of this query is heavily dependent on the engine (InnoDb) and the indexes
+  // LIMIT 1 FOR UPDATE SKIP LOCKED may lock more than 1 (+ gap) row depending on the indexes
+  // in the worst case, it locks every row it has to look at when performing the query (eg reading a row to resolve the WHERE or ORDER BY clause) 
+  // and it locks every operation that would impact the indexes used in the query 
+  // here it works because: 
+  // in the WHERE clause, status and ref_id are indexed
+  // in the ORDER BY clause: the id index (PRIMARY KEY AUTO_INCREMENT) helps and result in a single row read
+  // note: ORDER BY create_time would not work and would lock all rows matching the WHERE clause
+  // it is important to enforce in-order execution for tasks referencing the same entity - this condition may be relaxed later on
+  // for the moment this means we need AND ref_id not in (select ref_id from task_entity where status = 'RUNNING') + ORDER BY id ASC
+  private static final String SELECT_AND_LOCK_NEXT_TASK_QUERY = """
+      select * from task_entity
+      WHERE status = 'WAITING'
+      AND ref_id not in (select ref_id from task_entity where status = 'RUNNING')
+      ORDER BY id ASC
+      LIMIT 1
+      FOR UPDATE SKIP LOCKED
+      """;
   private static final Logger LOG = LoggerFactory.getLogger(TaskDao.class);
   private static final boolean IS_DEBUG = LOG.isDebugEnabled();
 
   private final DatabaseOrm databaseOrm;
   private final DatabaseClient databaseClient;
+  private final GenericResultSetMapper genericResultSetMapper;
 
   @Inject
   public TaskDao(final DatabaseOrm databaseOrm,
-      final DatabaseClient DatabaseClient) {
+      final DatabaseClient DatabaseClient,
+      final GenericResultSetMapper genericResultSetMapper) {
     this.databaseOrm = databaseOrm;
     this.databaseClient = DatabaseClient;
+    this.genericResultSetMapper = genericResultSetMapper;
   }
 
   private TaskEntity toEntity(final TaskDTO dto)
@@ -261,6 +287,42 @@ public class TaskDao {
     } catch (JsonProcessingException | SQLException e) {
       LOG.error(e.getMessage(), e);
       return Collections.emptyList();
+    }
+  }
+
+  public TaskDTO acquireNextTaskToRun(final long workerId) {
+    try {
+      return databaseClient.executeTransaction(
+          connection -> {
+            try (final Statement s = connection.createStatement();
+                final ResultSet rs = s.executeQuery(SELECT_AND_LOCK_NEXT_TASK_QUERY)
+            ) {
+              final List<TaskEntity> res = genericResultSetMapper.mapAll(rs, TaskEntity.class);
+              if (res.size() == 1) {
+                final List<TaskDTO> dtos = toDto(res);
+                final TaskDTO toUpdate = dtos.get(0);
+                toUpdate.setStatus(TaskStatus.RUNNING);
+                toUpdate.setWorkerId(workerId);
+                toUpdate.setStartTime(System.currentTimeMillis());
+                toUpdate.setVersion(toUpdate.getVersion() + 1);
+                final int success = databaseOrm.update(toEntity(toUpdate), null, connection);
+                if (success == 1) {
+                  return toUpdate;
+                } else {
+                  throw new RuntimeException("Failed to acquire task. Failed to update the task, even though it is locked by this SQL transaction. Please reach out to StarTree support. Task id: " + toUpdate.getId());
+                }
+              } else if (res.isEmpty()) {
+                // no task to run
+                return null;
+              } else {
+                throw new RuntimeException(
+                    "Failed to acquire task. Query returned multiple rows. Only one row was expected. Please reach out to StarTree support.");
+              }
+            }
+          }, null);
+    } catch (SQLException e) {
+      LOG.error(e.getMessage(), e);
+      return null;
     }
   }
 

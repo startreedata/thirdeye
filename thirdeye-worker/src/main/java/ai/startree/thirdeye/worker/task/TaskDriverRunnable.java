@@ -92,7 +92,7 @@ public class TaskDriverRunnable implements Runnable {
   public void run() {
     while (!isShutdown()) {
       // select a task to execute, and update it to RUNNING
-      final TaskDTO taskDTO = waitForTask();
+      final TaskDTO taskDTO = config.isNewAcquisitionLogic() ? waitForTask() : waitForTaskLegacy();
       if (taskDTO == null) {
         continue;
       }
@@ -166,7 +166,7 @@ public class TaskDriverRunnable implements Runnable {
    *
    * @return null if system is shutting down.
    */
-  private TaskDTO waitForTask() {
+  private TaskDTO waitForTaskLegacy() {
     while (!isShutdown()) {
       final TaskDTO nextTask;
       try {
@@ -202,6 +202,37 @@ public class TaskDriverRunnable implements Runnable {
         taskRunnerWaitIdleTimer.record(() -> sleep(true));
         continue;
       }
+    }
+    return null;
+  }
+
+  /**
+   * Returns a TaskDTO if a task is successfully acquired; returns null if system is shutting down.
+   *
+   * @return null if system is shutting down.
+   */
+  private TaskDTO waitForTask() {
+    while (!isShutdown()) {
+      final TaskDTO nextTask;
+      try {
+        nextTask = taskManager.acquireNextTaskToRun(workerId);
+      } catch (Exception e) {
+        // FIXME CYRIL acquireNextTaskToRun is not throwing errors up to here
+        LOG.error("Failed to fetch a new task to run", e);
+        taskRunnerWaitIdleTimer.record(() -> sleep(true));
+        continue;
+      }
+      if (nextTask == null) {
+        // no task found
+        taskRunnerWaitIdleTimer.record(() -> sleep(false));
+        continue;
+      }
+      if (isShutdown()) {
+        break;
+      }
+      final long waitTime = System.currentTimeMillis() - nextTask.getCreateTime().getTime();
+      taskWaitTimer.record(waitTime, TimeUnit.MILLISECONDS);
+      return nextTask;
     }
     return null;
   }

@@ -130,7 +130,16 @@ public class NotificationTaskRunner implements TaskRunner {
     /* fire notifications */
     final Map<NotificationSpecDTO, Exception> specToException = notificationDispatcher.dispatch(sg, payload);
 
-    /* post process, Update watermarks, etc once notification is successfully sent */
-    notificationTaskPostProcessor.postProcess(result, specToException);
+    if (!specToException.isEmpty()) {
+      /* post process, Update watermarks, etc once notification is successfully sent */
+      notificationTaskPostProcessor.postProcess(result, specToException);
+    } else {
+      LOG.warn(
+          "Subscription group {} does not contain any notification channel specification or " 
+              + "could not obtain the specifications from the object. If this is unexpected, " 
+              + "please double check the subscription group configuration. " 
+              + "Notification watermarks will not be updated",
+          sg.getId());
+    }
   }
 }

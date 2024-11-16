@@ -67,11 +67,10 @@ public class HeartbeatTest {
   public void setUp() {
     config = new TaskDriverConfiguration()
         .setRandomWorkerIdEnabled(true)
-        .setHeartbeatInterval(HEARTBEAT_INTERVAL);
+        .setHeartbeatInterval(HEARTBEAT_INTERVAL)
+        .setNewAcquisitionLogic(true);
 
     taskManager = Mockito.mock(TaskManager.class);
-    when(taskManager.acquireTaskToRun(any(), anyLong()))
-        .thenReturn(true);
 
     doNothing().when(taskManager)
         .updateStatusAndTaskEndTime(anyLong(), any(), any(), anyLong(), any());
@@ -94,7 +93,7 @@ public class HeartbeatTest {
   public void heartbeatPulseCheck() {
     final Timestamp startTime = new Timestamp(System.currentTimeMillis());
     final TaskDTO taskDTO = newTask();
-    when(taskManager.findNextTaskToRun()).thenAnswer(i -> pollingCount++ == 0? taskDTO : null);
+    when(taskManager.acquireNextTaskToRun(anyLong())).thenAnswer(i -> pollingCount++ == 0 ? taskDTO : null);
 
     doAnswer(invocation -> {
       taskDTO.setStatus(TaskStatus.COMPLETED);

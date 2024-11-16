@@ -166,6 +166,7 @@ public class TaskDriverRunnable implements Runnable {
    *
    * @return null if system is shutting down.
    */
+  @Deprecated
   private TaskDTO waitForTaskLegacy() {
     while (!isShutdown()) {
       final TaskDTO nextTask;

@@ -138,7 +138,7 @@ public class PinotControllerRestClient {
         schema = VANILLA_OBJECT_MAPPER.readValue(schemaContent, Schema.class);
       }
     } catch (final Exception e) {
-      LOG.error("Exception in retrieving schema collections, skipping {}", dataset);
+      LOG.error("Exception in retrieving schema collections, skipping {}", dataset, e);
     } finally {
       if (schemaRes != null) {
         if (schemaRes.getEntity() != null) {

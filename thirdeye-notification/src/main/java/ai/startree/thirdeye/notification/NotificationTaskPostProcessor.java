@@ -106,6 +106,7 @@ public class NotificationTaskPostProcessor {
     return Math.max(initialWatermark, alert.getLastTimestamp());
   }
 
+  // assume specToException is not empty
   public void postProcess(final NotificationTaskFilterResult result,
       final Map<NotificationSpecDTO, Exception> specToException) {
     if (specToException.values().stream().allMatch(Objects::nonNull)) {

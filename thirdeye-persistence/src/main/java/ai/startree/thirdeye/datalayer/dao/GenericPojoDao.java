@@ -265,7 +265,7 @@ public class GenericPojoDao {
       if (genericJsonEntity != null) {
         return toDto(genericJsonEntity,
             SubEntities.BEAN_TYPE_MAP.asMultimap().inverse().get(
-                SubEntityType.valueOf(genericJsonEntity.getType())).asList().get(0));
+                SubEntityType.valueOf(genericJsonEntity.getType())).asList().getFirst());
       }
     } catch (final JsonProcessingException | SQLException e) {
       LOG.error(e.getMessage(), e);

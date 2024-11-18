@@ -27,6 +27,7 @@
   <name>thirdeye-spi</name>
   <url>http://maven.apache.org</url>
 
+  <!--NOTE: the spi should stay compatible with jdk 11. This means thirdeye-dataframe should also stay compatible with jdk 11. Some users are building custom plugins in jdk 11.  TODO CYRIL enforce with maven-compiler-plugin-->
   <properties>
 
   </properties>

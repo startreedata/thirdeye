@@ -191,7 +191,7 @@ public class DetectionCronScheduler implements Runnable {
   @SuppressWarnings("unchecked")
   private boolean isJobUpdated(final AlertDTO config, final JobKey key) throws SchedulerException {
     final List<Trigger> triggers = (List<Trigger>) scheduler.getTriggersOfJob(key);
-    final CronTrigger cronTrigger = (CronTrigger) triggers.get(0);
+    final CronTrigger cronTrigger = (CronTrigger) triggers.getFirst();
     final String cronInSchedule = cronTrigger.getCronExpression();
 
     if (!config.getCron().equals(cronInSchedule)) {

@@ -170,7 +170,7 @@ public class HappyPathTest {
     final Response response = request("api/data-sources").post(Entity.json(List.of(
         pinotDataSourceApi)));
     assert200(response);
-    final DataSourceApi dataSourceInResponse = response.readEntity(DATASOURCE_LIST_TYPE).get(0);
+    final DataSourceApi dataSourceInResponse = response.readEntity(DATASOURCE_LIST_TYPE).getFirst();
     pinotDataSourceApi.setId(dataSourceInResponse.getId());
     
   }
@@ -268,7 +268,7 @@ public class HappyPathTest {
 
     assert200(response);
     final List<AlertApi> alerts = response.readEntity(ALERT_LIST_TYPE);
-    alertId = alerts.get(0).getId();
+    alertId = alerts.getFirst().getId();
     UPDATE_ALERT_API.setId(alertId);
   }
 
@@ -370,8 +370,8 @@ public class HappyPathTest {
     final Response response = request("api/alerts").put(Entity.json(List.of(UPDATE_ALERT_API)));
     assert200(response);
     final List<AlertApi> alerts = response.readEntity(ALERT_LIST_TYPE);
-    assertThat(alerts.get(0).getId()).isEqualTo(alertId);
-    alertLastUpdateTime = alerts.get(0).getUpdated().getTime();
+    assertThat(alerts.getFirst().getId()).isEqualTo(alertId);
+    alertLastUpdateTime = alerts.getFirst().getUpdated().getTime();
   }
 
   @Test(dependsOnMethods = "testUpdateAlert", timeOut = 50000L)
@@ -748,7 +748,7 @@ public class HappyPathTest {
     final var response = request("api/alerts")
         .post(Entity.json(List.of(alertApi)));
     assertThat(response.getStatus()).isEqualTo(200);
-    final var gotApi = response.readEntity(new GenericType<List<AlertApi>>() {}).get(0);
+    final var gotApi = response.readEntity(new GenericType<List<AlertApi>>() {}).getFirst();
     assertThat(gotApi).isNotNull();
     assertThat(gotApi.getId()).isNotNull();
     return gotApi.getId();
@@ -758,7 +758,7 @@ public class HappyPathTest {
     final var response = request("api/rca/investigations")
         .post(Entity.json(List.of(investigationApi)));
     assertThat(response.getStatus()).isEqualTo(200);
-    final var gotApi = response.readEntity(new GenericType<List<RcaInvestigationApi>>() {}).get(0);
+    final var gotApi = response.readEntity(new GenericType<List<RcaInvestigationApi>>() {}).getFirst();
     assertThat(gotApi).isNotNull();
     assertThat(gotApi.getId()).isNotNull();
     return gotApi.getId();

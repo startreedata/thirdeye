@@ -112,7 +112,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
         .map(this::toApi)
         .collect(Collectors.toList());
     if (!result.isEmpty()) {
-      authorizationManager.invalidateCache(result.get(0).namespace(), result.get(0).getClass());
+      authorizationManager.invalidateCache(result.getFirst().namespace(), result.getFirst().getClass());
     }
     return result;
   }
@@ -127,7 +127,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
         .map(this::toApi)
         .collect(Collectors.toList());
     if (!result.isEmpty()) {
-      authorizationManager.invalidateCache(result.get(0).namespace(), result.get(0).getClass());
+      authorizationManager.invalidateCache(result.getFirst().namespace(), result.getFirst().getClass());
     }
     return result;
   }
@@ -218,7 +218,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
       LOG.warn("Deleted id: {} by principal: {}", dto.getId(), principal.getName());
     }
     if (!entities.isEmpty()) {
-      authorizationManager.invalidateCache(namespace, entities.get(0).getClass());
+      authorizationManager.invalidateCache(namespace, entities.getFirst().getClass());
     }
   }
 

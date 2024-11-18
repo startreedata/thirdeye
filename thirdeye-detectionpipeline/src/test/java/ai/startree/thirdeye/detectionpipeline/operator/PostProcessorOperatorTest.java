@@ -154,7 +154,7 @@ public class PostProcessorOperatorTest {
   private void assertLabelsAreCorrect(final OperatorResult r) {
     for (final AnomalyDTO anomaly : r.getAnomalies()) {
       assertThat(anomaly.getAnomalyLabels().size()).isEqualTo(1);
-      final AnomalyLabelDTO label = anomaly.getAnomalyLabels().get(0);
+      final AnomalyLabelDTO label = anomaly.getAnomalyLabels().getFirst();
       assertThat(label.getName()).isEqualTo(TEST_POST_PROCESSOR_LABEL_NAME);
       assertThat(label.getSourceNodeName()).isEqualTo(NODE_BEAN_NAME);
       assertThat(label.getSourcePostProcessor()).isEqualTo(TEST_POST_PROCESSOR_NAME);

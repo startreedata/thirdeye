@@ -114,7 +114,7 @@ public class QueryProjection {
           SqlParserPos.ZERO,
           quantifier != null ? symbolLiteralOf(quantifier) : null));
     } else if (operands.size() == 1 && quantifier == null) {
-      return applySpecialOperators(operandNodes(sqlParserConfig).get(0));
+      return applySpecialOperators(operandNodes(sqlParserConfig).getFirst());
     } else {
       throw new UnsupportedOperationException(String.format(
           "Unsupported combination for QueryProjection: %s",

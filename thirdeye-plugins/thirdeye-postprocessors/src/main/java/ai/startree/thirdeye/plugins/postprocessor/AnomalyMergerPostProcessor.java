@@ -428,9 +428,8 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
             .filter(a -> !hasOutdatedLabel(a))
             .sorted(COMPARATOR)
             .toList();
-        final AnomalyDTO firstChildren = sortedNotOutdatedChildren.get(0);
-        final AnomalyDTO lastChildren = sortedNotOutdatedChildren.get(
-            sortedNotOutdatedChildren.size() - 1);
+        final AnomalyDTO firstChildren = sortedNotOutdatedChildren.getFirst();
+        final AnomalyDTO lastChildren = sortedNotOutdatedChildren.getLast();
         existingAnomaly.setStartTime(firstChildren.getStartTime());
         updateAnomalyWithNewValues(existingAnomaly, firstChildren);
         final List<List<AnomalyLabelDTO>> notOutdatedLabels = sortedNotOutdatedChildren.stream()

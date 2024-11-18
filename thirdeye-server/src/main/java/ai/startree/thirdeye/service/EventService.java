@@ -91,6 +91,6 @@ public class EventService extends CrudService<EventApi, EventDTO> {
       LOG.error("Failed to create event from an anomaly. List of created entities is not of size 1. Returned list: {}", created);
       throw new RuntimeException("Failed to create event from anomaly. Number of anomalies created: " + created.size());
     }
-    return created.get(0);
+    return created.getFirst();
   }
 }

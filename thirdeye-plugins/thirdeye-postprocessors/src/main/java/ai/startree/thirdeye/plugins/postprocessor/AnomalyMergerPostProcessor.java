@@ -504,9 +504,22 @@ public class AnomalyMergerPostProcessor implements AnomalyPostProcessor {
             // if an anomaly is in ignore state and has never been notified, but is now changing to not ignore, then ensure it is notified 
             // by hack on the createTime to ensure the notification logic finds this anomaly
             // see spec decision table https://docs.google.com/document/d/1bSbv4XhTQsdGR1XVM_dYL1cK9Q6JlntvzNYmmMiXQRI/edit
-            // FIXME CYRIL - something similar should also be done at the parent level 
             if (isIgnore(previousAnomaly) && !previousAnomaly.isNotified() && !isIgnore(anomaly)) {
               previousAnomaly.setCreateTime(new Timestamp(System.currentTimeMillis()));
+            }
+            if (isIgnore(previousAnomaly) != isIgnore(anomaly)) {
+              // need to update the parentCandidate/ignoredParentCandidate if necessary
+              if (previousAnomaly == ignoredParentCandidate) {
+                // the current ignoredParentCandidate is not ignored now - move it to parentCandidate
+                ignoredParentCandidate = null;
+                optional(parentCandidate).ifPresent(anomaliesToUpdate::add);
+                parentCandidate = previousAnomaly;
+              } else if (previousAnomaly == parentCandidate) {
+                // the current parentCandidate is ignored now - move it to ignoredParentCandidate 
+                parentCandidate = null;
+                optional(ignoredParentCandidate).ifPresent(anomaliesToUpdate::add);
+                ignoredParentCandidate = previousAnomaly;
+              }
             }
             // update the existing anomaly with minor changes - drop the new anomaly
             updateAnomalyWithNewValues(previousAnomaly, anomaly);

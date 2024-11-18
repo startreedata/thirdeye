@@ -75,7 +75,13 @@ export const ThresholdSetupV3: FunctionComponent<ThresholdSetupProps> = ({
 
     const unsetProperties = useMemo(() => {
         return inputFieldConfigs.filter((config) => {
-            return !localAlertTemplateProperties[config.templatePropertyName];
+            const value =
+                localAlertTemplateProperties[config.templatePropertyName];
+            if (value === 0) {
+                return false;
+            }
+
+            return !value;
         });
     }, [inputFieldConfigs, localAlertTemplateProperties]);
 
@@ -87,15 +93,13 @@ export const ThresholdSetupV3: FunctionComponent<ThresholdSetupProps> = ({
             ) {
                 return false;
             }
-            if (!localAlertTemplateProperties[config.templatePropertyName]) {
+            const value =
+                localAlertTemplateProperties[config.templatePropertyName];
+            if (!value) {
                 return false;
             }
 
-            return !isValidISO8601(
-                localAlertTemplateProperties[
-                    config.templatePropertyName
-                ] as string
-            );
+            return !isValidISO8601(value as string);
         });
     }, [inputFieldConfigs, localAlertTemplateProperties]);
 

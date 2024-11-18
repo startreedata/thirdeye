@@ -253,7 +253,8 @@ export const PreviewChartV3: FunctionComponent<PreviewChartProps> = ({
                         evaluationTimeRange={evaluationTimeRange}
                         hideCallToActionPrompt={hideCallToActionPrompt}
                         legendsPlacement={legendsPlacement}
-                        showLoadButton={!!disableReload}
+                        showDeleteIcon={false}
+                        showLoadButton={!disableReload}
                         onReloadClick={handleAutoRangeClick}
                     />
                 </LoadingErrorStateSwitch>

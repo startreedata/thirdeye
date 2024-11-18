@@ -1998,6 +1998,9 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                 hideCallToActionPrompt={
                                                                                     false
                                                                                 }
+                                                                                showDeleteIcon={
+                                                                                    false
+                                                                                }
                                                                                 onAlertPropertyChange={
                                                                                     onAlertPropertyChange
                                                                                 }

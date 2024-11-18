@@ -12,20 +12,20 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Grid } from "@material-ui/core";
+import { Icon } from "@iconify/react";
+import { Box, Button, Grid, ThemeProvider } from "@material-ui/core";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useOutletContext } from "react-router-dom";
 import { AlertDetails } from "../../components/alert-wizard-v2/alert-details/alert-details-v2.component";
+import { AlertNotifications } from "../../components/alert-wizard-v2/alert-notifications/alert-notifications.component";
 import { AlertTemplate } from "../../components/alert-wizard-v2/alert-template/alert-template-v2.component";
-import { Portal } from "../../components/portal/portal.component";
-import { WizardBottomBar } from "../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import { PageContentsGridV1 } from "../../platform/components";
-import { easyAlertStyles } from "../alerts-create-page/alerts-create-easy-page/alerts-create-easy-page.styles";
 import {
-    AlertsSimpleAdvancedJsonContainerPageOutletContextProps,
-    BOTTOM_BAR_ELEMENT_ID,
-} from "../alerts-edit-create-common/alerts-edit-create-common-page.interfaces";
+    createAlertPageTheme,
+    easyAlertStyles,
+} from "../alerts-create-page/alerts-create-easy-page/alerts-create-easy-page.styles";
+import { AlertsSimpleAdvancedJsonContainerPageOutletContextProps } from "../alerts-edit-create-common/alerts-edit-create-common-page.interfaces";
 
 export const AlertsUpdateAdvancedPage: FunctionComponent = () => {
     const { t } = useTranslation();
@@ -44,6 +44,8 @@ export const AlertsUpdateAdvancedPage: FunctionComponent = () => {
         isEditRequestInFlight,
         handleSubmitAlertClick,
         onPageExit,
+        selectedSubscriptionGroups,
+        handleSubscriptionGroupChange: onSubscriptionGroupsChange,
     } = useOutletContext<AlertsSimpleAdvancedJsonContainerPageOutletContextProps>();
 
     const classes = easyAlertStyles();
@@ -56,7 +58,7 @@ export const AlertsUpdateAdvancedPage: FunctionComponent = () => {
     }, []);
 
     return (
-        <>
+        <ThemeProvider theme={createAlertPageTheme}>
             <Box className={classes.backgroundContainer}>
                 <PageContentsGridV1>
                     <Grid item xs={12}>
@@ -82,21 +84,53 @@ export const AlertsUpdateAdvancedPage: FunctionComponent = () => {
                             }}
                         />
                     </Grid>
+                    <Grid item xs={12}>
+                        <AlertNotifications
+                            alert={alert}
+                            initiallySelectedSubscriptionGroups={
+                                selectedSubscriptionGroups
+                            }
+                            onSubscriptionGroupsChange={
+                                onSubscriptionGroupsChange
+                            }
+                        />
+                    </Grid>
                 </PageContentsGridV1>
 
-                <Portal containerId={BOTTOM_BAR_ELEMENT_ID}>
-                    <WizardBottomBar
-                        doNotWrapInContainer
-                        backButtonLabel={t("label.cancel")}
-                        handleBackClick={onPageExit}
-                        handleNextClick={() => handleSubmitAlertClick(alert)}
-                        nextButtonIsDisabled={
-                            !isSubmitBtnEnabled || isEditRequestInFlight
-                        }
-                        nextButtonLabel={submitBtnLabel}
-                    />
-                </Portal>
+                <Box
+                    display="flex"
+                    gridColumnGap={12}
+                    marginBottom={3}
+                    marginLeft={1}
+                    marginTop={3}
+                >
+                    <Button
+                        className={classes.button}
+                        color="primary"
+                        size="small"
+                        variant="outlined"
+                        onClick={onPageExit}
+                    >
+                        {t("label.cancel")}
+                    </Button>
+                    <Button
+                        className={classes.button}
+                        color="primary"
+                        size="small"
+                        onClick={() => {
+                            handleSubmitAlertClick(alert);
+                        }}
+                    >
+                        <Box component="span" display="flex" mr={0.5}>
+                            <Icon
+                                fontSize={16}
+                                icon="mdi:check-circle-outline"
+                            />
+                        </Box>
+                        <Box component="span">{t("label.update-alert")}</Box>
+                    </Button>
+                </Box>
             </Box>
-        </>
+        </ThemeProvider>
     );
 };

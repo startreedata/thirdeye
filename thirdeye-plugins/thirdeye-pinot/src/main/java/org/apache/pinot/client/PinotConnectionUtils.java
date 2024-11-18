@@ -136,7 +136,7 @@ public class PinotConnectionUtils {
           .build();
     } catch (final NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
       // This section shouldn't happen because we use Accept All Strategy
-      LOG.error("Failed to generate SSL context for Pinot in https.");
+      LOG.error("Failed to generate SSL context for Pinot in https.", e);
       throw new RuntimeException(e);
     }
   }

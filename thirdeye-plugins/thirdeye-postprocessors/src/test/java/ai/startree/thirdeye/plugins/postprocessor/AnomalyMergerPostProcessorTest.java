@@ -18,6 +18,7 @@ import static ai.startree.thirdeye.plugins.postprocessor.AnomalyMergerPostProces
 import static ai.startree.thirdeye.plugins.postprocessor.AnomalyMergerPostProcessor.newAfterReplayLabel;
 import static ai.startree.thirdeye.plugins.postprocessor.AnomalyMergerPostProcessor.newOutdatedLabel;
 import static ai.startree.thirdeye.spi.Constants.VANILLA_OBJECT_MAPPER;
+import static ai.startree.thirdeye.spi.util.AnomalyUtils.isIgnore;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -759,8 +760,16 @@ public class AnomalyMergerPostProcessorTest {
             .setIgnore(true)));
     final Interval detectionInterval = new Interval(JANUARY_1_2021_01H, JANUARY_1_2021_03H, UTC);
     final Set<AnomalyDTO> output = detectionMerger.merge(listOf(r1, r2), detectionInterval);
-    
-    // TODO CYRIL complete test
+
+    assertThat(output).isEqualTo(Set.of(e1, e2));
+    assertThat(e1.getAnomalyLabels()).isNull();
+    assertThat(isIgnore(e1)).isFalse();
+    assertThat(e2.getAnomalyLabels().size()).isEqualTo(1);
+    assertThat(isIgnore(e2)).isTrue();
+    // e1 create time was changed to trigger notification
+    assertThat(e1.getCreateTime().getTime()).isGreaterThan(0);
+    // e2 create time is not changed ()
+    assertThat(e1.getCreateTime().getTime()).isGreaterThan(0);
   }
 
   @Test(dataProvider = "rule3bisSameAsRule3Cases")

@@ -20,7 +20,7 @@ import { PageContentsCardV1 } from "../../../platform/components";
 import { TemplatePropertiesObject } from "../../../rest/dto/alert.interfaces";
 import { isValidISO8601 } from "../../../utils/alerts/alerts.util";
 import { AlertJsonEditorModal } from "../../alert-json-editor-modal/alert-json-editor-modal.component";
-import { PreviewChart } from "../../alert-wizard-v2/alert-template/preview-chart/preview-chart-v2.component";
+import { PreviewChartV3 } from "../../alert-wizard-v2/alert-template/preview-chart/preview-chart-v3.component";
 import { InputSection } from "../../form-basics/input-section/input-section.component";
 import { ParseMarkdown } from "../../parse-markdown/parse-markdown.component";
 import { SpecificPropertiesRendererV3 } from "./specific-properties-renderer/specific-properties-renderer.component-v3";
@@ -208,11 +208,17 @@ export const ThresholdSetupV3: FunctionComponent<ThresholdSetupProps> = ({
                 </Alert>
             ) : null}
 
-            <PreviewChart
+            <PreviewChartV3
                 hideCallToActionPrompt
                 alert={alert}
                 alertEvaluation={
-                    unsetProperties.length === 0 ? alertEvaluation : undefined
+                    unsetProperties.length === 0 &&
+                    invalidProperties.length === 0
+                        ? alertEvaluation
+                        : undefined
+                }
+                disableReload={
+                    unsetProperties.length > 0 || invalidProperties.length > 0
                 }
                 hasAutoReload={false}
                 onAlertPropertyChange={onAlertPropertyChange}

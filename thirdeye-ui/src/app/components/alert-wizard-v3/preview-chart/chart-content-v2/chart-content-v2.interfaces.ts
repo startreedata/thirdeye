@@ -29,4 +29,5 @@ export interface ChartContentProps {
     onAlertPropertyChange?: (contents: Partial<EditableAlert>) => void;
     evaluationTimeRange: TimeRange;
     legendsPlacement?: `${LegendPlacement}`;
+    showDimensionSearch?: boolean;
 }

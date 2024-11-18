@@ -31,20 +31,25 @@ export const TimeRangeButtonWithContext: FunctionComponent<TimeRangeButtonWithCo
         btnGroupColor = "secondary",
         hideQuickExtend,
         timezone,
+        defaultTimeRange,
     }) => {
         const { recentCustomTimeRangeDurations, setTimeRangeDuration } =
             useTimeRange();
         const [searchParams, setSearchParams] = useSearchParams();
         const timeRangeDuration = useMemo(() => {
-            return {
-                [TimeRangeQueryStringKey.TIME_RANGE]: TimeRange.CUSTOM,
-                [TimeRangeQueryStringKey.START_TIME]: Number(
-                    searchParams.get(TimeRangeQueryStringKey.START_TIME)
-                ),
-                [TimeRangeQueryStringKey.END_TIME]: Number(
-                    searchParams.get(TimeRangeQueryStringKey.END_TIME)
-                ),
-            };
+            if (!defaultTimeRange) {
+                return {
+                    [TimeRangeQueryStringKey.TIME_RANGE]: TimeRange.CUSTOM,
+                    [TimeRangeQueryStringKey.START_TIME]: Number(
+                        searchParams.get(TimeRangeQueryStringKey.START_TIME)
+                    ),
+                    [TimeRangeQueryStringKey.END_TIME]: Number(
+                        searchParams.get(TimeRangeQueryStringKey.END_TIME)
+                    ),
+                };
+            }
+
+            return defaultTimeRange;
         }, [searchParams]);
 
         const onHandleTimeRangeChange = (

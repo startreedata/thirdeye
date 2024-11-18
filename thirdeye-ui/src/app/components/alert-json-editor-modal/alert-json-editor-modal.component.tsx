@@ -21,7 +21,7 @@ import { EditableAlert } from "../../rest/dto/alert.interfaces";
 import { AlertJsonEditorModalProps } from "./alert-json-editor-modal.interfaces";
 
 export const AlertJsonEditorModal: FunctionComponent<AlertJsonEditorModalProps> =
-    ({ alert, onSubmitChanges }) => {
+    ({ alert, onSubmitChanges, isReadOnly }) => {
         const { t } = useTranslation();
         const { showDialog } = useDialogProviderV1();
 
@@ -46,7 +46,8 @@ export const AlertJsonEditorModal: FunctionComponent<AlertJsonEditorModalProps> 
                     />
                 ),
                 width: "md",
-                okButtonText: t("label.apply-changes"),
+                okButtonText: isReadOnly ? "" : t("label.apply-changes"),
+                hideOkButton: isReadOnly,
                 cancelButtonText: t("label.cancel"),
                 onOk: () => {
                     setLocalAlert((current) => {

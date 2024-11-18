@@ -27,6 +27,12 @@ import {
     generateDateRangeMonthsFromNow,
 } from "../../utils/routes/routes.util";
 
+const AlertsCreateUpdated = lazy(() =>
+    import(
+        /* webpackChunkName: "alerts-all-page" */ "../../pages/create-alert"
+    ).then((module) => ({ default: module.CreateAlert }))
+);
+
 const AlertsAllPage = lazy(() =>
     import(
         /* webpackChunkName: "alerts-all-page" */ "../../pages/alerts-all-page-v2/alerts-all-page.component"
@@ -158,6 +164,16 @@ export const AlertsRouter: FunctionComponent = () => {
 
                 {/* Alerts create path */}
                 <Route path={`${AppRouteRelative.ALERTS_CREATE}/*`}>
+                    <Route
+                        element={
+                            <CancelAPICallsOnPageUnload
+                                key={AppRouteRelative.ALERTS_ALL}
+                            >
+                                <AlertsCreateUpdated />
+                            </CancelAPICallsOnPageUnload>
+                        }
+                        path="updated"
+                    />
                     <Route
                         index
                         element={

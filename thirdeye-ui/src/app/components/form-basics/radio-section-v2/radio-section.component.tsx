@@ -32,6 +32,7 @@ export const RadioSection: FunctionComponent<RadioSectionProps> = ({
     options,
     subText,
     value,
+    preventDoubleTrigger,
 }) => {
     const classes = radioInputStyles();
 
@@ -50,6 +51,16 @@ export const RadioSection: FunctionComponent<RadioSectionProps> = ({
                     row
                     aria-labelledby="demo-row-radio-buttons-group-label"
                     value={value || undefined}
+                    onChange={(e, newValue) => {
+                        if (preventDoubleTrigger) {
+                            const selectedOption = options.find(
+                                (option) => option.value === newValue
+                            );
+                            if (selectedOption && selectedOption.onClick) {
+                                selectedOption.onClick(e);
+                            }
+                        }
+                    }}
                 >
                     {options.map((item) => (
                         <Box
@@ -71,7 +82,9 @@ export const RadioSection: FunctionComponent<RadioSectionProps> = ({
                                 disabled={item.disabled}
                                 label={item.label}
                                 value={item.value}
-                                onClick={item.onClick}
+                                onClick={(e) => {
+                                    !preventDoubleTrigger && item.onClick(e);
+                                }}
                             />
                             {!!item.tooltipText && (
                                 <Tooltip

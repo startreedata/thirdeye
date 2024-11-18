@@ -732,6 +732,36 @@ public class AnomalyMergerPostProcessorTest {
       assertThat(e2.getCreateTime().getTime()).isEqualTo(0);
     }
   }
+  
+  @Test
+  public void testReplayRule3bisUC1FollowedByAnomalyInMergeFrame() {
+    // ensure the Rule 3bis UC1 implementation does not break merging behavior for anomalies that follow
+    // existing: (existing parentWithNoChild: ignored, not notified), existing parentWithNoChild ignored)
+    // at replay (replay (not ignored), replay ignored)
+    // input of doMerge (existing parentWithNoChild: ignored, not notified), replay (not ignored), existing parentWithNoChild ignored, replay ignored)
+    final AnomalyDTO e1 = existingAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H)
+        .setAnomalyLabels(listOf(new AnomalyLabelDTO().setName("NEW_LABEL").setIgnore(true)));
+    final AnomalyDTO e2 = existingAnomaly(JANUARY_1_2021_02H, JANUARY_1_2021_03H)
+        .setAnomalyLabels(listOf(new AnomalyLabelDTO().setName("SOME_LABEL")
+            .setIgnore(true)));
+    existingAnomalies = listOf(e1, e2);
+    // no merge
+    detectionSpec.setMergeMaxGap("PT0S");
+    detectionSpec.setReNotifyAbsoluteThreshold(-1.);
+    detectionSpec.setReNotifyPercentageThreshold(-1.);
+    detectionMerger = new AnomalyMergerPostProcessor(detectionSpec);
+
+    // new anomaly at 1H is not ignored anymore
+    final AnomalyDTO r1 = newAnomaly(JANUARY_1_2021_01H, JANUARY_1_2021_02H);
+    // anomaly at 2H does not change
+    final AnomalyDTO r2 = newAnomaly(JANUARY_1_2021_02H, JANUARY_1_2021_03H)
+        .setAnomalyLabels(listOf(new AnomalyLabelDTO().setName("SOME_LABEL")
+            .setIgnore(true)));
+    final Interval detectionInterval = new Interval(JANUARY_1_2021_01H, JANUARY_1_2021_03H, UTC);
+    final Set<AnomalyDTO> output = detectionMerger.merge(listOf(r1, r2), detectionInterval);
+    
+    // TODO CYRIL complete test
+  }
 
   @Test(dataProvider = "rule3bisSameAsRule3Cases")
   public void testReplayRule3BisBehaveLikeRule3WithChildInsideParentUpdated(

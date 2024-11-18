@@ -36,15 +36,6 @@ export const useAppHeaderStyles = (
                 : "end",
             gap: "50px",
         },
-        dropdownContainer: {
-            background: "#fff",
-            borderRadius: "5px",
-            padding: "4px",
-            display: "flex",
-            gap: "8px",
-            border: "1px solid #bed3e4",
-            alignItems: "center",
-        },
         selectEmpty: {
             padding: 0,
             borderBottom: 0,
@@ -69,3 +60,26 @@ export const useAppHeaderStyles = (
             width: "16px",
         },
     });
+
+export const useWorkpsaceSwitcherStyles = makeStyles({
+    workspaceContainer: {
+        background: "#fff",
+        borderRadius: "5px",
+        padding: "4px",
+        display: "flex",
+        gap: "8px",
+        border: "1px solid #bed3e4",
+        alignItems: "center",
+        width: "400px",
+    },
+    autocomplete: {
+        "& .MuiOutlinedInput-notchedOutline": {
+            border: "none",
+        },
+    },
+    listbox: {
+        "& li": {
+            padding: "0px",
+        },
+    },
+});

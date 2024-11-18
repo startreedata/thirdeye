@@ -152,7 +152,7 @@ public class DataSourceCache {
     try {
       dataSource.close();
     } catch (final Exception e) {
-      LOG.error("Datasource {} was not flushed gracefully.", dataSource.getName());
+      LOG.error("Datasource {} was not flushed gracefully.", dataSource.getName(), e);
     }
   }
 

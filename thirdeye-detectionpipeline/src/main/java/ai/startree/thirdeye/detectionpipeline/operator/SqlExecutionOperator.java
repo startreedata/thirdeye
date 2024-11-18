@@ -103,7 +103,7 @@ public class SqlExecutionOperator extends DetectionPipelineOperator {
     try {
       dataTableToSqlAdapter.loadTables(connection, datatables);
     } catch (final SQLException e) {
-      LOG.error("Failed to load tables");
+      LOG.error("Failed to load tables", e);
       throw e;
     }
   }

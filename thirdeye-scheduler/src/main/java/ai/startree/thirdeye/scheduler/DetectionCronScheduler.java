@@ -117,7 +117,7 @@ public class DetectionCronScheduler implements Runnable {
         startJob(alert, detectionJob);
       }
     } catch (final Exception e) {
-      LOG.error("Error creating/updating job key for detection config {}", alert.getId());
+      LOG.error("Error creating/updating job key for detection config {}", alert.getId(), e);
     }
   }
 
@@ -136,7 +136,7 @@ public class DetectionCronScheduler implements Runnable {
           stopJob(jobKey);
         }
       } catch (final Exception e) {
-        LOG.error("Error removing job key {}", jobKey);
+        LOG.error("Error removing job key {}", jobKey, e);
       }
     }
   }

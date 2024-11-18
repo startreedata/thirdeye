@@ -137,7 +137,7 @@ public class AnomalyResolutionTest {
     response = client.request("api/data-sources")
         .post(Entity.json(List.of(pinotDataSourceApi)));
     assert200(response);
-    final DataSourceApi dataSourceInResponse = response.readEntity(DATASOURCE_LIST_TYPE).get(0);
+    final DataSourceApi dataSourceInResponse = response.readEntity(DATASOURCE_LIST_TYPE).getFirst();
     pinotDataSourceApi.setId(dataSourceInResponse.getId());
 
     // create dataset
@@ -158,7 +158,7 @@ public class AnomalyResolutionTest {
         .post(Entity.json(List.of(ALERT_API)));
     assertThat(createResponse.getStatus()).isEqualTo(200);
     final List<AlertApi> alerts = createResponse.readEntity(ALERT_LIST_TYPE);
-    alertId = alerts.get(0).getId();
+    alertId = alerts.getFirst().getId();
 
     final AlertDTO alert = alertManager.findById(alertId);
     final AlertTemplateDTO renderedTemplate = alertTemplateRenderer.renderAlert(alert);
@@ -182,7 +182,7 @@ public class AnomalyResolutionTest {
     try (final Response r = client.request("api/subscription-groups")
         .post(Entity.json(List.of(SUBSCRIPTION_GROUP_API)))) {
       assertThat(r.getStatus()).isEqualTo(200);
-      subscriptionGroupId = r.readEntity(SUBSCRIPTION_GROUP_LIST_TYPE).get(0).getId();
+      subscriptionGroupId = r.readEntity(SUBSCRIPTION_GROUP_LIST_TYPE).getFirst().getId();
     }
   }
 
@@ -231,7 +231,7 @@ public class AnomalyResolutionTest {
     final NotificationPayloadApi notificationPayload = nsf.getNotificationPayload();
     assertThat(notificationPayload.getAnomalyReports()).hasSize(1);
 
-    final AnomalyApi anomalyApi = notificationPayload.getAnomalyReports().get(0).getAnomaly();
+    final AnomalyApi anomalyApi = notificationPayload.getAnomalyReports().getFirst().getAnomaly();
     assertThat(anomalyApi.getStartTime()).isEqualTo(new Date(epoch("2020-02-17 00:00")));
     assertThat(anomalyApi.getEndTime()).isEqualTo(new Date(epoch("2020-02-21 00:00")));
   }
@@ -296,7 +296,7 @@ public class AnomalyResolutionTest {
     final NotificationPayloadApi notificationPayload = nsf.getNotificationPayload();
     assertThat(notificationPayload.getAnomalyReports()).hasSize(1);
 
-    final AnomalyApi anomalyApi = notificationPayload.getAnomalyReports().get(0).getAnomaly();
+    final AnomalyApi anomalyApi = notificationPayload.getAnomalyReports().getFirst().getAnomaly();
     assertThat(anomalyApi.getStartTime()).isEqualTo(new Date(epoch("2020-03-02 00:00")));
     assertThat(anomalyApi.getEndTime()).isEqualTo(new Date(epoch("2020-03-03 00:00")));
   }

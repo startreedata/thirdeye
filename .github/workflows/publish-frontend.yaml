@@ -29,10 +29,10 @@ jobs:
           cache: "npm"
           cache-dependency-path: './thirdeye-ui/package-lock.json'
       # java is required to get the backend project version with maven
-      - name: Install JDK 17
+      - name: Install JDK 21
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: 'temurin'
       - name: Generate frontend distribution
         id: generate-frontend-dist

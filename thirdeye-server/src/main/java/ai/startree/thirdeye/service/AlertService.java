@@ -410,7 +410,8 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
       // replay from JAN 1 2000 because replaying from 1970 is too slow with small granularity
       LOG.error("Could not fetch insights for alert {}. Using the minimum time allowed. {}",
           dto,
-          minimumOnboardingStartTime);
+          minimumOnboardingStartTime,
+          e);
       return minimumOnboardingStartTime;
     }
   }

@@ -54,19 +54,16 @@ public class DtoIndexMapper {
   private static <E extends AbstractDTO> AbstractIndexEntity buildAbstractIndexEntity(final E pojo,
       final Class<? extends AbstractIndexEntity> indexClass)
       throws InstantiationException, IllegalAccessException {
-    if (pojo instanceof AnomalyDTO) {
-      return IndexMapper.INSTANCE.toIndexEntity((AnomalyDTO) pojo);
-    } else if (pojo instanceof EnumerationItemDTO) {
-      return IndexMapper.INSTANCE.toIndexEntity((EnumerationItemDTO) pojo);
-    } else if (pojo instanceof RcaInvestigationDTO) {
-      return IndexMapper.INSTANCE.toIndexEntity((RcaInvestigationDTO) pojo);
-    }
-
-    return buildWithLegacyModelMapper(pojo, indexClass);
+    return switch (pojo) {
+      case AnomalyDTO obj -> IndexMapper.INSTANCE.toIndexEntity(obj);
+      case EnumerationItemDTO obj -> IndexMapper.INSTANCE.toIndexEntity(obj);
+      case RcaInvestigationDTO obj -> IndexMapper.INSTANCE.toIndexEntity(obj);
+      case null, default -> buildWithLegacyModelMapper(pojo, indexClass);
+    };
   }
 
   /**
-   * TODO spyne remove modelmapper code and dependencies
+   * TODO cyril remove modelmapper code and dependencies
    */
   private static <E extends AbstractDTO> AbstractIndexEntity buildWithLegacyModelMapper(
       final E pojo,

@@ -111,10 +111,10 @@ public class ColdStartPostProcessorTest {
     assertThat(resultMap).hasSize(2);
     final List<AnomalyDTO> res1Anomalies = resultMap.get(RES_1_KEY).getAnomalies();
     assertThat(res1Anomalies).hasSize(2);
-    final AnomalyDTO firstAnomaly = res1Anomalies.get(0);
+    final AnomalyDTO firstAnomaly = res1Anomalies.getFirst();
     // first anomaly is in cold start zone
     assertThat(firstAnomaly.getAnomalyLabels()).hasSize(1);
-    final AnomalyLabelDTO label = firstAnomaly.getAnomalyLabels().get(0);
+    final AnomalyLabelDTO label = firstAnomaly.getAnomalyLabels().getFirst();
     assertThat(label.getName()).isEqualTo(labelName(Period.days(28)));
     assertThat(label.isIgnore()).isTrue();
     // second anomaly is out of cold start zone
@@ -123,10 +123,10 @@ public class ColdStartPostProcessorTest {
 
     final List<AnomalyDTO> res2Anomalies = resultMap.get(RES_2_KEY).getAnomalies();
     assertThat(res2Anomalies).hasSize(1);
-    final AnomalyDTO res2SingleAnomaly = res2Anomalies.get(0);
+    final AnomalyDTO res2SingleAnomaly = res2Anomalies.getFirst();
     // first anomaly is in cold start zone
     assertThat(res2SingleAnomaly.getAnomalyLabels()).hasSize(1);
-    final AnomalyLabelDTO res2Label = res2SingleAnomaly.getAnomalyLabels().get(0);
+    final AnomalyLabelDTO res2Label = res2SingleAnomaly.getAnomalyLabels().getFirst();
     assertThat(res2Label.getName()).isEqualTo(labelName(Period.days(28)));
     assertThat(res2Label.isIgnore()).isTrue();
   }
@@ -143,8 +143,8 @@ public class ColdStartPostProcessorTest {
     postProcessor.postProcess(UTC_DETECTION_INTERVAL, resultMap);
 
     final List<AnomalyDTO> res1Anomalies = resultMap.get(RES_1_KEY).getAnomalies();
-    final AnomalyDTO firstAnomaly = res1Anomalies.get(0);
-    final AnomalyLabelDTO label = firstAnomaly.getAnomalyLabels().get(0);
+    final AnomalyDTO firstAnomaly = res1Anomalies.getFirst();
+    final AnomalyLabelDTO label = firstAnomaly.getAnomalyLabels().getFirst();
     assertThat(label.isIgnore()).isFalse();
   }
 
@@ -167,7 +167,7 @@ public class ColdStartPostProcessorTest {
     postProcessor.postProcess(UTC_DETECTION_INTERVAL, resultMap);
 
     final List<AnomalyDTO> res1Anomalies = resultMap.get(RES_1_KEY).getAnomalies();
-    final AnomalyDTO firstAnomaly = res1Anomalies.get(0);
+    final AnomalyDTO firstAnomaly = res1Anomalies.getFirst();
     final List<AnomalyLabelDTO> labels = firstAnomaly.getAnomalyLabels();
     assertThat(labels).hasSize(2);
     final AnomalyLabelDTO label1 = labels.get(0);

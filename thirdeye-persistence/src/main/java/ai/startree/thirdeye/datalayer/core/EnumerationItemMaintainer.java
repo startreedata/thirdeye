@@ -156,7 +156,7 @@ public class EnumerationItemMaintainer {
       return source;
     } else if (matching.size() == 1) {
       // already exists
-      return matching.get(0);
+      return matching.getFirst();
     } else {
       final List<Long> ids = matching.stream()
           .map(EnumerationItemDTO::getId)
@@ -166,7 +166,7 @@ public class EnumerationItemMaintainer {
           ids);
       // returning the first item of the list 
       // fixme cyril kept the existing behavior but we should throw an error - the system is in an inconsistent state
-      return matching.get(0);
+      return matching.getFirst();
     }
   }
 

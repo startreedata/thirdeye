@@ -43,7 +43,7 @@ public class MetricConfigManagerImpl extends AbstractManagerImpl<MetricConfigDTO
         .stream().filter(d -> Objects.equals(d.namespace(), namespace)).toList();
     if (CollectionUtils.isNotEmpty(list)) {
       // TODO CYRIL behavior is different in AbstractManager#findUniqueByNameAndNamespace --> clarify
-      return list.get(0);
+      return list.getFirst();
     }
     return null;
   }

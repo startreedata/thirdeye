@@ -170,7 +170,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
       return thirdEyeResultSetGroup;
     } catch (final ExecutionException e) {
       LOG.error("Failed to execute SQL: {} with options {}", pinotQuery.getQuery(),
-          pinotQuery.getOptions());
+          pinotQuery.getOptions(), e);
       LOG.error("queryCache.stats: {}", queryCache.stats());
       throw e;
     }

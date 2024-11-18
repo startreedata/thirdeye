@@ -24,7 +24,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Map;
 import org.apache.pinot.client.Connection;
-import org.apache.pinot.client.PinotConnectionUtils;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.testng.annotations.Test;

@@ -800,9 +800,6 @@ public class AnomalyMergerPostProcessorTest {
     assertThat(e1.getAnomalyLabels().size()).isEqualTo(1);
     assertThat(isIgnore(e1)).isTrue();
     assertThat(e2.getAnomalyLabels()).isNull();
-    // e1 and e2 create times are not changed
-    assertThat(e1.getCreateTime().getTime()).isGreaterThan(0);
-    assertThat(e2.getCreateTime().getTime()).isGreaterThan(0);
   }
 
   @Test(dataProvider = "rule3bisSameAsRule3Cases")

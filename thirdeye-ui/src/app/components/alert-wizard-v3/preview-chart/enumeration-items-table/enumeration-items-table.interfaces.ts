@@ -26,4 +26,5 @@ export interface EnumerationItemsTableProps {
     alert?: any;
     evaluationTimeRange: TimeRange;
     legendsPlacement?: `${LegendPlacement}`;
+    showDimensionSearch?: boolean;
 }

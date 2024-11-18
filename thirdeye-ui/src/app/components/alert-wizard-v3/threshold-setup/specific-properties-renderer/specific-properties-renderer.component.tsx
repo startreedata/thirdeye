@@ -13,7 +13,7 @@
  * the License.
  */
 import { Slider, TextField } from "@material-ui/core";
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { SliderAlgorithmOptionInputFieldConfig } from "../threshold-setup.interfaces";
 import { SpecificPropertiesRendererProps } from "./specific-properties-renderer.interfaces";
@@ -34,6 +34,22 @@ export const SpecificPropertiesRenderer: FunctionComponent<SpecificPropertiesRen
         ): void => {
             onAlertPropertyChange(propertyName, newValue);
         };
+
+        useEffect(() => {
+            if (
+                inputFieldConfig.type === "slider" &&
+                (existingValue === undefined || existingValue === null)
+            ) {
+                const sliderFieldConfig =
+                    inputFieldConfig as SliderAlgorithmOptionInputFieldConfig;
+                const middlePoint =
+                    (sliderFieldConfig.min + sliderFieldConfig.max) / 2;
+                handlePropertyChange(
+                    sliderFieldConfig.templatePropertyName,
+                    middlePoint.toString()
+                );
+            }
+        }, []);
 
         if (inputFieldConfig.type === "slider") {
             const sliderFieldConfig =

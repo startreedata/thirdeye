@@ -62,6 +62,11 @@ export const AdditonalFiltersDrawer: FunctionComponent<AdditonalFiltersDrawerPro
             onApply(localCopyOfProperties);
         };
 
+        const handleClose = (): void => {
+            setLocalCopyOfProperties({ ...defaultValues });
+            onClose();
+        };
+
         return (
             <Drawer
                 PaperProps={{
@@ -69,7 +74,7 @@ export const AdditonalFiltersDrawer: FunctionComponent<AdditonalFiltersDrawerPro
                 }}
                 anchor="right"
                 open={isOpen}
-                onClose={onClose}
+                onClose={handleClose}
             >
                 <form onSubmit={onSubmit}>
                     <Box
@@ -85,7 +90,7 @@ export const AdditonalFiltersDrawer: FunctionComponent<AdditonalFiltersDrawerPro
                             cursor="pointer"
                             fontSize={24}
                             icon="ic:round-close"
-                            onClick={onClose}
+                            onClick={handleClose}
                         />
                     </Box>
                     {emptyMessage ? (
@@ -94,7 +99,7 @@ export const AdditonalFiltersDrawer: FunctionComponent<AdditonalFiltersDrawerPro
                         <>
                             <Box className={classes.content} flex={1}>
                                 <Box>
-                                    {availableConfigurations.map((config) => (
+                                    {availableConfigurations?.map((config) => (
                                         <Box
                                             className={classes.configItem}
                                             key={config.name}
@@ -169,7 +174,7 @@ export const AdditonalFiltersDrawer: FunctionComponent<AdditonalFiltersDrawerPro
                                     className={classes.actionSecondary}
                                     size="medium"
                                     variant="contained"
-                                    onClick={onClose}
+                                    onClick={handleClose}
                                 >
                                     {t("label.close")}
                                 </Button>

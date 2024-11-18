@@ -44,6 +44,7 @@ export const ChartContentV2: FunctionComponent<ChartContentProps> = ({
     hideCallToActionPrompt,
     evaluationTimeRange,
     legendsPlacement,
+    showDimensionSearch,
 }) => {
     const sharedWizardClasses = useAlertWizardV2Styles();
     const previewChartClasses = usePreviewChartStyles();
@@ -98,7 +99,7 @@ export const ChartContentV2: FunctionComponent<ChartContentProps> = ({
         }
 
         return timeseriesConfiguration;
-    }, [workingDetectionEvaluations]);
+    }, [workingDetectionEvaluations, showOnlyActivity]);
 
     const handleDeleteEnumerationItemClick = (
         detectionEvaluation: DetectionEvaluation
@@ -212,6 +213,7 @@ export const ChartContentV2: FunctionComponent<ChartContentProps> = ({
                                     alertEvaluation?.alert.template
                                 )}
                                 legendsPlacement={legendsPlacement}
+                                showDimensionSearch={showDimensionSearch}
                                 showOnlyActivity={showOnlyActivity}
                                 timezone={determineTimezoneFromAlertInEvaluation(
                                     alertEvaluation?.alert.template

@@ -51,14 +51,6 @@
           <artifactId>pinot-segment-spi</artifactId>
         </exclusion>
         <exclusion>
-          <groupId>org.apache.calcite</groupId>
-          <artifactId>calcite-core</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.calcite</groupId>
-          <artifactId>calcite-babel</artifactId>
-        </exclusion>
-        <exclusion>
           <groupId>org.glassfish.jersey.containers</groupId>
           <artifactId>jersey-container-grizzly2-http</artifactId>
         </exclusion>

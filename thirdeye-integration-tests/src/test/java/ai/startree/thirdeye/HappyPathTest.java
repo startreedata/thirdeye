@@ -64,6 +64,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.dropwizard.testing.DropwizardTestSupport;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -86,6 +87,7 @@ import org.testng.TestException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
+import org.testng.annotations.Factory;
 import org.testng.annotations.Test;
 
 /**
@@ -107,6 +109,17 @@ import org.testng.annotations.Test;
  * - test authorization
  */
 public class HappyPathTest {
+
+  @Factory
+  public static Object[] createInstances() {
+    return Arrays.stream(PinotVersion.values()).map(HappyPathTest::new).toArray();
+  }
+
+  private final PinotVersion pinotVersion;
+
+  public HappyPathTest(final PinotVersion pinotVersion) {
+    this.pinotVersion = pinotVersion;
+  }
 
   public static final String THRESHOLD_TEMPLATE_NAME = "startree-threshold";
   private static final Logger log = LoggerFactory.getLogger(HappyPathTest.class);
@@ -140,8 +153,7 @@ public class HappyPathTest {
 
   @BeforeClass
   public void beforeClass() throws Exception {
-    final Future<DataSourceApi> pinotDataSourceFuture = PinotDataSourceManager.getPinotDataSourceApi(
-        PinotVersion.recommendedVersion());
+    final Future<DataSourceApi> pinotDataSourceFuture = PinotDataSourceManager.getPinotDataSourceApi(pinotVersion);
     final DatabaseConfiguration dbConfiguration = MySqlTestDatabase.sharedDatabaseConfiguration();
 
     // Setup plugins dir so ThirdEye can load it

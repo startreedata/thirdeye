@@ -35,6 +35,7 @@ public class PinotContainer extends GenericContainer<PinotContainer> {
   public static final int DEFAULT_ZOOKEEPER_PORT = 2123;
   public static final int DEFAULT_CONTROLLER_HTTP_PORT = 9000;
   public static final int DEFAULT_BROKER_HTTP_PORT = 8000;
+  private final DockerImageName dockerImageName;
 
   public enum PinotVersion {
     v0_11_1("0.11.0", "0.11.0-arm64"),
@@ -83,7 +84,7 @@ public class PinotContainer extends GenericContainer<PinotContainer> {
         final BufferedReader reader = new BufferedReader(inputStream);
         try (inputStream; reader) {
           final String cpuBrand = reader.readLine().trim();
-          if (cpuBrand.startsWith("Apple M1")) {
+          if (cpuBrand.startsWith("Apple M")) {
             return "arm64";
           }
         }
@@ -99,6 +100,7 @@ public class PinotContainer extends GenericContainer<PinotContainer> {
     dockerImageName.assertCompatibleWith(DEFAULT_IMAGE_NAME);
     withExposedPorts(DEFAULT_ZOOKEEPER_PORT, DEFAULT_CONTROLLER_HTTP_PORT,
         DEFAULT_BROKER_HTTP_PORT);
+    this.dockerImageName = dockerImageName;
   }
 
   public PinotContainer(final PinotVersion pinotVersion, final List<AddTable> addTables, final List<ImportData> importDataList) {
@@ -134,7 +136,7 @@ public class PinotContainer extends GenericContainer<PinotContainer> {
     }
 
     withCreateContainerCmdModifier(
-        createContainerCmd -> createContainerCmd.withName("pinot-quickstart-test"));
+        createContainerCmd -> createContainerCmd.withName("pinot-quickstart-test-" + dockerImageName.getVersionPart()));
     withCommand("QuickStart", "-type", "EMPTY");
     waitingFor(
         new WaitAllStrategy()
@@ -210,5 +212,10 @@ public class PinotContainer extends GenericContainer<PinotContainer> {
 
   public Integer getZookeeperPort() {
     return getMappedPort(DEFAULT_ZOOKEEPER_PORT);
+  }
+
+  public static void main(String[] args) {
+    System.out.println(hostArch());
+    System.out.println(hostArch());
   }
 }

@@ -116,6 +116,7 @@ export const AlertsUpdateAdvancedPage: FunctionComponent = () => {
                     <Button
                         className={classes.button}
                         color="primary"
+                        disabled={!isSubmitBtnEnabled || isEditRequestInFlight}
                         size="small"
                         onClick={() => {
                             handleSubmitAlertClick(alert);
@@ -127,7 +128,7 @@ export const AlertsUpdateAdvancedPage: FunctionComponent = () => {
                                 icon="mdi:check-circle-outline"
                             />
                         </Box>
-                        <Box component="span">{t("label.update-alert")}</Box>
+                        <Box component="span">{submitBtnLabel}</Box>
                     </Button>
                 </Box>
             </Box>

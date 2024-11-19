@@ -47,10 +47,6 @@
       <artifactId>pinot-java-client</artifactId>
       <exclusions>
         <exclusion>
-          <groupId>org.apache.pinot</groupId>
-          <artifactId>pinot-segment-spi</artifactId>
-        </exclusion>
-        <exclusion>
           <groupId>org.glassfish.jersey.containers</groupId>
           <artifactId>jersey-container-grizzly2-http</artifactId>
         </exclusion>
@@ -130,14 +126,6 @@
         <exclusion>
           <groupId>jakarta.servlet</groupId>
           <artifactId>jakarta.servlet-api</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.thrift</groupId>
-          <artifactId>libthrift</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.thrift</groupId>
-          <artifactId>libthrift</artifactId>
         </exclusion>
         <exclusion>
           <groupId>org.xerial.snappy</groupId>

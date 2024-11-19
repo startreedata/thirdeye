@@ -77,6 +77,7 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import org.apache.pinot.testcontainer.PinotContainer.PinotVersion;
 import org.joda.time.DateTimeZone;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
@@ -139,7 +140,8 @@ public class HappyPathTest {
 
   @BeforeClass
   public void beforeClass() throws Exception {
-    final Future<DataSourceApi> pinotDataSourceFuture = PinotDataSourceManager.getPinotDataSourceApi();
+    final Future<DataSourceApi> pinotDataSourceFuture = PinotDataSourceManager.getPinotDataSourceApi(
+        PinotVersion.recommendedVersion());
     final DatabaseConfiguration dbConfiguration = MySqlTestDatabase.sharedDatabaseConfiguration();
 
     // Setup plugins dir so ThirdEye can load it

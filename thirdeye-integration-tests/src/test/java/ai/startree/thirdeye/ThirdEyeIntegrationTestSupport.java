@@ -26,6 +26,7 @@ import io.dropwizard.testing.DropwizardTestSupport;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import javax.ws.rs.client.Client;
+import org.apache.pinot.testcontainer.PinotContainer.PinotVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +44,7 @@ public class ThirdEyeIntegrationTestSupport {
   }
 
   public void setup() throws Exception {
-    pinotDataSourceFuture = PinotDataSourceManager.getPinotDataSourceApi();
+    pinotDataSourceFuture = PinotDataSourceManager.getPinotDataSourceApi(PinotVersion.recommendedVersion());
     dbConfiguration = MySqlTestDatabase.sharedDatabaseConfiguration();
 
     if (useLocalMysqlInstance()) {

@@ -22,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.Container;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.Network;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.containers.wait.strategy.WaitAllStrategy;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,25 +36,39 @@ public class PinotContainer extends GenericContainer<PinotContainer> {
   public static final int DEFAULT_CONTROLLER_HTTP_PORT = 9000;
   public static final int DEFAULT_BROKER_HTTP_PORT = 8000;
 
+  public enum PinotVersion {
+    v0_11_1("0.11.0", "0.11.0-arm64"),
+    v0_12_1("0.12.1", "0.12.1"),
+    v1_0_0("1.0.0", "1.0.0"),
+    v1_1_0("1.1.0", "1.1.0"),
+    v1_2_0("1.2.0", "1.2.0");
+    
+    private final String amdTag;
+    private final String armTag;
+    
+    PinotVersion(final String amdTag, final String armTag) {
+      this.amdTag = amdTag;
+      this.armTag = armTag;
+    }
+    
+    public String getTag() {
+      if (hostArch().endsWith("arm64")) {
+        return armTag;
+      }
+      return amdTag;
+    }
+    
+    // if the test does not run for every supported Pinot version, use this version
+    public static PinotVersion recommendedVersion() {
+      return v1_1_0;
+    }
+  }
+  
   private static final DockerImageName DEFAULT_IMAGE_NAME = DockerImageName.parse(
       "apachepinot/pinot");
-  private static final String DEFAULT_TAG = "1.1.0";
-  private static final String DEFAULT_TAG_ARM64 = DEFAULT_TAG;
   public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private List<AddTable> addTables;
   private List<ImportData> importDataList;
-  private Network network;
-
-  public PinotContainer() {
-    this(DEFAULT_IMAGE_NAME.withTag(imageTag()));
-  }
-
-  private static String imageTag() {
-    if (hostArch().endsWith("arm64")) {
-      return DEFAULT_TAG_ARM64;
-    }
-    return DEFAULT_TAG;
-  }
 
   // Return the cpu arch for the Docker host.
   private static String hostArch() {
@@ -81,19 +94,15 @@ public class PinotContainer extends GenericContainer<PinotContainer> {
     return System.getProperty("os.arch");
   }
 
-  public PinotContainer(String pinotVersion) {
-    this(DEFAULT_IMAGE_NAME.withTag(pinotVersion));
-  }
-
-  public PinotContainer(final DockerImageName dockerImageName) {
+  private PinotContainer(final DockerImageName dockerImageName) {
     super(dockerImageName);
     dockerImageName.assertCompatibleWith(DEFAULT_IMAGE_NAME);
     withExposedPorts(DEFAULT_ZOOKEEPER_PORT, DEFAULT_CONTROLLER_HTTP_PORT,
         DEFAULT_BROKER_HTTP_PORT);
   }
 
-  public PinotContainer(List<AddTable> addTables, List<ImportData> importDataList) {
-    this();
+  public PinotContainer(final PinotVersion pinotVersion, final List<AddTable> addTables, final List<ImportData> importDataList) {
+    this(DEFAULT_IMAGE_NAME.withTag(pinotVersion.getTag()));
     this.addTables = addTables;
     this.importDataList = importDataList;
   }

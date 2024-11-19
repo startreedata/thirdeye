@@ -32,7 +32,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.apache.pinot.client.Connection;
 import org.apache.pinot.client.PinotClientException;
-import org.apache.pinot.client.Request;
 import org.apache.pinot.client.ResultSet;
 import org.apache.pinot.client.ResultSetGroup;
 import org.slf4j.Logger;
@@ -204,10 +203,9 @@ public class PinotQueryExecutor extends CacheLoader<PinotQuery, ThirdEyeResultSe
     try {
       final Connection connection = pinotConnectionProvider.get();
       final long start = System.nanoTime();
-      final String queryFormat = pinotQuery.isUseSql() ? SQL_QUERY_FORMAT : PQL_QUERY_FORMAT;
       final ResultSetGroup resultSetGroup = connection.execute(
           pinotQuery.getTableName(),
-          new Request(queryFormat, queryWithOptions)
+          queryWithOptions
       );
 
       final long end = System.nanoTime();

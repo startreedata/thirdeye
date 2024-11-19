@@ -24,7 +24,6 @@ import javax.annotation.Nullable;
 import org.apache.http.HttpHeaders;
 import org.apache.pinot.client.Connection;
 import org.apache.pinot.client.PinotClientException;
-import org.apache.pinot.client.PinotConnectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

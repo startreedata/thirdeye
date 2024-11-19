@@ -16,6 +16,7 @@ package ai.startree.thirdeye.plugins.datasource.pinot.restclient;
 import static ai.startree.thirdeye.spi.Constants.TWO_DIGITS_FORMATTER;
 import static java.util.Objects.requireNonNull;
 
+import ai.startree.thirdeye.plugins.datasource.pinot.PinotConnectionUtils;
 import ai.startree.thirdeye.plugins.datasource.pinot.PinotOauthUtils;
 import ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSourceConfig;
 import java.io.IOException;
@@ -25,7 +26,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.apache.http.HttpHeaders;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.pinot.client.PinotConnectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

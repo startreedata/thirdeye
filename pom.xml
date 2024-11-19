@@ -78,7 +78,7 @@
     <!-- See our internal ticket for more info https://startree.atlassian.net/browse/TE-1970 -->
     <mysql.connector.version>8.0.28</mysql.connector.version>
     <org.mapstruct.version>1.5.5.Final</org.mapstruct.version>
-    <pinot.version>0.10.0</pinot.version>
+    <pinot.version>1.2.0</pinot.version>
     <prometheus.version>0.11.0</prometheus.version>
     <quartz.version>2.3.2</quartz.version>
     <reflections.version>0.10.2</reflections.version>

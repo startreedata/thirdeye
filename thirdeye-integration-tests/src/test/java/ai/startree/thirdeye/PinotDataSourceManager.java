@@ -22,13 +22,16 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import org.apache.pinot.testcontainer.AddTable;
 import org.apache.pinot.testcontainer.ImportData;
 import org.apache.pinot.testcontainer.PinotContainer;
+import org.apache.pinot.testcontainer.PinotContainer.PinotVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,26 +51,27 @@ public class PinotDataSourceManager {
   private static final String TABLE_CONFIG_FILENAME = "table-config.json";
   private static final String DATA_FILENAME = "data.csv";
   private static final ExecutorService EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
-  private static PinotContainer instance;
+  // this map must be synchronized manually
+  private static final Map<PinotVersion, PinotContainer> versionToInstance = new HashMap<>();
 
   private PinotDataSourceManager() {
   }
 
-  private synchronized static PinotContainer getInstance() {
-    if (instance == null) {
-      instance = createPinotContainer();
+  private synchronized static PinotContainer getInstance(final PinotVersion pinotVersion) {
+    if (!versionToInstance.containsKey(pinotVersion)) {
+      final PinotContainer instance = createPinotContainer(pinotVersion);
       try {
         instance.start();
         instance.addTables();
       } catch (final IOException | InterruptedException e) {
         throw new RuntimeException("Could not launch Pinot for integration tests.");
       }
+      versionToInstance.put(pinotVersion, instance);
     }
-
-    return instance;
+    return versionToInstance.get(pinotVersion);
   }
 
-  private static PinotContainer createPinotContainer() {
+  private static PinotContainer createPinotContainer(final PinotVersion pinotVersion) {
     final URL datasetsBaseResource = PinotDataSourceManager.class.getResource("/datasets");
     requireNonNull(datasetsBaseResource);
 
@@ -89,21 +93,21 @@ public class PinotDataSourceManager {
       final File dataFile = Paths.get(datasetsBasePath, tableName, DATA_FILENAME).toFile();
       importDataList.add(new ImportData(batchJobSpecFile, dataFile));
     }
-    return new PinotContainer(addTableList, importDataList);
+    return new PinotContainer(pinotVersion, addTableList, importDataList);
   }
 
-  public static synchronized Future<DataSourceApi> getPinotDataSourceApi() {
-    return EXECUTOR_SERVICE.submit(PinotDataSourceManager::internalGetPinotDataSourceApi);
+  public static synchronized Future<DataSourceApi> getPinotDataSourceApi(final PinotVersion pinotVersion) {
+    return EXECUTOR_SERVICE.submit(() -> PinotDataSourceManager.internalGetPinotDataSourceApi(pinotVersion));
   }
 
-  private static synchronized DataSourceApi internalGetPinotDataSourceApi() {
+  private static synchronized DataSourceApi internalGetPinotDataSourceApi(final PinotVersion pinotVersion) {
     final String property = System.getProperty("thirdeye.test.useLocalPinotInstance");
     if (property != null) {
       LOG.warn("Using local pinot instance for testing!");
       return localPinotDataSourceApi();
     }
     /* Create the pinot instance if required */
-    final PinotContainer instance = getInstance();
+    final PinotContainer instance = getInstance(pinotVersion);
 
     return getPinotDataSourceApi(instance);
   }

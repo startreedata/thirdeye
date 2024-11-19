@@ -99,6 +99,8 @@ taskDriver:
   # must be a non-negative integer unique per instance/worker
   # must be omitted when `randomWorkerIdEnabled` is set `true`
   id: 0
+  # whether to use the new task acquisition logic (beta) or the old one (slow) 
+  newAcquisitionLogic: false
 
 rca:
   # default values - structure example

@@ -30,6 +30,9 @@ public class TaskDriverConfiguration {
 
   private int taskFetchSizeCap = 50;
   private int maxParallelTasks = 5;
+  
+  // still experimental -- TODO CYRIL - set to true once validated and stable - then remove
+  private boolean newAcquisitionLogic = false;
 
   public Long getId() {
     return id;
@@ -127,6 +130,16 @@ public class TaskDriverConfiguration {
 
   public TaskDriverConfiguration setActiveThresholdMultiplier(final int activeThresholdMultiplier) {
     this.activeThresholdMultiplier = activeThresholdMultiplier;
+    return this;
+  }
+
+  public boolean isNewAcquisitionLogic() {
+    return newAcquisitionLogic;
+  }
+
+  public TaskDriverConfiguration setNewAcquisitionLogic(
+      final boolean newAcquisitionLogic) {
+    this.newAcquisitionLogic = newAcquisitionLogic;
     return this;
   }
 }

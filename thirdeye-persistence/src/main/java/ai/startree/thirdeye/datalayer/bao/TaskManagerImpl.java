@@ -125,6 +125,11 @@ public class TaskManagerImpl implements TaskManager {
 
   // TODO CYRIL NOTE - RETRY IS NOT IMPLEMENTED BUT IT SHOULD BE EASY BY ACCEPTING STATUS = FAILED IN THE 2 METHODS BELOW AND PUTTING A LIMIT ON THE VALUE OF VERSION
   @Override
+  public TaskDTO acquireNextTaskToRun(final long workerId) {
+    return dao.acquireNextTaskToRun(workerId);
+  }
+
+  @Override
   public TaskDTO findNextTaskToRun() {
     final String queryClause = """
         WHERE status = 'WAITING'

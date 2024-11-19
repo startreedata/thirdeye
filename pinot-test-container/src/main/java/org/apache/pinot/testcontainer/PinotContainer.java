@@ -213,9 +213,4 @@ public class PinotContainer extends GenericContainer<PinotContainer> {
   public Integer getZookeeperPort() {
     return getMappedPort(DEFAULT_ZOOKEEPER_PORT);
   }
-
-  public static void main(String[] args) {
-    System.out.println(hostArch());
-    System.out.println(hostArch());
-  }
 }

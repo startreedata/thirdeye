@@ -44,6 +44,7 @@ export const ChartContentV2: FunctionComponent<ChartContentProps> = ({
     hideCallToActionPrompt,
     evaluationTimeRange,
     legendsPlacement,
+    showDeleteIcon = true,
 }) => {
     const sharedWizardClasses = useAlertWizardV2Styles();
     const previewChartClasses = usePreviewChartStyles();
@@ -207,7 +208,10 @@ export const ChartContentV2: FunctionComponent<ChartContentProps> = ({
                                     workingDetectionEvaluations
                                 }
                                 evaluationTimeRange={evaluationTimeRange}
-                                hideDelete={onAlertPropertyChange === undefined}
+                                hideDelete={
+                                    onAlertPropertyChange === undefined ||
+                                    !showDeleteIcon
+                                }
                                 hideTime={shouldHideTimeInDatetimeFormat(
                                     alertEvaluation?.alert.template
                                 )}

@@ -45,7 +45,7 @@ import { TimeSeriesChartProps } from "../../../visualizations/time-series-chart/
 import { PreviewChartProps } from "./preview-chart.interfaces";
 import { usePreviewChartStyles } from "./preview-chart.styles";
 
-export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
+export const PreviewChartV3: FunctionComponent<PreviewChartProps> = ({
     alert,
     onChartDataLoadSuccess,
     hideCallToActionPrompt,
@@ -248,12 +248,13 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
                     }
                 >
                     <ChartContentV2
-                        showLoadButton
                         alert={alert}
                         alertEvaluation={evaluation}
                         evaluationTimeRange={evaluationTimeRange}
                         hideCallToActionPrompt={hideCallToActionPrompt}
                         legendsPlacement={legendsPlacement}
+                        showDeleteIcon={false}
+                        showLoadButton={!disableReload}
                         onReloadClick={handleAutoRangeClick}
                     />
                 </LoadingErrorStateSwitch>

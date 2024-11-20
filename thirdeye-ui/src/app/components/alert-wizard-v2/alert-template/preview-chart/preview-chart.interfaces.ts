@@ -23,6 +23,7 @@ export interface PreviewChartProps {
     hideCallToActionPrompt?: boolean;
     disableReload?: boolean;
     alertEvaluation?: AlertEvaluation;
+    hasAutoReload?: boolean;
     onAlertPropertyChange: (
         contents: Partial<EditableAlert>,
         isTotalReplace?: boolean

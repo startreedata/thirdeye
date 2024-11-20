@@ -116,9 +116,11 @@ public class PinotConnectionUtils {
     final JsonAsyncHttpPinotClientTransportFactory factory = 
         new JsonAsyncHttpPinotClientTransportFactory();
 
+    final Properties properties = new Properties();
     if (config.getControllerConnectionScheme() != null) {
       final String scheme = config.getControllerConnectionScheme();
-      factory.setScheme(scheme);
+      // not using setScheme on purpose - see https://github.com/apache/pinot/issues/14500
+      properties.setProperty("scheme", scheme);
       if ("https".equals(scheme)) {
         try {
           factory.setSslContext(SSLContext.getDefault());
@@ -134,7 +136,6 @@ public class PinotConnectionUtils {
     mergedHeaders.putAll(additionalHeaders);
     factory.setHeaders(mergedHeaders);
 
-    final Properties properties = new Properties();
     properties.setProperty("appId", THIRDEYE_CLIENT_USER_AGENT);
     optional(config.getReadTimeoutMs())
         .ifPresent(v -> properties.setProperty("brokerReadTimeoutMs", v.toString()));

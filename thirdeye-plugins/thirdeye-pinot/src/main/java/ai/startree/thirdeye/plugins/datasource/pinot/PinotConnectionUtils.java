@@ -120,7 +120,12 @@ public class PinotConnectionUtils {
       final String scheme = config.getControllerConnectionScheme();
       factory.setScheme(scheme);
       if ("https".equals(scheme)) {
-          factory.setSslContext(httpsSslContext());
+        try {
+          factory.setSslContext(SSLContext.getDefault());
+        } catch (final NoSuchAlgorithmException e) {
+          // FIXME CYRIL - follow up PR --> throw an exception instead of not setting https
+          LOG.warn("SSL context not set for transport!");
+        }
       }
     }
 

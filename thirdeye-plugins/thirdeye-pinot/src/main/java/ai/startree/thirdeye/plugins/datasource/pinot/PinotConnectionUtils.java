@@ -135,7 +135,7 @@ public class PinotConnectionUtils {
     optional(config.getHeaders()).ifPresent(mergedHeaders::putAll);
     mergedHeaders.putAll(additionalHeaders);
     factory.setHeaders(mergedHeaders);
-    
+
     properties.setProperty("appId", THIRDEYE_CLIENT_USER_AGENT);
     optional(config.getReadTimeoutMs())
         .ifPresent(v -> properties.setProperty("brokerReadTimeoutMs", v.toString()));

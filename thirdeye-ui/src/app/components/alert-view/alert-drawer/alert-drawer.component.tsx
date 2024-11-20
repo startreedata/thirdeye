@@ -37,10 +37,11 @@ import {
     rerunAnomalyDetectionForAlert,
 } from "../../../rest/alerts/alerts.rest";
 import {
+    AppRouteRelative,
     createPathWithRecognizedQueryString,
     getAlertsAllPath,
     getAlertsCreateCopyPath,
-    getAlertsUpdatePath,
+    getAlertsUpdateV2Path,
     getAnomaliesCreatePath,
 } from "../../../utils/routes/routes.util";
 import { Modal } from "../../modal/modal.component";
@@ -91,12 +92,12 @@ const AlertDrawer: React.FC<AlertDrawerProps> = ({
         navigate(getAlertsCreateCopyPath(alert.id));
     };
 
-    const handleAlertEdit = (): void => {
+    const handleAlertEdit = (relativePath: string): void => {
         if (!alert) {
             return;
         }
 
-        navigate(getAlertsUpdatePath(alert.id));
+        navigate(getAlertsUpdateV2Path(alert.id, relativePath));
     };
 
     const handleCreateAlertAnomaly = (): void => {
@@ -159,17 +160,26 @@ const AlertDrawer: React.FC<AlertDrawerProps> = ({
                         {
                             id: "alertWizard",
                             label: t("label.alert-wizard"),
-                            onClick: () => handleAlertEdit(),
+                            onClick: () =>
+                                handleAlertEdit(
+                                    `/${AppRouteRelative.ALERTS_UPDATE_SIMPLE}/${AppRouteRelative.ALERTS_CREATE_EASY_ALERT}`
+                                ),
                         },
                         {
                             id: "advancedJsonEditor",
                             label: t("label.advanced-json-editor"),
-                            onClick: () => handleAlertEdit(),
+                            onClick: () =>
+                                handleAlertEdit(
+                                    `/${AppRouteRelative.ALERTS_CREATE_JSON_EDITOR}`
+                                ),
                         },
                         {
                             id: "advancedOld",
                             label: t("label.advanced-old"),
-                            onClick: () => handleAlertEdit(),
+                            onClick: () =>
+                                handleAlertEdit(
+                                    `/${AppRouteRelative.ALERTS_UPDATE_ADVANCED_V2}`
+                                ),
                         },
                     ],
                 },

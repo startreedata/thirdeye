@@ -241,6 +241,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                     alert.templateProperties
                         .monitoringGranularity as GranularityValue
                 );
+                getAlertRecommendation(alert);
                 setAlgorithmOption(
                     alertTemplateOptions.find((item) => {
                         const name = isMultiDimensionAlert
@@ -265,6 +266,9 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                         String(alert.templateProperties?.enumeratorQuery)
                     );
                     setDimension(SelectDimensionsOptions.ENUMERATORS);
+                    setEnumerations(true);
+                } else if (alert.templateProperties?.enumerationItems) {
+                    setDimension(SelectDimensionsOptions.DIMENSION_RECOMMENDER);
                 }
             }
         }
@@ -1380,8 +1384,8 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                             option,
                                                                             value
                                                                         ) =>
-                                                                            option.value ===
-                                                                            value.value
+                                                                            option?.value ===
+                                                                            value?.value
                                                                         }
                                                                         inputValue={
                                                                             inputValue
@@ -1932,6 +1936,38 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                 </Grid>
                                                                             </Grid>
                                                                         </Grid>
+                                                                        {compositeFilters &&
+                                                                        dimension ===
+                                                                            SelectDimensionsOptions.DIMENSION_RECOMMENDER ? (
+                                                                            <Grid
+                                                                                item
+                                                                                xs={
+                                                                                    12
+                                                                                }
+                                                                            >
+                                                                                <Button
+                                                                                    color="primary"
+                                                                                    startIcon={
+                                                                                        <AddCircleOutline />
+                                                                                    }
+                                                                                    variant="outlined"
+                                                                                    onClick={() =>
+                                                                                        setOpenCompositeFilterModal(
+                                                                                            true
+                                                                                        )
+                                                                                    }
+                                                                                >
+                                                                                    {t(
+                                                                                        "label.edit-entity",
+                                                                                        {
+                                                                                            entity: t(
+                                                                                                "label.dimensions"
+                                                                                            ),
+                                                                                        }
+                                                                                    )}
+                                                                                </Button>
+                                                                            </Grid>
+                                                                        ) : null}
 
                                                                         {algorithmOption ? (
                                                                             <Grid

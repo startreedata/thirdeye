@@ -1,3 +1,10 @@
+### [2.54.4](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.54.3...thirdeye-ui-2.54.4) (2024-11-20)
+
+
+### Bug Fixes
+
+* TE-XX show alert message if all required properties are not set and bug fixes ([b195ebda8](https://github.com/startreedata/thirdeye/commit/b195ebda8a9ead3fedf7a5cb4e9aa064f75e0e30))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

@@ -102,10 +102,7 @@
           <groupId>org.testng</groupId>
           <artifactId>testng</artifactId>
         </exclusion>
-        <exclusion>
-          <groupId>com.jayway.jsonpath</groupId>
-          <artifactId>json-path</artifactId>
-        </exclusion>
+        <!-- not excluded: com.jayway.jsonpath:json-path. It is required if the connection parses the query to get the table names - used during calcite parsing-->
         <exclusion>
           <groupId>io.grpc</groupId>
           <artifactId>grpc-protobuf</artifactId>

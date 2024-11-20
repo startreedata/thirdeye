@@ -1,3 +1,5 @@
+### [2.54.3](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.54.2...thirdeye-ui-2.54.3) (2024-11-20)
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

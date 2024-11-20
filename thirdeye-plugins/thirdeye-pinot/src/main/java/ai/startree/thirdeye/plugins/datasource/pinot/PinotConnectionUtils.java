@@ -19,6 +19,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 
+import java.lang.reflect.Field;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -116,9 +117,11 @@ public class PinotConnectionUtils {
     final JsonAsyncHttpPinotClientTransportFactory factory = 
         new JsonAsyncHttpPinotClientTransportFactory();
 
+    final Properties properties = new Properties();
     if (config.getControllerConnectionScheme() != null) {
       final String scheme = config.getControllerConnectionScheme();
-      factory.setScheme(scheme);
+      // not using setScheme on purpose - see https://github.com/apache/pinot/issues/14500
+      properties.setProperty("scheme", scheme);
       if ("https".equals(scheme)) {
         try {
           factory.setSslContext(SSLContext.getDefault());
@@ -133,8 +136,7 @@ public class PinotConnectionUtils {
     optional(config.getHeaders()).ifPresent(mergedHeaders::putAll);
     mergedHeaders.putAll(additionalHeaders);
     factory.setHeaders(mergedHeaders);
-
-    final Properties properties = new Properties();
+    
     properties.setProperty("appId", THIRDEYE_CLIENT_USER_AGENT);
     optional(config.getReadTimeoutMs())
         .ifPresent(v -> properties.setProperty("brokerReadTimeoutMs", v.toString()));
@@ -178,4 +180,29 @@ public class PinotConnectionUtils {
       return true;
     }
   }
+
+  public static void main(String[] args) throws NoSuchFieldException, IllegalAccessException {
+    JsonAsyncHttpPinotClientTransportFactory factory = new JsonAsyncHttpPinotClientTransportFactory();
+    // using reflection to print the _scheme field
+    final Field field = factory.getClass().getDeclaredField("_scheme");
+    field.setAccessible(true);
+
+    System.out.println(field.get(factory));
+    // prints http
+    // OK, http is the default value of the builder
+
+    factory.setScheme("https");
+    System.out.println(field.get(factory));
+    // prints https
+    // OK, the setter works
+
+    // any set of properties that does not have a value for "scheme"
+    final Properties properties = new Properties();
+    properties.setProperty("scheme", "https");
+    factory = factory.withConnectionProperties(properties);
+    System.out.println(field.get(factory));
+    // prints http
+    // NOT OK - scheme value was overridden
+  }
+  
 }

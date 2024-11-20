@@ -78,10 +78,17 @@
           <groupId>org.apache.helix</groupId>
           <artifactId>helix-core</artifactId>
         </exclusion>
+
+        <!-- coming from the zookeeper dependency - zookeeper dep is required -->
         <exclusion>
-          <groupId>org.apache.zookeeper</groupId>
-          <artifactId>zookeeper</artifactId>
+          <groupId>ch.qos.logback</groupId>
+          <artifactId>logback-core</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>ch.qos.logback</groupId>
+          <artifactId>logback-classic</artifactId>
+        </exclusion>
+        
         <!-- these 2 dependencies are removed in pinot-java-client 1.3.0 https://github.com/apache/pinot/commit/6d64650e7c210456a890ee6f9a6eaf05a7ab557b#diff-417cfb66063e3f9b092a1acd9e0842f724d938af0451cb46ee864beb8a915198 -->
         <exclusion>
           <groupId>org.slf4j</groupId>

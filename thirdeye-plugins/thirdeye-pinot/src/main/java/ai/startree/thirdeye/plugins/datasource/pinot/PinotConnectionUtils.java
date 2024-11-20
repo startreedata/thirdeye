@@ -179,5 +179,4 @@ public class PinotConnectionUtils {
       return true;
     }
   }
-  
 }

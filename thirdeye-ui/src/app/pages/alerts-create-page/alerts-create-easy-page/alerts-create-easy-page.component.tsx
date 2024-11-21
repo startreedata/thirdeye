@@ -457,6 +457,11 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
             handleReloadPreviewClick(workingAlert);
         } else if (item === AnomalyDetectionOptions.COMPOSITE) {
             setCompositeFilters(null);
+            if (queryFilters && !queryFilters.includes("${queryFilters}")) {
+                const updatedQueryFilters =
+                    "${queryFilters}" + " " + queryFilters;
+                setQueryFilters(updatedQueryFilters);
+            }
             setIsMultiDimensionAlert(true);
         }
     };
@@ -486,7 +491,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                 ),
                 min: 0,
                 max: 1,
-                queryFilters: "${queryFilters}",
+                queryFilters: queryFilters ? queryFilters : "${queryFilters}",
                 enumeratorQuery: enumerators,
             },
         };
@@ -786,6 +791,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
             },
             templateProperties: {
                 ...template,
+                queryFilters: queryFilters ? queryFilters : "${queryFilters}",
             },
         };
         onAlertPropertyChange(workingAlert);
@@ -1244,9 +1250,10 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                         placeholder={t(
                                                                             "label.placeholder-sql-where"
                                                                         )}
-                                                                        value={
-                                                                            queryFilters
-                                                                        }
+                                                                        value={queryFilters.replace(
+                                                                            /\$\{queryFilters\}/g,
+                                                                            ""
+                                                                        )}
                                                                         onChange={(
                                                                             e
                                                                         ) =>

@@ -123,4 +123,4 @@ jobs:
           docker_tag: ${{ env.REGISTRY }}/thirdeye:${{ steps.release-version.outputs.RELEASE_VERSION }}       # Replace with Docker image tag (e.g., repo.startreedata.io/image:tag)
           project_name: "thirdeye"            # Replace with your project name (must match entry in assignee.yml)
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}  # This is the GitHub token secret for authenticat
+          GH_TOKEN: ${{ secrets.GHH_TOKEN }}  # This is the GitHub token secret for authenticat

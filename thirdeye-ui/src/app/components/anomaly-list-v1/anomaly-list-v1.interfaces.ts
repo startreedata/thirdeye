@@ -16,6 +16,7 @@ import type { ReactNode } from "react";
 import { ActionStatus } from "../../rest/actions.interfaces";
 import type { EnumerationItem } from "../../rest/dto/enumeration-item.interfaces";
 import type { UiAnomaly } from "../../rest/dto/ui-anomaly.interfaces";
+import { Alert } from "../../rest/dto/alert.interfaces";
 
 interface EnumerationDataProps {
     showEnumerationItem: boolean;
@@ -30,6 +31,7 @@ export interface AnomalyListV1Props extends Partial<EnumerationDataProps> {
     onSearchFilterValueChange?: (value: string) => void;
     toolbar?: ReactNode;
     timezone?: string;
+    allAlerts?: Alert[] | null;
 }
 
 export const ANOMALY_LIST_TEST_IDS = {

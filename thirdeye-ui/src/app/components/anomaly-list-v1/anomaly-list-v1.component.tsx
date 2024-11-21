@@ -55,6 +55,7 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
     enumerationItemsStatus,
     // If timezone is passed, override all datetime rendering to use this timezone
     timezone,
+    allAlerts,
 }) => {
     const [selectedAnomaly, setSelectedAnomaly] =
         useState<DataGridSelectionModelV1<UiAnomaly>>();
@@ -122,12 +123,16 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
 
     const alertNameRenderer = useCallback(
         (cellValue: Record<string, unknown>, data: UiAnomaly): ReactNode => {
+            const alertName =
+                allAlerts?.find((alert) => alert.id === data.alertId)?.name ||
+                cellValue;
+
             return addMutedStyle(
                 linkRendererV1(
-                    cellValue,
+                    alertName,
                     getAlertsAlertPath(data.alertId),
                     false,
-                    `${t("label.view")} ${t("label.alert")}:${cellValue}`
+                    `${t("label.view")} ${t("label.alert")}:${alertName}`
                 ),
                 data
             );

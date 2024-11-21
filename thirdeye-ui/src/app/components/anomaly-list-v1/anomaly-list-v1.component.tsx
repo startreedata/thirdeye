@@ -137,7 +137,7 @@ export const AnomalyListV1: FunctionComponent<AnomalyListV1Props> = ({
                 data
             );
         },
-        []
+        [allAlerts]
     );
 
     const metricNameRenderer = useCallback(

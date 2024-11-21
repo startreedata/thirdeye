@@ -24,7 +24,7 @@ import { getUiAnomalies } from "../../utils/anomalies/anomalies.util";
 import { AnomaliesAllPageContext } from "../anomalies-all-page/anomalies-all-page.interfaces";
 
 export const AnomaliesListAllPage: FunctionComponent = () => {
-    const { anomalies, handleAnomalyDelete } =
+    const { anomalies, handleAnomalyDelete, alerts } =
         useOutletContext<AnomaliesAllPageContext>();
     const [uiAnomalies, setUiAnomalies] = useState<UiAnomaly[] | null>(null);
     const {
@@ -66,6 +66,7 @@ export const AnomaliesListAllPage: FunctionComponent = () => {
                 <Box height="90vh">
                     <AnomalyListV1
                         showEnumerationItem
+                        allAlerts={alerts}
                         anomalies={uiAnomalies}
                         enumerationItems={enumerationItems}
                         enumerationItemsStatus={enumerationItemsStatus}

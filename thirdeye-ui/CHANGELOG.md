@@ -1,3 +1,10 @@
+### [2.54.7](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.54.6...thirdeye-ui-2.54.7) (2024-11-21)
+
+
+### Bug Fixes
+
+* [TE-2556](https://cortexdata.atlassian.net/browse/TE-2556) show alert name in anomalies list page ([824d78b1a](https://github.com/startreedata/thirdeye/commit/824d78b1acef6ff5c9fb81e9045f8d957e9688dc))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

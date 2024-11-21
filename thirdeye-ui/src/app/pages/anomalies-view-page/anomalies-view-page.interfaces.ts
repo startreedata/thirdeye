@@ -13,7 +13,7 @@
  * the License.
  */
 import { ActionStatus } from "../../rest/actions.interfaces";
-import { AlertInsight } from "../../rest/dto/alert.interfaces";
+import { Alert, AlertInsight } from "../../rest/dto/alert.interfaces";
 import { Anomaly, AnomalyFeedback } from "../../rest/dto/anomaly.interfaces";
 import { EnumerationItem } from "../../rest/dto/enumeration-item.interfaces";
 import { Investigation } from "../../rest/dto/rca.interfaces";
@@ -38,4 +38,5 @@ export interface AnomalyViewContainerPageOutletContext {
     alertInsight: AlertInsight | null;
     getInvestigationsRequestStatus: ActionStatus;
     investigations: Investigation[];
+    alert?: Alert | null;
 }

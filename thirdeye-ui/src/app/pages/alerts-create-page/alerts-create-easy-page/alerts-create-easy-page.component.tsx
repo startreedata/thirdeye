@@ -791,6 +791,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
             },
             templateProperties: {
                 ...template,
+                queryFilters: queryFilters ? queryFilters : "${queryFilters}",
             },
         };
         onAlertPropertyChange(workingAlert);
@@ -2126,7 +2127,6 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                     </Grid>
                     {openCompositeFilterModal && (
                         <AlertCompositeFiltersModal
-                            queryFilters={queryFilters}
                             onCancel={() => setOpenCompositeFilterModal(false)}
                             onUpdateCompositeFiltersChange={
                                 onUpdateCompositeFiltersChange

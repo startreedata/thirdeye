@@ -116,5 +116,13 @@ jobs:
           SLACK_TITLE: FAILURE
           SLACK_LINK_NAMES: true
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+            # Run Scan and JIRA Automation
+      - name: Run Scan and JIRA Automation
+        uses: startreedata/securitypipeline/scan-and-jira-action@main  # Update the repo path as needed
+        with:
+          docker_tag: ${{ env.REGISTRY }}/thirdeye:${{ steps.release-version.outputs.RELEASE_VERSION }}       # Replace with Docker image tag (e.g., repo.startreedata.io/image:tag)
+          project_name: "thirdeye"            # Replace with your project name (must match entry in assignee.yml)
+        env:
+          GH_TOKEN: "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"  # This is the GitHub token secret for authenticat
 
 

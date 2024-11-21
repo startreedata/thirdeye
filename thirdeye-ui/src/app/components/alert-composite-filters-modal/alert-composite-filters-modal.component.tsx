@@ -41,7 +41,7 @@ import { Modal } from "../modal/modal.component";
 import { AlertCompositeFiltersModalProps } from "./alert-composite-filters-modal.interfaces";
 
 export const AlertCompositeFiltersModal: FunctionComponent<AlertCompositeFiltersModalProps> =
-    ({ onUpdateCompositeFiltersChange, onCancel }) => {
+    ({ onUpdateCompositeFiltersChange, onCancel, queryFilters: qF }) => {
         const { t } = useTranslation();
         const { notify } = useNotificationProviderV1();
 
@@ -151,7 +151,7 @@ export const AlertCompositeFiltersModal: FunctionComponent<AlertCompositeFilters
                 }
             );
 
-            let queryFilters = "${queryFilters}";
+            let queryFilters = qF || "${queryFilters}";
 
             // Append the custom query filter if exists
             if (queryValue) {

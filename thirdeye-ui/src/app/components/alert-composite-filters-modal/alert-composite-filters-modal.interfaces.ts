@@ -19,5 +19,6 @@ export interface AlertCompositeFiltersModalProps {
     onUpdateCompositeFiltersChange: (
         template: TemplatePropertiesObject
     ) => void;
+    queryFilters: string;
     onCancel: () => void;
 }

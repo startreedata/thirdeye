@@ -65,6 +65,11 @@ public enum MetricType {
     public int byteSize() {
       return 8;
     }
+  },
+  BIG_DECIMAL {
+    public Number toNumber(String s) { return Double.parseDouble(s); }
+
+    public int byteSize() { return 8; }
   };
 
   public Number toNumber(String s) {

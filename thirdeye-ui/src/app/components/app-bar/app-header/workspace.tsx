@@ -33,6 +33,7 @@ import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { CopyButtonV2 } from "../../copy-button-v2/copy-button-v2.component";
 import { useWorkpsaceSwitcherStyles } from "./app-header.styles";
+import { isEmpty } from "lodash";
 
 export const WorkspaceSwitcher = ({
     workspaces,
@@ -57,12 +58,7 @@ export const WorkspaceSwitcher = ({
             const lowercaseWorkspaceId = workspace.id.toLowerCase();
             const lowercaseFilterWorkspaceId = value.toLowerCase();
 
-            return (
-                lowercaseWorkspaceId.includes(lowercaseFilterWorkspaceId) ||
-                lowercaseWorkspaceId.includes(
-                    selectedWorkspace.id.toLowerCase()
-                )
-            );
+            return lowercaseWorkspaceId.includes(lowercaseFilterWorkspaceId);
         });
         setFilteredWorkspaces(newFilteredWorkspaces);
     };
@@ -143,6 +139,11 @@ export const WorkspaceSwitcher = ({
                                 </div>
                             </MenuItem>
                         ))}
+                        {isEmpty(filteredWorkspaces) && (
+                            <div className={classes.noResults}>
+                                No search results.
+                            </div>
+                        )}
                     </div>
                 </TextField>
             </div>

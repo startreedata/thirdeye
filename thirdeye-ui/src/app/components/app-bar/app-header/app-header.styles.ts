@@ -93,4 +93,8 @@ export const useWorkpsaceSwitcherStyles = makeStyles({
             visibility: "visible",
         },
     },
+    noResults: {
+        display: "flex",
+        justifyContent: "center",
+    },
 });

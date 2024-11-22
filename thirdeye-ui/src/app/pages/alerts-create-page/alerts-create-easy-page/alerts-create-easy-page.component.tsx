@@ -457,9 +457,12 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
             handleReloadPreviewClick(workingAlert);
         } else if (item === AnomalyDetectionOptions.COMPOSITE) {
             setCompositeFilters(null);
-            if (queryFilters && !queryFilters.includes("${queryFilters}")) {
-                const updatedQueryFilters =
-                    "${queryFilters}" + " " + queryFilters;
+            if (queryFilters) {
+                const updatedQueryFilters = queryFilters
+                    .trim()
+                    .startsWith("${queryFilters}")
+                    ? queryFilters
+                    : "${queryFilters} " + queryFilters;
                 setQueryFilters(updatedQueryFilters);
             }
             setIsMultiDimensionAlert(true);

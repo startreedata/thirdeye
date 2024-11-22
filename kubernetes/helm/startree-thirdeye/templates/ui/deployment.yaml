@@ -148,12 +148,12 @@ spec:
               add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
               {{- end }}
               location = /admin/prometheus {
-                add_header Content-Type text/plain;
+                default_type text/plain;
                 {{- if .Values.tls.enabled }}
                 add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
                 {{- end }}
                 server_tokens off;
-                return 200 "thirdeye_version_info_frontend{environment_url="{{ default "unknown" (regexReplaceAll "(https?://)" .Values.ui.publicUrl "") }}",semver="{{ .Values.ui.image.tag }}"} 1.0\n";
+                return 200 "thirdeye_version_info_frontend{environment_url=\"{{ default "unknown" (regexReplaceAll "(https?://)" .Values.ui.publicUrl "") }}\",semver=\"{{ .Values.ui.image.tag }}\"} 1.0\n";
               }
             }
             {{- end }}

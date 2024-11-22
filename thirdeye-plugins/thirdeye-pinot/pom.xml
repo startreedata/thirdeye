@@ -119,10 +119,7 @@
           <groupId>org.mindrot</groupId>
           <artifactId>jbcrypt</artifactId>
         </exclusion>
-        <exclusion>
-          <groupId>com.github.seancfoley</groupId>
-          <artifactId>ipaddress</artifactId>
-        </exclusion>
+        <!-- not excluded: com.github.seancfoley:ipaddress. It is required if the connection parses the query-->
         <exclusion>
           <groupId>com.yscope.clp</groupId>
           <artifactId>clp-ffi</artifactId>

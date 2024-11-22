@@ -12,12 +12,6 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import React, { useMemo, useState } from "react";
-import { Autocomplete } from "@material-ui/lab";
-import { Box, MenuItem, TextField } from "@material-ui/core";
-import { CopyButtonV2 } from "../../copy-button-v2/copy-button-v2.component";
-import { useWorkpsaceSwitcherStyles } from "./app-header.styles";
-import { useTranslation } from "react-i18next";
 
 type WorkspaceSwitcherProps = {
     workspaces: { id: string }[];
@@ -25,10 +19,20 @@ type WorkspaceSwitcherProps = {
     onWorkspaceChange: (workspace: { id: string }) => void;
 };
 
-type DropdownOption = {
-    id: string;
-    label: string;
-};
+import {
+    InputLabel,
+    ListItem,
+    ListItemIcon,
+    ListItemText,
+    TextField,
+} from "@material-ui/core";
+import MenuItem from "@material-ui/core/MenuItem";
+import Typography from "@material-ui/core/Typography";
+import CheckIcon from "@material-ui/icons/Check";
+import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { CopyButtonV2 } from "../../copy-button-v2/copy-button-v2.component";
+import { useWorkpsaceSwitcherStyles } from "./app-header.styles";
 
 export const WorkspaceSwitcher = ({
     workspaces,
@@ -37,89 +41,111 @@ export const WorkspaceSwitcher = ({
 }: WorkspaceSwitcherProps): JSX.Element => {
     const { t } = useTranslation();
     const classes = useWorkpsaceSwitcherStyles();
-    const [selectedOption, setSelectedOption] = useState({
-        id: selectedWorkspace.id,
-        label: selectedWorkspace.id,
-    });
-    const workspaceOptions = useMemo(() => {
-        return workspaces.map((workspace) => {
-            return {
-                id: workspace.id,
-                label: workspace.id,
-            };
+    const [filteredWorkspaces, setFilteredWorkspaces] = useState(workspaces);
+    const [open, setOpen] = useState(false);
+
+    const handleChangeWorkspace = (value: string | null): void => {
+        if (!value) {
+            return;
+        }
+        setFilteredWorkspaces(workspaces);
+        onWorkspaceChange({ id: value });
+    };
+
+    const handleFilter = (value: string): void => {
+        const newFilteredWorkspaces = workspaces.filter((workspace) => {
+            const lowercaseWorkspaceId = workspace.id.toLowerCase();
+            const lowercaseFilterWorkspaceId = value.toLowerCase();
+
+            return (
+                lowercaseWorkspaceId.includes(lowercaseFilterWorkspaceId) ||
+                lowercaseWorkspaceId.includes(
+                    selectedWorkspace.id.toLowerCase()
+                )
+            );
         });
-    }, [workspaces]);
-
-    const handleWorkspaceChange = (option: DropdownOption): void => {
-        setSelectedOption(option);
-        onWorkspaceChange({ id: option.id });
+        setFilteredWorkspaces(newFilteredWorkspaces);
     };
 
-    const renderAlertTemplateSelectOption = (
-        option: DropdownOption
-    ): JSX.Element => {
-        return (
-            <MenuItem
-                key={option.id}
-                style={{
-                    width: "100%",
-                    background:
-                        option.id === selectedOption.id ? "#e1edff" : "",
-                }}
-                value={option.id}
-            >
-                <Box
-                    display="flex"
-                    justifyContent="space-between"
-                    padding="8px"
-                    width="100%"
-                >
-                    <div>{option.id}</div>
-                    <div onClick={(e) => e.stopPropagation()}>
-                        <CopyButtonV2
-                            afterCopyTooltip="Copied"
-                            content={option.id}
-                        />
-                    </div>
-                </Box>
-            </MenuItem>
-        );
-    };
+    useEffect(() => {
+        if (open) {
+            setTimeout(() => {
+                const selectedWorkspaceElem = document.getElementById(
+                    selectedWorkspace.id
+                );
+                selectedWorkspaceElem?.scrollIntoView();
+            });
+        }
+    }, [open]);
 
     return (
-        <div className={classes.workspaceContainer}>
-            <div>{t("label.app-header.workspace")}:</div>
-            <Autocomplete
-                disableClearable
-                fullWidth
-                className={classes.autocomplete}
-                classes={{
-                    listbox: classes.listbox,
-                }}
-                getOptionLabel={(option: { id: string; label: string }) =>
-                    option.label as string
-                }
-                noOptionsText={t("message.no-search-results")}
-                options={workspaceOptions}
-                renderInput={(params) => (
-                    <TextField
-                        {...params}
-                        InputLabelProps={{
-                            shrink: false,
-                        }}
-                        InputProps={{
-                            ...params.InputProps,
-                        }}
-                        label={selectedOption ? "" : "Select Workspace"}
-                        variant="outlined"
-                    />
-                )}
-                renderOption={renderAlertTemplateSelectOption}
-                value={selectedOption}
-                onChange={(_, selectedValue) => {
-                    handleWorkspaceChange(selectedValue);
-                }}
-            />
+        <div style={{ display: "flex", gap: "8px" }}>
+            <InputLabel>
+                <Typography variant="overline">
+                    {t("label.app-header.workspace")}:
+                </Typography>
+            </InputLabel>
+
+            <div className={classes.dropdown}>
+                <TextField
+                    autoFocus
+                    select
+                    SelectProps={{
+                        open,
+                        // eslint-disable-next-line react/display-name
+                        renderValue: () => (
+                            <Typography variant="subtitle1">
+                                {selectedWorkspace.id}
+                            </Typography>
+                        ),
+                    }}
+                    value={selectedWorkspace.id || ""}
+                    onClick={() => setOpen(!open)}
+                >
+                    {workspaces.length > 1 && (
+                        <ListItem>
+                            <TextField
+                                fullWidth
+                                placeholder="Search workspace"
+                                onChange={(e) => {
+                                    handleFilter(e.target.value);
+                                }}
+                                // prevent selecting search box
+                                onClick={(e) => e.stopPropagation()}
+                            />
+                        </ListItem>
+                    )}
+                    <div style={{ maxHeight: "400px", overflow: "auto" }}>
+                        {filteredWorkspaces.map((workspace, index) => (
+                            <MenuItem
+                                className={classes.menuItem}
+                                id={workspace.id}
+                                key={index}
+                                value={workspace.id}
+                                onClick={(event: React.MouseEvent) => {
+                                    const elem = event.target as HTMLElement;
+                                    handleChangeWorkspace(elem.textContent);
+                                }}
+                            >
+                                <ListItemIcon style={{ minWidth: "40px" }}>
+                                    {selectedWorkspace.id === workspace.id && (
+                                        <CheckIcon
+                                            color="primary"
+                                            fontSize="small"
+                                        />
+                                    )}
+                                </ListItemIcon>
+                                <ListItemText style={{ marginRight: "16px" }}>
+                                    {workspace.id}
+                                </ListItemText>
+                                <div onClick={(e) => e.stopPropagation()}>
+                                    <CopyButtonV2 content={workspace.id} />
+                                </div>
+                            </MenuItem>
+                        ))}
+                    </div>
+                </TextField>
+            </div>
         </div>
     );
 };

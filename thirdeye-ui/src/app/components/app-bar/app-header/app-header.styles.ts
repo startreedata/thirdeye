@@ -62,24 +62,35 @@ export const useAppHeaderStyles = (
     });
 
 export const useWorkpsaceSwitcherStyles = makeStyles({
-    workspaceContainer: {
-        background: "#fff",
-        borderRadius: "5px",
-        padding: "4px",
-        display: "flex",
-        gap: "8px",
+    dropdown: {
+        background: "white",
         border: "1px solid #bed3e4",
-        alignItems: "center",
-        width: "400px",
-    },
-    autocomplete: {
+        borderRadius: "5px",
+        paddingLeft: "8px",
+        "& .MuiInputBase-root": {
+            minWidth: "200px",
+            borderRadius: 0,
+        },
+        "& .MuiSelect-root": {
+            padding: 0,
+            "&:focus": {
+                backgroundColor: "unset",
+            },
+        },
+        "& .MuiSvgIcon-root": {},
+        "& .MuiFormLabel-root": {
+            transform: "translate(12px, 12px) ",
+        },
         "& .MuiOutlinedInput-notchedOutline": {
             border: "none",
         },
     },
-    listbox: {
-        "& li": {
-            padding: "0px",
+    menuItem: {
+        "& .copy-icon-button": {
+            visibility: "hidden",
+        },
+        "&:hover .copy-icon-button": {
+            visibility: "visible",
         },
     },
 });

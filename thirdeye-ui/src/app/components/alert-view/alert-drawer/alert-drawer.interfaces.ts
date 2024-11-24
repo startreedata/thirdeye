@@ -32,4 +32,5 @@ export interface AlertDrawerProps {
     alert: Alert;
     onChange: (alert: Alert) => void;
     onDetectionRerunSuccess: () => void;
+    handleAlertResetClick: () => void;
 }

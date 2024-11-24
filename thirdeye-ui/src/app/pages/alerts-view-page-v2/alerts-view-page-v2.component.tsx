@@ -120,6 +120,7 @@ export const AlertsViewPageV2: FunctionComponent = () => {
         alert: alertThatWasReset,
         status: resetAlertRequestStatus,
         errorMessages: resetAlertRequestErrors,
+        resetAlert,
     } = useResetAlert();
 
     const getAlertQuery = useFetchQuery({
@@ -479,6 +480,19 @@ export const AlertsViewPageV2: FunctionComponent = () => {
                     <Grid item xs={2}>
                         <AlertDrawer
                             alert={getAlertQuery.data as Alert}
+                            handleAlertResetClick={() => {
+                                resetAlert(Number(alertId)).then(() => {
+                                    getAnomaliesQuery.refetch();
+
+                                    searchParams.set(
+                                        QUERY_PARAM_KEY_ANOMALIES_RETRY,
+                                        "true"
+                                    );
+                                    setSearchParams(searchParams, {
+                                        replace: true,
+                                    });
+                                });
+                            }}
                             onChange={handleAlertChange}
                             onDetectionRerunSuccess={
                                 handleAnomalyDetectionRerun

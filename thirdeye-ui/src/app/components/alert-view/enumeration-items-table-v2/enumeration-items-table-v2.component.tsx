@@ -253,14 +253,15 @@ export const EnumerationItemsTableV2: FunctionComponent<EnumerationItemsTableV2P
                             >
                                 <Grid container>
                                     <Grid
+                                        container
                                         item
-                                        sm={
+                                        direction="row"
+                                        xs={
                                             filteredEnumerationItemsWithAnomalies.length !==
                                             enumerationsItems.length
-                                                ? 9
-                                                : 12
+                                                ? 6
+                                                : 9
                                         }
-                                        xs={12}
                                     >
                                         <TextField
                                             fullWidth
@@ -284,6 +285,17 @@ export const EnumerationItemsTableV2: FunctionComponent<EnumerationItemsTableV2P
                                                 setSearchTerm(e.target.value)
                                             }
                                         />
+                                    </Grid>
+                                    <Grid item xs={3}>
+                                        <Button
+                                            color="primary"
+                                            variant="contained"
+                                            onClick={() =>
+                                                handleSearchClick(searchTerm)
+                                            }
+                                        >
+                                            {t("label.search")}
+                                        </Button>
                                     </Grid>
                                     {filteredEnumerationItemsWithAnomalies.length !==
                                         enumerationsItems.length && (

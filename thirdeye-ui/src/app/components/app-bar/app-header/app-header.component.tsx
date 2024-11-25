@@ -14,11 +14,12 @@
  */
 import React, { ReactElement } from "react";
 import { useAppHeaderStyles } from "./app-header.styles";
-import { MenuItem, Select, Link } from "@material-ui/core";
+import { Link } from "@material-ui/core";
 import { AppHeaderprops } from "./app-header.inerfaces";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 import { useTranslation } from "react-i18next";
 import { useNavBarV1 } from "../../../platform/stores/nav-bar-v1/nav-bar-v1.store";
+import { WorkspaceSwitcher } from "./workspace";
 
 export const Appheader = ({
     isFullScreen,
@@ -34,40 +35,15 @@ export const Appheader = ({
         isFullScreen,
         navBarMinimized,
     })();
-    const handleChange = (event: { target: { value: any } }): void => {
-        onWorkspaceChange({ id: event.target.value });
-    };
 
     return (
         <div className={compoenentStyles.header}>
             {showWorkspaceSwitcher && (
-                <div className={compoenentStyles.dropdownContainer}>
-                    <>
-                        <div>{t("label.app-header.workspace")}:</div>
-                        <Select
-                            disableUnderline
-                            displayEmpty
-                            className={compoenentStyles.selectEmpty}
-                            value={selectedWorkspace?.id}
-                            onChange={handleChange}
-                        >
-                            {workspaces &&
-                                workspaces.map(({ id }): ReactElement => {
-                                    return (
-                                        <MenuItem
-                                            className={
-                                                compoenentStyles.dropdownItem
-                                            }
-                                            key={id}
-                                            value={id}
-                                        >
-                                            {id}
-                                        </MenuItem>
-                                    );
-                                })}
-                        </Select>
-                    </>
-                </div>
+                <WorkspaceSwitcher
+                    selectedWorkspace={selectedWorkspace}
+                    workspaces={workspaces!}
+                    onWorkspaceChange={onWorkspaceChange}
+                />
             )}
             <div>
                 <Link href="https://startree.cloud/" target="_blank">

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 StarTree Inc
+ * Copyright 2024 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -12,8 +12,18 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Task } from "../../../../rest/dto/taks.interface";
+import create from "zustand";
+import { Alert } from "../../../rest/dto/alert.interfaces";
 
-export interface TaskRowProps {
-    task: Task;
-}
+type AlertDataType = {
+    alertData: { [key: number]: Alert };
+    setAlertData: (data: { [key: number]: Alert }) => void;
+};
+
+export const useAlertDataStore = create<AlertDataType>((set) => ({
+    alertData: [],
+    setAlertData: (data: { [key: number]: Alert }) =>
+        set({
+            alertData: data,
+        }),
+}));

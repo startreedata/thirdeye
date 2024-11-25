@@ -36,15 +36,6 @@ export const useAppHeaderStyles = (
                 : "end",
             gap: "50px",
         },
-        dropdownContainer: {
-            background: "#fff",
-            borderRadius: "5px",
-            padding: "4px",
-            display: "flex",
-            gap: "8px",
-            border: "1px solid #bed3e4",
-            alignItems: "center",
-        },
         selectEmpty: {
             padding: 0,
             borderBottom: 0,
@@ -69,3 +60,41 @@ export const useAppHeaderStyles = (
             width: "16px",
         },
     });
+
+export const useWorkpsaceSwitcherStyles = makeStyles({
+    dropdown: {
+        background: "white",
+        border: "1px solid #bed3e4",
+        borderRadius: "5px",
+        paddingLeft: "8px",
+        "& .MuiInputBase-root": {
+            minWidth: "200px",
+            borderRadius: 0,
+        },
+        "& .MuiSelect-root": {
+            padding: 0,
+            "&:focus": {
+                backgroundColor: "unset",
+            },
+        },
+        "& .MuiSvgIcon-root": {},
+        "& .MuiFormLabel-root": {
+            transform: "translate(12px, 12px) ",
+        },
+        "& .MuiOutlinedInput-notchedOutline": {
+            border: "none",
+        },
+    },
+    menuItem: {
+        "& .copy-icon-button": {
+            visibility: "hidden",
+        },
+        "&:hover .copy-icon-button": {
+            visibility: "visible",
+        },
+    },
+    noResults: {
+        display: "flex",
+        justifyContent: "center",
+    },
+});

@@ -18,7 +18,7 @@
   <parent>
     <artifactId>thirdeye-plugins</artifactId>
     <groupId>ai.startree.thirdeye.plugins</groupId>
-    <version>1.381.0-SNAPSHOT</version>
+    <version>1.382.0-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -157,7 +157,7 @@
           <artifactId>log4j-1.2-api</artifactId>
         </exclusion>
         
-        <!-- pinot-segment-spi is required  but all dependencies can be removed -->
+        <!-- pinot-segment-spi is required  but almost all dependencies can be removed -->
         <exclusion>
           <groupId>org.roaringbitmap</groupId>
           <artifactId>RoaringBitmap</artifactId>
@@ -166,10 +166,7 @@
           <groupId>org.roaringbitmap</groupId>
           <artifactId>RoaringBitmap</artifactId>
         </exclusion>
-        <exclusion>
-          <groupId>org.locationtech.jts</groupId>
-          <artifactId>jts-core</artifactId>
-        </exclusion>
+        <!-- not excluded: org.locationtech.jts:jts-core. It is required if the connection parses the query-->
         <exclusion>
           <groupId>org.xerial.larray</groupId>
           <artifactId>larray-mmap</artifactId>

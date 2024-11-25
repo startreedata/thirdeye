@@ -224,7 +224,7 @@ export const ThresholdSetupV3: FunctionComponent<ThresholdSetupProps> = ({
                 disableReload={
                     unsetProperties.length > 0 || invalidProperties.length > 0
                 }
-                hasAutoReload={false}
+                hasAutoReload={!!algorithmOptionConfig?.recommendationId}
                 onAlertPropertyChange={onAlertPropertyChange}
             />
         </PageContentsCardV1>

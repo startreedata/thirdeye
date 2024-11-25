@@ -794,7 +794,7 @@
         "list-of-all-dimensions-related-to-alert": "List of all dimensions related to this alert for the date range selected",
         "login-error": "Unable to login",
         "logout": "You have been logged out",
-        "looks-like-this-alert-was-just-created-this-page-a": "Looks like this alert was just created. This page automatically refresh when the initial anomalies job is complete",
+        "looks-like-this-alert-was-just-created-this-page-a": "Looks like this alert was just created. This page automatically refreshes when the initial anomalies job is complete",
         "manual-filter-for-dimensions-analysis": "Manual filter for dimensions analysis.",
         "mean-variance-rule-algorithm-description": "Estimate the standard deviation, and consider the standard deviation is caused by noise only.",
         "metric-from-dataset-moved-along-all-dimensions-no-specific-root": "{{metric}} from {{dataset}} moved along all dimensions. No specific root cause detected.",

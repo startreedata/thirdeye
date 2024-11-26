@@ -16,9 +16,12 @@ import {
     Box,
     Button,
     Card,
+    ClickAwayListener,
     List,
     ListItem,
     ListItemText,
+    Popper,
+    PopperProps,
     Tooltip,
     Typography,
 } from "@material-ui/core";
@@ -80,6 +83,23 @@ const AlertDrawer: React.FC<AlertDrawerProps> = ({
             });
         },
     });
+
+    const CustomPopper = (popperProps: PopperProps): JSX.Element => {
+        const { anchorEl, open, disablePortal, modifiers, ...other } =
+            popperProps;
+
+        return (
+            <ClickAwayListener onClickAway={() => setIsTooltipOpen("")}>
+                <Popper
+                    anchorEl={anchorEl}
+                    disablePortal={disablePortal}
+                    modifiers={modifiers}
+                    open={open}
+                    {...other}
+                />
+            </ClickAwayListener>
+        );
+    };
 
     const handleAlertStateToggle = (): void => {
         if (!alert || !alert) {
@@ -275,6 +295,7 @@ const AlertDrawer: React.FC<AlertDrawerProps> = ({
                     <Tooltip
                         disableHoverListener
                         interactive
+                        PopperComponent={CustomPopper}
                         classes={{ tooltip: classes.tooltip }}
                         open={isTooltipOpen === option.id}
                         placement="right"
@@ -288,7 +309,11 @@ const AlertDrawer: React.FC<AlertDrawerProps> = ({
                                             <ListItem
                                                 button
                                                 key={subOption.id}
-                                                onClick={subOption.onClick}
+                                                onClick={() => {
+                                                    subOption.onClick &&
+                                                        subOption.onClick();
+                                                    setIsTooltipOpen("");
+                                                }}
                                             >
                                                 <ListItemText
                                                     primary={subOption.label}

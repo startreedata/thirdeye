@@ -33,5 +33,6 @@ export const useEnumerationItemsTableV2Styles = makeStyles((theme) => ({
     sortContainer: {
         paddingLeft: theme.spacing(2),
         paddingRight: theme.spacing(2),
+        paddingBottom: theme.spacing(2),
     },
 }));

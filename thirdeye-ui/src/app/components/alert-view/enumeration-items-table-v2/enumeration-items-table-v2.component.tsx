@@ -17,15 +17,22 @@ import {
     Card,
     CardContent,
     Grid,
+    IconButton,
     InputAdornment,
     TextField,
     Typography,
 } from "@material-ui/core";
-import { Search } from "@material-ui/icons";
+import { Close, Search } from "@material-ui/icons";
 import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
 import ArrowUpwardIcon from "@material-ui/icons/ArrowUpward";
-import { sortBy } from "lodash";
-import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
+import { debounce, sortBy } from "lodash";
+import React, {
+    FunctionComponent,
+    useCallback,
+    useEffect,
+    useMemo,
+    useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { DataGridSortOrderV1 } from "../../../platform/components";
 import { filterEnumerationItems } from "../../../utils/enumeration-items/enumeration-items.util";
@@ -64,6 +71,7 @@ export const EnumerationItemsTableV2: FunctionComponent<EnumerationItemsTableV2P
         sortKey,
     }) => {
         const classes = useEnumerationItemsTableV2Styles();
+        const { t } = useTranslation();
 
         const enumerationItemsWithAnomalies = useMemo(() => {
             const enumerationIdToObjects: {
@@ -114,25 +122,38 @@ export const EnumerationItemsTableV2: FunctionComponent<EnumerationItemsTableV2P
         ] = useState(filteredEnumerationItemsWithAnomalies);
 
         const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
-        const { t } = useTranslation();
 
-        const handleSearchClick = (term: string): void => {
-            onSearchTermChange(term);
-            if (term === "") {
+        // Wrap handleSearchClick with useCallback to ensure stable reference
+        const handleSearchClick = useCallback(
+            (term: string): void => {
+                onSearchTermChange(term);
+                if (term === "") {
+                    setFilteredEnumerationItemsWithAnomalies(
+                        enumerationItemsWithAnomalies
+                    );
+
+                    return;
+                }
+
                 setFilteredEnumerationItemsWithAnomalies(
-                    enumerationItemsWithAnomalies
+                    filterEnumerationItems(enumerationItemsWithAnomalies, term)
                 );
+            },
+            [enumerationItemsWithAnomalies, onSearchTermChange]
+        );
 
-                return;
-            }
+        // Create debounced function using lodash debounce
+        const debouncedHandleSearchClick = useMemo(
+            () => debounce(handleSearchClick, 300),
+            [handleSearchClick]
+        );
 
-            setFilteredEnumerationItemsWithAnomalies(
-                filterEnumerationItems(
-                    enumerationItemsWithAnomalies,
-                    searchTerm
-                )
-            );
-        };
+        // Cleanup debounce on unmount
+        useEffect(() => {
+            return () => {
+                debouncedHandleSearchClick.cancel();
+            };
+        }, [debouncedHandleSearchClick]);
 
         const handleIsOpenChange = (isOpen: boolean, name: string): void => {
             let copied = [...expanded];
@@ -245,84 +266,49 @@ export const EnumerationItemsTableV2: FunctionComponent<EnumerationItemsTableV2P
                             )}
                         </Grid>
                         <Grid item>
-                            <form
-                                onSubmit={(e) => {
-                                    e.preventDefault();
-                                    handleSearchClick(searchTerm);
-                                }}
-                            >
-                                <Grid container>
-                                    <Grid
-                                        container
-                                        item
-                                        direction="row"
-                                        xs={
-                                            filteredEnumerationItemsWithAnomalies.length !==
-                                            enumerationsItems.length
-                                                ? 6
-                                                : 9
-                                        }
-                                    >
-                                        <TextField
-                                            fullWidth
-                                            InputProps={{
-                                                startAdornment: (
-                                                    <InputAdornment position="start">
-                                                        <Search />
-                                                    </InputAdornment>
-                                                ),
-                                            }}
-                                            placeholder={t(
-                                                "label.search-entity",
-                                                {
-                                                    entity: t(
-                                                        "label.dimensions"
-                                                    ),
-                                                }
-                                            )}
-                                            value={searchTerm}
-                                            onChange={(e) =>
-                                                setSearchTerm(e.target.value)
-                                            }
-                                        />
-                                    </Grid>
-                                    <Grid item xs={3}>
-                                        <Button
-                                            color="primary"
-                                            variant="contained"
-                                            onClick={() =>
-                                                handleSearchClick(searchTerm)
-                                            }
-                                        >
-                                            {t("label.search")}
-                                        </Button>
-                                    </Grid>
-                                    {filteredEnumerationItemsWithAnomalies.length !==
-                                        enumerationsItems.length && (
-                                        <Grid
-                                            container
-                                            item
-                                            alignItems="center"
-                                            sm={3}
-                                            spacing={1}
-                                            xs={12}
-                                        >
-                                            <Grid item>
-                                                <Button
-                                                    variant="outlined"
-                                                    onClick={() => {
-                                                        setSearchTerm("");
-                                                        onSearchTermChange("");
-                                                        handleSearchClick("");
-                                                    }}
-                                                >
-                                                    {t("label.reset")}
-                                                </Button>
-                                            </Grid>
-                                        </Grid>
-                                    )}
+                            <Grid container>
+                                <Grid container item direction="row" xs={12}>
+                                    <TextField
+                                        fullWidth
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <Search />
+                                                </InputAdornment>
+                                            ),
+                                            endAdornment: (
+                                                <InputAdornment position="end">
+                                                    {searchTerm && (
+                                                        <IconButton
+                                                            aria-label="clear search"
+                                                            onClick={() => {
+                                                                setSearchTerm(
+                                                                    ""
+                                                                );
+                                                                debouncedHandleSearchClick(
+                                                                    ""
+                                                                );
+                                                            }}
+                                                        >
+                                                            <Close />
+                                                        </IconButton>
+                                                    )}
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                        placeholder={t("label.search-entity", {
+                                            entity: t("label.dimensions"),
+                                        })}
+                                        value={searchTerm}
+                                        onChange={(e) => {
+                                            setSearchTerm(e.target.value);
+                                            debouncedHandleSearchClick(
+                                                e.target.value
+                                            );
+                                        }}
+                                    />
                                 </Grid>
-                            </form>
+                            </Grid>
                         </Grid>
                     </Grid>
                     <Grid container>

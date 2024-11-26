@@ -14,6 +14,8 @@
 package ai.startree.thirdeye.worker.task.runner;
 
 import static ai.startree.thirdeye.spi.Constants.METRICS_TIMER_PERCENTILES;
+import static ai.startree.thirdeye.spi.util.MetricsUtils.NAMESPACE_TAG;
+import static ai.startree.thirdeye.spi.util.MetricsUtils.getNamespaceTagValue;
 import static ai.startree.thirdeye.spi.util.MetricsUtils.record;
 import static java.util.Objects.requireNonNull;
 
@@ -22,7 +24,6 @@ import ai.startree.thirdeye.notification.NotificationPayloadBuilder;
 import ai.startree.thirdeye.notification.NotificationTaskFilter;
 import ai.startree.thirdeye.notification.NotificationTaskFilterResult;
 import ai.startree.thirdeye.notification.NotificationTaskPostProcessor;
-import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.NotificationSpecDTO;
@@ -39,8 +40,6 @@ import io.micrometer.core.instrument.Timer;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,8 +52,6 @@ public class NotificationTaskRunner implements TaskRunner {
 
   private static final Logger LOG = LoggerFactory.getLogger(NotificationTaskRunner.class);
 
-  private final static String NAMESPACE_TAG = "namespace";
-  private final static String NULL_NAMESPACE_TAG_VALUE = "__null__";
   private final static String NOTIFICATION_TASK_TIMER_NAME = "thirdeye_notification_task";
   private final static String NOTIFICATION_TASK_TIMER_DESCRIPTION = "Start: a task is started from an input subscription group id. End: the task execution is finished. Tag exception=true means an exception was thrown by the method call.";
 
@@ -138,16 +135,12 @@ public class NotificationTaskRunner implements TaskRunner {
     }
   }
 
-  private @NonNull String getNamespaceTag(final SubscriptionGroupDTO dto) {
-    return Optional.ofNullable(dto.namespace()).orElse(NULL_NAMESPACE_TAG_VALUE);
-  }
-
   private Timer getNotificationTaskSuccessTimer(final SubscriptionGroupDTO dto) {
     return Timer.builder(NOTIFICATION_TASK_TIMER_NAME)
         .description(NOTIFICATION_TASK_TIMER_DESCRIPTION)
         .publishPercentiles(METRICS_TIMER_PERCENTILES)
         .tag("exception", "false")
-        .tag(NAMESPACE_TAG, getNamespaceTag(dto))
+        .tag(NAMESPACE_TAG, getNamespaceTagValue(dto.namespace()))
         .register(Metrics.globalRegistry);
   }
 
@@ -156,7 +149,7 @@ public class NotificationTaskRunner implements TaskRunner {
         .description(NOTIFICATION_TASK_TIMER_DESCRIPTION)
         .publishPercentiles(METRICS_TIMER_PERCENTILES)
         .tag("exception", "true")
-        .tag(NAMESPACE_TAG, getNamespaceTag(dto))
+        .tag(NAMESPACE_TAG, getNamespaceTagValue(dto.namespace()))
         .register(Metrics.globalRegistry);
   }
 }

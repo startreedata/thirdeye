@@ -14,6 +14,8 @@
 package ai.startree.thirdeye.notification;
 
 import static ai.startree.thirdeye.spi.Constants.METRICS_TIMER_PERCENTILES;
+import static ai.startree.thirdeye.spi.util.MetricsUtils.NAMESPACE_TAG;
+import static ai.startree.thirdeye.spi.util.MetricsUtils.getNamespaceTagValue;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
@@ -25,13 +27,10 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.Timer;
-import io.micrometer.core.instrument.Timer.Builder;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,8 +39,6 @@ public class NotificationDispatcher {
 
   private static final Logger LOG = LoggerFactory.getLogger(NotificationDispatcher.class);
 
-  private final static String NAMESPACE_TAG = "namespace";
-  private final static String NULL_NAMESPACE_TAG_VALUE = "__null__";
   private final static String NOTIFICATION_DISPATCH_TIMER_NAME = "thirdeye_notification_dispatch";
   private final static String NOTIFICATION_DISPATCH_TIMER_DESCRIPTION = "Start: A notification payload is passed to the NotificationService#notify implementation. End: The method returns. Tag exception=true means an exception was thrown by the method call.";
 
@@ -124,16 +121,12 @@ public class NotificationDispatcher {
     }
   }
 
-  private @NonNull String getNamespaceTag(final SubscriptionGroupDTO dto) {
-    return Optional.ofNullable(dto.namespace()).orElse(NULL_NAMESPACE_TAG_VALUE);
-  }
-
   private Timer getNotificationDispatchSuccessTimer(final SubscriptionGroupDTO dto) {
     return Timer.builder(NOTIFICATION_DISPATCH_TIMER_NAME)
         .description(NOTIFICATION_DISPATCH_TIMER_DESCRIPTION)
         .publishPercentiles(METRICS_TIMER_PERCENTILES)
         .tag("exception", "false")
-        .tag(NAMESPACE_TAG, getNamespaceTag(dto))
+        .tag(NAMESPACE_TAG, getNamespaceTagValue(dto.namespace()))
         .register(Metrics.globalRegistry);
   }
 
@@ -142,7 +135,7 @@ public class NotificationDispatcher {
         .description(NOTIFICATION_DISPATCH_TIMER_DESCRIPTION)
         .publishPercentiles(METRICS_TIMER_PERCENTILES)
         .tag("exception", "true")
-        .tag(NAMESPACE_TAG, getNamespaceTag(dto))
+        .tag(NAMESPACE_TAG, getNamespaceTagValue(dto.namespace()))
         .register(Metrics.globalRegistry);
   }
 }

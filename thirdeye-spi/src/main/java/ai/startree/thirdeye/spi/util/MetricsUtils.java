@@ -15,13 +15,18 @@ package ai.startree.thirdeye.spi.util;
 
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.Timer;
+import java.util.Optional;
 import java.util.concurrent.Callable;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Utilities for micrometer metrics.
  */
 public class MetricsUtils {
 
+  public final static String NAMESPACE_TAG = "namespace";
+  public final static String NULL_NAMESPACE_TAG_VALUE = "__null__";
 
   // if the callable does not throw, record time in the successTimer. 
   // Else, record time in the exceptionTimer. 
@@ -36,5 +41,9 @@ public class MetricsUtils {
       sample.stop(exceptionTimer);
       throw e;
     }
+  }
+
+  public static @NonNull String getNamespaceTagValue(@Nullable String namespace) {
+    return Optional.ofNullable(namespace).orElse(NULL_NAMESPACE_TAG_VALUE);
   }
 }

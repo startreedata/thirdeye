@@ -15,7 +15,7 @@ package ai.startree.thirdeye.notification;
 
 import static ai.startree.thirdeye.spi.Constants.METRICS_TIMER_PERCENTILES;
 import static ai.startree.thirdeye.spi.util.MetricsUtils.NAMESPACE_TAG;
-import static ai.startree.thirdeye.spi.util.MetricsUtils.getNamespaceTagValue;
+import static ai.startree.thirdeye.spi.util.MetricsUtils.namespaceTagValueOf;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,7 +69,7 @@ public class NotificationDispatcher {
     for (final NotificationSpecDTO notificationSpec: notificationSpecDTOs) {
       final NotificationService service = getNotificationService(notificationSpec);
       try {
-        timedNotify(service, payload, subscriptionGroup);
+        timedNotify(service, payload, subscriptionGroup.namespace());
         specToException.put(notificationSpec, null);
       } catch (Exception e) {
         LOG.error("Notification failed for channel of type {}.", notificationSpec.getType(), e);
@@ -84,10 +85,10 @@ public class NotificationDispatcher {
    * @throws Exception notification to external system can fail for many reason.
    * */
   private void timedNotify(final NotificationService service,
-      final NotificationPayloadApi payload, final SubscriptionGroupDTO sg)
+      final NotificationPayloadApi payload, final @Nullable String namespace)
       throws Exception {
-    final Timer notificationDispatchTimerOfSuccess = getNotificationDispatchSuccessTimer(sg);
-    final Timer notificationDispatchTimerOfException = getNotificationDispatchExceptionTimer(sg);
+    final Timer notificationDispatchTimerOfSuccess = getNotificationDispatchTimer(namespace, false);
+    final Timer notificationDispatchTimerOfException = getNotificationDispatchTimer(namespace, true);
     final Timer.Sample sample = Timer.start(Metrics.globalRegistry);
     try {
       service.notify(payload);
@@ -121,21 +122,12 @@ public class NotificationDispatcher {
     }
   }
 
-  private Timer getNotificationDispatchSuccessTimer(final SubscriptionGroupDTO dto) {
+  private Timer getNotificationDispatchTimer(final @Nullable String namespace, final Boolean exception) {
     return Timer.builder(NOTIFICATION_DISPATCH_TIMER_NAME)
         .description(NOTIFICATION_DISPATCH_TIMER_DESCRIPTION)
         .publishPercentiles(METRICS_TIMER_PERCENTILES)
-        .tag("exception", "false")
-        .tag(NAMESPACE_TAG, getNamespaceTagValue(dto.namespace()))
-        .register(Metrics.globalRegistry);
-  }
-
-  private Timer getNotificationDispatchExceptionTimer(final SubscriptionGroupDTO dto) {
-    return Timer.builder(NOTIFICATION_DISPATCH_TIMER_NAME)
-        .description(NOTIFICATION_DISPATCH_TIMER_DESCRIPTION)
-        .publishPercentiles(METRICS_TIMER_PERCENTILES)
-        .tag("exception", "true")
-        .tag(NAMESPACE_TAG, getNamespaceTagValue(dto.namespace()))
+        .tag("exception", exception ? "true" : "false")
+        .tag(NAMESPACE_TAG, namespaceTagValueOf(namespace))
         .register(Metrics.globalRegistry);
   }
 }

@@ -15,7 +15,7 @@ package ai.startree.thirdeye.worker.task.runner;
 
 import static ai.startree.thirdeye.spi.Constants.METRICS_TIMER_PERCENTILES;
 import static ai.startree.thirdeye.spi.util.MetricsUtils.NAMESPACE_TAG;
-import static ai.startree.thirdeye.spi.util.MetricsUtils.getNamespaceTagValue;
+import static ai.startree.thirdeye.spi.util.MetricsUtils.namespaceTagValueOf;
 import static ai.startree.thirdeye.spi.util.MetricsUtils.record;
 import static java.util.Objects.requireNonNull;
 
@@ -40,6 +40,7 @@ import io.micrometer.core.instrument.Timer;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,8 +94,8 @@ public class NotificationTaskRunner implements TaskRunner {
 
   public List<TaskResult> execute(final long subscriptionGroupId) throws Exception {
     final SubscriptionGroupDTO sg = getSubscriptionGroupDTO(subscriptionGroupId);
-    final Timer notificationTaskTimerOfSuccess = getNotificationTaskSuccessTimer(sg);
-    final Timer notificationTaskTimerOfException = getNotificationTaskExceptionTimer(sg);
+    final Timer notificationTaskTimerOfSuccess = getNotificationTaskTimer(sg.namespace(), false);
+    final Timer notificationTaskTimerOfException = getNotificationTaskTimer(sg.namespace(), true);
     return record(
         () -> {
           executeInternal(sg);
@@ -135,21 +136,12 @@ public class NotificationTaskRunner implements TaskRunner {
     }
   }
 
-  private Timer getNotificationTaskSuccessTimer(final SubscriptionGroupDTO dto) {
+  private Timer getNotificationTaskTimer(final @Nullable String namespace, final Boolean exception) {
     return Timer.builder(NOTIFICATION_TASK_TIMER_NAME)
         .description(NOTIFICATION_TASK_TIMER_DESCRIPTION)
         .publishPercentiles(METRICS_TIMER_PERCENTILES)
-        .tag("exception", "false")
-        .tag(NAMESPACE_TAG, getNamespaceTagValue(dto.namespace()))
-        .register(Metrics.globalRegistry);
-  }
-
-  private Timer getNotificationTaskExceptionTimer(final SubscriptionGroupDTO dto) {
-    return Timer.builder(NOTIFICATION_TASK_TIMER_NAME)
-        .description(NOTIFICATION_TASK_TIMER_DESCRIPTION)
-        .publishPercentiles(METRICS_TIMER_PERCENTILES)
-        .tag("exception", "true")
-        .tag(NAMESPACE_TAG, getNamespaceTagValue(dto.namespace()))
+        .tag("exception", exception ? "true" : "false")
+        .tag(NAMESPACE_TAG, namespaceTagValueOf(namespace))
         .register(Metrics.globalRegistry);
   }
 }

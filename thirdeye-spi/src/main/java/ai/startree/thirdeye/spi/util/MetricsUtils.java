@@ -25,7 +25,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public class MetricsUtils {
 
-  public final static String NAMESPACE_TAG = "namespace";
+  public final static String NAMESPACE_TAG = "thirdeye_workspace";
   public final static String NULL_NAMESPACE_TAG_VALUE = "__null__";
 
   // if the callable does not throw, record time in the successTimer. 
@@ -43,7 +43,7 @@ public class MetricsUtils {
     }
   }
 
-  public static @NonNull String getNamespaceTagValue(@Nullable String namespace) {
+  public static @NonNull String namespaceTagValueOf(@Nullable String namespace) {
     return Optional.ofNullable(namespace).orElse(NULL_NAMESPACE_TAG_VALUE);
   }
 }

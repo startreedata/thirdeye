@@ -75,7 +75,7 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
 
   @Override
   public List<TaskResult> execute(final TaskInfo taskInfo, final TaskContext taskContext,
-      String namespace) throws Exception {
+      @Nullable String namespace) throws Exception {
     final Timer detectionTaskTimerOfSuccess = getDetectionTaskTimer(namespace, false);
     final Timer detectionTaskTimerOfException = getDetectionTaskTimer(namespace, true);
     final Timer.Sample sample = Timer.start(Metrics.globalRegistry);

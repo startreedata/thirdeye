@@ -175,23 +175,4 @@ public class InternalResource {
       return Response.ok(-1).build();
     }
   }
-
-  @Path("run-detection-task-locally")
-  @POST
-  @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
-  public Response runTask(@Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
-      @FormParam("alertId") final Long alertId, @FormParam("start") Long startTime,
-      @FormParam("end") Long endTime) throws Exception {
-    checkArgument(alertId != null && alertId >= 0);
-    if (endTime == null) {
-      endTime = System.currentTimeMillis();
-    }
-    if (startTime == null) {
-      startTime = endTime - TimeUnit.MINUTES.toMillis(1);
-    }
-    internalService.runDetectionTaskLocally(principal, alertId, startTime, endTime);
-
-    return Response.ok().build();
-  }
 }

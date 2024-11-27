@@ -88,7 +88,7 @@ public class NotificationTaskRunner implements TaskRunner {
 
   @Override
   public List<TaskResult> execute(final TaskInfo taskInfo, final TaskContext taskContext,
-      String namespace) throws Exception {
+      @Nullable String namespace) throws Exception {
     return execute(((DetectionAlertTaskInfo) taskInfo).getDetectionAlertConfigId(), namespace);
   }
 

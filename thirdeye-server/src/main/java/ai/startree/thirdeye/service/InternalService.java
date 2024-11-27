@@ -104,14 +104,4 @@ public class InternalService {
     }
     return emailHtml;
   }
-
-  public void runDetectionTaskLocally(final ThirdEyePrincipal principal, final long alertId, final long startTime,
-      final long endTime) throws Exception {
-    authorizationManager.hasRootAccess(principal);
-    final DetectionPipelineTaskInfo info = new DetectionPipelineTaskInfo(alertId, startTime,
-        endTime);
-    final AlertDTO alert = requireNonNull(alertManager.findById(alertId),
-        String.format("Could not find alert with id %d for local detection task run", alertId));
-    detectionPipelineTaskRunner.execute(info, new TaskContext(), alert.namespace());
-  }
 }

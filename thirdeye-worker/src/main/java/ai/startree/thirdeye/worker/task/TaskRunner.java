@@ -21,5 +21,5 @@ import java.util.List;
  */
 public interface TaskRunner {
 
-  List<TaskResult> execute(TaskInfo taskInfo, TaskContext taskContext) throws Exception;
+  List<TaskResult> execute(TaskInfo taskInfo, TaskContext taskContext, String namespace) throws Exception;
 }

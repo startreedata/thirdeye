@@ -74,18 +74,13 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
   }
 
   @Override
-  public List<TaskResult> execute(final TaskInfo taskInfo, final TaskContext taskContext)
-      throws Exception {
-    final DetectionPipelineTaskInfo detectionPipelineTaskInfo = (DetectionPipelineTaskInfo) taskInfo;
-    final AlertDTO alert = requireNonNull(alertManager.findById(detectionPipelineTaskInfo.getConfigId()),
-        String.format("Could not resolve config id %d", detectionPipelineTaskInfo.getConfigId()));
-
-    final Timer detectionTaskTimerOfSuccess = getDetectionTaskTimer(alert.namespace(), false);
-    final Timer detectionTaskTimerOfException = getDetectionTaskTimer(alert.namespace(), true);
+  public List<TaskResult> execute(final TaskInfo taskInfo, final TaskContext taskContext,
+      String namespace) throws Exception {
+    final Timer detectionTaskTimerOfSuccess = getDetectionTaskTimer(namespace, false);
+    final Timer detectionTaskTimerOfException = getDetectionTaskTimer(namespace, true);
     final Timer.Sample sample = Timer.start(Metrics.globalRegistry);
-
     try {
-      final List<TaskResult> result = execute0(detectionPipelineTaskInfo, alert);
+      final List<TaskResult> result = execute0((DetectionPipelineTaskInfo) taskInfo);
       sample.stop(detectionTaskTimerOfSuccess);
       return result;
     } catch (final Exception e) {
@@ -94,12 +89,14 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
     }
   }
 
-  private List<TaskResult> execute0(final DetectionPipelineTaskInfo info, final AlertDTO alert)
+  private List<TaskResult> execute0(final DetectionPipelineTaskInfo info)
       throws Exception {
     LOG.info("Start detection task for id {} between {} and {}",
         info.getConfigId(),
         new DateTime(info.getStart(), DateTimeZone.UTC),
         new DateTime(info.getEnd(), DateTimeZone.UTC));
+    final AlertDTO alert = requireNonNull(alertManager.findById(info.getConfigId()),
+        String.format("Could not resolve config id %d", info.getConfigId()));
 
     final AlertTemplateDTO renderedTemplate = alertTemplateRenderer.renderAlert(alert);
     final Interval detectionInterval = computeCorrectedInterval(

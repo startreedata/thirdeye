@@ -22,7 +22,9 @@ import ai.startree.thirdeye.notification.NotificationTaskFilter;
 import ai.startree.thirdeye.notification.NotificationTaskFilterResult;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DetectionPipelineTaskInfo;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
@@ -45,6 +47,7 @@ public class InternalService {
   private final NotificationServiceRegistry notificationServiceRegistry;
   private final DetectionPipelineTaskRunner detectionPipelineTaskRunner;
   private final AuthorizationManager authorizationManager;
+  private final AlertManager alertManager;
 
   @Inject
   public InternalService(final NotificationTaskRunner notificationTaskRunner,
@@ -53,7 +56,8 @@ public class InternalService {
       final NotificationTaskFilter notificationTaskFilter,
       final NotificationServiceRegistry notificationServiceRegistry,
       final DetectionPipelineTaskRunner detectionPipelineTaskRunner,
-      final AuthorizationManager authorizationManager) {
+      final AuthorizationManager authorizationManager,
+      final AlertManager alertManager) {
     this.notificationTaskRunner = notificationTaskRunner;
     this.subscriptionGroupManager = subscriptionGroupManager;
     this.notificationPayloadBuilder = notificationPayloadBuilder;
@@ -61,6 +65,7 @@ public class InternalService {
     this.notificationServiceRegistry = notificationServiceRegistry;
     this.detectionPipelineTaskRunner = detectionPipelineTaskRunner;
     this.authorizationManager = authorizationManager;
+    this.alertManager = alertManager;
   }
 
   public void notify(final ThirdEyePrincipal principal, final Long subscriptionGroupId, final Boolean reset) throws Exception {
@@ -70,7 +75,7 @@ public class InternalService {
       sg.setVectorClocks(null);
       subscriptionGroupManager.save(sg);
     }
-    notificationTaskRunner.execute(subscriptionGroupId);
+    notificationTaskRunner.execute(subscriptionGroupId, sg.namespace());
   }
 
   public String generateHtmlEmail(final ThirdEyePrincipal principal, final Long subscriptionGroupManagerById, final Boolean reset) {
@@ -105,6 +110,8 @@ public class InternalService {
     authorizationManager.hasRootAccess(principal);
     final DetectionPipelineTaskInfo info = new DetectionPipelineTaskInfo(alertId, startTime,
         endTime);
-    detectionPipelineTaskRunner.execute(info, new TaskContext());
+    final AlertDTO alert = requireNonNull(alertManager.findById(alertId),
+        String.format("Could not find alert with id %d for local detection task run", alertId));
+    detectionPipelineTaskRunner.execute(info, new TaskContext(), alert.namespace());
   }
 }

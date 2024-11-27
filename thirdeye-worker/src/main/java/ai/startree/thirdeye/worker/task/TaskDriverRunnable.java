@@ -158,7 +158,7 @@ public class TaskDriverRunnable implements Runnable {
 
     // execute the selected task asynchronously
     return taskDriverThreadPoolManager.getTaskExecutorService()
-        .submit(() -> taskRunner.execute(taskInfo, taskContext));
+        .submit(() -> taskRunner.execute(taskInfo, taskContext, taskDTO.namespace()));
   }
 
   /**

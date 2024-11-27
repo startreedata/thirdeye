@@ -87,17 +87,17 @@ public class NotificationTaskRunner implements TaskRunner {
   }
 
   @Override
-  public List<TaskResult> execute(final TaskInfo taskInfo, final TaskContext taskContext)
-      throws Exception {
-    return execute(((DetectionAlertTaskInfo) taskInfo).getDetectionAlertConfigId());
+  public List<TaskResult> execute(final TaskInfo taskInfo, final TaskContext taskContext,
+      String namespace) throws Exception {
+    return execute(((DetectionAlertTaskInfo) taskInfo).getDetectionAlertConfigId(), namespace);
   }
 
-  public List<TaskResult> execute(final long subscriptionGroupId) throws Exception {
-    final SubscriptionGroupDTO sg = getSubscriptionGroupDTO(subscriptionGroupId);
-    final Timer notificationTaskTimerOfSuccess = getNotificationTaskTimer(sg.namespace(), false);
-    final Timer notificationTaskTimerOfException = getNotificationTaskTimer(sg.namespace(), true);
+  public List<TaskResult> execute(final long subscriptionGroupId, String namespace) throws Exception {
+    final Timer notificationTaskTimerOfSuccess = getNotificationTaskTimer(namespace, false);
+    final Timer notificationTaskTimerOfException = getNotificationTaskTimer(namespace, true);
     return record(
         () -> {
+          final SubscriptionGroupDTO sg = getSubscriptionGroupDTO(subscriptionGroupId);
           executeInternal(sg);
           return Collections.emptyList();
         },

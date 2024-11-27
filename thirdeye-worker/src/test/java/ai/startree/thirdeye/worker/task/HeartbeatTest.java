@@ -78,7 +78,7 @@ public class HeartbeatTest {
     taskDriverThreadPoolManager = new TaskDriverThreadPoolManager(config);
 
     taskRunnerFactory = Mockito.mock(TaskRunnerFactory.class);
-    when(taskRunnerFactory.get(any())).thenReturn((taskInfo, taskContext) -> {
+    when(taskRunnerFactory.get(any())).thenReturn((taskInfo, taskContext, namespace) -> {
       Thread.sleep(TASK_DELAY.toMillis());
       return null;
     });

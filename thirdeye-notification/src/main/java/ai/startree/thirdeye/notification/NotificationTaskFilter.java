@@ -274,7 +274,7 @@ public class NotificationTaskFilter {
           toFormattedDate(f.getCreateTimeWindow().getEndMillis()));
     }
 
-    LOG.info("Subscription Group: {} Alert: {} context: {}. {}/{} filtered. {}",
+    LOG.debug("Subscription Group: {} Alert: {} context: {}. {}/{} filtered. {}",
         subscriptionGroup.getId(),
         f.getAlertId(),
         logContext,

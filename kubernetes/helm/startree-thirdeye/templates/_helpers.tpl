@@ -139,15 +139,18 @@ The name of the thirdeye scheduler (worker with special detector.yml) headless s
 */}}
 {{- define "lessOrEqualTo1Cpu" -}}
 {{- $cpu := . | trim -}}
-{{- $millicores := 0.0 -}}
 {{- if hasSuffix "m" $cpu -}}
-  {{- $millicores = (trimSuffix "m" $cpu) | float64 -}}
+  {{- $millicores := (trimSuffix "m" $cpu) | float64 -}}
+  {{- if le $millicores 1000.0 -}}
+  true
+  {{- else -}}
+  false
+  {{- end -}}
 {{- else -}}
-  {{- $millicores = mulf (float64 $cpu) 1000.0 -}}
-{{- end -}}
-{{- if le $millicores 1000.0 -}}
-true
-{{- else -}}
-false
+  {{- if le (float64 $cpu) 1.0 -}}
+  true
+  {{- else -}}
+  false
+  {{- end -}}
 {{- end -}}
 {{- end -}}

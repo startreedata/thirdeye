@@ -38,6 +38,24 @@ public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
   @Inject
   public AlertManagerImpl(final GenericPojoDao genericPojoDao) {
     super(AlertDTO.class, genericPojoDao);
+  }
+
+  @Override
+  public int update(final AlertDTO alertDTO) {
+    if (alertDTO.getId() == null) {
+      final Long id = save(alertDTO);
+      if (id > 0) {
+        return 1;
+      } else {
+        return 0;
+      }
+    } else {
+      return genericPojoDao.update(alertDTO);
+    }
+  }
+
+  @Override
+  public void registerDatabaseMetrics() {
     Gauge.builder("thirdeye_active_alerts",
             memoizeWithExpiration(this::countActive, METRICS_CACHE_TIMEOUT.toMinutes(),
                 TimeUnit.MINUTES))
@@ -55,20 +73,6 @@ public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
     Gauge.builder("thirdeye_active_timeseries",
             memoizeWithExpiration(activeTimeseriesCountFun, 15, TimeUnit.MINUTES))
         .register(Metrics.globalRegistry);
-  }
-
-  @Override
-  public int update(final AlertDTO alertDTO) {
-    if (alertDTO.getId() == null) {
-      final Long id = save(alertDTO);
-      if (id > 0) {
-        return 1;
-      } else {
-        return 0;
-      }
-    } else {
-      return genericPojoDao.update(alertDTO);
-    }
   }
 
   @Override

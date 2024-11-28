@@ -32,11 +32,15 @@ import ai.startree.thirdeye.scheduler.SchedulerService;
 import ai.startree.thirdeye.scheduler.events.MockEventsLoader;
 import ai.startree.thirdeye.service.ResourcesBootstrapService;
 import ai.startree.thirdeye.spi.Constants;
+import ai.startree.thirdeye.spi.datalayer.bao.AbstractManager;
 import ai.startree.thirdeye.worker.task.TaskDriver;
 import ch.qos.logback.classic.Level;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
+import com.google.inject.Binding;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.spi.DefaultBindingScopingVisitor;
 import io.dropwizard.auth.AuthDynamicFeature;
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.AuthValueFactoryProvider;
@@ -66,6 +70,7 @@ import io.sentry.Sentry;
 import io.sentry.SentryLevel;
 import io.sentry.logback.SentryAppender;
 import java.util.EnumSet;
+import java.util.Map;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
 import javax.ws.rs.WebApplicationException;
@@ -215,6 +220,8 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
           injector.getInstance(ResourcesBootstrapService.class)
               .bootstrap(AuthorizationManager.getInternalValidPrincipal());
 
+          registerDatabaseMetricsOfAllDaos(injector);
+
           // Start the scheduler
           schedulerService.start();
         }
@@ -238,6 +245,22 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
         injector.getInstance(PlanExecutor.class).close();
       }
     };
+  }
+
+  private void registerDatabaseMetricsOfAllDaos(final Injector injector) {
+    for(final Map.Entry<Key<?>, Binding<?>> entry : injector.getAllBindings().entrySet()) {
+      final Binding<?> binding = entry.getValue();
+      if (AbstractManager.class.isAssignableFrom(
+          entry.getKey().getTypeLiteral().getRawType())) {
+        binding.acceptScopingVisitor(new DefaultBindingScopingVisitor<Void>() {
+          @Override public Void visitEagerSingleton() {
+            final AbstractManager instance = (AbstractManager) (binding.getProvider().get());
+            instance.registerDatabaseMetrics();
+            return null;
+          }
+        });
+      }
+    }
   }
 
   /**

@@ -71,4 +71,12 @@ public interface AbstractManager<E extends AbstractDTO> {
   default long count(final Predicate predicate) {
     throw new UnsupportedOperationException();
   }
+
+  /**
+   * Register metrics that perform regular calls to the persistence database.
+   * These metrics should not be registered by all components of ThirdEye. 
+   * This would result in a linear scaling of database queries when components are scaled linearly. 
+   * It is recommended to only have the scheduler component register such metrics.
+   */
+  void registerDatabaseMetrics();
 }

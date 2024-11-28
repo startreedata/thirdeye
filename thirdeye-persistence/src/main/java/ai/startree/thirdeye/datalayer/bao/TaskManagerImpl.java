@@ -66,7 +66,6 @@ public class TaskManagerImpl implements TaskManager {
     this.dao = dao;
     orphanTasksGauge = Metrics.globalRegistry.gauge("thirdeye_task_orphans",
         new AtomicInteger(0));
-    registerMetrics();
   }
 
   @Override
@@ -251,7 +250,8 @@ public class TaskManagerImpl implements TaskManager {
         Predicate.EQ("type", type)));
   }
 
-  private void registerMetrics() {
+  @Override
+  public void registerDatabaseMetrics() {
     for (final TaskType type : TaskType.values()) {
       Gauge.builder("thirdeye_task_latency",
               memoizeWithExpiration(() -> getTaskLatency(type, TaskStatus.WAITING, TaskStatus.RUNNING), 30, TimeUnit.SECONDS))

@@ -274,6 +274,7 @@ public class TaskManagerImpl implements TaskManager {
             .register(Metrics.globalRegistry);
       }
     }
+    LOG.info("Registered task database metrics.");
   }
 
   // FIXME CYRIL - this should have as less cache as possible and as precise as possible

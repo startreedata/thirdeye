@@ -30,10 +30,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
     AlertManager {
+  
+  private static final Logger LOG = LoggerFactory.getLogger(AlertManagerImpl.class);
 
   @Inject
   public AlertManagerImpl(final GenericPojoDao genericPojoDao) {
@@ -73,6 +77,7 @@ public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
     Gauge.builder("thirdeye_active_timeseries",
             memoizeWithExpiration(activeTimeseriesCountFun, 15, TimeUnit.MINUTES))
         .register(Metrics.globalRegistry);
+    LOG.info("Registered alert database metrics.");
   }
 
   @Override

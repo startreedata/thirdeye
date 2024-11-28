@@ -76,26 +76,6 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
   @Inject
   public AnomalyManagerImpl(final GenericPojoDao genericPojoDao) {
     super(AnomalyDTO.class, genericPojoDao);
-
-    Gauge.builder("thirdeye_anomalies",
-            memoizeWithExpiration(() -> count(NOT_CHILD_NOT_IGNORED_FILTER),
-                METRICS_CACHE_TIMEOUT.toMinutes(),
-                TimeUnit.MINUTES))
-        .register(Metrics.globalRegistry);
-    Gauge.builder("thirdeye_anomaly_feedbacks",
-            memoizeWithExpiration(() -> count(HAS_FEEDBACK_FILTER), METRICS_CACHE_TIMEOUT.toMinutes(),
-                TimeUnit.MINUTES))
-        .register(Metrics.globalRegistry);
-
-    final Supplier<ConfusionMatrix> cachedConfusionMatrix = memoizeWithExpiration(
-        this::computeConfusionMatrixForAnomalies, METRICS_CACHE_TIMEOUT.toMinutes(),
-        TimeUnit.MINUTES);
-    Gauge.builder("thirdeye_anomaly_precision",
-            () -> cachedConfusionMatrix.get().getPrecision())
-        .register(Metrics.globalRegistry);
-    Gauge.builder("thirdeye_anomaly_response_rate",
-            () -> cachedConfusionMatrix.get().getResponseRate())
-        .register(Metrics.globalRegistry);
   }
 
   @Override
@@ -217,6 +197,30 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
     final List<AnomalyDTO> anomalies = super.filter(daoFilter);
     // FIXME CYRIL this filter is only decorating with feedback - while some others decorate with feedback and children
     return decorateWithFeedback(anomalies);
+  }
+
+  @Override
+  public void registerDatabaseMetrics() {
+    Gauge.builder("thirdeye_anomalies",
+            memoizeWithExpiration(() -> count(NOT_CHILD_NOT_IGNORED_FILTER),
+                METRICS_CACHE_TIMEOUT.toMinutes(),
+                TimeUnit.MINUTES))
+        .register(Metrics.globalRegistry);
+    Gauge.builder("thirdeye_anomaly_feedbacks",
+            memoizeWithExpiration(() -> count(HAS_FEEDBACK_FILTER), METRICS_CACHE_TIMEOUT.toMinutes(),
+                TimeUnit.MINUTES))
+        .register(Metrics.globalRegistry);
+
+    final Supplier<ConfusionMatrix> cachedConfusionMatrix = memoizeWithExpiration(
+        this::computeConfusionMatrixForAnomalies, METRICS_CACHE_TIMEOUT.toMinutes(),
+        TimeUnit.MINUTES);
+    Gauge.builder("thirdeye_anomaly_precision",
+            () -> cachedConfusionMatrix.get().getPrecision())
+        .register(Metrics.globalRegistry);
+    Gauge.builder("thirdeye_anomaly_response_rate",
+            () -> cachedConfusionMatrix.get().getResponseRate())
+        .register(Metrics.globalRegistry);
+    LOG.info("Registered anomaly database metrics.");
   }
 
   @Override

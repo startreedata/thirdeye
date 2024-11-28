@@ -40,7 +40,7 @@ import com.google.inject.Binding;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
-import com.google.inject.spi.DefaultBindingScopingVisitor;
+import com.google.inject.spi.DefaultElementVisitor;
 import io.dropwizard.auth.AuthDynamicFeature;
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.AuthValueFactoryProvider;
@@ -70,7 +70,10 @@ import io.sentry.Sentry;
 import io.sentry.SentryLevel;
 import io.sentry.logback.SentryAppender;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
 import javax.ws.rs.WebApplicationException;
@@ -248,14 +251,22 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
   }
 
   private void registerDatabaseMetricsOfAllDaos(final Injector injector) {
-    for(final Map.Entry<Key<?>, Binding<?>> entry : injector.getAllBindings().entrySet()) {
+    final Set<Entry<Key<?>, Binding<?>>> keyToBinding = injector.getAllBindings().entrySet();
+    // both implementation and interface may be listed in keyToBinding - so we deduplicate manually 
+    final Set<Class> loadedClasses = new HashSet<>();
+    for(final Map.Entry<Key<?>, Binding<?>> entry : keyToBinding) {
       final Binding<?> binding = entry.getValue();
-      if (AbstractManager.class.isAssignableFrom(
-          entry.getKey().getTypeLiteral().getRawType())) {
-        binding.acceptScopingVisitor(new DefaultBindingScopingVisitor<Void>() {
-          @Override public Void visitEagerSingleton() {
-            final AbstractManager instance = (AbstractManager) (binding.getProvider().get());
-            instance.registerDatabaseMetrics();
+      if (AbstractManager.class.isAssignableFrom(entry.getKey().getTypeLiteral().getRawType())) {
+        binding.acceptVisitor(new DefaultElementVisitor<AbstractManager<?>>() {
+          @Override
+          public <T> AbstractManager<?> visit(final Binding<T> binding) {
+            final AbstractManager<?> instance = (AbstractManager<?>) binding.getProvider().get();
+            if (!loadedClasses.contains(instance.getClass())) {
+              instance.registerDatabaseMetrics();
+              loadedClasses.add(instance.getClass());
+            } else {
+              System.out.println("look who's here");
+            }
             return null;
           }
         });

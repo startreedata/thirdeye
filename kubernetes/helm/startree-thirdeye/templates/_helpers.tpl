@@ -133,3 +133,17 @@ The name of the thirdeye scheduler (worker with special detector.yml) headless s
 {{-    end -}}
 {{- end -}}
 
+{{/*
+  Normalises the CPU requests value
+  This convert cpu values to number of millicores
+*/}}
+{{- define "normalizeCpu" -}}
+{{- $cpu := . | trim -}}
+{{- if hasSuffix "m" $cpu -}}
+  {{- $millicores := (trimSuffix "m" $cpu | int) -}}
+  {{- $millicores | float64 -}}
+{{- else -}}
+  {{- $millicores := (mulf (float64 $cpu) 1000.0) -}}
+  {{- $millicores -}}
+{{- end -}}
+{{- end -}}

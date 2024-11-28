@@ -45,7 +45,7 @@ public class ThirdEyeIntegrationTestSupport {
 
   public void setup() throws Exception {
     pinotDataSourceFuture = PinotDataSourceManager.getPinotDataSourceApi(PinotVersion.recommendedVersion());
-    dbConfiguration = MySqlTestDatabase.sharedDatabaseConfiguration();
+    dbConfiguration = MySqlTestDatabase.newDatabaseConfiguration();
 
     if (useLocalMysqlInstance()) {
       MySqlTestDatabase.cleanSharedDatabase();

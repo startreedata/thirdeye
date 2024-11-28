@@ -264,8 +264,6 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
             if (!loadedClasses.contains(instance.getClass())) {
               instance.registerDatabaseMetrics();
               loadedClasses.add(instance.getClass());
-            } else {
-              System.out.println("look who's here");
             }
             return null;
           }

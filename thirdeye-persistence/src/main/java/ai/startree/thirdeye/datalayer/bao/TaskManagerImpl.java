@@ -59,12 +59,12 @@ public class TaskManagerImpl implements TaskManager {
 
   private static final Logger LOG = LoggerFactory.getLogger(TaskManagerImpl.class);
 
-  private final AtomicInteger orphanTasksCountMetric;
+  private final AtomicInteger orphanTasksGauge;
 
   @Inject
   public TaskManagerImpl(final TaskDao dao) {
     this.dao = dao;
-    orphanTasksCountMetric = Metrics.globalRegistry.gauge("thirdeye_task_orphans",
+    orphanTasksGauge = Metrics.globalRegistry.gauge("thirdeye_task_orphans",
         new AtomicInteger(0));
     registerMetrics();
   }
@@ -230,7 +230,7 @@ public class TaskManagerImpl implements TaskManager {
             Predicate.LT("lastActive", activeThreshold)
         )
     );
-    orphanTasksCountMetric.set(orphanTasks.size());
+    orphanTasksGauge.set(orphanTasks.size());
     orphanTasks.forEach(task -> updateStatusAndTaskEndTime(
             task.getId(),
             TaskStatus.RUNNING,

@@ -254,12 +254,21 @@ public class TaskManagerImpl implements TaskManager {
   private void registerMetrics() {
     for (final TaskType type : TaskType.values()) {
       Gauge.builder("thirdeye_task_latency",
-              memoizeWithExpiration(() -> getTaskLatency(type), 1, TimeUnit.MINUTES))
+              memoizeWithExpiration(() -> getTaskLatency(type, TaskStatus.WAITING, TaskStatus.RUNNING), 30, TimeUnit.SECONDS))
           .tags("type", type.toString())
+          .description("Maximum amount of time a task has been pending in status WAITING or RUNNING.")
           .register(Metrics.globalRegistry);
+
+      Gauge.builder("thirdeye_task_acquisition_latency",
+              memoizeWithExpiration(() -> getTaskLatency(type, TaskStatus.WAITING), 30, TimeUnit.SECONDS))
+          .tags("type", type.toString())
+          .description("Maximum amount of time a task has been pending in status WAITING.")
+          .register(Metrics.globalRegistry);
+      
+      
       for (final TaskStatus status : TaskStatus.values()) {
         Gauge.builder("thirdeye_tasks",
-                memoizeWithExpiration(() -> countBy(status, type), 1, TimeUnit.MINUTES))
+                memoizeWithExpiration(() -> countBy(status, type), 30, TimeUnit.SECONDS))
             .tag("status", status.toString())
             .tags("type", type.toString())
             .register(Metrics.globalRegistry);
@@ -268,12 +277,11 @@ public class TaskManagerImpl implements TaskManager {
   }
 
   // FIXME CYRIL - this should have as less cache as possible and as precise as possible
-  private long getTaskLatency(final TaskType type) {
-    // fetch pending tasks from DB of the given type
-    final List<TaskStatus> pendingStatus = List.of(TaskStatus.WAITING, TaskStatus.RUNNING);
+  private long getTaskLatency(final TaskType type, TaskStatus... pendingStatuses) {
+    // fetch pending tasks from DB
     final DaoFilter filter = new DaoFilter()
         .setPredicate(Predicate.AND(
-            Predicate.IN("status", pendingStatus.toArray()),
+            Predicate.IN("status", pendingStatuses),
             Predicate.EQ("type", type)
         ));
     final long currentTime = System.currentTimeMillis();

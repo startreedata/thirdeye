@@ -134,16 +134,20 @@ The name of the thirdeye scheduler (worker with special detector.yml) headless s
 {{- end -}}
 
 {{/*
-  Normalises the CPU requests value
-  This convert cpu values to number of millicores
+  lessOrEqualTo1Cpu returns true if cpu core count
+  is less than or equal to 1.0
 */}}
-{{- define "normalizeCpu" -}}
+{{- define "lessOrEqualTo1Cpu" -}}
 {{- $cpu := . | trim -}}
+{{- $millicores := 0.0 -}}
 {{- if hasSuffix "m" $cpu -}}
-  {{- $millicores := (trimSuffix "m" $cpu | int) -}}
-  {{- $millicores | float64 -}}
+  {{- $millicores = (trimSuffix "m" $cpu) | float64 -}}
 {{- else -}}
-  {{- $millicores := (mulf (float64 $cpu) 1000.0) -}}
-  {{- $millicores -}}
+  {{- $millicores = mulf (float64 $cpu) 1000.0 -}}
+{{- end -}}
+{{- if le $millicores 1000.0 -}}
+true
+{{- else -}}
+false
 {{- end -}}
 {{- end -}}

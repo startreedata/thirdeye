@@ -16,7 +16,6 @@ package ai.startree.thirdeye.scheduler;
 import ai.startree.thirdeye.scheduler.events.HolidayEventsLoaderConfiguration;
 import ai.startree.thirdeye.scheduler.events.HolidayEventsLoaderScheduler;
 import ai.startree.thirdeye.scheduler.taskcleanup.TaskCleanUpConfiguration;
-import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.worker.task.TaskDriverConfiguration;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -54,8 +53,7 @@ public class SchedulerService implements Managed {
       final HolidayEventsLoaderScheduler holidayEventsLoader,
       final DetectionCronScheduler detectionScheduler,
       final SubscriptionCronScheduler subscriptionScheduler,
-      final TaskManager taskManager,
-      final AlertManager alertManager) {
+      final TaskManager taskManager) {
     this.config = config;
     this.holidayEventsLoaderConfiguration = holidayEventsLoaderConfiguration;
     this.taskDriverConfiguration = taskDriverConfiguration;

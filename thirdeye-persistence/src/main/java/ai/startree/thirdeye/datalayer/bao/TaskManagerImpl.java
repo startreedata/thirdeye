@@ -254,12 +254,14 @@ public class TaskManagerImpl implements TaskManager {
   private void registerMetrics() {
     for (final TaskType type : TaskType.values()) {
       Gauge.builder("thirdeye_task_latency",
-              memoizeWithExpiration(() -> getTaskLatency(type), 1, TimeUnit.MINUTES))
+              memoizeWithExpiration(() -> getTaskLatency(type), 30, TimeUnit.SECONDS))
           .tags("type", type.toString())
           .register(Metrics.globalRegistry);
+      
+      
       for (final TaskStatus status : TaskStatus.values()) {
         Gauge.builder("thirdeye_tasks",
-                memoizeWithExpiration(() -> countBy(status, type), 1, TimeUnit.MINUTES))
+                memoizeWithExpiration(() -> countBy(status, type), 30, TimeUnit.SECONDS))
             .tag("status", status.toString())
             .tags("type", type.toString())
             .register(Metrics.globalRegistry);

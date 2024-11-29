@@ -138,7 +138,7 @@ The name of the thirdeye scheduler (worker with special detector.yml) headless s
   is less than or equal to 1.0
 */}}
 {{- define "lessOrEqualTo1Cpu" -}}
-{{- $cpu := . | trim -}}
+{{- $cpu := . | toString | trim -}}
 {{- if hasSuffix "m" $cpu -}}
   {{- $millicores := (trimSuffix "m" $cpu) | float64 -}}
   {{- if le $millicores 1000.0 -}}

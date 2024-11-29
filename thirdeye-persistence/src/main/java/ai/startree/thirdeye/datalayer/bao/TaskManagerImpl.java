@@ -59,14 +59,13 @@ public class TaskManagerImpl implements TaskManager {
 
   private static final Logger LOG = LoggerFactory.getLogger(TaskManagerImpl.class);
 
-  private final AtomicInteger orphanTasksCountMetric;
+  private final AtomicInteger orphanTasksGauge;
 
   @Inject
   public TaskManagerImpl(final TaskDao dao) {
     this.dao = dao;
-    orphanTasksCountMetric = Metrics.globalRegistry.gauge("thirdeye_task_orphans",
+    orphanTasksGauge = Metrics.globalRegistry.gauge("thirdeye_task_orphans",
         new AtomicInteger(0));
-    registerMetrics();
   }
 
   @Override
@@ -230,7 +229,7 @@ public class TaskManagerImpl implements TaskManager {
             Predicate.LT("lastActive", activeThreshold)
         )
     );
-    orphanTasksCountMetric.set(orphanTasks.size());
+    orphanTasksGauge.set(orphanTasks.size());
     orphanTasks.forEach(task -> updateStatusAndTaskEndTime(
             task.getId(),
             TaskStatus.RUNNING,
@@ -251,7 +250,8 @@ public class TaskManagerImpl implements TaskManager {
         Predicate.EQ("type", type)));
   }
 
-  private void registerMetrics() {
+  @Override
+  public void registerDatabaseMetrics() {
     for (final TaskType type : TaskType.values()) {
       Gauge.builder("thirdeye_task_latency",
               memoizeWithExpiration(() -> getTaskLatency(type, TaskStatus.WAITING, TaskStatus.RUNNING), 30, TimeUnit.SECONDS))
@@ -274,6 +274,7 @@ public class TaskManagerImpl implements TaskManager {
             .register(Metrics.globalRegistry);
       }
     }
+    LOG.info("Registered task database metrics.");
   }
 
   // FIXME CYRIL - this should have as less cache as possible and as precise as possible

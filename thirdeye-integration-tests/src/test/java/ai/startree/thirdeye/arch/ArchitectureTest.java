@@ -26,6 +26,7 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.methods;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 
 import ai.startree.thirdeye.PluginLoader;
+import ai.startree.thirdeye.ThirdEyeServer;
 import ai.startree.thirdeye.ThirdEyeServerModule;
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.alert.EvaluationContextProcessor;
@@ -194,6 +195,7 @@ public class ArchitectureTest {
         EvaluationContextProcessor.class,
         AlertTemplateRenderer.class,
         AuthorizationManager.class, // OK - REVIEW ON MAY 6 2024
+        ThirdEyeServer.class // used to register database-reading metrics
     };
     final ArchRule rule = noClasses().that(
             doNot(

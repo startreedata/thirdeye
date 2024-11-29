@@ -26,14 +26,22 @@ import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.Metrics;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public class SubscriptionGroupManagerImpl extends
     AbstractManagerImpl<SubscriptionGroupDTO> implements SubscriptionGroupManager {
 
+  private static final Logger LOG = LoggerFactory.getLogger(SubscriptionGroupManagerImpl.class);
+
   @Inject
   public SubscriptionGroupManagerImpl(final GenericPojoDao genericPojoDao) {
     super(SubscriptionGroupDTO.class, genericPojoDao);
+  }
+
+  @Override
+  public void registerDatabaseMetrics() {
     final Supplier<Number> notificationFlowsFun = () -> findAll().stream()
         .filter(sg -> CollectionUtils.isNotEmpty(sg.getAlertAssociations()))
         .filter(sg -> CollectionUtils.isNotEmpty(sg.getSpecs()))
@@ -44,5 +52,7 @@ public class SubscriptionGroupManagerImpl extends
             memoizeWithExpiration(notificationFlowsFun, METRICS_CACHE_TIMEOUT.toMinutes(),
                 TimeUnit.MINUTES))
         .register(Metrics.globalRegistry);
+
+    LOG.info("Registered subscription group database metrics.");
   }
 }

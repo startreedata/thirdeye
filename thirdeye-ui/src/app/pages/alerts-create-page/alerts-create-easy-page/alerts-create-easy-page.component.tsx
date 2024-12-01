@@ -42,6 +42,7 @@ import {
 import DimensionImage from "../../../../assets/images/dimensions.png";
 import { AdditonalFiltersDrawer } from "../../../components/additional-filters-drawer/additional-filters-drawer.component";
 import { AlertCompositeFiltersModal } from "../../../components/alert-composite-filters-modal/alert-composite-filters-modal.component";
+import { AlertJsonEditorModal } from "../../../components/alert-json-editor-modal/alert-json-editor-modal.component";
 // Remove "createNewStartingAlertThreshold as" for fallback
 import { createNewStartingAlertThreshold as createNewStartingAlert } from "../../../components/alert-wizard-v2/alert-template/alert-template.utils";
 import { AvailableAlgorithmOption } from "../../../components/alert-wizard-v3/alert-type-selection/alert-type-selection.interfaces";
@@ -1882,6 +1883,21 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                     <Grid
                                                                                         container
                                                                                     >
+                                                                                        <AlertJsonEditorModal
+                                                                                            isReadOnly
+                                                                                            alert={
+                                                                                                alert
+                                                                                            }
+                                                                                            buttonText={t(
+                                                                                                "label.view-json"
+                                                                                            )}
+                                                                                            cancelButtonText={t(
+                                                                                                "label.close"
+                                                                                            )}
+                                                                                            isDisabled={
+                                                                                                !algorithmOption
+                                                                                            }
+                                                                                        />
                                                                                         <Button
                                                                                             className={
                                                                                                 classes.infoButton
@@ -1987,6 +2003,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                             </Grid>
                                                                         ) : (
                                                                             <ChartContentV2
+                                                                                isSearchEnabled
                                                                                 showLoadButton
                                                                                 showOnlyActivity
                                                                                 alert={

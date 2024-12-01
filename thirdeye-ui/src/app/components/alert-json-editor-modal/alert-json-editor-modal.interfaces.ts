@@ -17,5 +17,12 @@ import { EditableAlert } from "../../rest/dto/alert.interfaces";
 
 export interface AlertJsonEditorModalProps {
     alert: EditableAlert;
-    onSubmitChanges: (contents: EditableAlert, isTotalChange?: boolean) => void;
+    buttonText?: React.ReactNode;
+    isReadOnly?: boolean;
+    isDisabled?: boolean;
+    cancelButtonText?: string;
+    onSubmitChanges?: (
+        contents: EditableAlert,
+        isTotalChange?: boolean
+    ) => void;
 }

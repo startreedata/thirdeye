@@ -29,32 +29,46 @@ export const EnumerationItemsTable: FunctionComponent<EnumerationItemsTableProps
         alert,
         evaluationTimeRange,
         legendsPlacement,
+        searchTerm,
     }) => {
         return (
             <Card variant="outlined">
                 <CardContent>
                     <Grid container>
-                        {detectionEvaluations.map((detectionEvaluation) => {
-                            return (
-                                <EnumerationItemRow
-                                    alert={alert}
-                                    anomalies={detectionEvaluation.anomalies}
-                                    detectionEvaluation={detectionEvaluation}
-                                    evaluationTimeRange={evaluationTimeRange}
-                                    hideDelete={hideDelete}
-                                    hideTime={hideTime}
-                                    key={generateNameForDetectionResult(
-                                        detectionEvaluation
-                                    )}
-                                    legendsPlacement={legendsPlacement}
-                                    showOnlyActivity={showOnlyActivity}
-                                    timezone={timezone}
-                                    onDeleteClick={() =>
-                                        onDeleteClick(detectionEvaluation)
-                                    }
-                                />
-                            );
-                        })}
+                        {detectionEvaluations
+                            .filter((detectionEvaluation) =>
+                                detectionEvaluation.enumerationItem?.params?.queryFilters
+                                    ?.toString()
+                                    .toLowerCase()
+                                    .includes(searchTerm?.toLowerCase() ?? "")
+                            )
+                            .map((detectionEvaluation) => {
+                                return (
+                                    <EnumerationItemRow
+                                        alert={alert}
+                                        anomalies={
+                                            detectionEvaluation.anomalies
+                                        }
+                                        detectionEvaluation={
+                                            detectionEvaluation
+                                        }
+                                        evaluationTimeRange={
+                                            evaluationTimeRange
+                                        }
+                                        hideDelete={hideDelete}
+                                        hideTime={hideTime}
+                                        key={generateNameForDetectionResult(
+                                            detectionEvaluation
+                                        )}
+                                        legendsPlacement={legendsPlacement}
+                                        showOnlyActivity={showOnlyActivity}
+                                        timezone={timezone}
+                                        onDeleteClick={() =>
+                                            onDeleteClick(detectionEvaluation)
+                                        }
+                                    />
+                                );
+                            })}
                     </Grid>
                 </CardContent>
             </Card>

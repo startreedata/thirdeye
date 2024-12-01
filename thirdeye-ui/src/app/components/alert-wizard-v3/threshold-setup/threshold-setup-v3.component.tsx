@@ -19,7 +19,6 @@ import { useTranslation } from "react-i18next";
 import { PageContentsCardV1 } from "../../../platform/components";
 import { TemplatePropertiesObject } from "../../../rest/dto/alert.interfaces";
 import { isValidISO8601 } from "../../../utils/alerts/alerts.util";
-import { AlertJsonEditorModal } from "../../alert-json-editor-modal/alert-json-editor-modal.component";
 import { PreviewChartV3 } from "../../alert-wizard-v2/alert-template/preview-chart/preview-chart-v3.component";
 import { InputSection } from "../../form-basics/input-section/input-section.component";
 import { ParseMarkdown } from "../../parse-markdown/parse-markdown.component";
@@ -105,42 +104,11 @@ export const ThresholdSetupV3: FunctionComponent<ThresholdSetupProps> = ({
 
     return (
         <PageContentsCardV1>
-            <Grid container alignItems="center" justifyContent="space-between">
-                <Grid item>
-                    <Typography variant="h5">
-                        {algorithmOptionConfig &&
-                            t("label.entity-setup", {
-                                entity: algorithmOptionConfig.algorithmOption
-                                    .title,
-                                multidimension:
-                                    algorithmOptionConfig.algorithmOption
-                                        .alertTemplateForMultidimension ===
-                                    alert.template?.name
-                                        ? `(${t("label.multidimension")})`
-                                        : "",
-                            })}
-                    </Typography>
-                </Grid>
-                <Grid item>
-                    <AlertJsonEditorModal
-                        alert={alert}
-                        onSubmitChanges={(newAlert, isTotalChange) => {
-                            onAlertPropertyChange(newAlert, isTotalChange);
-
-                            setLocalAlertTemplateProperties({
-                                ...newAlert.templateProperties,
-                            });
-                        }}
-                    />
-                </Grid>
-            </Grid>
-
             {inputFieldConfigs.length > 0 && (
                 <Grid item xs={12}>
                     <Box padding={2} />
                 </Grid>
             )}
-
             <Box display="flex" flexDirection="row">
                 {inputFieldConfigs.length > 0 &&
                     inputFieldConfigs.map((config) => {

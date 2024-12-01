@@ -248,6 +248,7 @@ export const PreviewChartV3: FunctionComponent<PreviewChartProps> = ({
                     }
                 >
                     <ChartContentV2
+                        isSearchEnabled
                         alert={alert}
                         alertEvaluation={evaluation}
                         evaluationTimeRange={evaluationTimeRange}

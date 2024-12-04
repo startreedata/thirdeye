@@ -49,9 +49,6 @@ export const useAdditonalFiltersDrawerStyles = makeStyles((theme) => ({
         fontWeight: 500,
         color: PaletteV1.NavBarBackgroundColor,
     },
-    accordionDetails: {
-        paddingBottom: theme.spacing(4),
-    },
     footer: {
         padding: "10px 12px",
         backgroundColor: ColorV1.Grey9,

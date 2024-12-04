@@ -80,6 +80,7 @@ public class TaskDriverRunnable implements Runnable {
         .register(Metrics.globalRegistry);
     this.taskRunnerWaitIdleTimer = io.micrometer.core.instrument.Timer.builder(
             "thirdeye_task_runner_idle")
+        .tag("thread_name", Thread.currentThread().getName())
         .description(
             "Start: start thread sleep because no tasks were found. End: end of sleep. Mostly used for the sum and the count.")
         .publishPercentiles(METRICS_TIMER_PERCENTILES)

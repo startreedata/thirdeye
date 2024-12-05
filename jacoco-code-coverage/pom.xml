@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright 2024 StarTree Inc
+
+    Licensed under the StarTree Community License (the "License"); you may not use
+    this file except in compliance with the License. You may obtain a copy of the
+    License at http://www.startree.ai/legal/startree-community-license
+
+    Unless required by applicable law or agreed to in writing, software distributed under the
+    License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+    either express or implied.
+    See the License for the specific language governing permissions and limitations under
+    the License.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>ai.startree.thirdeye</groupId>
+    <artifactId>thirdeye</artifactId>
+    <version>1.387.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>jacoco-code-coverage</artifactId>
+
+  <properties>
+    <maven.compiler.source>21</maven.compiler.source>
+    <maven.compiler.target>21</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>ai.startree.thirdeye</groupId>
+      <artifactId>thirdeye-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ai.startree.thirdeye</groupId>
+      <artifactId>thirdeye-dataframe</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ai.startree.thirdeye</groupId>
+      <artifactId>thirdeye-detectionpipeline</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ai.startree.thirdeye</groupId>
+      <artifactId>thirdeye-notification</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ai.startree.thirdeye</groupId>
+      <artifactId>thirdeye-persistence</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ai.startree.thirdeye</groupId>
+      <artifactId>thirdeye-scheduler</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ai.startree.thirdeye</groupId>
+      <artifactId>thirdeye-server</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ai.startree.thirdeye</groupId>
+      <artifactId>thirdeye-spi</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ai.startree.thirdeye</groupId>
+      <artifactId>thirdeye-worker</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>ai.startree.thirdeye</groupId>
+      <artifactId>thirdeye-integration-tests</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+
+    <dependency>
+      <groupId>ai.startree.thirdeye.plugins</groupId>
+      <artifactId>thirdeye-pinot</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ai.startree.thirdeye.plugins</groupId>
+      <artifactId>thirdeye-detectors</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ai.startree.thirdeye.plugins</groupId>
+      <artifactId>thirdeye-oauth</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ai.startree.thirdeye.plugins</groupId>
+      <artifactId>thirdeye-notification-email</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ai.startree.thirdeye.plugins</groupId>
+      <artifactId>thirdeye-contributors-simple</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ai.startree.thirdeye.plugins</groupId>
+      <artifactId>thirdeye-bootstrap-open-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ai.startree.thirdeye.plugins</groupId>
+      <artifactId>thirdeye-enumerators</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ai.startree.thirdeye.plugins</groupId>
+      <artifactId>thirdeye-postprocessors</artifactId>
+    </dependency>
+
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.8.11</version>
+        <executions>
+          <execution>
+            <phase>verify</phase>
+            <goals>
+              <goal>report-aggregate</goal>
+            </goals>
+            <configuration>
+              <dataFileIncludes>
+                <dataFileInclude>**/jacoco.exec</dataFileInclude>
+              </dataFileIncludes>
+              <outputDirectory>${project.reporting.outputDirectory}/jacoco-aggregate
+              </outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

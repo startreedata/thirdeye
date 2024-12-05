@@ -2003,7 +2003,6 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                             </Grid>
                                                                         ) : (
                                                                             <ChartContentV2
-                                                                                isSearchEnabled
                                                                                 showLoadButton
                                                                                 showOnlyActivity
                                                                                 alert={
@@ -2023,6 +2022,10 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                 }}
                                                                                 hideCallToActionPrompt={
                                                                                     false
+                                                                                }
+                                                                                isSearchEnabled={
+                                                                                    anomalyDetection ===
+                                                                                    AnomalyDetectionOptions.COMPOSITE
                                                                                 }
                                                                                 showDeleteIcon={
                                                                                     false

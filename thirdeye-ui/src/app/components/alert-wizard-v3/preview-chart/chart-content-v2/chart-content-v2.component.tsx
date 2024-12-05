@@ -209,7 +209,7 @@ export const ChartContentV2: FunctionComponent<ChartContentProps> = ({
                         </Box>
                     )}
 
-                {isSearchEnabled && (
+                {isSearchEnabled && workingDetectionEvaluations?.length > 0 && (
                     <Box
                         display="flex"
                         justifyContent="flex-end"

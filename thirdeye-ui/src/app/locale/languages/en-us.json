@@ -49,6 +49,7 @@
         "unknown-rca-algorithm": "Unknown error running the RCA algorithm."
     },
     "info": {
+        "minimumAnomalyLength": "If enabled, only notify anomalies that have a duration equal or bigger than the provided duration. If zero, all detected anomalies are notified.",
         "notifyHistoricalAnomalies": "By default, notifications are only sent for anomalies detected on times greater than the alert creation time. If enabled, notifications will also be sent for anomalies detected on times less than the alert creation time.",
         "pinot-instance-not-detected": "Could not detect a Pinot instance automatically. Please provide a Pinot datasource configuration."
     },
@@ -400,6 +401,7 @@
         "milliseconds-lowercase": "milliseconds",
         "minimize": "Minimize",
         "minimum": "Minimum",
+        "minimumAnomalyLength": "Minimum anomaly duration",
         "minute": "Minute",
         "minute-lowercase": "minute",
         "minutes-lowercase": "minutes",

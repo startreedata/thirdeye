@@ -44,6 +44,11 @@ export const useAdditonalFiltersDrawerStyles = makeStyles((theme) => ({
         overflowY: "auto",
         height: 0,
     },
+    heading: {
+        fontSize: theme.typography.pxToRem(15),
+        fontWeight: 500,
+        color: PaletteV1.NavBarBackgroundColor,
+    },
     footer: {
         padding: "10px 12px",
         backgroundColor: ColorV1.Grey9,

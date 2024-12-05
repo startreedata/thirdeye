@@ -618,6 +618,7 @@
         "view-detection-failures": "View Detection Failures",
         "view-entity": "View {{entity}}",
         "view-investigation": "View Investigation",
+        "view-json": "View JSON",
         "view-logs": "View Logs",
         "view-recent-entities": "View recent {{entity}}",
         "view-recipe": "View recipe",

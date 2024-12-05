@@ -43,6 +43,7 @@
     <module>pinot-test-container</module>
     <module>thirdeye-integration-tests</module>
     <module>thirdeye-benchmarks</module>
+    <module>jacoco-code-coverage</module>
   </modules>
 
   <properties>

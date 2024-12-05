@@ -20,4 +20,11 @@ export const usePropertiesFormStyle = makeStyles({
             alignSelf: "baseline",
         },
     },
+    defaultInputContainer: {
+        display: "flex",
+        gap: "4px",
+        "& .MuiSelect-select:focus": {
+            backgroundColor: "transparent",
+        },
+    },
 });

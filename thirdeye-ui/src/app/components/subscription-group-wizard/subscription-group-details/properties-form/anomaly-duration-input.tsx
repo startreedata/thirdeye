@@ -23,6 +23,7 @@ import {
     TextField,
 } from "@material-ui/core";
 import { AnomalyDurationInput } from "./properties-form.interfaces";
+import { usePropertiesFormStyle } from "./styles";
 
 const options: { [key: string]: string } = {
     D: "Days",
@@ -35,6 +36,7 @@ export const AnomayDurationInput = ({
     value,
     onChange,
 }: AnomalyDurationInput): JSX.Element => {
+    const classes = usePropertiesFormStyle();
     const [showCustomInput, setShowCustomInput] = useState(false);
     const [selectedOption, setSelectedOption] = useState<string | null>(
         options["D"]
@@ -86,7 +88,7 @@ export const AnomayDurationInput = ({
 
     const renderDefaultInput = (): JSX.Element => {
         return (
-            <div style={{ display: "flex", gap: "4px" }}>
+            <div className={classes.defaultInputContainer}>
                 <TextField
                     InputLabelProps={{
                         shrink: true,

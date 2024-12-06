@@ -384,6 +384,14 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
     return count(finalPredicate);
   }
 
+  @Override
+  public long countWithNamespace(final @NonNull AnomalyFilter filter,
+      final @Nullable String namespace) {
+    // todo authz extremely inefficient because will load anomalies in memory to count them
+    // it is not possible to perform a count directly in the DB until all anomalies are migrated in the index table to ensure they have their namespace value set
+    return filterWithNamespace(filter, namespace).size();
+  }
+
   private Predicate toPredicate(final AnomalyFilter af) {
     final List<Predicate> predicates = new ArrayList<>();
     optional(af.getCreateTimeWindow())

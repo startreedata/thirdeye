@@ -19,8 +19,8 @@ import ai.startree.thirdeye.spi.api.DatasetApi;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import com.google.common.collect.ImmutableMap;
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 // fixme deleting a dataset should delete related metrics - longer term I feel like this metrics entity does not help - could be kept inside datasets imo
 @Singleton

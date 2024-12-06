@@ -66,7 +66,7 @@
     <flyway.version>8.5.13</flyway.version>
     <freemarker.version>2.3.32</freemarker.version>
     <guava.version>33.3.0-jre</guava.version>
-    <guice.version>5.1.0</guice.version>
+    <guice.version>6.0.0</guice.version>
     <hsqldb.version>2.7.1</hsqldb.version>
     <!-- should match dropwizard version - except for security issues -->
     <jackson.version>2.18.1</jackson.version>
@@ -88,7 +88,7 @@
     <!-- should match dropwizard version - except for security issues -->
     <slf4j-api.version>2.0.16</slf4j-api.version>
     <snakeyaml.version>2.2</snakeyaml.version>
-    <dropwizard.swagger.version>3.0.0-1</dropwizard.swagger.version>
+    <dropwizard.swagger.version>4.0.5-1</dropwizard.swagger.version>
     <testcontainers.version>1.19.3</testcontainers.version>
     <micrometer.version>1.11.4</micrometer.version>
     <sentry.version>7.2.0</sentry.version>
@@ -620,7 +620,7 @@
       <dependency>
         <groupId>io.dropwizard</groupId>
         <artifactId>dropwizard-bom</artifactId>
-        <version>3.0.10</version>
+        <version>4.0.11</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -653,12 +653,6 @@
         <artifactId>archunit</artifactId>
         <version>1.2.1</version>
         <scope>test</scope>
-      </dependency>
-      <!-- http://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
-      <dependency>
-        <groupId>javax.servlet</groupId>
-        <artifactId>javax.servlet-api</artifactId>
-        <version>3.1.0</version>
       </dependency>
 
       <!-- jackson -->

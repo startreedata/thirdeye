@@ -21,7 +21,7 @@ import ai.startree.thirdeye.spi.auth.OpenIdConfigurationProvider;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Singleton
 public class AuthService {

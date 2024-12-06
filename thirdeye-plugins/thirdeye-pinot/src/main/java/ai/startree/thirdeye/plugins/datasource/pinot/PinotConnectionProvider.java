@@ -20,10 +20,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import javax.annotation.Nullable;
 import org.apache.http.HttpHeaders;
 import org.apache.pinot.client.Connection;
 import org.apache.pinot.client.PinotClientException;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +41,7 @@ public class PinotConnectionProvider {
     this.config = config;
   }
 
+  // FIXME CYRIL - this connection can get closed - there is no way to know about it
   public Connection get() {
     if (config.isOAuthEnabled()) {
       // fixme cyril every time this method is called and oAuth is enabled, getting the connection results in reading a file

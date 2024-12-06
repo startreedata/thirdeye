@@ -16,7 +16,6 @@ package ai.startree.thirdeye.resources;
 import static ai.startree.thirdeye.ResourceUtils.ensure;
 import static ai.startree.thirdeye.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.SecurityUtils.hmacSHA512;
-import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.notification.NotificationServiceRegistry;
@@ -28,11 +27,10 @@ import ai.startree.thirdeye.worker.task.TaskDriver;
 import ai.startree.thirdeye.worker.task.TaskDriverConfiguration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.jaxrs.annotation.JacksonFeatures;
+import com.fasterxml.jackson.jakarta.rs.annotation.JacksonFeatures;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import io.dropwizard.auth.Auth;
-import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
@@ -40,24 +38,23 @@ import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.concurrent.TimeUnit;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HeaderParam;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Produces(MediaType.APPLICATION_JSON)
 @Tag(name = "zzz Internal zzz")
-@SecurityRequirement(name="oauth")
+@SecurityRequirement(name = "oauth")
 @SecurityRequirement(name = Constants.NAMESPACE_SECURITY)
 @OpenAPIDefinition(security = {
     @SecurityRequirement(name = "oauth"),

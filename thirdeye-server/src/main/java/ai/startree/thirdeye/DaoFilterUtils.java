@@ -31,13 +31,13 @@ import ai.startree.thirdeye.spi.util.Pair;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import jakarta.ws.rs.core.MultivaluedMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.ws.rs.core.MultivaluedMap;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class DaoFilterUtils {

@@ -41,11 +41,11 @@ import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Singleton;
+import jakarta.inject.Inject;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.inject.Inject;
 import org.quartz.CronExpression;
 
 @Singleton

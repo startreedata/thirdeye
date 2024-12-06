@@ -77,20 +77,19 @@ public class SchedulerService implements Managed {
     if (config.isDetectionAlert()) {
       subscriptionScheduler.start();
     }
-
-    // TODO spyne improve scheduler arch and localize
-    // TODO spyne explore: consolidate all orphan maintenance tasks in a single pool
-    scheduleTaskCleanUp(config.getTaskCleanUpConfiguration());
-    if (taskDriverConfiguration.isRandomWorkerIdEnabled()) {
-      scheduleOrphanTaskCleanUp(config.getTaskCleanUpConfiguration());
-    }
-  }
-
-  private void scheduleTaskCleanUp(final TaskCleanUpConfiguration config) {
-    executorService.scheduleWithFixedDelay(() -> cleanTasks(config),
+    
+    // schedule task maintenance operations
+    final TaskCleanUpConfiguration taskCleanUpConfiguration = config.getTaskCleanUpConfiguration();
+    executorService.scheduleWithFixedDelay(() -> cleanTasks(taskCleanUpConfiguration),
         1,
-        config.getIntervalInMinutes(),
+        taskCleanUpConfiguration.getIntervalInMinutes(),
         TimeUnit.MINUTES);
+    if (taskDriverConfiguration.isRandomWorkerIdEnabled()) {
+      executorService.scheduleWithFixedDelay(this::handleOrphanTasks,
+          0,
+          taskCleanUpConfiguration.getOrphanIntervalInSeconds(),
+          TimeUnit.SECONDS);
+    }
   }
 
   private void cleanTasks(final TaskCleanUpConfiguration config) {
@@ -103,13 +102,6 @@ public class SchedulerService implements Managed {
       // catching exceptions only. errors will be escalated.
       LOG.error("Error occurred during task purge", e);
     }
-  }
-
-  private void scheduleOrphanTaskCleanUp(final TaskCleanUpConfiguration config) {
-    executorService.scheduleWithFixedDelay(this::handleOrphanTasks,
-        0,
-        config.getOrphanIntervalInSeconds(),
-        TimeUnit.SECONDS);
   }
 
   private void handleOrphanTasks() {

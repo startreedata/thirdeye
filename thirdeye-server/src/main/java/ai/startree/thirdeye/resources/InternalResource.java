@@ -16,7 +16,6 @@ package ai.startree.thirdeye.resources;
 import static ai.startree.thirdeye.ResourceUtils.ensure;
 import static ai.startree.thirdeye.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.util.SecurityUtils.hmacSHA512;
-import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.notification.NotificationServiceRegistry;
@@ -28,11 +27,10 @@ import ai.startree.thirdeye.worker.task.TaskDriver;
 import ai.startree.thirdeye.worker.task.TaskDriverConfiguration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.jaxrs.annotation.JacksonFeatures;
+import com.fasterxml.jackson.jakarta.rs.annotation.JacksonFeatures;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import io.dropwizard.auth.Auth;
-import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
@@ -51,7 +49,6 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

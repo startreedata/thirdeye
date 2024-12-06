@@ -812,7 +812,7 @@
         <artifactId>guice-persist</artifactId>
         <version>${guice.version}</version>
       </dependency>
-      <!-- fixme cyril is this really necessary ? and -->
+      <!-- fixme cyril is this really necessary ? and is it imported by a project ? -->
       <dependency>
         <groupId>jakarta.inject</groupId>
         <artifactId>jakarta.inject-api</artifactId>

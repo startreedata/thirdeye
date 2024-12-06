@@ -88,7 +88,6 @@ export const CronAdvance: FunctionComponent<CronAdvanceProps> = ({
             labelComponent={
                 <>
                     <InputLabel
-                        shrink
                         className={classes.label}
                         data-testid="cron-input-label"
                         error={!isCronValid}

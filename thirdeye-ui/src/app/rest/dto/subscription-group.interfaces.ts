@@ -34,6 +34,7 @@ export interface SubscriptionGroup {
     notificationSchemes?: NotificationSchemes;
     specs: NotificationSpec[];
     notifyHistoricalAnomalies?: boolean; // optional as its only coming when this property is set
+    minimumAnomalyLength?: string | null;
 }
 
 export enum SpecType {

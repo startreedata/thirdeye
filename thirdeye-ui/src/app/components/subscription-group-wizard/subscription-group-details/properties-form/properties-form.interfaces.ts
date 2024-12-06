@@ -20,6 +20,7 @@ interface FormValues {
     name: string;
     cron: string;
     notifyHistoricalAnomalies?: boolean;
+    minimumAnomalyLength?: string | null;
 }
 
 export interface PropertiesFormProps {
@@ -27,3 +28,8 @@ export interface PropertiesFormProps {
     onChange: Dispatch<SetStateAction<SubscriptionGroup>>;
     customHeader?: ReactNode;
 }
+
+export type AnomalyDurationInput = {
+    value?: string | null;
+    onChange: (value: string) => void;
+};

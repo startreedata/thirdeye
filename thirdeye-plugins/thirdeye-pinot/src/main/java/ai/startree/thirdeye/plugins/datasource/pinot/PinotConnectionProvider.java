@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.plugins.datasource.pinot;
 
+import static ai.startree.thirdeye.plugins.datasource.pinot.PinotConnectionUtils.isClosed;
 import static ai.startree.thirdeye.spi.Constants.TWO_DIGITS_FORMATTER;
 import static java.util.Objects.requireNonNull;
 
@@ -46,7 +47,7 @@ public class PinotConnectionProvider {
     if (config.isOAuthEnabled()) {
       // fixme cyril every time this method is called and oAuth is enabled, getting the connection results in reading a file
       final String newToken = requireNonNull(PinotOauthUtils.getOauthToken(config.getOauth()), "token supplied is null");
-      if (connection == null || !Objects.equals(currentToken, newToken)) {
+      if (connection == null || !Objects.equals(currentToken, newToken) || isClosed(connection)) {
         // need to update the authorization token
         /* Closing old connection is a lower priority. do it async */
         closeConnectionAsync(connection);
@@ -56,7 +57,7 @@ public class PinotConnectionProvider {
         connection = PinotConnectionUtils.createConnection(config, additionalHeaders);
       }
     } else {
-      if (connection == null) {
+      if (connection == null || isClosed(connection)) {
         connection = PinotConnectionUtils.createConnection(config, Map.of());
       }
     }

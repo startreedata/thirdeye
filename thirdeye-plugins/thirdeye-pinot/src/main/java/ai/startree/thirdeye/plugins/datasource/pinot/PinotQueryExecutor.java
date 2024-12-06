@@ -217,8 +217,6 @@ public class PinotQueryExecutor extends CacheLoader<PinotQuery, ThirdEyeResultSe
 
       return toThirdEyeResultSetGroup(resultSetGroup);
     } catch (final PinotClientException cause) {
-      // FIXME - if cause is Closed, tell the pinotConnectionProvider to cleanup the connection
-      
       LOG.error("Error when running SQL:" + queryWithOptions, cause);
       throw new PinotClientException("Error when running SQL:" + queryWithOptions, cause);
     }

@@ -42,6 +42,7 @@ public class PinotControllerHttpClientProvider {
     this.config = config;
   }
 
+  // FIXME ASAP - pinotControllerClient being closed is not managed - add this logic - consider using org.asynchttpclient for consistency with Pinot and remove httpcomponents dependency
   public CloseableHttpClient get() {
     if (config.isOAuthEnabled()) {
       // fixme cyril - at every call this reads a file 

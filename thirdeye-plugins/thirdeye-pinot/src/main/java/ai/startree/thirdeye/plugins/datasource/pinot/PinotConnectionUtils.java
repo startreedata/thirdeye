@@ -19,6 +19,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 
+import java.lang.reflect.Field;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -38,8 +39,10 @@ import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.ssl.TrustStrategy;
 import org.apache.pinot.client.Connection;
 import org.apache.pinot.client.ConnectionFactory;
+import org.apache.pinot.client.JsonAsyncHttpPinotClientTransport;
 import org.apache.pinot.client.JsonAsyncHttpPinotClientTransportFactory;
 import org.apache.pinot.client.PinotClientTransport;
+import org.asynchttpclient.AsyncHttpClient;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +51,10 @@ public class PinotConnectionUtils {
 
   private static final Logger LOG = LoggerFactory.getLogger(PinotConnectionUtils.class);
   private static final String THIRDEYE_CLIENT_USER_AGENT;
+  
+  // reflection hacks - see usage - will be removed once Connection provides a isClosed method
+  private static final Field transportField;
+  private static final Field asyncHttpClientField;
   
   static {
     String thirdeyeVersion;
@@ -63,7 +70,18 @@ public class PinotConnectionUtils {
       pinotClientVersion = "unknown";
     }
     THIRDEYE_CLIENT_USER_AGENT = "thirdeye/" + thirdeyeVersion + " pinot-java-client/" + pinotClientVersion;
-       
+  }
+  
+  static {
+    try {
+      transportField = Connection.class.getDeclaredField("_transport");
+      transportField.setAccessible(true);
+      asyncHttpClientField = JsonAsyncHttpPinotClientTransport.class.getDeclaredField("_httpClient");
+      asyncHttpClientField.setAccessible(true); 
+    } catch (Exception e) {
+      LOG.error("Fatal error. Failed to prepare Pinot Connection.isClosed method by reflection hack. Will not be able to connect to Pinot.");
+      throw new RuntimeException(e);
+    }
   }
 
   public static CloseableHttpClient createHttpClient(
@@ -164,6 +182,18 @@ public class PinotConnectionUtils {
     } catch (final NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
       // This section shouldn't happen because we use Accept All Strategy
       LOG.error("Failed to generate SSL context for Pinot in https.", e);
+      throw new RuntimeException(e);
+    }
+  }
+  
+  // hack function to simulate a isClosed method that is not available in the interface provided by Connection
+  // will be removed once the Connection provides a isClosed method
+  public static boolean isClosed(@NonNull Connection connection) {
+    try {
+      final JsonAsyncHttpPinotClientTransport transport = (JsonAsyncHttpPinotClientTransport) transportField.get(connection);
+      final AsyncHttpClient asyncHttpClient = (AsyncHttpClient) asyncHttpClientField.get(transport);
+      return asyncHttpClient.isClosed();
+    } catch (IllegalAccessException e) {
       throw new RuntimeException(e);
     }
   }

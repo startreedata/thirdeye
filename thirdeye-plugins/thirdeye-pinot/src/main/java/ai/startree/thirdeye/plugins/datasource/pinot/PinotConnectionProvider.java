@@ -42,7 +42,6 @@ public class PinotConnectionProvider {
     this.config = config;
   }
 
-  // FIXME CYRIL - this connection can get closed - there is no way to know about it
   public Connection get() {
     if (config.isOAuthEnabled()) {
       // fixme cyril every time this method is called and oAuth is enabled, getting the connection results in reading a file

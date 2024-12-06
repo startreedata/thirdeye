@@ -66,7 +66,7 @@
     <flyway.version>8.5.13</flyway.version>
     <freemarker.version>2.3.32</freemarker.version>
     <guava.version>33.3.0-jre</guava.version>
-    <guice.version>5.1.0</guice.version>
+    <guice.version>6.0.0</guice.version>
     <hsqldb.version>2.7.1</hsqldb.version>
     <!-- should match dropwizard version - except for security issues -->
     <jackson.version>2.18.1</jackson.version>

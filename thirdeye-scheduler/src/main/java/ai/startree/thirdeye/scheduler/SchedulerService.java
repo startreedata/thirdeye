@@ -80,7 +80,7 @@ public class SchedulerService implements Managed {
     
     // schedule task maintenance operations
     final TaskCleanUpConfiguration taskCleanUpConfiguration = config.getTaskCleanUpConfiguration();
-    executorService.scheduleWithFixedDelay(() -> cleanTasks(taskCleanUpConfiguration),
+    executorService.scheduleWithFixedDelay(this::purgeOldTasks,
         1,
         taskCleanUpConfiguration.getIntervalInMinutes(),
         TimeUnit.MINUTES);
@@ -92,12 +92,12 @@ public class SchedulerService implements Managed {
     }
   }
 
-  private void cleanTasks(final TaskCleanUpConfiguration config) {
+  private void purgeOldTasks() {
     // try catch is important to not throw exceptions while running in the scheduler.
     try {
       taskManager.purge(
-          Duration.ofDays(config.getRetentionInDays()),
-          config.getMaxEntriesToDelete());
+          Duration.ofDays(config.getTaskCleanUpConfiguration().getRetentionInDays()),
+          config.getTaskCleanUpConfiguration().getMaxEntriesToDelete());
     } catch (Exception e) {
       // catching exceptions only. errors will be escalated.
       LOG.error("Error occurred during task purge", e);

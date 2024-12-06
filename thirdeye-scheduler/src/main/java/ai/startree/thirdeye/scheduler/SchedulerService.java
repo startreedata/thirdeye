@@ -77,7 +77,7 @@ public class SchedulerService implements Managed {
     if (config.isDetectionAlert()) {
       subscriptionScheduler.start();
     }
-    
+
     // schedule task maintenance operations
     final TaskCleanUpConfiguration taskCleanUpConfiguration = config.getTaskCleanUpConfiguration();
     executorService.scheduleWithFixedDelay(this::purgeOldTasks,
@@ -98,17 +98,25 @@ public class SchedulerService implements Managed {
       taskManager.purge(
           Duration.ofDays(config.getTaskCleanUpConfiguration().getRetentionInDays()),
           config.getTaskCleanUpConfiguration().getMaxEntriesToDelete());
+      LOG.debug("Old task purge performed successfully.");
     } catch (Exception e) {
-      // catching exceptions only. errors will be escalated.
-      LOG.error("Error occurred during task purge", e);
+      // catching exceptions only. Errors will be escalated.
+      LOG.error("Failed to purge old tasks.", e);
     }
   }
 
   private void handleOrphanTasks() {
-    final long activeBuffer = taskDriverConfiguration.getActiveThresholdMultiplier()
-        * taskDriverConfiguration.getHeartbeatInterval().toMillis();
-    final Timestamp activeThreshold = new Timestamp(System.currentTimeMillis() - activeBuffer);
-    taskManager.orphanTaskCleanUp(activeThreshold);
+    // try catch is important to not throw exceptions while running in the scheduler.
+    try {
+      final long activeBuffer = taskDriverConfiguration.getActiveThresholdMultiplier()
+          * taskDriverConfiguration.getHeartbeatInterval().toMillis();
+      final Timestamp activeThreshold = new Timestamp(System.currentTimeMillis() - activeBuffer);
+      taskManager.cleanupOrphanTasks(activeThreshold);
+      LOG.debug("Orphan tasks handling performed successfully.");
+    } catch (Exception e) {
+      // catching exceptions only. Errors will be escalated.
+      LOG.error("Failed to handle orphan tasks.", e);
+    }
   }
 
   @Override

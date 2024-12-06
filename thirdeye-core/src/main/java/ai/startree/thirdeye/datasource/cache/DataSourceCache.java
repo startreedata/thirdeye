@@ -86,10 +86,20 @@ public class DataSourceCache {
 
   // TODO CYRIL authz refacto - move this DataSourceCache should not have access to DataSourceManager - update architectureTest
   private Integer getHealthyDatasourceCount() {
-    return Math.toIntExact(dataSourceManager.findAll().stream()
-        .map(this::getDataSource)
-        .filter(this::validateWithTimeout)
-        .count());
+    int healthyDatasourceCount = 0;
+    for (final DataSourceDTO datasourceDto: dataSourceManager.findAll()) {
+      final ThirdEyeDataSource thirdEyeDataSource;
+      try {
+        thirdEyeDataSource = getDataSource(datasourceDto);
+      } catch (final Exception e) {
+        LOG.error("Failed to get data source {}", datasourceDto, e);
+        continue;
+      }
+      if (validateWithTimeout(thirdEyeDataSource)) {
+        healthyDatasourceCount++;
+      }
+    }
+    return healthyDatasourceCount;
   }
 
   private boolean validateWithTimeout(final ThirdEyeDataSource ds) {

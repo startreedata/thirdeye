@@ -113,13 +113,10 @@ public class SchedulerService implements Managed {
   }
 
   private void handleOrphanTasks() {
-    final Timestamp activeThreshold = new Timestamp(System.currentTimeMillis() - getActiveBuffer());
-    taskManager.orphanTaskCleanUp(activeThreshold);
-  }
-
-  private long getActiveBuffer() {
-    return taskDriverConfiguration.getActiveThresholdMultiplier()
+    final long activeBuffer = taskDriverConfiguration.getActiveThresholdMultiplier()
         * taskDriverConfiguration.getHeartbeatInterval().toMillis();
+    final Timestamp activeThreshold = new Timestamp(System.currentTimeMillis() - activeBuffer);
+    taskManager.orphanTaskCleanUp(activeThreshold);
   }
 
   @Override

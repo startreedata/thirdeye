@@ -29,6 +29,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -294,6 +295,7 @@ public class TaskDao {
     try {
       return databaseClient.executeTransaction(
           connection -> {
+            connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
             try (final Statement s = connection.createStatement();
                 final ResultSet rs = s.executeQuery(SELECT_AND_LOCK_NEXT_TASK_QUERY)
             ) {

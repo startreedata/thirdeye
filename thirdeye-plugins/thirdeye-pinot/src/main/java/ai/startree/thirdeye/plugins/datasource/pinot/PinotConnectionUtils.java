@@ -191,7 +191,7 @@ public class PinotConnectionUtils {
   public static boolean isClosed(@NonNull Connection connection) {
     try {
       final JsonAsyncHttpPinotClientTransport transport = (JsonAsyncHttpPinotClientTransport) transportField.get(connection);
-      final AsyncHttpClient asyncHttpClient = (AsyncHttpClient) transportField.get(transport);
+      final AsyncHttpClient asyncHttpClient = (AsyncHttpClient) asyncHttpClientField.get(transport);
       return asyncHttpClient.isClosed();
     } catch (IllegalAccessException e) {
       throw new RuntimeException(e);

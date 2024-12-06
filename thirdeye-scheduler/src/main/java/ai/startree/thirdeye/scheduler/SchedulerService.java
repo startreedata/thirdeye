@@ -13,6 +13,8 @@
  */
 package ai.startree.thirdeye.scheduler;
 
+import static ai.startree.thirdeye.spi.Constants.METRICS_TIMER_PERCENTILES;
+import static ai.startree.thirdeye.spi.util.MetricsUtils.record;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.scheduler.events.HolidayEventsLoaderConfiguration;
@@ -24,6 +26,8 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.dropwizard.lifecycle.Managed;
+import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.Timer;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.util.concurrent.ExecutorService;
@@ -37,6 +41,33 @@ import org.slf4j.LoggerFactory;
 public class SchedulerService implements Managed {
 
   private static final Logger LOG = LoggerFactory.getLogger(SchedulerService.class);
+
+  private static final String PURGE_OLD_TASKS_TIMER_NAME = "thirdeye_old_tasks_purge";
+  private static final String PURGE_OLD_TASKS_TIMER_DESCRIPTION = "Start: triggered by schedule, no input. End: the old tasks deletion logic is finished. Tag exception=true means an exception was thrown by the method call.";
+  private static final Timer purgeOldTasksTimerOfSuccess = Timer.builder(PURGE_OLD_TASKS_TIMER_NAME)
+      .description(PURGE_OLD_TASKS_TIMER_DESCRIPTION)
+      .publishPercentiles(METRICS_TIMER_PERCENTILES)
+      .tag("exception", "false")
+      .register(Metrics.globalRegistry);
+  private static final Timer purgeOldTasksTimerOfException = Timer.builder(PURGE_OLD_TASKS_TIMER_NAME)
+      .description(PURGE_OLD_TASKS_TIMER_DESCRIPTION)
+      .publishPercentiles(METRICS_TIMER_PERCENTILES)
+      .tag("exception", "true")
+      .register(Metrics.globalRegistry);
+
+  private static final String ORPHAN_TASKS_CLEANUP_TIMER_NAME = "thirdeye_orphan_tasks_cleanup";
+  private static final String ORPHAN_TASKS_CLEANUP_TIMER_DESCRIPTION = "Start: triggered by schedule, no input. End: the orphan tasks cleanup logic is finished. Tag exception=true means an exception was thrown by the method call.";
+  private static final Timer handleOrphanTasksTimerOfSuccess = Timer.builder(ORPHAN_TASKS_CLEANUP_TIMER_NAME)
+      .description(ORPHAN_TASKS_CLEANUP_TIMER_DESCRIPTION)
+      .publishPercentiles(METRICS_TIMER_PERCENTILES)
+      .tag("exception", "false")
+      .register(Metrics.globalRegistry);
+  private static final Timer handleOrphanTasksTimerOfException = Timer.builder(ORPHAN_TASKS_CLEANUP_TIMER_NAME)
+      .description(ORPHAN_TASKS_CLEANUP_TIMER_DESCRIPTION)
+      .publishPercentiles(METRICS_TIMER_PERCENTILES)
+      .tag("exception", "true")
+      .register(Metrics.globalRegistry);
+  
 
   private final ThirdEyeSchedulerConfiguration config;
   private final HolidayEventsLoaderConfiguration holidayEventsLoaderConfiguration;
@@ -69,7 +100,8 @@ public class SchedulerService implements Managed {
         new ThreadFactoryBuilder().setNameFormat("scheduler-old-tasks-purge-service-%d").build());
     if (taskDriverConfiguration.isRandomWorkerIdEnabled()) {
       orphanTasksExecutorService = Executors.newScheduledThreadPool(1,
-          new ThreadFactoryBuilder().setNameFormat("scheduler-orphan-tasks-cleanup-service-%d").build()); 
+          new ThreadFactoryBuilder().setNameFormat("scheduler-orphan-tasks-cleanup-service-%d")
+              .build());
     } else {
       // no need to reserve a thread
       orphanTasksExecutorService = null;
@@ -105,9 +137,14 @@ public class SchedulerService implements Managed {
   private void purgeOldTasks() {
     // try catch is important to not throw exceptions while running in the scheduler.
     try {
-      taskManager.purge(
-          Duration.ofDays(config.getTaskCleanUpConfiguration().getRetentionInDays()),
-          config.getTaskCleanUpConfiguration().getMaxEntriesToDelete());
+      record(
+          () -> {
+            taskManager.purge(
+                Duration.ofDays(config.getTaskCleanUpConfiguration().getRetentionInDays()),
+                config.getTaskCleanUpConfiguration().getMaxEntriesToDelete());
+          },
+          purgeOldTasksTimerOfSuccess,
+          purgeOldTasksTimerOfException);
       LOG.debug("Old task purge performed successfully.");
     } catch (Exception e) {
       // catching exceptions only. Errors will be escalated.
@@ -118,10 +155,16 @@ public class SchedulerService implements Managed {
   private void handleOrphanTasks() {
     // try catch is important to not throw exceptions while running in the scheduler.
     try {
-      final long activeBuffer = taskDriverConfiguration.getActiveThresholdMultiplier()
-          * taskDriverConfiguration.getHeartbeatInterval().toMillis();
-      final Timestamp activeThreshold = new Timestamp(System.currentTimeMillis() - activeBuffer);
-      taskManager.cleanupOrphanTasks(activeThreshold);
+      record(
+          () -> {
+            final long activeBuffer = taskDriverConfiguration.getActiveThresholdMultiplier()
+                * taskDriverConfiguration.getHeartbeatInterval().toMillis();
+            final Timestamp activeThreshold = new Timestamp(System.currentTimeMillis() - activeBuffer);
+            taskManager.cleanupOrphanTasks(activeThreshold);
+          },
+          handleOrphanTasksTimerOfSuccess,
+          handleOrphanTasksTimerOfException
+      );
       LOG.debug("Orphan tasks handling performed successfully.");
     } catch (Exception e) {
       // catching exceptions only. Errors will be escalated.

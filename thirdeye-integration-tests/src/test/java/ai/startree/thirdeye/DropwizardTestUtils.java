@@ -25,11 +25,11 @@ import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.testing.DropwizardTestSupport;
 import io.dropwizard.util.Duration;
+import jakarta.ws.rs.client.Client;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Date;
-import javax.ws.rs.client.Client;
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 
 public class DropwizardTestUtils {

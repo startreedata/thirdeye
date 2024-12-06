@@ -16,16 +16,16 @@ package ai.startree.thirdeye.auth.basic;
 import ai.startree.thirdeye.spi.Constants;
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.Authenticator;
+import jakarta.annotation.Priority;
+import jakarta.ws.rs.Priorities;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.SecurityContext;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.Base64;
-import javax.annotation.Nullable;
-import javax.annotation.Priority;
-import javax.ws.rs.Priorities;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.SecurityContext;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Priority(Priorities.AUTHENTICATION)
 public class BasicNamespacedCredentialAuthFilter<P extends Principal> extends AuthFilter<BasicNamespacedCredentials, P> {
@@ -53,8 +53,7 @@ public class BasicNamespacedCredentialAuthFilter<P extends Principal> extends Au
      * @param namespaceHeader the value of the `namespace` header
      * @return a username, password, namespace as {@link BasicNamespacedCredentials}
      */
-    @Nullable
-    private BasicNamespacedCredentials getCredentials(
+    private @Nullable BasicNamespacedCredentials getCredentials(
         final String authHeader, 
         final String namespaceHeader) {
         if (authHeader == null) {

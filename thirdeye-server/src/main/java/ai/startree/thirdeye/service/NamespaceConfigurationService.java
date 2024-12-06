@@ -22,9 +22,9 @@ import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.api.NamespaceConfigurationApi;
 import ai.startree.thirdeye.spi.datalayer.bao.NamespaceConfigurationManager;
 import ai.startree.thirdeye.spi.datalayer.dto.NamespaceConfigurationDTO;
-import java.util.Objects;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
+import java.util.Objects;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 @Singleton

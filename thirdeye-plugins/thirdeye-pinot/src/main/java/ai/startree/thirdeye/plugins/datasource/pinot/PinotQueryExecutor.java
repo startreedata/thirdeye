@@ -23,13 +23,13 @@ import ai.startree.thirdeye.spi.detection.v2.ColumnType.ColumnDataType;
 import ai.startree.thirdeye.spi.util.Pair;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.CacheLoader;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
 import org.apache.pinot.client.Connection;
 import org.apache.pinot.client.PinotClientException;
 import org.apache.pinot.client.ResultSet;
@@ -217,6 +217,8 @@ public class PinotQueryExecutor extends CacheLoader<PinotQuery, ThirdEyeResultSe
 
       return toThirdEyeResultSetGroup(resultSetGroup);
     } catch (final PinotClientException cause) {
+      // FIXME - if cause is Closed, tell the pinotConnectionProvider to cleanup the connection
+      
       LOG.error("Error when running SQL:" + queryWithOptions, cause);
       throw new PinotClientException("Error when running SQL:" + queryWithOptions, cause);
     }

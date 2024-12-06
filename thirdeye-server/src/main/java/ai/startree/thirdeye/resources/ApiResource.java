@@ -14,7 +14,7 @@
 package ai.startree.thirdeye.resources;
 
 import jakarta.inject.Inject;
-import javax.ws.rs.Path;
+import jakarta.ws.rs.Path;
 
 public class ApiResource {
 

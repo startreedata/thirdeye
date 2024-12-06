@@ -43,6 +43,20 @@ public class MetricsUtils {
     }
   }
 
+  // if the callable does not throw, record time in the successTimer. 
+  // Else, record time in the exceptionTimer. 
+  public static void record(Runnable fun, final Timer successTimer, final Timer exceptionTimer)
+      throws Exception {
+    final Timer.Sample sample = Timer.start(Metrics.globalRegistry);
+    try {
+      fun.run();
+      sample.stop(successTimer);
+    } catch (Exception e) {
+      sample.stop(exceptionTimer);
+      throw e;
+    }
+  }
+
   public static @NonNull String namespaceTagValueOf(@Nullable String namespace) {
     return Optional.ofNullable(namespace).orElse(NULL_NAMESPACE_TAG_VALUE);
   }

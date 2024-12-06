@@ -13,6 +13,10 @@
  */
 package ai.startree.thirdeye.scheduler;
 
+import static ai.startree.thirdeye.spi.Constants.METRICS_TIMER_PERCENTILES;
+import static ai.startree.thirdeye.spi.util.MetricsUtils.record;
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+
 import ai.startree.thirdeye.scheduler.events.HolidayEventsLoaderConfiguration;
 import ai.startree.thirdeye.scheduler.events.HolidayEventsLoaderScheduler;
 import ai.startree.thirdeye.scheduler.taskcleanup.TaskCleanUpConfiguration;
@@ -22,8 +26,11 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.dropwizard.lifecycle.Managed;
+import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.Timer;
 import java.sql.Timestamp;
 import java.time.Duration;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -33,8 +40,34 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class SchedulerService implements Managed {
 
-  public static final int CORE_POOL_SIZE = 8;
   private static final Logger LOG = LoggerFactory.getLogger(SchedulerService.class);
+
+  private static final String PURGE_OLD_TASKS_TIMER_NAME = "thirdeye_old_tasks_purge";
+  private static final String PURGE_OLD_TASKS_TIMER_DESCRIPTION = "Start: triggered by schedule, no input. End: the old tasks deletion logic is finished. Tag exception=true means an exception was thrown by the method call.";
+  private static final Timer purgeOldTasksTimerOfSuccess = Timer.builder(PURGE_OLD_TASKS_TIMER_NAME)
+      .description(PURGE_OLD_TASKS_TIMER_DESCRIPTION)
+      .publishPercentiles(METRICS_TIMER_PERCENTILES)
+      .tag("exception", "false")
+      .register(Metrics.globalRegistry);
+  private static final Timer purgeOldTasksTimerOfException = Timer.builder(PURGE_OLD_TASKS_TIMER_NAME)
+      .description(PURGE_OLD_TASKS_TIMER_DESCRIPTION)
+      .publishPercentiles(METRICS_TIMER_PERCENTILES)
+      .tag("exception", "true")
+      .register(Metrics.globalRegistry);
+
+  private static final String ORPHAN_TASKS_CLEANUP_TIMER_NAME = "thirdeye_orphan_tasks_cleanup";
+  private static final String ORPHAN_TASKS_CLEANUP_TIMER_DESCRIPTION = "Start: triggered by schedule, no input. End: the orphan tasks cleanup logic is finished. Tag exception=true means an exception was thrown by the method call.";
+  private static final Timer handleOrphanTasksTimerOfSuccess = Timer.builder(ORPHAN_TASKS_CLEANUP_TIMER_NAME)
+      .description(ORPHAN_TASKS_CLEANUP_TIMER_DESCRIPTION)
+      .publishPercentiles(METRICS_TIMER_PERCENTILES)
+      .tag("exception", "false")
+      .register(Metrics.globalRegistry);
+  private static final Timer handleOrphanTasksTimerOfException = Timer.builder(ORPHAN_TASKS_CLEANUP_TIMER_NAME)
+      .description(ORPHAN_TASKS_CLEANUP_TIMER_DESCRIPTION)
+      .publishPercentiles(METRICS_TIMER_PERCENTILES)
+      .tag("exception", "true")
+      .register(Metrics.globalRegistry);
+  
 
   private final ThirdEyeSchedulerConfiguration config;
   private final HolidayEventsLoaderConfiguration holidayEventsLoaderConfiguration;
@@ -44,7 +77,8 @@ public class SchedulerService implements Managed {
   private final SubscriptionCronScheduler subscriptionScheduler;
   private final TaskManager taskManager;
 
-  private final ScheduledExecutorService executorService;
+  private final ScheduledExecutorService oldTasksExecutorService;
+  private final ScheduledExecutorService orphanTasksExecutorService;
 
   @Inject
   public SchedulerService(final ThirdEyeSchedulerConfiguration config,
@@ -62,8 +96,16 @@ public class SchedulerService implements Managed {
     this.subscriptionScheduler = subscriptionScheduler;
     this.taskManager = taskManager;
 
-    executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE,
-        new ThreadFactoryBuilder().setNameFormat("scheduler-service-%d").build());
+    oldTasksExecutorService = Executors.newScheduledThreadPool(1,
+        new ThreadFactoryBuilder().setNameFormat("scheduler-old-tasks-purge-service-%d").build());
+    if (taskDriverConfiguration.isRandomWorkerIdEnabled()) {
+      orphanTasksExecutorService = Executors.newScheduledThreadPool(1,
+          new ThreadFactoryBuilder().setNameFormat("scheduler-orphan-tasks-cleanup-service-%d")
+              .build());
+    } else {
+      // no need to reserve a thread
+      orphanTasksExecutorService = null;
+    }
   }
 
   @Override
@@ -78,53 +120,62 @@ public class SchedulerService implements Managed {
       subscriptionScheduler.start();
     }
 
-    // TODO spyne improve scheduler arch and localize
-    // TODO spyne explore: consolidate all orphan maintenance tasks in a single pool
-    scheduleTaskCleanUp(config.getTaskCleanUpConfiguration());
+    // schedule task maintenance operations
+    final TaskCleanUpConfiguration taskCleanUpConfiguration = config.getTaskCleanUpConfiguration();
+    oldTasksExecutorService.scheduleWithFixedDelay(this::purgeOldTasks,
+        1,
+        taskCleanUpConfiguration.getIntervalInMinutes(),
+        TimeUnit.MINUTES);
     if (taskDriverConfiguration.isRandomWorkerIdEnabled()) {
-      scheduleOrphanTaskCleanUp(config.getTaskCleanUpConfiguration());
+      orphanTasksExecutorService.scheduleWithFixedDelay(this::handleOrphanTasks,
+          0,
+          taskCleanUpConfiguration.getOrphanIntervalInSeconds(),
+          TimeUnit.SECONDS);
     }
   }
 
-  private void scheduleTaskCleanUp(final TaskCleanUpConfiguration config) {
-    executorService.scheduleWithFixedDelay(() -> cleanTasks(config),
-        1,
-        config.getIntervalInMinutes(),
-        TimeUnit.MINUTES);
-  }
-
-  private void cleanTasks(final TaskCleanUpConfiguration config) {
+  private void purgeOldTasks() {
     // try catch is important to not throw exceptions while running in the scheduler.
     try {
-      taskManager.purge(
-          Duration.ofDays(config.getRetentionInDays()),
-          config.getMaxEntriesToDelete());
+      record(
+          () -> {
+            taskManager.purge(
+                Duration.ofDays(config.getTaskCleanUpConfiguration().getRetentionInDays()),
+                config.getTaskCleanUpConfiguration().getMaxEntriesToDelete());
+          },
+          purgeOldTasksTimerOfSuccess,
+          purgeOldTasksTimerOfException);
+      LOG.debug("Old task purge performed successfully.");
     } catch (Exception e) {
-      // catching exceptions only. errors will be escalated.
-      LOG.error("Error occurred during task purge", e);
+      // catching exceptions only. Errors will be escalated.
+      LOG.error("Failed to purge old tasks.", e);
     }
-  }
-
-  private void scheduleOrphanTaskCleanUp(final TaskCleanUpConfiguration config) {
-    executorService.scheduleWithFixedDelay(this::handleOrphanTasks,
-        0,
-        config.getOrphanIntervalInSeconds(),
-        TimeUnit.SECONDS);
   }
 
   private void handleOrphanTasks() {
-    final Timestamp activeThreshold = new Timestamp(System.currentTimeMillis() - getActiveBuffer());
-    taskManager.orphanTaskCleanUp(activeThreshold);
-  }
-
-  private long getActiveBuffer() {
-    return taskDriverConfiguration.getActiveThresholdMultiplier()
-        * taskDriverConfiguration.getHeartbeatInterval().toMillis();
+    // try catch is important to not throw exceptions while running in the scheduler.
+    try {
+      record(
+          () -> {
+            final long activeBuffer = taskDriverConfiguration.getActiveThresholdMultiplier()
+                * taskDriverConfiguration.getHeartbeatInterval().toMillis();
+            final Timestamp activeThreshold = new Timestamp(System.currentTimeMillis() - activeBuffer);
+            taskManager.cleanupOrphanTasks(activeThreshold);
+          },
+          handleOrphanTasksTimerOfSuccess,
+          handleOrphanTasksTimerOfException
+      );
+      LOG.debug("Orphan tasks handling performed successfully.");
+    } catch (Exception e) {
+      // catching exceptions only. Errors will be escalated.
+      LOG.error("Failed to handle orphan tasks.", e);
+    }
   }
 
   @Override
   public void stop() throws Exception {
-    executorService.shutdown();
+    oldTasksExecutorService.shutdown();
+    optional(orphanTasksExecutorService).ifPresent(ExecutorService::shutdown);
     if (holidayEventsLoaderConfiguration.isEnabled()) {
       holidayEventsLoader.shutdown();
     }

@@ -16,7 +16,7 @@ package ai.startree.thirdeye.resources.root;
 import ai.startree.thirdeye.resources.ApiResource;
 import ai.startree.thirdeye.resources.InternalResource;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;

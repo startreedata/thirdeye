@@ -23,7 +23,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import java.util.Map;
 import java.util.Set;
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import org.apache.http.HttpHeaders;
 
 public class PinotThirdEyeDataSourceModule extends AbstractModule {

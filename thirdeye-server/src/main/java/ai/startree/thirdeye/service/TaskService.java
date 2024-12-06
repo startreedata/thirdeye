@@ -22,8 +22,8 @@ import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import com.google.common.collect.ImmutableMap;
 import java.time.Duration;
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 @Singleton
 public class TaskService extends CrudService<TaskApi, TaskDTO> {

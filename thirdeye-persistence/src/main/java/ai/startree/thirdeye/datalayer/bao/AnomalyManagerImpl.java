@@ -364,12 +364,7 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
       final @Nullable String namespace) {
     final Predicate predicate = Predicate.AND(
         toPredicate(anomalyFilter),
-        Predicate.OR(
-            Predicate.EQ("namespace", namespace),
-            // existing entities are not migrated automatically so they can have their namespace column to null in the index table, even if they do belong to a namespace 
-            //  todo cyril authz - prepare migration scripts - or some logic to ensure all entities are eventually migrated
-            Predicate.EQ("namespace", null)
-        )
+        Predicate.EQ("namespace", namespace)
     );
     final List<AnomalyDTO> list = filter(new DaoFilter().setPredicate(predicate))
         .stream()
@@ -387,9 +382,11 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
   @Override
   public long countWithNamespace(final @NonNull AnomalyFilter filter,
       final @Nullable String namespace) {
-    // todo authz extremely inefficient because will load anomalies in memory to count them
-    // it is not possible to perform a count directly in the DB until all anomalies are migrated in the index table to ensure they have their namespace value set
-    return filterWithNamespace(filter, namespace).size();
+    final Predicate predicate = Predicate.AND(
+        toPredicate(filter),
+        Predicate.EQ("namespace", namespace)
+    );
+    return count(predicate);
   }
 
   private Predicate toPredicate(final AnomalyFilter af) {

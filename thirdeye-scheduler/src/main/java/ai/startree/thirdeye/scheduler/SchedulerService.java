@@ -13,6 +13,8 @@
  */
 package ai.startree.thirdeye.scheduler;
 
+import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+
 import ai.startree.thirdeye.scheduler.events.HolidayEventsLoaderConfiguration;
 import ai.startree.thirdeye.scheduler.events.HolidayEventsLoaderScheduler;
 import ai.startree.thirdeye.scheduler.taskcleanup.TaskCleanUpConfiguration;
@@ -24,6 +26,7 @@ import com.google.inject.Singleton;
 import io.dropwizard.lifecycle.Managed;
 import java.sql.Timestamp;
 import java.time.Duration;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -33,7 +36,6 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class SchedulerService implements Managed {
 
-  public static final int CORE_POOL_SIZE = 8;
   private static final Logger LOG = LoggerFactory.getLogger(SchedulerService.class);
 
   private final ThirdEyeSchedulerConfiguration config;
@@ -44,7 +46,8 @@ public class SchedulerService implements Managed {
   private final SubscriptionCronScheduler subscriptionScheduler;
   private final TaskManager taskManager;
 
-  private final ScheduledExecutorService executorService;
+  private final ScheduledExecutorService oldTasksExecutorService;
+  private final ScheduledExecutorService orphanTasksExecutorService;
 
   @Inject
   public SchedulerService(final ThirdEyeSchedulerConfiguration config,
@@ -62,8 +65,15 @@ public class SchedulerService implements Managed {
     this.subscriptionScheduler = subscriptionScheduler;
     this.taskManager = taskManager;
 
-    executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE,
-        new ThreadFactoryBuilder().setNameFormat("scheduler-service-%d").build());
+    oldTasksExecutorService = Executors.newScheduledThreadPool(1,
+        new ThreadFactoryBuilder().setNameFormat("scheduler-old-tasks-purge-service-%d").build());
+    if (taskDriverConfiguration.isRandomWorkerIdEnabled()) {
+      orphanTasksExecutorService = Executors.newScheduledThreadPool(1,
+          new ThreadFactoryBuilder().setNameFormat("scheduler-orphan-tasks-cleanup-service-%d").build()); 
+    } else {
+      // no need to reserve a thread
+      orphanTasksExecutorService = null;
+    }
   }
 
   @Override
@@ -80,12 +90,12 @@ public class SchedulerService implements Managed {
 
     // schedule task maintenance operations
     final TaskCleanUpConfiguration taskCleanUpConfiguration = config.getTaskCleanUpConfiguration();
-    executorService.scheduleWithFixedDelay(this::purgeOldTasks,
+    oldTasksExecutorService.scheduleWithFixedDelay(this::purgeOldTasks,
         1,
         taskCleanUpConfiguration.getIntervalInMinutes(),
         TimeUnit.MINUTES);
     if (taskDriverConfiguration.isRandomWorkerIdEnabled()) {
-      executorService.scheduleWithFixedDelay(this::handleOrphanTasks,
+      orphanTasksExecutorService.scheduleWithFixedDelay(this::handleOrphanTasks,
           0,
           taskCleanUpConfiguration.getOrphanIntervalInSeconds(),
           TimeUnit.SECONDS);
@@ -121,7 +131,8 @@ public class SchedulerService implements Managed {
 
   @Override
   public void stop() throws Exception {
-    executorService.shutdown();
+    oldTasksExecutorService.shutdown();
+    optional(orphanTasksExecutorService).ifPresent(ExecutorService::shutdown);
     if (holidayEventsLoaderConfiguration.isEnabled()) {
       holidayEventsLoader.shutdown();
     }

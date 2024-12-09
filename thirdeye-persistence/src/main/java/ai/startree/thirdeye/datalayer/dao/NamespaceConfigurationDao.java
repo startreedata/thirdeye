@@ -27,7 +27,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -103,10 +102,10 @@ public class NamespaceConfigurationDao {
     try {
       final NamespaceConfigurationEntity entity = toEntity(pojo);
       return databaseClient.executeTransaction(
-          (connection) -> databaseOrm.save(entity, connection),
-          null);
-    } catch (JsonProcessingException | SQLException e) {
+          (connection) -> databaseOrm.save(entity, connection));
+    } catch (Exception e) {
       LOG.error(e.getMessage(), e);
+      // TODO cyril design - surface exception to remove error logic in consumers ? 
       return null;
     }
   }
@@ -151,10 +150,10 @@ public class NamespaceConfigurationDao {
     try {
       final NamespaceConfigurationEntity entity = toEntity(pojo);
       return databaseClient.executeTransaction(
-          (connection) -> databaseOrm.update(entity, predicate, connection),
-          0);
-    } catch (JsonProcessingException | SQLException e) {
+          (connection) -> databaseOrm.update(entity, predicate, connection));
+    } catch (Exception e) {
       LOG.error(e.getMessage(), e);
+      // TODO cyril design - surface exception to remove error logic in consumers ?
       return 0;
     }
   }
@@ -163,11 +162,11 @@ public class NamespaceConfigurationDao {
     try {
       final List<NamespaceConfigurationEntity> entities = databaseClient.executeTransaction(
           (connection) -> databaseOrm.findAll(null,
-              null, null, NamespaceConfigurationEntity.class, connection),
-          Collections.emptyList());
+              null, null, NamespaceConfigurationEntity.class, connection));
       return toDto(entities);
-    } catch (final JsonProcessingException | SQLException e) {
+    } catch (final Exception e) {
       LOG.error(e.getMessage(), e);
+      // TODO cyril design - surface exception to remove error logic in consumers ?
       return Collections.emptyList();
     }
   }
@@ -176,11 +175,11 @@ public class NamespaceConfigurationDao {
     try {
       final List<NamespaceConfigurationEntity> entities = databaseClient.executeTransaction(
           (connection) -> databaseOrm.findAll(null,
-              limit, offset, NamespaceConfigurationEntity.class, connection),
-          Collections.emptyList());
+              limit, offset, NamespaceConfigurationEntity.class, connection));
       return toDto(entities);
-    } catch (final JsonProcessingException | SQLException e) {
+    } catch (final Exception e) {
       LOG.error(e.getMessage(), e);
+      // TODO cyril design - surface exception to remove error logic in consumers ?
       return Collections.emptyList();
     }
   }
@@ -188,13 +187,12 @@ public class NamespaceConfigurationDao {
   public NamespaceConfigurationDTO get(final Long id) {
     try {
       final NamespaceConfigurationEntity entity = databaseClient.executeTransaction(
-          (connection) -> databaseOrm.find(id, NamespaceConfigurationEntity.class, connection),
-          null);
+          (connection) -> databaseOrm.find(id, NamespaceConfigurationEntity.class, connection));
       if (entity == null) {
         return null;
       }
       return toDto(entity);
-    } catch (final JsonProcessingException | SQLException e) {
+    } catch (final Exception e) {
       LOG.error(e.getMessage(), e);
       return null;
     }
@@ -221,10 +219,9 @@ public class NamespaceConfigurationDao {
     try {
       final List<NamespaceConfigurationEntity> entities = databaseClient.executeTransaction(
           (connection) -> databaseOrm.findAll(
-              predicate, limit, null, NamespaceConfigurationEntity.class, connection),
-          Collections.emptyList());
+              predicate, limit, null, NamespaceConfigurationEntity.class, connection));
       return toDto(entities);
-    } catch (final JsonProcessingException | SQLException e) {
+    } catch (final Exception e) {
       LOG.error(e.getMessage(), e);
       return Collections.emptyList();
     }
@@ -234,10 +231,10 @@ public class NamespaceConfigurationDao {
     try {
       return databaseClient.executeTransaction(
           (connection) -> databaseOrm.count(null, NamespaceConfigurationEntity.class,
-              connection),
-          0L);
-    } catch (SQLException e) {
+              connection));
+    } catch (Exception e) {
       LOG.error(e.getMessage(), e);
+      // TODO cyril design - surface exception to remove error logic in consumers ?
       return 0;
     }
   }
@@ -246,10 +243,10 @@ public class NamespaceConfigurationDao {
     try {
       return databaseClient.executeTransaction(
           (connection) -> databaseOrm.count(predicate, NamespaceConfigurationEntity.class,
-              connection),
-          0L);
-    } catch (SQLException e) {
+              connection));
+    } catch (Exception e) {
       LOG.error(e.getMessage(), e);
+      // TODO cyril design - surface exception to remove error logic in consumers ?
       return 0;
     }
   }
@@ -266,10 +263,10 @@ public class NamespaceConfigurationDao {
     try {
       return databaseClient.executeTransaction(
           (connection) -> databaseOrm.delete(predicate, NamespaceConfigurationEntity.class,
-              connection),
-          0);
-    } catch (SQLException e) {
+              connection));
+    } catch (Exception e) {
       LOG.error(e.getMessage(), e);
+      // TODO cyril design - surface exception to remove error logic in consumers ?
       return 0;
     }
   }

@@ -29,7 +29,6 @@ import static java.util.Objects.requireNonNull;
 
 import ai.startree.thirdeye.datalayer.DatabaseClient;
 import ai.startree.thirdeye.datalayer.DatabaseOrm;
-import ai.startree.thirdeye.datalayer.entity.AbstractEntity;
 import ai.startree.thirdeye.datalayer.entity.AbstractIndexEntity;
 import ai.startree.thirdeye.datalayer.entity.GenericJsonEntity;
 import ai.startree.thirdeye.datalayer.entity.SubEntityType;
@@ -38,12 +37,10 @@ import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.lang.reflect.Field;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,7 +57,6 @@ import org.slf4j.LoggerFactory;
 public class GenericPojoDao {
 
   private static final Logger LOG = LoggerFactory.getLogger(GenericPojoDao.class);
-  private static final boolean IS_DEBUG = LOG.isDebugEnabled();
 
   private final DatabaseOrm databaseOrm;
   private final DatabaseClient databaseClient;
@@ -100,7 +96,8 @@ public class GenericPojoDao {
     return indexedColumnNames;
   }
 
-  public <E extends AbstractDTO> Long create(final E pojo) {
+  // return the id of the created entity. return null in case of error
+  public <E extends AbstractDTO> @Nullable Long create(final E pojo) {
     requireNonNull(pojo, "entity is null");
     checkArgument(pojo.getId() == null, "id must be null for create flow.");
 
@@ -125,9 +122,10 @@ public class GenericPojoDao {
         } else {
           return pojo.getId();
         }
-      }, null);
-    } catch (final SQLException e) {
+      });
+    } catch (final Exception e) {
       LOG.error(e.getMessage(), e);
+      // TODO CYRIL redesign - maybe all operations in this calls should throw exceptions instead of catching them? what's the use case of returning null ? the operation failed, and then some custom logic is required to find the null - see https://github.com/startreedata/thirdeye/blob/51c7d9decf707176153822b1a90c6162f072066a/thirdeye-server/src/main/java/ai/startree/thirdeye/service/CrudService.java#L110
       return null;
     }
   }
@@ -163,6 +161,7 @@ public class GenericPojoDao {
     return updateCounter;
   }
 
+  // return 1 if the update is successful. else return 0.
   public <E extends AbstractDTO> int update(final E pojo, final Predicate predicate) {
     checkNotNull(pojo.getId(), "An id is required to update the entity: %s", pojo);
 
@@ -189,7 +188,7 @@ public class GenericPojoDao {
           throw new ThirdEyeException(ThirdEyeStatus.ERR_UNKNOWN, "Too many rows updated");
         }
         return ret;
-      }, 0);
+      });
     } catch (final Exception e) {
       pojo.setUpdateTime(lastUpdateTime);
       LOG.error("Could not update entity : {}", pojo, e);
@@ -197,6 +196,7 @@ public class GenericPojoDao {
     }
   }
 
+  // return a list of entity. if the operation fails, return an empty list 
   public <E extends AbstractDTO> List<E> list(final Class<E> beanClass, final long limit,
       final long offset) {
     try {
@@ -206,7 +206,7 @@ public class GenericPojoDao {
               limit,
               offset,
               GenericJsonEntity.class,
-              connection), emptyList());
+              connection));
       final List<E> result = new ArrayList<>();
       if (entities != null) {
         for (final GenericJsonEntity entity : entities) {
@@ -215,8 +215,9 @@ public class GenericPojoDao {
         }
       }
       return result;
-    } catch (final JsonProcessingException | SQLException e) {
+    } catch (final Exception e) {
       LOG.error(e.getMessage(), e);
+      // TODO CYRIL - throw exception instead of returning an empty list ?
       return emptyList();
     }
   }
@@ -225,23 +226,23 @@ public class GenericPojoDao {
     return count(null, beanClass);
   }
 
+  // return the count of entity matching the predicate. If the operation fails, return -1. 
   public <E extends AbstractDTO> long count(final @Nullable Predicate predicate, final Class<E> beanClass) {
     final Class<? extends AbstractIndexEntity> indexClass = BEAN_INDEX_MAP.get(beanClass);
     try {
       return databaseClient.executeTransaction(
-          (connection) -> databaseOrm.count(predicate, indexClass, connection),
-          -1L);
-    } catch (final SQLException e) {
+          (connection) -> databaseOrm.count(predicate, indexClass, connection));
+    } catch (final Exception e) {
       LOG.error(e.getMessage(), e);
       return -1L;
     }
   }
 
+  // return the entity with a given id. If the entity is not found, is not of the input pojoClass type, or the operation fails, return null 
   public <E extends AbstractDTO> E get(final Long id, final Class<E> pojoClass) {
     try {
       final GenericJsonEntity genericJsonEntity = databaseClient.executeTransaction(
-          (connection) -> databaseOrm.find(id, GenericJsonEntity.class, connection),
-          null);
+          (connection) -> databaseOrm.find(id, GenericJsonEntity.class, connection));
       if (genericJsonEntity == null) {
         return null;
       }
@@ -251,33 +252,38 @@ public class GenericPojoDao {
         return null;
       }
       return toDto(genericJsonEntity, pojoClass);
-    } catch (final JsonProcessingException | SQLException e) {
+    } catch (final Exception e) {
       LOG.error(e.getMessage(), e);
+      // TODO CYRIL design - surface exception ? 
       return null;
     }
   }
 
+  // return the entity with a given id. If not found or the operation fails, return null
   public AbstractDTO getRaw(final Long id) {
     try {
       final GenericJsonEntity genericJsonEntity = databaseClient.executeTransaction(
-          (connection) -> databaseOrm.find(id, GenericJsonEntity.class, connection),
-          null);
+          (connection) -> databaseOrm.find(id, GenericJsonEntity.class, connection));
       if (genericJsonEntity != null) {
         return toDto(genericJsonEntity,
             SubEntities.BEAN_TYPE_MAP.asMultimap().inverse().get(
                 SubEntityType.valueOf(genericJsonEntity.getType())).asList().getFirst());
+      } else {
+        return null;
       }
-    } catch (final JsonProcessingException | SQLException e) {
+    } catch (final Exception e) {
       LOG.error(e.getMessage(), e);
+      // TODO CYRIL design - surface exception ?
+      return null;
     }
-    return null;
   }
 
   public <E extends AbstractDTO> List<E> get(final List<Long> idList, final Class<E> pojoClass) {
     try {
       return fetchEntities(pojoClass, Predicate.IN("id", idList.toArray()));
-    } catch (final JsonProcessingException | SQLException e) {
+    } catch (final Exception e) {
       LOG.error(e.getMessage(), e);
+      // TODO CYRIL design - surface exception ?
       return emptyList();
     }
   }
@@ -285,8 +291,9 @@ public class GenericPojoDao {
   public <E extends AbstractDTO> List<E> getAll(final Class<E> pojoClass) {
     try {
       return fetchEntities(pojoClass, Predicate.EQ("type", SubEntities.getType(pojoClass)));
-    } catch (final JsonProcessingException | SQLException e) {
+    } catch (final Exception e) {
       LOG.error(e.getMessage(), e);
+      // TODO CYRIL design - surface exception ?
       return emptyList();
     }
   }
@@ -312,13 +319,13 @@ public class GenericPojoDao {
 
   private <E extends AbstractDTO> List<E> fetchEntities(final Class<E> pojoClass,
       final Predicate predicate)
-      throws SQLException, JsonProcessingException {
+      throws Exception {
     final List<GenericJsonEntity> entities = databaseClient.executeTransaction(
         (connection) -> databaseOrm.findAll(predicate,
             null,
             null,
             GenericJsonEntity.class,
-            connection), emptyList());
+            connection));
     final List<E> results = new ArrayList<>();
     if (CollectionUtils.isNotEmpty(entities)) {
       for (final GenericJsonEntity entity : entities) {
@@ -341,7 +348,7 @@ public class GenericPojoDao {
               daoFilter.getLimit(),
               daoFilter.getOffset(),
               indexClass,
-              connection), emptyList());
+              connection));
       final List<Long> idsToReturn = new ArrayList<>();
       if (CollectionUtils.isNotEmpty(indexEntities)) {
         for (final AbstractIndexEntity entity : indexEntities) {
@@ -349,42 +356,19 @@ public class GenericPojoDao {
         }
       }
       return idsToReturn;
-    } catch (final SQLException e) {
+    } catch (final Exception e) {
       LOG.error(e.getMessage(), e);
+      // TODO CYRIL design - surface exception ?
       return emptyList();
     }
   }
 
-  /**
-   * Dump all entities of type entityClass to logger
-   * This utility is useful to dump the entire table. However, it gets executed in code regularly in
-   * debug mode.
-   *
-   * @param entityClass The entity class.
-   */
-  @SuppressWarnings("unused")
-  private void dumpTable(final Class<? extends AbstractEntity> entityClass) {
-    if (IS_DEBUG) {
-      try {
-        final List<? extends AbstractEntity> entities = databaseClient.executeTransaction(
-            (connection) -> databaseOrm.findAll(null,
-                null,
-                null,
-                entityClass,
-                connection), emptyList());
-        for (final AbstractEntity entity : entities) {
-          LOG.debug("{}", entity);
-        }
-      } catch (final SQLException e) {
-        LOG.error(e.getMessage(), e);
-      }
-    }
-  }
-
+  // delete the entity with the given id. Returns 1 if the deletion is successful, else return 0.
   public <E extends AbstractDTO> int delete(final Long id, final Class<E> pojoClass) {
     return delete(List.of(id), pojoClass);
   }
 
+  // delete the entity with the given id. Returns 1 if the deletion is successful, else return 0.
   public <E extends AbstractDTO> int delete(final List<Long> idsToDelete,
       final Class<E> pojoClass) {
     final Class<? extends AbstractIndexEntity> indexEntityClass = BEAN_INDEX_MAP.get(pojoClass);
@@ -401,9 +385,10 @@ public class GenericPojoDao {
             Predicate.IN(databaseOrm.getIdColumnName(indexEntityClass), idsToDelete.toArray()),
             indexEntityClass,
             connection);
-      }, 0);
-    } catch (final SQLException e) {
+      });
+    } catch (final Exception e) {
       LOG.error(e.getMessage(), e);
+      // TODO CYRIL design - surface exception ?
       return 0;
     }
   }

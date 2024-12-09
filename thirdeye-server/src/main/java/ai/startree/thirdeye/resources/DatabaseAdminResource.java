@@ -29,7 +29,6 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -57,14 +56,6 @@ public class DatabaseAdminResource {
   public Response getTables(@Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal)
       throws Exception {
     return Response.ok(databaseAdminService.getTables(principal)).build();
-  }
-
-  @Deprecated // fixme cyril remove this
-  @GET
-  @Path("execute-query")
-  public Response executeQuery(@Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
-      @QueryParam("sql") String sql) throws Exception {
-    return Response.ok(databaseAdminService.executeQuery(principal, sql)).build();
   }
 
   @POST

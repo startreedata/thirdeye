@@ -91,7 +91,7 @@ public class TestAnomalyTaskManager {
   }
 
   @Test(dependsOnMethods = {"testFindAll"})
-  public void testAcquireTaskToRun() {
+  public void testAcquireTaskToRun() throws Exception {
     CLOCK.tick(1);
     final Long workerId = 1L;
     final TaskDTO taskDTO = taskDAO.findById(anomalyTaskId1);
@@ -104,7 +104,7 @@ public class TestAnomalyTaskManager {
   }
 
   @Test(dependsOnMethods = {"testAcquireTaskToRun"})
-  public void testFindNextTaskToRun() {
+  public void testFindNextTaskToRun() throws Exception {
     final Long workerId = 1L;
     final TaskDTO anomalyTask = taskDAO.acquireNextTaskToRun(workerId);
     assertThat(anomalyTask).isNotNull();

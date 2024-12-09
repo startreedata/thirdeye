@@ -213,7 +213,6 @@ public class TaskDriverRunnable implements Runnable {
       try {
         nextTask = taskManager.acquireNextTaskToRun(workerId);
       } catch (Exception e) {
-        // FIXME CYRIL acquireNextTaskToRun is not throwing errors up to here - requires redesign of DatabaseClient#executeTransaction
         LOG.error("Failed to fetch a new task to run", e);
         idleTimer().record(() -> sleep(true));
         continue;

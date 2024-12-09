@@ -55,7 +55,7 @@ public interface TaskManager extends AbstractManager<TaskDTO> {
 
   void purge(Duration expiryDuration, Integer limitOptional);
 
-  void orphanTaskCleanUp(Timestamp activeThreshold);
+  void cleanupOrphanTasks(Timestamp activeThreshold);
 
   long countByStatus(final TaskStatus status);
 }

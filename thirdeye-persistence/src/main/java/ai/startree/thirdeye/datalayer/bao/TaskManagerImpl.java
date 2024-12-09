@@ -221,7 +221,7 @@ public class TaskManagerImpl implements TaskManager {
   }
 
   @Override
-  public void orphanTaskCleanUp(final Timestamp activeThreshold) {
+  public void cleanupOrphanTasks(final Timestamp activeThreshold) {
     final long current = System.currentTimeMillis();
     final List<TaskDTO> orphanTasks = findByPredicate(
         Predicate.AND(

@@ -30,13 +30,27 @@ public class MetricsUtils {
 
   // if the callable does not throw, record time in the successTimer. 
   // Else, record time in the exceptionTimer. 
-  public static <E> E record(Callable<E> fun, final Timer successTimer, final Timer exceptionTimer)
+  public static <E> E record(final Callable<E> fun, final Timer successTimer, final Timer exceptionTimer)
       throws Exception {
     final Timer.Sample sample = Timer.start(Metrics.globalRegistry);
     try {
       E res = fun.call();
       sample.stop(successTimer);
       return res;
+    } catch (Exception e) {
+      sample.stop(exceptionTimer);
+      throw e;
+    }
+  }
+
+  // if the callable does not throw, record time in the successTimer. 
+  // Else, record time in the exceptionTimer. 
+  public static void record(final Runnable fun, final Timer successTimer, final Timer exceptionTimer)
+      throws Exception {
+    final Timer.Sample sample = Timer.start(Metrics.globalRegistry);
+    try {
+      fun.run();
+      sample.stop(successTimer);
     } catch (Exception e) {
       sample.stop(exceptionTimer);
       throw e;

@@ -42,7 +42,7 @@ public interface TaskManager extends AbstractManager<TaskDTO> {
   @Deprecated // use acquireNextTaskToRun instead
   boolean acquireTaskToRun(TaskDTO taskDTO, final long workerId);
 
-  TaskDTO acquireNextTaskToRun(final long workerId);
+  TaskDTO acquireNextTaskToRun(final long workerId) throws Exception;
 
   List<TaskDTO> findByStatusAndWorkerId(Long workerId, TaskStatus status);
 

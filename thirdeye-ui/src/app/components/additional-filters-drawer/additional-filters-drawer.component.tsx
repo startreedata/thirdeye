@@ -14,7 +14,15 @@
  */
 
 import { Icon } from "@iconify/react";
-import { Box, Button, Drawer, Typography } from "@material-ui/core";
+import {
+    Accordion,
+    AccordionDetails,
+    AccordionSummary,
+    Box,
+    Button,
+    Drawer,
+    Typography,
+} from "@material-ui/core";
 import React, { FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -25,6 +33,8 @@ import { FormComponentForTemplateField } from "../alert-wizard-v2/alert-template
 import { LabelForTemplateFieldV2 } from "../alert-wizard-v2/alert-template/alert-template-form-field/label-for-template-field-v2/label-for-template-field-v2.component";
 import { AdditonalFiltersDrawerProps } from "./additional-filters-drawer.interfaces";
 import { useAdditonalFiltersDrawerStyles } from "./additional-filters-drawer.styles";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+
 // import { uniq } from "lodash";
 
 /**
@@ -101,61 +111,75 @@ export const AdditonalFiltersDrawer: FunctionComponent<AdditonalFiltersDrawerPro
                                             mb={3}
                                             width="100%"
                                         >
-                                            <Typography
-                                                color="inherit"
-                                                variant="h6"
-                                            >
-                                                {config.name}
-                                            </Typography>
-                                            <Box
-                                                className={
-                                                    classes.configItemFields
-                                                }
-                                            >
-                                                {config.requiredPropertiesWithMetadata.map(
-                                                    (propertyMetadata) => (
-                                                        <Box
-                                                            key={
-                                                                propertyMetadata.name
-                                                            }
-                                                        >
-                                                            <LabelForTemplateFieldV2
-                                                                className={
-                                                                    classes.formLabel
-                                                                }
-                                                                name={
-                                                                    propertyMetadata.name
-                                                                }
-                                                                tooltipText={
-                                                                    propertyMetadata.description
-                                                                }
-                                                            />
-                                                            <FormComponentForTemplateField
-                                                                propertyKey={
-                                                                    propertyMetadata.name
-                                                                }
-                                                                templateFieldProperty={
-                                                                    propertyMetadata
-                                                                }
-                                                                value={
-                                                                    localCopyOfProperties[
-                                                                        propertyMetadata
-                                                                            .name
-                                                                    ]
-                                                                }
-                                                                onChange={(
-                                                                    newValue
-                                                                ) => {
-                                                                    handleOnChange(
-                                                                        propertyMetadata.name,
-                                                                        newValue
-                                                                    );
-                                                                }}
-                                                            />
-                                                        </Box>
-                                                    )
-                                                )}
-                                            </Box>
+                                            <Accordion>
+                                                <AccordionSummary
+                                                    aria-controls={`${config.name}-content`}
+                                                    expandIcon={
+                                                        <ExpandMoreIcon />
+                                                    }
+                                                    id={`${config.name}-header`}
+                                                >
+                                                    <Typography
+                                                        color="inherit"
+                                                        variant="h6"
+                                                    >
+                                                        {config.name}
+                                                    </Typography>
+                                                </AccordionSummary>
+                                                <AccordionDetails>
+                                                    <Box
+                                                        className={
+                                                            classes.configItemFields
+                                                        }
+                                                    >
+                                                        {config.requiredPropertiesWithMetadata.map(
+                                                            (
+                                                                propertyMetadata
+                                                            ) => (
+                                                                <Box
+                                                                    key={
+                                                                        propertyMetadata.name
+                                                                    }
+                                                                >
+                                                                    <LabelForTemplateFieldV2
+                                                                        className={
+                                                                            classes.formLabel
+                                                                        }
+                                                                        name={
+                                                                            propertyMetadata.name
+                                                                        }
+                                                                        tooltipText={
+                                                                            propertyMetadata.description
+                                                                        }
+                                                                    />
+                                                                    <FormComponentForTemplateField
+                                                                        propertyKey={
+                                                                            propertyMetadata.name
+                                                                        }
+                                                                        templateFieldProperty={
+                                                                            propertyMetadata
+                                                                        }
+                                                                        value={
+                                                                            localCopyOfProperties[
+                                                                                propertyMetadata
+                                                                                    .name
+                                                                            ]
+                                                                        }
+                                                                        onChange={(
+                                                                            newValue
+                                                                        ) => {
+                                                                            handleOnChange(
+                                                                                propertyMetadata.name,
+                                                                                newValue
+                                                                            );
+                                                                        }}
+                                                                    />
+                                                                </Box>
+                                                            )
+                                                        )}
+                                                    </Box>
+                                                </AccordionDetails>
+                                            </Accordion>
                                         </Box>
                                     ))}
                                 </Box>

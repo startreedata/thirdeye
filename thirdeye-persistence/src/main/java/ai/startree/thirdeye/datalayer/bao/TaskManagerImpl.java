@@ -278,6 +278,7 @@ public class TaskManagerImpl implements TaskManager {
   }
 
   // FIXME CYRIL - this should have as less cache as possible and as precise as possible
+  // TODO CYRIL scale - compute this in database directly - for the moment we assume the filter is such that the number of tasks returned is small 
   private long getTaskLatency(final TaskType type, TaskStatus... pendingStatuses) {
     // fetch pending tasks from DB
     final DaoFilter filter = new DaoFilter()

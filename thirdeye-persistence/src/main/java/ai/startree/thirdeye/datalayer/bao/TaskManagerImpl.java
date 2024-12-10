@@ -17,8 +17,8 @@ import static ai.startree.thirdeye.spi.Constants.TASK_EXPIRY_DURATION;
 import static ai.startree.thirdeye.spi.Constants.TASK_MAX_DELETES_PER_CLEANUP;
 import static ai.startree.thirdeye.spi.Constants.TWO_DIGITS_FORMATTER;
 import static ai.startree.thirdeye.spi.Constants.VANILLA_OBJECT_MAPPER;
+import static ai.startree.thirdeye.spi.util.MetricsUtils.scheduledRefreshSupplier;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
-import static com.google.common.base.Suppliers.memoizeWithExpiration;
 
 import ai.startree.thirdeye.datalayer.dao.TaskDao;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
@@ -43,7 +43,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -254,13 +253,13 @@ public class TaskManagerImpl implements TaskManager {
   public void registerDatabaseMetrics() {
     for (final TaskType type : TaskType.values()) {
       Gauge.builder("thirdeye_task_latency",
-              memoizeWithExpiration(() -> getTaskLatency(type, TaskStatus.WAITING, TaskStatus.RUNNING), 30, TimeUnit.SECONDS))
+              scheduledRefreshSupplier(() -> getTaskLatency(type, TaskStatus.WAITING, TaskStatus.RUNNING), Duration.ofSeconds(30)))
           .tags("type", type.toString())
           .description("Maximum amount of time a task has been pending in status WAITING or RUNNING.")
           .register(Metrics.globalRegistry);
 
       Gauge.builder("thirdeye_task_acquisition_latency",
-              memoizeWithExpiration(() -> getTaskLatency(type, TaskStatus.WAITING), 30, TimeUnit.SECONDS))
+              scheduledRefreshSupplier(() -> getTaskLatency(type, TaskStatus.WAITING), Duration.ofSeconds(30)))
           .tags("type", type.toString())
           .description("Maximum amount of time a task has been pending in status WAITING.")
           .register(Metrics.globalRegistry);
@@ -268,7 +267,7 @@ public class TaskManagerImpl implements TaskManager {
       
       for (final TaskStatus status : TaskStatus.values()) {
         Gauge.builder("thirdeye_tasks",
-                memoizeWithExpiration(() -> countBy(status, type), 30, TimeUnit.SECONDS))
+                scheduledRefreshSupplier(() -> countBy(status, type), Duration.ofSeconds(30)))
             .tag("status", status.toString())
             .tags("type", type.toString())
             .register(Metrics.globalRegistry);

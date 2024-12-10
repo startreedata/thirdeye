@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.datalayer.bao;
 
 import static ai.startree.thirdeye.spi.Constants.METRICS_CACHE_TIMEOUT;
+import static ai.startree.thirdeye.spi.util.MetricsUtils.scheduledRefreshSupplier;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Suppliers.memoizeWithExpiration;
@@ -202,13 +203,13 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
   @Override
   public void registerDatabaseMetrics() {
     Gauge.builder("thirdeye_anomalies",
-            memoizeWithExpiration(() -> count(NOT_CHILD_NOT_IGNORED_FILTER), METRICS_CACHE_TIMEOUT))
+            scheduledRefreshSupplier(() -> count(NOT_CHILD_NOT_IGNORED_FILTER), METRICS_CACHE_TIMEOUT))
         .register(Metrics.globalRegistry);
     Gauge.builder("thirdeye_anomaly_feedbacks",
-            memoizeWithExpiration(() -> count(HAS_FEEDBACK_FILTER), METRICS_CACHE_TIMEOUT))
+            scheduledRefreshSupplier(() -> count(HAS_FEEDBACK_FILTER), METRICS_CACHE_TIMEOUT))
         .register(Metrics.globalRegistry);
 
-    final Supplier<ConfusionMatrix> cachedConfusionMatrix = memoizeWithExpiration(
+    final Supplier<ConfusionMatrix> cachedConfusionMatrix = scheduledRefreshSupplier(
         this::computeConfusionMatrixForAnomalies, METRICS_CACHE_TIMEOUT);
     Gauge.builder("thirdeye_anomaly_precision",
             () -> cachedConfusionMatrix.get().getPrecision())

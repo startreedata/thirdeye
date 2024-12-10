@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.datalayer.bao;
 
-import static com.google.common.base.Suppliers.memoizeWithExpiration;
+import static ai.startree.thirdeye.spi.util.MetricsUtils.scheduledRefreshSupplier;
 
 import ai.startree.thirdeye.datalayer.DatabaseClient;
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
@@ -26,9 +26,9 @@ import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.Metrics;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,10 +77,10 @@ public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
   @Override
   public void registerDatabaseMetrics() {
     Gauge.builder("thirdeye_active_alerts",
-            memoizeWithExpiration(this::countActive, 1, TimeUnit.MINUTES))
+            scheduledRefreshSupplier(this::countActive, Duration.ofMinutes(1)))
         .register(Metrics.globalRegistry);
     Gauge.builder("thirdeye_active_timeseries",
-            memoizeWithExpiration(this::countActiveTimeseries, 1, TimeUnit.MINUTES))
+            scheduledRefreshSupplier(this::countActiveTimeseries, Duration.ofMinutes(1)))
         .register(Metrics.globalRegistry);
     LOG.info("Registered alert database metrics.");
   }

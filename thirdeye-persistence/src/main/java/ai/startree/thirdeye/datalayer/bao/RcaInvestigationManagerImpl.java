@@ -14,7 +14,7 @@
 package ai.startree.thirdeye.datalayer.bao;
 
 import static ai.startree.thirdeye.spi.Constants.METRICS_CACHE_TIMEOUT;
-import static com.google.common.base.Suppliers.memoizeWithExpiration;
+import static ai.startree.thirdeye.spi.util.MetricsUtils.scheduledRefreshSupplier;
 
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
@@ -75,7 +75,7 @@ public class RcaInvestigationManagerImpl extends AbstractManagerImpl<RcaInvestig
   @Override
   public void registerDatabaseMetrics() {
     Gauge.builder("thirdeye_rca_investigations",
-            memoizeWithExpiration(this::count, METRICS_CACHE_TIMEOUT))
+            scheduledRefreshSupplier(this::count, METRICS_CACHE_TIMEOUT))
         .register(Metrics.globalRegistry);
     LOG.info("Registered RCA investigation database metrics.");
   }

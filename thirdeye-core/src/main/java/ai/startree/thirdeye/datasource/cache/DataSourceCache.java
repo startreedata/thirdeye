@@ -20,9 +20,9 @@ package ai.startree.thirdeye.datasource.cache;
 
 import static ai.startree.thirdeye.spi.Constants.METRICS_CACHE_TIMEOUT;
 import static ai.startree.thirdeye.spi.util.ExecutorUtils.threadsNamed;
+import static ai.startree.thirdeye.spi.util.MetricsUtils.scheduledRefreshSupplier;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.base.Suppliers.memoizeWithExpiration;
 import static java.util.Collections.emptyList;
 
 import ai.startree.thirdeye.datasource.DataSourcesLoader;
@@ -78,7 +78,7 @@ public class DataSourceCache {
     this.dataSourcesLoader = dataSourcesLoader;
 
     Gauge.builder("thirdeye_healthy_datasources",
-            memoizeWithExpiration(this::getHealthyDatasourceCount, METRICS_CACHE_TIMEOUT))
+            scheduledRefreshSupplier(this::getHealthyDatasourceCount, METRICS_CACHE_TIMEOUT))
         .register(Metrics.globalRegistry);
     Metrics.gaugeMapSize("thirdeye_cached_datasources", emptyList(), cache);
   }

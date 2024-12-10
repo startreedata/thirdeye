@@ -13,8 +13,6 @@
  */
 package ai.startree.thirdeye.service;
 
-import static ai.startree.thirdeye.spi.Constants.METRICS_CACHE_TIMEOUT;
-
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.spi.api.AppAnalyticsApi;
@@ -26,13 +24,9 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertMetadataDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
-import com.google.common.base.Suppliers;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import io.micrometer.core.instrument.Gauge;
-import io.micrometer.core.instrument.Metrics;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,13 +48,6 @@ public class AppAnalyticsService {
     this.renderer = renderer;
     this.authorizationManager = authorizationManager;
     this.anomalyDao = anomalyManager;
-    
-    // todo cyril authz global entity metrics should be maintained by DAOs - this one requires access to the alertTemplate manager though
-    // FIXME cyril ASAP scale - should only run from the scheduler 
-    Gauge.builder("thirdeye_active_distinct_metrics",
-            Suppliers.memoizeWithExpiration(this::getUniqueMonitoredMetrics,
-                METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES))
-        .register(Metrics.globalRegistry);
   }
 
   public String appVersion(final @Nullable ThirdEyePrincipal principal) {
@@ -88,16 +75,6 @@ public class AppAnalyticsService {
 
   private int getUniqueMonitoredMetricsInNamespace(final @Nullable String namespace) {
     return Math.toIntExact(alertManager.findAllActiveInNamespace(namespace)
-        .stream()
-        .map(alertDTO -> renderer.renderAlert(alertDTO).getMetadata())
-        .filter(Objects::nonNull)
-        .map(MonitoredMetricKey::fromMetadata)
-        .distinct().count());
-  }
-  
-  // for internal use only - see getUniqueMonitoredMetricsWithNamespace
-  private int getUniqueMonitoredMetrics() {
-    return Math.toIntExact(alertManager.findAllActive()
         .stream()
         .map(alertDTO -> renderer.renderAlert(alertDTO).getMetadata())
         .filter(Objects::nonNull)

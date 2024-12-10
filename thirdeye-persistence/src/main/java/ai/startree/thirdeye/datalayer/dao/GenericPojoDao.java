@@ -340,8 +340,8 @@ public class GenericPojoDao {
     //apply the predicates and fetch the primary key ids
     final Class<? extends AbstractIndexEntity> indexClass = BEAN_INDEX_MAP.get(
         daoFilter.getBeanClass());
+    validate(daoFilter);
     try {
-      validate(daoFilter);
       //find the matching ids
       final List<? extends AbstractIndexEntity> indexEntities = databaseClient.executeTransaction(
           (connection) -> databaseOrm.findAll(daoFilter.getPredicate(),

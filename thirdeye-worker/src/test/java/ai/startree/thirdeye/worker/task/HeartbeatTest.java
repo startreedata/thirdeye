@@ -90,7 +90,7 @@ public class HeartbeatTest {
   }
 
   @Test
-  public void heartbeatPulseCheck() {
+  public void heartbeatPulseCheck() throws Exception {
     final Timestamp startTime = new Timestamp(System.currentTimeMillis());
     final TaskDTO taskDTO = newTask();
     when(taskManager.acquireNextTaskToRun(anyLong())).thenAnswer(i -> pollingCount++ == 0 ? taskDTO : null);

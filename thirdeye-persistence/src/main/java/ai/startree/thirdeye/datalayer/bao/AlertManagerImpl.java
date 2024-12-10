@@ -65,6 +65,19 @@ public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
                 TimeUnit.MINUTES))
         .register(Metrics.globalRegistry);
 
+    // FIXME CYRIL ASAP scale - generate 1 query per alert --> way too much 
+    // same as
+    // with t as (
+    //    select
+    //        detection_config_index.base_id,
+    //        COUNT(enumeration_item_index.base_id) as c
+    //    from
+    //        detection_config_index
+    //            left join enumeration_item_index on detection_config_index.base_id = alert_id
+    //    where detection_config_index.active
+    //    group by detection_config_index.base_id
+    //)
+    //select SUM(CASE WHEN c < 1 THEN 1 else c END ) from t;
     final Supplier<Number> activeTimeseriesCountFun = () -> {
       final List<AlertDTO> activeAlerts = findAllActive();
       return activeAlerts.stream()

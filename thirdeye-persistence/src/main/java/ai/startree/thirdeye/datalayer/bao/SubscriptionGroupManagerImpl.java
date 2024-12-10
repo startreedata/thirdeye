@@ -42,6 +42,7 @@ public class SubscriptionGroupManagerImpl extends
 
   @Override
   public void registerDatabaseMetrics() {
+    // TODO CYRIL scale - compute this in database directly - for the moment we assume the number of subscription groups stays small
     final Supplier<Number> notificationFlowsFun = () -> findAll().stream()
         .filter(sg -> CollectionUtils.isNotEmpty(sg.getAlertAssociations()))
         .filter(sg -> CollectionUtils.isNotEmpty(sg.getSpecs()))

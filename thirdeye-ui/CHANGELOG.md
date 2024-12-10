@@ -1,3 +1,10 @@
+### [2.54.5](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.54.4...thirdeye-ui-2.54.5) (2024-11-20)
+
+
+### Bug Fixes
+
+* [TE-2481](https://cortexdata.atlassian.net/browse/TE-2481) hide need help button ([55a45d48c](https://github.com/startreedata/thirdeye/commit/55a45d48c88e046e8f0879c477bea5775872d383))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

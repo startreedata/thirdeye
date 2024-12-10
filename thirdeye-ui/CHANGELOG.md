@@ -1,3 +1,15 @@
+## [2.54.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.53.1...thirdeye-ui-2.54.0) (2024-11-11)
+
+
+### Features
+
+* [TE-2448](https://cortexdata.atlassian.net/browse/TE-2448) added namespace config tab in configuration page ([22d1decd8](https://github.com/startreedata/thirdeye/commit/22d1decd8becc43bdbcbb1d40014d5769bf72bab))
+
+
+### Bug Fixes
+
+* TE-XX create alert dx-query-fix ([46c75b49a](https://github.com/startreedata/thirdeye/commit/46c75b49a51ddc702e86b3430dbd144f93195ce1))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

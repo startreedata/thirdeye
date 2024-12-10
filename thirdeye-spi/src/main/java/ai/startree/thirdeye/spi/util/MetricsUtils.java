@@ -17,6 +17,7 @@ import com.google.common.base.Supplier;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.Timer;
+import io.micrometer.core.instrument.binder.jvm.ExecutorServiceMetrics;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.Callable;
@@ -42,6 +43,10 @@ public class MetricsUtils {
       .newScheduledThreadPool(3, new ThreadFactoryBuilder()
           .setNameFormat("scheduled-refresh-metrics-%d")
           .build());
+
+  static {
+    ExecutorServiceMetrics.monitor(Metrics.globalRegistry, SCHEDULED_SUPPLIERS_EXECUTOR_SERVICE, "scheduled-refresh-metrics");
+  }
   
   public final static String NAMESPACE_TAG = "thirdeye_workspace";
   public final static String NULL_NAMESPACE_TAG_VALUE = "__null__";

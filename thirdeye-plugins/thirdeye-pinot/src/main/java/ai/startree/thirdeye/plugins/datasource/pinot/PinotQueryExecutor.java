@@ -42,8 +42,6 @@ public class PinotQueryExecutor extends CacheLoader<PinotQuery, ThirdEyeResultSe
 
   private static final Logger LOG = LoggerFactory.getLogger(PinotQueryExecutor.class);
 
-  private static final String SQL_QUERY_FORMAT = "sql";
-  private static final String PQL_QUERY_FORMAT = "pql";
   private final PinotConnectionProvider pinotConnectionProvider;
 
   @Inject

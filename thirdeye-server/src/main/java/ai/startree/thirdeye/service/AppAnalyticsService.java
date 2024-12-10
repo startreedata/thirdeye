@@ -54,7 +54,9 @@ public class AppAnalyticsService {
     this.renderer = renderer;
     this.authorizationManager = authorizationManager;
     this.anomalyDao = anomalyManager;
+    
     // todo cyril authz global entity metrics should be maintained by DAOs - this one requires access to the alertTemplate manager though
+    // FIXME cyril ASAP scale - should only run from the scheduler 
     Gauge.builder("thirdeye_active_distinct_metrics",
             Suppliers.memoizeWithExpiration(this::getUniqueMonitoredMetrics,
                 METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES))

@@ -78,8 +78,7 @@ public class DataSourceCache {
     this.dataSourcesLoader = dataSourcesLoader;
 
     Gauge.builder("thirdeye_healthy_datasources",
-            memoizeWithExpiration(this::getHealthyDatasourceCount, METRICS_CACHE_TIMEOUT.toMinutes(),
-                TimeUnit.MINUTES))
+            memoizeWithExpiration(this::getHealthyDatasourceCount, METRICS_CACHE_TIMEOUT))
         .register(Metrics.globalRegistry);
     Metrics.gaugeMapSize("thirdeye_cached_datasources", emptyList(), cache);
   }

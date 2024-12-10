@@ -202,18 +202,14 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
   @Override
   public void registerDatabaseMetrics() {
     Gauge.builder("thirdeye_anomalies",
-            memoizeWithExpiration(() -> count(NOT_CHILD_NOT_IGNORED_FILTER),
-                METRICS_CACHE_TIMEOUT.toMinutes(),
-                TimeUnit.MINUTES))
+            memoizeWithExpiration(() -> count(NOT_CHILD_NOT_IGNORED_FILTER), METRICS_CACHE_TIMEOUT))
         .register(Metrics.globalRegistry);
     Gauge.builder("thirdeye_anomaly_feedbacks",
-            memoizeWithExpiration(() -> count(HAS_FEEDBACK_FILTER), METRICS_CACHE_TIMEOUT.toMinutes(),
-                TimeUnit.MINUTES))
+            memoizeWithExpiration(() -> count(HAS_FEEDBACK_FILTER), METRICS_CACHE_TIMEOUT))
         .register(Metrics.globalRegistry);
 
     final Supplier<ConfusionMatrix> cachedConfusionMatrix = memoizeWithExpiration(
-        this::computeConfusionMatrixForAnomalies, METRICS_CACHE_TIMEOUT.toMinutes(),
-        TimeUnit.MINUTES);
+        this::computeConfusionMatrixForAnomalies, METRICS_CACHE_TIMEOUT);
     Gauge.builder("thirdeye_anomaly_precision",
             () -> cachedConfusionMatrix.get().getPrecision())
         .register(Metrics.globalRegistry);

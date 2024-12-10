@@ -25,7 +25,6 @@ import com.google.inject.Singleton;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.Metrics;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,7 +75,7 @@ public class RcaInvestigationManagerImpl extends AbstractManagerImpl<RcaInvestig
   @Override
   public void registerDatabaseMetrics() {
     Gauge.builder("thirdeye_rca_investigations",
-            memoizeWithExpiration(this::count, METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES))
+            memoizeWithExpiration(this::count, METRICS_CACHE_TIMEOUT))
         .register(Metrics.globalRegistry);
     LOG.info("Registered RCA investigation database metrics.");
   }

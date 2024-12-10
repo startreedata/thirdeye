@@ -13,7 +13,6 @@
  */
 package ai.startree.thirdeye.datalayer.bao;
 
-import static ai.startree.thirdeye.spi.Constants.METRICS_CACHE_TIMEOUT;
 import static com.google.common.base.Suppliers.memoizeWithExpiration;
 
 import ai.startree.thirdeye.datalayer.DatabaseClient;
@@ -78,8 +77,7 @@ public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
   @Override
   public void registerDatabaseMetrics() {
     Gauge.builder("thirdeye_active_alerts",
-            memoizeWithExpiration(this::countActive, METRICS_CACHE_TIMEOUT.toMinutes(),
-                TimeUnit.MINUTES))
+            memoizeWithExpiration(this::countActive, 1, TimeUnit.MINUTES))
         .register(Metrics.globalRegistry);
     Gauge.builder("thirdeye_active_timeseries",
             memoizeWithExpiration(this::countActiveTimeseries, 1, TimeUnit.MINUTES))

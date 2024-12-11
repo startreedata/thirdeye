@@ -18,6 +18,7 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import ai.startree.thirdeye.plugins.datasource.pinot.resultset.ThirdEyeResultSet;
 import ai.startree.thirdeye.plugins.datasource.pinot.resultset.ThirdEyeResultSetGroup;
 import ai.startree.thirdeye.spi.Constants;
+import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datasource.DataSourceRequest;
@@ -31,6 +32,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.binder.cache.GuavaCacheMetrics;
@@ -157,7 +159,8 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
    * @throws ExecutionException is thrown if failed to connect to Pinot or gets results from
    *     Pinot.
    */
-  private ThirdEyeResultSetGroup executeSQL(final PinotQuery pinotQuery) throws ExecutionException {
+  private ThirdEyeResultSetGroup executeSQL(final PinotQuery pinotQuery) throws ExecutionException,
+      ThirdEyeException {
     try {
       final ThirdEyeResultSetGroup thirdEyeResultSetGroup = queryCache.get(pinotQuery);
       final long current = System.currentTimeMillis();
@@ -173,6 +176,16 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
           pinotQuery.getOptions(), e);
       LOG.error("queryCache.stats: {}", queryCache.stats());
       throw e;
+    } catch (UncheckedExecutionException e) {
+      LOG.error("Failed to execute SQL: {} with options {}", pinotQuery.getQuery(),
+          pinotQuery.getOptions(), e);
+      LOG.error("queryCache.stats: {}", queryCache.stats());
+      Throwable cause = e.getCause();
+      if (cause instanceof ThirdEyeException) {
+        throw (ThirdEyeException) cause;
+      } else {
+        throw new ExecutionException(e.getMessage(), e);
+      }
     }
   }
 
@@ -195,14 +208,14 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   public boolean validate() {
     try {
       return validate0();
-    } catch (final ExecutionException | IOException | ArrayIndexOutOfBoundsException e) {
+    } catch (final ExecutionException | IOException | ArrayIndexOutOfBoundsException | ThirdEyeException e) {
       LOG.error("Exception while performing pinot datasource validation.", e);
     }
     return false;
   }
 
   // todo cyril healthcheck should be abstracted by the controller
-  private boolean validate0() throws IOException, ExecutionException {
+  private boolean validate0() throws IOException, ExecutionException, ThirdEyeException {
     final PinotHealthCheckConfiguration healthCheck = config.getHealthCheck();
     if (healthCheck == null || !healthCheck.isEnabled()) {
       return true;

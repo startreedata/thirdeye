@@ -13,10 +13,14 @@
  */
 package ai.startree.thirdeye.plugins.datasource.pinot;
 
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_PINOT_QUERY_EXECUTION;
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_PINOT_QUERY_QUOTA_EXCEEDED;
+
 import ai.startree.thirdeye.plugins.datasource.pinot.resultset.ThirdEyeDataFrameResultSet;
 import ai.startree.thirdeye.plugins.datasource.pinot.resultset.ThirdEyeResultSet;
 import ai.startree.thirdeye.plugins.datasource.pinot.resultset.ThirdEyeResultSetGroup;
 import ai.startree.thirdeye.plugins.datasource.pinot.resultset.ThirdEyeResultSetMetaData;
+import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.detection.v2.ColumnType;
 import ai.startree.thirdeye.spi.detection.v2.ColumnType.ColumnDataType;
@@ -41,6 +45,7 @@ import org.slf4j.LoggerFactory;
 public class PinotQueryExecutor extends CacheLoader<PinotQuery, ThirdEyeResultSetGroup> {
 
   private static final Logger LOG = LoggerFactory.getLogger(PinotQueryExecutor.class);
+  private static final String QUOTA_EXCEEDED_ERR = "QuotaExceededError";
 
   private final PinotConnectionProvider pinotConnectionProvider;
 
@@ -215,8 +220,11 @@ public class PinotQueryExecutor extends CacheLoader<PinotQuery, ThirdEyeResultSe
 
       return toThirdEyeResultSetGroup(resultSetGroup);
     } catch (final PinotClientException cause) {
-      LOG.error("Error when running SQL:" + queryWithOptions, cause);
-      throw new PinotClientException("Error when running SQL:" + queryWithOptions, cause);
+      LOG.error("Error when running SQL" + queryWithOptions, cause);
+      if (cause.toString().toUpperCase().contains(QUOTA_EXCEEDED_ERR.toUpperCase())) {
+        throw new ThirdEyeException(cause, ERR_PINOT_QUERY_QUOTA_EXCEEDED, cause.toString(), queryWithOptions);
+      }
+      throw new ThirdEyeException(cause, ERR_PINOT_QUERY_EXECUTION, cause.toString(), queryWithOptions);
     }
   }
 

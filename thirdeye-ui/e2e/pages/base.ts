@@ -12,8 +12,17 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-export interface TitleCardProps {
-    title: React.ReactNode;
-    content: React.ReactNode;
-    datatestId?: string;
+import { Page } from "@playwright/test";
+
+export class BasePage {
+    readonly page: Page;
+
+    constructor(page: Page) {
+        this.page = page;
+    }
+
+    async gotoHomePage() {
+        await this.page.goto('http://localhost:7004/#access_token=""');
+        await this.page.waitForURL("http://localhost:7004/home");
+    }
 }

@@ -310,6 +310,7 @@ export const AlertsAllPage: FunctionComponent = () => {
                         <DropdownButtonV1
                             color="primary"
                             data-testid="create-menu-button"
+                            dataTestId="create-alert-dropdown"
                             dropdownMenuItems={createMenuItems}
                             type={DropdownButtonTypeV1.Regular}
                             onClick={handleAlertRedirect}

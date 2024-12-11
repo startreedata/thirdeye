@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.datalayer.bao;
 
 import static ai.startree.thirdeye.spi.Constants.METRICS_CACHE_TIMEOUT;
+import static ai.startree.thirdeye.spi.util.MetricsUtils.scheduledRefreshSupplier;
 import static com.google.common.base.Suppliers.memoizeWithExpiration;
 
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
@@ -24,7 +25,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.Metrics;
-import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,8 +50,7 @@ public class SubscriptionGroupManagerImpl extends
         .reduce(0, Integer::sum);
 
     Gauge.builder("thirdeye_notification_flows",
-            memoizeWithExpiration(notificationFlowsFun, METRICS_CACHE_TIMEOUT.toMinutes(),
-                TimeUnit.MINUTES))
+            scheduledRefreshSupplier(notificationFlowsFun, METRICS_CACHE_TIMEOUT))
         .register(Metrics.globalRegistry);
 
     LOG.info("Registered subscription group database metrics.");

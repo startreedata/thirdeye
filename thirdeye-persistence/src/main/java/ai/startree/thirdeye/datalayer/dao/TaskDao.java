@@ -65,7 +65,6 @@ public class TaskDao {
       FOR UPDATE SKIP LOCKED
       """;
   private static final Logger LOG = LoggerFactory.getLogger(TaskDao.class);
-  private static final boolean IS_DEBUG = LOG.isDebugEnabled();
 
   private final DatabaseOrm databaseOrm;
   private final DatabaseClient databaseClient;

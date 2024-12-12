@@ -239,11 +239,7 @@ public class TaskManagerImpl implements TaskManager {
     );
   }
 
-  public long countByStatus(final TaskStatus status) {
-    return count(Predicate.EQ("status", status.toString()));
-  }
-
-  public long countBy(final TaskStatus status, final TaskType type) {
+  private long countBy(final TaskStatus status, final TaskType type) {
     return count(Predicate.AND(
         Predicate.EQ("status", status.toString()),
         Predicate.EQ("type", type)));

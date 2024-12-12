@@ -26,6 +26,7 @@ export const SubscriptionGroupDetails: FunctionComponent<SubscriptionGroupDetail
             notifyHistoricalAnomalies: Boolean(
                 subscriptionGroup.notifyHistoricalAnomalies
             ),
+            minimumAnomalyLength: subscriptionGroup.minimumAnomalyLength,
         };
 
         return (

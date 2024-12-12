@@ -21,21 +21,27 @@ import {
     Switch,
     TextField,
 } from "@material-ui/core";
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { CronEditor } from "../../../cron-editor-v1/cron-editor-v1.component";
 import { InputSection } from "../../../form-basics/input-section/input-section.component";
 import { PropertiesFormProps } from "./properties-form.interfaces";
 import { InfoLabel } from "../../../info-label/info-label.component";
+import { AnomayDurationInput } from "./anomaly-duration-input";
+import { usePropertiesFormStyle } from "./styles";
 
 // Refer: SubscriptionGroupPropertiesForm
 export const PropertiesForm: FunctionComponent<PropertiesFormProps> = ({
-    values: { name, cron, notifyHistoricalAnomalies },
+    values: { name, cron, notifyHistoricalAnomalies, minimumAnomalyLength },
     onChange,
     customHeader,
 }) => {
     const { t } = useTranslation();
+    const [showAnomalyDurationInput, setShowAnomalyDurationInput] = useState(
+        !!minimumAnomalyLength
+    );
 
+    const classes = usePropertiesFormStyle();
     const handleUpdateCron = (cron: string): void => {
         onChange((stateProp) => ({ ...stateProp, cron }));
     };
@@ -48,6 +54,24 @@ export const PropertiesForm: FunctionComponent<PropertiesFormProps> = ({
         notifyHistoricalAnomalies: boolean
     ): void => {
         onChange((stateProp) => ({ ...stateProp, notifyHistoricalAnomalies }));
+    };
+
+    const handleAnonalyDurationToggle = (
+        showAnomalyDurationInput: boolean
+    ): void => {
+        setShowAnomalyDurationInput(showAnomalyDurationInput);
+        const value = showAnomalyDurationInput ? minimumAnomalyLength : null;
+        onChange((stateProp) => ({
+            ...stateProp,
+            minimumAnomalyLength: value,
+        }));
+    };
+
+    const handleAnonalyDurationChange = (value: string): void => {
+        onChange((stateProp) => ({
+            ...stateProp,
+            minimumAnomalyLength: value,
+        }));
     };
 
     return (
@@ -105,6 +129,38 @@ export const PropertiesForm: FunctionComponent<PropertiesFormProps> = ({
                             />
                         }
                     />
+                    <div className={classes.anomalyDurationContainer}>
+                        <InputSection
+                            inputComponent={
+                                <div>
+                                    <Switch
+                                        defaultChecked={
+                                            !!showAnomalyDurationInput
+                                        }
+                                        onChange={(e) => {
+                                            handleAnonalyDurationToggle(
+                                                e.target.checked
+                                            );
+                                        }}
+                                    />
+                                    {showAnomalyDurationInput && (
+                                        <AnomayDurationInput
+                                            value={minimumAnomalyLength}
+                                            onChange={
+                                                handleAnonalyDurationChange
+                                            }
+                                        />
+                                    )}
+                                </div>
+                            }
+                            labelComponent={
+                                <InfoLabel
+                                    label={t("label.minimumAnomalyLength")}
+                                    tooltipText={t("info.minimumAnomalyLength")}
+                                />
+                            }
+                        />
+                    </div>
                 </CardContent>
             </Card>
         </Grid>

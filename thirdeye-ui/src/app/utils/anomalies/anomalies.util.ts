@@ -393,31 +393,37 @@ export const getShortText = (
     return textToShow;
 };
 
-export const ANOMALY_OPTIONS_TO_DESCRIPTIONS = {
-    [AnomalyFeedbackType.ANOMALY.valueOf()]: i18n.t(
+export const ANOMALY_OPTIONS_TO_DESCRIPTIONS = (
+    translation: TFunction
+): { [key: string]: string } => ({
+    [AnomalyFeedbackType.ANOMALY.valueOf()]: translation(
         "message.yes-this-is-a-valid-anomaly"
     ),
-    [AnomalyFeedbackType.ANOMALY_EXPECTED.valueOf()]: i18n.t(
+    [AnomalyFeedbackType.ANOMALY_EXPECTED.valueOf()]: translation(
         "message.yes-this-anomaly-is-expected"
     ),
-    [AnomalyFeedbackType.ANOMALY_NEW_TREND.valueOf()]: i18n.t(
+    [AnomalyFeedbackType.ANOMALY_NEW_TREND.valueOf()]: translation(
         "message.yes-however-this-may-be-a-new-trend"
     ),
-};
+});
 
-export const ALL_OPTIONS_TO_DESCRIPTIONS = {
-    ...ANOMALY_OPTIONS_TO_DESCRIPTIONS,
-    [AnomalyFeedbackType.NOT_ANOMALY.valueOf()]: i18n.t(
+export const ALL_OPTIONS_TO_DESCRIPTIONS = (
+    translation: TFunction
+): { [key: string]: string } => ({
+    ...ANOMALY_OPTIONS_TO_DESCRIPTIONS(translation),
+    [AnomalyFeedbackType.NOT_ANOMALY.valueOf()]: translation(
         "message.no-this-is-an-anomaly"
     ),
-};
+});
 
-export const ALL_OPTIONS_WITH_NO_FEEDBACK = {
-    ...ALL_OPTIONS_TO_DESCRIPTIONS,
-    [AnomalyFeedbackType.NO_FEEDBACK.valueOf()]: i18n.t(
+export const ALL_OPTIONS_WITH_NO_FEEDBACK = (
+    translation: TFunction
+): { [key: string]: string } => ({
+    ...ALL_OPTIONS_TO_DESCRIPTIONS(translation),
+    [AnomalyFeedbackType.NO_FEEDBACK.valueOf()]: translation(
         "message.is-this-an-anomaly"
     ),
-};
+});
 
 export const handleAlertPropertyChangeGenerator = (
     setAlert: Dispatch<SetStateAction<EditableAlert>>,

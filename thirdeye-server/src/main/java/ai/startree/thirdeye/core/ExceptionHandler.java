@@ -18,6 +18,7 @@ import static ai.startree.thirdeye.ResourceUtils.statusApi;
 import static ai.startree.thirdeye.ResourceUtils.statusListApi;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_ALERT_PIPELINE_EXECUTION;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DATA_UNAVAILABLE;
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_EXECUTION_RCA_ALGORITHM;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_TIMEOUT;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_UNKNOWN;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_UNKNOWN_RCA_ALGORITHM;
@@ -58,6 +59,16 @@ public class ExceptionHandler {
 
   private static final Map<Class<?>, Function<Throwable, StatusApi>> RCA_HANDLERS = ImmutableMap.<Class<?>, Function<Throwable, StatusApi>>builder()
       .put(TimeoutException.class, e -> statusApi(ERR_TIMEOUT))
+      .put(ExecutionException.class,
+          e -> {
+            Throwable cause = e.getCause();
+            if (cause instanceof final ThirdEyeException thirdEyeException) {
+              return new StatusApi().setCode(thirdEyeException.getStatus())
+                  .setMsg(thirdEyeException.getMessage());
+            } else {
+              return statusApi(ERR_EXECUTION_RCA_ALGORITHM, e.getCause().getMessage());
+            }
+          })
       .put(ThirdEyeException.class,
           e -> {
             final ThirdEyeException thirdEyeException = (ThirdEyeException) e;

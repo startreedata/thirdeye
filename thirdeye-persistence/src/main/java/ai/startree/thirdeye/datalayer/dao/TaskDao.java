@@ -224,11 +224,11 @@ public class TaskDao {
     return get(predicate, null);
   }
   
-  public List<TaskDTO> get(final Predicate predicate, @Nullable Long limit) {
+  public List<TaskDTO> get(final Predicate predicate, final @Nullable Long limit) {
     return get(predicate, limit, null);
   }
 
-  public List<TaskDTO> get(final Predicate predicate, @Nullable Long limit, @Nullable Integer transactionIsolationLevel) {
+  public List<TaskDTO> get(final Predicate predicate, final @Nullable Long limit, final @Nullable Integer transactionIsolationLevel) {
     try {
       final List<TaskEntity> entities = databaseClient.executeTransaction(
           (connection) -> {

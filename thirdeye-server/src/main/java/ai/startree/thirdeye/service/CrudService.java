@@ -205,6 +205,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
     return null;
   }
 
+  // FIXME CYRIL scale - highly inefficient for tasks 
   public void deleteAll(final ThirdEyeServerPrincipal principal) {
     final String namespace = authorizationManager.currentNamespace(principal);
     final DaoFilter daoFilter = DaoFilterUtils.buildFilter(EMPTY_PARAMS, apiToIndexMap,

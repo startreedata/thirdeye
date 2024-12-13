@@ -63,7 +63,7 @@ public class TaskDao {
       ORDER BY id ASC
       LIMIT 1
       FOR UPDATE SKIP LOCKED
-      """;
+      """.replace("\n", " ");
   private static final Logger LOG = LoggerFactory.getLogger(TaskDao.class);
 
   private final DatabaseOrm databaseOrm;

@@ -1,3 +1,10 @@
+## [2.56.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.55.1...thirdeye-ui-2.56.0) (2024-12-13)
+
+
+### Features
+
+* [TE-2585](https://cortexdata.atlassian.net/browse/TE-2585) add 10 minutes granularity to simple flow ([b88a1b515](https://github.com/startreedata/thirdeye/commit/b88a1b51521ac1f088de8a19d9f29fc012106841))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

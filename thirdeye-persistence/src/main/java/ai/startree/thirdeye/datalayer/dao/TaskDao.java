@@ -178,19 +178,6 @@ public class TaskDao {
     }
   }
 
-  public List<TaskDTO> getAll() {
-    try {
-      final List<TaskEntity> entities = databaseClient.executeTransaction(
-          (connection) -> databaseOrm.findAll(null,
-              null, null, TaskEntity.class, connection));
-      return toDto(entities);
-    } catch (final Exception e) {
-      LOG.error(e.getMessage(), e);
-      // TODO CYRIL design - surface exception ?
-      return Collections.emptyList();
-    }
-  }
-
   public List<TaskDTO> list(final long limit, final long offset) {
     try {
       final List<TaskEntity> entities = databaseClient.executeTransaction(
@@ -253,7 +240,10 @@ public class TaskDao {
   public long count() {
     try {
       return databaseClient.executeTransaction(
-          (connection) -> databaseOrm.count(null, TaskEntity.class, connection));
+          (connection) -> {
+            connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+            return databaseOrm.count(null, TaskEntity.class, connection);
+          });
     } catch (Exception e) {
       LOG.error(e.getMessage(), e);
       // TODO CYRIL design - surface exception ?
@@ -264,7 +254,10 @@ public class TaskDao {
   public long count(final Predicate predicate) {
     try {
       return databaseClient.executeTransaction(
-          (connection) -> databaseOrm.count(predicate, TaskEntity.class, connection));
+          (connection) -> {
+            connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+            return databaseOrm.count(predicate, TaskEntity.class, connection);
+          });
     } catch (Exception e) {
       LOG.error(e.getMessage(), e);
       // TODO CYRIL design - surface exception ?

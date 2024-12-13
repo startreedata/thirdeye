@@ -372,7 +372,9 @@ public class TaskManagerImpl implements TaskManager {
 
   @Override
   public List<TaskDTO> findAll() {
-    return dao.getAll();
+    // this operation can stress the task execution framework - if there is no use case for it, keep it unsupported
+    // most use cases should use a filter by namespace
+    throw new UnsupportedOperationException("findAll operation is not supported for Tasks. If this error is unexpected, please reach out to support.");
   }
 
   @Override

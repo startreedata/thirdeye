@@ -43,6 +43,7 @@
     <module>pinot-test-container</module>
     <module>thirdeye-integration-tests</module>
     <module>thirdeye-benchmarks</module>
+    <module>jacoco-code-coverage</module>
   </modules>
 
   <properties>
@@ -70,6 +71,8 @@
     <hsqldb.version>2.7.1</hsqldb.version>
     <!-- should match dropwizard version - except for security issues -->
     <jackson.version>2.18.1</jackson.version>
+    <!-- Skip Jacoco by default -->
+    <jacoco.skip>true</jacoco.skip>
     <jodatime.version>2.12.7</jodatime.version>
     <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
     <mockito.version>5.12.0</mockito.version>
@@ -133,6 +136,21 @@
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+            <configuration>
+              <!-- Sets a property to be re-used in the maven-surefire-plugin JVM argument line -->
+              <propertyName>surefireArgLine</propertyName>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
@@ -264,12 +282,17 @@
           </executions>
         </plugin>
         <plugin>
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <version>0.8.11</version>
+        </plugin>
+        <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
           <version>3.0.0-M1</version>
           <configuration>
             <argLine>
-              -javaagent:"${settings.localRepository}"/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.time=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED
+              -javaagent:"${settings.localRepository}"/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar ${surefireArgLine} --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.time=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED
             </argLine>
             <threadCount>1</threadCount>
             <systemPropertyVariables>

@@ -44,14 +44,16 @@ import { AdditonalFiltersDrawer } from "../../../components/additional-filters-d
 import { AlertCompositeFiltersModal } from "../../../components/alert-composite-filters-modal/alert-composite-filters-modal.component";
 import { AlertJsonEditorModal } from "../../../components/alert-json-editor-modal/alert-json-editor-modal.component";
 // Remove "createNewStartingAlertThreshold as" for fallback
-import { createNewStartingAlertThreshold as createNewStartingAlert } from "../../../components/alert-wizard-v2/alert-template/alert-template.utils";
+import {
+    createNewStartingAlertThreshold as createNewStartingAlert,
+    determinePropertyFieldConfiguration,
+    setUpFieldInputRenderConfig,
+} from "../../../components/alert-wizard-v2/alert-template/alert-template.utils";
 import { AvailableAlgorithmOption } from "../../../components/alert-wizard-v3/alert-type-selection/alert-type-selection.interfaces";
 import {
     generateAvailableAlgorithmOptions,
     generateAvailableAlgorithmOptionsForRecommendations,
 } from "../../../components/alert-wizard-v3/alert-type-selection/alert-type-selection.utils";
-import { AnomaliesFilterConfiguratorRenderConfigs } from "../../../components/alert-wizard-v3/anomalies-filter-panel/anomalies-filter-panel.interfaces";
-import { getAvailableFilterOptions } from "../../../components/alert-wizard-v3/anomalies-filter-panel/anomalies-filter-panel.utils";
 import { NotificationConfiguration } from "../../../components/alert-wizard-v3/notification-configuration/notification-configuration.component";
 import { ChartContentV2 } from "../../../components/alert-wizard-v3/preview-chart/chart-content-v2/chart-content-v2.component";
 import {
@@ -86,6 +88,7 @@ import {
 import {
     createAlertEvaluation,
     determineTimezoneFromAlertInEvaluation,
+    groupPropertyByStepAndSubStep,
 } from "../../../utils/alerts/alerts.util";
 import {
     DatasetInfo,
@@ -306,14 +309,6 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
             return alertTemplateCandidate.name === alertTemplateToFind;
         });
     }, [alertTemplates, alert, algorithmOption, isMultiDimensionAlert]);
-
-    const availableConfigurations = useMemo(() => {
-        if (!alertTemplateForEvaluate) {
-            return undefined;
-        }
-
-        return getAvailableFilterOptions(alertTemplateForEvaluate, t);
-    }, [alertTemplateForEvaluate]);
 
     const handleGranularityChange = async (
         _: unknown,
@@ -779,6 +774,23 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
             return alertTemplateCandidate.name === alert.template?.name;
         });
     }, [alertTemplates, alert]);
+
+    const availableConfigurations = useMemo(() => {
+        if (!alertTemplateForEvaluate) {
+            return undefined;
+        }
+
+        const [_requiredKeys, optionalKeys] = setUpFieldInputRenderConfig(
+            selectedAlertTemplate
+                ? determinePropertyFieldConfiguration(selectedAlertTemplate)
+                : [],
+            alert.templateProperties
+        );
+
+        return groupPropertyByStepAndSubStep(optionalKeys);
+
+        // return getAvailableFilterOptions(alertTemplateForEvaluate, t);
+    }, [alertTemplateForEvaluate, selectedAlertTemplate]);
 
     const onUpdateCompositeFiltersChange = (
         template: TemplatePropertiesObject
@@ -1923,7 +1935,8 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                         </Button>
                                                                                         <AdditonalFiltersDrawer
                                                                                             availableConfigurations={
-                                                                                                availableConfigurations as AnomaliesFilterConfiguratorRenderConfigs[]
+                                                                                                availableConfigurations ??
+                                                                                                {}
                                                                                             }
                                                                                             defaultValues={
                                                                                                 alert.templateProperties

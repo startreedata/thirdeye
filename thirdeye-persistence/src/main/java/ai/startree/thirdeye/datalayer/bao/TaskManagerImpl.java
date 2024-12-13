@@ -129,6 +129,7 @@ public class TaskManagerImpl implements TaskManager {
     return dao.acquireNextTaskToRun(workerId);
   }
 
+  @Deprecated
   @Override
   public TaskDTO findNextTaskToRun() {
     final String queryClause = """
@@ -147,6 +148,7 @@ public class TaskManagerImpl implements TaskManager {
    * This method has side effects on the task DTO, even if the acquisition attempt fails.
    * Re-fetch the taskDto if you need to ensure consistency with the persistence layer.
    */
+  @Deprecated
   @Override
   public boolean acquireTaskToRun(final TaskDTO task, final long workerId) {
     task.setStatus(TaskStatus.RUNNING);
@@ -154,6 +156,7 @@ public class TaskManagerImpl implements TaskManager {
     task.setStartTime(System.currentTimeMillis());
     final int currentVersion = task.getVersion();
     task.setVersion(currentVersion + 1);
+    task.setLastActive(new Timestamp(System.currentTimeMillis()));
     final Predicate predicate = Predicate.AND(
         Predicate.EQ("version", currentVersion),
         Predicate.EQ("status", TaskStatus.WAITING.toString())

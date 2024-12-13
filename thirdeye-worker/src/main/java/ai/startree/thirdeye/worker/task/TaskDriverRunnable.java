@@ -112,7 +112,10 @@ public class TaskDriverRunnable implements Runnable {
     if (config.isRandomWorkerIdEnabled()) {
       heartbeat = taskDriverThreadPoolManager.getHeartbeatExecutorService()
           .scheduleAtFixedRate(() -> taskExecutionHeartbeat(taskDTO),
-              0,
+              // a heartbeat is recorded at the same time the task is acquired 
+              // assuming runTask is run just after the task is acquired 
+              // we can run the next heartbeat at the next heartbeat interval. Taking 1 millisecond of margin just in case  
+              config.getHeartbeatInterval().toMillis() - 1,
               config.getHeartbeatInterval().toMillis(),
               TimeUnit.MILLISECONDS);
     }

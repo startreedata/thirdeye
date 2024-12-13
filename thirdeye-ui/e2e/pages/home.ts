@@ -135,7 +135,7 @@ export class HomePage extends BasePage {
         const tableHeaders = tableContainer.locator("table thead th");
         await expect(tableHeaders).toHaveCount(2);
 
-        await expect(tableHeaders.nth(0)).toHaveText("Subscription Name");
+        await expect(tableHeaders.nth(0)).toHaveText("Subscription name");
         await expect(tableHeaders.nth(1)).toHaveText("Created");
 
         const topSubsciptionGroups = this.subscriptionResponseData

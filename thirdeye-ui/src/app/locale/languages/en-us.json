@@ -54,6 +54,7 @@
     },
     "label": {
         "1-minute": "1 Minute",
+        "10-minutes": "10 Minutes",
         "15-minutes": "15 Minutes",
         "404": "404",
         "5-minutes": "5 Minutes",

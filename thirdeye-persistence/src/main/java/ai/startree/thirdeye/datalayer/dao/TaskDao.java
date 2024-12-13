@@ -217,7 +217,7 @@ public class TaskDao {
     requireNonNull(daoFilter.getPredicate(),
         "If the predicate is null, you can just do "
             + "getAll() which doesn't need to fetch IDs first");
-    return get(daoFilter.getPredicate(), daoFilter.getLimit());
+    return get(daoFilter.getPredicate(), daoFilter.getLimit(), daoFilter.getTransactionIsolationLevel());
   }
 
   public List<TaskDTO> get(final Predicate predicate) {
@@ -225,10 +225,19 @@ public class TaskDao {
   }
   
   public List<TaskDTO> get(final Predicate predicate, @Nullable Long limit) {
+    return get(predicate, limit, null);
+  }
+
+  public List<TaskDTO> get(final Predicate predicate, @Nullable Long limit, @Nullable Integer transactionIsolationLevel) {
     try {
       final List<TaskEntity> entities = databaseClient.executeTransaction(
-          (connection) -> databaseOrm.findAll(
-              predicate, limit, null, TaskEntity.class, connection));
+          (connection) -> {
+            if (transactionIsolationLevel != null) {
+              connection.setTransactionIsolation(transactionIsolationLevel);
+            }
+            return databaseOrm.findAll(
+                predicate, limit, null, TaskEntity.class, connection);
+          });
       return toDto(entities);
     } catch (final Exception e) {
       LOG.error(e.getMessage(), e);

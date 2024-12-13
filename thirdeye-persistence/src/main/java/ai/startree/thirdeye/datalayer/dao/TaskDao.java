@@ -65,7 +65,6 @@ public class TaskDao {
       FOR UPDATE SKIP LOCKED
       """;
   private static final Logger LOG = LoggerFactory.getLogger(TaskDao.class);
-  private static final boolean IS_DEBUG = LOG.isDebugEnabled();
 
   private final DatabaseOrm databaseOrm;
   private final DatabaseClient databaseClient;
@@ -179,19 +178,6 @@ public class TaskDao {
     }
   }
 
-  public List<TaskDTO> getAll() {
-    try {
-      final List<TaskEntity> entities = databaseClient.executeTransaction(
-          (connection) -> databaseOrm.findAll(null,
-              null, null, TaskEntity.class, connection));
-      return toDto(entities);
-    } catch (final Exception e) {
-      LOG.error(e.getMessage(), e);
-      // TODO CYRIL design - surface exception ?
-      return Collections.emptyList();
-    }
-  }
-
   public List<TaskDTO> list(final long limit, final long offset) {
     try {
       final List<TaskEntity> entities = databaseClient.executeTransaction(
@@ -231,18 +217,27 @@ public class TaskDao {
     requireNonNull(daoFilter.getPredicate(),
         "If the predicate is null, you can just do "
             + "getAll() which doesn't need to fetch IDs first");
-    return get(daoFilter.getPredicate(), daoFilter.getLimit());
+    return get(daoFilter.getPredicate(), daoFilter.getLimit(), daoFilter.getTransactionIsolationLevel());
   }
 
   public List<TaskDTO> get(final Predicate predicate) {
     return get(predicate, null);
   }
   
-  public List<TaskDTO> get(final Predicate predicate, @Nullable Long limit) {
+  public List<TaskDTO> get(final Predicate predicate, final @Nullable Long limit) {
+    return get(predicate, limit, null);
+  }
+
+  public List<TaskDTO> get(final Predicate predicate, final @Nullable Long limit, final @Nullable Integer transactionIsolationLevel) {
     try {
       final List<TaskEntity> entities = databaseClient.executeTransaction(
-          (connection) -> databaseOrm.findAll(
-              predicate, limit, null, TaskEntity.class, connection));
+          (connection) -> {
+            if (transactionIsolationLevel != null) {
+              connection.setTransactionIsolation(transactionIsolationLevel);
+            }
+            return databaseOrm.findAll(
+                predicate, limit, null, TaskEntity.class, connection);
+          });
       return toDto(entities);
     } catch (final Exception e) {
       LOG.error(e.getMessage(), e);
@@ -254,7 +249,10 @@ public class TaskDao {
   public long count() {
     try {
       return databaseClient.executeTransaction(
-          (connection) -> databaseOrm.count(null, TaskEntity.class, connection));
+          (connection) -> {
+            connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+            return databaseOrm.count(null, TaskEntity.class, connection);
+          });
     } catch (Exception e) {
       LOG.error(e.getMessage(), e);
       // TODO CYRIL design - surface exception ?
@@ -265,7 +263,10 @@ public class TaskDao {
   public long count(final Predicate predicate) {
     try {
       return databaseClient.executeTransaction(
-          (connection) -> databaseOrm.count(predicate, TaskEntity.class, connection));
+          (connection) -> {
+            connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+            return databaseOrm.count(predicate, TaskEntity.class, connection);
+          });
     } catch (Exception e) {
       LOG.error(e.getMessage(), e);
       // TODO CYRIL design - surface exception ?

@@ -16,6 +16,7 @@ package ai.startree.thirdeye.datalayer.dao;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
+import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskStatus;
@@ -28,6 +29,8 @@ import org.testng.annotations.Test;
 
 public class TestTaskDao {
 
+  public static final DaoFilter ALL_IN_NULL_NAMESPACE = new DaoFilter().setPredicate(
+      Predicate.EQ("namespace", null));
   private TaskDao dao;
 
   @BeforeClass
@@ -38,7 +41,7 @@ public class TestTaskDao {
 
   @AfterClass(alwaysRun = true)
   public void afterClass() {
-    dao.getAll().forEach(task -> dao.delete(task.getId()));
+    dao.filter(ALL_IN_NULL_NAMESPACE).forEach(task -> dao.delete(task.getId()));
   }
 
   private TaskDTO buildTask() {
@@ -62,7 +65,7 @@ public class TestTaskDao {
 
   @Test(dependsOnMethods = {"saveTest"})
   public void updateTest() {
-    TaskDTO dto = dao.getAll().get(0);
+    TaskDTO dto = dao.filter(ALL_IN_NULL_NAMESPACE).get(0);
     dto.setVersion(dto.getVersion()+1);
     assertThat(dao.update(dto)).isEqualTo(1);
     assertThat(dao.get(dto.getId()).getVersion()).isEqualTo(dto.getVersion());
@@ -70,7 +73,7 @@ public class TestTaskDao {
 
   @Test(dependsOnMethods = {"updateTest"})
   public void deleteTest() {
-    List<TaskDTO> tasks = dao.getAll();
+    List<TaskDTO> tasks = dao.filter(ALL_IN_NULL_NAMESPACE);
     assertThat(tasks.size()).isGreaterThan(0);
     TaskDTO taskToDelete = tasks.get(0);
     dao.delete(taskToDelete.getId());

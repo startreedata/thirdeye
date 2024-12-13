@@ -24,6 +24,7 @@ import ai.startree.thirdeye.datalayer.dao.TaskDao;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskInfo;
@@ -35,6 +36,7 @@ import com.google.inject.Singleton;
 import com.google.inject.persist.Transactional;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.Metrics;
+import java.sql.Connection;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -205,12 +207,15 @@ public class TaskManagerImpl implements TaskManager {
 
     final long startTime = System.nanoTime();
     final List<TaskDTO> tasksToBeDeleted = filter(new DaoFilter()
+        // non locking read
+        .setTransactionIsolationLevel(Connection.TRANSACTION_READ_UNCOMMITTED)
         .setPredicate(Predicate.LT("createTime", formattedDate))
         .setLimit((long) limit)
     );
 
     /* Delete each task */
-    tasksToBeDeleted.forEach(this::delete);
+    // locking but using primary key, should only lock the impacted rows
+    deleteByIds(tasksToBeDeleted.stream().map(AbstractDTO::getId).toList());
 
     final double totalTime = (System.nanoTime() - startTime) / 1e9;
 
@@ -239,11 +244,7 @@ public class TaskManagerImpl implements TaskManager {
     );
   }
 
-  public long countByStatus(final TaskStatus status) {
-    return count(Predicate.EQ("status", status.toString()));
-  }
-
-  public long countBy(final TaskStatus status, final TaskType type) {
+  private long countBy(final TaskStatus status, final TaskType type) {
     return count(Predicate.AND(
         Predicate.EQ("status", status.toString()),
         Predicate.EQ("type", type)));
@@ -276,11 +277,13 @@ public class TaskManagerImpl implements TaskManager {
     LOG.info("Registered task database metrics.");
   }
 
-  // FIXME CYRIL - this should have as less cache as possible and as precise as possible
-  // TODO CYRIL scale - compute this in database directly - for the moment we assume the filter is such that the number of tasks returned is small 
+  // FIXME CYRIL - this should have as less cache as possible
+  // TODO CYRIL scale - compute this in database directly - for the moment we assume the filter is such that the number of tasks returned is small
+  // TODO CYRIL - may be simpler to perform a single group by query now that there is TRANSACTION_READ_UNCOMMITTED
   private long getTaskLatency(final TaskType type, TaskStatus... pendingStatuses) {
     // fetch pending tasks from DB
     final DaoFilter filter = new DaoFilter()
+        .setTransactionIsolationLevel(Connection.TRANSACTION_READ_UNCOMMITTED)
         .setPredicate(Predicate.AND(
             Predicate.IN("status", pendingStatuses),
             Predicate.EQ("type", type)
@@ -376,7 +379,9 @@ public class TaskManagerImpl implements TaskManager {
 
   @Override
   public List<TaskDTO> findAll() {
-    return dao.getAll();
+    // this operation can stress the task execution framework - if there is no use case for it, keep it unsupported
+    // most use cases should use a filter by namespace
+    throw new UnsupportedOperationException("findAll operation is not supported for Tasks. If this error is unexpected, please reach out to support.");
   }
 
   @Override

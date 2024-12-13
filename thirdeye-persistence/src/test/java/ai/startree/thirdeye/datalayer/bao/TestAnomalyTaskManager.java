@@ -14,9 +14,12 @@
 package ai.startree.thirdeye.datalayer.bao;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import ai.startree.thirdeye.aspect.TimeProvider;
 import ai.startree.thirdeye.datalayer.MySqlTestDatabase;
+import ai.startree.thirdeye.spi.datalayer.DaoFilter;
+import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskInfo;
@@ -47,6 +50,9 @@ import org.testng.annotations.Test;
  */
 public class TestAnomalyTaskManager {
 
+  private static final DaoFilter ALL_IN_NULL_NAMESPACE = new DaoFilter().setPredicate(
+      Predicate.EQ("namespace", null));
+
   private static final Set<TaskStatus> allowedOldTaskStatus = new HashSet<>();
 
   private static final TimeProvider CLOCK = TimeProvider.instance();
@@ -73,7 +79,7 @@ public class TestAnomalyTaskManager {
   @AfterClass(alwaysRun = true)
   public void afterClass() {
     CLOCK.useSystemTime();
-    taskDAO.findAll().forEach(taskDAO::delete);
+    taskDAO.filter(ALL_IN_NULL_NAMESPACE).forEach(taskDAO::delete);
   }
 
   @Test
@@ -83,14 +89,19 @@ public class TestAnomalyTaskManager {
     anomalyTaskId2 = taskDAO.save(getTestTaskSpec( 2));
     Assert.assertNotNull(anomalyTaskId2);
   }
+  
+  @Test
+  public void testFilterAllNotSupported() {
+    assertThatThrownBy(() -> taskDAO.findAll()).isInstanceOf(UnsupportedOperationException.class);
+  }
 
   @Test(dependsOnMethods = {"testCreate"})
-  public void testFindAll() {
-    List<TaskDTO> anomalyTasks = taskDAO.findAll();
+  public void testFilterAllInANamespace() {
+    List<TaskDTO> anomalyTasks = taskDAO.filter(ALL_IN_NULL_NAMESPACE);
     Assert.assertEquals(anomalyTasks.size(), 2);
   }
 
-  @Test(dependsOnMethods = {"testFindAll"})
+  @Test(dependsOnMethods = {"testFilterAllInANamespace"})
   public void testAcquireTaskToRun() throws Exception {
     CLOCK.tick(1);
     final Long workerId = 1L;

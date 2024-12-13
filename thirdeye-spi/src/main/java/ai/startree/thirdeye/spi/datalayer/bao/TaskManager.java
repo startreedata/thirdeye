@@ -42,7 +42,7 @@ public interface TaskManager extends AbstractManager<TaskDTO> {
   @Deprecated // use acquireNextTaskToRun instead
   boolean acquireTaskToRun(TaskDTO taskDTO, final long workerId);
 
-  TaskDTO acquireNextTaskToRun(final long workerId);
+  TaskDTO acquireNextTaskToRun(final long workerId) throws Exception;
 
   List<TaskDTO> findByStatusAndWorkerId(Long workerId, TaskStatus status);
 
@@ -55,7 +55,5 @@ public interface TaskManager extends AbstractManager<TaskDTO> {
 
   void purge(Duration expiryDuration, Integer limitOptional);
 
-  void orphanTaskCleanUp(Timestamp activeThreshold);
-
-  long countByStatus(final TaskStatus status);
+  void cleanupOrphanTasks(Timestamp activeThreshold);
 }

@@ -162,6 +162,7 @@ export enum GranularityValue {
     DAILY = "P1D",
     HOURLY = "PT1H",
     FIFTEEN_MINUTES = "PT15M",
+    TEN_MINUTES = "PT10M",
     FIVE_MINUTES = "PT5M",
     ONE_MINUTE = "PT1M",
 }
@@ -182,6 +183,10 @@ export const GRANULARITY_OPTIONS = [
     {
         label: i18n.t("label.15-minutes"),
         value: GranularityValue.FIFTEEN_MINUTES,
+    },
+    {
+        label: i18n.t("label.10-minutes"),
+        value: GranularityValue.TEN_MINUTES,
     },
     {
         label: i18n.t("label.5-minutes"),

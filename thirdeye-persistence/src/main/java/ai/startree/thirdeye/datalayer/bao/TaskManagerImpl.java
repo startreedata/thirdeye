@@ -17,13 +17,14 @@ import static ai.startree.thirdeye.spi.Constants.TASK_EXPIRY_DURATION;
 import static ai.startree.thirdeye.spi.Constants.TASK_MAX_DELETES_PER_CLEANUP;
 import static ai.startree.thirdeye.spi.Constants.TWO_DIGITS_FORMATTER;
 import static ai.startree.thirdeye.spi.Constants.VANILLA_OBJECT_MAPPER;
+import static ai.startree.thirdeye.spi.util.MetricsUtils.scheduledRefreshSupplier;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
-import static com.google.common.base.Suppliers.memoizeWithExpiration;
 
 import ai.startree.thirdeye.datalayer.dao.TaskDao;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskInfo;
@@ -35,6 +36,7 @@ import com.google.inject.Singleton;
 import com.google.inject.persist.Transactional;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.Metrics;
+import java.sql.Connection;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -43,7 +45,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -124,7 +125,7 @@ public class TaskManagerImpl implements TaskManager {
 
   // TODO CYRIL NOTE - RETRY IS NOT IMPLEMENTED BUT IT SHOULD BE EASY BY ACCEPTING STATUS = FAILED IN THE 2 METHODS BELOW AND PUTTING A LIMIT ON THE VALUE OF VERSION
   @Override
-  public TaskDTO acquireNextTaskToRun(final long workerId) {
+  public TaskDTO acquireNextTaskToRun(final long workerId) throws Exception {
     return dao.acquireNextTaskToRun(workerId);
   }
 
@@ -206,12 +207,15 @@ public class TaskManagerImpl implements TaskManager {
 
     final long startTime = System.nanoTime();
     final List<TaskDTO> tasksToBeDeleted = filter(new DaoFilter()
+        // non locking read
+        .setTransactionIsolationLevel(Connection.TRANSACTION_READ_UNCOMMITTED)
         .setPredicate(Predicate.LT("createTime", formattedDate))
         .setLimit((long) limit)
     );
 
     /* Delete each task */
-    tasksToBeDeleted.forEach(this::delete);
+    // locking but using primary key, should only lock the impacted rows
+    deleteByIds(tasksToBeDeleted.stream().map(AbstractDTO::getId).toList());
 
     final double totalTime = (System.nanoTime() - startTime) / 1e9;
 
@@ -221,7 +225,7 @@ public class TaskManagerImpl implements TaskManager {
   }
 
   @Override
-  public void orphanTaskCleanUp(final Timestamp activeThreshold) {
+  public void cleanupOrphanTasks(final Timestamp activeThreshold) {
     final long current = System.currentTimeMillis();
     final List<TaskDTO> orphanTasks = findByPredicate(
         Predicate.AND(
@@ -240,11 +244,7 @@ public class TaskManagerImpl implements TaskManager {
     );
   }
 
-  public long countByStatus(final TaskStatus status) {
-    return count(Predicate.EQ("status", status.toString()));
-  }
-
-  public long countBy(final TaskStatus status, final TaskType type) {
+  private long countBy(final TaskStatus status, final TaskType type) {
     return count(Predicate.AND(
         Predicate.EQ("status", status.toString()),
         Predicate.EQ("type", type)));
@@ -254,13 +254,13 @@ public class TaskManagerImpl implements TaskManager {
   public void registerDatabaseMetrics() {
     for (final TaskType type : TaskType.values()) {
       Gauge.builder("thirdeye_task_latency",
-              memoizeWithExpiration(() -> getTaskLatency(type, TaskStatus.WAITING, TaskStatus.RUNNING), 30, TimeUnit.SECONDS))
+              scheduledRefreshSupplier(() -> getTaskLatency(type, TaskStatus.WAITING, TaskStatus.RUNNING), Duration.ofSeconds(30)))
           .tags("type", type.toString())
           .description("Maximum amount of time a task has been pending in status WAITING or RUNNING.")
           .register(Metrics.globalRegistry);
 
       Gauge.builder("thirdeye_task_acquisition_latency",
-              memoizeWithExpiration(() -> getTaskLatency(type, TaskStatus.WAITING), 30, TimeUnit.SECONDS))
+              scheduledRefreshSupplier(() -> getTaskLatency(type, TaskStatus.WAITING), Duration.ofSeconds(30)))
           .tags("type", type.toString())
           .description("Maximum amount of time a task has been pending in status WAITING.")
           .register(Metrics.globalRegistry);
@@ -268,7 +268,7 @@ public class TaskManagerImpl implements TaskManager {
       
       for (final TaskStatus status : TaskStatus.values()) {
         Gauge.builder("thirdeye_tasks",
-                memoizeWithExpiration(() -> countBy(status, type), 30, TimeUnit.SECONDS))
+                scheduledRefreshSupplier(() -> countBy(status, type), Duration.ofSeconds(30)))
             .tag("status", status.toString())
             .tags("type", type.toString())
             .register(Metrics.globalRegistry);
@@ -277,10 +277,13 @@ public class TaskManagerImpl implements TaskManager {
     LOG.info("Registered task database metrics.");
   }
 
-  // FIXME CYRIL - this should have as less cache as possible and as precise as possible
+  // FIXME CYRIL - this should have as less cache as possible
+  // TODO CYRIL scale - compute this in database directly - for the moment we assume the filter is such that the number of tasks returned is small
+  // TODO CYRIL - may be simpler to perform a single group by query now that there is TRANSACTION_READ_UNCOMMITTED
   private long getTaskLatency(final TaskType type, TaskStatus... pendingStatuses) {
     // fetch pending tasks from DB
     final DaoFilter filter = new DaoFilter()
+        .setTransactionIsolationLevel(Connection.TRANSACTION_READ_UNCOMMITTED)
         .setPredicate(Predicate.AND(
             Predicate.IN("status", pendingStatuses),
             Predicate.EQ("type", type)
@@ -376,7 +379,9 @@ public class TaskManagerImpl implements TaskManager {
 
   @Override
   public List<TaskDTO> findAll() {
-    return dao.getAll();
+    // this operation can stress the task execution framework - if there is no use case for it, keep it unsupported
+    // most use cases should use a filter by namespace
+    throw new UnsupportedOperationException("findAll operation is not supported for Tasks. If this error is unexpected, please reach out to support.");
   }
 
   @Override

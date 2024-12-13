@@ -52,8 +52,8 @@ public class DatabaseClient {
         .register(Metrics.globalRegistry);
   }
 
-  public <T> T executeTransaction(final DBOperation<T> operation, final T defaultReturn)
-      throws SQLException {
+  public <T> T executeTransaction(final DBOperation<T> operation)
+      throws Exception {
     try (Connection connection = dataSource.getConnection()) {
       try {
         connection.setAutoCommit(false);
@@ -72,7 +72,7 @@ public class DatabaseClient {
             LOG.error("Failed to rollback SQL execution", e);
           }
         }
-        return defaultReturn;
+        throw e;
       }
     }
   }

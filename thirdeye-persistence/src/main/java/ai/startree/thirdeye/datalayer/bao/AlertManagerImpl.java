@@ -13,22 +13,22 @@
  */
 package ai.startree.thirdeye.datalayer.bao;
 
-import static ai.startree.thirdeye.spi.Constants.METRICS_CACHE_TIMEOUT;
-import static com.google.common.base.Suppliers.memoizeWithExpiration;
+import static ai.startree.thirdeye.spi.util.MetricsUtils.scheduledRefreshSupplier;
 
+import ai.startree.thirdeye.datalayer.DatabaseClient;
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.EnumerationItemDTO;
-import com.google.common.base.Supplier;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.Metrics;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,10 +38,26 @@ public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
     AlertManager {
   
   private static final Logger LOG = LoggerFactory.getLogger(AlertManagerImpl.class);
+  private static final String COUNT_ACTIVE_TIMESERIES_QUERY = """
+  with t as (
+    SELECT
+      detection_config_index.base_id,
+      COUNT(enumeration_item_index.base_id) AS c
+    FROM detection_config_index
+      LEFT JOIN enumeration_item_index ON detection_config_index.base_id = alert_id
+    WHERE detection_config_index.active
+    GROUP BY detection_config_index.base_id
+    )
+    select SUM(CASE WHEN c < 1 THEN 1 else c END ) from t;
+  """;
+
+  // TODO CYRIL introduce JOOQ 
+  private final DatabaseClient databaseClient;
 
   @Inject
-  public AlertManagerImpl(final GenericPojoDao genericPojoDao) {
+  public AlertManagerImpl(final GenericPojoDao genericPojoDao, final DatabaseClient databaseClient) {
     super(AlertDTO.class, genericPojoDao);
+    this.databaseClient = databaseClient;
   }
 
   @Override
@@ -61,24 +77,33 @@ public class AlertManagerImpl extends AbstractManagerImpl<AlertDTO> implements
   @Override
   public void registerDatabaseMetrics() {
     Gauge.builder("thirdeye_active_alerts",
-            memoizeWithExpiration(this::countActive, METRICS_CACHE_TIMEOUT.toMinutes(),
-                TimeUnit.MINUTES))
+            scheduledRefreshSupplier(this::countActive, Duration.ofMinutes(1)))
         .register(Metrics.globalRegistry);
-
-    final Supplier<Number> activeTimeseriesCountFun = () -> {
-      final List<AlertDTO> activeAlerts = findAllActive();
-      return activeAlerts.stream()
-          // Assumes dangling enumeration items are handled and only linked items are present in DB
-          .map(alert -> (int) genericPojoDao.count(Predicate.EQ("alertId", alert.getId()),
-              EnumerationItemDTO.class))
-          // add enumerationItems count if present, else just add 1 for simple alert
-          .reduce(0, (tsCount, enumCount) -> tsCount + (enumCount == 0 ? 1 : enumCount));
-    };
     Gauge.builder("thirdeye_active_timeseries",
-            memoizeWithExpiration(activeTimeseriesCountFun, 15, TimeUnit.MINUTES))
+            scheduledRefreshSupplier(this::countActiveTimeseries, Duration.ofMinutes(1)))
         .register(Metrics.globalRegistry);
     LOG.info("Registered alert database metrics.");
   }
+  
+  private long countActiveTimeseries() {
+    try {
+      return databaseClient.executeTransaction(connection -> {
+        try (final Statement s = connection.createStatement();
+            final ResultSet rs = s.executeQuery(COUNT_ACTIVE_TIMESERIES_QUERY)
+        ) {
+          if (rs.next()) {
+            return rs.getLong(1);
+          } else {
+            return 0L;
+          }
+        }
+      });
+    } catch (Exception e) {
+      LOG.error("Failed to compute the number of active timeseries from the database. Returning -1.", e);
+      return -1;
+    }
+  }
+  
 
   @Override
   public Long save(final AlertDTO alertDTO) {

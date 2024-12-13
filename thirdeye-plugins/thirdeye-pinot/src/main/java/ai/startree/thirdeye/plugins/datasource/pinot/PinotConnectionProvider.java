@@ -57,6 +57,7 @@ public class PinotConnectionProvider {
       }
     } else {
       if (connection == null || isClosed(connection)) {
+        closeConnectionAsync(connection);
         connection = PinotConnectionUtils.createConnection(config, Map.of());
       }
     }

@@ -144,6 +144,10 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
             value: GranularityValue.FIFTEEN_MINUTES,
         },
         {
+            label: t("label.10-minutes"),
+            value: GranularityValue.TEN_MINUTES,
+        },
+        {
             label: t("label.5-minutes"),
             value: GranularityValue.FIVE_MINUTES,
         },

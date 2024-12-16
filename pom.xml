@@ -185,6 +185,8 @@
               <!-- Sets a property to be re-used in the maven-surefire-plugin JVM argument line -->
               <propertyName>surefireArgLine</propertyName>
               <destFile>${project.build.directory}/jacoco.exec</destFile>
+              <!-- Disable source generation -->
+              <output>file</output>
             </configuration>
           </execution>
         </executions>

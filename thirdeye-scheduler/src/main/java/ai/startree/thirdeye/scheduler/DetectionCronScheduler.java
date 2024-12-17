@@ -95,7 +95,23 @@ public class DetectionCronScheduler implements Runnable {
 
   private void managerAlertsAndJobs() throws SchedulerException {
     alertManager.findAll().forEach(this::processAlert);
-    processScheduledJobs();
+    final Set<JobKey> scheduledJobs = getScheduledJobs();
+    for (final JobKey jobKey : scheduledJobs) {
+      try {
+        final Long id = getIdFromJobKey(jobKey);
+        final AlertDTO detectionDTO = alertManager.findById(id);
+        if (detectionDTO == null) {
+          LOG.info("Found a scheduled detection config task, but not found in the database {}",
+              id);
+          stopJob(jobKey);
+        } else if (!detectionDTO.isActive()) {
+          LOG.info("Found a scheduled detection config task, but has been deactivated {}", id);
+          stopJob(jobKey);
+        }
+      } catch (final Exception e) {
+        LOG.error("Error removing job key {}", jobKey, e);
+      }
+    }
   }
 
   private void processAlert(final AlertDTO alert) {
@@ -122,26 +138,6 @@ public class DetectionCronScheduler implements Runnable {
       }
     } catch (final Exception e) {
       LOG.error("Error creating/updating job key for detection config {}", alert.getId(), e);
-    }
-  }
-
-  private void processScheduledJobs() throws SchedulerException {
-    final Set<JobKey> scheduledJobs = getScheduledJobs();
-    for (final JobKey jobKey : scheduledJobs) {
-      try {
-        final Long id = getIdFromJobKey(jobKey);
-        final AlertDTO detectionDTO = alertManager.findById(id);
-        if (detectionDTO == null) {
-          LOG.info("Found a scheduled detection config task, but not found in the database {}",
-              id);
-          stopJob(jobKey);
-        } else if (!detectionDTO.isActive()) {
-          LOG.info("Found a scheduled detection config task, but has been deactivated {}", id);
-          stopJob(jobKey);
-        }
-      } catch (final Exception e) {
-        LOG.error("Error removing job key {}", jobKey, e);
-      }
     }
   }
 

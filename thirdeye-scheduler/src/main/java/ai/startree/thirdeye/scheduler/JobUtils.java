@@ -42,7 +42,6 @@ public class JobUtils {
           t -> Metrics.counter("thirdeye_scheduler_backpressure_total", "task_type",
               t.toString())));
 
-  // TODO CYRIL scale - this job name design does not help - just use the id as the job name - do this change as part of removing the job name from the db
   public static Long getIdFromJobKey(JobKey jobKey) {
     final String[] tokens = jobKey.getName().split("_");
     final String id = tokens[tokens.length - 1];

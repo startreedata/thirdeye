@@ -52,41 +52,46 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class DetectionCronScheduler implements Runnable {
 
-  public static final TimeUnit ALERT_DELAY_UNIT = TimeUnit.SECONDS;
-  public static final String QUARTZ_DETECTION_GROUP = TaskType.DETECTION.toString();
-  public static final GroupMatcher<JobKey> DETECTION_JOBS_GROUP_MATCHER = GroupMatcher.jobGroupEquals(
-      QUARTZ_DETECTION_GROUP);
-
   private static final Logger LOG = LoggerFactory.getLogger(DetectionCronScheduler.class);
-  // todo cyril make this a config file parameter, and throw when it is not respected
+  public static final String QUARTZ_GROUP = TaskType.DETECTION.toString();
+  public static final GroupMatcher<JobKey> GROUP_MATCHER = GroupMatcher.jobGroupEquals(
+      QUARTZ_GROUP);
   private static final int DETECTION_SCHEDULER_CRON_MAX_TRIGGERS_PER_MINUTE = 10;
 
-  private final AlertManager alertManager;
   private final Scheduler scheduler;
   private final ScheduledExecutorService executorService;
-  private final int alertDelay;
+  private final AlertManager alertManager;
+  private final ThirdEyeSchedulerConfiguration configuration;
 
   @Inject
   public DetectionCronScheduler(
-      final ThirdEyeSchedulerConfiguration thirdEyeSchedulerConfiguration,
-      final GuiceJobFactory guiceJobFactory,
-      final AlertManager alertManager) {
-    this.alertManager = alertManager;
-    alertDelay = thirdEyeSchedulerConfiguration.getAlertUpdateDelay();
-    executorService = Executors.newSingleThreadScheduledExecutor(
-        new ThreadFactoryBuilder().setNameFormat("detection-cron-%d").build());
+      final AlertManager alertManager,
+      final ThirdEyeSchedulerConfiguration configuration,
+      final GuiceJobFactory guiceJobFactory) {
     try {
       scheduler = StdSchedulerFactory.getDefaultScheduler();
       scheduler.setJobFactory(guiceJobFactory);
     } catch (final SchedulerException e) {
-      throw new RuntimeException(e);
+      throw new RuntimeException("Failed to initialize the scheduler", e);
     }
+    this.configuration = configuration;
+    executorService = Executors.newSingleThreadScheduledExecutor(
+        new ThreadFactoryBuilder().setNameFormat("detection-cron-%d").build());
+    
+    this.alertManager = alertManager;
   }
 
   public void start() throws SchedulerException {
     scheduler.start();
-    executorService
-        .scheduleWithFixedDelay(this, 0, alertDelay, ALERT_DELAY_UNIT);
+    executorService.scheduleWithFixedDelay(this,
+        0, 
+        configuration.getAlertUpdateDelay(), 
+        TimeUnit.SECONDS);
+  }
+
+  public void shutdown() throws SchedulerException {
+    shutdownExecutionService(executorService);
+    scheduler.shutdown();
   }
 
   @Override
@@ -110,7 +115,7 @@ public class DetectionCronScheduler implements Runnable {
     // cleanup schedules of deleted and deactivated alerts   
     final Map<Long, AlertDTO> idToAlert = allAlerts.stream()
         .collect(Collectors.toMap(AbstractDTO::getId, e -> e));
-    final Set<JobKey> scheduledJobKeys = scheduler.getJobKeys(DETECTION_JOBS_GROUP_MATCHER);
+    final Set<JobKey> scheduledJobKeys = scheduler.getJobKeys(GROUP_MATCHER);
     for (final JobKey jobKey : scheduledJobKeys) {
       try {
         final Long id = getIdFromJobKey(jobKey);
@@ -138,58 +143,56 @@ public class DetectionCronScheduler implements Runnable {
     // schedule detection job: add or update job
     try {
       final String jobName = TaskType.DETECTION + "_" + alert.getId();
-      final JobKey alertJobKey = new JobKey(jobName, QUARTZ_DETECTION_GROUP);
-      final JobDetail detectionJob = JobBuilder.newJob(DetectionPipelineJob.class)
-          .withIdentity(alertJobKey)
-          .build();
-      if (scheduler.checkExists(alertJobKey)) {
-        LOG.debug("Alert {} is already scheduled for detection", alertJobKey.getName());
-        final String currentCron = currentCron(scheduler, alertJobKey);
+      final JobKey jobKey = new JobKey(jobName, QUARTZ_GROUP);
+      if (scheduler.checkExists(jobKey)) {
+        LOG.debug("Alert {} is already scheduled", jobKey.getName());
+        final String currentCron = currentCron(scheduler, jobKey);
         if (!alert.getCron().equals(currentCron)) {
-          LOG.info("Cron expression for detection pipeline {} has been changed from {} to {}. "
+          LOG.info("Cron expression of alert {} has been changed from {} to {}. "
                   + "Restarting schedule",
               alert.getId(), currentCron, alert.getCron());
-          stopJob(detectionJob.getKey());
-          startJob(alert, detectionJob);
+          stopJob(jobKey);
+          startJob(alert, jobKey);
         }
       } else {
-        startJob(alert, detectionJob);
+        startJob(alert, jobKey);
       }
     } catch (final Exception e) {
       LOG.error("Error creating/updating job key for detection config {}", alert.getId(), e);
     }
   }
 
-  public void shutdown() throws SchedulerException {
-    shutdownExecutionService(executorService);
-    scheduler.shutdown();
+  public void startJob(final AlertDTO config, final JobKey jobKey) throws SchedulerException {
+    final Trigger trigger = buildTrigger(config);
+    final JobDetail job = JobBuilder.newJob(DetectionPipelineJob.class)
+        .withIdentity(jobKey)
+        .build();
+    scheduler.scheduleJob(job, trigger);
+    LOG.info("Scheduled detection job {}", jobKey.getName());
   }
 
-  public void startJob(final AlertDTO config, final JobDetail job) throws SchedulerException {
+  private void stopJob(final JobKey jobKey) throws SchedulerException {
+    if (!scheduler.checkExists(jobKey)) {
+      LOG.error("Could not find job to delete {}, {} in the job scheduler. This should never happen. Please reach out to StarTree support.", jobKey.getName(), jobKey.getGroup());
+    }
+    scheduler.deleteJob(jobKey);
+    LOG.info("Stopped job " + jobKey.getName());
+  }
+
+
+  private static Trigger buildTrigger(final AlertDTO config) {
     final String cron = config.getCron();
     final int maxTriggersPerMinute = maximumTriggersPerMinute(cron);
     checkArgument(maxTriggersPerMinute <= DETECTION_SCHEDULER_CRON_MAX_TRIGGERS_PER_MINUTE,
         "Attempting to schedule a detection job for alert %s that can trigger up to %s times per minute. The limit is %s. Please update the cron %s",
         config.getId(),
         maxTriggersPerMinute, DETECTION_SCHEDULER_CRON_MAX_TRIGGERS_PER_MINUTE, cron
-        );
+    );
     final CronScheduleBuilder cronScheduleBuilder = CronScheduleBuilder
         .cronSchedule(cron)
         .inTimeZone(TimeZone.getTimeZone(CRON_TIMEZONE));
-
-    final Trigger trigger = TriggerBuilder.newTrigger()
+    return TriggerBuilder.newTrigger()
         .withSchedule(cronScheduleBuilder)
         .build();
-    scheduler.scheduleJob(job, trigger);
-    LOG.info("Scheduled detection pipeline job " + job.getKey().getName());
-  }
-
-  public void stopJob(final JobKey jobKey) throws SchedulerException {
-    if (!scheduler.checkExists(jobKey)) {
-      throw new IllegalStateException(
-          "Cannot stop detection pipeline " + jobKey.getName() + ", it has not been scheduled");
-    }
-    scheduler.deleteJob(jobKey);
-    LOG.info("Stopped detection pipeline " + jobKey.getName());
   }
 }

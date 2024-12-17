@@ -13,9 +13,72 @@
  * the License.
  */
 import { expect, Page } from "@playwright/test";
-import { BasePage } from "./base";
 import { sortBy } from "lodash";
-import { generateOptions } from "../../src/app/components/alert-wizard-v3/alert-type-selection/alert-type-selection.utils";
+import { BasePage } from "./base";
+
+export const generateOptions = (): any[] => {
+    return [
+        {
+            title: "Threshold",
+            description: "Threshold algorithm description",
+            alertTemplate: "startree-threshold",
+            alertTemplateForMultidimension: "startree-threshold-dx",
+            alertTemplateForMultidimensionQuery: "startree-threshold-query-dx",
+            alertTemplateForPercentile: "startree-threshold-percentile",
+            exampleImage: "ThresholdScreenshot",
+        },
+        {
+            title: "Mean Variance Rule",
+            description: "Mean variance rule algorithm description",
+            alertTemplate: "startree-mean-variance",
+            alertTemplateForMultidimension: "startree-mean-variance-dx",
+            alertTemplateForMultidimensionQuery:
+                "startree-mean-variance-query-dx",
+            alertTemplateForPercentile: "startree-mean-variance-percentile",
+            exampleImage: "MeanVarianceScreenshot",
+        },
+        {
+            title: "Percentage Rule",
+            description: "Percentage rule algorithm description",
+            alertTemplate: "startree-percentage-rule",
+            alertTemplateForMultidimension: "startree-percentage-rule-dx",
+            alertTemplateForMultidimensionQuery:
+                "startree-percentage-rule-query-dx",
+            alertTemplateForPercentile: "startree-percentage-percentile",
+            exampleImage: "PercentageRuleScreenshot",
+        },
+        {
+            title: "Absolute Change Rule",
+            description: "Absolute change rule algorithm description",
+            alertTemplate: "startree-absolute-rule",
+            alertTemplateForMultidimension: "startree-absolute-rule-dx",
+            alertTemplateForMultidimensionQuery:
+                "startree-absolute-rule-query-dx",
+            alertTemplateForPercentile: "startree-absolute-percentile",
+            exampleImage: "AbsoluteScreenshot",
+        },
+        {
+            title: "Startree ETS",
+            description: "Startree ETS algorithm description",
+            alertTemplate: "startree-ets",
+            alertTemplateForMultidimension: "startree-ets-dx",
+            alertTemplateForMultidimensionQuery: "startree-ets-query-dx",
+            alertTemplateForPercentile: "startree-ets-percentile",
+            exampleImage: "ETSScreenshot",
+        },
+        {
+            title: "Matrix Profile",
+            description:
+                "The matrix profile method is a direct anomaly detection method",
+            alertTemplate: "startree-matrix-profile",
+            alertTemplateForMultidimension: "startree-matrix-profile-dx",
+            alertTemplateForMultidimensionQuery:
+                "startree-matrix-profile-query-dx",
+            alertTemplateForPercentile: "startree-matrix-profile-percentile",
+            exampleImage: "MatrixProfileScreenshot",
+        },
+    ];
+};
 
 export class CreateAlertPage extends BasePage {
     readonly page: Page;
@@ -198,7 +261,9 @@ export class CreateAlertPage extends BasePage {
     async addSQLQuery() {
         const textarea = await this.page.locator("textarea");
         const placeholderText = await textarea.getAttribute("placeholder");
-        textarea.fill(placeholderText);
+        if (placeholderText) {
+            textarea.fill(placeholderText);
+        }
         await this.page
             .getByRole("button", { name: "Run enumerations" })
             .click();

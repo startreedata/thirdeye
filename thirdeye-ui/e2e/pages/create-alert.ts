@@ -16,7 +16,7 @@ import { expect, Page } from "@playwright/test";
 import { sortBy } from "lodash";
 import { BasePage } from "./base";
 
-export const generateOptions = (): any[] => {
+const generateOptions = (): any[] => {
     return [
         {
             title: "Threshold",
@@ -58,7 +58,7 @@ export const generateOptions = (): any[] => {
             exampleImage: "AbsoluteScreenshot",
         },
         {
-            title: "Startree ETS",
+            title: "Startree-ETS",
             description: "Startree ETS algorithm description",
             alertTemplate: "startree-ets",
             alertTemplateForMultidimension: "startree-ets-dx",
@@ -124,7 +124,7 @@ export class CreateAlertPage extends BasePage {
         const [recommendApiResponse] = await Promise.all([
             this.page.waitForResponse(
                 (response) =>
-                    response.url().includes("/api/recommend") &&
+                    response.url().includes("/api/alerts/recommend") &&
                     response.status() === 200
             ),
         ]);
@@ -136,7 +136,7 @@ export class CreateAlertPage extends BasePage {
         const [evaluateApiResponse] = await Promise.all([
             this.page.waitForResponse(
                 (response) =>
-                    response.url().includes("/api/evaluate") &&
+                    response.url().includes("/api/alerts/evaluate") &&
                     response.status() === 200
             ),
         ]);
@@ -152,6 +152,8 @@ export class CreateAlertPage extends BasePage {
                     response.status() === 200
             ),
         ]);
+        const data = await cohortsApiResponse.json();
+        return data;
     }
 
     async selectDatasetAndMetric() {
@@ -227,8 +229,13 @@ export class CreateAlertPage extends BasePage {
         await expect(this.page.locator("h5")).toHaveText("Alert wizard");
     }
 
+    async clickLoadChartButton() {
+        await this.page.getByRole("button", { name: "Load chart" }).click();
+    }
+
     async createAlert() {
-        await this.page.getByText("Anomalies", { exact: true }).click();
+        const switchElement = this.page.locator(".MuiSwitch-input");
+        await switchElement.click();
         await this.page.getByRole("button", { name: "Create alert" }).click();
         await this.page
             .getByTestId("alert-name-input")
@@ -244,13 +251,25 @@ export class CreateAlertPage extends BasePage {
     async addDimensions() {
         await this.page.getByRole("button", { name: "Add dimensions" }).click();
         await this.page.getByPlaceholder("Select dimensions").click();
-        await this.page.getByRole("option", { name: "Exchange" }).click();
         await this.page
-            .getByRole("button", { name: "Generate dimensions to monitor" })
+            .getByRole("option", {
+                name: this.datasetsResponseData[0]?.dimensions[0],
+            })
             .click();
-        await this.resolveMetricsCohortsApis();
+        await this.page.waitForTimeout(1000);
+        const button = this.page.locator("button", {
+            hasText: "Generate dimensions to monitor",
+        });
+        await button.click();
+        const data = await this.resolveMetricsCohortsApis();
         await this.page
-            .getByRole("row", { name: "Exchange='DoubleClick' 350." })
+            .getByRole("row", {
+                name: `${this.datasetsResponseData[0]?.dimensions[0]}='${
+                    data?.results[0].dimensionFilters[
+                        this.datasetsResponseData[0]?.dimensions[0]
+                    ]
+                }'`,
+            })
             .getByRole("checkbox")
             .check();
         await this.page
@@ -259,7 +278,7 @@ export class CreateAlertPage extends BasePage {
     }
 
     async addSQLQuery() {
-        const textarea = await this.page.locator("textarea");
+        const textarea = await this.page.locator("textarea:first-of-type");
         const placeholderText = await textarea.getAttribute("placeholder");
         if (placeholderText) {
             textarea.fill(placeholderText);

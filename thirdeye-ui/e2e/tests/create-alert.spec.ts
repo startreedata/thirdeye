@@ -18,8 +18,8 @@ import { CreateAlertPage } from "../pages/create-alert";
 test("Create Simple Alert", async ({ page }) => {
     const createAlertPage = new CreateAlertPage(page);
     await createAlertPage.goToCreateAlertPage();
-    await createAlertPage.checkHeader();
     await createAlertPage.resolveApis();
+    await createAlertPage.checkHeader();
     await createAlertPage.selectDatasetAndMetric();
     await createAlertPage.selectStaticFields();
     await createAlertPage.resolveRecommendApis();
@@ -31,13 +31,13 @@ test("Create Simple Alert", async ({ page }) => {
 test("Create Multi Dimensions Alert", async ({ page }) => {
     const createAlertPage = new CreateAlertPage(page);
     await createAlertPage.goToCreateAlertPage();
-    await createAlertPage.checkHeader();
     await createAlertPage.resolveApis();
+    await createAlertPage.checkHeader();
     await createAlertPage.selectDatasetAndMetric();
     await createAlertPage.selectStaticFields(true);
     await createAlertPage.addDimensions();
     await createAlertPage.resolveRecommendApis();
-    await createAlertPage.selectDetectionAlgorithm();
+    await createAlertPage.selectDetectionAlgorithm(true);
     await createAlertPage.resolveEvaluateApis();
     await createAlertPage.createAlert();
 });
@@ -45,13 +45,14 @@ test("Create Multi Dimensions Alert", async ({ page }) => {
 test("Create Multi Dimensions SQL Alert", async ({ page }) => {
     const createAlertPage = new CreateAlertPage(page);
     await createAlertPage.goToCreateAlertPage();
-    await createAlertPage.checkHeader();
     await createAlertPage.resolveApis();
+    await createAlertPage.checkHeader();
     await createAlertPage.selectDatasetAndMetric();
     await createAlertPage.selectStaticFields(true, true);
     await createAlertPage.addSQLQuery();
     await createAlertPage.resolveRecommendApis();
-    await createAlertPage.selectDetectionAlgorithm();
+    await createAlertPage.selectDetectionAlgorithm(true);
+    await createAlertPage.clickLoadChartButton();
     await createAlertPage.resolveEvaluateApis();
     await createAlertPage.createAlert();
 });

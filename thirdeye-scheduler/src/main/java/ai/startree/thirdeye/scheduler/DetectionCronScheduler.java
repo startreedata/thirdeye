@@ -99,7 +99,7 @@ public class DetectionCronScheduler implements Runnable {
     try {
       updateDetectionSchedules();
     } catch (final SchedulerException e) {
-      LOG.error("Error while scheduling detection pipeline", e);
+      LOG.error("Error updating detection task creation schedules", e);
     }
   }
 

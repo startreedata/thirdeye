@@ -105,7 +105,7 @@ public class SubscriptionCronScheduler implements Runnable {
     try {
       updateNotificationSchedules();
     } catch (final Exception e) {
-      LOG.error("Error running scheduler", e);
+      LOG.error("Error updating notification task creation schedules", e);
     }
   }
 

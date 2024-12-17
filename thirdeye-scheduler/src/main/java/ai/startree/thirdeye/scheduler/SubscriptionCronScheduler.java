@@ -13,28 +13,30 @@
  */
 package ai.startree.thirdeye.scheduler;
 
+import static ai.startree.thirdeye.scheduler.JobUtils.currentCron;
 import static ai.startree.thirdeye.scheduler.JobUtils.getIdFromJobKey;
 import static ai.startree.thirdeye.spi.Constants.CRON_TIMEZONE;
 import static ai.startree.thirdeye.spi.util.ExecutorUtils.shutdownExecutionService;
 import static ai.startree.thirdeye.spi.util.TimeUtils.maximumTriggersPerMinute;
-import static java.util.stream.Collectors.toList;
+import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.scheduler.job.NotificationPipelineJob;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
+import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.task.TaskType;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import org.quartz.CronScheduleBuilder;
-import org.quartz.CronTrigger;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
@@ -44,30 +46,31 @@ import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.impl.matchers.GroupMatcher;
-import org.quartz.utils.Key;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The Detection alert scheduler. Schedule new detection alert jobs or update existing detection
- * alert jobs
- * in the cron scheduler.
+ * The Subscription group scheduler. Schedule, update, delete subscription group quartz jobs.
+ * The scheduled jobs create tasks.
  */
 @Singleton
 public class SubscriptionCronScheduler implements Runnable {
 
   private static final Logger LOG = LoggerFactory.getLogger(SubscriptionCronScheduler.class);
-  private static final String Q_JOB_GROUP = TaskType.NOTIFICATION.toString();
+  private static final String QUARTZ_GROUP = TaskType.NOTIFICATION.toString();
+  public static final GroupMatcher<JobKey> GROUP_MATCHER = GroupMatcher.jobGroupEquals(
+      QUARTZ_GROUP);
   private static final int SUBSCRIPTION_SCHEDULER_CRON_MAX_TRIGGERS_PER_MINUTE = 10;
 
   private final Scheduler scheduler;
   private final ScheduledExecutorService executorService;
-  private final SubscriptionGroupManager subscriptionGroupManager;
-
   private final ThirdEyeSchedulerConfiguration configuration;
 
+  private final SubscriptionGroupManager subscriptionGroupManager;
+
   @Inject
-  public SubscriptionCronScheduler(final SubscriptionGroupManager subscriptionGroupManager,
+  public SubscriptionCronScheduler(
+      final SubscriptionGroupManager subscriptionGroupManager,
       final ThirdEyeSchedulerConfiguration configuration,
       final GuiceJobFactory guiceJobFactory) {
     try {
@@ -76,50 +79,11 @@ public class SubscriptionCronScheduler implements Runnable {
     } catch (final SchedulerException e) {
       throw new RuntimeException("Failed to initialize the scheduler", e);
     }
-    this.subscriptionGroupManager = subscriptionGroupManager;
     this.configuration = configuration;
-    executorService = createExecutorService();
-  }
-
-  @VisibleForTesting
-  SubscriptionCronScheduler(final SubscriptionGroupManager subscriptionGroupManager,
-      final Scheduler scheduler,
-      final ThirdEyeSchedulerConfiguration configuration) {
+    executorService = Executors.newSingleThreadScheduledExecutor(
+        new ThreadFactoryBuilder().setNameFormat("subscription-scheduler-%d").build());
+    
     this.subscriptionGroupManager = subscriptionGroupManager;
-    this.scheduler = scheduler;
-    this.configuration = configuration;
-    executorService = createExecutorService();
-  }
-
-  private static ScheduledExecutorService createExecutorService() {
-    return Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder()
-        .setNameFormat("subscription-scheduler-%d")
-        .build());
-  }
-
-  private static JobDetail buildJobDetail(final JobKey jobKey) {
-    return JobBuilder.newJob(NotificationPipelineJob.class)
-        .withIdentity(jobKey)
-        .build();
-  }
-
-  private static Trigger buildTrigger(final String cron) {
-    final int maxTriggersPerMinute = maximumTriggersPerMinute(cron);
-    if (maxTriggersPerMinute > SUBSCRIPTION_SCHEDULER_CRON_MAX_TRIGGERS_PER_MINUTE) {
-      LOG.warn(
-          "Scheduling a subscription job that can trigger up to {} times per minute. The limit is {}."
-              + "This will be forbidden and throw an exception in the future. Please update the cron {}",
-          maxTriggersPerMinute, SUBSCRIPTION_SCHEDULER_CRON_MAX_TRIGGERS_PER_MINUTE, cron);
-    }
-    return TriggerBuilder.newTrigger()
-        .withSchedule(CronScheduleBuilder.cronSchedule(cron)
-            .inTimeZone(TimeZone.getTimeZone(CRON_TIMEZONE)))
-        .build();
-  }
-
-  @VisibleForTesting
-  static JobKey jobKey(final Long id) {
-    return new JobKey(String.format("%s_%d", TaskType.NOTIFICATION, id), Q_JOB_GROUP);
   }
 
   public void start() throws SchedulerException {
@@ -137,93 +101,102 @@ public class SubscriptionCronScheduler implements Runnable {
 
   @Override
   public void run() {
+    // catch all exceptions to prevent unscheduling - this is run in executorService.scheduleWithFixedDelay
     try {
-      updateScheduledJobs();
+      updateSchedules();
     } catch (final Exception e) {
-      LOG.error("Error running scheduler", e);
+      LOG.error("Error updating notification task creation schedules", e);
     }
   }
 
-  private void updateScheduledJobs() throws SchedulerException {
-    final Set<JobKey> scheduledJobs = getScheduledJobs();
-    LOG.info("Scheduled jobs {}", scheduledJobs.stream()
-        .map(Key::getName)
-        .collect(toList()));
-
-    final List<SubscriptionGroupDTO> subscriptionGroups = subscriptionGroupManager.findAll();
-    subscriptionGroups.forEach(sg -> processSubscriptionGroup(sg, scheduledJobs));
-    scheduledJobs.forEach(this::deleteIfNotInDatabase);
-  }
-
-  @VisibleForTesting
-  protected void processSubscriptionGroup(final SubscriptionGroupDTO sg,
-      final Set<JobKey> scheduledJobs) {
-    try {
-      final Long id = sg.getId();
-      final JobKey jobKey = jobKey(id);
-      final boolean isScheduled = scheduledJobs.contains(jobKey);
-      handleJobScheduling(sg, isScheduled, jobKey);
-    } catch (final Exception e) {
-      LOG.error("Could not process subscription group ({}): {}", sg.getId(), sg, e);
+  private void updateSchedules() throws SchedulerException {
+    final List<SubscriptionGroupDTO> allSubscriptionGroups = subscriptionGroupManager.findAll();
+    
+    // schedule active subscription groups
+    allSubscriptionGroups.forEach(this::schedule);
+    
+    // cleanup schedules of deleted and deactivated subscription groups
+    final Map<Long, SubscriptionGroupDTO> idToSubscriptionGroup = allSubscriptionGroups.stream()
+        .collect(Collectors.toMap(AbstractDTO::getId, e -> e));
+    final Set<JobKey> scheduledJobKeys = scheduler.getJobKeys(GROUP_MATCHER);
+    for (final JobKey jobKey : scheduledJobKeys) {
+      try {
+        final Long id = getIdFromJobKey(jobKey);
+        final SubscriptionGroupDTO subscriptionGroup = idToSubscriptionGroup.get(id);
+        if (subscriptionGroup == null) {
+          LOG.info("Subscription Group with id {} does not exist anymore. Stopping the scheduled subscription group job.",
+              id);
+          stopJob(jobKey);
+        } else if (!subscriptionGroup.isActive()) {
+          LOG.info("Subscription group with id {} is deactivated. Stopping the scheduled subscription group job.", id);
+          stopJob(jobKey);
+        }
+      } catch (final Exception e) {
+        LOG.error("Error removing job key {}", jobKey, e);
+      }
     }
   }
 
-  private void handleJobScheduling(final SubscriptionGroupDTO sg,
-      final boolean isScheduled,
-      final JobKey jobKey) throws SchedulerException {
-    if (sg.isActive()) {
-      if (!isScheduled) {
-        startJob(jobKey, sg.getCronExpression());
+  private void schedule(final SubscriptionGroupDTO subscriptionGroup) {
+    if (!subscriptionGroup.isActive()) {
+      LOG.debug("Subscription Group: {} is inactive. Skipping.", subscriptionGroup.getId());
+      return;
+    }
+
+    // schedule detection job: add or update job
+    try {
+      final String jobName = TaskType.NOTIFICATION + "_" + subscriptionGroup.getId();
+      final JobKey jobKey = new JobKey(jobName, QUARTZ_GROUP);
+      if (scheduler.checkExists(jobKey)) {
+        LOG.debug("Subscription group {} is already scheduled", jobKey.getName());
+        final String currentCron = currentCron(scheduler, jobKey);
+        if (!subscriptionGroup.getCronExpression().equals(currentCron)) {
+          LOG.info("Cron expression of subscription group {} has been changed from {} to {}. "
+                  + "Restarting schedule",
+              subscriptionGroup.getId(), currentCron, subscriptionGroup.getCronExpression());
+          stopJob(jobKey);
+          startJob(subscriptionGroup, jobKey);
+        }
       } else {
-        updateJobIfNecessary(jobKey, sg.getCronExpression());
+        startJob(subscriptionGroup, jobKey);
       }
-    } else if (isScheduled) {
-      // stop the job if it is no longer active and is scheduled
-      stopJob(jobKey);
+    } catch (final Exception e) {
+      LOG.error("Error creating/updating job key for subscription group {}", subscriptionGroup.getId(), e);
     }
   }
 
-  private void startJob(final JobKey jobKey, final String cron)
+  private void startJob(final SubscriptionGroupDTO config, final JobKey jobKey)
       throws SchedulerException {
-    final JobDetail job = buildJobDetail(jobKey);
-    final Trigger trigger = buildTrigger(cron);
+    final Trigger trigger = buildTrigger(config);
+    final JobDetail job = JobBuilder.newJob(NotificationPipelineJob.class)
+        .withIdentity(jobKey)
+        .build();
     scheduler.scheduleJob(job, trigger);
-    LOG.info("Started job: {}", jobKey);
-  }
-
-  private void updateJobIfNecessary(final JobKey jobKey, final String cron)
-      throws SchedulerException {
-    final List<? extends Trigger> triggers = scheduler.getTriggersOfJob(jobKey);
-    if (!triggers.isEmpty()) {
-      final CronTrigger cronTrigger = (CronTrigger) triggers.getFirst();
-      final String currentCron = cronTrigger.getCronExpression();
-      if (!currentCron.equals(cron)) {
-        stopJob(jobKey);
-        startJob(jobKey, cron);
-        LOG.info("Updated job: {}", jobKey);
-      }
-    }
-  }
-
-  @VisibleForTesting
-  void deleteIfNotInDatabase(final JobKey jobKey) {
-    try {
-      final Long id = getIdFromJobKey(jobKey);
-      if (subscriptionGroupManager.findById(id) == null) {
-        stopJob(jobKey);
-        LOG.info("Deleted job not in database: {}", jobKey);
-      }
-    } catch (final SchedulerException e) {
-      LOG.error("Failed to delete job '{}'", jobKey, e);
-    }
+    LOG.info("Scheduled notification job {}", jobKey);
   }
 
   private void stopJob(final JobKey jobKey) throws SchedulerException {
+    if (!scheduler.checkExists(jobKey)) {
+      LOG.error("Could not find job to delete {}, {} in the job scheduler. This should never happen. Please reach out to StarTree support.", jobKey.getName(), jobKey.getGroup());
+    }
     scheduler.deleteJob(jobKey);
-    LOG.info("Stopped job: {}", jobKey);
+    LOG.info("Stopped job {}", jobKey.getName());
   }
 
-  private Set<JobKey> getScheduledJobs() throws SchedulerException {
-    return scheduler.getJobKeys(GroupMatcher.jobGroupEquals(Q_JOB_GROUP));
+
+  private static Trigger buildTrigger(final SubscriptionGroupDTO config) {
+    final String cron = config.getCronExpression();
+    final int maxTriggersPerMinute = maximumTriggersPerMinute(cron);
+    checkArgument(maxTriggersPerMinute <= SUBSCRIPTION_SCHEDULER_CRON_MAX_TRIGGERS_PER_MINUTE,
+        "Attempting to schedule a notification job for subscription group %s that can trigger up to %s times per minute. The limit is %s. Please update the cron %s",
+        config.getId(),
+        maxTriggersPerMinute, SUBSCRIPTION_SCHEDULER_CRON_MAX_TRIGGERS_PER_MINUTE, cron
+    );
+    final CronScheduleBuilder cronScheduleBuilder = CronScheduleBuilder
+        .cronSchedule(cron)
+        .inTimeZone(TimeZone.getTimeZone(CRON_TIMEZONE));
+    return TriggerBuilder.newTrigger()
+        .withSchedule(cronScheduleBuilder)
+        .build();
   }
 }

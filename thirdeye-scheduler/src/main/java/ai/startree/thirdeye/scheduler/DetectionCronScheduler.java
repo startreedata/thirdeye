@@ -60,8 +60,9 @@ public class DetectionCronScheduler implements Runnable {
 
   private final Scheduler scheduler;
   private final ScheduledExecutorService executorService;
-  private final AlertManager alertManager;
   private final ThirdEyeSchedulerConfiguration configuration;
+
+  private final AlertManager alertManager;
 
   @Inject
   public DetectionCronScheduler(
@@ -105,13 +106,14 @@ public class DetectionCronScheduler implements Runnable {
   }
 
   private void updateSchedules() throws SchedulerException {
-    // TODO CYRIL scale - loading all alerts is expensive - only the id and the cron are necessary - requires custom SQL (JOOQ)
+    // TODO CYRIL scale - loading all entities is expensive - only the id and the cron are necessary - requires custom SQL (JOOQ)
     // FIXME CYRIL SCALE - No need for a strong isolation level here - the default isolation level lock all alerts until the query is finished, blocking progress of tasks and potentially some update/delete operations in the UI.
-    //   dirty reads are be fine, this logic runs every minute 
+    //   dirty reads are be fine, this logic runs every minute
+    //   also only fetch active entities directly
     final List<AlertDTO> allAlerts = alertManager.findAll();
     
     // schedule active alerts
-    allAlerts.forEach(this::scheduleAlert);
+    allAlerts.forEach(this::schedule);
     
     // cleanup schedules of deleted and deactivated alerts   
     final Map<Long, AlertDTO> idToAlert = allAlerts.stream()
@@ -135,7 +137,7 @@ public class DetectionCronScheduler implements Runnable {
     }
   }
 
-  private void scheduleAlert(final AlertDTO alert) {
+  private void schedule(final AlertDTO alert) {
     if (!alert.isActive()) {
       LOG.debug("Alert: {} is inactive. Skipping.", alert.getId());
       return;

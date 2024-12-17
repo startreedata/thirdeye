@@ -64,9 +64,9 @@ public class SubscriptionCronScheduler implements Runnable {
 
   private final Scheduler scheduler;
   private final ScheduledExecutorService executorService;
-  private final SubscriptionGroupManager subscriptionGroupManager;
-
   private final ThirdEyeSchedulerConfiguration configuration;
+
+  private final SubscriptionGroupManager subscriptionGroupManager;
 
   @Inject
   public SubscriptionCronScheduler(
@@ -80,9 +80,8 @@ public class SubscriptionCronScheduler implements Runnable {
       throw new RuntimeException("Failed to initialize the scheduler", e);
     }
     this.configuration = configuration;
-    executorService = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder()
-        .setNameFormat("subscription-scheduler-%d")
-        .build());
+    executorService = Executors.newSingleThreadScheduledExecutor(
+        new ThreadFactoryBuilder().setNameFormat("subscription-scheduler-%d").build());
     
     this.subscriptionGroupManager = subscriptionGroupManager;
   }

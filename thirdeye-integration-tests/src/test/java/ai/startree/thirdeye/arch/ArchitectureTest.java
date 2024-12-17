@@ -61,6 +61,7 @@ import ai.startree.thirdeye.resources.CrudResource;
 import ai.startree.thirdeye.scheduler.DetectionCronScheduler;
 import ai.startree.thirdeye.scheduler.SchedulerService;
 import ai.startree.thirdeye.scheduler.SubscriptionCronScheduler;
+import ai.startree.thirdeye.scheduler.TaskCronSchedulerRunnable;
 import ai.startree.thirdeye.scheduler.events.HolidayEventsLoader;
 import ai.startree.thirdeye.scheduler.events.MockEventsLoader;
 import ai.startree.thirdeye.scheduler.job.DetectionPipelineJob;
@@ -195,7 +196,8 @@ public class ArchitectureTest {
         EvaluationContextProcessor.class,
         AlertTemplateRenderer.class,
         AuthorizationManager.class, // OK - REVIEW ON MAY 6 2024
-        ThirdEyeServer.class // used to register database-reading metrics
+        ThirdEyeServer.class, // used to register database-reading metrics
+        TaskCronSchedulerRunnable.class, //used to schedule tasks 
     };
     final ArchRule rule = noClasses().that(
             doNot(

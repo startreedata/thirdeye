@@ -87,11 +87,15 @@ public class DetectionCronScheduler implements Runnable {
   @Override
   public void run() {
     try {
-      alertManager.findAll().forEach(this::processAlert);
-      processScheduledJobs();
+      managerAlertsAndJobs();
     } catch (final SchedulerException e) {
       LOG.error("Error while scheduling detection pipeline", e);
     }
+  }
+
+  private void managerAlertsAndJobs() throws SchedulerException {
+    alertManager.findAll().forEach(this::processAlert);
+    processScheduledJobs();
   }
 
   private void processAlert(final AlertDTO alert) {

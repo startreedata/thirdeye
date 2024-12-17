@@ -50,8 +50,8 @@ import { getUiAlerts } from "../../utils/alerts/alerts.util";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import {
-    getAlertsCreateAdvancePath,
-    getAlertsCreateNewJsonEditorPath,
+    getAlertsCreateAdvanceV2Path,
+    getAlertsCreateNewJsonEditorV2Path,
     getAlertsCreatePath,
     getAlertsEasyCreatePath,
 } from "../../utils/routes/routes.util";
@@ -224,9 +224,11 @@ export const AlertsAllPage: FunctionComponent = () => {
             navigate(getAlertsEasyCreatePath());
             // navigate(getAlertsCreatePath());
         } else if (alertType === "advancedAlert") {
-            navigate(getAlertsCreateAdvancePath());
+            navigate(getAlertsCreateAdvanceV2Path());
+            // navigate(getAlertsCreateAdvancePath());
         } else if (alertType === "jsonAlert") {
-            navigate(getAlertsCreateNewJsonEditorPath());
+            navigate(getAlertsCreateNewJsonEditorV2Path());
+            // navigate(getAlertsCreateNewJsonEditorPath());
         }
     };
 

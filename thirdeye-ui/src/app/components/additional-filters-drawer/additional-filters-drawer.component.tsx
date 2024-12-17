@@ -14,17 +14,34 @@
  */
 
 import { Icon } from "@iconify/react";
-import { Box, Button, Drawer, Typography } from "@material-ui/core";
+import {
+    Accordion,
+    AccordionDetails,
+    AccordionSummary,
+    Box,
+    Button,
+    Drawer,
+    Typography,
+} from "@material-ui/core";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import { isEmpty } from "lodash";
 import React, { FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
     PropertyConfigValueTypes,
     TemplatePropertiesObject,
 } from "../../rest/dto/alert.interfaces";
+import {
+    ALERT_PROPERTIES_DEFAULT_ORDER,
+    ALERT_PROPERTIES_DEFAULT_STEP,
+    extendablePropertyStepNameMap,
+} from "../../utils/alerts/alerts.util";
 import { FormComponentForTemplateField } from "../alert-wizard-v2/alert-template/alert-template-form-field/form-component-for-template-field/form-component-for-template-field.component";
 import { LabelForTemplateFieldV2 } from "../alert-wizard-v2/alert-template/alert-template-form-field/label-for-template-field-v2/label-for-template-field-v2.component";
+import { PropertyRenderConfig } from "../alert-wizard-v2/alert-template/alert-template-properties-builder/alert-template-properties-builder.interfaces";
 import { AdditonalFiltersDrawerProps } from "./additional-filters-drawer.interfaces";
 import { useAdditonalFiltersDrawerStyles } from "./additional-filters-drawer.styles";
+
 // import { uniq } from "lodash";
 
 /**
@@ -62,6 +79,36 @@ export const AdditonalFiltersDrawer: FunctionComponent<AdditonalFiltersDrawerPro
             onApply(localCopyOfProperties);
         };
 
+        const orderedGroupedProperties: Record<
+            string,
+            Record<string, PropertyRenderConfig[]>
+        > = {};
+        /* The idea is to display properties in a specifc order. We have that order pre-defined.
+            In case there is a property that belongs to a step that is not in pre-defined order,
+            we push it at the second last place, just before the properties of "OTHER" step
+        */
+        const keysPresent = Object.keys(availableConfigurations);
+        ALERT_PROPERTIES_DEFAULT_ORDER.forEach((alertProperty) => {
+            if (alertProperty !== ALERT_PROPERTIES_DEFAULT_STEP.STEP) {
+                if (availableConfigurations[alertProperty]) {
+                    orderedGroupedProperties[alertProperty] =
+                        availableConfigurations[alertProperty];
+                }
+            }
+        });
+        const keysNotInDefaultOrder = keysPresent.filter(
+            (key) => !ALERT_PROPERTIES_DEFAULT_ORDER.includes(key)
+        );
+        if (!isEmpty(keysNotInDefaultOrder)) {
+            keysNotInDefaultOrder.forEach((key) => {
+                orderedGroupedProperties[key] = availableConfigurations[key];
+            });
+        }
+        if (availableConfigurations[ALERT_PROPERTIES_DEFAULT_STEP.STEP]) {
+            orderedGroupedProperties[ALERT_PROPERTIES_DEFAULT_STEP.STEP] =
+                availableConfigurations[ALERT_PROPERTIES_DEFAULT_STEP.STEP];
+        }
+
         return (
             <Drawer
                 PaperProps={{
@@ -94,70 +141,215 @@ export const AdditonalFiltersDrawer: FunctionComponent<AdditonalFiltersDrawerPro
                         <>
                             <Box className={classes.content} flex={1}>
                                 <Box>
-                                    {availableConfigurations.map((config) => (
-                                        <Box
-                                            className={classes.configItem}
-                                            key={config.name}
-                                            mb={3}
-                                            width="100%"
-                                        >
-                                            <Typography
-                                                color="inherit"
-                                                variant="h6"
-                                            >
-                                                {config.name}
-                                            </Typography>
-                                            <Box
-                                                className={
-                                                    classes.configItemFields
-                                                }
-                                            >
-                                                {config.requiredPropertiesWithMetadata.map(
-                                                    (propertyMetadata) => (
-                                                        <Box
-                                                            key={
-                                                                propertyMetadata.name
+                                    {Object.keys(orderedGroupedProperties).map(
+                                        (config) => {
+                                            const subStepMap =
+                                                availableConfigurations[config];
+
+                                            return (
+                                                <Box
+                                                    className={
+                                                        classes.configItem
+                                                    }
+                                                    key={
+                                                        extendablePropertyStepNameMap[
+                                                            config
+                                                        ]
+                                                    }
+                                                    mb={3}
+                                                    width="100%"
+                                                >
+                                                    <Accordion>
+                                                        <AccordionSummary
+                                                            aria-controls={`${extendablePropertyStepNameMap[config]}-content`}
+                                                            expandIcon={
+                                                                <ExpandMoreIcon />
                                                             }
+                                                            id={`${extendablePropertyStepNameMap[config]}-header`}
                                                         >
-                                                            <LabelForTemplateFieldV2
-                                                                className={
-                                                                    classes.formLabel
-                                                                }
-                                                                name={
-                                                                    propertyMetadata.name
-                                                                }
-                                                                tooltipText={
-                                                                    propertyMetadata.description
-                                                                }
-                                                            />
-                                                            <FormComponentForTemplateField
-                                                                propertyKey={
-                                                                    propertyMetadata.name
-                                                                }
-                                                                templateFieldProperty={
-                                                                    propertyMetadata
-                                                                }
-                                                                value={
-                                                                    localCopyOfProperties[
-                                                                        propertyMetadata
-                                                                            .name
+                                                            <Typography
+                                                                color="inherit"
+                                                                variant="h6"
+                                                            >
+                                                                {
+                                                                    extendablePropertyStepNameMap[
+                                                                        config
                                                                     ]
                                                                 }
-                                                                onChange={(
-                                                                    newValue
-                                                                ) => {
-                                                                    handleOnChange(
-                                                                        propertyMetadata.name,
-                                                                        newValue
-                                                                    );
-                                                                }}
-                                                            />
-                                                        </Box>
-                                                    )
-                                                )}
-                                            </Box>
-                                        </Box>
-                                    ))}
+                                                            </Typography>
+                                                        </AccordionSummary>
+                                                        <AccordionDetails>
+                                                            <Box
+                                                                className={
+                                                                    classes.configItemFields
+                                                                }
+                                                            >
+                                                                {subStepMap[
+                                                                    ALERT_PROPERTIES_DEFAULT_STEP
+                                                                        .SUBSTEP
+                                                                ] &&
+                                                                    subStepMap[
+                                                                        ALERT_PROPERTIES_DEFAULT_STEP
+                                                                            .SUBSTEP
+                                                                    ].map(
+                                                                        (
+                                                                            step
+                                                                        ) => (
+                                                                            <Box
+                                                                                key={
+                                                                                    step
+                                                                                        .metadata
+                                                                                        .name
+                                                                                }
+                                                                            >
+                                                                                <LabelForTemplateFieldV2
+                                                                                    className={
+                                                                                        classes.formLabel
+                                                                                    }
+                                                                                    name={
+                                                                                        step
+                                                                                            .metadata
+                                                                                            .name
+                                                                                    }
+                                                                                    tooltipText={
+                                                                                        step
+                                                                                            .metadata
+                                                                                            .description
+                                                                                    }
+                                                                                />
+                                                                                <FormComponentForTemplateField
+                                                                                    propertyKey={
+                                                                                        step
+                                                                                            .metadata
+                                                                                            .name
+                                                                                    }
+                                                                                    templateFieldProperty={
+                                                                                        step.metadata
+                                                                                    }
+                                                                                    value={
+                                                                                        localCopyOfProperties[
+                                                                                            step
+                                                                                                .metadata
+                                                                                                .name
+                                                                                        ]
+                                                                                    }
+                                                                                    onChange={(
+                                                                                        newValue
+                                                                                    ) => {
+                                                                                        handleOnChange(
+                                                                                            step
+                                                                                                .metadata
+                                                                                                .name,
+                                                                                            newValue
+                                                                                        );
+                                                                                    }}
+                                                                                />
+                                                                            </Box>
+                                                                        )
+                                                                    )}
+                                                                {Object.keys(
+                                                                    subStepMap
+                                                                )
+                                                                    .filter(
+                                                                        (
+                                                                            subStep
+                                                                        ) =>
+                                                                            subStep !==
+                                                                            ALERT_PROPERTIES_DEFAULT_STEP.SUBSTEP
+                                                                    )
+                                                                    .filter(
+                                                                        (cs) =>
+                                                                            subStepMap[
+                                                                                cs
+                                                                            ]
+                                                                                .length >
+                                                                            0
+                                                                    )
+                                                                    .map(
+                                                                        (
+                                                                            currentSubStep
+                                                                        ) => (
+                                                                            <Box
+                                                                                key={
+                                                                                    currentSubStep
+                                                                                }
+                                                                                pb={
+                                                                                    3
+                                                                                }
+                                                                            >
+                                                                                <Typography variant="h6">
+                                                                                    {
+                                                                                        currentSubStep
+                                                                                    }
+                                                                                </Typography>
+                                                                                {subStepMap[
+                                                                                    currentSubStep
+                                                                                ].map(
+                                                                                    (
+                                                                                        step
+                                                                                    ) => (
+                                                                                        <Box
+                                                                                            key={
+                                                                                                step
+                                                                                                    .metadata
+                                                                                                    .name
+                                                                                            }
+                                                                                        >
+                                                                                            <LabelForTemplateFieldV2
+                                                                                                className={
+                                                                                                    classes.formLabel
+                                                                                                }
+                                                                                                name={
+                                                                                                    step
+                                                                                                        .metadata
+                                                                                                        .name
+                                                                                                }
+                                                                                                tooltipText={
+                                                                                                    step
+                                                                                                        .metadata
+                                                                                                        .description
+                                                                                                }
+                                                                                            />
+                                                                                            <FormComponentForTemplateField
+                                                                                                propertyKey={
+                                                                                                    step
+                                                                                                        .metadata
+                                                                                                        .name
+                                                                                                }
+                                                                                                templateFieldProperty={
+                                                                                                    step.metadata
+                                                                                                }
+                                                                                                value={
+                                                                                                    localCopyOfProperties[
+                                                                                                        step
+                                                                                                            .metadata
+                                                                                                            .name
+                                                                                                    ]
+                                                                                                }
+                                                                                                onChange={(
+                                                                                                    newValue
+                                                                                                ) => {
+                                                                                                    handleOnChange(
+                                                                                                        step
+                                                                                                            .metadata
+                                                                                                            .name,
+                                                                                                        newValue
+                                                                                                    );
+                                                                                                }}
+                                                                                            />
+                                                                                        </Box>
+                                                                                    )
+                                                                                )}
+                                                                            </Box>
+                                                                        )
+                                                                    )}
+                                                            </Box>
+                                                        </AccordionDetails>
+                                                    </Accordion>
+                                                </Box>
+                                            );
+                                        }
+                                    )}
                                 </Box>
                             </Box>
                             <Box

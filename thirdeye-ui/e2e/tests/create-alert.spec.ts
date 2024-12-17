@@ -38,8 +38,6 @@ test("Create Alert Page", async ({ page }) => {
     await page.getByText("Anomalies", { exact: true }).click();
     await page.getByRole("button", { name: "Create alert" }).click();
     await page.getByRole("button", { name: "Create alert" }).click();
-
-    // Multiple dimensions
     await page.getByText("Dataset Select a dataset to").click();
     await page
         .getByRole("option", { name: "AdCampaignData 6 metrics" })
@@ -76,4 +74,8 @@ test("Create Alert Page", async ({ page }) => {
     await expect(page.locator("h4")).toHaveText(
         "Impressions_SUM_star-tree-ets_dx-456"
     );
+    // SQL Query flow
+    // All steps same till SQL Query radio button select
+    // SQL query input box enter same text as its placeholder and Run Enumerations
+    // Post that the same flow
 });

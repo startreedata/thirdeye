@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AlertDTO extends AbstractDTO {
+public class AlertDTO extends AbstractDTO implements Schedulable {
 
   private String name;
   private String description;
@@ -70,6 +70,7 @@ public class AlertDTO extends AbstractDTO {
     return this;
   }
 
+  @Override
   public String getCron() {
     return cron;
   }
@@ -96,6 +97,7 @@ public class AlertDTO extends AbstractDTO {
     return this;
   }
 
+  @Override
   public boolean isActive() {
     return active;
   }

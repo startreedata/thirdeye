@@ -18,9 +18,8 @@ import com.google.common.base.Objects;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
-import org.joda.time.Period;
 
-public class SubscriptionGroupDTO extends AbstractDTO {
+public class SubscriptionGroupDTO extends AbstractDTO implements Schedulable {
 
   private boolean active;
   private String name;
@@ -61,6 +60,11 @@ public class SubscriptionGroupDTO extends AbstractDTO {
 
   public boolean isActive() {
     return active;
+  }
+
+  @Override
+  public String getCron() {
+    return getCronExpression();
   }
 
   public SubscriptionGroupDTO setActive(final boolean active) {

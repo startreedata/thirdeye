@@ -23,21 +23,24 @@ import {
     Drawer,
     Typography,
 } from "@material-ui/core";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import { isEmpty } from "lodash";
 import React, { FunctionComponent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
     PropertyConfigValueTypes,
     TemplatePropertiesObject,
 } from "../../rest/dto/alert.interfaces";
-import { FormComponentForTemplateField } from "../alert-wizard-v2/alert-template/alert-template-form-field/form-component-for-template-field/form-component-for-template-field.component";
-import { LabelForTemplateFieldV2 } from "../alert-wizard-v2/alert-template/alert-template-form-field/label-for-template-field-v2/label-for-template-field-v2.component";
-import { AdditonalFiltersDrawerProps } from "./additional-filters-drawer.interfaces";
-import { useAdditonalFiltersDrawerStyles } from "./additional-filters-drawer.styles";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import {
+    ALERT_PROPERTIES_DEFAULT_ORDER,
     ALERT_PROPERTIES_DEFAULT_STEP,
     extendablePropertyStepNameMap,
 } from "../../utils/alerts/alerts.util";
+import { FormComponentForTemplateField } from "../alert-wizard-v2/alert-template/alert-template-form-field/form-component-for-template-field/form-component-for-template-field.component";
+import { LabelForTemplateFieldV2 } from "../alert-wizard-v2/alert-template/alert-template-form-field/label-for-template-field-v2/label-for-template-field-v2.component";
+import { PropertyRenderConfig } from "../alert-wizard-v2/alert-template/alert-template-properties-builder/alert-template-properties-builder.interfaces";
+import { AdditonalFiltersDrawerProps } from "./additional-filters-drawer.interfaces";
+import { useAdditonalFiltersDrawerStyles } from "./additional-filters-drawer.styles";
 
 // import { uniq } from "lodash";
 
@@ -76,6 +79,36 @@ export const AdditonalFiltersDrawer: FunctionComponent<AdditonalFiltersDrawerPro
             onApply(localCopyOfProperties);
         };
 
+        const orderedGroupedProperties: Record<
+            string,
+            Record<string, PropertyRenderConfig[]>
+        > = {};
+        /* The idea is to display properties in a specifc order. We have that order pre-defined.
+            In case there is a property that belongs to a step that is not in pre-defined order,
+            we push it at the second last place, just before the properties of "OTHER" step
+        */
+        const keysPresent = Object.keys(availableConfigurations);
+        ALERT_PROPERTIES_DEFAULT_ORDER.forEach((alertProperty) => {
+            if (alertProperty !== ALERT_PROPERTIES_DEFAULT_STEP.STEP) {
+                if (availableConfigurations[alertProperty]) {
+                    orderedGroupedProperties[alertProperty] =
+                        availableConfigurations[alertProperty];
+                }
+            }
+        });
+        const keysNotInDefaultOrder = keysPresent.filter(
+            (key) => !ALERT_PROPERTIES_DEFAULT_ORDER.includes(key)
+        );
+        if (!isEmpty(keysNotInDefaultOrder)) {
+            keysNotInDefaultOrder.forEach((key) => {
+                orderedGroupedProperties[key] = availableConfigurations[key];
+            });
+        }
+        if (availableConfigurations[ALERT_PROPERTIES_DEFAULT_STEP.STEP]) {
+            orderedGroupedProperties[ALERT_PROPERTIES_DEFAULT_STEP.STEP] =
+                availableConfigurations[ALERT_PROPERTIES_DEFAULT_STEP.STEP];
+        }
+
         return (
             <Drawer
                 PaperProps={{
@@ -108,7 +141,7 @@ export const AdditonalFiltersDrawer: FunctionComponent<AdditonalFiltersDrawerPro
                         <>
                             <Box className={classes.content} flex={1}>
                                 <Box>
-                                    {Object.keys(availableConfigurations).map(
+                                    {Object.keys(orderedGroupedProperties).map(
                                         (config) => {
                                             const subStepMap =
                                                 availableConfigurations[config];

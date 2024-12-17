@@ -780,6 +780,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
             return undefined;
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const [_requiredKeys, optionalKeys] = setUpFieldInputRenderConfig(
             selectedAlertTemplate
                 ? determinePropertyFieldConfiguration(selectedAlertTemplate)

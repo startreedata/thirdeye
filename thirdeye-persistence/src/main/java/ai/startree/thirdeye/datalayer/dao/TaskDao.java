@@ -63,7 +63,7 @@ public class TaskDao {
       ORDER BY id ASC
       LIMIT 1
       FOR UPDATE SKIP LOCKED
-      """;
+      """.replace("\n", " ");
   private static final Logger LOG = LoggerFactory.getLogger(TaskDao.class);
 
   private final DatabaseOrm databaseOrm;
@@ -309,6 +309,7 @@ public class TaskDao {
               toUpdate.setWorkerId(workerId);
               toUpdate.setStartTime(System.currentTimeMillis());
               toUpdate.setVersion(toUpdate.getVersion() + 1);
+              toUpdate.setLastActive(new Timestamp(System.currentTimeMillis()));
               final int success = databaseOrm.update(toEntity(toUpdate), null, connection);
               if (success == 1) {
                 return toUpdate;

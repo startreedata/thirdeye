@@ -23,7 +23,6 @@ import { AnalysisPeriod } from "../common/anaylysis-period/analysis-period.compo
 import { LineGraph } from "./line-graph.component";
 import { WeeklyGraph } from "./weekly-graph.component";
 import { SectionHeader } from "../common/section-header/section-header.component";
-import { MenuItem, Select } from "@material-ui/core";
 
 // Interfaces
 import { DetectionPerformanceProps } from "./detection-performance.interfaces";
@@ -33,6 +32,7 @@ import { useDetectionPerformanceApiRequests } from "./api";
 
 // Data
 import { useGetDetectionPerformanceData } from "./data";
+import { AlertDropdown } from "./alert-dropdown";
 
 const defaultAlertDropdownOption = { id: -1, name: "All alerts" };
 
@@ -80,14 +80,12 @@ export const DetectionPerformance = ({
         setAlertDropdownOptions([...options, defaultAlertDropdownOption]);
     }, [alerts]);
 
-    const handleAlertChange = (
-        event: React.ChangeEvent<{ value: unknown }>
-    ): void => {
+    const handleAlertChange = (alertName: string): void => {
         alertDropdownOptions &&
             setSelectedAlert(
                 alertDropdownOptions.find(
                     (alertDropdownOption) =>
-                        alertDropdownOption.id === event.target.value
+                        alertDropdownOption.name === alertName
                 )!
             );
     };
@@ -106,26 +104,11 @@ export const DetectionPerformance = ({
                         selectedPeriod={selectedAnalysisPeriod}
                         onClick={onAnalysisPeriodChange}
                     />
-                    <Select
-                        className={componentStyles.select}
-                        id="alert-dropdown"
-                        label="Age"
-                        labelId="alert-dropdown"
-                        value={selectedAlert?.id}
-                        variant="outlined"
-                        onChange={handleAlertChange}
-                    >
-                        {alertDropdownOptions?.map((alertDropdownOption) => {
-                            return (
-                                <MenuItem
-                                    key={alertDropdownOption.id}
-                                    value={alertDropdownOption.id}
-                                >
-                                    {alertDropdownOption.name}
-                                </MenuItem>
-                            );
-                        })}
-                    </Select>
+                    <AlertDropdown
+                        alerts={alertDropdownOptions}
+                        selectedAlert={selectedAlert}
+                        onAlertChange={handleAlertChange}
+                    />
                 </div>
             </div>
             <div className={componentStyles.visualizationContainer}>

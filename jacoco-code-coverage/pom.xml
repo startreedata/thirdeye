@@ -15,14 +15,20 @@
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>ai.startree.thirdeye</groupId>
     <artifactId>thirdeye</artifactId>
     <version>1.399.0-SNAPSHOT</version>
   </parent>
-  <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>thirdeye-server</artifactId>
+  <artifactId>jacoco-code-coverage</artifactId>
+
+  <properties>
+    <maven.compiler.source>21</maven.compiler.source>
+    <maven.compiler.target>21</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
 
   <dependencies>
     <dependency>
@@ -51,6 +57,10 @@
     </dependency>
     <dependency>
       <groupId>ai.startree.thirdeye</groupId>
+      <artifactId>thirdeye-server</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ai.startree.thirdeye</groupId>
       <artifactId>thirdeye-spi</artifactId>
     </dependency>
     <dependency>
@@ -59,89 +69,69 @@
     </dependency>
 
     <dependency>
-      <groupId>io.dropwizard</groupId>
-      <artifactId>dropwizard-auth</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.dropwizard</groupId>
-      <artifactId>dropwizard-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.smoketurner</groupId>
-      <artifactId>dropwizard-swagger</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.prometheus</groupId>
-      <artifactId>simpleclient_dropwizard</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.prometheus</groupId>
-      <artifactId>simpleclient_servlet</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.micrometer</groupId>
-      <artifactId>micrometer-registry-prometheus</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.nimbusds</groupId>
-      <artifactId>nimbus-jose-jwt</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.sentry</groupId>
-      <artifactId>sentry</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.sentry</groupId>
-      <artifactId>sentry-logback</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>com.squareup.retrofit2</groupId>
-      <artifactId>retrofit</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.squareup.retrofit2</groupId>
-      <artifactId>converter-jackson</artifactId>
-    </dependency>
-
-    <!-- support for joda types in server configuration -->
-    <dependency>
-      <groupId>com.fasterxml.jackson.datatype</groupId>
-      <artifactId>jackson-datatype-joda</artifactId>
-    </dependency>
-
-    <!-- ################################### -->
-    <!-- test dependencies start             -->
-    <!-- ################################### -->
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-core</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.testng</groupId>
-      <artifactId>testng</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.assertj</groupId>
-      <artifactId>assertj-core</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.testcontainers</groupId>
-      <artifactId>testcontainers</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.testcontainers</groupId>
-      <artifactId>mysql</artifactId>
+      <groupId>ai.startree.thirdeye</groupId>
+      <artifactId>thirdeye-integration-tests</artifactId>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
 
-    <!-- ################################### -->
-    <!-- test dependencies end               -->
-    <!-- ################################### -->
+    <dependency>
+      <groupId>ai.startree.thirdeye.plugins</groupId>
+      <artifactId>thirdeye-pinot</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ai.startree.thirdeye.plugins</groupId>
+      <artifactId>thirdeye-detectors</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ai.startree.thirdeye.plugins</groupId>
+      <artifactId>thirdeye-oauth</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ai.startree.thirdeye.plugins</groupId>
+      <artifactId>thirdeye-notification-email</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ai.startree.thirdeye.plugins</groupId>
+      <artifactId>thirdeye-contributors-simple</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ai.startree.thirdeye.plugins</groupId>
+      <artifactId>thirdeye-bootstrap-open-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ai.startree.thirdeye.plugins</groupId>
+      <artifactId>thirdeye-enumerators</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ai.startree.thirdeye.plugins</groupId>
+      <artifactId>thirdeye-postprocessors</artifactId>
+    </dependency>
 
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>verify</phase>
+            <goals>
+              <goal>report-aggregate</goal>
+            </goals>
+            <configuration>
+              <dataFileIncludes>
+                <dataFileInclude>**/jacoco.exec</dataFileInclude>
+              </dataFileIncludes>
+              <outputDirectory>${project.reporting.outputDirectory}/jacoco-aggregate
+              </outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
 </project>

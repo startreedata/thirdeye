@@ -192,8 +192,8 @@ export const AnomalyFeedbackModal: FunctionComponent<AnomalyFeedbackModalProps> 
                   ),
               }
             : showNo
-            ? ALL_OPTIONS_TO_DESCRIPTIONS
-            : ANOMALY_OPTIONS_TO_DESCRIPTIONS;
+            ? ALL_OPTIONS_TO_DESCRIPTIONS(t)
+            : ANOMALY_OPTIONS_TO_DESCRIPTIONS(t);
 
         return (
             <>
@@ -224,9 +224,9 @@ export const AnomalyFeedbackModal: FunctionComponent<AnomalyFeedbackModalProps> 
                                                     control={<Radio />}
                                                     key={k}
                                                     label={
-                                                        ALL_OPTIONS_TO_DESCRIPTIONS[
-                                                            k
-                                                        ]
+                                                        ALL_OPTIONS_TO_DESCRIPTIONS(
+                                                            t
+                                                        )[k]
                                                     }
                                                     value={k}
                                                 />

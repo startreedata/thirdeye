@@ -179,7 +179,7 @@ public class DetectionCronScheduler implements Runnable {
       LOG.error("Could not find job to delete {}, {} in the job scheduler. This should never happen. Please reach out to StarTree support.", jobKey.getName(), jobKey.getGroup());
     }
     scheduler.deleteJob(jobKey);
-    LOG.info("Stopped job " + jobKey.getName());
+    LOG.info("Stopped job {}", jobKey.getName());
   }
 
 

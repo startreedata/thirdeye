@@ -21,7 +21,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.spi.datalayer.bao.AbstractManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.Schedulable;
 import ai.startree.thirdeye.spi.task.TaskType;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +41,7 @@ import org.quartz.impl.matchers.GroupMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TaskCronSchedulerRunnable<E extends AbstractDTO & Schedulable> implements Runnable {
+public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnable {
   
   private final Logger log;
   private final Scheduler scheduler;
@@ -52,10 +51,14 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO & Schedulable> impl
   private final AbstractManager<E> entityDao;
   private final String entityName;
   private final Class<? extends Job> jobClazz;
+  private final CronGetter<E> cronGetter;
+  private final isActiveGetter<E> isActiveGetter;
 
   public TaskCronSchedulerRunnable(
       final AbstractManager<E> entityDao,
-      Class<E> entityClazz,
+      final CronGetter<E> cronGetter,
+      final isActiveGetter<E> isActiveGetter,
+      final Class<E> entityClazz,
       final TaskType taskType,
       final Class<? extends Job> jobClazz,
       final GuiceJobFactory guiceJobFactory,
@@ -69,6 +72,8 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO & Schedulable> impl
       throw new RuntimeException("Failed to initialize the scheduler", e);
     }
     this.entityDao = entityDao;
+    this.cronGetter = cronGetter;
+    this.isActiveGetter = isActiveGetter;
     this.entityName = entityClazz.getSimpleName();
     this.taskType = taskType;
     this.jobClazz = jobClazz;
@@ -115,7 +120,7 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO & Schedulable> impl
           log.info("{} with id {} does not exist anymore. Stopping the scheduled {} job.",
               entityName, id, taskType);
           stopJob(jobKey);
-        } else if (!entity.isActive()) {
+        } else if (!isActive(entity)) {
           log.info("{} with id {} is deactivated. Stopping the scheduled {} job.", entityName, id, taskType);
           stopJob(jobKey);
         }
@@ -126,7 +131,7 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO & Schedulable> impl
   }
 
   private void schedule(final E entity) {
-    if (!entity.isActive()) {
+    if (!isActive(entity)) {
       log.debug("{}: {} is inactive. Skipping.", entityName, entity.getId());
       return;
     }
@@ -138,10 +143,10 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO & Schedulable> impl
       if (scheduler.checkExists(jobKey)) {
         log.debug("{} {} is already scheduled", entityName, jobKey.getName());
         final String currentCron = currentCron(scheduler, jobKey);
-        if (!entity.getCron().equals(currentCron)) {
+        if (!cronOf(entity).equals(currentCron)) {
           log.info("Cron expression of {} {} has been changed from {} to {}. "
                   + "Restarting schedule",
-              entityName, entity.getId(), currentCron, entity.getCron());
+              entityName, entity.getId(), currentCron, cronOf(entity));
           stopJob(jobKey);
           startJob(entity, jobKey);
         }
@@ -172,7 +177,7 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO & Schedulable> impl
 
 
   private Trigger buildTrigger(final E config) {
-    final String cron = config.getCron();
+    final String cron = cronOf(config);
     final int maxTriggersPerMinute = maximumTriggersPerMinute(cron);
     checkArgument(maxTriggersPerMinute <= cronMaxTriggersPerMinute,
         "Attempting to schedule a %s job for %s %s that can trigger up to %s times per minute. The limit is %s. Please update the cron %s",
@@ -187,5 +192,21 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO & Schedulable> impl
     return TriggerBuilder.newTrigger()
         .withSchedule(cronScheduleBuilder)
         .build();
+  }
+  
+  private boolean isActive(final E entity) {
+    return isActiveGetter.isActive(entity);
+  }
+
+  private String cronOf(final E entity) {
+    return cronGetter.getCron(entity);
+  }
+  
+  public interface CronGetter<E extends AbstractDTO> {
+    String getCron(final E entity);
+  }
+
+  public interface isActiveGetter<E extends AbstractDTO> {
+    boolean isActive(final E entity);
   }
 }

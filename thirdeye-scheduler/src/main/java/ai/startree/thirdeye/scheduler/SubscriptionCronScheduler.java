@@ -59,6 +59,8 @@ public class SubscriptionCronScheduler {
   public void start() throws SchedulerException {
     runnable = new TaskCronSchedulerRunnable<>(
         subscriptionGroupManager,
+        SubscriptionGroupDTO::getCronExpression,
+        SubscriptionGroupDTO::isActive,
         SubscriptionGroupDTO.class,
         TaskType.NOTIFICATION,
         NotificationPipelineJob.class,

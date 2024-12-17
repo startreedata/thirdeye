@@ -19,7 +19,7 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 
-public class SubscriptionGroupDTO extends AbstractDTO implements Schedulable {
+public class SubscriptionGroupDTO extends AbstractDTO {
 
   private boolean active;
   private String name;
@@ -62,7 +62,6 @@ public class SubscriptionGroupDTO extends AbstractDTO implements Schedulable {
     return active;
   }
 
-  @Override
   public String getCron() {
     return getCronExpression();
   }

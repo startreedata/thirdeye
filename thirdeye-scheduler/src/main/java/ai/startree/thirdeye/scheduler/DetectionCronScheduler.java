@@ -54,7 +54,9 @@ public class DetectionCronScheduler {
 
   public void start() throws SchedulerException {
     runnable = new TaskCronSchedulerRunnable<>(
-        alertManager, 
+        alertManager,
+        AlertDTO::getCron,
+        AlertDTO::isActive,
         AlertDTO.class,
         TaskType.DETECTION, 
         DetectionPipelineJob.class,

@@ -17,9 +17,14 @@ import ai.startree.thirdeye.spi.task.TaskType;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.quartz.CronTrigger;
 import org.quartz.JobKey;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.Trigger;
 
 public class JobUtils {
   // TODO cyril add to grafana dashboard
@@ -37,9 +42,22 @@ public class JobUtils {
           t -> Metrics.counter("thirdeye_scheduler_backpressure_total", "task_type",
               t.toString())));
 
+  // TODO CYRIL scale - this job name design does not help - just use the id as the job name - do this change as part of removing the job name from the db
   public static Long getIdFromJobKey(JobKey jobKey) {
     final String[] tokens = jobKey.getName().split("_");
     final String id = tokens[tokens.length - 1];
     return Long.valueOf(id);
+  }
+
+  
+  /**
+   * Return the cron expression of the job in the scheduler matching the job key.
+   * Pre-condition: the jobkey should exist ==> scheduler.checkExists(key) is true
+   **/
+  public static String currentCron(final Scheduler scheduler, final JobKey key) throws SchedulerException {
+    final List<Trigger> triggers = (List<Trigger>) scheduler.getTriggersOfJob(key);
+    final CronTrigger cronTrigger = (CronTrigger) triggers.getFirst();
+    final String cronInSchedule = cronTrigger.getCronExpression();
+    return cronInSchedule;
   }
 }

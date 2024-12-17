@@ -13,10 +13,12 @@
  */
 package ai.startree.thirdeye.scheduler;
 
+import static ai.startree.thirdeye.scheduler.JobUtils.currentCron;
 import static ai.startree.thirdeye.scheduler.JobUtils.getIdFromJobKey;
 import static ai.startree.thirdeye.spi.Constants.CRON_TIMEZONE;
 import static ai.startree.thirdeye.spi.util.ExecutorUtils.shutdownExecutionService;
 import static ai.startree.thirdeye.spi.util.TimeUtils.maximumTriggersPerMinute;
+import static com.google.common.base.Preconditions.checkArgument;
 
 import ai.startree.thirdeye.scheduler.job.DetectionPipelineJob;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
@@ -27,13 +29,14 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import org.quartz.CronScheduleBuilder;
-import org.quartz.CronTrigger;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
@@ -50,7 +53,9 @@ import org.slf4j.LoggerFactory;
 public class DetectionCronScheduler implements Runnable {
 
   public static final TimeUnit ALERT_DELAY_UNIT = TimeUnit.SECONDS;
-  public static final String QUARTZ_DETECTION_GROUPER = TaskType.DETECTION.toString();
+  public static final String QUARTZ_DETECTION_GROUP = TaskType.DETECTION.toString();
+  public static final GroupMatcher<JobKey> DETECTION_JOBS_GROUP_MATCHER = GroupMatcher.jobGroupEquals(
+      QUARTZ_DETECTION_GROUP);
 
   private static final Logger LOG = LoggerFactory.getLogger(DetectionCronScheduler.class);
   // todo cyril make this a config file parameter, and throw when it is not respected
@@ -87,25 +92,33 @@ public class DetectionCronScheduler implements Runnable {
   @Override
   public void run() {
     try {
-      managerAlertsAndJobs();
+      updateDetectionSchedules();
     } catch (final SchedulerException e) {
       LOG.error("Error while scheduling detection pipeline", e);
     }
   }
 
-  private void managerAlertsAndJobs() throws SchedulerException {
-    alertManager.findAll().forEach(this::processAlert);
-    final Set<JobKey> scheduledJobs = getScheduledJobs();
-    for (final JobKey jobKey : scheduledJobs) {
+  private void updateDetectionSchedules() throws SchedulerException {
+    // TODO CYRIL scale - loading all alerts is expensive - only the id and the cron are necessary - requires custom SQL (JOOQ) 
+    final List<AlertDTO> allAlerts = alertManager.findAll();
+    
+    // schedule active alerts
+    allAlerts.forEach(this::scheduleAlert);
+    
+    // cleanup schedules of deleted and deactivated alerts   
+    final Map<Long, AlertDTO> idToAlert = allAlerts.stream()
+        .collect(Collectors.toMap(AbstractDTO::getId, e -> e));
+    final Set<JobKey> scheduledJobKeys = scheduler.getJobKeys(DETECTION_JOBS_GROUP_MATCHER);
+    for (final JobKey jobKey : scheduledJobKeys) {
       try {
         final Long id = getIdFromJobKey(jobKey);
-        final AlertDTO detectionDTO = alertManager.findById(id);
+        final AlertDTO detectionDTO = idToAlert.get(id);
         if (detectionDTO == null) {
-          LOG.info("Found a scheduled detection config task, but not found in the database {}",
+          LOG.info("Alert with id {} does not exist anymore. Stopping the scheduled detection job.",
               id);
           stopJob(jobKey);
         } else if (!detectionDTO.isActive()) {
-          LOG.info("Found a scheduled detection config task, but has been deactivated {}", id);
+          LOG.info("Alert with id {} is deactivated. Stopping the scheduled detection job.", id);
           stopJob(jobKey);
         }
       } catch (final Exception e) {
@@ -114,24 +127,28 @@ public class DetectionCronScheduler implements Runnable {
     }
   }
 
-  private void processAlert(final AlertDTO alert) {
+  private void scheduleAlert(final AlertDTO alert) {
     if (!alert.isActive()) {
       LOG.debug("Alert: {} is inactive. Skipping.", alert.getId());
       return;
     }
 
-    // add or update
+    // schedule detection job: add or update job
     try {
-      // Schedule detection jobs
-      final String jobKeyString = getJobKey(alert.getId(), TaskType.DETECTION);
-      final JobKey alertJobKey = new JobKey(jobKeyString, QUARTZ_DETECTION_GROUPER);
+      final String jobName = TaskType.DETECTION + "_" + alert.getId();
+      final JobKey alertJobKey = new JobKey(jobName, QUARTZ_DETECTION_GROUP);
       final JobDetail detectionJob = JobBuilder.newJob(DetectionPipelineJob.class)
           .withIdentity(alertJobKey)
           .build();
       if (scheduler.checkExists(alertJobKey)) {
-        LOG.info("Alert {} is already scheduled for detection", alertJobKey.getName());
-        if (isJobUpdated(alert, alertJobKey)) {
-          restartJob(alert, detectionJob);
+        LOG.debug("Alert {} is already scheduled for detection", alertJobKey.getName());
+        final String currentCron = currentCron(scheduler, alertJobKey);
+        if (!alert.getCron().equals(currentCron)) {
+          LOG.info("Cron expression for detection pipeline {} has been changed from {} to {}. "
+                  + "Restarting schedule",
+              alert.getId(), currentCron, alert.getCron());
+          stopJob(detectionJob.getKey());
+          startJob(alert, detectionJob);
         }
       } else {
         startJob(alert, detectionJob);
@@ -141,29 +158,19 @@ public class DetectionCronScheduler implements Runnable {
     }
   }
 
-  private void restartJob(final AlertDTO config, final JobDetail job) throws SchedulerException {
-    stopJob(job.getKey());
-    startJob(config, job);
-  }
-
-  public Set<JobKey> getScheduledJobs() throws SchedulerException {
-    return scheduler.getJobKeys(GroupMatcher.jobGroupEquals(QUARTZ_DETECTION_GROUPER));
-  }
-
   public void shutdown() throws SchedulerException {
     shutdownExecutionService(executorService);
     scheduler.shutdown();
   }
 
-  public void startJob(final AbstractDTO config, final JobDetail job) throws SchedulerException {
-    final String cron = ((AlertDTO) config).getCron();
+  public void startJob(final AlertDTO config, final JobDetail job) throws SchedulerException {
+    final String cron = config.getCron();
     final int maxTriggersPerMinute = maximumTriggersPerMinute(cron);
-    if (maxTriggersPerMinute > DETECTION_SCHEDULER_CRON_MAX_TRIGGERS_PER_MINUTE) {
-      LOG.warn(
-          "Scheduling a detection job for alert {} that can trigger up to {} times per minute. The limit is {}."
-              + "This will be forbidden and throw an exception in the future. Please update the cron {}", config.getId(),
-          maxTriggersPerMinute, DETECTION_SCHEDULER_CRON_MAX_TRIGGERS_PER_MINUTE, cron);
-    }
+    checkArgument(maxTriggersPerMinute <= DETECTION_SCHEDULER_CRON_MAX_TRIGGERS_PER_MINUTE,
+        "Attempting to schedule a detection job for alert %s that can trigger up to %s times per minute. The limit is %s. Please update the cron %s",
+        config.getId(),
+        maxTriggersPerMinute, DETECTION_SCHEDULER_CRON_MAX_TRIGGERS_PER_MINUTE, cron
+        );
     final CronScheduleBuilder cronScheduleBuilder = CronScheduleBuilder
         .cronSchedule(cron)
         .inTimeZone(TimeZone.getTimeZone(CRON_TIMEZONE));
@@ -182,24 +189,5 @@ public class DetectionCronScheduler implements Runnable {
     }
     scheduler.deleteJob(jobKey);
     LOG.info("Stopped detection pipeline " + jobKey.getName());
-  }
-
-  public String getJobKey(final Long id, final TaskType taskType) {
-    return String.format("%s_%d", taskType, id);
-  }
-
-  @SuppressWarnings("unchecked")
-  private boolean isJobUpdated(final AlertDTO config, final JobKey key) throws SchedulerException {
-    final List<Trigger> triggers = (List<Trigger>) scheduler.getTriggersOfJob(key);
-    final CronTrigger cronTrigger = (CronTrigger) triggers.getFirst();
-    final String cronInSchedule = cronTrigger.getCronExpression();
-
-    if (!config.getCron().equals(cronInSchedule)) {
-      LOG.info("Cron expression for detection pipeline {} has been changed from {}  to {}. "
-              + "Restarting schedule",
-          config.getId(), cronInSchedule, config.getCron());
-      return true;
-    }
-    return false;
   }
 }

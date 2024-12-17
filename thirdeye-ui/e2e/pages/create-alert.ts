@@ -14,16 +14,139 @@
  */
 import { expect, Page } from "@playwright/test";
 import { BasePage } from "./base";
+import { sortBy } from "lodash";
+import { generateOptions } from "../../src/app/components/alert-wizard-v3/alert-type-selection/alert-type-selection.utils";
 
 export class CreateAlertPage extends BasePage {
     readonly page: Page;
-    alertResponseData: any;
-    subscriptionResponseData: any;
-    anomalyResponseData: any;
+    datasetsResponseData: any;
+    metricsResponseData: any;
+    dataSourcesResponseData: any;
+    evaluateResponseData: any;
+    recommendResponseData: any;
 
     constructor(page: Page) {
         super(page);
         this.page = page;
+    }
+
+    async resolveApis() {
+        const [datasetsApiResponse, metricsApiResponse, dataSourcesResponse] =
+            await Promise.all([
+                this.page.waitForResponse(
+                    (response) =>
+                        response.url().includes("/api/datasets") &&
+                        response.status() === 200
+                ),
+                this.page.waitForResponse(
+                    (response) =>
+                        response.url().includes("/api/metrics") &&
+                        response.status() === 200
+                ),
+                this.page.waitForResponse(
+                    (response) =>
+                        response.url().includes("/api/data-sources") &&
+                        response.status() === 200
+                ),
+            ]);
+        const datasetInfo = await datasetsApiResponse.json();
+        this.datasetsResponseData = sortBy(datasetInfo, [
+            (d) => d.name.toLowerCase(),
+        ]);
+        this.metricsResponseData = await metricsApiResponse.json();
+        this.dataSourcesResponseData = await dataSourcesResponse.json();
+    }
+
+    async resolveRecommendApis() {
+        const [recommendApiResponse] = await Promise.all([
+            this.page.waitForResponse(
+                (response) =>
+                    response.url().includes("/api/recommend") &&
+                    response.status() === 200
+            ),
+        ]);
+
+        this.recommendResponseData = await recommendApiResponse.json();
+    }
+
+    async resolveEvaluateApis() {
+        const [evaluateApiResponse] = await Promise.all([
+            this.page.waitForResponse(
+                (response) =>
+                    response.url().includes("/api/evaluate") &&
+                    response.status() === 200
+            ),
+        ]);
+
+        this.evaluateResponseData = await evaluateApiResponse.json();
+    }
+
+    async resolveMetricsCohortsApis() {
+        const [cohortsApiResponse] = await Promise.all([
+            this.page.waitForResponse(
+                (response) =>
+                    response.url().includes("/api/rca/metrics/cohorts") &&
+                    response.status() === 200
+            ),
+        ]);
+    }
+
+    async selectDatasetAndMetric() {
+        await this.page.getByText("Dataset Select a dataset to").click();
+        await this.page
+            .getByRole("option", { name: this.datasetsResponseData[0].name })
+            .click();
+        await this.page
+            .getByTestId("metric-select")
+            .locator("div")
+            .nth(1)
+            .click();
+        const metrics = this.metricsResponseData?.find(
+            (m) => m?.dataset?.name === this.datasetsResponseData[0].name
+        );
+        await this.page.getByRole("option", { name: metrics.name }).click();
+    }
+
+    async selectStaticFields(isMultiDimensional = false, isSQLQuery = false) {
+        await this.page.locator("div").filter({ hasText: /^SUM$/ }).click();
+        await this.page.getByLabel("SUM").check();
+        await this.page.getByPlaceholder("Select granularity").click();
+        await this.page.getByRole("option", { name: "Daily" }).click();
+        if (!isMultiDimensional) {
+            await this.page
+                .locator("div")
+                .filter({ hasText: /^Single metric$/ })
+                .click();
+            return;
+        }
+        await this.page.getByLabel("Multiple dimensions").check();
+        if (isSQLQuery) {
+            await this.page.getByLabel("SQL Query").check();
+            return;
+        }
+        await this.page.getByLabel("Dimension recommender").check();
+    }
+
+    async selectDetectionAlgorithm(isMultiDimensional = false) {
+        await this.page.getByPlaceholder("Select an algorithm").click();
+        const availableOptions = generateOptions();
+        const algorithmOption = availableOptions.find(
+            (option) =>
+                option.alertTemplate ===
+                    this.recommendResponseData?.recommendations[0]?.alert
+                        .template?.name ||
+                (isMultiDimensional &&
+                    option.alertTemplateForMultidimension ===
+                        this.recommendResponseData?.recommendations[0]?.alert
+                            .template?.name)
+        );
+        await this.page
+            .getByRole("heading", {
+                name: algorithmOption
+                    ? `${algorithmOption.title} option 1`
+                    : availableOptions[0].title,
+            })
+            .click();
     }
 
     async goToCreateAlertPage() {
@@ -39,5 +162,45 @@ export class CreateAlertPage extends BasePage {
 
     async checkHeader() {
         await expect(this.page.locator("h5")).toHaveText("Alert wizard");
+    }
+
+    async createAlert() {
+        await this.page.getByText("Anomalies", { exact: true }).click();
+        await this.page.getByRole("button", { name: "Create alert" }).click();
+        await this.page
+            .getByTestId("alert-name-input")
+            .getByRole("textbox")
+            .click();
+        await this.page
+            .getByTestId("alert-name-input")
+            .getByRole("textbox")
+            .fill(`Impressions_SUM_star-tree-ets_dx-${Date.now()}`);
+        await this.page.getByRole("button", { name: "Create alert" }).click();
+    }
+
+    async addDimensions() {
+        await this.page.getByRole("button", { name: "Add dimensions" }).click();
+        await this.page.getByPlaceholder("Select dimensions").click();
+        await this.page.getByRole("option", { name: "Exchange" }).click();
+        await this.page
+            .getByRole("button", { name: "Generate dimensions to monitor" })
+            .click();
+        await this.resolveMetricsCohortsApis();
+        await this.page
+            .getByRole("row", { name: "Exchange='DoubleClick' 350." })
+            .getByRole("checkbox")
+            .check();
+        await this.page
+            .getByRole("button", { name: "Add selected dimensions" })
+            .click();
+    }
+
+    async addSQLQuery() {
+        const textarea = await this.page.locator("textarea");
+        const placeholderText = await textarea.getAttribute("placeholder");
+        textarea.fill(placeholderText);
+        await this.page
+            .getByRole("button", { name: "Run enumerations" })
+            .click();
     }
 }

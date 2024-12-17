@@ -1,3 +1,11 @@
+### [2.57.1](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.57.0...thirdeye-ui-2.57.1) (2024-12-17)
+
+
+### Bug Fixes
+
+* [TE-2594](https://cortexdata.atlassian.net/browse/TE-2594) do not allow negative value for time period compare in anomaly view ([7ea28ecc0](https://github.com/startreedata/thirdeye/commit/7ea28ecc00d1350082e9324171682f27499c8fc4))
+* Added Accordion to the input groups in drawer and increase the drawer width ([665118e21](https://github.com/startreedata/thirdeye/commit/665118e212db1be3b9c989625c36568514a96d8b))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

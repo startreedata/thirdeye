@@ -99,7 +99,9 @@ public class DetectionCronScheduler implements Runnable {
   }
 
   private void updateDetectionSchedules() throws SchedulerException {
-    // TODO CYRIL scale - loading all alerts is expensive - only the id and the cron are necessary - requires custom SQL (JOOQ) 
+    // TODO CYRIL scale - loading all alerts is expensive - only the id and the cron are necessary - requires custom SQL (JOOQ)
+    // FIXME CYRIL SCALE - No need for a strong isolation level here - the default isolation level lock all alerts until the query is finished, blocking progress of tasks and potentially some update/delete operations in the UI.
+    //   dirty reads are be fine, this logic runs every minute 
     final List<AlertDTO> allAlerts = alertManager.findAll();
     
     // schedule active alerts

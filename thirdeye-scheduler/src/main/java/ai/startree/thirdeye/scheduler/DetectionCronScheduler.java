@@ -96,14 +96,15 @@ public class DetectionCronScheduler implements Runnable {
 
   @Override
   public void run() {
+    // catch all exceptions to prevent unscheduling - this is run in executorService.scheduleWithFixedDelay
     try {
-      updateDetectionSchedules();
-    } catch (final SchedulerException e) {
+      updateSchedules();
+    } catch (final Exception e) {
       LOG.error("Error updating detection task creation schedules", e);
     }
   }
 
-  private void updateDetectionSchedules() throws SchedulerException {
+  private void updateSchedules() throws SchedulerException {
     // TODO CYRIL scale - loading all alerts is expensive - only the id and the cron are necessary - requires custom SQL (JOOQ)
     // FIXME CYRIL SCALE - No need for a strong isolation level here - the default isolation level lock all alerts until the query is finished, blocking progress of tasks and potentially some update/delete operations in the UI.
     //   dirty reads are be fine, this logic runs every minute 

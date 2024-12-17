@@ -102,18 +102,19 @@ public class SubscriptionCronScheduler implements Runnable {
 
   @Override
   public void run() {
+    // catch all exceptions to prevent unscheduling - this is run in executorService.scheduleWithFixedDelay
     try {
-      updateNotificationSchedules();
+      updateSchedules();
     } catch (final Exception e) {
       LOG.error("Error updating notification task creation schedules", e);
     }
   }
 
-  private void updateNotificationSchedules() throws SchedulerException {
+  private void updateSchedules() throws SchedulerException {
     final List<SubscriptionGroupDTO> allSubscriptionGroups = subscriptionGroupManager.findAll();
     
     // schedule active subscription groups
-    allSubscriptionGroups.forEach(this::scheduleSubscriptionGroup);
+    allSubscriptionGroups.forEach(this::schedule);
     
     // cleanup schedules of deleted and deactivated subscription groups
     final Map<Long, SubscriptionGroupDTO> idToSubscriptionGroup = allSubscriptionGroups.stream()
@@ -137,7 +138,7 @@ public class SubscriptionCronScheduler implements Runnable {
     }
   }
 
-  private void scheduleSubscriptionGroup(final SubscriptionGroupDTO subscriptionGroup) {
+  private void schedule(final SubscriptionGroupDTO subscriptionGroup) {
     if (!subscriptionGroup.isActive()) {
       LOG.debug("Subscription Group: {} is inactive. Skipping.", subscriptionGroup.getId());
       return;

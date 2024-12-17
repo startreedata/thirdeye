@@ -155,9 +155,38 @@ export class AlertListPage extends BasePage {
                 '{"name": "Clicks_SUM_mean-variance-rule-dup","description": "","template": {"name": "startree-mean-variance"},"templateProperties": {"dataSource": "pinot","dataset": "AdCampaignData","aggregationColumn": "Clicks","aggregationFunction": "SUM","monitoringGranularity": "P1D","timezone": "UTC","queryFilters": "","sensitivity": "-6","lookback": "P21D"},"cron": "0 0 5 ? * MON-FRI *","auth": {"namespace": null}}'
             );
         });
+        const createBtn = this.page.locator("#next-bottom-bar-btn");
+        await expect(createBtn).toHaveText("Create Alert");
+        const createAlertApiRequest = this.page.waitForRequest("/api/alerts");
+        const createAlertApiResponse = this.page.waitForResponse("/api/alerts");
+        await createBtn.click({ force: true });
+        const createAlertRequest = await createAlertApiRequest;
+        const createAlertResponse = await createAlertApiResponse;
 
-        await this.page.locator("#next-bottom-bar-btn").click({ force: true });
-        await this.page.waitForURL("http://localhost:7004/alerts/*/view?*");
+        expect(createAlertRequest.method()).toBe("POST");
+        expect(createAlertRequest.postDataJSON()[0]).toEqual({
+            name: "Clicks_SUM_mean-variance-rule-dup",
+            description: "",
+            template: { name: "startree-mean-variance" },
+            templateProperties: {
+                dataSource: "pinot",
+                dataset: "AdCampaignData",
+                aggregationColumn: "Clicks",
+                aggregationFunction: "SUM",
+                monitoringGranularity: "P1D",
+                timezone: "UTC",
+                queryFilters: "",
+                sensitivity: "-6",
+                lookback: "P21D",
+            },
+            cron: "0 0 5 ? * MON-FRI *",
+            auth: { namespace: null },
+        });
+        const responseBody = await createAlertResponse.json();
+        const alertId = responseBody[0].id;
+        await this.page.waitForURL(
+            `http://localhost:7004/alerts/${alertId}/view?*`
+        );
     }
 
     async editAlert() {
@@ -168,23 +197,23 @@ export class AlertListPage extends BasePage {
         );
         tableActions.nth(1).click();
 
-        const topAlertId = this.alertResponseData.reverse()[0].id;
+        const topAlert = this.alertResponseData.reverse()[0];
+        console.log("topp", topAlert);
+        console.log("firstAlert", await firstAlert.allTextContents());
         await this.page.waitForURL(
-            `http://localhost:7004/alerts/create/copy/${topAlertId}`
+            `http://localhost:7004/alerts/${topAlert.id}/update`
         );
         await this.page.waitForURL(
-            `http://localhost:7004/alerts/${topAlertId}/update/json-editor?*`
+            `http://localhost:7004/alerts/${topAlert.id}/update/json-editor?*`
         );
 
         const jsonEditor = this.page.locator(".CodeMirror");
         await jsonEditor.click();
-
-        await this.page.evaluate(() => {
+        const editedAlert = `{"id": ${topAlert.id}, "name": "Clicks_SUM_mean-variance-rule-dup-edit","description": "","template": {"name": "startree-mean-variance"},"templateProperties": {"dataSource": "pinot","dataset": "AdCampaignData","aggregationColumn": "Clicks","aggregationFunction": "SUM","monitoringGranularity": "P1D","timezone": "UTC","queryFilters": "","sensitivity": "-6","lookback": "P21D"},"cron": "0 0 5 ? * MON-FRI *","auth": {"namespace": null}}`;
+        await this.page.evaluate((editedAlert) => {
             const editor = document.querySelector(".CodeMirror")?.CodeMirror;
-            editor.setValue(
-                '{"name": "Clicks_SUM_mean-variance-rule-dup-edit","description": "","template": {"name": "startree-mean-variance"},"templateProperties": {"dataSource": "pinot","dataset": "AdCampaignData","aggregationColumn": "Clicks","aggregationFunction": "SUM","monitoringGranularity": "P1D","timezone": "UTC","queryFilters": "","sensitivity": "-6","lookback": "P21D"},"cron": "0 0 5 ? * MON-FRI *","auth": {"namespace": null}}'
-            );
-        });
+            editor.setValue(editedAlert);
+        }, editedAlert);
 
         const saveButton = this.page.locator("#next-bottom-bar-btn");
         expect(saveButton).toBeDisabled();
@@ -205,19 +234,92 @@ export class AlertListPage extends BasePage {
         const evaluateApiResponse = this.page.waitForResponse(
             "/api/alerts/evaluate"
         );
+        await this.page.getByTestId("preview-chart-button").click();
 
         const insightRequest = await insightApiRequest;
+
         const insightResponse = await insightApiResponse;
 
         const evaluateRequest = await evaluateApiRequest;
         const evaluateResponse = await evaluateApiResponse;
 
-        await this.page.getByTestId("preview-chart-button").click();
+        expect(insightRequest.postDataJSON().alert).toEqual(
+            JSON.parse(editedAlert)
+        );
+        const evaluateReq = JSON.parse(editedAlert);
+        delete evaluateReq.id;
+        expect(evaluateRequest.postDataJSON().alert).toEqual(evaluateReq);
+        const saveButtonAfterLoadChart = this.page.locator(
+            "#next-bottom-bar-btn"
+        );
+        await expect(saveButtonAfterLoadChart).toBeEnabled();
+        await expect(saveButtonAfterLoadChart).toHaveText("Update Alert");
+
+        const updateApiRequest = this.page.waitForRequest("/api/alerts");
+        const updateApiResponse = this.page.waitForResponse("/api/alerts");
+        await saveButtonAfterLoadChart.click();
+
+        const updateAlertRequest = await updateApiRequest;
+
+        const updateAlertResponse = await updateApiResponse;
+
+        expect(updateAlertRequest.method()).toBe("PUT");
+        expect(updateAlertRequest.postDataJSON()[0]).toEqual(
+            JSON.parse(editedAlert)
+        );
+        expect(updateAlertResponse.status()).toBe(200);
+
+        await this.page.waitForURL(
+            `http://localhost:7004/alerts/${topAlert.id}?*`
+        );
+        await this.page.waitForURL(
+            `http://localhost:7004/alerts/${topAlert.id}/view?*`
+        );
     }
 
-    async resetAlert() {}
+    async resetAlert() {
+        const firstAlert = this.page.locator(".BaseTable__row").nth(0);
+        firstAlert.locator(">div").nth(0).click();
+        const tableActions = this.page.locator(
+            '[data-testId="alert-list-actions"] button'
+        );
+        tableActions.nth(3).click();
+
+        const topAlert = this.alertResponseData.reverse()[0];
+        await expect(
+            this.page.locator('[data-testId="reset-alert-dialog-content"]')
+        ).toHaveText(
+            `Resetting the alert will delete existing anomalies as well as saved investigations and rerun the detection algorithm.Are you sure you want to reset the "${topAlert.name}" alert?`
+        );
+        const actionBttons = this.page.locator(
+            '[data-testId="reset-alert-dialog-actions"] > button'
+        );
+        expect(actionBttons).toHaveCount(2);
+        expect(actionBttons.nth(0)).toHaveText("Cancel");
+        expect(actionBttons.nth(1)).toHaveText("Confirm");
+        await actionBttons.nth(0).click();
+        expect(
+            this.page.locator('[data-testId="reset-alert-dialog-content"]')
+        ).toHaveCount(0);
+        tableActions.nth(3).click();
+        actionBttons.nth(1).click();
+        const resetApiRequest = this.page.waitForRequest(
+            `/api/alerts/${topAlert.id}/reset`
+        );
+        const resetApiResponse = this.page.waitForResponse(
+            `/api/alerts/${topAlert.id}/reset`
+        );
+        const resetRequest = await resetApiRequest;
+        const resetResponse = await resetApiResponse;
+        expect(resetRequest.method()).toBe("POST");
+        expect(resetResponse.status()).toBe(200);
+        await expect(this.page.getByTestId("notfication-container")).toHaveText(
+            `Anomalies deleted and detection algorithm successfully ran for "${topAlert.name}"`
+        );
+    }
 
     async deleteAlert() {
+        const topAlert = this.alertResponseData.reverse()[0];
         const firstAlert = this.page.locator(".BaseTable__row").nth(0);
         firstAlert.locator(">div").nth(0).click();
         const tableActions = this.page.locator(
@@ -226,9 +328,9 @@ export class AlertListPage extends BasePage {
         tableActions.nth(2).click();
         await expect(
             this.page.locator('[data-testId="delete-alert-dialog-content"]')
-        ).toHaveText("");
+        ).toHaveText(`Are you sure you want to delete ${topAlert.name}?`);
         const actionBttons = this.page.locator(
-            '[data-testId="delete-alert-dialog-actions"]'
+            '[data-testId="delete-alert-dialog-actions"] > button'
         );
         expect(actionBttons).toHaveCount(2);
         expect(actionBttons.nth(0)).toHaveText("Cancel");
@@ -236,8 +338,21 @@ export class AlertListPage extends BasePage {
         actionBttons.nth(0).click();
         expect(
             this.page.locator('[data-testId="delete-alert-dialog-content"]')
-        ).toBeFalsy();
+        ).toHaveCount(0);
         tableActions.nth(2).click();
         actionBttons.nth(1).click();
+        const deleteApiRequest = this.page.waitForRequest(
+            `/api/alerts/${topAlert.id}`
+        );
+        const deleteApiResponse = this.page.waitForResponse(
+            `/api/alerts/${topAlert.id}`
+        );
+        const resetRequest = await deleteApiRequest;
+        const resetResponse = await deleteApiResponse;
+        expect(resetRequest.method()).toBe("DELETE");
+        expect(resetResponse.status()).toBe(200);
+        await expect(this.page.getByTestId("notfication-container")).toHaveText(
+            "Alert deleted successfully"
+        );
     }
 }

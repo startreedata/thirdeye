@@ -202,6 +202,7 @@ export const AlertsAllPage: FunctionComponent = () => {
             onOk: () => {
                 resetAlert(alert.id);
             },
+            dataTestId: "reset-alert-dialog",
         });
     };
 

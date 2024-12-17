@@ -12,16 +12,23 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { test } from "@playwright/test";
-import { HomePage } from "../pages/home";
+import { Page, expect } from "@playwright/test";
+import { BasePage } from "./base";
 
-test("Home Page", async ({ page }) => {
-    const homePage = new HomePage(page);
-    await homePage.gotoHomePage();
-    await homePage.resolveApis();
-    await homePage.checkHeadingSection();
-    await homePage.checkSummaryCards();
-    await homePage.checkActiveAlerts();
-    await homePage.checkSubscriptionGroups();
-    await homePage.checkRecentAnomalies();
-});
+export class AnomalyListPage extends BasePage {
+    readonly page: Page;
+    alertResponseData: any;
+    subscriptionResponseData: any;
+    anomalyResponseData: any;
+
+    constructor(page: Page) {
+        super(page);
+        this.page = page;
+    }
+
+    async goToAnomalyListPage() {
+        await this.page.goto(
+            "http://localhost:7004/anomalies/all/range/anomalies-list?*"
+        );
+    }
+}

@@ -62,10 +62,6 @@ public class SubscriptionGroupDTO extends AbstractDTO {
     return active;
   }
 
-  public String getCron() {
-    return getCronExpression();
-  }
-
   public SubscriptionGroupDTO setActive(final boolean active) {
     this.active = active;
     return this;

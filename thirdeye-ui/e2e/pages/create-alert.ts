@@ -156,7 +156,7 @@ export class CreateAlertPage extends BasePage {
         return data;
     }
 
-    async selectDatasetAndMetric() {
+    async selectDatasetAndMetric(customMetric = false) {
         await this.page.getByText("Dataset Select a dataset to").click();
         await this.page
             .getByRole("option", { name: this.datasetsResponseData[0].name })
@@ -166,6 +166,15 @@ export class CreateAlertPage extends BasePage {
             .locator("div")
             .nth(1)
             .click();
+        if (customMetric) {
+            await this.page
+                .getByRole("option", {
+                    name: "Custom (Metric + Aggregation function)",
+                })
+                .click();
+
+            return;
+        }
         const metrics = this.metricsResponseData?.find(
             (m) => m?.dataset?.name === this.datasetsResponseData[0].name
         );
@@ -285,6 +294,40 @@ export class CreateAlertPage extends BasePage {
         }
         await this.page
             .getByRole("button", { name: "Run enumerations" })
+            .click();
+    }
+
+    async addAdvancedOptions() {
+        await this.page
+            .getByRole("button", { name: "Add advanced options" })
+            .click();
+        await this.page.getByTestId("optionedselect-daysOfWeek").click();
+        await this.page
+            .getByRole("option", {
+                name: "MONDAY",
+            })
+            .click();
+        await this.page.getByTestId("optionedselect-daysOfWeek").click();
+        await this.page
+            .getByRole("option", {
+                name: "TUESDAY",
+            })
+            .click();
+        await this.page.getByRole("button", { name: "Apply filter" }).click();
+        await this.page.getByRole("button", { name: "Reload preview" }).click();
+    }
+
+    async addCustomMetric() {
+        const metrics = this.metricsResponseData?.find(
+            (m) => m?.dataset?.name === this.datasetsResponseData[0].name
+        );
+        const textarea = await this.page.locator("textarea:first-of-type");
+        textarea.fill(`SUM(${metrics.name})`);
+        await this.page.getByPlaceholder("Select granularity").click();
+        await this.page.getByRole("option", { name: "Daily" }).click();
+        await this.page
+            .locator("div")
+            .filter({ hasText: /^Single metric$/ })
             .click();
     }
 }

@@ -56,3 +56,31 @@ test("Create Multi Dimensions SQL Alert", async ({ page }) => {
     await createAlertPage.resolveEvaluateApis();
     await createAlertPage.createAlert();
 });
+
+test("Create Alert With Advanced Options", async ({ page }) => {
+    const createAlertPage = new CreateAlertPage(page);
+    await createAlertPage.goToCreateAlertPage();
+    await createAlertPage.resolveApis();
+    await createAlertPage.checkHeader();
+    await createAlertPage.selectDatasetAndMetric();
+    await createAlertPage.selectStaticFields();
+    await createAlertPage.resolveRecommendApis();
+    await createAlertPage.selectDetectionAlgorithm();
+    await createAlertPage.resolveEvaluateApis();
+    await createAlertPage.addAdvancedOptions();
+    await createAlertPage.resolveEvaluateApis();
+    await createAlertPage.createAlert();
+});
+
+test("Create Alert With Custom Metric", async ({ page }) => {
+    const createAlertPage = new CreateAlertPage(page);
+    await createAlertPage.goToCreateAlertPage();
+    await createAlertPage.resolveApis();
+    await createAlertPage.checkHeader();
+    await createAlertPage.selectDatasetAndMetric(true);
+    await createAlertPage.addCustomMetric();
+    await createAlertPage.resolveRecommendApis();
+    await createAlertPage.selectDetectionAlgorithm();
+    await createAlertPage.resolveEvaluateApis();
+    await createAlertPage.createAlert();
+});

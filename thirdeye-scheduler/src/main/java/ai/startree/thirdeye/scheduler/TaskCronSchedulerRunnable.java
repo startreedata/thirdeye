@@ -79,9 +79,7 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
     this.jobClazz = jobClazz;
     this.cronMaxTriggersPerMinute = cronMaxTriggersPerMinute;
     this.log = LoggerFactory.getLogger(loggerClass);
-
     this.groupMatcher = GroupMatcher.jobGroupEquals(taskType.toString());
-    
   }
 
   @Override

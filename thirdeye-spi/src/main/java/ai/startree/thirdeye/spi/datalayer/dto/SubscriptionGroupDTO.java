@@ -18,7 +18,6 @@ import com.google.common.base.Objects;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
-import org.joda.time.Period;
 
 public class SubscriptionGroupDTO extends AbstractDTO {
 

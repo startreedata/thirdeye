@@ -69,7 +69,7 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
       scheduler.setJobFactory(guiceJobFactory);
       scheduler.start();
     } catch (final SchedulerException e) {
-      throw new RuntimeException("Failed to initialize the scheduler", e);
+      throw new RuntimeException("Failed to initialize the %s scheduler".formatted(taskType), e);
     }
     this.entityDao = entityDao;
     this.cronGetter = cronGetter;

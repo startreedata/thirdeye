@@ -12,8 +12,25 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-export interface TitleCardProps {
-    title: React.ReactNode;
-    content: React.ReactNode;
-    datatestId?: string;
+import { Page, expect } from "@playwright/test";
+import { BasePage } from "./base";
+
+export class AlertListPage extends BasePage {
+    readonly page: Page;
+    alertResponseData: any;
+    subscriptionResponseData: any;
+    anomalyResponseData: any;
+
+    constructor(page: Page) {
+        super(page);
+        this.page = page;
+    }
+
+    async goToAlertPage() {
+        await this.page.goto("http://localhost:7004/alerts/all");
+    }
+
+    async checkHeader() {
+        await expect(this.page.locator("h4")).toHaveText("Alerts");
+    }
 }

@@ -40,7 +40,7 @@ export const ActiveAlertsCountV2: FunctionComponent<ActiveAlertsCountProps> = ({
             direction="row"
             justifyContent="space-between"
         >
-            <Grid item>
+            <Grid item data-testId="alert-count">
                 <Grid container alignItems="center" direction="row">
                     <Grid item>
                         <LoadingErrorStateSwitch
@@ -76,7 +76,7 @@ export const ActiveAlertsCountV2: FunctionComponent<ActiveAlertsCountProps> = ({
                     </Grid>
                 </Grid>
             </Grid>
-            <Grid item>
+            <Grid item data-testId="alert-create">
                 <IconLink
                     icon={<AddCircleOutline />}
                     label={t("label.create-entity", {

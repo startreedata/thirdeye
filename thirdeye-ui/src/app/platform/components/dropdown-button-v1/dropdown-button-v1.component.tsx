@@ -32,6 +32,7 @@ export const DropdownButtonV1: FunctionComponent<DropdownButtonV1Props> = ({
     className,
     onClick,
     children,
+    dataTestId = "dropdown-button",
     ...otherProps
 }) => {
     const [menuElement, setMenuElement] = useState<HTMLElement | null>();
@@ -72,6 +73,7 @@ export const DropdownButtonV1: FunctionComponent<DropdownButtonV1Props> = ({
                     {...otherProps}
                     className={classNames(className, "dropdown-button-v1")}
                     color={color}
+                    data-testId={dataTestId}
                     disabled={disabled}
                     endIcon={<KeyboardArrowDownIcon />}
                     onClick={handleButtonClick}

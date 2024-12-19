@@ -121,6 +121,7 @@ export const AnomalyFiltersSelection: FunctionComponent<AnomalyFiltersSelectionP
                                     <Grid item>
                                         <Typography
                                             color="textSecondary"
+                                            data-testId="filter-text"
                                             variant="caption"
                                         >
                                             {t(
@@ -196,6 +197,7 @@ export const AnomalyFiltersSelection: FunctionComponent<AnomalyFiltersSelectionP
                             <Grid item>
                                 <Button
                                     color="primary"
+                                    data-testId="clear-filters"
                                     data-testid={
                                         ANOMALY_FILTERS_TEST_IDS.CLEAR_BTN
                                     }

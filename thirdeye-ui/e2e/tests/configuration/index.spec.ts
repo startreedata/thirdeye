@@ -12,3 +12,12 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { test } from "@playwright/test";
+import { ConfigurationPage } from "../../pages/configuration";
+
+test("Configuration Page", async ({ page }) => {
+    const configurationPage = new ConfigurationPage(page);
+    await configurationPage.gotToConfigPage();
+    await configurationPage.checkHeader();
+    await configurationPage.checkTabs();
+});

@@ -140,6 +140,7 @@ export const AddFilterModal: FunctionComponent<AddFilterModalProps> = ({
                 return (
                     <Button
                         color="primary"
+                        data-testId="modify-filters"
                         data-testid={ANOMALY_FILTERS_TEST_IDS.MODIFY_BTN}
                         size="small"
                         onClick={opeCallback}

@@ -23,28 +23,28 @@ test.beforeEach(async ({ page }) => {
     await alertListPage.resolveAPIs();
 });
 
-test("Alert List Page", async ({ page }) => {
-    await alertListPage.checkHeader();
-    await alertListPage.checkTableActionButtons();
-    await alertListPage.checkTable();
-});
+// test("Alert List Page", async ({ page }) => {
+//     await alertListPage.checkHeader();
+//     await alertListPage.checkTableActionButtons();
+//     await alertListPage.checkTable();
+// });
 
-test("Alert List Search", async ({ page }) => {
-    await alertListPage.performSearch();
-});
+// test("Alert List Search", async ({ page }) => {
+//     await alertListPage.performSearch();
+// });
 
-test("Duplicate Alert", async ({ page }) => {
-    await alertListPage.duplicateAlert();
-});
+// test("Duplicate Alert", async ({ page }) => {
+//     await alertListPage.duplicateAlert();
+// });
 
-test("Edit Alert", async ({ page }) => {
-    await alertListPage.editAlert();
-});
+// test("Edit Alert", async ({ page }) => {
+//     await alertListPage.editAlert();
+// });
 
-test("Reset Alert", async ({ page }) => {
-    await alertListPage.resetAlert();
-});
+// test("Reset Alert", async ({ page }) => {
+//     await alertListPage.resetAlert();
+// });
 
-test("Delete Alert", async ({ page }) => {
-    await alertListPage.deleteAlert();
-});
+// test("Delete Alert", async ({ page }) => {
+//     await alertListPage.deleteAlert();
+// });

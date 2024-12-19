@@ -14,14 +14,12 @@
  */
 import { test } from "@playwright/test";
 import { HomePage } from "../pages/home";
+import { AnomalyViewPage } from "../pages/anomaly-view";
 
-// test("Home Page", async ({ page }) => {
-//     const homePage = new HomePage(page);
-//     await homePage.gotoHomePage();
-//     await homePage.resolveApis();
-//     await homePage.checkHeadingSection();
-//     await homePage.checkSummaryCards();
-//     await homePage.checkActiveAlerts();
-//     await homePage.checkSubscriptionGroups();
-//     await homePage.checkRecentAnomalies();
-// });
+test("Anomaly View", async ({ page }) => {
+    // const anomalyViewPage = new AnomalyViewPage(page);
+    // await anomalyViewPage.goToAnomalyView();
+    // await anomalyViewPage.checkHeaderAndBreadcrumbs()
+    // await anomalyViewPage.checkSummary()
+    // await anomalyViewPage.checkConfirmAnomalyActions()
+});

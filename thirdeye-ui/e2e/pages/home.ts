@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Page, expect } from "@playwright/test";
+import { expect, Page } from "@playwright/test";
 import { BasePage } from "./base";
 // import { getUiAnomaly } from '../../src/app/utils/anomalies/anomalies.util'
 

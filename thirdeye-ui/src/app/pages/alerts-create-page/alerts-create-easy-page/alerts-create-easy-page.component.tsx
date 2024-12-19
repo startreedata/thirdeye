@@ -896,7 +896,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         onAlertPropertyChange(workingAlert);
     };
 
-    const NotificationView = (): JSX.Element => {
+    const notificationView = (): JSX.Element => {
         return (
             <Grid item xs={12}>
                 <PageContentsCardV1 className={classes.notificationContainer}>
@@ -2114,7 +2114,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                 marginTop={2}
                                                                 width="100%"
                                                             >
-                                                                <NotificationView />
+                                                                {notificationView()}
                                                             </Box>
                                                         </Grid>
                                                     )}

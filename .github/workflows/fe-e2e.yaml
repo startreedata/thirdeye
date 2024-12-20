@@ -27,6 +27,11 @@ jobs:
           cd thirdeye-ui
           npm ci --legacy-peer-deps
 
+      - name: Install Playwright Browsers
+        run: |
+          cd thirdeye-ui
+          run: npx playwright install --with-deps
+
       - name: Run local server
         run: |
           cd thirdeye-ui
@@ -46,3 +51,6 @@ jobs:
         run: |
           cd thirdeye-ui
           npx playwright test
+      - name: Stop local server
+        run: |
+          kill $(lsof -t -i:7004)

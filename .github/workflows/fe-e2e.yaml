@@ -38,4 +38,4 @@ jobs:
       - name: Run Playwright tests
         run: |
           cd thirdeye-ui
-          npm playwright test
+          npx playwright test

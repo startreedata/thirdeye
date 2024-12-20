@@ -332,8 +332,6 @@
           <version>3.0.0-M1</version>
           <configuration>
             <autoVersionSubmodules>true</autoVersionSubmodules>
-            <!-- TODO CYRIL need to check if a wait time is necessary with Github Action-->
-            <waitBeforeTagging>0</waitBeforeTagging>
             <developmentVersion>
               ${parsedVersion.majorVersion}.${parsedVersion.nextMinorVersion}.0-SNAPSHOT
             </developmentVersion>

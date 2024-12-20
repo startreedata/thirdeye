@@ -13,20 +13,23 @@
  * the License.
  */
 import { test } from "@playwright/test";
-import { AnomalyListPage } from "../pages/anomaly-list";
+import { ConfigurationEventsPage } from "../../pages/configuration/events";
 
-let anomalyListpage;
-test.beforeEach(async ({ page }) => {
-    anomalyListpage = new AnomalyListPage(page);
-    await anomalyListpage.gotoHomePage();
-    await anomalyListpage.goToAnomalyListPage();
-    await anomalyListpage.resolveAPIs();
+test("Events list", async ({ page }) => {
+    const eventsTab = new ConfigurationEventsPage(page);
+    await eventsTab.gotoEventstab();
+    await eventsTab.checkTableActions();
+    await eventsTab.checkTable();
 });
 
-test("Alert List Page", async ({ page }) => {
-    await anomalyListpage.checkBreadcrumbAndHeader();
-    await anomalyListpage.checkTabs();
-    await anomalyListpage.checkFilters();
-    await anomalyListpage.checkTableActions();
-    await anomalyListpage.checkTable();
+test("Create Event", async ({ page }) => {
+    const eventsTab = new ConfigurationEventsPage(page);
+    await eventsTab.gotoEventstab();
+    await eventsTab.createEvent();
+});
+
+test("Delete Event", async ({ page }) => {
+    const eventsTab = new ConfigurationEventsPage(page);
+    await eventsTab.gotoEventstab();
+    await eventsTab.deleteEvent();
 });

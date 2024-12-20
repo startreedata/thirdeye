@@ -15,13 +15,13 @@
 import { test } from "@playwright/test";
 import { HomePage } from "../pages/home";
 
-// test("Home Page", async ({ page }) => {
-//     const homePage = new HomePage(page);
-//     await homePage.gotoHomePage();
-//     await homePage.resolveApis();
-//     await homePage.checkHeadingSection();
-//     await homePage.checkSummaryCards();
-//     await homePage.checkActiveAlerts();
-//     await homePage.checkSubscriptionGroups();
-//     await homePage.checkRecentAnomalies();
-// });
+test("Home Page", async ({ page }) => {
+    const homePage = new HomePage(page);
+    await homePage.gotoHomePage();
+    await homePage.resolveApis();
+    await homePage.checkHeadingSection();
+    await homePage.checkSummaryCards();
+    await homePage.checkActiveAlerts();
+    await homePage.checkSubscriptionGroups();
+    await homePage.checkRecentAnomalies();
+});

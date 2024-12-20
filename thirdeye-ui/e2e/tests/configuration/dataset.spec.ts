@@ -13,12 +13,13 @@
  * the License.
  */
 import { test } from "@playwright/test";
-import { AnomalyViewPage } from "../pages/anomaly-view";
+import { ConfigurationDataSetPage } from "../../pages/configuration/dataset";
 
-test("Anomaly View", async ({ page }) => {
-    const anomalyViewPage = new AnomalyViewPage(page);
-    await anomalyViewPage.goToAnomalyView();
-    await anomalyViewPage.checkHeaderAndBreadcrumbs();
-    await anomalyViewPage.checkSummary();
-    await anomalyViewPage.checkConfirmAnomalyActions();
+test("Dataset List", async ({ page }) => {});
+
+test("Dataset Delete", async ({ page }) => {
+    const datasetPage = new ConfigurationDataSetPage(page);
+    await datasetPage.goToDatasetTab();
+    await datasetPage.resolveApis();
+    await datasetPage.deleteDataset();
 });

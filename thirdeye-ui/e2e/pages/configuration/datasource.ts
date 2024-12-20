@@ -133,27 +133,27 @@ export class ConfigurationDataSourcePage extends BasePage {
         );
         await expect(this.page.locator("h4")).toHaveText("Create Datasource");
         const newDatasource = `{
-      "name": "newdatasource",
-      "type": "pinot",
-      "defaultQueryOptions": {
-        "timeoutMs": "30000"
-      },
-      "properties": {
-        "zookeeperUrl": "pinot-zookeeper-headless.managed.svc.cluster.local:2181",
-        "brokerUrl": "pinot-pinot-broker-headless.managed.svc.cluster.local:8095",
-        "clusterName": "pinot",
-        "controllerConnectionScheme": "https",
-        "controllerHost": "pinot-pinot-controller-headless.managed.svc.cluster.local",
-        "controllerPort": 9000,
-        "oauth": {
-          "enabled": true,
-          "tokenFilePath": "/var/run/secrets/kubernetes.io/serviceaccount/token"
+        "name": "newdatasource",
+        "type": "pinot",
+        "defaultQueryOptions": {
+            "timeoutMs": "30000"
+        },
+        "properties": {
+            "zookeeperUrl": "pinot-zookeeper-headless.managed.svc.cluster.local:2181",
+            "brokerUrl": "pinot-pinot-broker-headless.managed.svc.cluster.local:8095",
+            "clusterName": "pinot",
+            "controllerConnectionScheme": "https",
+            "controllerHost": "pinot-pinot-controller-headless.managed.svc.cluster.local",
+            "controllerPort": 9000,
+            "oauth": {
+            "enabled": true,
+            "tokenFilePath": "/var/run/secrets/kubernetes.io/serviceaccount/token"
+            }
+        },
+        "auth": {
+            "namespace": null
         }
-      },
-      "auth": {
-        "namespace": null
-      }
-    }`;
+        }`;
         await this.page.evaluate((newDatasource) => {
             const editor = document.querySelector(".CodeMirror")?.CodeMirror;
             editor.setValue(newDatasource);
@@ -190,7 +190,7 @@ export class ConfigurationDataSourcePage extends BasePage {
             `configuration/datasources/update/id/${datasourceToEdit.id}`
         );
         await expect(this.page.locator("h4")).toHaveText("Update Datasource");
-        // Name is not nallowed to updaye. What is allowed to update?
+        // Name is not allowed to update. What is allowed to update?
         // const editedDatasource = `{
         //   "name": "newdatasource",
         //   "type": "pinot",
@@ -248,7 +248,9 @@ export class ConfigurationDataSourcePage extends BasePage {
         );
         await deleteBtn.click();
         await expect(this.page.getByTestId("dialoag-content")).toHaveText(
-            "Are you sure you want to delete mypinot?"
+            `Are you sure you want to delete ${
+                datasources[datasources.length - 1].name
+            }?`
         );
         const actionButtons = this.page.locator(
             '[data-testId="dialoag-actions"] > button'

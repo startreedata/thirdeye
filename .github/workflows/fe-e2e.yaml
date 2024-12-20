@@ -30,10 +30,17 @@ jobs:
       - name: Run local server
         run: |
           cd thirdeye-ui
-          npm run start
+          npm run start &
         env:
           VERCEL_ACCESS_TOKEN: ${{ secrets.E2E_TOKEN }}
           TE_DEV_PROXY_SERVER: ${{ secrets.E2E_PROXY }}
+
+      - name: Wait for server to be ready
+        run: |
+          until curl -s http://localhost:7004; do
+            echo "Waiting for server to be ready..."
+            sleep 5
+          done
 
       - name: Run Playwright tests
         run: |

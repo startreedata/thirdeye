@@ -45,4 +45,5 @@ export interface DialogDataV1 {
     onBeforeOk?: () => boolean;
     onOk?: () => void;
     onCancel?: () => void;
+    dataTestId?: string;
 }

@@ -93,10 +93,11 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = ({
                         <Grid
                             container
                             alignItems="center"
+                            data-testId="anomaly-summary"
                             justifyContent="space-between"
                         >
                             {/* Start */}
-                            <Grid item>
+                            <Grid item data-testId="anomaly-start">
                                 <AnomalySummaryCardDetail
                                     label={t("label.anomaly-start")}
                                     value={`${dateFormatter(
@@ -107,7 +108,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = ({
                             </Grid>
 
                             {/* End */}
-                            <Grid item>
+                            <Grid item data-testId="anomaly-end">
                                 <AnomalySummaryCardDetail
                                     label={t("label.anomaly-end")}
                                     value={`${dateFormatter(
@@ -118,7 +119,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = ({
                             </Grid>
 
                             {/* Duration */}
-                            <Grid item>
+                            <Grid item data-testId="anomaly-duration">
                                 <AnomalySummaryCardDetail
                                     label="Anomaly duration"
                                     value={uiAnomaly.duration}
@@ -126,7 +127,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = ({
                             </Grid>
 
                             {/* Seasonality */}
-                            <Grid item>
+                            <Grid item data-testId="anomaly-seasonality">
                                 <LoadingErrorStateSwitch
                                     isError={status === ActionStatus.Error}
                                     isLoading={
@@ -158,7 +159,7 @@ export const AnomalyCard: FunctionComponent<AnomalyCardProps> = ({
                             </Grid>
 
                             {/* Deviation (Current/Predicted) */}
-                            <Grid item>
+                            <Grid item data-testId="anomaly-deviation">
                                 <AnomalySummaryCardDetail
                                     label={`${t("label.deviation")} (${t(
                                         "label.current"

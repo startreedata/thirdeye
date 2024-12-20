@@ -15,4 +15,5 @@
 export interface TitleCardProps {
     title: React.ReactNode;
     content: React.ReactNode;
+    datatestId?: string;
 }

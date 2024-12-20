@@ -101,6 +101,7 @@
     "devDependencies": {
         "@iconify/react": "^3.2.2",
         "@musement/iso-duration": "^1.0.0",
+        "@playwright/test": "^1.49.1",
         "@pmmmwh/react-refresh-webpack-plugin": "0.5.11",
         "@prettier/plugin-xml": "1.0.2",
         "@semantic-release/changelog": "6.0.1",
@@ -116,6 +117,7 @@
         "@types/jest": "^26.0.19",
         "@types/lodash": "^4.14.167",
         "@types/luxon": "3.2.0",
+        "@types/node": "^22.10.1",
         "@types/react": "^16.14.15",
         "@types/react-highlight-words": "^0.16.1",
         "@types/react-show-more-text": "^1.4.2",
@@ -175,6 +177,5 @@
         "webpack-dev-server": "4.7.3",
         "webpack-retry-chunk-load-plugin": "2.2.0",
         "webpackbar": "5.0.0-3"
-    },
-    "peerDependencies": {}
+    }
 }

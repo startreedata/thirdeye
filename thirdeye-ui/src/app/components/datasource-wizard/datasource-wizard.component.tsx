@@ -143,7 +143,11 @@ export const DatasourceWizard: FunctionComponent<DatasourceWizardProps> = ({
                             </Button>
                         </Grid>
                         <Grid item>
-                            <Button color="primary" onClick={handleSubmitClick}>
+                            <Button
+                                color="primary"
+                                data-testId="create-datasource-btn"
+                                onClick={handleSubmitClick}
+                            >
                                 {submitBtnLabel}
                             </Button>
                         </Grid>

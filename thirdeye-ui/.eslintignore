@@ -36,6 +36,7 @@ src/test/e2e/downloads/
 src/test/e2e/screenshots/
 src/test/e2e/support/
 src/test/e2e/videos/
+e2e
 
 # Semantic Release (ESLint rules don't agree with how these configs are written)
 release.config.js

@@ -61,6 +61,7 @@ export const RecipientDetails: FunctionComponent<RecipientDetailsProps> = ({
         <Grid item xs={12}>
             <Card>
                 <CardHeader
+                    data-testid="recepient-details-card-header"
                     subheader={t(
                         "message.configure-notification-channels-that-will-receive-updates-from-this-subscription-group"
                     )}

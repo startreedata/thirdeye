@@ -212,6 +212,7 @@ export const AnomaliesViewInformationPage: FunctionComponent = () => {
                         />
                         <Button
                             component="button"
+                            data-testId="delete-anomaly-btn"
                             variant="contained"
                             onClick={handleAnomalyDelete}
                         >

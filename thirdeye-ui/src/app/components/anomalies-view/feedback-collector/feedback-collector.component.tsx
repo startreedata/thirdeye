@@ -36,8 +36,19 @@ export const FeedbackCollector: FunctionComponent<FeedbackCollectorProps> = ({
 
     return (
         <>
-            <Grid container alignItems="center" justifyContent="space-between">
-                <Grid item lg md={5} sm={12}>
+            <Grid
+                container
+                alignItems="center"
+                data-testId="feedback-collector-container"
+                justifyContent="space-between"
+            >
+                <Grid
+                    item
+                    lg
+                    data-testId="feedback-collector-text"
+                    md={5}
+                    sm={12}
+                >
                     <Typography variant="h4">
                         {t("label.confirm-anomaly")}
                     </Typography>
@@ -47,7 +58,13 @@ export const FeedbackCollector: FunctionComponent<FeedbackCollectorProps> = ({
                         )}
                     </Typography>
                 </Grid>
-                <Grid item lg md={7} sm={12}>
+                <Grid
+                    item
+                    lg
+                    data-testId="feedback-collector-buttons"
+                    md={7}
+                    sm={12}
+                >
                     <Grid container justifyContent="flex-end">
                         <Grid item>
                             <AnomalyFeedbackModal
@@ -58,6 +75,7 @@ export const FeedbackCollector: FunctionComponent<FeedbackCollectorProps> = ({
                                     return (
                                         <Button
                                             color="primary"
+                                            data-testId="not-an-anomaly"
                                             variant="outlined"
                                             onClick={() => {
                                                 setLocalFeedback({
@@ -84,6 +102,7 @@ export const FeedbackCollector: FunctionComponent<FeedbackCollectorProps> = ({
                                     return (
                                         <Button
                                             color="primary"
+                                            data-testId="is-an-anomaly"
                                             variant="outlined"
                                             onClick={openCallback}
                                         >
@@ -100,6 +119,7 @@ export const FeedbackCollector: FunctionComponent<FeedbackCollectorProps> = ({
                             <Button
                                 color="primary"
                                 component={RouterLink}
+                                data-testId="investigate-anomaly"
                                 size="medium"
                                 to={`${getRootCauseAnalysisForAnomalyInvestigateV2Path(
                                     anomaly?.id

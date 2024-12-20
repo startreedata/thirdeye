@@ -161,6 +161,7 @@ export const EventsWizard: FunctionComponent<EventWizardProps> = ({
                         <Grid item>
                             <Button
                                 color="primary"
+                                data-testId="create-event-btn"
                                 onClick={handleSubmit(
                                     onSubmitEventsPropertiesForm
                                 )}

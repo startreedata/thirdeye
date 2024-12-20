@@ -66,6 +66,7 @@ export const NotificationDisplayV1: FunctionComponent<NotificationDisplayV1Props
             <div
                 {...otherProps}
                 className={classNames(className, "notification-display-v1")}
+                data-testId="notfication-container"
             >
                 {notification && (
                     <Snackbar

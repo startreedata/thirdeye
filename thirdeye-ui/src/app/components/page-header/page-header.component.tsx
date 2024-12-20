@@ -105,6 +105,7 @@ export const PageHeader: FunctionComponent<PageHeaderProps> = ({
                     <Grid
                         item
                         className={pageHeaderStyles.noPaddingBottom}
+                        data-testId="breadcrumbs"
                         xs={12}
                     >
                         {breadcrumbs && <Breadcrumbs crumbs={breadcrumbs} />}
@@ -166,12 +167,14 @@ export const PageHeader: FunctionComponent<PageHeaderProps> = ({
                         <Grid item xs={12}>
                             <Tabs
                                 className="page-header-sub-nav"
+                                data-testId="tabs"
                                 value={subNavigationSelected}
                             >
                                 {subNavigation.map((subNavConfig, idx) => {
                                     return (
                                         <Tab
                                             component={RouterLink}
+                                            data-testId={`tab-${idx}`}
                                             key={subNavConfig.link}
                                             label={subNavConfig.label}
                                             to={subNavConfig.link}

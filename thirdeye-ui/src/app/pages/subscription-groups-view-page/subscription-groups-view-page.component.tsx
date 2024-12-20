@@ -233,6 +233,7 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
             <PageHeaderActionsV1>
                 <Button
                     color="primary"
+                    data-testId="edit-subscription-group"
                     variant="outlined"
                     onClick={handleSubscriptionGroupEdit}
                 >
@@ -241,6 +242,7 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
                 <LocalThemeProviderV1 primary={lightV1.palette.error}>
                     <Button
                         color="primary"
+                        data-testId="delete-subscription-group"
                         variant="outlined"
                         onClick={handleSubscriptionGroupDelete}
                     >

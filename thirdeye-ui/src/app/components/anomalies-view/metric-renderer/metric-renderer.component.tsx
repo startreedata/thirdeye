@@ -42,7 +42,7 @@ export const MetricRenderer: FunctionComponent<MetricRendererProps> = ({
     }, [alert, alertData]);
 
     return (
-        <Grid container spacing={1}>
+        <Grid container data-testId="anomaly-metric" spacing={1}>
             <Grid item color="text.disabled">
                 <Typography color="textSecondary" variant="body1">
                     {t("label.metric")}:

@@ -245,6 +245,7 @@ export const Slack: FunctionComponent<SlackProps> = ({
                         inputComponent={
                             <TextField
                                 fullWidth
+                                data-testid="slack-owner-container"
                                 error={Boolean(
                                     errors && errors.textConfiguration?.owner
                                 )}

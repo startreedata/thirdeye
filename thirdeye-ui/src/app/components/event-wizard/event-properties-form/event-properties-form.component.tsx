@@ -28,12 +28,18 @@ export const EventPropertiesForm: FunctionComponent<EventPropertiesFormProps> =
 
         return (
             <Grid container>
-                <Grid item xs={12}>
+                <Grid item data-testId="event-properties-title" xs={12}>
                     <Typography variant="h5">
                         {t("label.event-properties")}
                     </Typography>
                 </Grid>
-                <Grid container item alignItems="center" xs={12}>
+                <Grid
+                    container
+                    item
+                    alignItems="center"
+                    data-testId="event-properties-form"
+                    xs={12}
+                >
                     {/* Name input */}
                     <InputSection
                         fullWidth={fullWidth}

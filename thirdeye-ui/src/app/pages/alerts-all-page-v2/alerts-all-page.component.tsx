@@ -156,6 +156,7 @@ export const AlertsAllPage: FunctionComponent = () => {
             okButtonText: t("label.confirm"),
             cancelButtonText: t("label.cancel"),
             onOk: () => handleAlertDeleteOk(uiAlert),
+            dataTestId: "delete-alert-dialog",
         });
     };
 
@@ -201,6 +202,7 @@ export const AlertsAllPage: FunctionComponent = () => {
             onOk: () => {
                 resetAlert(alert.id);
             },
+            dataTestId: "reset-alert-dialog",
         });
     };
 
@@ -310,6 +312,7 @@ export const AlertsAllPage: FunctionComponent = () => {
                         <DropdownButtonV1
                             color="primary"
                             data-testid="create-menu-button"
+                            dataTestId="create-alert-dropdown"
                             dropdownMenuItems={createMenuItems}
                             type={DropdownButtonTypeV1.Regular}
                             onClick={handleAlertRedirect}

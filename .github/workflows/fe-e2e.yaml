@@ -30,7 +30,7 @@ jobs:
       - name: Install Playwright Browsers
         run: |
           cd thirdeye-ui
-          run: npx playwright install --with-deps
+          npx playwright install --with-deps
 
       - name: Run local server
         run: |

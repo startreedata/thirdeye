@@ -23,13 +23,21 @@ jobs:
           cache-dependency-path: './thirdeye-ui/package-lock.json'
 
       - name: Install dependencies
-        run: npm ci --legacy-peer-deps
+        run: |
+          cd thirdeye-ui
+          npm ci --legacy-peer-deps
 
       - name: Install Playwright Browsers
-        run: npm exec playwright install --with-deps
+        run: |
+          cd thirdeye-ui
+          npm exec playwright install --with-deps
 
       - name: Run local server
-        run: VERCEL_ACCESS_TOKEN=${{ secrets.E2E_TOKEN }} TE_DEV_PROXY_SERVER={{ secrets.E2E_PROXY}} npm run start
+        run: |
+          cd thirdeye-ui
+          VERCEL_ACCESS_TOKEN=${{ secrets.E2E_TOKEN }} TE_DEV_PROXY_SERVER={{ secrets.E2E_PROXY}} npm run start
 
       - name: Run Playwright tests
-        run: npm exec playwright test
+        run: |
+          cd thirdeye-ui
+          npm exec playwright test

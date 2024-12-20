@@ -30,7 +30,10 @@ jobs:
       - name: Run local server
         run: |
           cd thirdeye-ui
-          VERCEL_ACCESS_TOKEN=${{ secrets.E2E_TOKEN }} TE_DEV_PROXY_SERVER={{ secrets.E2E_PROXY}} npm run start
+          npm run start
+        env:
+          VERCEL_ACCESS_TOKEN: ${{ secrets.E2E_TOKEN }}
+          TE_DEV_PROXY_SERVER: ${{ secrets.E2E_PROXY }}
 
       - name: Run Playwright tests
         run: |

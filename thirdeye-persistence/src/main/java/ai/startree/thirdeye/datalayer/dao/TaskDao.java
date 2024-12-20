@@ -57,7 +57,8 @@ public class TaskDao {
   // it is important to enforce in-order execution for tasks referencing the same entity - this condition may be relaxed later on
   // for the moment this means we need AND ref_id not in (select ref_id from task_entity where status = 'RUNNING') + ORDER BY id ASC
   private static final String SELECT_AND_LOCK_NEXT_TASK_QUERY = """
-      select * from task_entity
+      SELECT *
+      FROM task_entity FORCE INDEX (task_status_idx)
       WHERE status = 'WAITING'
       AND ref_id not in (select ref_id from task_entity where status = 'RUNNING')
       ORDER BY id ASC

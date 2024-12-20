@@ -27,11 +27,6 @@ jobs:
           cd thirdeye-ui
           npm ci --legacy-peer-deps
 
-      - name: Install Playwright Browsers
-        run: |
-          cd thirdeye-ui
-          npm exec playwright install --with-deps
-
       - name: Run local server
         run: |
           cd thirdeye-ui

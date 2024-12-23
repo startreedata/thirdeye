@@ -153,7 +153,10 @@ export class AlertDetailsPage extends BasePage {
         await this.page
             .locator("a")
             .filter({
-                hasText: this.anomaliesApiResponseData[0]?.id,
+                hasText:
+                    this.anomaliesApiResponseData[
+                        this.anomaliesApiResponseData.length - 1
+                    ]?.id,
             })
             .click();
     }
@@ -180,9 +183,12 @@ export class AlertDetailsPage extends BasePage {
             })
         ).toBeDefined();
         expect(
-            this.page
-                .locator("li")
-                .filter({ hasText: this.anomaliesApiResponseData[0]?.id })
+            this.page.locator("li").filter({
+                hasText:
+                    this.anomaliesApiResponseData[
+                        this.anomaliesApiResponseData.length - 1
+                    ]?.id,
+            })
         ).toBeDefined();
         await expect(this.page.locator("h4").nth(1)).toHaveText(
             "Confirm anomaly"
@@ -212,9 +218,12 @@ export class AlertDetailsPage extends BasePage {
         );
 
         expect(
-            this.page
-                .locator("li")
-                .filter({ hasText: this.anomaliesApiResponseData[0]?.id })
+            this.page.locator("li").filter({
+                hasText:
+                    this.anomaliesApiResponseData[
+                        this.anomaliesApiResponseData.length - 1
+                    ]?.id,
+            })
         ).toBeDefined();
         expect(
             this.page.locator("p").filter({ hasText: "Anomaly start" })

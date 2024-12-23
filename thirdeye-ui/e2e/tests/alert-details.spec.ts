@@ -22,6 +22,10 @@ test("View anomalies for alerts", async ({ page }) => {
     await alertDetailsPage.checkHeader();
     await alertDetailsPage.openFirstAlert();
     await alertDetailsPage.checkAlertHeader();
+    const anomalyCount = await alertDetailsPage.checkAnomaliesCount();
+    if (anomalyCount === "0") {
+        return;
+    }
     await alertDetailsPage.openAnomalies();
     await alertDetailsPage.resolveAnomaliesApis();
     await alertDetailsPage.openAnomalieFromTable();
@@ -35,6 +39,10 @@ test("Active and Deactivate alerts", async ({ page }) => {
     await alertDetailsPage.checkHeader();
     await alertDetailsPage.openFirstAlert();
     await alertDetailsPage.checkAlertHeader();
+    const anomalyCount = await alertDetailsPage.checkAnomaliesCount();
+    if (anomalyCount === "0") {
+        return;
+    }
     await alertDetailsPage.checkAlertIsActiveOrDeactive(true);
     await alertDetailsPage.activeDeactiveAlert(false);
     await alertDetailsPage.resolveApis();

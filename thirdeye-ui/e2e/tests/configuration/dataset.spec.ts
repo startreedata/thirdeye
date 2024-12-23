@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 StarTree Inc
+ * Copyright 2024 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -12,17 +12,14 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-export interface DropdownMenuV1Props {
-    dropdownMenuItems: DropdownMenuItemV1[];
-    anchorEl?: null | Element | ((element: Element) => Element);
-    open: boolean;
-    className?: string;
-    onClose?: () => void;
-    onClick?: (menuItemId: number | string, text: string) => void;
-    dataTestId?: string;
-}
+import { test } from "@playwright/test";
+import { ConfigurationDataSetPage } from "../../pages/configuration/dataset";
 
-export interface DropdownMenuItemV1 {
-    id: number | string;
-    text: string;
-}
+test("Dataset List", async ({ page }) => {});
+
+test("Dataset Delete", async ({ page }) => {
+    const datasetPage = new ConfigurationDataSetPage(page);
+    await datasetPage.goToDatasetTab();
+    await datasetPage.resolveApis();
+    await datasetPage.deleteDataset();
+});

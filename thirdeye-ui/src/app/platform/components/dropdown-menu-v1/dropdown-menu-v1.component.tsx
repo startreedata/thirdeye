@@ -28,6 +28,7 @@ export const DropdownMenuV1: FunctionComponent<DropdownMenuV1Props> = ({
     className,
     onClose,
     onClick,
+    dataTestId = "dropdown-menu",
     ...otherProps
 }) => {
     const handleMenuItemClick = (menuItem: DropdownMenuItemV1): void => {
@@ -41,12 +42,14 @@ export const DropdownMenuV1: FunctionComponent<DropdownMenuV1Props> = ({
                     {...otherProps}
                     anchorEl={anchorEl}
                     className={classNames(className, "dropdown-menu-v1")}
+                    data-testId={dataTestId}
                     open={open}
                     onClose={onClose}
                 >
                     {dropdownMenuItems.map((eachDropdownMenuItem, index) => (
                         <MenuItem
                             className="dropdown-menu-v1-item"
+                            data-testId={`dropdown-option-${index}`}
                             key={index}
                             onClick={() =>
                                 handleMenuItemClick(eachDropdownMenuItem)

@@ -124,6 +124,7 @@ export const SubscriptionGroupListV1: FunctionComponent<SubscriptionGroupListV1P
                             .map((iconName) => (
                                 <Icon
                                     color={theme.palette.primary.dark}
+                                    data-testId={iconName}
                                     fontSize={24}
                                     icon={iconName}
                                     key={iconName}

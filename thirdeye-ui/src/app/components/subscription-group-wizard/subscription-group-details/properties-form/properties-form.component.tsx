@@ -52,9 +52,10 @@ export const PropertiesForm: FunctionComponent<PropertiesFormProps> = ({
 
     return (
         <Grid item xs={12}>
-            <Card>
+            <Card data-testId="card-container">
                 {customHeader || (
                     <CardHeader
+                        data-testId="details-card-header"
                         subheader={t(
                             "message.add-details-that-define-the-groups-purpose-and-frequency"
                         )}
@@ -70,6 +71,7 @@ export const PropertiesForm: FunctionComponent<PropertiesFormProps> = ({
                             <TextField
                                 fullWidth
                                 required
+                                data-testId="group-name"
                                 name="name"
                                 type="string"
                                 value={name}

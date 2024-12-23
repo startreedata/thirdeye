@@ -86,6 +86,7 @@ export const DropdownButtonV1: FunctionComponent<DropdownButtonV1Props> = ({
             <DropdownMenuV1
                 anchorEl={menuElement}
                 className="dropdown-button-v1-menu"
+                dataTestId={`${dataTestId}-menu`}
                 dropdownMenuItems={dropdownMenuItems}
                 open={Boolean(menuElement)}
                 onClick={handleMenuItemClick}

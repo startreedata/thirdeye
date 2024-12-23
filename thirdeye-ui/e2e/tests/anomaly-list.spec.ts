@@ -13,15 +13,20 @@
  * the License.
  */
 import { test } from "@playwright/test";
-import { HomePage } from "../pages/home";
+import { AnomalyListPage } from "../pages/anomaly-list";
 
-test("Home Page", async ({ page }) => {
-    const homePage = new HomePage(page);
-    await homePage.gotoHomePage();
-    await homePage.resolveApis();
-    await homePage.checkHeadingSection();
-    await homePage.checkSummaryCards();
-    await homePage.checkActiveAlerts();
-    await homePage.checkSubscriptionGroups();
-    await homePage.checkRecentAnomalies();
+let anomalyListpage;
+test.beforeEach(async ({ page }) => {
+    anomalyListpage = new AnomalyListPage(page);
+    await anomalyListpage.gotoHomePage();
+    await anomalyListpage.goToAnomalyListPage();
+    await anomalyListpage.resolveAPIs();
+});
+
+test("Alert List Page", async ({ page }) => {
+    await anomalyListpage.checkBreadcrumbAndHeader();
+    await anomalyListpage.checkTabs();
+    await anomalyListpage.checkFilters();
+    await anomalyListpage.checkTableActions();
+    await anomalyListpage.checkTable();
 });

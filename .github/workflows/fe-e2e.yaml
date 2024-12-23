@@ -2,7 +2,7 @@ name: TE UI - E2E Tests
 on:
   push:
     branches:
-      - e2e-setup
+      - harshil/e2e-tests
   workflow_dispatch:
 jobs:
   test:
@@ -20,7 +20,7 @@ jobs:
         with:
           node-version: 14
           cache: "npm"
-          cache-dependency-path: './thirdeye-ui/package-lock.json'
+          cache-dependency-path: "./thirdeye-ui/package-lock.json"
 
       - name: Install dependencies
         run: |

@@ -22,8 +22,8 @@ test("View anomalies for alerts", async ({ page }) => {
     await alertDetailsPage.checkHeader();
     await alertDetailsPage.openFirstAlert();
     await alertDetailsPage.checkAlertHeader();
-    const anomalyCount = await alertDetailsPage.checkAnomaliesCount();
-    if (anomalyCount === "0") {
+    const anomalyDisabled = await alertDetailsPage.checkAnomaliesCount();
+    if (anomalyDisabled) {
         return;
     }
     await alertDetailsPage.openAnomalies();
@@ -39,8 +39,8 @@ test("Active and Deactivate alerts", async ({ page }) => {
     await alertDetailsPage.checkHeader();
     await alertDetailsPage.openFirstAlert();
     await alertDetailsPage.checkAlertHeader();
-    const anomalyCount = await alertDetailsPage.checkAnomaliesCount();
-    if (anomalyCount === "0") {
+    const anomalyDisabled = await alertDetailsPage.checkAnomaliesCount();
+    if (anomalyDisabled) {
         return;
     }
     await alertDetailsPage.checkAlertIsActiveOrDeactive(true);

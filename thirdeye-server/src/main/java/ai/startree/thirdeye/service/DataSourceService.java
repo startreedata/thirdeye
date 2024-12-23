@@ -38,11 +38,11 @@ import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import com.google.common.collect.ImmutableMap;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Singleton
 public class DataSourceService extends CrudService<DataSourceApi, DataSourceDTO> {

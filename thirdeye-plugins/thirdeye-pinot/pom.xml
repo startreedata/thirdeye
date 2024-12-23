@@ -18,7 +18,7 @@
   <parent>
     <artifactId>thirdeye-plugins</artifactId>
     <groupId>ai.startree.thirdeye.plugins</groupId>
-    <version>1.368.0-SNAPSHOT</version>
+    <version>1.401.0-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -44,24 +44,144 @@
     </dependency>
     <dependency>
       <groupId>org.apache.pinot</groupId>
-      <artifactId>pinot-jdbc-client</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-log4j12</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.pinot</groupId>
       <artifactId>pinot-java-client</artifactId>
       <exclusions>
         <exclusion>
+          <groupId>org.glassfish.jersey.containers</groupId>
+          <artifactId>jersey-container-grizzly2-http</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.glassfish.jersey.media</groupId>
+          <artifactId>jersey-media-multipart</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.glassfish.jersey.media</groupId>
+          <artifactId>jersey-media-json-jackson</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.glassfish.jersey.inject</groupId>
+          <artifactId>jersey-hk2</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.glassfish.hk2</groupId>
+          <artifactId>hk2-metadata-generator</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>io.swagger</groupId>
+          <artifactId>swagger-jersey2-jaxrs</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.webjars</groupId>
+          <artifactId>swagger-ui</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.helix</groupId>
+          <artifactId>helix-core</artifactId>
+        </exclusion>
+
+        <!-- coming from the zookeeper dependency - zookeeper dep is required -->
+        <exclusion>
+          <groupId>ch.qos.logback</groupId>
+          <artifactId>logback-core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>ch.qos.logback</groupId>
+          <artifactId>logback-classic</artifactId>
+        </exclusion>
+        
+        <!-- these 2 dependencies are removed in pinot-java-client 1.3.0 https://github.com/apache/pinot/commit/6d64650e7c210456a890ee6f9a6eaf05a7ab557b#diff-417cfb66063e3f9b092a1acd9e0842f724d938af0451cb46ee864beb8a915198 -->
+        <exclusion>
           <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-log4j12</artifactId>
+          <artifactId>slf4j-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-databind</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.testng</groupId>
+          <artifactId>testng</artifactId>
+        </exclusion>
+        <!-- not excluded: com.jayway.jsonpath:json-path. It is required if the connection parses the query to get the table names - used during calcite parsing-->
+        <exclusion>
+          <groupId>io.grpc</groupId>
+          <artifactId>grpc-protobuf</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>io.grpc</groupId>
+          <artifactId>grpc-netty-shaded</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.yetus</groupId>
+          <artifactId>audience-annotations</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.mindrot</groupId>
+          <artifactId>jbcrypt</artifactId>
+        </exclusion>
+        <!-- not excluded: com.github.seancfoley:ipaddress. It is required if the connection parses the query-->
+        <exclusion>
+          <groupId>com.yscope.clp</groupId>
+          <artifactId>clp-ffi</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>jakarta.servlet</groupId>
+          <artifactId>jakarta.servlet-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.xerial.snappy</groupId>
+          <artifactId>snappy-java</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.github.luben</groupId>
+          <artifactId>zstd-jni</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.lz4</groupId>
+          <artifactId>lz4-java</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.google.protobuf</groupId>
+          <artifactId>protobuf-java</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>io.grpc</groupId>
+          <artifactId>grpc-stub</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-slf4j2-impl</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-1.2-api</artifactId>
+        </exclusion>
+        
+        <!-- pinot-segment-spi is required  but almost all dependencies can be removed -->
+        <exclusion>
+          <groupId>org.roaringbitmap</groupId>
+          <artifactId>RoaringBitmap</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.roaringbitmap</groupId>
+          <artifactId>RoaringBitmap</artifactId>
+        </exclusion>
+        <!-- not excluded: org.locationtech.jts:jts-core. It is required if the connection parses the query-->
+        <exclusion>
+          <groupId>org.xerial.larray</groupId>
+          <artifactId>larray-mmap</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>net.openhft</groupId>
+          <artifactId>posix</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>net.openhft</groupId>
+          <artifactId>chronicle-core</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
+    
     <dependency>
       <groupId>org.apache.pinot</groupId>
       <artifactId>pinot-spi</artifactId>
@@ -71,15 +191,32 @@
           <artifactId>mail</artifactId>
         </exclusion>
         <exclusion>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-log4j12</artifactId>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-slf4j2-impl</artifactId>
         </exclusion>
         <exclusion>
           <groupId>org.apache.logging.log4j</groupId>
-          <artifactId>log4j-slf4j-impl</artifactId>
+          <artifactId>log4j-1.2-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.yaml</groupId>
+          <artifactId>snakeyaml</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.avro</groupId>
+          <artifactId>avro</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.codehaus.groovy</groupId>
+          <artifactId>groovy-all</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>jcl-over-slf4j</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
+    
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>

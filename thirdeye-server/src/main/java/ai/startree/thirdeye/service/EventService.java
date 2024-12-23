@@ -27,9 +27,9 @@ import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import com.google.common.collect.ImmutableMap;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.List;
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

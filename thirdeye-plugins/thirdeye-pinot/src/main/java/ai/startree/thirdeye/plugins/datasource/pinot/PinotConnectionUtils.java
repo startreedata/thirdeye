@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.apache.pinot.client;
+package ai.startree.thirdeye.plugins.datasource.pinot;
 
 import static ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSource.HTTPS_SCHEME;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
@@ -19,7 +19,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSourceConfig;
+import java.lang.reflect.Field;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -27,6 +27,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.stream.Collectors;
 import javax.net.ssl.SSLContext;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
@@ -36,6 +37,12 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.ssl.TrustStrategy;
+import org.apache.pinot.client.Connection;
+import org.apache.pinot.client.ConnectionFactory;
+import org.apache.pinot.client.JsonAsyncHttpPinotClientTransport;
+import org.apache.pinot.client.JsonAsyncHttpPinotClientTransportFactory;
+import org.apache.pinot.client.PinotClientTransport;
+import org.asynchttpclient.AsyncHttpClient;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +50,39 @@ import org.slf4j.LoggerFactory;
 public class PinotConnectionUtils {
 
   private static final Logger LOG = LoggerFactory.getLogger(PinotConnectionUtils.class);
+  private static final String THIRDEYE_CLIENT_USER_AGENT;
+  
+  // reflection hacks - see usage - will be removed once Connection provides a isClosed method
+  private static final Field transportField;
+  private static final Field asyncHttpClientField;
+  
+  static {
+    String thirdeyeVersion;
+    try {
+      thirdeyeVersion = PinotConnectionUtils.class.getPackage().getImplementationVersion();
+    } catch (Exception e) {
+      thirdeyeVersion = "unknown";
+    }
+    String pinotClientVersion;
+    try {
+      pinotClientVersion = JsonAsyncHttpPinotClientTransportFactory.class.getPackage().getImplementationVersion();
+    } catch (Exception e) {
+      pinotClientVersion = "unknown";
+    }
+    THIRDEYE_CLIENT_USER_AGENT = "thirdeye/" + thirdeyeVersion + " pinot-java-client/" + pinotClientVersion;
+  }
+  
+  static {
+    try {
+      transportField = Connection.class.getDeclaredField("_transport");
+      transportField.setAccessible(true);
+      asyncHttpClientField = JsonAsyncHttpPinotClientTransport.class.getDeclaredField("_httpClient");
+      asyncHttpClientField.setAccessible(true); 
+    } catch (Exception e) {
+      LOG.error("Fatal error. Failed to prepare Pinot Connection.isClosed method by reflection hack. Will not be able to connect to Pinot.");
+      throw new RuntimeException(e);
+    }
+  }
 
   public static CloseableHttpClient createHttpClient(
       final PinotThirdEyeDataSourceConfig config, final @NonNull Map<String, String> additionalHeaders) {
@@ -91,40 +131,45 @@ public class PinotConnectionUtils {
   private static PinotClientTransport buildTransport(
       final PinotThirdEyeDataSourceConfig config,
       final @NonNull Map<String, String> additionalHeaders) {
-    final ThirdEyeJsonAsyncHttpPinotClientTransportFactory factory =
-        new ThirdEyeJsonAsyncHttpPinotClientTransportFactory();
+    final JsonAsyncHttpPinotClientTransportFactory factory = 
+        new JsonAsyncHttpPinotClientTransportFactory();
 
-    optional(config.getControllerConnectionScheme()).ifPresent(
-        schema -> {
-          factory.setScheme(schema);
-          if ("https".equals(schema)) {
-            try {
-              factory.setSslContext(SSLContext.getDefault());
-            } catch (final NoSuchAlgorithmException e) {
-              LOG.warn("SSL context not set for transport!");
-            }
-          }
+    final Properties properties = new Properties();
+    if (config.getControllerConnectionScheme() != null) {
+      final String scheme = config.getControllerConnectionScheme();
+      // not using setScheme on purpose - see https://github.com/apache/pinot/issues/14500
+      properties.setProperty("scheme", scheme);
+      if ("https".equals(scheme)) {
+        try {
+          factory.setSslContext(SSLContext.getDefault());
+        } catch (final NoSuchAlgorithmException e) {
+          // FIXME CYRIL - follow up PR --> throw an exception instead of not setting https
+          LOG.warn("SSL context not set for transport!");
         }
-    );
+      }
+    }
 
     final Map<String, String> mergedHeaders = new HashMap<>();
     optional(config.getHeaders()).ifPresent(mergedHeaders::putAll);
     mergedHeaders.putAll(additionalHeaders);
     factory.setHeaders(mergedHeaders);
 
+    properties.setProperty("appId", THIRDEYE_CLIENT_USER_AGENT);
     optional(config.getReadTimeoutMs())
-        .ifPresent(factory::setReadTimeoutMs);
-
-    optional(config.getRequestTimeoutMs())
-        .ifPresent(factory::setRequestTimeoutMs);
-
+        .ifPresent(v -> properties.setProperty("brokerReadTimeoutMs", v.toString()));
     optional(config.getConnectTimeoutMs())
-        .ifPresent(factory::setConnectTimeoutMs);
+        .ifPresent(v -> properties.setProperty("brokerConnectTimeoutMs", v.toString()));
+    
+    if (config.getBrokerResponseTimeoutMs() != null) {
+      // using error logs to quickly find who is using this
+      LOG.error("brokerResponseTimeoutMs is set in Pinot configuration. This value is ignored and will be removed in a next version.");
+    }
+    if (config.getRequestTimeoutMs() != null) {
+      // using error logs to quickly find who is using this
+      LOG.error("requestTimeoutMs is set in Pinot configuration. This value is ignored and will be removed in a next version.");
+    }
 
-    optional(config.getBrokerResponseTimeoutMs())
-        .ifPresent(factory::setBrokerResponseTimeoutMs);
-
-    return factory.buildTransport();
+    return factory.withConnectionProperties(properties).buildTransport();
   }
 
   // SSL context that accepts all SSL certificate. 
@@ -137,6 +182,18 @@ public class PinotConnectionUtils {
     } catch (final NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
       // This section shouldn't happen because we use Accept All Strategy
       LOG.error("Failed to generate SSL context for Pinot in https.", e);
+      throw new RuntimeException(e);
+    }
+  }
+  
+  // hack function to simulate a isClosed method that is not available in the interface provided by Connection
+  // will be removed once the Connection provides a isClosed method
+  public static boolean isClosed(@NonNull Connection connection) {
+    try {
+      final JsonAsyncHttpPinotClientTransport transport = (JsonAsyncHttpPinotClientTransport) transportField.get(connection);
+      final AsyncHttpClient asyncHttpClient = (AsyncHttpClient) asyncHttpClientField.get(transport);
+      return asyncHttpClient.isClosed();
+    } catch (IllegalAccessException e) {
       throw new RuntimeException(e);
     }
   }

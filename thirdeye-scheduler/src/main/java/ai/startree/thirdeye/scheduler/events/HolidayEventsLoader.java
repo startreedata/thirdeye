@@ -31,6 +31,7 @@ import com.google.api.services.calendar.model.Event;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+// fixme cyril remove usage an dependency on this library - it's 12mb
 import com.ibm.icu.util.TimeZone;
 import java.io.FileInputStream;
 import java.util.ArrayList;

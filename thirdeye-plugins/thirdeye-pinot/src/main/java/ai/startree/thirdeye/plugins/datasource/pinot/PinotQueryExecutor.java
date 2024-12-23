@@ -13,26 +13,29 @@
  */
 package ai.startree.thirdeye.plugins.datasource.pinot;
 
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_PINOT_QUERY_EXECUTION;
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_PINOT_QUERY_QUOTA_EXCEEDED;
+
 import ai.startree.thirdeye.plugins.datasource.pinot.resultset.ThirdEyeDataFrameResultSet;
 import ai.startree.thirdeye.plugins.datasource.pinot.resultset.ThirdEyeResultSet;
 import ai.startree.thirdeye.plugins.datasource.pinot.resultset.ThirdEyeResultSetGroup;
 import ai.startree.thirdeye.plugins.datasource.pinot.resultset.ThirdEyeResultSetMetaData;
+import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.dataframe.DataFrame;
 import ai.startree.thirdeye.spi.detection.v2.ColumnType;
 import ai.startree.thirdeye.spi.detection.v2.ColumnType.ColumnDataType;
 import ai.startree.thirdeye.spi.util.Pair;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.CacheLoader;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import org.apache.pinot.client.Connection;
 import org.apache.pinot.client.PinotClientException;
-import org.apache.pinot.client.Request;
 import org.apache.pinot.client.ResultSet;
 import org.apache.pinot.client.ResultSetGroup;
 import org.slf4j.Logger;
@@ -42,9 +45,8 @@ import org.slf4j.LoggerFactory;
 public class PinotQueryExecutor extends CacheLoader<PinotQuery, ThirdEyeResultSetGroup> {
 
   private static final Logger LOG = LoggerFactory.getLogger(PinotQueryExecutor.class);
+  private static final String QUOTA_EXCEEDED_ERR = "QuotaExceededError";
 
-  private static final String SQL_QUERY_FORMAT = "sql";
-  private static final String PQL_QUERY_FORMAT = "pql";
   private final PinotConnectionProvider pinotConnectionProvider;
 
   @Inject
@@ -204,10 +206,9 @@ public class PinotQueryExecutor extends CacheLoader<PinotQuery, ThirdEyeResultSe
     try {
       final Connection connection = pinotConnectionProvider.get();
       final long start = System.nanoTime();
-      final String queryFormat = pinotQuery.isUseSql() ? SQL_QUERY_FORMAT : PQL_QUERY_FORMAT;
       final ResultSetGroup resultSetGroup = connection.execute(
           pinotQuery.getTableName(),
-          new Request(queryFormat, queryWithOptions)
+          queryWithOptions
       );
 
       final long end = System.nanoTime();
@@ -219,8 +220,11 @@ public class PinotQueryExecutor extends CacheLoader<PinotQuery, ThirdEyeResultSe
 
       return toThirdEyeResultSetGroup(resultSetGroup);
     } catch (final PinotClientException cause) {
-      LOG.error("Error when running SQL:" + queryWithOptions, cause);
-      throw new PinotClientException("Error when running SQL:" + queryWithOptions, cause);
+      LOG.error("Error when running SQL" + queryWithOptions, cause);
+      if (cause.toString().toUpperCase().contains(QUOTA_EXCEEDED_ERR.toUpperCase())) {
+        throw new ThirdEyeException(cause, ERR_PINOT_QUERY_QUOTA_EXCEEDED, cause.toString(), queryWithOptions);
+      }
+      throw new ThirdEyeException(cause, ERR_PINOT_QUERY_EXECUTION, cause.toString(), queryWithOptions);
     }
   }
 

@@ -26,6 +26,7 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.methods;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 
 import ai.startree.thirdeye.PluginLoader;
+import ai.startree.thirdeye.ThirdEyeServer;
 import ai.startree.thirdeye.ThirdEyeServerModule;
 import ai.startree.thirdeye.alert.AlertTemplateRenderer;
 import ai.startree.thirdeye.alert.EvaluationContextProcessor;
@@ -60,6 +61,7 @@ import ai.startree.thirdeye.resources.CrudResource;
 import ai.startree.thirdeye.scheduler.DetectionCronScheduler;
 import ai.startree.thirdeye.scheduler.SchedulerService;
 import ai.startree.thirdeye.scheduler.SubscriptionCronScheduler;
+import ai.startree.thirdeye.scheduler.TaskCronSchedulerRunnable;
 import ai.startree.thirdeye.scheduler.events.HolidayEventsLoader;
 import ai.startree.thirdeye.scheduler.events.MockEventsLoader;
 import ai.startree.thirdeye.scheduler.job.DetectionPipelineJob;
@@ -87,16 +89,16 @@ import com.tngtech.archunit.lang.SimpleConditionEvent;
 import com.tngtech.archunit.lang.syntax.elements.MethodsShouldConjunction;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HEAD;
+import jakarta.ws.rs.OPTIONS;
+import jakarta.ws.rs.PATCH;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
 import javax.sql.DataSource;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.HEAD;
-import javax.ws.rs.OPTIONS;
-import javax.ws.rs.PATCH;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -194,6 +196,8 @@ public class ArchitectureTest {
         EvaluationContextProcessor.class,
         AlertTemplateRenderer.class,
         AuthorizationManager.class, // OK - REVIEW ON MAY 6 2024
+        ThirdEyeServer.class, // used to register database-reading metrics
+        TaskCronSchedulerRunnable.class, //used to schedule tasks 
     };
     final ArchRule rule = noClasses().that(
             doNot(

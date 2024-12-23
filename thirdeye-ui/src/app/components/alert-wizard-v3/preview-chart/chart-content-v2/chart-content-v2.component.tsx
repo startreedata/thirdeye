@@ -12,7 +12,15 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Button, Grid } from "@material-ui/core";
+import {
+    Box,
+    Button,
+    Grid,
+    IconButton,
+    InputAdornment,
+    TextField,
+} from "@material-ui/core";
+import { Close, Search } from "@material-ui/icons";
 import RefreshIcon from "@material-ui/icons/Refresh";
 import { Alert } from "@material-ui/lab";
 import { isEqual } from "lodash";
@@ -44,9 +52,12 @@ export const ChartContentV2: FunctionComponent<ChartContentProps> = ({
     hideCallToActionPrompt,
     evaluationTimeRange,
     legendsPlacement,
+    showDeleteIcon = true,
+    isSearchEnabled = false,
 }) => {
     const sharedWizardClasses = useAlertWizardV2Styles();
     const previewChartClasses = usePreviewChartStyles();
+    const [searchTerm, setSearchTerm] = useState("");
     const { t } = useTranslation();
 
     const detectionEvaluations = useMemo(() => {
@@ -198,6 +209,47 @@ export const ChartContentV2: FunctionComponent<ChartContentProps> = ({
                         </Box>
                     )}
 
+                {isSearchEnabled && workingDetectionEvaluations?.length > 0 && (
+                    <Box
+                        display="flex"
+                        justifyContent="flex-end"
+                        marginTop={1}
+                        ml={2}
+                        mr={1}
+                    >
+                        <TextField
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <Search />
+                                    </InputAdornment>
+                                ),
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        {searchTerm && (
+                                            <IconButton
+                                                aria-label="clear search"
+                                                onClick={() => {
+                                                    setSearchTerm("");
+                                                }}
+                                            >
+                                                <Close />
+                                            </IconButton>
+                                        )}
+                                    </InputAdornment>
+                                ),
+                            }}
+                            placeholder={t("label.search-entity", {
+                                entity: t("label.dimensions"),
+                            })}
+                            value={searchTerm}
+                            onChange={(e) => {
+                                setSearchTerm(e.target.value);
+                            }}
+                        />
+                    </Box>
+                )}
+
                 {workingDetectionEvaluations &&
                     workingDetectionEvaluations[0]?.enumerationItem && (
                         <Box marginTop={1}>
@@ -207,11 +259,15 @@ export const ChartContentV2: FunctionComponent<ChartContentProps> = ({
                                     workingDetectionEvaluations
                                 }
                                 evaluationTimeRange={evaluationTimeRange}
-                                hideDelete={onAlertPropertyChange === undefined}
+                                hideDelete={
+                                    onAlertPropertyChange === undefined ||
+                                    !showDeleteIcon
+                                }
                                 hideTime={shouldHideTimeInDatetimeFormat(
                                     alertEvaluation?.alert.template
                                 )}
                                 legendsPlacement={legendsPlacement}
+                                searchTerm={searchTerm}
                                 showOnlyActivity={showOnlyActivity}
                                 timezone={determineTimezoneFromAlertInEvaluation(
                                     alertEvaluation?.alert.template

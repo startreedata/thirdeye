@@ -37,7 +37,7 @@ public class PluginClassLoader extends URLClassLoader {
       .add("org.joda.time")
       .add("org.slf4j")
       .add("com.mysql")
-      .add("javax.activation")
+      .add("jakarta.activation")
       .add("com.fasterxml.jackson")
       .build();
 

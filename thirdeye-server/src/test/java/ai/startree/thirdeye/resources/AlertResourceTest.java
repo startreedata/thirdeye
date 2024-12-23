@@ -51,6 +51,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.util.StringTemplateUtils;
+import jakarta.ws.rs.ForbiddenException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
@@ -59,7 +60,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import javax.ws.rs.ForbiddenException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

@@ -84,6 +84,9 @@ export const PastDurationPicker: FunctionComponent<PastDurationPickerProps> = ({
             {!!children && <Grid item>{children}</Grid>}
             <Grid item>
                 <TextField
+                    inputProps={{
+                        min: 1,
+                    }}
                     size="small"
                     type="number"
                     value={offsetValue}

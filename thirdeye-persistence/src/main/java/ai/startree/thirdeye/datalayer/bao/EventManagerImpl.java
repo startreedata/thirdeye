@@ -43,6 +43,7 @@ public class EventManagerImpl extends AbstractManagerImpl<EventDTO> implements E
   public EventManagerImpl(GenericPojoDao genericPojoDao) {
     super(EventDTO.class, genericPojoDao);
 
+    // FIXME CYRIL remove this early 2025
     shareEventsInUnsetNamespace = System.getenv("TE_SHARE_EVENTS_IN_UNSET_NAMESPACE") != null;
     if (shareEventsInUnsetNamespace) {
       LOG.warn("Events with a namespace not set are made available to all namespaces. " 

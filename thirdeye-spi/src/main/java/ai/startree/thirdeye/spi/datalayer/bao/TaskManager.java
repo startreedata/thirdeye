@@ -33,12 +33,16 @@ public interface TaskManager extends AbstractManager<TaskDTO> {
   TaskDTO createTaskDto(final TaskInfo taskInfo, final TaskType taskType,
       final AuthorizationConfigurationDTO auth) throws Exception;
 
+  @Deprecated // use acquireNextTaskToRun instead
   TaskDTO findNextTaskToRun();
 
   // true if a task with the same name and status WAITING or RUNNING exists 
   boolean isAlreadyInQueue(final String taskName);
 
+  @Deprecated // use acquireNextTaskToRun instead
   boolean acquireTaskToRun(TaskDTO taskDTO, final long workerId);
+
+  TaskDTO acquireNextTaskToRun(final long workerId) throws Exception;
 
   List<TaskDTO> findByStatusAndWorkerId(Long workerId, TaskStatus status);
 
@@ -51,7 +55,5 @@ public interface TaskManager extends AbstractManager<TaskDTO> {
 
   void purge(Duration expiryDuration, Integer limitOptional);
 
-  void orphanTaskCleanUp(Timestamp activeThreshold);
-
-  long countByStatus(final TaskStatus status);
+  void cleanupOrphanTasks(Timestamp activeThreshold);
 }

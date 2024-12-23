@@ -21,7 +21,14 @@ import { EditableAlert } from "../../rest/dto/alert.interfaces";
 import { AlertJsonEditorModalProps } from "./alert-json-editor-modal.interfaces";
 
 export const AlertJsonEditorModal: FunctionComponent<AlertJsonEditorModalProps> =
-    ({ alert, onSubmitChanges }) => {
+    ({
+        alert,
+        onSubmitChanges,
+        isReadOnly = false,
+        buttonText,
+        isDisabled = false,
+        cancelButtonText,
+    }) => {
         const { t } = useTranslation();
         const { showDialog } = useDialogProviderV1();
 
@@ -47,12 +54,13 @@ export const AlertJsonEditorModal: FunctionComponent<AlertJsonEditorModalProps> 
                 ),
                 width: "md",
                 okButtonText: t("label.apply-changes"),
-                cancelButtonText: t("label.cancel"),
+                cancelButtonText: cancelButtonText ?? t("label.cancel"),
+                hideOkButton: isReadOnly,
                 onOk: () => {
                     setLocalAlert((current) => {
                         // Wait for previous state updates to finish before
                         // calling onSubmitChanges
-                        onSubmitChanges(current, true);
+                        onSubmitChanges?.(current, true);
 
                         return current;
                     });
@@ -64,10 +72,11 @@ export const AlertJsonEditorModal: FunctionComponent<AlertJsonEditorModalProps> 
             <>
                 <Button
                     color="primary"
+                    disabled={isDisabled}
                     variant="outlined"
                     onClick={handleAdvancedEditorBtnClick}
                 >
-                    {t("label.json-editor")}
+                    {buttonText ?? t("label.json-editor")}
                 </Button>
             </>
         );

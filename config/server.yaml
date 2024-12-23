@@ -65,9 +65,6 @@ auth:
 #    cache:
 #      size: 64
 #      ttl: 60000
-  authorization:
-    # set to true to enable the new namespace system
-    requireNamespace: false
  
 #accessControl:
   # used for dev, test and debug 
@@ -99,6 +96,8 @@ taskDriver:
   # must be a non-negative integer unique per instance/worker
   # must be omitted when `randomWorkerIdEnabled` is set `true`
   id: 0
+  # whether to use the new task acquisition logic (beta) or the old one (slow) 
+  newAcquisitionLogic: false
 
 rca:
   # default values - structure example

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 StarTree Inc
+ * Copyright 2024 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -12,8 +12,19 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Task } from "../../../../rest/dto/taks.interface";
+import { makeStyles } from "@material-ui/core";
 
-export interface TaskRowProps {
-    task: Task;
-}
+export const usePropertiesFormStyle = makeStyles({
+    anomalyDurationContainer: {
+        "& >div>div>div": {
+            alignSelf: "baseline",
+        },
+    },
+    defaultInputContainer: {
+        display: "flex",
+        gap: "4px",
+        "& .MuiSelect-select:focus": {
+            backgroundColor: "transparent",
+        },
+    },
+});

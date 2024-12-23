@@ -28,15 +28,15 @@ import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.bao.AbstractManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import com.google.common.collect.ImmutableMap;
+import jakarta.ws.rs.core.MultivaluedMap;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.annotation.Nullable;
-import javax.ws.rs.core.MultivaluedMap;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.glassfish.jersey.internal.util.collection.ImmutableMultivaluedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -205,6 +205,7 @@ public abstract class CrudService<ApiT extends ThirdEyeCrudApi<ApiT>, DtoT exten
     return null;
   }
 
+  // FIXME CYRIL scale - highly inefficient for tasks 
   public void deleteAll(final ThirdEyeServerPrincipal principal) {
     final String namespace = authorizationManager.currentNamespace(principal);
     final DaoFilter daoFilter = DaoFilterUtils.buildFilter(EMPTY_PARAMS, apiToIndexMap,

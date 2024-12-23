@@ -13,6 +13,9 @@
  */
 package ai.startree.thirdeye.worker.task.runner;
 
+import static ai.startree.thirdeye.spi.Constants.METRICS_TIMER_PERCENTILES;
+import static ai.startree.thirdeye.spi.util.MetricsUtils.NAMESPACE_TAG;
+import static ai.startree.thirdeye.spi.util.MetricsUtils.namespaceTagValueOf;
 import static ai.startree.thirdeye.spi.util.MetricsUtils.record;
 import static java.util.Objects.requireNonNull;
 
@@ -21,7 +24,6 @@ import ai.startree.thirdeye.notification.NotificationPayloadBuilder;
 import ai.startree.thirdeye.notification.NotificationTaskFilter;
 import ai.startree.thirdeye.notification.NotificationTaskFilterResult;
 import ai.startree.thirdeye.notification.NotificationTaskPostProcessor;
-import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
 import ai.startree.thirdeye.spi.datalayer.dto.NotificationSpecDTO;
@@ -38,6 +40,7 @@ import io.micrometer.core.instrument.Timer;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,14 +53,14 @@ public class NotificationTaskRunner implements TaskRunner {
 
   private static final Logger LOG = LoggerFactory.getLogger(NotificationTaskRunner.class);
 
+  private final static String NOTIFICATION_TASK_TIMER_NAME = "thirdeye_notification_task";
+  private final static String NOTIFICATION_TASK_TIMER_DESCRIPTION = "Start: a task is started from an input subscription group id. End: the task execution is finished. Tag exception=true means an exception was thrown by the method call.";
+
   private final SubscriptionGroupManager subscriptionGroupManager;
   private final NotificationDispatcher notificationDispatcher;
   private final NotificationPayloadBuilder notificationPayloadBuilder;
   private final NotificationTaskFilter notificationTaskFilter;
   private final NotificationTaskPostProcessor notificationTaskPostProcessor;
-
-  private final Timer notificationTaskTimerOfSuccess;
-  private final Timer notificationTaskTimerOfException;
 
   @Inject
   public NotificationTaskRunner(
@@ -71,18 +74,6 @@ public class NotificationTaskRunner implements TaskRunner {
     this.notificationPayloadBuilder = notificationPayloadBuilder;
     this.notificationTaskFilter = notificationTaskFilter;
     this.notificationTaskPostProcessor = notificationTaskPostProcessor;
-
-    final String description = "Start: a task is started from an input subscription group id. End: the task execution is finished. Tag exception=true means an exception was thrown by the method call.";
-    this.notificationTaskTimerOfSuccess = Timer.builder("thirdeye_notification_task")
-        .description(description)
-        .publishPercentiles(Constants.METRICS_TIMER_PERCENTILES)
-        .tag("exception", "false")
-        .register(Metrics.globalRegistry);
-    this.notificationTaskTimerOfException = Timer.builder("thirdeye_notification_task")
-        .description(description)
-        .publishPercentiles(Constants.METRICS_TIMER_PERCENTILES)
-        .tag("exception", "true")
-        .register(Metrics.globalRegistry);
   }
 
   private SubscriptionGroupDTO getSubscriptionGroupDTO(final long id) {
@@ -96,12 +87,14 @@ public class NotificationTaskRunner implements TaskRunner {
   }
 
   @Override
-  public List<TaskResult> execute(final TaskInfo taskInfo, final TaskContext taskContext)
-      throws Exception {
-    return execute(((DetectionAlertTaskInfo) taskInfo).getDetectionAlertConfigId());
+  public List<TaskResult> execute(final TaskInfo taskInfo, final TaskContext taskContext,
+      @Nullable String namespace) throws Exception {
+    return execute(((DetectionAlertTaskInfo) taskInfo).getDetectionAlertConfigId(), namespace);
   }
 
-  public List<TaskResult> execute(final long subscriptionGroupId) throws Exception {
+  public List<TaskResult> execute(final long subscriptionGroupId, String namespace) throws Exception {
+    final Timer notificationTaskTimerOfSuccess = getNotificationTaskTimer(namespace, false);
+    final Timer notificationTaskTimerOfException = getNotificationTaskTimer(namespace, true);
     return record(
         () -> {
           final SubscriptionGroupDTO sg = getSubscriptionGroupDTO(subscriptionGroupId);
@@ -141,5 +134,14 @@ public class NotificationTaskRunner implements TaskRunner {
               + "Notification watermarks will not be updated",
           sg.getId());
     }
+  }
+
+  private Timer getNotificationTaskTimer(final @Nullable String namespace, final Boolean exception) {
+    return Timer.builder(NOTIFICATION_TASK_TIMER_NAME)
+        .description(NOTIFICATION_TASK_TIMER_DESCRIPTION)
+        .publishPercentiles(METRICS_TIMER_PERCENTILES)
+        .tag("exception", exception ? "true" : "false")
+        .tag(NAMESPACE_TAG, namespaceTagValueOf(namespace))
+        .register(Metrics.globalRegistry);
   }
 }

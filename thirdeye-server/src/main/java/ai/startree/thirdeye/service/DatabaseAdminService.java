@@ -13,8 +13,6 @@
  */
 package ai.startree.thirdeye.service;
 
-import static ai.startree.thirdeye.ResourceUtils.resultSetToMap;
-
 import ai.startree.thirdeye.auth.AuthorizationManager;
 import ai.startree.thirdeye.datalayer.DatabaseClient;
 import ai.startree.thirdeye.resources.DatabaseAdminResource;
@@ -24,8 +22,6 @@ import com.google.inject.Singleton;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,14 +45,6 @@ public class DatabaseAdminService {
   public List<String> getTables(final ThirdEyePrincipal principal) throws SQLException {
     authorizationManager.hasRootAccess(principal);
     return databaseClient.adminGetTables();
-  }
-
-  @NonNull
-  public List<Map<String, Object>> executeQuery(final ThirdEyePrincipal principal, final String sql)
-      throws SQLException {
-    authorizationManager.hasRootAccess(principal);
-    return resultSetToMap(databaseClient.executeTransaction(
-        c -> c.createStatement().executeQuery(sql), null));
   }
 
   public void createAllTables(final ThirdEyePrincipal principal) throws SQLException, IOException {

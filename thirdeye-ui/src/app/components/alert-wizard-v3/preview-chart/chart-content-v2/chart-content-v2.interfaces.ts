@@ -25,6 +25,8 @@ export interface ChartContentProps {
     showLoadButton: boolean;
     showOnlyActivity?: boolean;
     hideCallToActionPrompt?: boolean;
+    showDeleteIcon?: boolean;
+    isSearchEnabled?: boolean;
     alert: EditableAlert;
     onAlertPropertyChange?: (contents: Partial<EditableAlert>) => void;
     evaluationTimeRange: TimeRange;

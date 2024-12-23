@@ -62,7 +62,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.dropwizard.testing.DropwizardTestSupport;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation.Builder;
+import jakarta.ws.rs.core.GenericType;
+import jakarta.ws.rs.core.MultivaluedHashMap;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -70,21 +78,19 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.GenericType;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
+import java.util.stream.Stream;
+import org.apache.pinot.testcontainer.PinotContainer.PinotVersion;
 import org.joda.time.DateTimeZone;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.ITest;
 import org.testng.TestException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
+import org.testng.annotations.Factory;
 import org.testng.annotations.Test;
 
 /**
@@ -105,7 +111,35 @@ import org.testng.annotations.Test;
  * - get the anomaly breakdown (heatmap)
  * - test authorization
  */
-public class HappyPathTest {
+public class HappyPathTest implements ITest {
+
+  private ThreadLocal<String> testNameInternal = new ThreadLocal<>();
+
+  @Override
+  public String getTestName() {
+    return testNameInternal.get();
+  }
+
+  @BeforeMethod
+  public void beforeMethod(Method method) {
+    testNameInternal.set(method.getName() + " (Pinot " + pinotVersion.getTag() + ")");
+  }
+
+  @Factory
+  public static Object[] createInstances() {
+    // TODO CYRIL - running tests for all pinot versions requires some docker/testcontainers/testng tuning
+    //return Arrays.stream(PinotVersion.values()).map(HappyPathTest::new).toArray();
+    // picking a specific version 
+    //return Stream.of(PinotVersion.v1_2_0).map(HappyPathTest::new).toArray();
+
+    return Stream.of(PinotVersion.recommendedVersion()).map(HappyPathTest::new).toArray();
+  }
+
+  private final PinotVersion pinotVersion;
+
+  public HappyPathTest(final PinotVersion pinotVersion) {
+    this.pinotVersion = pinotVersion;
+  }
 
   public static final String THRESHOLD_TEMPLATE_NAME = "startree-threshold";
   private static final Logger log = LoggerFactory.getLogger(HappyPathTest.class);
@@ -139,8 +173,8 @@ public class HappyPathTest {
 
   @BeforeClass
   public void beforeClass() throws Exception {
-    final Future<DataSourceApi> pinotDataSourceFuture = PinotDataSourceManager.getPinotDataSourceApi();
-    final DatabaseConfiguration dbConfiguration = MySqlTestDatabase.sharedDatabaseConfiguration();
+    final Future<DataSourceApi> pinotDataSourceFuture = PinotDataSourceManager.getPinotDataSourceApi(pinotVersion);
+    final DatabaseConfiguration dbConfiguration = MySqlTestDatabase.newDatabaseConfiguration();
 
     // Setup plugins dir so ThirdEye can load it
     IntegrationTestUtils.setupPluginsDirAbsolutePath();

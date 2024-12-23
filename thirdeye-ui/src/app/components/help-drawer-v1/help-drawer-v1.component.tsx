@@ -34,14 +34,14 @@ export const HelpDrawerV1: FunctionComponent<HelpDrawerV1Props> = ({
     title,
     cards,
     children,
-    trigger,
+    // trigger,
 }) => {
     const classes = useHelperDrawerV1Styles();
     const [isOpen, setIsOpen] = useState<boolean>(false);
 
     return (
         <>
-            {trigger(() => setIsOpen(true))}
+            {/* {trigger(() => setIsOpen(true))} */}
             <Drawer
                 PaperProps={{
                     className: classes.drawerPaper,

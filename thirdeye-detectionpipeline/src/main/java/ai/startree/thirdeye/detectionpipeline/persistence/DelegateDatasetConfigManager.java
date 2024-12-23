@@ -132,4 +132,9 @@ public class DelegateDatasetConfigManager implements DatasetConfigManager {
   public List<DatasetConfigDTO> findActive() {
     return delegate.findActive();
   }
+
+  @Override
+  public void registerDatabaseMetrics() {
+    delegate.registerDatabaseMetrics();
+  }
 }

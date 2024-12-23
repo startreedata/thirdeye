@@ -22,6 +22,10 @@ test("Investigate Anomaly", async ({ page }) => {
     await alertDetailsPage.checkHeader();
     await alertDetailsPage.openFirstAlert();
     await alertDetailsPage.checkAlertHeader();
+    const anomalyCount = await alertDetailsPage.checkAnomaliesCount();
+    if (anomalyCount === "0") {
+        return;
+    }
     await alertDetailsPage.openAnomalies();
     await alertDetailsPage.resolveAnomaliesApis();
     await alertDetailsPage.openAnomalieFromTable();

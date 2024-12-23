@@ -129,6 +129,14 @@ export class AlertDetailsPage extends BasePage {
             .click();
     }
 
+    async checkAnomaliesCount() {
+        const node = this.page
+            .locator("span")
+            .filter({ hasText: "Anomalies" })
+            .first();
+        const str = await node.allTextContents();
+        return str[0];
+    }
     async openFirstAlert() {
         await this.page
             .locator("a")

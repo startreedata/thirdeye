@@ -334,7 +334,7 @@ export class ConfigurationSubscriptionGroupPage extends BasePage {
                 response.url().includes("/api/subscription-groups") &&
                 response.status() === 200
         );
-        await saveBtn.click();
+        saveBtn.click();
         await response;
     }
 
@@ -406,7 +406,7 @@ export class ConfigurationSubscriptionGroupPage extends BasePage {
         await searchInput.fill("e2e subscription group update");
         const row = this.page.locator(".MuiDataGrid-row").nth(0);
         await expect(row.locator(">div").nth(1)).toHaveText(
-            "e2e subscription group update sdlanlsnfljs"
+            "e2e subscription group update"
         );
         const chekbox = row.locator(">div").nth(0);
         await chekbox.click();

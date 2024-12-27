@@ -58,7 +58,6 @@ jobs:
           # Extract all test results
           cd thirdeye-ui
           RESULTS=$(jq '[.suites[].specs[] | {name: .title, status: .ok}]' e2e-test-results.json)
-          echo "Results: $RESULTS"
           # Failed and passed counts
           FAILED_COUNT=$(echo "$RESULTS" | jq '[.[] | select(.status == false)] | length')
           PASSED_COUNT=$(echo "$RESULTS" | jq '[.[] | select(.status == true)] | length')
@@ -76,12 +75,12 @@ jobs:
           # Set Slack message content
           STATUS=${{ job.status }}
           COLOR="good"
-          TITLE="Success"
+          TITLE="✅ All E2E tests passed."
           if [[ "$FAILED_COUNT" -gt 0 ]]; then
-            TITLE="Failure"
+            TITLE=" ❌ E2E tests failed. Please check the failing tests below."
             COLOR="danger"
           fi
-          MESSAGE="Test Results:\\nPassed: ${{ env.PASSED_COUNT }}\\nFailed: ${{ env.FAILED_COUNT }}\\nFailed Tests: ${{ env.FAILED_TITLES }}"
+          MESSAGE="E2E Test Results:\\nPassed: ${{ env.PASSED_COUNT }}\\nFailed: ${{ env.FAILED_COUNT }}\\nFailed Tests: ${{ env.FAILED_TITLES }}"
 
           # Post to Slack using curl
           curl -X POST -H 'Content-type: application/json' \
@@ -91,7 +90,6 @@ jobs:
                   \"color\": \"$COLOR\",
                   \"title\": \"$TITLE\",
                   \"text\": \"$MESSAGE\",
-                  \"footer\": \"GitHub Actions\"
                 }
               ]
             }" ${{ secrets.SLACK_WEBHOOK }}

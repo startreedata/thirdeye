@@ -23,3 +23,10 @@ test("Dataset Delete", async ({ page }) => {
     await datasetPage.resolveApis();
     await datasetPage.deleteDataset();
 });
+
+test("Dataset Onboard", async ({ page }) => {
+    const datasetPage = new ConfigurationDataSetPage(page);
+    await datasetPage.goToDatasetTab();
+    await datasetPage.resolveApis();
+    await datasetPage.onBoardDataset();
+});

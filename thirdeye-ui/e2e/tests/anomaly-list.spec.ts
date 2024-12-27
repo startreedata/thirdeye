@@ -23,7 +23,7 @@ test.beforeEach(async ({ page }) => {
     await anomalyListpage.resolveAPIs();
 });
 
-test("Alert List Page", async ({ page }) => {
+test("Anomaly List Page", async ({ page }) => {
     await anomalyListpage.checkBreadcrumbAndHeader();
     await anomalyListpage.checkTabs();
     await anomalyListpage.checkFilters();

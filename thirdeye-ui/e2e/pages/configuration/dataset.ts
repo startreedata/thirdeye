@@ -28,8 +28,6 @@ export class ConfigurationDataSetPage extends BasePage {
     async resolveApis() {
         const datasetsApiRequest = await this.page.waitForRequest((request) => {
             request.url().includes("/api/datasets");
-            console.log("request.headers", request.headers());
-            console.log("request.headersa", request.headers().Authorization);
             this.auth = request.headers["authorization"];
             return true;
         });
@@ -75,21 +73,59 @@ export class ConfigurationDataSetPage extends BasePage {
         await expect(this.page.getByTestId("notfication-container")).toHaveText(
             "Dataset deleted successfully"
         );
+    }
 
-        const response = await this.page.request.post(
-            "/api/data-sources/onboard-dataset/",
-            {
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                    Authorization: this.auth,
-                },
-                form: {
-                    dataSourceId: 156,
-                    datasetName: "AdCampaignData",
-                },
-            }
+    async onBoardDataset() {
+        await this.page.getByTestId("create-menu-button").click();
+        const dropdownOptions = this.page.locator(
+            "[data-testid^=dropdown-option]"
         );
-        // const res = await response
-        console.log("res", response);
+        dropdownOptions.nth(1).click();
+        await this.page.waitForURL(
+            "http://localhost:7004/configuration/datasets/onboard"
+        );
+        const onboardedDatasetApi = this.page.waitForResponse(
+            (response) =>
+                response.url().includes("/api/datasets") &&
+                response.status() === 200
+        );
+        const datasourcesApi = this.page.waitForResponse(
+            (response) =>
+                response.url().includes("/api/data-sources") &&
+                response.status() === 200
+        );
+        await onboardedDatasetApi;
+        await datasourcesApi;
+
+        await expect(this.page.locator("h4")).toHaveText("Onboard Dataset");
+        const selectDatasourceInout = this.page.getByPlaceholder(
+            "Select a datasource"
+        );
+        await selectDatasourceInout.click();
+        const datasourceOptions = this.page
+            .getByRole("presentation")
+            .locator("li");
+        const selectedDatasourceDatsetsApi = this.page.waitForResponse(
+            (responnse) =>
+                responnse.url().includes(`/api/data-sources`) &&
+                responnse.status() === 200
+        );
+        await datasourceOptions.nth(0).click();
+        await selectedDatasourceDatsetsApi;
+        await this.page.waitForTimeout(2000);
+        const datasetsToOnboard = await this.page
+            .locator('input[type="checkbox"]')
+            .all();
+        for (let i = 0; i < datasetsToOnboard.length; i++) {
+            await datasetsToOnboard[i].click();
+        }
+        const submitBtn = this.page.locator("#next-bottom-bar-btn");
+        const onboardDatasetApi = this.page.waitForResponse(
+            (response) =>
+                response.url().includes("/api/data-sources/onboard-dataset") &&
+                response.status() === 200
+        );
+        await submitBtn.click();
+        await onboardDatasetApi;
     }
 }

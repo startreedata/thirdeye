@@ -57,8 +57,8 @@ jobs:
         run: |
           # Extract all test results
           cd thirdeye-ui
-          RESULTS=$(jq '.suites[].specs[] | {name: .title, status: .ok}' e2e-test-results.json)
-
+          RESULTS=$(jq '[.suites[].specs[] | {name: .title, status: .ok}]' e2e-test-results.json)
+          echo "Results: $RESULTS"
           # Failed and passed counts
           FAILED_COUNT=$(echo "$RESULTS" | jq '[.[] | select(.status == false)] | length')
           PASSED_COUNT=$(echo "$RESULTS" | jq '[.[] | select(.status == true)] | length')

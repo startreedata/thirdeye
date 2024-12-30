@@ -127,7 +127,7 @@ export class AnomalyViewPage extends BasePage {
         await expect(breadrumbsElem.nth(0)).toHaveText("Anomalies");
         await expect(breadrumbsElem.nth(1)).toHaveText("/");
         let alertNameBreadcrumb = this.anomalyAlert.name;
-        if (this.anomaly.enumerationItem.id) {
+        if (this.anomaly.enumerationItem?.id) {
             alertNameBreadcrumb = `${alertNameBreadcrumb} (${this.enumerationItem.name})`;
         }
         await expect(breadrumbsElem.nth(2)).toHaveText(alertNameBreadcrumb);

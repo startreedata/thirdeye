@@ -26,7 +26,29 @@ test("Onboarding page", async ({ page }) => {
     await onboardingPage.goToWelcomeLanding();
     await onboardingPage.resolveApis();
     await onboardingPage.checkHeader();
+    await onboardingPage.checkCartHeader();
     await onboardingPage.clickCreateAlertButton();
     await onboardingPage.resolveCreateAlertApis();
     await onboardingPage.checkCreateAlertHeader();
+});
+
+test("Add Datasets Button on Onboarding Page", async ({ page }) => {
+    const onboardingPage = new OnboardingPage(page);
+    await page.route("*/**/api/alerts/count", async (route) => {
+        const json = {
+            count: 0,
+        };
+        await route.fulfill({ json });
+    });
+    await page.route("*/**/api/datasets", async (route) => {
+        const json = {};
+        await route.fulfill({ json });
+    });
+    await onboardingPage.goToWelcomeLanding();
+    await onboardingPage.resolveApis();
+    await onboardingPage.checkHeader();
+    await onboardingPage.checkConfigureCardHeader();
+    await onboardingPage.clickConfigureDataButton();
+    await onboardingPage.resolveDataSourcesApi();
+    await onboardingPage.checkConfigurePageHeader();
 });

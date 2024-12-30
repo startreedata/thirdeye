@@ -159,7 +159,7 @@ export class AlertListPage extends BasePage {
         await expect(createBtn).toHaveText("Create Alert");
         const createAlertApiRequest = this.page.waitForRequest("/api/alerts");
         const createAlertApiResponse = this.page.waitForResponse("/api/alerts");
-        await createBtn.click({ force: true });
+        createBtn.click({ force: true });
         const createAlertRequest = await createAlertApiRequest;
         const createAlertResponse = await createAlertApiResponse;
 

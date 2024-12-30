@@ -15,6 +15,8 @@
 import { test } from "@playwright/test";
 import { ConfigurationDataSourcePage } from "../../pages/configuration/datasource";
 
+test.describe.configure({ mode: "serial" });
+
 test("Datasource List", async ({ page }) => {
     const configurationDataSourcePage = new ConfigurationDataSourcePage(page);
     await configurationDataSourcePage.gotToDataSourceTabPage();

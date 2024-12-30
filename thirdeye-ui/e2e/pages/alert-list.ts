@@ -198,8 +198,6 @@ export class AlertListPage extends BasePage {
         tableActions.nth(1).click();
 
         const topAlert = this.alertResponseData.reverse()[0];
-        console.log("topp", topAlert);
-        console.log("firstAlert", await firstAlert.allTextContents());
         await this.page.waitForURL(
             `http://localhost:7004/alerts/${topAlert.id}/update`
         );
@@ -257,7 +255,7 @@ export class AlertListPage extends BasePage {
 
         const updateApiRequest = this.page.waitForRequest("/api/alerts");
         const updateApiResponse = this.page.waitForResponse("/api/alerts");
-        await saveButtonAfterLoadChart.click();
+        saveButtonAfterLoadChart.click();
 
         const updateAlertRequest = await updateApiRequest;
 

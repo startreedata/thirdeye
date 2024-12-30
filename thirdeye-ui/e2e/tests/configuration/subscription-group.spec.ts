@@ -15,6 +15,8 @@
 import { test } from "@playwright/test";
 import { ConfigurationSubscriptionGroupPage } from "../../pages/configuration/subscription-group";
 
+test.describe.configure({ mode: "serial" });
+
 test("Subscription List", async ({ page }) => {
     const subscriptionGroupPage = new ConfigurationSubscriptionGroupPage(page);
     await subscriptionGroupPage.goToSubscriptionGroupsTab();

@@ -51,6 +51,50 @@ jobs:
         run: |
           cd thirdeye-ui
           npx playwright test
-      - name: Stop local server
+      - name: Extract Test Results
+        if: always()
+        id: test-results
         run: |
-          kill $(lsof -t -i:7004)
+          # Extract all test results
+          cd thirdeye-ui
+          RESULTS=$(jq '[.suites[].specs[] | {name: .title, status: .ok}]' e2e-test-results.json)
+          # Failed and passed counts
+          FAILED_COUNT=$(echo "$RESULTS" | jq '[.[] | select(.status == false)] | length')
+          PASSED_COUNT=$(echo "$RESULTS" | jq '[.[] | select(.status == true)] | length')
+
+          # Extract titles of failed tests
+          FAILED_TITLES=$(echo "$RESULTS" | jq -r '[.[] | select(.status == false) | .name] | join(", ")')
+
+          # Export variables
+          echo "FAILED_COUNT=$FAILED_COUNT" >> $GITHUB_ENV
+          echo "PASSED_COUNT=$PASSED_COUNT" >> $GITHUB_ENV
+          echo "FAILED_TITLES=$FAILED_TITLES" >> $GITHUB_ENV
+      - name: Post status to ci-thirdeye slack channel
+        if: always()
+        run: |
+          # Set Slack message content
+          STATUS=${{ job.status }}
+          COLOR="good"
+          TITLE="✅ All E2E tests passed."
+          if [[ "$FAILED_COUNT" -gt 0 ]]; then
+            TITLE=" ❌ E2E tests failed. Please check the failing tests below."
+            COLOR="danger"
+          fi
+          MESSAGE="E2E Test Results:\\nPassed: ${{ env.PASSED_COUNT }}\\nFailed: ${{ env.FAILED_COUNT }}\\nFailed Tests: ${{ env.FAILED_TITLES }}"
+
+          # Post to Slack using curl
+          curl -X POST -H 'Content-type: application/json' \
+            --data "{
+              \"attachments\": [
+                {
+                  \"color\": \"$COLOR\",
+                  \"title\": \"$TITLE\",
+                  \"text\": \"$MESSAGE\",
+                }
+              ]
+            }" ${{ secrets.SLACK_WEBHOOK }}
+
+      - name: Stop local server
+        if: always()
+        run: |
+          kill $(lsof -t -i:7004);

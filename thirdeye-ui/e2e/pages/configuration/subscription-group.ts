@@ -329,19 +329,20 @@ export class ConfigurationSubscriptionGroupPage extends BasePage {
             },
         ];
         const saveBtn = this.page.locator("#next-bottom-bar-btn");
-        await saveBtn.click();
-        await this.page.waitForResponse(
+        const response = this.page.waitForResponse(
             (response) =>
                 response.url().includes("/api/subscription-groups") &&
                 response.status() === 200
         );
+        saveBtn.click();
+        await response;
     }
 
     async editSubscriptionGroup() {
         const group = this.subscriptiongroups.find(
             (grp) => grp.name === "e2e subscription group"
         );
-        const hasEnumerationItems = group.alertAssociations.find((alert) =>
+        const hasEnumerationItems = group?.alertAssociations.find((alert) =>
             Object.keys(alert).includes("enumerationItem")
         );
         const searchInput = this.page.getByPlaceholder(
@@ -386,12 +387,13 @@ export class ConfigurationSubscriptionGroupPage extends BasePage {
         await this.page.locator("#next-bottom-bar-btn").click();
         const updatebtn = this.page.locator("#next-bottom-bar-btn");
         await expect(updatebtn).toHaveText("Update");
-        await updatebtn.click();
-        await this.page.waitForResponse(
+        const response = this.page.waitForResponse(
             (response) =>
                 response.url().includes("/api/subscription-groups") &&
                 response.status() === 200
         );
+        await updatebtn.click();
+        await response;
     }
 
     async deleteSubscriptiongroup() {
@@ -421,14 +423,15 @@ export class ConfigurationSubscriptionGroupPage extends BasePage {
         await expect(modalActions).toHaveCount(2);
         await expect(modalActions.nth(0)).toHaveText("Cancel");
         await expect(modalActions.nth(1)).toHaveText("Confirm");
-        await modalActions.nth(1).click();
-        await this.page.waitForResponse(
+        const response = this.page.waitForResponse(
             (response) =>
                 response
                     .url()
                     .includes(`/api/subscription-groups/${group.id}`) &&
                 response.status() === 200
         );
+        await modalActions.nth(1).click();
+        await response;
         await expect(this.page.getByTestId("notfication-container")).toHaveText(
             "Subscription Group deleted successfully"
         );

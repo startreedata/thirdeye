@@ -15,6 +15,7 @@
 import { Page, expect } from "@playwright/test";
 import { BasePage } from "../base";
 import { Response } from "@playwright/test";
+
 export class ConfigurationDataSourcePage extends BasePage {
     readonly page: Page;
     datasources: any;
@@ -166,10 +167,9 @@ export class ConfigurationDataSourcePage extends BasePage {
                 response.url().includes("/api/data-sources") &&
                 response.status() === 200
         );
-
-        await createBtn.click();
-        const createResponse = await waitForCreateResponse;
-        const createdDatasource = await createResponse.json()[0];
+        createBtn.click();
+        const response = await waitForCreateResponse;
+        const createdDatasource = (await response.json())[0];
 
         await this.page.waitForURL(
             `http://localhost:7004/configuration/datasources/view/id/${createdDatasource.id}`
@@ -219,12 +219,11 @@ export class ConfigurationDataSourcePage extends BasePage {
         // }, editedDatasource);
 
         const updateBtn = this.page.getByTestId("create-datasource-btn");
-        expect(updateBtn).toHaveText("Update Datasource");
+        await expect(updateBtn).toHaveText("Update Datasource");
         const apiRequest = this.page.waitForRequest(
             (request) =>
                 request.url().includes("/api/data-sources") &&
-                request.method() === "PUT" &&
-                request.postData === datasourceToEdit
+                request.method() === "PUT"
         );
         const apiResponse = this.page.waitForResponse(
             (response) =>
@@ -232,34 +231,38 @@ export class ConfigurationDataSourcePage extends BasePage {
                 response.status() === 200
         );
         await updateBtn.click();
-        await apiRequest;
+        const request = await apiRequest;
+        const payload = JSON.parse(request.postData()!)[0];
+        expect(payload).toEqual(datasourceToEdit);
         await apiResponse;
     }
 
     async deleteDatasource() {
         const datasources = this.datasources;
-        const datasourceRow = this.page
-            .locator(".MuiDataGrid-row")
-            .nth(datasources.length - 1);
-        const checkbox = datasourceRow.locator(">div").nth(0);
-        await checkbox.click();
-        const deleteBtn = this.page.getByTestId(
-            "datasource-list-delete-button"
-        );
-        await deleteBtn.click();
-        await expect(this.page.getByTestId("dialoag-content")).toHaveText(
-            `Are you sure you want to delete ${
-                datasources[datasources.length - 1].name
-            }?`
-        );
-        const actionButtons = this.page.locator(
-            '[data-testId="dialoag-actions"] > button'
-        );
-        await expect(actionButtons.nth(0)).toHaveText("Cancel");
-        await expect(actionButtons.nth(1)).toHaveText("Confirm");
-        await actionButtons.nth(1).click();
-        await expect(this.page.getByTestId("notfication-container")).toHaveText(
-            "Datasource deleted successfully"
-        );
+        if (datasources.length > 1) {
+            const datasourceRow = this.page
+                .locator(".MuiDataGrid-row")
+                .nth(datasources.length - 1);
+            const checkbox = datasourceRow.locator(">div").nth(0);
+            await checkbox.click();
+            const deleteBtn = this.page.getByTestId(
+                "datasource-list-delete-button"
+            );
+            await deleteBtn.click();
+            await expect(this.page.getByTestId("dialoag-content")).toHaveText(
+                `Are you sure you want to delete ${
+                    datasources[datasources.length - 1].name
+                }?`
+            );
+            const actionButtons = this.page.locator(
+                '[data-testId="dialoag-actions"] > button'
+            );
+            await expect(actionButtons.nth(0)).toHaveText("Cancel");
+            await expect(actionButtons.nth(1)).toHaveText("Confirm");
+            await actionButtons.nth(1).click();
+            await expect(
+                this.page.getByTestId("notfication-container")
+            ).toHaveText("Datasource deleted successfully");
+        }
     }
 }

@@ -29,7 +29,7 @@ jobs:
       - name: Release UI
         run: |
           cd thirdeye-ui
-          npm ci
+          npm ci --legacy-peer-deps
           npm run build
           export GH_SHA=$(git log -1 --format="%H")
           npm run release

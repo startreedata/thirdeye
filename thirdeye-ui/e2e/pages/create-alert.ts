@@ -178,7 +178,10 @@ export class CreateAlertPage extends BasePage {
         const metrics = this.metricsResponseData?.find(
             (m) => m?.dataset?.name === this.datasetsResponseData[0].name
         );
-        await this.page.getByRole("option", { name: metrics.name }).click();
+        await this.page
+            .getByRole("option", { name: metrics.name })
+            .first()
+            .click();
     }
 
     async selectStaticFields(isMultiDimensional = false, isSQLQuery = false) {
@@ -301,6 +304,7 @@ export class CreateAlertPage extends BasePage {
         await this.page
             .getByRole("button", { name: "Add advanced options" })
             .click();
+        await this.page.click('h6:text("Filtering")');
         await this.page.getByTestId("optionedselect-daysOfWeek").click();
         await this.page
             .getByRole("option", {

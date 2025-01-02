@@ -304,6 +304,7 @@ export class CreateAlertPage extends BasePage {
         await this.page
             .getByRole("button", { name: "Add advanced options" })
             .click();
+        await this.page.click('h6:text("Filtering")');
         await this.page.getByTestId("optionedselect-daysOfWeek").click();
         await this.page
             .getByRole("option", {

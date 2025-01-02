@@ -2,7 +2,7 @@ name: TE UI - E2E Tests
 on:
   push:
     branches:
-      - harshil/fix-e2e-tests
+      - master
   workflow_dispatch:
 jobs:
   test:

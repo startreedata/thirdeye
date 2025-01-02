@@ -106,8 +106,8 @@ export class OnboardingPage extends BasePage {
         await expect(this.page.locator("h5").first()).toHaveText(
             "Complete the following steps."
         );
-        await expect(this.page.locator("h6").nth(1)).toHaveText(
-            "Create my first alert"
+        await expect(this.page.locator("h5").nth(1)).toHaveText(
+            "Select Datasource"
         );
     }
 

@@ -20,7 +20,7 @@ jobs:
         with:
           node-version: 14
           cache: "npm"
-          cache-dependency-path: './thirdeye-ui/package-lock.json'
+          cache-dependency-path: "./thirdeye-ui/package-lock.json"
 
       - name: Install dependencies
         run: |
@@ -93,7 +93,7 @@ jobs:
                 }
               ]
             }" ${{ secrets.SLACK_WEBHOOK }}
-          
+
       - name: Stop local server
         if: always()
         run: |

@@ -22,7 +22,7 @@ export class BasePage {
     }
 
     async gotoHomePage() {
-        await this.page.goto("http://localhost:7004");
+        await this.page.goto("http://localhost:7004/#access_token=''");
         await this.page.waitForURL("http://localhost:7004/home");
     }
 }

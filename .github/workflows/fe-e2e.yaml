@@ -2,7 +2,7 @@ name: TE UI - E2E Tests
 on:
   push:
     branches:
-      - master
+      - harshil/onboarding-datasource-e2e
   workflow_dispatch:
 jobs:
   test:

@@ -64,6 +64,16 @@ export class OnboardingPage extends BasePage {
             ]);
     }
 
+    async resolveDataSourcesApi() {
+        const [datasetsApiResponse] = await Promise.all([
+            this.page.waitForResponse(
+                (response) =>
+                    response.url().includes("/api/data-sources") &&
+                    response.status() === 200
+            ),
+        ]);
+    }
+
     async goToWelcomeLanding() {
         await this.page.goto("http://localhost:7004/#access_token=''");
         await this.page.waitForSelector("h4:has-text('StarTree ThirdEye')", {
@@ -82,6 +92,25 @@ export class OnboardingPage extends BasePage {
         );
     }
 
+    async checkConfigureCardHeader() {
+        await expect(this.page.locator("h6").first()).toHaveText(
+            "Review and configure data"
+        );
+    }
+
+    async checkConfigurePageHeader() {
+        await expect(this.page.locator("h4")).toHaveText(
+            "Let's start setting up your data"
+        );
+
+        await expect(this.page.locator("h5").first()).toHaveText(
+            "Complete the following steps."
+        );
+        await expect(this.page.locator("h6").nth(1)).toHaveText(
+            "Select Datasource"
+        );
+    }
+
     async checkCreateAlertHeader() {
         await expect(this.page.locator("h4")).toHaveText("Create Alert");
     }
@@ -97,5 +126,9 @@ export class OnboardingPage extends BasePage {
 
     async clickCreateAlertButton() {
         await this.page.getByRole("button", { name: "Create Alert" }).click();
+    }
+
+    async clickConfigureDataButton() {
+        await this.page.getByRole("button", { name: "Configure Data" }).click();
     }
 }

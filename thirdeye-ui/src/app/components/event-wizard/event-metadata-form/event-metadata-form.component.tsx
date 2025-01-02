@@ -72,7 +72,7 @@ export const EventMetadataForm: FunctionComponent<EventMetadataFormProps> = ({
     return (
         <Grid container>
             <Grid item xs={12}>
-                <Box marginBottom={2}>
+                <Box data-testId="events-metadata-title" marginBottom={2}>
                     <Typography variant="h5">
                         {t("label.event-metadata")}
                     </Typography>
@@ -104,6 +104,7 @@ export const EventMetadataForm: FunctionComponent<EventMetadataFormProps> = ({
                             <Grid item xs={5}>
                                 <TextField
                                     fullWidth
+                                    data-testId={`property-name-${idx}`}
                                     inputProps={{ tabIndex: -1 }}
                                     name="propertyName"
                                     placeholder={t("label.add-property-key")}
@@ -138,6 +139,7 @@ export const EventMetadataForm: FunctionComponent<EventMetadataFormProps> = ({
                                                  */
                                                 className: classes.input,
                                             }}
+                                            data-testId={`property-value-${idx}`}
                                             name="propertyValue"
                                             placeholder={t(
                                                 "message.property-value-placeholder"
@@ -182,6 +184,7 @@ export const EventMetadataForm: FunctionComponent<EventMetadataFormProps> = ({
                 <Grid item xs={12}>
                     <Button
                         color="primary"
+                        data-testId="add-metadata-entry"
                         variant="outlined"
                         onClick={handleAddListItem}
                     >

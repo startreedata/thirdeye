@@ -29,6 +29,6 @@ jobs:
       - name: Install dependencies, run test, and build
         run: |
           cd thirdeye-ui
-          npm ci
+          npm ci --legacy-peer-deps
           npm run test
           npm run build

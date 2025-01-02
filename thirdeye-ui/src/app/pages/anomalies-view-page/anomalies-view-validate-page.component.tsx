@@ -162,6 +162,7 @@ export const AnomaliesViewValidatePage: FunctionComponent = () => {
                     <Box textAlign="right">
                         <Button
                             color="primary"
+                            data-testid="add-previous-period"
                             style={{ backgroundColor: "#FFF" }}
                             variant="outlined"
                             onClick={handleAddChartClick}

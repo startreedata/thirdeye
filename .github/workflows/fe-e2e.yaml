@@ -1,0 +1,100 @@
+name: TE UI - E2E Tests
+on:
+  push:
+    branches:
+      - e2e-setup
+  workflow_dispatch:
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull Repository
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            thirdeye-ui
+
+      - name: Install node and npm
+        uses: actions/setup-node@v3
+        with:
+          node-version: 14
+          cache: "npm"
+          cache-dependency-path: "./thirdeye-ui/package-lock.json"
+
+      - name: Install dependencies
+        run: |
+          cd thirdeye-ui
+          npm ci --legacy-peer-deps
+
+      - name: Install Playwright Browsers
+        run: |
+          cd thirdeye-ui
+          npx playwright install --with-deps
+
+      - name: Run local server
+        run: |
+          cd thirdeye-ui
+          npm run start &
+        env:
+          VERCEL_ACCESS_TOKEN: ${{ secrets.E2E_TOKEN }}
+          TE_DEV_PROXY_SERVER: ${{ secrets.E2E_PROXY }}
+
+      - name: Wait for server to be ready
+        run: |
+          until curl -s http://localhost:7004; do
+            echo "Waiting for server to be ready..."
+            sleep 5
+          done
+
+      - name: Run Playwright tests
+        run: |
+          cd thirdeye-ui
+          npx playwright test
+      - name: Extract Test Results
+        if: always()
+        id: test-results
+        run: |
+          # Extract all test results
+          cd thirdeye-ui
+          RESULTS=$(jq '[.suites[].specs[] | {name: .title, status: .ok}]' e2e-test-results.json)
+          # Failed and passed counts
+          FAILED_COUNT=$(echo "$RESULTS" | jq '[.[] | select(.status == false)] | length')
+          PASSED_COUNT=$(echo "$RESULTS" | jq '[.[] | select(.status == true)] | length')
+
+          # Extract titles of failed tests
+          FAILED_TITLES=$(echo "$RESULTS" | jq -r '[.[] | select(.status == false) | .name] | join(", ")')
+
+          # Export variables
+          echo "FAILED_COUNT=$FAILED_COUNT" >> $GITHUB_ENV
+          echo "PASSED_COUNT=$PASSED_COUNT" >> $GITHUB_ENV
+          echo "FAILED_TITLES=$FAILED_TITLES" >> $GITHUB_ENV
+      - name: Post status to ci-thirdeye slack channel
+        if: always()
+        run: |
+          # Set Slack message content
+          STATUS=${{ job.status }}
+          COLOR="good"
+          TITLE="✅ All E2E tests passed."
+          if [[ "$FAILED_COUNT" -gt 0 ]]; then
+            TITLE=" ❌ E2E tests failed. Please check the failing tests below."
+            COLOR="danger"
+          fi
+          MESSAGE="E2E Test Results:\\nPassed: ${{ env.PASSED_COUNT }}\\nFailed: ${{ env.FAILED_COUNT }}\\nFailed Tests: ${{ env.FAILED_TITLES }}"
+
+          # Post to Slack using curl
+          curl -X POST -H 'Content-type: application/json' \
+            --data "{
+              \"attachments\": [
+                {
+                  \"color\": \"$COLOR\",
+                  \"title\": \"$TITLE\",
+                  \"text\": \"$MESSAGE\",
+                }
+              ]
+            }" ${{ secrets.SLACK_WEBHOOK }}
+
+      - name: Stop local server
+        if: always()
+        run: |
+          kill $(lsof -t -i:7004);

@@ -160,6 +160,7 @@ export const HomePage: FunctionComponent = () => {
                                     alertsQuery={getAlertsQuery}
                                 />
                             }
+                            datatestId="alert-summary"
                             title={
                                 <Grid
                                     container
@@ -199,6 +200,7 @@ export const HomePage: FunctionComponent = () => {
                                     }
                                 />
                             }
+                            datatestId="subscription-summary"
                             title={
                                 <Grid
                                     container
@@ -236,6 +238,7 @@ export const HomePage: FunctionComponent = () => {
                                     route={getAdminPath()}
                                 />
                             }
+                            datatestId="admin-summary"
                             title={
                                 <Grid
                                     container
@@ -265,16 +268,31 @@ export const HomePage: FunctionComponent = () => {
                         />
                     </Grid>
 
-                    <Grid item className={style.gridSpace} sm={6}>
+                    <Grid
+                        item
+                        className={style.gridSpace}
+                        data-testId="active-alerts"
+                        sm={6}
+                    >
                         <LatestActiveAlerts alertsQuery={getAlertsQuery} />
                     </Grid>
-                    <Grid item className={style.gridSpace} sm={6}>
+                    <Grid
+                        item
+                        className={style.gridSpace}
+                        data-testId="subscription-groups"
+                        sm={6}
+                    >
                         <LatestSubscriptionGroups
                             subscriptionGroupsQuery={getSubscriptionGroupsQuery}
                         />
                     </Grid>
 
-                    <Grid item className={style.gridSpace} xs={12}>
+                    <Grid
+                        item
+                        className={style.gridSpace}
+                        data-testId="recent-anomalies"
+                        xs={12}
+                    >
                         <RecentAnomaliesV2 />
                     </Grid>
 

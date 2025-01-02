@@ -47,7 +47,7 @@ export const AlertsDimensions: FunctionComponent<AlertsDimensionsProps> = ({
 
     return (
         <Grid container>
-            <Grid item xs={12}>
+            <Grid item data-testId="add-alerts-to-group" xs={12}>
                 <Typography variant="h5">
                     {t("label.alerts-and-dimensions")}
                 </Typography>
@@ -66,7 +66,11 @@ export const AlertsDimensions: FunctionComponent<AlertsDimensionsProps> = ({
                             justifyContent="space-between"
                         >
                             <Grid item>
-                                <RadioGroup row value={showOnly}>
+                                <RadioGroup
+                                    row
+                                    data-testId="alert-types"
+                                    value={showOnly}
+                                >
                                     <FormControlLabel
                                         control={<Radio color="primary" />}
                                         label={t("label.all")}

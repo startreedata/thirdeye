@@ -61,7 +61,7 @@ public class PinotContainer extends GenericContainer<PinotContainer> {
     
     // if the test does not run for every supported Pinot version, use this version
     public static PinotVersion recommendedVersion() {
-      return v1_1_0;
+      return v1_2_0;
     }
   }
   

@@ -16,7 +16,7 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 TE_REPO="${SCRIPT_DIR}/.."
 if [ -z "${PINOT_VERSION}" ]; then
-  PINOT_VERSION=1.1.0
+  PINOT_VERSION=1.2.0
 fi
 if [ -z "${CONTROLLER_PROTOCOL}" ]; then
   CONTROLLER_PROTOCOL=http

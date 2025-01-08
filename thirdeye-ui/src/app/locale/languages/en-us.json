@@ -971,6 +971,7 @@
         "validation-failed": "Validation failed",
         "values-need-to-be-one-of-the-following-values": "\"{{propertyKey}}\" values need to be one of the following values: {{expectedKeys}}",
         "values-need-to-be-one-of-the-following-values-it-is": "\"{{propertyKey}}\" values need to be one of the following values: {{expectedKeys}}. It is: {{valueForProperty}}",
+        "view-algorithms-documentation": "View algorithms documentation",
         "view-detection-configuration": "View detection configuration",
         "view-documentation": "View documentation",
         "view-documentation-on-all-available-algorithms": "View documentation on all available algorithms",

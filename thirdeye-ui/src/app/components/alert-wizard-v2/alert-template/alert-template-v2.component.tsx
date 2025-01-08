@@ -237,9 +237,7 @@ function AlertTemplate({
                             </Box>
                             <Box>
                                 <Typography variant="caption">
-                                    {t(
-                                        "message.view-documentation-on-all-available-algorithms"
-                                    )}
+                                    {t("message.view-algorithms-documentation")}
                                 </Typography>
                             </Box>
                         </Link>

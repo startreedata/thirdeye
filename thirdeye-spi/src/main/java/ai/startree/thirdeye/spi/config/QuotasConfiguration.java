@@ -13,15 +13,18 @@
  */
 package ai.startree.thirdeye.spi.config;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 public class QuotasConfiguration {
 
+  @Nullable
   private Integer pinotMaxQPSQuotaOverride;
 
-  public Integer getPinotMaxQPSQuotaOverride() {
+  public @Nullable Integer getPinotMaxQPSQuotaOverride() {
     return pinotMaxQPSQuotaOverride;
   }
 
-  public QuotasConfiguration setPinotMaxQPSQuotaOverride(final Integer pinotMaxQPSQuotaOverride) {
+  public QuotasConfiguration setPinotMaxQPSQuotaOverride(final @Nullable Integer pinotMaxQPSQuotaOverride) {
     this.pinotMaxQPSQuotaOverride = pinotMaxQPSQuotaOverride;
     return this;
   }

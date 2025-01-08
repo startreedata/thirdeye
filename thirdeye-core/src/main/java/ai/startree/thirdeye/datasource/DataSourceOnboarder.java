@@ -76,10 +76,9 @@ public class DataSourceOnboarder {
         .filter(d -> !alreadyOnboardedDatasets.contains(d.getDataset()))
         .toList();
 
-    datasetsToOnboard.forEach(datasetConfigDTO -> dataSource.prepareDatasetForOnboarding(
-        datasetConfigDTO.getDataset()));
-
     final List<DatasetConfigDTO> addedDatasets = datasetsToOnboard.stream()
+        .peek(datasetConfigDTO -> dataSource.prepareDatasetForOnboarding(
+            datasetConfigDTO.getDataset()))
         .map(datasetConfigDTO -> persist(datasetConfigDTO, dataSourceDto.getAuth()))
         .collect(Collectors.toList());
 

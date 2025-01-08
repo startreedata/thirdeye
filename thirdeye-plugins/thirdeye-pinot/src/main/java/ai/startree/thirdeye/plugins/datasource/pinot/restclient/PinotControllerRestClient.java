@@ -194,17 +194,17 @@ public class PinotControllerRestClient {
   }
 
   public void updateTableMaxQPSQuota(final String dataset, final JsonNode tableJson) throws IOException {
-    Integer customMaxQPSQuota = context.getQuotasConfiguration().getPinotMaxQPSQuotaOverride();
+    final Integer customMaxQPSQuota = context.getQuotasConfiguration().getPinotMaxQPSQuotaOverride();
     if (customMaxQPSQuota == null || customMaxQPSQuota <= 0) {
       return;
     }
 
     // update quota if it exists
-    JsonNode quotaJson = tableJson.get(TABLE_CONFIG_QUOTA_KEY);
+    final JsonNode quotaJson = tableJson.get(TABLE_CONFIG_QUOTA_KEY);
     if (quotaJson != null) {
       ((ObjectNode) quotaJson).put(TABLE_CONFIG_QUOTA_MAX_QPS_KEY, Integer.toString(customMaxQPSQuota));
     } else {
-      LOG.warn("quota not configured for dataset {} while onboarding. skipping max qps override", dataset);
+      LOG.error("quota not configured for dataset {} while onboarding. skipping max qps override", dataset);
       return;
     }
 

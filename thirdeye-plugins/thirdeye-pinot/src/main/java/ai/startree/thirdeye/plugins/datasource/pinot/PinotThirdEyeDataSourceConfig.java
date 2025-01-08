@@ -38,7 +38,7 @@ public class PinotThirdEyeDataSourceConfig {
   private Integer requestTimeoutMs;
   @Deprecated // use timeoutMs queryOption
   private Integer brokerResponseTimeoutMs;
-
+  
   public boolean isOAuthEnabled() {
     return oauth != null && oauth.isEnabled();
   }

@@ -284,7 +284,7 @@ public class ThirdEyeServerConfiguration extends Configuration {
     return this;
   }
 
-  public QuotasConfiguration getEnvironmentContextConfiguration() {
+  public QuotasConfiguration getQuotasConfiguration() {
     return quotasConfiguration;
   }
 

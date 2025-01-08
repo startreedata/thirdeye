@@ -195,7 +195,15 @@ public class AlertInsightsProvider {
               datasetConfigDTO.getDataset())));
       return;
     }
-    insights.setDatasetStartTime(datasetStartTime);
+    if (datasetStartTime > 0) {
+      insights.setDatasetStartTime(datasetStartTime);
+    } else {
+      LOG.warn(
+          "Dataset minTime is negative: {}. Most likely a data issue in the dataset. Replacing minTime by 0.",
+          datasetStartTime);
+      insights.setDatasetStartTime(0L);
+      insights.setSuspiciousDatasetStartTime(datasetStartTime);
+    }
 
     // process endTime
     final @Nullable Long datasetMaxTime = maxTimeFuture.get(FETCH_TIMEOUT_MILLIS, MILLISECONDS);

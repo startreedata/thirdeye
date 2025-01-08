@@ -13,11 +13,13 @@
  */
 package ai.startree.thirdeye.spi.datasource;
 
+import ai.startree.thirdeye.spi.config.EnvironmentContextConfiguration;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 
 public class ThirdEyeDataSourceContext {
 
   private DataSourceDTO dataSourceDTO;
+  private EnvironmentContextConfiguration environmentContextConfiguration;
 
   public DataSourceDTO getDataSourceDTO() {
     return dataSourceDTO;
@@ -26,6 +28,16 @@ public class ThirdEyeDataSourceContext {
   public ThirdEyeDataSourceContext setDataSourceDTO(
       final DataSourceDTO dataSourceDTO) {
     this.dataSourceDTO = dataSourceDTO;
+    return this;
+  }
+
+  public EnvironmentContextConfiguration getEnvironmentContextConfiguration() {
+    return environmentContextConfiguration;
+  }
+
+  public ThirdEyeDataSourceContext setEnvironmentContextConfiguration(
+      final EnvironmentContextConfiguration environmentContextConfiguration) {
+    this.environmentContextConfiguration = environmentContextConfiguration;
     return this;
   }
 }

@@ -55,7 +55,8 @@ public class ThirdEyeServerModule extends AbstractModule {
         configuration.getRcaConfiguration(),
         configuration.getUiConfiguration(),
         configuration.getTimeConfiguration(),
-        configuration.getNamespaceConfiguration()));
+        configuration.getNamespaceConfiguration(),
+        configuration.getEnvironmentContextConfiguration()));
     install(new ThirdEyeNotificationModule(configuration.getNotificationConfiguration()));
     install(new ThirdEyeDetectionPipelineModule(configuration.getDetectionPipelineConfiguration()));
     install(new ThirdEyeWorkerModule(configuration.getTaskDriverConfiguration()));

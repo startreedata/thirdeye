@@ -17,6 +17,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
+import ai.startree.thirdeye.spi.config.EnvironmentContextConfiguration;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
@@ -40,8 +41,11 @@ public class DataSourcesLoader {
 
   private final Map<String, ThirdEyeDataSourceFactory> dataSourceFactoryMap = new HashMap<>();
 
+  private final EnvironmentContextConfiguration environmentContextConfiguration;
+
   @Inject
-  public DataSourcesLoader() {
+  public DataSourcesLoader(final EnvironmentContextConfiguration environmentContextConfiguration) {
+    this.environmentContextConfiguration = environmentContextConfiguration;
   }
 
   public void addThirdEyeDataSourceFactory(ThirdEyeDataSourceFactory f) {
@@ -79,7 +83,8 @@ public class DataSourcesLoader {
     try {
       final DataSourceDTO dataSourceWithEnvVarResolved = StringTemplateUtils.applyContext(
           dataSource, values);
-      return new ThirdEyeDataSourceContext().setDataSourceDTO(dataSourceWithEnvVarResolved);
+      return new ThirdEyeDataSourceContext().setDataSourceDTO(dataSourceWithEnvVarResolved)
+          .setEnvironmentContextConfiguration(environmentContextConfiguration);
     } catch (IOException e) {
       throw new RuntimeException(
           "Error while replacing env variables in datasource spec. spec: " + dataSource);

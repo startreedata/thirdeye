@@ -76,6 +76,9 @@ public class DataSourceOnboarder {
         .filter(d -> !alreadyOnboardedDatasets.contains(d.getDataset()))
         .toList();
 
+    datasetsToOnboard.forEach(datasetConfigDTO -> dataSource.prepareDatasetForOnboarding(
+        datasetConfigDTO.getDataset()));
+
     final List<DatasetConfigDTO> addedDatasets = datasetsToOnboard.stream()
         .map(datasetConfigDTO -> persist(datasetConfigDTO, dataSourceDto.getAuth()))
         .collect(Collectors.toList());
@@ -89,8 +92,9 @@ public class DataSourceOnboarder {
       final String datasetName) {
     final ThirdEyeDataSource dataSource = dataSourceCache.getDataSource(dataSourceDto);
     checkThirdEye(dataSource != null, ThirdEyeStatus.ERR_DATASOURCE_NOT_LOADED, dataSourceDto.getName());
-    final DatasetConfigDTO newDataset = dataSource.getDataset(datasetName, true);
+    final DatasetConfigDTO newDataset = dataSource.getDataset(datasetName);
     checkThirdEye(newDataset != null, ThirdEyeStatus.ERR_DATASET_NOT_FOUND, datasetName);
+    dataSource.prepareDatasetForOnboarding(datasetName);
     final DatasetConfigDTO datasetConfigDTO = persist(newDataset, dataSourceDto.getAuth());
     checkThirdEye(datasetConfigDTO != null, ThirdEyeStatus.ERR_DATASET_NOT_FOUND, datasetName);
 

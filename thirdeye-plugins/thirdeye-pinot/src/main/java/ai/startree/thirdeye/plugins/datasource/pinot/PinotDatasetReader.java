@@ -68,7 +68,7 @@ public class PinotDatasetReader {
     final List<DatasetConfigDTO> onboarded = new ArrayList<>();
     for (final String tableName : allTables) {
       try {
-        final DatasetConfigDTO datasetConfigDTO = getTable(tableName, dataSourceName, false);
+        final DatasetConfigDTO datasetConfigDTO = getTable(tableName, dataSourceName);
         onboarded.add(requireNonNull(datasetConfigDTO, "Dataset config is null"));
       } catch (final Exception e) {
         // Catch the exception and continue to onboard other tables
@@ -78,7 +78,7 @@ public class PinotDatasetReader {
     return onboarded;
   }
 
-  public DatasetConfigDTO getTable(final String tableName, final String dataSourceName, final Boolean onboard)
+  public DatasetConfigDTO getTable(final String tableName, final String dataSourceName)
       throws IOException {
     final Schema schema = pinotControllerRestClient.getSchemaFromPinot(tableName);
     requireNonNull(schema, "Onboarding Error: schema is null for pinot table: " + tableName);
@@ -89,10 +89,6 @@ public class PinotDatasetReader {
         .getTableConfigFromPinotEndpoint(tableName);
     checkArgument(tableConfigJson != null && !tableConfigJson.isNull(),
         "Onboarding Error: table config is null for pinot table: " + tableName);
-
-    if (onboard) {
-      pinotControllerRestClient.updateTableMaxQPSQuota(tableName, tableConfigJson);
-    }
 
     final String timeColumnName = pinotControllerRestClient
         .extractTimeColumnFromPinotTable(tableConfigJson);
@@ -110,6 +106,16 @@ public class PinotDatasetReader {
         timeColumnName,
         pinotCustomProperties,
         dataSourceName);
+  }
+
+  public void prepareDatasetForOnboarding(final String datasetName)
+      throws IOException {
+    final JsonNode tableConfigJson = pinotControllerRestClient
+        .getTableConfigFromPinotEndpoint(datasetName);
+    checkArgument(tableConfigJson != null && !tableConfigJson.isNull(),
+        "Onboarding Preparation Error: table config is null for pinot table: " + datasetName);
+
+    pinotControllerRestClient.updateTableMaxQPSQuota(datasetName, tableConfigJson);
   }
 
   public void close() {

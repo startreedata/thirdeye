@@ -17,8 +17,10 @@ import static ai.startree.thirdeye.spi.Constants.VANILLA_OBJECT_MAPPER;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSourceConfig;
+import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.io.IOException;
@@ -33,6 +35,8 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 import org.apache.pinot.spi.data.Schema;
 import org.slf4j.Logger;
@@ -48,16 +52,22 @@ public class PinotControllerRestClient {
   private static final String PINOT_SCHEMA_ENDPOINT_TEMPLATE = "/schemas/%s";
   private static final String PINOT_TABLE_CONFIG_ENDPOINT_TEMPLATE = "/tables/%s/schema";
 
+  private static final String TABLE_CONFIG_QUOTA_KEY = "quota";
+  private static final String TABLE_CONFIG_QUOTA_MAX_QPS_KEY = "maxQueriesPerSecond";
+
   private final HttpHost pinotControllerHost;
   private final PinotControllerHttpClientProvider pinotControllerRestClientSupplier;
+  private final ThirdEyeDataSourceContext context;
 
   @Inject
-  public PinotControllerRestClient(final PinotThirdEyeDataSourceConfig config) {
+  public PinotControllerRestClient(final PinotThirdEyeDataSourceConfig config,
+      final ThirdEyeDataSourceContext context) {
 
     pinotControllerHost = new HttpHost(config.getControllerHost(),
         config.getControllerPort(),
         config.getControllerConnectionScheme());
     this.pinotControllerRestClientSupplier = new PinotControllerHttpClientProvider(config);
+    this.context = context;
   }
 
   public List<String> getAllTablesFromPinot() throws IOException {
@@ -181,6 +191,46 @@ public class PinotControllerRestClient {
       }
     }
     return tableJson;
+  }
+
+  public void updateTableMaxQPSQuota(final String dataset, final JsonNode tableJson) throws IOException {
+    final Integer customMaxQPSQuota = context.getQuotasConfiguration().getPinotMaxQPSQuotaOverride();
+    if (customMaxQPSQuota == null || customMaxQPSQuota <= 0) {
+      return;
+    }
+
+    // update quota if it exists
+    final JsonNode quotaJson = tableJson.get(TABLE_CONFIG_QUOTA_KEY);
+    if (quotaJson != null) {
+      ((ObjectNode) quotaJson).put(TABLE_CONFIG_QUOTA_MAX_QPS_KEY, Integer.toString(customMaxQPSQuota));
+    } else {
+      LOG.error("quota not configured for dataset {} while onboarding. skipping max qps override", dataset);
+      return;
+    }
+
+    // update table config with updated quota
+    final HttpPut request = new HttpPut(String.format(PINOT_TABLES_ENDPOINT_TEMPLATE, dataset));
+    request.setEntity(new StringEntity(tableJson.toString()));
+
+    CloseableHttpResponse response = null;
+    try {
+      response = pinotControllerRestClientSupplier.get().execute(pinotControllerHost, request);
+      if (response.getStatusLine().getStatusCode() != 200) {
+        throw new IllegalStateException(response.getStatusLine().toString());
+      }
+    } catch (final Exception e) {
+      LOG.error("Exception in updating table config of dataset {}", dataset, e);
+      throw e;
+    } finally {
+      if (response != null) {
+        if (response.getEntity() != null) {
+          EntityUtils.consume(response.getEntity());
+        }
+        response.close();
+      }
+    }
+
+    return ;
   }
 
   /**

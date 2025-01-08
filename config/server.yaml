@@ -202,6 +202,9 @@ sentry:
   tags:
     component: coordinator
 
+quotas:
+  pinotMaxQPSQuotaOverride: 100
+
 scheduler:
   # Run the Quartz Scheduler.
   # Only 1 instance of scheduler should run. This responsibility is currently on the user!!

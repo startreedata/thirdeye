@@ -60,6 +60,11 @@ public class MeteredDataSource implements ThirdEyeDataSource {
   }
 
   @Override
+  public void prepareDatasetForOnboarding(final String datasetName) {
+    delegate.prepareDatasetForOnboarding(datasetName);
+  }
+
+  @Override
   public DatasetConfigDTO getDataset(final String datasetName) {
     return delegate.getDataset(datasetName);
   }

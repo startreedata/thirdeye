@@ -319,7 +319,9 @@ export const AlertsAllPage: FunctionComponent = () => {
                             type={DropdownButtonTypeV1.Regular}
                             onClick={handleAlertRedirect}
                         >
-                            {t("label.create")}
+                            {t("label.create-entity", {
+                                entity: t("label.alert"),
+                            })}
                         </DropdownButtonV1>
                     </PageHeaderActionsV1>
                 }

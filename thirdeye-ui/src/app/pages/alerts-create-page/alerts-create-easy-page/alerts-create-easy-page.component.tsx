@@ -962,22 +962,6 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                     justifyContent="space-between"
                                 >
                                     <Grid item xs={12}>
-                                        <Box display="flex">
-                                            <Typography
-                                                className={classes.header}
-                                                variant="h5"
-                                            >
-                                                {t("label.alert-wizard")}
-                                            </Typography>
-                                        </Box>
-                                        <Box>
-                                            <Typography variant="body2">
-                                                {t("message.lets-get-started")}
-                                            </Typography>
-                                        </Box>
-                                    </Grid>
-
-                                    <Grid item xs={12}>
                                         <Grid container>
                                             <Grid item xs={4}>
                                                 <InputSectionV2

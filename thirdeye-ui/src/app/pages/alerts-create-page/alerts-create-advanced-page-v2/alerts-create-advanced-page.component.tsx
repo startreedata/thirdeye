@@ -55,7 +55,14 @@ export const AlertsCreateAdvancedPage: FunctionComponent = () => {
                     <Grid item xs={12}>
                         <AlertTemplate
                             alert={alert}
-                            alertTemplateOptions={alertTemplateOptions}
+                            alertTemplateOptions={alertTemplateOptions.sort(
+                                (a, b) =>
+                                    a.name < b.name
+                                        ? -1
+                                        : a.name > b.name
+                                        ? 1
+                                        : 0
+                            )}
                             selectedAlertTemplate={selectedAlertTemplate}
                             setSelectedAlertTemplate={setSelectedAlertTemplate}
                             onAlertPropertyChange={onAlertPropertyChange}

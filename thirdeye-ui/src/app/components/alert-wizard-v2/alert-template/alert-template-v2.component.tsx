@@ -28,7 +28,6 @@ import { easyAlertStyles } from "../../../pages/alerts-create-page/alerts-create
 import { AlertTemplate as AlertTemplateType } from "../../../rest/dto/alert-template.interfaces";
 import { TemplatePropertiesObject } from "../../../rest/dto/alert.interfaces";
 import { getAlertTemplatesCreatePath } from "../../../utils/routes/routes.util";
-import { AlertTemplatesInformationLinks } from "../../alert-wizard-v3/alert-templates-information-links/alert-templates-information-links";
 import { InputSectionV2 } from "../../form-basics/input-section-v2/input-section-v2.component";
 import { useAlertWizardV2Styles } from "../alert-wizard-v2.styles";
 import { AlertTemplatePropertiesBuilder } from "./alert-template-properties-builder/alert-template-properties-builder-v2.component";
@@ -171,16 +170,10 @@ function AlertTemplate({
                     <Typography className={classes.header} variant="h6">
                         {t("label.detection-template")}
                     </Typography>
-                    <Typography variant="body2">
-                        {t("label.select-the-detection-type-for-your-data")}
-                    </Typography>
                 </Box>
             </Grid>
             <Grid item xs={4}>
                 <InputSectionV2
-                    description={t(
-                        "message.select-a-template-to-monitor-an-detect-anomalies"
-                    )}
                     inputComponent={
                         <>
                             <Autocomplete<AlertTemplateType>
@@ -222,22 +215,34 @@ function AlertTemplate({
                 />
             </Grid>
             <Grid item xs={4}>
-                <Box alignItems="center" display="flex" height="100%">
+                <Box alignItems="flex-end" display="flex" height="100%">
                     <Button
                         className={easyAlertClasses.infoButton}
                         color="primary"
                         size="small"
                         variant="outlined"
                     >
-                        <Box component="span" display="flex" mr={1}>
-                            <Icon
-                                fontSize={24}
-                                icon="mdi:info-circle-outline"
-                            />
-                        </Box>
-                        <Box component="span">
-                            <AlertTemplatesInformationLinks />
-                        </Box>
+                        <Link
+                            className={
+                                easyAlertClasses.recommendedAlgorithmContainer
+                            }
+                            href="https://dev.startree.ai/docs/startree-enterprise-edition/startree-thirdeye/concepts/anomaly-detection-algorithms#detection-algorithms"
+                            target="_blank"
+                        >
+                            <Box component="span" display="flex" mr={1}>
+                                <Icon
+                                    fontSize={24}
+                                    icon="mdi:info-circle-outline"
+                                />
+                            </Box>
+                            <Box>
+                                <Typography variant="caption">
+                                    {t(
+                                        "message.view-documentation-on-all-available-algorithms"
+                                    )}
+                                </Typography>
+                            </Box>
+                        </Link>
                     </Button>
                 </Box>
             </Grid>

@@ -173,6 +173,7 @@ public class PinotQueryExecutor extends CacheLoader<PinotQuery, ThirdEyeResultSe
         try {
           valueString = resultSet.getString(rowIdx, metricColumnIdx);
         } catch (final Exception e) {
+          LOG.error("Failed to get value as String from result set. Replacing with a null value. This may generate errors downstream. Please reach out to support.", e);
           // Do nothing and subsequently insert a null value to the current series.
         }
         columnsOfTheRow[metricColumnIdx + groupByColumnCount] = valueString;

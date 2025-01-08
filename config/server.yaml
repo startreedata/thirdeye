@@ -202,7 +202,7 @@ sentry:
   tags:
     component: coordinator
 
-environmentContext:
+quotas:
   pinotMaxQPSQuotaOverride: 100
 
 scheduler:

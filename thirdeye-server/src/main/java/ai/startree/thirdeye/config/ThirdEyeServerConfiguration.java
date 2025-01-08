@@ -21,7 +21,7 @@ import ai.startree.thirdeye.notification.NotificationConfiguration;
 import ai.startree.thirdeye.rootcause.configuration.RcaConfiguration;
 import ai.startree.thirdeye.scheduler.ThirdEyeSchedulerConfiguration;
 import ai.startree.thirdeye.scheduler.events.MockEventsConfiguration;
-import ai.startree.thirdeye.spi.config.EnvironmentContextConfiguration;
+import ai.startree.thirdeye.spi.config.QuotasConfiguration;
 import ai.startree.thirdeye.spi.config.TimeConfiguration;
 import ai.startree.thirdeye.spi.datalayer.dto.NamespaceConfigurationDTO;
 import ai.startree.thirdeye.worker.task.TaskDriverConfiguration;
@@ -81,8 +81,8 @@ public class ThirdEyeServerConfiguration extends Configuration {
   @JsonProperty("accessControl")
   private AccessControlConfiguration accessControlConfiguration = new AccessControlConfiguration();
 
-  @JsonProperty("environmentContext")
-  private EnvironmentContextConfiguration environmentContextConfiguration = new EnvironmentContextConfiguration();
+  @JsonProperty("quotas")
+  private QuotasConfiguration quotasConfiguration = new QuotasConfiguration();
 
   private String phantomJsPath = "";
   private String failureFromAddress;
@@ -284,13 +284,13 @@ public class ThirdEyeServerConfiguration extends Configuration {
     return this;
   }
 
-  public EnvironmentContextConfiguration getEnvironmentContextConfiguration() {
-    return environmentContextConfiguration;
+  public QuotasConfiguration getEnvironmentContextConfiguration() {
+    return quotasConfiguration;
   }
 
-  public ThirdEyeServerConfiguration setEnvironmentContextConfiguration(
-      final EnvironmentContextConfiguration environmentContextConfiguration) {
-    this.environmentContextConfiguration = environmentContextConfiguration;
+  public ThirdEyeServerConfiguration setQuotasConfiguration(
+      final QuotasConfiguration quotasConfiguration) {
+    this.quotasConfiguration = quotasConfiguration;
     return this;
   }
 }

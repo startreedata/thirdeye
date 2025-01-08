@@ -18,7 +18,7 @@ import ai.startree.thirdeye.datalayer.ThirdEyePersistenceModule;
 import ai.startree.thirdeye.datasource.loader.DefaultAggregationLoader;
 import ai.startree.thirdeye.datasource.loader.DefaultMinMaxTimeLoader;
 import ai.startree.thirdeye.rootcause.configuration.RcaConfiguration;
-import ai.startree.thirdeye.spi.config.EnvironmentContextConfiguration;
+import ai.startree.thirdeye.spi.config.QuotasConfiguration;
 import ai.startree.thirdeye.spi.config.TimeConfiguration;
 import ai.startree.thirdeye.spi.datalayer.dto.NamespaceConfigurationDTO;
 import ai.startree.thirdeye.spi.datasource.loader.AggregationLoader;
@@ -39,21 +39,21 @@ public class ThirdEyeCoreModule extends AbstractModule {
   private final UiConfiguration uiConfiguration;
   private final TimeConfiguration timeConfiguration;
   private final NamespaceConfigurationDTO defaultNamespaceConfiguration;
-  private final EnvironmentContextConfiguration environmentContextConfiguration;
+  private final QuotasConfiguration quotasConfiguration;
 
   public ThirdEyeCoreModule(final DataSource dataSource,
       final RcaConfiguration rcaConfiguration,
       final UiConfiguration uiConfiguration,
       final TimeConfiguration timeConfiguration,
       final NamespaceConfigurationDTO defaultNamespaceConfiguration,
-      final EnvironmentContextConfiguration environmentContextConfiguration) {
+      final QuotasConfiguration quotasConfiguration) {
     this.dataSource = dataSource;
 
     this.rcaConfiguration = rcaConfiguration;
     this.uiConfiguration = uiConfiguration;
     this.timeConfiguration = timeConfiguration;
     this.defaultNamespaceConfiguration = defaultNamespaceConfiguration;
-    this.environmentContextConfiguration = environmentContextConfiguration;
+    this.quotasConfiguration = quotasConfiguration;
   }
 
   @Override
@@ -72,6 +72,6 @@ public class ThirdEyeCoreModule extends AbstractModule {
       bind(TimeConfiguration.class).toProvider(Providers.of(null));
     }
     bind(NamespaceConfigurationDTO.class).toInstance(defaultNamespaceConfiguration);
-    bind(EnvironmentContextConfiguration.class).toInstance(environmentContextConfiguration);
+    bind(QuotasConfiguration.class).toInstance(quotasConfiguration);
   }
 }

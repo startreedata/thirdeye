@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.spi.config;
 
-public class EnvironmentContextConfiguration {
+public class QuotasConfiguration {
 
   private Integer pinotMaxQPSQuotaOverride;
 
@@ -21,7 +21,7 @@ public class EnvironmentContextConfiguration {
     return pinotMaxQPSQuotaOverride;
   }
 
-  public EnvironmentContextConfiguration setPinotMaxQPSQuotaOverride(final Integer pinotMaxQPSQuotaOverride) {
+  public QuotasConfiguration setPinotMaxQPSQuotaOverride(final Integer pinotMaxQPSQuotaOverride) {
     this.pinotMaxQPSQuotaOverride = pinotMaxQPSQuotaOverride;
     return this;
   }

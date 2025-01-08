@@ -13,13 +13,13 @@
  */
 package ai.startree.thirdeye.spi.datasource;
 
-import ai.startree.thirdeye.spi.config.EnvironmentContextConfiguration;
+import ai.startree.thirdeye.spi.config.QuotasConfiguration;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 
 public class ThirdEyeDataSourceContext {
 
   private DataSourceDTO dataSourceDTO;
-  private EnvironmentContextConfiguration environmentContextConfiguration;
+  private QuotasConfiguration quotasConfiguration;
 
   public DataSourceDTO getDataSourceDTO() {
     return dataSourceDTO;
@@ -31,13 +31,13 @@ public class ThirdEyeDataSourceContext {
     return this;
   }
 
-  public EnvironmentContextConfiguration getEnvironmentContextConfiguration() {
-    return environmentContextConfiguration;
+  public QuotasConfiguration getQuotasConfiguration() {
+    return quotasConfiguration;
   }
 
-  public ThirdEyeDataSourceContext setEnvironmentContextConfiguration(
-      final EnvironmentContextConfiguration environmentContextConfiguration) {
-    this.environmentContextConfiguration = environmentContextConfiguration;
+  public ThirdEyeDataSourceContext setQuotasConfiguration(
+      final QuotasConfiguration quotasConfiguration) {
+    this.quotasConfiguration = quotasConfiguration;
     return this;
   }
 }

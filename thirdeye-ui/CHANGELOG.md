@@ -1,3 +1,16 @@
+## [2.58.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.57.1...thirdeye-ui-2.58.0) (2025-01-08)
+
+
+### Features
+
+* [TE-2589](https://cortexdata.atlassian.net/browse/TE-2589) e2e setup and P0 tests ([ce409d658](https://github.com/startreedata/thirdeye/commit/ce409d6587c96ae82afdecd245af54ab8f29cca5))
+
+
+### Bug Fixes
+
+* Added Test fix ([4b61aa495](https://github.com/startreedata/thirdeye/commit/4b61aa495c635d9acb9ced31821646980131aa58))
+* TE-XX run workflow on push to master ([c0b60dbe3](https://github.com/startreedata/thirdeye/commit/c0b60dbe37aa73e91fefb0ccec30074822faec02))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

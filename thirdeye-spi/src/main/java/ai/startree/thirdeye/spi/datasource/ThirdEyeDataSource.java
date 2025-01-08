@@ -46,9 +46,10 @@ public interface ThirdEyeDataSource {
    * Fetch metadata about the dataset.
    *
    * @param datasetName name of the table
+   * @param onboard whether this method is being called in onboarding flow
    * @return ThirdEye dataset describing available dimensions and metrics.
    */
-  default DatasetConfigDTO getDataset(String datasetName) {
+  default DatasetConfigDTO getDataset(final String datasetName, final Boolean onboard) {
     throw new UnsupportedOperationException();
   }
 

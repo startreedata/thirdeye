@@ -260,9 +260,9 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   }
 
   @Override
-  public DatasetConfigDTO getDataset(final String datasetName) {
+  public DatasetConfigDTO getDataset(final String datasetName, final Boolean onboard) {
     try {
-      return datasetReader.getTable(datasetName, name);
+      return datasetReader.getTable(datasetName, name, onboard);
     } catch (final IOException e) {
       throw new RuntimeException(e);
     }

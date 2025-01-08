@@ -282,8 +282,8 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         () =>
             !selectedTable ||
             !selectedMetric ||
-            !aggregationFunction ||
-            !granularity ||
+            (selectedMetric !== t("label.custom-metric-aggregation") &&
+                (!aggregationFunction || !granularity)) ||
             !anomalyDetection ||
             !algorithmOption,
         [
@@ -295,6 +295,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
             algorithmOption,
         ]
     );
+
     const alertTemplateForEvaluate = useMemo(() => {
         let alertTemplateToFind = isMultiDimensionAlert
             ? algorithmOption?.algorithmOption.alertTemplateForMultidimension
@@ -825,11 +826,11 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         algorithm: AvailableAlgorithmOption
     ): void => {
         if (
-            !algorithm ||
             !selectedTable ||
+            !granularity ||
             !selectedMetric ||
-            !aggregationFunction ||
-            !granularity
+            (selectedMetric !== t("label.custom-metric-aggregation") &&
+                (!aggregationFunction || !granularity))
         ) {
             return;
         }
@@ -1924,7 +1925,10 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                                 <FilterListRoundedIcon />
                                                                                             }
                                                                                             variant="outlined"
-                                                                                            onClick={() => {
+                                                                                            onClick={(
+                                                                                                e
+                                                                                            ) => {
+                                                                                                e.preventDefault();
                                                                                                 setShowAdvancedOptions(
                                                                                                     true
                                                                                                 );

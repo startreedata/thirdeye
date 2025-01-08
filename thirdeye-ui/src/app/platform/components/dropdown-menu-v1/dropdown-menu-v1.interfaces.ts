@@ -19,6 +19,7 @@ export interface DropdownMenuV1Props {
     className?: string;
     onClose?: () => void;
     onClick?: (menuItemId: number | string, text: string) => void;
+    dataTestId?: string;
 }
 
 export interface DropdownMenuItemV1 {

@@ -32,3 +32,7 @@ Thumbs.db
 ._*
 .Spotlight-V100
 .Trashes
+/test-results
+/playwright-report/
+/blob-report/
+/playwright/.cache/

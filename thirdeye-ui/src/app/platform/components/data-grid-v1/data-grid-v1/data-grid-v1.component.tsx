@@ -878,6 +878,7 @@ export function DataGridV1<T>({
                     classes={{
                         gutters: dataGridV1Classes.dataGridToolbarGutters,
                     }}
+                    data-testId="table-toolbar"
                 >
                     {/* Toolbar components */}
                     <div
@@ -913,6 +914,7 @@ export function DataGridV1<T>({
                                 className={
                                     dataGridV1Classes.dataGridToolbarSearch
                                 }
+                                data-testId="search-input"
                             >
                                 <SearchInputV1
                                     fullWidth
@@ -945,19 +947,20 @@ export function DataGridV1<T>({
                             ExpandIcon: DataGridExpandIconV1,
                         }}
                         data={data ? filteredData : loadingIndicatorData}
+                        data-testId="table"
                         estimatedRowHeight={HEIGHT_DATA_GRID_ROW}
                         expandColumnKey={expandColumnKey}
                         fixed={fixedTable}
                         headerHeight={HEIGHT_DATA_GRID_HEADER_ROW}
+                        // React Base Table closure issue with custom renderers means custom
+                        // renderers don't have the latest state values and thus
+                        // ignoreFunctionInColumnCompare is set to false and all the custom
+                        // renderers/handlers in columns are memoized via useCallback
                         height={
                             hideToolbar
                                 ? height
                                 : height - HEIGHT_DATA_GRID_TOOLBAR
                         }
-                        // React Base Table closure issue with custom renderers means custom
-                        // renderers don't have the latest state values and thus
-                        // ignoreFunctionInColumnCompare is set to false and all the custom
-                        // renderers/handlers in columns are memoized via useCallback
                         ignoreFunctionInColumnCompare={false}
                         ref={handleTableRefDebounced}
                         rowClassName={getRowClassName}
@@ -1036,6 +1039,7 @@ export function DataGridV1<T>({
                                     customHeaderTooltipRenderer={
                                         eachColumn.customHeaderTooltipRenderer
                                     }
+                                    data-testId="column"
                                     dataKey={eachColumn.dataKey}
                                     flexGrow={eachColumn.flex}
                                     header={eachColumn.header}

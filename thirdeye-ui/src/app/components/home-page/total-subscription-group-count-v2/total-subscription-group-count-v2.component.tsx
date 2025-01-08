@@ -36,7 +36,7 @@ export const TotalSubscriptionGroupCountV2: FunctionComponent<TotalSubscriptionG
                 direction="row"
                 justifyContent="space-between"
             >
-                <Grid item>
+                <Grid item data-testId="subscription-count">
                     <Grid container alignItems="center" direction="row">
                         <Grid item>
                             <LoadingErrorStateSwitch
@@ -77,7 +77,7 @@ export const TotalSubscriptionGroupCountV2: FunctionComponent<TotalSubscriptionG
                         </Grid>
                     </Grid>
                 </Grid>
-                <Grid item>
+                <Grid item data-testId="subscription-create">
                     <IconLink
                         icon={<SettingsIcon />}
                         label={t("label.setup-entity", {

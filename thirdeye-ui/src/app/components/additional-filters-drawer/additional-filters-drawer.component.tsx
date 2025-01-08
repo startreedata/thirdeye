@@ -75,7 +75,8 @@ export const AdditonalFiltersDrawer: FunctionComponent<AdditonalFiltersDrawerPro
             }));
         };
 
-        const onSubmit = (): void => {
+        const onSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
+            e.preventDefault();
             onApply(localCopyOfProperties);
         };
 

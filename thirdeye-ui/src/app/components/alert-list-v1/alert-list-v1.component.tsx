@@ -226,7 +226,12 @@ export const AlertListV1: FunctionComponent<AlertListV1Props> = ({
                             entity: t("label.alerts"),
                         })}
                         toolbarComponent={
-                            <Grid container alignItems="center" spacing={2}>
+                            <Grid
+                                container
+                                alignItems="center"
+                                data-testId="alert-list-actions"
+                                spacing={2}
+                            >
                                 {/* Duplicate */}
                                 <Grid item>
                                     <Button

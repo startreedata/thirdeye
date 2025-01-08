@@ -92,6 +92,9 @@ export const useWorkpsaceSwitcherStyles = makeStyles({
         "&:hover .copy-icon-button": {
             visibility: "visible",
         },
+        "& .MuiListItemText-primary": {
+            fontSize: "14px",
+        },
     },
     noResults: {
         display: "flex",

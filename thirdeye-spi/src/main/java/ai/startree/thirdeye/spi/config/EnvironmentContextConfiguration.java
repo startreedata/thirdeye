@@ -15,14 +15,14 @@ package ai.startree.thirdeye.spi.config;
 
 public class EnvironmentContextConfiguration {
 
-  private Integer customMaxQPSQuota;
+  private Integer pinotMaxQPSQuotaOverride;
 
-  public Integer getCustomMaxQPSQuota() {
-    return customMaxQPSQuota;
+  public Integer getPinotMaxQPSQuotaOverride() {
+    return pinotMaxQPSQuotaOverride;
   }
 
-  public EnvironmentContextConfiguration setCustomMaxQPSQuota(final Integer customMaxQPSQuota) {
-    this.customMaxQPSQuota = customMaxQPSQuota;
+  public EnvironmentContextConfiguration setPinotMaxQPSQuotaOverride(final Integer pinotMaxQPSQuotaOverride) {
+    this.pinotMaxQPSQuotaOverride = pinotMaxQPSQuotaOverride;
     return this;
   }
 }

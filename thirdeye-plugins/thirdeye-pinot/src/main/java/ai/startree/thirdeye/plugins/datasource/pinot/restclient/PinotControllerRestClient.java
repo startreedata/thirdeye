@@ -194,7 +194,7 @@ public class PinotControllerRestClient {
   }
 
   public void updateTableMaxQPSQuota(final String dataset, final JsonNode tableJson) throws IOException {
-    Integer customMaxQPSQuota = context.getEnvironmentContextConfiguration().getCustomMaxQPSQuota();
+    Integer customMaxQPSQuota = context.getEnvironmentContextConfiguration().getPinotMaxQPSQuotaOverride();
     if (customMaxQPSQuota == null || customMaxQPSQuota <= 0) {
       return;
     }

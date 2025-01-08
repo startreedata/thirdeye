@@ -203,7 +203,7 @@ sentry:
     component: coordinator
 
 environmentContext:
-  customMaxQPSQuota: 100
+  pinotMaxQPSQuotaOverride: 100
 
 scheduler:
   # Run the Quartz Scheduler.

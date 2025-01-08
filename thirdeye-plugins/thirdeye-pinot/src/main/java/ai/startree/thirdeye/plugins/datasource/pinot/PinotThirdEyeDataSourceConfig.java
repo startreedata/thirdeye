@@ -38,8 +38,7 @@ public class PinotThirdEyeDataSourceConfig {
   private Integer requestTimeoutMs;
   @Deprecated // use timeoutMs queryOption
   private Integer brokerResponseTimeoutMs;
-  private int customMaxQPSQuota;
-  
+
   public boolean isOAuthEnabled() {
     return oauth != null && oauth.isEnabled();
   }
@@ -175,15 +174,6 @@ public class PinotThirdEyeDataSourceConfig {
     return this;
   }
 
-  public int getCustomMaxQPSQuota() {
-    return customMaxQPSQuota;
-  }
-
-  public PinotThirdEyeDataSourceConfig setCustomMaxQPSQuota(final int customMaxQPSQuota) {
-    this.customMaxQPSQuota = customMaxQPSQuota;
-    return this;
-  }
-
   @Deprecated
   public Integer getBrokerResponseTimeoutMs() {
     return brokerResponseTimeoutMs;
@@ -218,8 +208,7 @@ public class PinotThirdEyeDataSourceConfig {
         && Objects.equals(readTimeoutMs, that.readTimeoutMs)
         && Objects.equals(requestTimeoutMs, that.requestTimeoutMs)
         && Objects.equals(connectTimeoutMs, that.connectTimeoutMs)
-        && Objects.equals(brokerResponseTimeoutMs, that.brokerResponseTimeoutMs)
-        && Objects.equals(customMaxQPSQuota, that.customMaxQPSQuota);
+        && Objects.equals(brokerResponseTimeoutMs, that.brokerResponseTimeoutMs);
   }
 
   @Override
@@ -237,7 +226,6 @@ public class PinotThirdEyeDataSourceConfig {
         readTimeoutMs,
         requestTimeoutMs,
         connectTimeoutMs,
-        brokerResponseTimeoutMs,
-        customMaxQPSQuota);
+        brokerResponseTimeoutMs);
   }
 }

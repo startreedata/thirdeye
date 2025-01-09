@@ -13,8 +13,12 @@
  */
 package ai.startree.thirdeye.plugins.datasource.pinot.resultset;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public abstract class AbstractThirdEyeResultSet implements ThirdEyeResultSet {
 
+  private static final Logger LOG = LoggerFactory.getLogger(AbstractThirdEyeResultSet.class);
   private static final String NULL_STRING = "null";
 
   @Override
@@ -40,24 +44,44 @@ public abstract class AbstractThirdEyeResultSet implements ThirdEyeResultSet {
   @Override
   public Integer getInteger(final int rowIndex, final int columnIndex) {
     final String stringValue = getString(rowIndex, columnIndex);
+    if (stringValue == null) {
+      // This can happen because Pinot and ThirdEye share the same null values for primitives. For instance, Pinot may return Long.MIN_VALUE. 
+      LOG.warn("Query returned a value that matches the internal null value of the ThirdEye Series implementation. If this is not expected, this may cause errors downstream.");
+      return null;
+    }
     return NULL_STRING.equals(stringValue) ? null : Integer.parseInt(stringValue);
   }
 
   @Override
   public Boolean getBoolean(final int rowIndex, final int columnIndex) {
     final String stringValue = getString(rowIndex, columnIndex);
+    if (stringValue == null) {
+      // This can happen because Pinot and ThirdEye share the same null values for primitives. For instance, Pinot may return Long.MIN_VALUE. 
+      LOG.warn("Query returned a value that matches the internal null value of the ThirdEye Series implementation. If this is not expected, this may cause errors downstream.");
+      return null;
+    }
     return NULL_STRING.equals(stringValue) ? null : Boolean.parseBoolean(stringValue);
   }
 
   @Override
   public Long getLong(final int rowIndex, final int columnIndex) {
     final String stringValue = getString(rowIndex, columnIndex);
+    if (stringValue == null) {
+      // This can happen because Pinot and ThirdEye share the same null values for primitives. For instance, Pinot may return Long.MIN_VALUE. 
+      LOG.warn("Query returned a value that matches the internal null value of the ThirdEye Series implementation. If this is not expected, this may cause errors downstream.");
+      return null;
+    }
     return NULL_STRING.equals(stringValue) ? null : Long.parseLong(stringValue);
   }
 
   @Override
   public Double getDouble(final int rowIndex, final int columnIndex) {
     final String stringValue = getString(rowIndex, columnIndex);
+    if (stringValue == null) {
+      // This can happen because Pinot and ThirdEye share the same null values for primitives. For instance, Pinot may return Long.MIN_VALUE. 
+      LOG.warn("Query returned a value that matches the internal null value of the ThirdEye Series implementation. If this is not expected, this may cause errors downstream.");
+      return null;
+    }
     return NULL_STRING.equals(stringValue) ? null : Double.parseDouble(stringValue);
   }
 }

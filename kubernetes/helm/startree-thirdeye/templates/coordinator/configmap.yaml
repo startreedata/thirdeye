@@ -135,6 +135,9 @@ data:
       tags:
         component: "{{ .Values.coordinator.name }}"  
 
+    quotas:
+{{ toYaml .Values.quotas | indent 6 }}
+
     notifications:
       useSendgridEmail: true
       smtp:

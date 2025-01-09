@@ -26,6 +26,7 @@ test("Create Simple Alert", async ({ page }) => {
     await createAlertPage.selectDetectionAlgorithm();
     await createAlertPage.resolveEvaluateApis();
     await createAlertPage.createAlert();
+    await createAlertPage.resolveCreateAlertApis();
 });
 
 test("Create Multi Dimensions Alert", async ({ page }) => {
@@ -40,6 +41,7 @@ test("Create Multi Dimensions Alert", async ({ page }) => {
     await createAlertPage.selectDetectionAlgorithm(true);
     await createAlertPage.resolveEvaluateApis();
     await createAlertPage.createAlert();
+    await createAlertPage.resolveCreateAlertApis();
 });
 
 test("Create Multi Dimensions SQL Alert", async ({ page }) => {
@@ -55,6 +57,7 @@ test("Create Multi Dimensions SQL Alert", async ({ page }) => {
     await createAlertPage.clickLoadChartButton();
     await createAlertPage.resolveEvaluateApis();
     await createAlertPage.createAlert();
+    await createAlertPage.resolveCreateAlertApis();
 });
 
 test("Create Alert With Advanced Options", async ({ page }) => {
@@ -70,6 +73,7 @@ test("Create Alert With Advanced Options", async ({ page }) => {
     await createAlertPage.addAdvancedOptions();
     await createAlertPage.resolveEvaluateApis();
     await createAlertPage.createAlert();
+    await createAlertPage.resolveCreateAlertApis();
 });
 
 test("Create Alert With Custom Metric", async ({ page }) => {
@@ -83,4 +87,5 @@ test("Create Alert With Custom Metric", async ({ page }) => {
     await createAlertPage.selectDetectionAlgorithm();
     await createAlertPage.resolveEvaluateApis();
     await createAlertPage.createAlert();
+    await createAlertPage.resolveCreateAlertApis();
 });

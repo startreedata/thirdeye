@@ -133,10 +133,11 @@ data:
       # Some characters are forbidden - see https://docs.sentry.io/platforms/java/configuration/environments
       environment: {{regexReplaceAll `(https?:|\n| |/)` .Values.ui.publicUrl ""}}
       tags:
-        component: "{{ .Values.coordinator.name }}"  
-
+        component: "{{ .Values.coordinator.name }}"
+{{ if .Values.quotas }}
     quotas:
-{{ toYaml .Values.quotas | indent 6 }}
+{{- toYaml .Values.quotas  | nindent 6 }}
+{{- end }}
 
     notifications:
       useSendgridEmail: true

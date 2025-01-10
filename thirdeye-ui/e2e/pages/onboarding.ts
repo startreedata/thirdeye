@@ -17,6 +17,7 @@ import { BasePage } from "./base";
 
 export class OnboardingPage extends BasePage {
     readonly page: Page;
+    datasourceApiResponse: any;
 
     constructor(page: Page) {
         super(page);
@@ -65,11 +66,25 @@ export class OnboardingPage extends BasePage {
     }
 
     async resolveDataSourcesApi() {
-        const [datasetsApiResponse] = await Promise.all([
+        const [datasourceApiResponse] = await Promise.all([
             this.page.waitForResponse(
                 (response) =>
                     response.url().includes("/api/data-sources") &&
                     response.status() === 200
+            ),
+        ]);
+        this.datasourceApiResponse = await datasourceApiResponse.json();
+    }
+
+    async resolveDataSetApi() {
+        const [dataSetApiResponse] = await Promise.all([
+            this.page.waitForResponse(
+                (response) =>
+                    response
+                        .url()
+                        .includes(
+                            `/api/data-sources/${this.datasourceApiResponse[0]?.id}/datasets`
+                        ) && response.status() === 200
             ),
         ]);
     }
@@ -130,5 +145,34 @@ export class OnboardingPage extends BasePage {
 
     async clickConfigureDataButton() {
         await this.page.getByRole("button", { name: "Configure Data" }).click();
+    }
+
+    async selectDataSources() {
+        await this.page.click(
+            `span:text("${
+                this.datasourceApiResponse
+                    ? this.datasourceApiResponse[0]?.name
+                    : ""
+            }")`
+        );
+        await this.page.getByRole("button", { name: "Next" }).click();
+    }
+
+    async onboardDatasets() {
+        await expect(this.page.locator("h5").nth(1)).toHaveText(
+            "Onboard datasets for mypinot"
+        );
+
+        await this.page
+            .getByRole("button", { name: "Onboard Datasets" })
+            .click();
+    }
+
+    async selectOtherDataSources() {
+        await this.page.click(`span:text("Add new Pinot datasource")`);
+        await this.page.click(`span:text("mypinot")`);
+        await this.page.press(`span:text("mypinot")`, "Digit2");
+
+        await this.page.getByRole("button", { name: "Next" }).click();
     }
 }

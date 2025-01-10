@@ -213,11 +213,11 @@ export const AlertsAllPage: FunctionComponent = () => {
         },
         {
             id: "advancedAlert",
-            text: t("label.advanced-alert"),
+            text: t("label.advanced-setup"),
         },
         {
             id: "jsonAlert",
-            text: t("label.json-alert"),
+            text: t("label.json-setup"),
         },
     ];
 

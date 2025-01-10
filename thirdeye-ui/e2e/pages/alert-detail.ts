@@ -169,7 +169,7 @@ export class AlertDetailsPage extends BasePage {
 
     async assertPageComponents() {
         await expect(this.page.locator("h4").first()).toHaveText(
-            /^Anomaly #\d+(\s\w+)?$/
+            /^Anomaly #\d+(\s\(\w+\))?$/
         );
         expect(
             this.page.locator("li").filter({ hasText: "Anomalies" })

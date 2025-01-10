@@ -144,6 +144,16 @@ export class CreateAlertPage extends BasePage {
         this.evaluateResponseData = await evaluateApiResponse.json();
     }
 
+    async resolveCreateAlertApis() {
+        const [createAlertApiResponse] = await Promise.all([
+            this.page.waitForResponse(
+                (response) =>
+                    response.url().includes("/api/alerts") &&
+                    response.status() === 200
+            ),
+        ]);
+    }
+
     async resolveMetricsCohortsApis() {
         const [cohortsApiResponse] = await Promise.all([
             this.page.waitForResponse(

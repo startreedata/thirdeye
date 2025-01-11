@@ -92,6 +92,8 @@ export const DialogProviderV1: FunctionComponent<DialogProviderV1Props> = ({
         hideDialog: hideDialog,
     };
 
+    const dataTestId = dialogData?.dataTestId || "dialoag";
+
     return (
         <DialogProviderV1Context.Provider value={dialogContext}>
             {children}
@@ -102,6 +104,7 @@ export const DialogProviderV1: FunctionComponent<DialogProviderV1Props> = ({
                     {...otherProps}
                     fullWidth
                     className={classNames(className, "dialog-provider-v1")}
+                    data-testId={dataTestId}
                     maxWidth={dialogData.width || "xs"}
                     open={visible}
                     scroll="body"
@@ -109,7 +112,10 @@ export const DialogProviderV1: FunctionComponent<DialogProviderV1Props> = ({
                 >
                     {/* Header */}
                     {dialogData.headerText && (
-                        <DialogTitle className="dialog-provider-v1-header">
+                        <DialogTitle
+                            className="dialog-provider-v1-header"
+                            data-testId={`${dataTestId}-title`}
+                        >
                             {dialogData.headerText}
                         </DialogTitle>
                     )}
@@ -119,12 +125,16 @@ export const DialogProviderV1: FunctionComponent<DialogProviderV1Props> = ({
                         <>
                             {/* Custom contents */}
                             {dialogData.customContents && (
-                                <>{dialogData.contents}</>
+                                <div data-testId={`${dataTestId}-content`}>
+                                    {dialogData.contents}
+                                </div>
                             )}
 
                             {/* Default contents */}
                             {!dialogData.customContents && (
-                                <DialogContent>
+                                <DialogContent
+                                    data-testId={`${dataTestId}-content`}
+                                >
                                     {dialogData.type === DialogType.ALERT ? (
                                         <DialogContentText>
                                             {dialogData.contents}
@@ -141,7 +151,9 @@ export const DialogProviderV1: FunctionComponent<DialogProviderV1Props> = ({
                     {!dialogData.customContents &&
                         (!dialogData.hideOkButton ||
                             !dialogData.hideCancelButton) && (
-                            <DialogActions>
+                            <DialogActions
+                                data-testId={`${dataTestId}-actions`}
+                            >
                                 {/* Cancel button */}
                                 {!dialogData.hideCancelButton && (
                                     <Button

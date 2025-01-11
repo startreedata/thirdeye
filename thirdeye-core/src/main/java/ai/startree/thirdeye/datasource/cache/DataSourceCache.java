@@ -20,9 +20,9 @@ package ai.startree.thirdeye.datasource.cache;
 
 import static ai.startree.thirdeye.spi.Constants.METRICS_CACHE_TIMEOUT;
 import static ai.startree.thirdeye.spi.util.ExecutorUtils.threadsNamed;
+import static ai.startree.thirdeye.spi.util.MetricsUtils.scheduledRefreshSupplier;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.base.Suppliers.memoizeWithExpiration;
 import static java.util.Collections.emptyList;
 
 import ai.startree.thirdeye.datasource.DataSourcesLoader;
@@ -78,18 +78,27 @@ public class DataSourceCache {
     this.dataSourcesLoader = dataSourcesLoader;
 
     Gauge.builder("thirdeye_healthy_datasources",
-            memoizeWithExpiration(this::getHealthyDatasourceCount, METRICS_CACHE_TIMEOUT.toMinutes(),
-                TimeUnit.MINUTES))
+            scheduledRefreshSupplier(this::getHealthyDatasourceCount, METRICS_CACHE_TIMEOUT))
         .register(Metrics.globalRegistry);
     Metrics.gaugeMapSize("thirdeye_cached_datasources", emptyList(), cache);
   }
 
   // TODO CYRIL authz refacto - move this DataSourceCache should not have access to DataSourceManager - update architectureTest
   private Integer getHealthyDatasourceCount() {
-    return Math.toIntExact(dataSourceManager.findAll().stream()
-        .map(this::getDataSource)
-        .filter(this::validateWithTimeout)
-        .count());
+    int healthyDatasourceCount = 0;
+    for (final DataSourceDTO datasourceDto: dataSourceManager.findAll()) {
+      final ThirdEyeDataSource thirdEyeDataSource;
+      try {
+        thirdEyeDataSource = getDataSource(datasourceDto);
+      } catch (final Exception e) {
+        LOG.error("Failed to get data source {}", datasourceDto, e);
+        continue;
+      }
+      if (validateWithTimeout(thirdEyeDataSource)) {
+        healthyDatasourceCount++;
+      }
+    }
+    return healthyDatasourceCount;
   }
 
   private boolean validateWithTimeout(final ThirdEyeDataSource ds) {
@@ -152,7 +161,7 @@ public class DataSourceCache {
     try {
       dataSource.close();
     } catch (final Exception e) {
-      LOG.error("Datasource {} was not flushed gracefully.", dataSource.getName());
+      LOG.error("Datasource {} was not flushed gracefully.", dataSource.getName(), e);
     }
   }
 

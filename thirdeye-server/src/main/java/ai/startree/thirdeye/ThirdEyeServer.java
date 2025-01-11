@@ -32,11 +32,15 @@ import ai.startree.thirdeye.scheduler.SchedulerService;
 import ai.startree.thirdeye.scheduler.events.MockEventsLoader;
 import ai.startree.thirdeye.service.ResourcesBootstrapService;
 import ai.startree.thirdeye.spi.Constants;
+import ai.startree.thirdeye.spi.datalayer.bao.AbstractManager;
 import ai.startree.thirdeye.worker.task.TaskDriver;
 import ch.qos.logback.classic.Level;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
+import com.google.inject.Binding;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.spi.DefaultElementVisitor;
 import io.dropwizard.auth.AuthDynamicFeature;
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.AuthValueFactoryProvider;
@@ -65,10 +69,14 @@ import io.sentry.Hint;
 import io.sentry.Sentry;
 import io.sentry.SentryLevel;
 import io.sentry.logback.SentryAppender;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.FilterRegistration;
+import jakarta.ws.rs.WebApplicationException;
 import java.util.EnumSet;
-import javax.servlet.DispatcherType;
-import javax.servlet.FilterRegistration;
-import javax.ws.rs.WebApplicationException;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
@@ -215,6 +223,8 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
           injector.getInstance(ResourcesBootstrapService.class)
               .bootstrap(AuthorizationManager.getInternalValidPrincipal());
 
+          registerDatabaseMetricsOfAllDaos(injector);
+
           // Start the scheduler
           schedulerService.start();
         }
@@ -238,6 +248,28 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
         injector.getInstance(PlanExecutor.class).close();
       }
     };
+  }
+
+  private void registerDatabaseMetricsOfAllDaos(final Injector injector) {
+    final Set<Entry<Key<?>, Binding<?>>> keyToBinding = injector.getAllBindings().entrySet();
+    // both implementation and interface may be listed in keyToBinding - so we deduplicate manually 
+    final Set<Class> loadedClasses = new HashSet<>();
+    for(final Map.Entry<Key<?>, Binding<?>> entry : keyToBinding) {
+      final Binding<?> binding = entry.getValue();
+      if (AbstractManager.class.isAssignableFrom(entry.getKey().getTypeLiteral().getRawType())) {
+        binding.acceptVisitor(new DefaultElementVisitor<AbstractManager<?>>() {
+          @Override
+          public <T> AbstractManager<?> visit(final Binding<T> binding) {
+            final AbstractManager<?> instance = (AbstractManager<?>) binding.getProvider().get();
+            if (!loadedClasses.contains(instance.getClass())) {
+              instance.registerDatabaseMetrics();
+              loadedClasses.add(instance.getClass());
+            }
+            return null;
+          }
+        });
+      }
+    }
   }
 
   /**

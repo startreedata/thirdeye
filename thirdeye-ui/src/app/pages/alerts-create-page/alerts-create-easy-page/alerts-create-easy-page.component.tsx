@@ -42,15 +42,18 @@ import {
 import DimensionImage from "../../../../assets/images/dimensions.png";
 import { AdditonalFiltersDrawer } from "../../../components/additional-filters-drawer/additional-filters-drawer.component";
 import { AlertCompositeFiltersModal } from "../../../components/alert-composite-filters-modal/alert-composite-filters-modal.component";
+import { AlertJsonEditorModal } from "../../../components/alert-json-editor-modal/alert-json-editor-modal.component";
 // Remove "createNewStartingAlertThreshold as" for fallback
-import { createNewStartingAlertThreshold as createNewStartingAlert } from "../../../components/alert-wizard-v2/alert-template/alert-template.utils";
+import {
+    createNewStartingAlertThreshold as createNewStartingAlert,
+    determinePropertyFieldConfiguration,
+    setUpFieldInputRenderConfig,
+} from "../../../components/alert-wizard-v2/alert-template/alert-template.utils";
 import { AvailableAlgorithmOption } from "../../../components/alert-wizard-v3/alert-type-selection/alert-type-selection.interfaces";
 import {
     generateAvailableAlgorithmOptions,
     generateAvailableAlgorithmOptionsForRecommendations,
 } from "../../../components/alert-wizard-v3/alert-type-selection/alert-type-selection.utils";
-import { AnomaliesFilterConfiguratorRenderConfigs } from "../../../components/alert-wizard-v3/anomalies-filter-panel/anomalies-filter-panel.interfaces";
-import { getAvailableFilterOptions } from "../../../components/alert-wizard-v3/anomalies-filter-panel/anomalies-filter-panel.utils";
 import { NotificationConfiguration } from "../../../components/alert-wizard-v3/notification-configuration/notification-configuration.component";
 import { ChartContentV2 } from "../../../components/alert-wizard-v3/preview-chart/chart-content-v2/chart-content-v2.component";
 import {
@@ -85,6 +88,7 @@ import {
 import {
     createAlertEvaluation,
     determineTimezoneFromAlertInEvaluation,
+    groupPropertyByStepAndSubStep,
 } from "../../../utils/alerts/alerts.util";
 import {
     DatasetInfo,
@@ -141,6 +145,10 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         {
             label: t("label.15-minutes"),
             value: GranularityValue.FIFTEEN_MINUTES,
+        },
+        {
+            label: t("label.10-minutes"),
+            value: GranularityValue.TEN_MINUTES,
         },
         {
             label: t("label.5-minutes"),
@@ -274,8 +282,8 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         () =>
             !selectedTable ||
             !selectedMetric ||
-            !aggregationFunction ||
-            !granularity ||
+            (selectedMetric !== t("label.custom-metric-aggregation") &&
+                (!aggregationFunction || !granularity)) ||
             !anomalyDetection ||
             !algorithmOption,
         [
@@ -287,6 +295,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
             algorithmOption,
         ]
     );
+
     const alertTemplateForEvaluate = useMemo(() => {
         let alertTemplateToFind = isMultiDimensionAlert
             ? algorithmOption?.algorithmOption.alertTemplateForMultidimension
@@ -301,14 +310,6 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
             return alertTemplateCandidate.name === alertTemplateToFind;
         });
     }, [alertTemplates, alert, algorithmOption, isMultiDimensionAlert]);
-
-    const availableConfigurations = useMemo(() => {
-        if (!alertTemplateForEvaluate) {
-            return undefined;
-        }
-
-        return getAvailableFilterOptions(alertTemplateForEvaluate, t);
-    }, [alertTemplateForEvaluate]);
 
     const handleGranularityChange = async (
         _: unknown,
@@ -407,7 +408,6 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                 value: item,
                 label: item,
                 onClick: () => handleAggregationChange(item),
-                tooltipText: item,
             })
         );
 
@@ -458,6 +458,14 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
             handleReloadPreviewClick(workingAlert);
         } else if (item === AnomalyDetectionOptions.COMPOSITE) {
             setCompositeFilters(null);
+            if (queryFilters) {
+                const updatedQueryFilters = queryFilters
+                    .trim()
+                    .startsWith("${queryFilters}")
+                    ? queryFilters
+                    : "${queryFilters} " + queryFilters;
+                setQueryFilters(updatedQueryFilters);
+            }
             setIsMultiDimensionAlert(true);
         }
     };
@@ -487,7 +495,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                 ),
                 min: 0,
                 max: 1,
-                queryFilters: "${queryFilters}",
+                queryFilters: queryFilters ? queryFilters : "${queryFilters}",
                 enumeratorQuery: enumerators,
             },
         };
@@ -506,7 +514,6 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                 label: item,
                 disabled: alertInsightLoading,
                 onClick: () => handleAnomalyDetectionChange(item),
-                tooltipText: item,
             })
         );
 
@@ -769,6 +776,24 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         });
     }, [alertTemplates, alert]);
 
+    const availableConfigurations = useMemo(() => {
+        if (!alertTemplateForEvaluate) {
+            return undefined;
+        }
+
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const [_requiredKeys, optionalKeys] = setUpFieldInputRenderConfig(
+            selectedAlertTemplate
+                ? determinePropertyFieldConfiguration(selectedAlertTemplate)
+                : [],
+            alert.templateProperties
+        );
+
+        return groupPropertyByStepAndSubStep(optionalKeys);
+
+        // return getAvailableFilterOptions(alertTemplateForEvaluate, t);
+    }, [alertTemplateForEvaluate, selectedAlertTemplate]);
+
     const onUpdateCompositeFiltersChange = (
         template: TemplatePropertiesObject
     ): void => {
@@ -788,6 +813,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
             },
             templateProperties: {
                 ...template,
+                queryFilters: queryFilters ? queryFilters : "${queryFilters}",
             },
         };
         onAlertPropertyChange(workingAlert);
@@ -800,11 +826,11 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         algorithm: AvailableAlgorithmOption
     ): void => {
         if (
-            !algorithm ||
             !selectedTable ||
+            !granularity ||
             !selectedMetric ||
-            !aggregationFunction ||
-            !granularity
+            (selectedMetric !== t("label.custom-metric-aggregation") &&
+                (!aggregationFunction || !granularity))
         ) {
             return;
         }
@@ -823,6 +849,10 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
             : null;
         const isEnumeratorQuery =
             dimension === SelectDimensionsOptions.ENUMERATORS;
+        const defaultAlertTemplate =
+            createNewStartingAlert().templateProperties;
+        delete (defaultAlertTemplate as TemplatePropertiesObject).min;
+        delete (defaultAlertTemplate as TemplatePropertiesObject).max;
         const workingAlert = {
             template: {
                 name: isCompositeAlert
@@ -840,9 +870,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                       ...recommendedTemplate.alert.templateProperties,
                   }
                 : {
-                      ...(isEnumeratorQuery
-                          ? {}
-                          : createNewStartingAlert().templateProperties),
+                      ...(isEnumeratorQuery ? {} : defaultAlertTemplate),
                       ...generateTemplateProperties(
                           selectedMetric as string,
                           selectedTable?.dataset,
@@ -869,7 +897,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         onAlertPropertyChange(workingAlert);
     };
 
-    const renderNotificationView = (): JSX.Element => {
+    const NotificationView = (): JSX.Element => {
         return (
             <Grid item xs={12}>
                 <PageContentsCardV1 className={classes.notificationContainer}>
@@ -944,9 +972,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                         </Box>
                                         <Box>
                                             <Typography variant="body2">
-                                                {t(
-                                                    "message.create-your-first-step-filling-fields"
-                                                )}
+                                                {t("message.lets-get-started")}
                                             </Typography>
                                         </Box>
                                     </Grid>
@@ -956,7 +982,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                             <Grid item xs={4}>
                                                 <InputSectionV2
                                                     description={t(
-                                                        "message.select-dataset-to-monitor-and-detect-anomalies"
+                                                        "message.select-a-dataset-to-monitor"
                                                     )}
                                                     inputComponent={
                                                         <Autocomplete<DatasetInfo>
@@ -989,7 +1015,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                         ...params.InputProps,
                                                                     }}
                                                                     placeholder={t(
-                                                                        "message.select-dataset"
+                                                                        "message.select-a-dataset"
                                                                     )}
                                                                     variant="outlined"
                                                                 />
@@ -1049,7 +1075,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                             <Grid item xs={4}>
                                                 <InputSectionV2
                                                     description={t(
-                                                        "message.select-metric-to-identify-unusual-changes-when-it-occurs"
+                                                        "message.select-a-metric-to-detect-anomalies"
                                                     )}
                                                     inputComponent={
                                                         <Autocomplete<string>
@@ -1122,7 +1148,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                   "message.select-dataset-first"
                                                                               )
                                                                             : t(
-                                                                                  "message.select-metric"
+                                                                                  "message.select-a-metric"
                                                                               )
                                                                     }
                                                                     variant="outlined"
@@ -1246,9 +1272,10 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                         placeholder={t(
                                                                             "label.placeholder-sql-where"
                                                                         )}
-                                                                        value={
-                                                                            queryFilters
-                                                                        }
+                                                                        value={queryFilters.replace(
+                                                                            /\$\{queryFilters\}/g,
+                                                                            ""
+                                                                        )}
                                                                         onChange={(
                                                                             e
                                                                         ) =>
@@ -1361,7 +1388,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
 
                                                         <Typography variant="body2">
                                                             {t(
-                                                                "label.select-the-level-of-detail-at-which-data-is-aggregated-or-stored-in-the-time-series-data"
+                                                                "label.select-the-time-increment-that-the-data-is-aggregated-to"
                                                             )}
                                                         </Typography>
                                                     </Box>
@@ -1582,7 +1609,6 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                 </Grid>
                                                             </Grid>
                                                         </Grid>
-                                                        {renderNotificationView()}
                                                     </>
                                                 )}
                                                 <Grid item xs={12}>
@@ -1875,6 +1901,21 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                     <Grid
                                                                                         container
                                                                                     >
+                                                                                        <AlertJsonEditorModal
+                                                                                            isReadOnly
+                                                                                            alert={
+                                                                                                alert
+                                                                                            }
+                                                                                            buttonText={t(
+                                                                                                "label.view-json"
+                                                                                            )}
+                                                                                            cancelButtonText={t(
+                                                                                                "label.close"
+                                                                                            )}
+                                                                                            isDisabled={
+                                                                                                !algorithmOption
+                                                                                            }
+                                                                                        />
                                                                                         <Button
                                                                                             className={
                                                                                                 classes.infoButton
@@ -1884,7 +1925,10 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                                 <FilterListRoundedIcon />
                                                                                             }
                                                                                             variant="outlined"
-                                                                                            onClick={() => {
+                                                                                            onClick={(
+                                                                                                e
+                                                                                            ) => {
+                                                                                                e.preventDefault();
                                                                                                 setShowAdvancedOptions(
                                                                                                     true
                                                                                                 );
@@ -1896,7 +1940,8 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                         </Button>
                                                                                         <AdditonalFiltersDrawer
                                                                                             availableConfigurations={
-                                                                                                availableConfigurations as AnomaliesFilterConfiguratorRenderConfigs[]
+                                                                                                availableConfigurations ??
+                                                                                                {}
                                                                                             }
                                                                                             defaultValues={
                                                                                                 alert.templateProperties
@@ -2000,6 +2045,13 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                 hideCallToActionPrompt={
                                                                                     false
                                                                                 }
+                                                                                isSearchEnabled={
+                                                                                    anomalyDetection ===
+                                                                                    AnomalyDetectionOptions.COMPOSITE
+                                                                                }
+                                                                                showDeleteIcon={
+                                                                                    false
+                                                                                }
                                                                                 onAlertPropertyChange={
                                                                                     onAlertPropertyChange
                                                                                 }
@@ -2066,7 +2118,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                 marginTop={2}
                                                                 width="100%"
                                                             >
-                                                                {renderNotificationView()}
+                                                                <NotificationView />
                                                             </Box>
                                                         </Grid>
                                                     )}

@@ -23,6 +23,7 @@ public class DataTableToSqlAdapterFactory {
     switch (sqlEngine.toUpperCase(DEFAULT_LOCALE)) {
       case "CALCITE":
         return new CalciteDataTableToSqlAdapter();
+      // todo cyril - remove hsqldb support 
       case "HYPERSQL": case "HSQLDB":
         return new HyperSqlDataTableToSqlAdapter();
       default:

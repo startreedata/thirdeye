@@ -14,6 +14,8 @@
 package ai.startree.thirdeye.notification;
 
 import static ai.startree.thirdeye.spi.Constants.METRICS_TIMER_PERCENTILES;
+import static ai.startree.thirdeye.spi.util.MetricsUtils.NAMESPACE_TAG;
+import static ai.startree.thirdeye.spi.util.MetricsUtils.namespaceTagValueOf;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.spi.api.NotificationPayloadApi;
@@ -29,6 +31,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,11 +40,11 @@ public class NotificationDispatcher {
 
   private static final Logger LOG = LoggerFactory.getLogger(NotificationDispatcher.class);
 
+  private final static String NOTIFICATION_DISPATCH_TIMER_NAME = "thirdeye_notification_dispatch";
+  private final static String NOTIFICATION_DISPATCH_TIMER_DESCRIPTION = "Start: A notification payload is passed to the NotificationService#notify implementation. End: The method returns. Tag exception=true means an exception was thrown by the method call.";
+
   private final NotificationServiceRegistry notificationServiceRegistry;
   private final NotificationSchemesMigrator notificationSchemesMigrator;
-  
-  private final Timer notificationDispatchTimerOfSuccess;
-  private final Timer notificationDispatchTimerOfException;
 
   @Inject
   public NotificationDispatcher(
@@ -49,19 +52,6 @@ public class NotificationDispatcher {
       final NotificationSchemesMigrator notificationSchemesMigrator) {
     this.notificationServiceRegistry = notificationServiceRegistry;
     this.notificationSchemesMigrator = notificationSchemesMigrator;
-    
-    // same metric but different tag - the time measure is assigned manually to the correct tag based on whether there was an exception 
-    final String description = "Start: A notification payload is passed to the NotificationService#notify implementation. End: The method returns. Tag exception=true means an exception was thrown by the method call.";
-    this.notificationDispatchTimerOfSuccess = Timer.builder("thirdeye_notification_dispatch")
-        .description(description)
-        .publishPercentiles(METRICS_TIMER_PERCENTILES)
-        .tag("exception", "false")
-        .register(Metrics.globalRegistry);
-    this.notificationDispatchTimerOfException = Timer.builder("thirdeye_notification_dispatch")
-        .description(description)
-        .publishPercentiles(METRICS_TIMER_PERCENTILES)
-        .tag("exception", "true")
-        .register(Metrics.globalRegistry);
   }
 
   // todo cyril the map output is pretty bad - not doing more for the moment because NotificationDispatcher and NotificationTaskPostProcessor may be merged - see todo below
@@ -79,7 +69,7 @@ public class NotificationDispatcher {
     for (final NotificationSpecDTO notificationSpec: notificationSpecDTOs) {
       final NotificationService service = getNotificationService(notificationSpec);
       try {
-        timedNotify(service, payload);
+        timedNotify(service, payload, subscriptionGroup.namespace());
         specToException.put(notificationSpec, null);
       } catch (Exception e) {
         LOG.error("Notification failed for channel of type {}.", notificationSpec.getType(), e);
@@ -95,7 +85,10 @@ public class NotificationDispatcher {
    * @throws Exception notification to external system can fail for many reason.
    * */
   private void timedNotify(final NotificationService service,
-      final NotificationPayloadApi payload) throws Exception {
+      final NotificationPayloadApi payload, final @Nullable String namespace)
+      throws Exception {
+    final Timer notificationDispatchTimerOfSuccess = getNotificationDispatchTimer(namespace, false);
+    final Timer notificationDispatchTimerOfException = getNotificationDispatchTimer(namespace, true);
     final Timer.Sample sample = Timer.start(Metrics.globalRegistry);
     try {
       service.notify(payload);
@@ -127,5 +120,14 @@ public class NotificationDispatcher {
     } catch (IOException e) {
       throw new RuntimeException("Error while replacing env variables in notification spec. spec: " + spec);
     }
+  }
+
+  private Timer getNotificationDispatchTimer(final @Nullable String namespace, final Boolean exception) {
+    return Timer.builder(NOTIFICATION_DISPATCH_TIMER_NAME)
+        .description(NOTIFICATION_DISPATCH_TIMER_DESCRIPTION)
+        .publishPercentiles(METRICS_TIMER_PERCENTILES)
+        .tag("exception", exception ? "true" : "false")
+        .tag(NAMESPACE_TAG, namespaceTagValueOf(namespace))
+        .register(Metrics.globalRegistry);
   }
 }

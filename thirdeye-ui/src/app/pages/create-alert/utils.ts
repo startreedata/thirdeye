@@ -90,7 +90,7 @@ export const getWorkingAlert = (
 
         workingAlert.templateProperties!.queryFilters = queryFilters
             ? "${queryFilters} " + `${queryFilters}`
-            : "";
+            : "${queryFilters}";
 
         if (enumeratorQuery) {
             workingAlert.templateProperties!.enumeratorQuery = enumeratorQuery;

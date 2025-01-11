@@ -13,15 +13,16 @@
  * the License.
  */
 import { Box, Divider, Grid, Typography } from "@material-ui/core";
+import { Alert } from "@material-ui/lab";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { PageContentsCardV1 } from "../../../platform/components";
 import { TemplatePropertiesObject } from "../../../rest/dto/alert.interfaces";
-import { AlertJsonEditorModal } from "../../alert-json-editor-modal/alert-json-editor-modal.component";
-import { PreviewChart } from "../../alert-wizard-v2/alert-template/preview-chart/preview-chart-v2.component";
+import { isValidISO8601 } from "../../../utils/alerts/alerts.util";
+import { PreviewChartV3 } from "../../alert-wizard-v2/alert-template/preview-chart/preview-chart-v3.component";
 import { InputSection } from "../../form-basics/input-section/input-section.component";
 import { ParseMarkdown } from "../../parse-markdown/parse-markdown.component";
-import { SpecificPropertiesRenderer } from "./specific-properties-renderer/specific-properties-renderer.component";
+import { SpecificPropertiesRendererV3 } from "./specific-properties-renderer/specific-properties-renderer.component-v3";
 import { ThresholdSetupProps } from "./threshold-setup.interfaces";
 import { generateInputFieldConfigsForAlertTemplate } from "./threshold-setup.utils";
 
@@ -71,44 +72,43 @@ export const ThresholdSetupV3: FunctionComponent<ThresholdSetupProps> = ({
         onAlertPropertyChange(newTemplateProperties);
     };
 
+    const unsetProperties = useMemo(() => {
+        return inputFieldConfigs.filter((config) => {
+            const value =
+                localAlertTemplateProperties[config.templatePropertyName];
+            if (value === 0) {
+                return false;
+            }
+
+            return !value;
+        });
+    }, [inputFieldConfigs, localAlertTemplateProperties]);
+
+    const invalidProperties = useMemo(() => {
+        return inputFieldConfigs.filter((config) => {
+            if (
+                config.templatePropertyName !== "lookback" &&
+                config.templatePropertyName !== "baselineOffset"
+            ) {
+                return false;
+            }
+            const value =
+                localAlertTemplateProperties[config.templatePropertyName];
+            if (!value) {
+                return false;
+            }
+
+            return !isValidISO8601(value as string);
+        });
+    }, [inputFieldConfigs, localAlertTemplateProperties]);
+
     return (
         <PageContentsCardV1>
-            <Grid container alignItems="center" justifyContent="space-between">
-                <Grid item>
-                    <Typography variant="h5">
-                        {algorithmOptionConfig &&
-                            t("label.entity-setup", {
-                                entity: algorithmOptionConfig.algorithmOption
-                                    .title,
-                                multidimension:
-                                    algorithmOptionConfig.algorithmOption
-                                        .alertTemplateForMultidimension ===
-                                    alert.template?.name
-                                        ? `(${t("label.multidimension")})`
-                                        : "",
-                            })}
-                    </Typography>
-                </Grid>
-                <Grid item>
-                    <AlertJsonEditorModal
-                        alert={alert}
-                        onSubmitChanges={(newAlert, isTotalChange) => {
-                            onAlertPropertyChange(newAlert, isTotalChange);
-
-                            setLocalAlertTemplateProperties({
-                                ...newAlert.templateProperties,
-                            });
-                        }}
-                    />
-                </Grid>
-            </Grid>
-
             {inputFieldConfigs.length > 0 && (
                 <Grid item xs={12}>
                     <Box padding={2} />
                 </Grid>
             )}
-
             <Box display="flex" flexDirection="row">
                 {inputFieldConfigs.length > 0 &&
                     inputFieldConfigs.map((config) => {
@@ -117,7 +117,7 @@ export const ThresholdSetupV3: FunctionComponent<ThresholdSetupProps> = ({
                                 gridItemProps={{ xs: 6 }}
                                 inputComponent={
                                     <>
-                                        <SpecificPropertiesRenderer
+                                        <SpecificPropertiesRendererV3
                                             inputFieldConfig={config}
                                             selectedTemplateProperties={
                                                 localAlertTemplateProperties
@@ -157,10 +157,42 @@ export const ThresholdSetupV3: FunctionComponent<ThresholdSetupProps> = ({
                 </Box>
             </Grid>
 
-            <PreviewChart
+            {unsetProperties.length > 0 ? (
+                <Alert severity="warning" variant="outlined">
+                    {t("message.following-values-must-be-provided")} :{" "}
+                    <Typography style={{ fontWeight: "bold" }} variant="body2">
+                        {unsetProperties
+                            .map((property) => property.label)
+                            .join(", ")}
+                    </Typography>
+                </Alert>
+            ) : null}
+
+            {invalidProperties.length > 0 ? (
+                <Alert severity="warning" variant="outlined">
+                    {t("message.following-values-dont-follow-expected-format")}{" "}
+                    :{" "}
+                    <Typography style={{ fontWeight: "bold" }} variant="body2">
+                        {invalidProperties
+                            .map((property) => property.label)
+                            .join(", ")}
+                    </Typography>
+                </Alert>
+            ) : null}
+
+            <PreviewChartV3
                 hideCallToActionPrompt
                 alert={alert}
-                alertEvaluation={alertEvaluation}
+                alertEvaluation={
+                    unsetProperties.length === 0 &&
+                    invalidProperties.length === 0
+                        ? alertEvaluation
+                        : undefined
+                }
+                disableReload={
+                    unsetProperties.length > 0 || invalidProperties.length > 0
+                }
+                hasAutoReload={!!algorithmOptionConfig?.recommendationId}
                 onAlertPropertyChange={onAlertPropertyChange}
             />
         </PageContentsCardV1>

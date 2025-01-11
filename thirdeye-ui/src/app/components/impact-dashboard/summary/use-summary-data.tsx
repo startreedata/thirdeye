@@ -25,11 +25,16 @@ import {
 // Utils
 import {
     getAlertsAllPath,
-    getAnomaliesAllPath,
+    getAnomaliesAllRangePath,
     getSubscriptionGroupsAllPath,
 } from "../../../utils/routes/routes.util";
 import { epochToDate } from "../detection-performance/util";
 import { isEmpty, uniq } from "lodash";
+import {
+    TimeRange,
+    TimeRangeQueryStringKey,
+} from "../../time-range/time-range-provider/time-range-provider.interfaces";
+import { anaylysisPeriodStartTimeMapping } from "../../../platform/utils";
 
 export const useSummaryData = ({
     alerts,
@@ -46,9 +51,10 @@ export const useSummaryData = ({
         0,
         selectedAnalysisPeriod.length - 1
     );
+
     const [summaryData, setSummaryData] = useState<SummaryData>({
         anomalies: {
-            detected: { count: 0, href: getAnomaliesAllPath() },
+            detected: { count: 0, href: getAnomaliesAllRangePath() },
             investigations: { count: 0, href: "" },
         },
         alerts: {
@@ -80,6 +86,38 @@ export const useSummaryData = ({
             },
             notificationChannelsUsed: [],
         });
+
+    useEffect(() => {
+        const anomaliesDateRangeParams = new URLSearchParams([
+            [
+                TimeRangeQueryStringKey.START_TIME,
+                anaylysisPeriodStartTimeMapping[
+                    selectedAnalysisPeriod
+                ].startTime.toString(),
+            ],
+            [
+                TimeRangeQueryStringKey.END_TIME,
+                anaylysisPeriodStartTimeMapping[
+                    selectedAnalysisPeriod
+                ].endTime.toString(),
+            ],
+            [TimeRangeQueryStringKey.TIME_RANGE, TimeRange.CUSTOM],
+        ]);
+        setSummaryData((prevState) => {
+            return {
+                ...prevState,
+                anomalies: {
+                    ...prevState.anomalies,
+                    detected: {
+                        ...prevState.anomalies.detected,
+                        href:
+                            getAnomaliesAllRangePath() +
+                            anomaliesDateRangeParams,
+                    },
+                },
+            };
+        });
+    }, [selectedAnalysisPeriod]);
 
     useEffect(() => {
         const allAlertIds = anomalies?.map((anomaly) => anomaly.alert.id);

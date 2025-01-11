@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Button, Grid } from "@material-ui/core";
+import { Grid } from "@material-ui/core";
 import { isEqual } from "lodash";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -176,9 +176,12 @@ export const AlertCompositeFiltersModal: FunctionComponent<AlertCompositeFilters
         return (
             <Modal
                 initiallyOpen
+                disableSubmitButton={selectedCohorts.length === 0}
                 maxWidth="md"
+                submitButtonLabel={t("label.add-selected-dimensions")}
                 title={t("label.add-dimensions")}
                 onCancel={onCancel}
+                onSubmit={handleCreateBtnClick}
             >
                 <Grid item xs={12}>
                     <DatasetDetails
@@ -213,17 +216,7 @@ export const AlertCompositeFiltersModal: FunctionComponent<AlertCompositeFilters
                         getCohortsRequestStatus={status}
                         initiallySelectedCohorts={initiallySelectedCohorts}
                         onSelectionChange={handleCohortsSelectionChange}
-                    >
-                        <Box textAlign="right">
-                            <Button
-                                color="primary"
-                                disabled={selectedCohorts.length === 0}
-                                onClick={handleCreateBtnClick}
-                            >
-                                {t("label.add-selected-dimensions")}
-                            </Button>
-                        </Box>
-                    </CohortsTable>
+                    />
                 </Grid>
             </Modal>
         );

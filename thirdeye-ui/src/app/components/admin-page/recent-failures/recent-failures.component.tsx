@@ -12,29 +12,40 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Grid, Table, Typography } from "@material-ui/core";
-import TableBody from "@material-ui/core/TableBody";
-import TableCell from "@material-ui/core/TableCell";
-import TableHead from "@material-ui/core/TableHead";
-import TableRow from "@material-ui/core/TableRow";
+import { Box, Grid, Link, Typography } from "@material-ui/core";
 import { sortBy } from "lodash";
 import React, { FunctionComponent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
-import { PageContentsCardV1, SkeletonV1 } from "../../../platform/components";
-import { TaskStatus, TaskType } from "../../../rest/dto/taks.interface";
+import {
+    DataGridColumnV1,
+    DataGridV1,
+    LocalThemeProviderV1,
+    PageContentsCardV1,
+    SkeletonV1,
+    useDialogProviderV1,
+} from "../../../platform/components";
+import { Task, TaskStatus, TaskType } from "../../../rest/dto/taks.interface";
 import { WEEK_IN_MILLISECONDS } from "../../../utils/time/time.util";
 import { NoDataIndicator } from "../../no-data-indicator/no-data-indicator.component";
 import { LoadingErrorStateSwitch } from "../../page-states/loading-error-state-switch/loading-error-state-switch.component";
 import { TimeRangeQueryStringKey } from "../../time-range/time-range-provider/time-range-provider.interfaces";
 import { TimeRangeSelectorButton } from "../../time-range/v2/time-range-selector-button/time-range-selector-button.component";
-import { TaskRow } from "./task-row/task-row.component";
 import { getTasks } from "../../../rest/tasks/tasks.rest";
 import { useFetchQuery } from "../../../rest/hooks/useFetchQuery";
+import {
+    formatDateAndTimeV1,
+    formatDurationV1,
+    lightV1,
+} from "../../../platform/utils";
+import { DialogType } from "../../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
+import { RenderAlertName, RenderAlertStatus } from "./render-alert-columns";
+import { TEST_IDS } from "../../alert-list-v1/alert-list-v1.interfaces";
 
 export const RecentFailures: FunctionComponent = () => {
     const { t } = useTranslation();
     const [searchParams, setSearchParams] = useSearchParams();
+    const { showDialog } = useDialogProviderV1();
 
     const [startTime, endTime] = useMemo(() => {
         // Apply the default filter of the last 7 days if no
@@ -91,11 +102,135 @@ export const RecentFailures: FunctionComponent = () => {
         if (!tasks) {
             return [];
         }
-
         const sortedTasks = sortBy(tasks, "startTime").reverse();
 
-        return sortedTasks.slice(0, 10);
+        return sortedTasks;
     }, [tasks]);
+
+    const handleShowError = (message: string): void => {
+        showDialog({
+            width: "xl",
+            type: DialogType.ALERT,
+            contents: message,
+            okButtonText: t("label.close"),
+            hideCancelButton: true,
+        });
+    };
+
+    const getAlertId = (task: Task): number | null => {
+        let id: number | null = null;
+        if (task.taskType === TaskType.DETECTION && task.taskInfo) {
+            id = JSON.parse(task.taskInfo).configId;
+        } else if (task.taskType === TaskType.NOTIFICATION && task.taskInfo) {
+            id = JSON.parse(task.taskInfo).detectionAlertConfigId;
+        }
+
+        return id;
+    };
+
+    const renderAlert = (
+        _: Record<string, unknown>,
+        data: Task
+    ): JSX.Element => {
+        const id = getAlertId(data);
+
+        return id ? <RenderAlertName id={id} /> : <></>;
+    };
+
+    const renderAlertStatus = (
+        _: Record<string, unknown>,
+        data: Task
+    ): JSX.Element => {
+        const id = getAlertId(data);
+
+        return id ? <RenderAlertStatus id={id} /> : <></>;
+    };
+    const renderMoreInfo = (
+        _: Record<string, unknown>,
+        data: Task
+    ): JSX.Element => {
+        return (
+            <LocalThemeProviderV1 primary={lightV1.palette.error}>
+                <Link
+                    underline="always"
+                    onClick={() => handleShowError(data.message)}
+                >
+                    {t("label.show-log")}
+                </Link>
+            </LocalThemeProviderV1>
+        );
+    };
+
+    const renderCreated = (_: Record<string, unknown>, data: Task): string => {
+        return formatDateAndTimeV1(data.created, undefined, true);
+    };
+    const renderStartTime = (
+        _: Record<string, unknown>,
+        data: Task
+    ): string => {
+        return formatDateAndTimeV1(data.startTime, undefined, true);
+    };
+    const renderDuration = (_: Record<string, unknown>, data: Task): string => {
+        return formatDurationV1(data.startTime, data.endTime);
+    };
+    const taskColumns: DataGridColumnV1<any>[] = [
+        {
+            key: "id",
+            dataKey: "id",
+            header: t("label.task-id"),
+            minWidth: 0,
+            flex: 1.5,
+        },
+        {
+            key: "alert-name",
+            dataKey: "alertname",
+            header: t("label.alert-name"),
+            minWidth: 0,
+            flex: 1,
+            customCellRenderer: renderAlert,
+        },
+        {
+            key: "active",
+            dataKey: "active",
+            header: t("label.active"),
+            minWidth: 0,
+            flex: 1,
+            customCellRenderer: renderAlertStatus,
+            cellTooltip: false,
+        },
+        {
+            key: "moreInfo",
+            dataKey: "task.moreInfo",
+            header: t("label.more-info"),
+            minWidth: 0,
+            flex: 1,
+            customCellRenderer: renderMoreInfo,
+        },
+        {
+            key: "created",
+            dataKey: "task.created",
+            header: t("label.created-at"),
+            minWidth: 0,
+            flex: 1,
+            customCellRenderer: renderCreated,
+        },
+        {
+            key: "startTime",
+            dataKey: "task.startTime",
+            header: t("label.start-time"),
+            minWidth: 0,
+            flex: 1,
+            customCellRenderer: renderStartTime,
+        },
+        {
+            key: "duration",
+            dataKey: "alert.duration",
+            header: t("label.duration"),
+            minWidth: 0,
+            flex: 1,
+            customCellRenderer: renderDuration,
+        },
+    ];
 
     return (
         <>
@@ -156,36 +291,18 @@ export const RecentFailures: FunctionComponent = () => {
                         </>
                     }
                 >
-                    <Table>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>{t("label.task-id")}</TableCell>
-                                <TableCell>{t("label.alert-name")}</TableCell>
-                                <TableCell>{t("label.active")}</TableCell>
-                                <TableCell>{t("label.more-info")}</TableCell>
-                                <TableCell>{t("label.created-at")}</TableCell>
-                                <TableCell>{t("label.start-time")}</TableCell>
-                                <TableCell>{t("label.duration")}</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {tasksToDisplay.length > 0 &&
-                                tasksToDisplay.map((task) => {
-                                    return (
-                                        <TaskRow key={task.id} task={task} />
-                                    );
-                                })}
-                            {tasksToDisplay.length === 0 && (
-                                <TableRow>
-                                    <TableCell align="center" colSpan={10}>
-                                        {t("message.no-recent-entity", {
-                                            entity: t("label.failures"),
-                                        })}
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
+                    <Box height="100vh">
+                        <DataGridV1<any>
+                            disableSearch
+                            disableSelection
+                            hideBorder
+                            hideToolbar
+                            columns={taskColumns}
+                            data={tasksToDisplay as Task[]}
+                            data-testId={TEST_IDS.TABLE}
+                            rowKey="id"
+                        />
+                    </Box>
                 </LoadingErrorStateSwitch>
             </PageContentsCardV1>
         </>

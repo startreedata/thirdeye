@@ -31,14 +31,14 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.testing.DropwizardTestSupport;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.Response;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,7 +105,7 @@ public class AuthIntegrationTest {
         .issuer(ISSUER)
         .expirationTime(new Date(System.currentTimeMillis() + 36000000))
         .build();
-    oAuthToken = String.format("Bearer %s", getToken(jwks.getKeys().get(0), claimsSet));
+    oAuthToken = String.format("Bearer %s", getToken(jwks.getKeys().getFirst(), claimsSet));
 
     dir = new File(DIR);
     dir.mkdir();

@@ -17,7 +17,7 @@ SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 REPO_DIR="${SCRIPT_DIR}/.."
 
 if [ -z "${PINOT_VERSION}" ]; then
-  PINOT_VERSION=1.1.0
+  PINOT_VERSION=1.2.0
 fi
 
 export PINOT_INSTALL_TMP_DIR="${REPO_DIR}/tmp/pinot-bin"

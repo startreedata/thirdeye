@@ -14,7 +14,7 @@
 package ai.startree.thirdeye.datalayer.bao;
 
 import static ai.startree.thirdeye.spi.Constants.METRICS_CACHE_TIMEOUT;
-import static com.google.common.base.Suppliers.memoizeWithExpiration;
+import static ai.startree.thirdeye.spi.util.MetricsUtils.scheduledRefreshSupplier;
 
 import ai.startree.thirdeye.datalayer.dao.GenericPojoDao;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
@@ -25,18 +25,18 @@ import com.google.inject.Singleton;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.Metrics;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public class RcaInvestigationManagerImpl extends AbstractManagerImpl<RcaInvestigationDTO> implements
     RcaInvestigationManager {
-  
+
+  private static final Logger LOG = LoggerFactory.getLogger(RcaInvestigationManagerImpl.class);
+
   @Inject
   public RcaInvestigationManagerImpl(final GenericPojoDao genericPojoDao) {
     super(RcaInvestigationDTO.class, genericPojoDao);
-    Gauge.builder("thirdeye_rca_investigations", 
-        memoizeWithExpiration(this::count, METRICS_CACHE_TIMEOUT.toMinutes(), TimeUnit.MINUTES))
-        .register(Metrics.globalRegistry);
   }
 
   @Override
@@ -70,5 +70,13 @@ public class RcaInvestigationManagerImpl extends AbstractManagerImpl<RcaInvestig
   @Override
   public List<RcaInvestigationDTO> findByAnomalyId(long id) {
     return findByPredicate(Predicate.EQ("anomalyId", id));
+  }
+
+  @Override
+  public void registerDatabaseMetrics() {
+    Gauge.builder("thirdeye_rca_investigations",
+            scheduledRefreshSupplier(this::count, METRICS_CACHE_TIMEOUT))
+        .register(Metrics.globalRegistry);
+    LOG.info("Registered RCA investigation database metrics.");
   }
 }

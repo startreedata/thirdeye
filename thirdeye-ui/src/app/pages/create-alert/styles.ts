@@ -15,7 +15,7 @@
 import { makeStyles } from "@material-ui/core";
 
 export const easyAlertStyles = makeStyles(() => ({
-    container: {
-        padding: "30px",
-    },
+    // container: {
+    //     padding: "30px",
+    // },
 }));

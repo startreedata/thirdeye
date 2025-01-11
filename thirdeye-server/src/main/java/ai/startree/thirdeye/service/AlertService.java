@@ -59,6 +59,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import jakarta.ws.rs.WebApplicationException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -66,7 +67,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
-import javax.ws.rs.WebApplicationException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.quartz.CronExpression;
 import org.slf4j.Logger;
@@ -410,7 +410,8 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
       // replay from JAN 1 2000 because replaying from 1970 is too slow with small granularity
       LOG.error("Could not fetch insights for alert {}. Using the minimum time allowed. {}",
           dto,
-          minimumOnboardingStartTime);
+          minimumOnboardingStartTime,
+          e);
       return minimumOnboardingStartTime;
     }
   }

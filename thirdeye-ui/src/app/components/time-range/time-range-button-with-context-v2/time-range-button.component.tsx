@@ -50,7 +50,7 @@ export const TimeRangeButtonWithContext: FunctionComponent<TimeRangeButtonWithCo
             }
 
             return defaultTimeRange;
-        }, [searchParams]);
+        }, [searchParams, defaultTimeRange]);
 
         const onHandleTimeRangeChange = (
             timeRangeDuration: TimeRangeDuration

@@ -31,7 +31,7 @@ import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.chained.ChainedAuthFilter;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class ThirdEyeAuthModule extends AbstractModule {
 

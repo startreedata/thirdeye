@@ -36,8 +36,8 @@ import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
+import jakarta.ws.rs.core.Response;
 import java.util.Map;
-import javax.ws.rs.core.Response;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -105,7 +105,7 @@ public class DataSourceResourceTest {
     assertThat(entity.getList()).isNotNull();
     assertThat(entity.getList().isEmpty()).isFalse();
 
-    final StatusApi statusApi = entity.getList().get(0);
+    final StatusApi statusApi = entity.getList().getFirst();
     assertThat(statusApi.getCode()).isEqualTo(ThirdEyeStatus.ERR_DATASOURCE_VALIDATION_FAILED);
   }
 

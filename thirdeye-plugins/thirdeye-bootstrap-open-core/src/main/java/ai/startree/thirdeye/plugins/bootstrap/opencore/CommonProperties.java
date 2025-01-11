@@ -38,7 +38,7 @@ public class CommonProperties {
       final TemplatePropertyMetadata[] commonProperties = readJsonObjectsFromResourcesFolder(
           COMMON_PROPERTIES_PATH,
           this.getClass(),
-          TemplatePropertyMetadata[].class).get(0);
+          TemplatePropertyMetadata[].class).getFirst();
       NAME_TO_PROPERTY = Arrays.stream(commonProperties)
           .collect(Collectors.toMap(TemplatePropertyMetadata::getName, e -> e));
     }

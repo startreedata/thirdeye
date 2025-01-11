@@ -22,10 +22,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.Predicate.OPER;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.core.MultivaluedHashMap;
+import jakarta.ws.rs.core.MultivaluedMap;
 import java.util.Map;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
 import org.testng.annotations.Test;
 
 public class DaoFilterBuilderTest {

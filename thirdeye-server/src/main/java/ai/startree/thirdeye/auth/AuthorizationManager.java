@@ -53,6 +53,11 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import jakarta.ws.rs.ForbiddenException;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
@@ -65,16 +70,13 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
-import javax.ws.rs.ForbiddenException;
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Singleton
 public class AuthorizationManager {
 
   private static final Logger LOG = LoggerFactory.getLogger(AuthorizationManager.class);
@@ -372,6 +374,7 @@ public class AuthorizationManager {
   private <T extends AbstractDTO> void addRelatedEntities(final T entity,
       final Set<ResourceIdentifier> result,
       final Caches caches) {
+
     if (entity instanceof final AlertDTO alertDto) {
       if (alertDto.getTemplate() != null) {
         final AlertTemplateDTO alertTemplateDTO = caches.templateCache.getUnchecked(
@@ -391,26 +394,31 @@ public class AuthorizationManager {
               alertDto.getTemplate(), alertDto.namespace());
         } 
       }
+
       // hack: find the related dataset by looking at the property value directly - assume the key is "dataset"
       // TODO cyril authz - fix this consider rendering the template? but make sure it's not too slow - 
       //  also slight security concern because it means we are rendering the template even if access to the template has not been checked yet
       // in effect templates could do anything, accessing one or multiple dataset/datasource - so we don't attempt to perform a full check - the alert pipeline execution will fail if entities are not valid 
       final @Nullable Object datasetName = optional(alertDto.getTemplateProperties()).map(
           e -> e.get("dataset")).orElse(null);
+
       if (datasetName instanceof String datasetNameStr) {
         final DatasetConfigDTO datasetConfigDTO = caches.datasetCache.getUnchecked(datasetNameStr)
             .orElse(null);
-        checkArgument(datasetConfigDTO != null,
-            "Invalid dataset name %s. Not found in alert namespace %s.", datasetNameStr,
-            alertDto.namespace());
-        final ResourceIdentifier resourceIdDataset = resourceId(datasetConfigDTO);
-        if (!result.contains(resourceIdDataset)) {
-          result.add(resourceIdDataset);
-          addRelatedEntities(datasetConfigDTO, result, caches);
+        if (datasetConfigDTO != null) {
+          final ResourceIdentifier resourceIdDataset = resourceId(datasetConfigDTO);
+          if (!result.contains(resourceIdDataset)) {
+            result.add(resourceIdDataset);
+            addRelatedEntities(datasetConfigDTO, result, caches);
+          }
+        } else {
+          LOG.error("Invalid dataset name {}. Not found in alert namespace {}.", datasetNameStr,
+              alertDto.namespace());
         }
       } else {
         LOG.error("Could not find dataset in alert configuration {}", alertDto);
       }
+
     } else if (entity instanceof SubscriptionGroupDTO subscriptionGroupDto) {
       final List<AlertAssociationDto> alertAssociations = optional(
           subscriptionGroupDto.getAlertAssociations()).orElse(Collections.emptyList());
@@ -437,46 +445,59 @@ public class AuthorizationManager {
           addRelatedEntities(alert, result, caches);
         }
       }
+
       // todo cyril authz in theory we should also do enumeration items
     } else if (entity instanceof RcaInvestigationDTO rcaInvestigationDTO) {
       final @NonNull Long anomalyId = rcaInvestigationDTO.getAnomaly().getId();
       final AnomalyDTO anomaly = caches.anomalyCache.getUnchecked(anomalyId).orElse(null);
       // the error message is the same whether the anomaly does not exist in db or the anomaly is in another namespace - this is to avoid leaking anomaly ids of other namespaces
-      checkArgument(
-          anomaly != null && Objects.equals(rcaInvestigationDTO.namespace(), anomaly.namespace()),
-          "Invalid anomaly id or rcaInvestigation namespace %s and anomaly namespace do not match for anomaly id %s.",
-          rcaInvestigationDTO.namespace(), anomalyId);
-      final ResourceIdentifier resourceId = resourceId(anomaly);
-      if (!result.contains(resourceId)) {
-        result.add(resourceId);
-        addRelatedEntities(anomaly, result, caches);
+      if (anomaly != null) {
+        checkArgument(Objects.equals(rcaInvestigationDTO.namespace(), anomaly.namespace()),
+            "rcaInvestigation namespace %s and anomaly namespace do not match for anomaly id %s.",
+            rcaInvestigationDTO.namespace(), anomalyId);
+        final ResourceIdentifier resourceId = resourceId(anomaly);
+        if (!result.contains(resourceId)) {
+          result.add(resourceId);
+          addRelatedEntities(anomaly, result, caches);
+        }
+      } else {
+        LOG.error("Invalid anomaly id {}. Not found in rca investigation namespace {}", anomalyId,
+            rcaInvestigationDTO.namespace());
       }
+
     } else if (entity instanceof AnomalyDTO anomalyDto) {
       final Long alertId = anomalyDto.getDetectionConfigId();
       if (alertId != null) {
         final AlertDTO alertDto = caches.alertCache.getUnchecked(alertId).orElse(null);
-        checkArgument(
-            alertDto != null && Objects.equals(anomalyDto.namespace(), alertDto.namespace()),
-            "Invalid alert id or anomaly namespace %s and alert namespace do not match for alert id %s.",
-            anomalyDto.namespace(), alertId);
-        final ResourceIdentifier resourceId = resourceId(alertDto);
-        if (!result.contains(resourceId)) {
-          result.add(resourceId);
-          addRelatedEntities(alertDto, result, caches);
-        }  
+        if (alertDto != null) {
+          checkArgument(Objects.equals(anomalyDto.namespace(), alertDto.namespace()),
+              "Invalid alert id or anomaly namespace %s and alert namespace do not match for alert id %s.",
+              anomalyDto.namespace(), alertId);
+          final ResourceIdentifier resourceId = resourceId(alertDto);
+          if (!result.contains(resourceId)) {
+            result.add(resourceId);
+            addRelatedEntities(alertDto, result, caches);
+          }
+        } else {
+          LOG.error("Invalid alert id {}. Not found in anomaly namespace {}", alertId,
+              anomalyDto.namespace());
+        }
       }
+
       // todo cyril authz implement enumeration item related entity anomalyDto.getEnumerationItem
     } else if (entity instanceof DatasetConfigDTO datasetConfigDTO) {
       final String datasourceName = datasetConfigDTO.getDataSource();
       final DataSourceDTO datasourceDto = caches.datasourceCache.getUnchecked(datasourceName)
           .orElse(null);
-      checkArgument(datasourceDto != null,
-          "Invalid datasource name %s. Not found in dataset namespace %s.", datasourceName,
-          datasetConfigDTO.namespace());
-      final ResourceIdentifier resourceId = resourceId(datasourceDto);
-      if (!result.contains(resourceId)) {
-        result.add(resourceId);
-        addRelatedEntities(datasourceDto, result, caches);
+      if (datasourceDto != null) {
+        final ResourceIdentifier resourceId = resourceId(datasourceDto);
+        if (!result.contains(resourceId)) {
+          result.add(resourceId);
+          addRelatedEntities(datasourceDto, result, caches);
+        }
+      } else {
+        LOG.error("Invalid datasource name {}. Not found in dataset namespace {}", datasourceName,
+            datasetConfigDTO.namespace());
       }
     }
     // todo authz taskDto, metricDto, etc...  

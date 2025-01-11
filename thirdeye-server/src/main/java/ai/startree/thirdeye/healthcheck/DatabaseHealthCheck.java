@@ -15,8 +15,8 @@ package ai.startree.thirdeye.healthcheck;
 
 import ai.startree.thirdeye.datalayer.DatabaseClient;
 import com.codahale.metrics.health.HealthCheck;
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 @Singleton
 public class DatabaseHealthCheck extends HealthCheck {

@@ -40,11 +40,7 @@ public interface AnomalyManager extends AbstractManager<AnomalyDTO> {
   // internal only - prefer countWithNamespace  
   long count(final @NonNull AnomalyFilter filter);
 
-  default long countWithNamespace(final @NonNull AnomalyFilter filter, final @Nullable String namespace) {
-    // todo authz extremely inefficient because will load anomalies in memory to count them
-    // it is not possible to perform a count directly in the DB until all anomalies are migrated in the index table to ensure they have their namespace value set
-    return filterWithNamespace(filter, namespace).size(); 
-  }
+  long countWithNamespace(final @NonNull AnomalyFilter filter, final @Nullable String namespace);
 
   List<AnomalyDTO> filter(@NonNull AnomalyFilter anomalyFilter);
   

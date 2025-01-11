@@ -121,7 +121,6 @@ export const PreviewChartMain: FunctionComponent<PreviewChartProps> = ({
                     }
                 >
                     <ChartContentV2
-                        showDimensionSearch
                         showLoadButton
                         alert={alert}
                         alertEvaluation={alertEvaluation}
@@ -131,6 +130,7 @@ export const PreviewChartMain: FunctionComponent<PreviewChartProps> = ({
                         }}
                         hideCallToActionPrompt={hideCallToActionPrompt}
                         legendsPlacement={legendsPlacement}
+                        showDeleteIcon={false}
                         showOnlyActivity={showOnlyActivity}
                         onAlertPropertyChange={onAlertPropertyChange}
                         onReloadClick={onReloadData}

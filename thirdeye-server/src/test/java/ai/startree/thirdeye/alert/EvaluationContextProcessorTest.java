@@ -62,6 +62,6 @@ public class EvaluationContextProcessorTest {
 
     assertThat(res.getPredicates()).isNotNull();
     assertThat(res.getPredicates().size()).isEqualTo(1);
-    assertThat(res.getPredicates().get(0)).isEqualTo(new Predicate("browser", OPER.EQ, "chrome"));
+    assertThat(res.getPredicates().getFirst()).isEqualTo(new Predicate("browser", OPER.EQ, "chrome"));
   }
 }

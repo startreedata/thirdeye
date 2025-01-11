@@ -23,9 +23,15 @@ import { graphOptionsStyles } from "./styles";
 import { DetectionAlgorithms } from "./detection-algorithm";
 import { DateRange } from "./date-range";
 import { AdvancedOptions } from "./advanced-options";
+import { AlertJsonEditorModal } from "../../../../../components/alert-json-editor-modal/alert-json-editor-modal.component";
+
+// state
+import { useCreateAlertStore } from "../../../hooks/state";
+import { EditableAlert } from "../../../../../rest/dto/alert.interfaces";
 
 export const GraphOptions = (): JSX.Element => {
     const componentStyles = graphOptionsStyles();
+    const { workingAlert } = useCreateAlertStore();
 
     return (
         <>
@@ -49,7 +55,23 @@ export const GraphOptions = (): JSX.Element => {
                             </Grid>
                         </Grid>
                         <Grid>
-                            <AdvancedOptions />
+                            <Grid container>
+                                <Box
+                                    display="flex"
+                                    gridGap="8px"
+                                    justifyContent="space-between"
+                                >
+                                    <AlertJsonEditorModal
+                                        isReadOnly
+                                        alert={workingAlert as EditableAlert}
+                                        buttonText="View Json"
+                                        onSubmitChanges={() => {
+                                            // handleAlertUpdate();
+                                        }}
+                                    />
+                                    <AdvancedOptions />
+                                </Box>
+                            </Grid>
                         </Grid>
                     </Grid>
                 </Grid>

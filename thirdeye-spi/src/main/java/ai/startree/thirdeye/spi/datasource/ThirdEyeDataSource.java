@@ -43,12 +43,20 @@ public interface ThirdEyeDataSource {
   }
 
   /**
+   * Prepares dataset for onboarding
+   * executes the steps needed before persisting a dataset
+   */
+  default void prepareDatasetForOnboarding(final String datasetName) {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
    * Fetch metadata about the dataset.
    *
    * @param datasetName name of the table
    * @return ThirdEye dataset describing available dimensions and metrics.
    */
-  default DatasetConfigDTO getDataset(String datasetName) {
+  default DatasetConfigDTO getDataset(final String datasetName) {
     throw new UnsupportedOperationException();
   }
 

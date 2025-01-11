@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.datalayer.bao;
 
 import static ai.startree.thirdeye.spi.Constants.METRICS_CACHE_TIMEOUT;
+import static ai.startree.thirdeye.spi.util.MetricsUtils.scheduledRefreshSupplier;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Suppliers.memoizeWithExpiration;
@@ -76,26 +77,6 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
   @Inject
   public AnomalyManagerImpl(final GenericPojoDao genericPojoDao) {
     super(AnomalyDTO.class, genericPojoDao);
-
-    Gauge.builder("thirdeye_anomalies",
-            memoizeWithExpiration(() -> count(NOT_CHILD_NOT_IGNORED_FILTER),
-                METRICS_CACHE_TIMEOUT.toMinutes(),
-                TimeUnit.MINUTES))
-        .register(Metrics.globalRegistry);
-    Gauge.builder("thirdeye_anomaly_feedbacks",
-            memoizeWithExpiration(() -> count(HAS_FEEDBACK_FILTER), METRICS_CACHE_TIMEOUT.toMinutes(),
-                TimeUnit.MINUTES))
-        .register(Metrics.globalRegistry);
-
-    final Supplier<ConfusionMatrix> cachedConfusionMatrix = memoizeWithExpiration(
-        this::computeConfusionMatrixForAnomalies, METRICS_CACHE_TIMEOUT.toMinutes(),
-        TimeUnit.MINUTES);
-    Gauge.builder("thirdeye_anomaly_precision",
-            () -> cachedConfusionMatrix.get().getPrecision())
-        .register(Metrics.globalRegistry);
-    Gauge.builder("thirdeye_anomaly_response_rate",
-            () -> cachedConfusionMatrix.get().getResponseRate())
-        .register(Metrics.globalRegistry);
   }
 
   @Override
@@ -217,6 +198,26 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
     final List<AnomalyDTO> anomalies = super.filter(daoFilter);
     // FIXME CYRIL this filter is only decorating with feedback - while some others decorate with feedback and children
     return decorateWithFeedback(anomalies);
+  }
+
+  @Override
+  public void registerDatabaseMetrics() {
+    Gauge.builder("thirdeye_anomalies",
+            scheduledRefreshSupplier(() -> count(NOT_CHILD_NOT_IGNORED_FILTER), METRICS_CACHE_TIMEOUT))
+        .register(Metrics.globalRegistry);
+    Gauge.builder("thirdeye_anomaly_feedbacks",
+            scheduledRefreshSupplier(() -> count(HAS_FEEDBACK_FILTER), METRICS_CACHE_TIMEOUT))
+        .register(Metrics.globalRegistry);
+
+    final Supplier<ConfusionMatrix> cachedConfusionMatrix = scheduledRefreshSupplier(
+        this::computeConfusionMatrixForAnomalies, METRICS_CACHE_TIMEOUT);
+    Gauge.builder("thirdeye_anomaly_precision",
+            () -> cachedConfusionMatrix.get().getPrecision())
+        .register(Metrics.globalRegistry);
+    Gauge.builder("thirdeye_anomaly_response_rate",
+            () -> cachedConfusionMatrix.get().getResponseRate())
+        .register(Metrics.globalRegistry);
+    LOG.info("Registered anomaly database metrics.");
   }
 
   @Override
@@ -360,12 +361,7 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
       final @Nullable String namespace) {
     final Predicate predicate = Predicate.AND(
         toPredicate(anomalyFilter),
-        Predicate.OR(
-            Predicate.EQ("namespace", namespace),
-            // existing entities are not migrated automatically so they can have their namespace column to null in the index table, even if they do belong to a namespace 
-            //  todo cyril authz - prepare migration scripts - or some logic to ensure all entities are eventually migrated
-            Predicate.EQ("namespace", null)
-        )
+        Predicate.EQ("namespace", namespace)
     );
     final List<AnomalyDTO> list = filter(new DaoFilter().setPredicate(predicate))
         .stream()
@@ -378,6 +374,16 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
   public long count(final @NonNull AnomalyFilter filter) {
     Predicate finalPredicate = toPredicate(filter);
     return count(finalPredicate);
+  }
+
+  @Override
+  public long countWithNamespace(final @NonNull AnomalyFilter filter,
+      final @Nullable String namespace) {
+    final Predicate predicate = Predicate.AND(
+        toPredicate(filter),
+        Predicate.EQ("namespace", namespace)
+    );
+    return count(predicate);
   }
 
   private Predicate toPredicate(final AnomalyFilter af) {
@@ -440,8 +446,9 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
 
   private ConfusionMatrix computeConfusionMatrixForAnomalies() {
     final long withNoFeedbackCount = count(HAS_NO_FEEDBACK_FILTER);
+    // todo cyril scale - would be simpler to be able to count by feedback type in the db directly - here we parse and load anomalies in memory - 
+    //  for the moment we assume the number of anomalies with feedback is small
     final List<AnomalyDTO> withFeedbacks = filter(HAS_FEEDBACK_FILTER);
-    // todo cyril - would be simpler to be able to count by feedback type in the db directly - here we parse and load anomalies in memory
     
     return new ConfusionMatrix()
         .addUnclassified(withNoFeedbackCount)

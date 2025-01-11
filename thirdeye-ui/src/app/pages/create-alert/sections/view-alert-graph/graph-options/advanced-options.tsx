@@ -14,12 +14,11 @@
  */
 // external
 import React, { useMemo, useState } from "react";
-import { Button, Grid } from "@material-ui/core";
+import { Button } from "@material-ui/core";
 import { Alert } from "@material-ui/lab";
 import { cloneDeep } from "lodash";
 
 // app components
-import { AnomaliesFilterConfiguratorRenderConfigs } from "../../../../../components/alert-wizard-v3/anomalies-filter-panel/anomalies-filter-panel.interfaces";
 import { useTranslation } from "react-i18next";
 import { AdditonalFiltersDrawer } from "../../../../../components/additional-filters-drawer/additional-filters-drawer.component";
 import { ReactComponent as FilterListRoundedIcon } from "../../../../../platform/assets/images/filter-icon.svg";
@@ -38,7 +37,11 @@ import {
 import { AnomalyDetectionOptions } from "../../../../../rest/dto/metric.interfaces";
 
 // utils
-import { getAvailableFilterOptions } from "../../../../../components/alert-wizard-v3/anomalies-filter-panel/anomalies-filter-panel.utils";
+import {
+    determinePropertyFieldConfiguration,
+    setUpFieldInputRenderConfig,
+} from "../../../../../components/alert-wizard-v2/alert-template/alert-template.utils";
+import { groupPropertyByStepAndSubStep } from "../../../../../utils/alerts/alerts.util";
 
 export const AdvancedOptions = (): JSX.Element => {
     const { t } = useTranslation();
@@ -65,12 +68,40 @@ export const AdvancedOptions = (): JSX.Element => {
                 return alertTemplateCandidate.name === alertTemplateToFind;
             }
         );
+
         if (!alertTemplateForEvaluate) {
             return undefined;
         }
 
-        return getAvailableFilterOptions(alertTemplateForEvaluate, t);
+        // return getAvailableFilterOptions(alertTemplateForEvaluate, t);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const [_requiredKeys, optionalKeys] = setUpFieldInputRenderConfig(
+            selectedDetectionAlgorithm
+                ? determinePropertyFieldConfiguration(alertTemplateForEvaluate)
+                : [],
+            workingAlert.templateProperties!
+        );
+
+        return groupPropertyByStepAndSubStep(optionalKeys);
     }, [alertTemplates, anomalyDetectionType, selectedDetectionAlgorithm]);
+
+    // const availableConfigurations = useMemo(() => {
+    //     if (!alertTemplateForEvaluate) {
+    //         return undefined;
+    //     }
+
+    //     // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    //     const [_requiredKeys, optionalKeys] = setUpFieldInputRenderConfig(
+    //         selectedAlertTemplate
+    //             ? determinePropertyFieldConfiguration(selectedAlertTemplate)
+    //             : [],
+    //         alert.templateProperties
+    //     );
+
+    //     return groupPropertyByStepAndSubStep(optionalKeys);
+
+    //     // return getAvailableFilterOptions(alertTemplateForEvaluate, t);
+    // }, [alertTemplateForEvaluate, selectedAlertTemplate]);
 
     const handleApplyAdvancedOptions = (
         fieldData: TemplatePropertiesObject
@@ -86,7 +117,7 @@ export const AdvancedOptions = (): JSX.Element => {
     };
 
     return (
-        <Grid container>
+        <>
             <Button
                 className={componentStyles.infoButton}
                 color="primary"
@@ -99,9 +130,7 @@ export const AdvancedOptions = (): JSX.Element => {
                 {t("label.add-advanced-options")}
             </Button>
             <AdditonalFiltersDrawer
-                availableConfigurations={
-                    availableConfigurations as AnomaliesFilterConfiguratorRenderConfigs[]
-                }
+                availableConfigurations={availableConfigurations ?? {}}
                 defaultValues={
                     (workingAlert as Partial<EditableAlert>).templateProperties!
                 }
@@ -120,6 +149,6 @@ export const AdvancedOptions = (): JSX.Element => {
                     setShowAdvancedOptions(false);
                 }}
             />
-        </Grid>
+        </>
     );
 };

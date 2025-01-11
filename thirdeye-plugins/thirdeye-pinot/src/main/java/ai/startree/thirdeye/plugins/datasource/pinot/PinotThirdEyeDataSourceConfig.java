@@ -33,8 +33,10 @@ public class PinotThirdEyeDataSourceConfig {
   private String name;
   private Map<String, String> headers;
   private Integer readTimeoutMs;
-  private Integer requestTimeoutMs;
   private Integer connectTimeoutMs;
+  @Deprecated // use timeoutMs queryOption
+  private Integer requestTimeoutMs;
+  @Deprecated // use timeoutMs queryOption
   private Integer brokerResponseTimeoutMs;
   
   public boolean isOAuthEnabled() {
@@ -152,10 +154,12 @@ public class PinotThirdEyeDataSourceConfig {
     return this;
   }
 
+  @Deprecated
   public Integer getRequestTimeoutMs() {
     return requestTimeoutMs;
   }
 
+  @Deprecated
   public PinotThirdEyeDataSourceConfig setRequestTimeoutMs(final Integer requestTimeoutMs) {
     this.requestTimeoutMs = requestTimeoutMs;
     return this;
@@ -170,10 +174,12 @@ public class PinotThirdEyeDataSourceConfig {
     return this;
   }
 
+  @Deprecated
   public Integer getBrokerResponseTimeoutMs() {
     return brokerResponseTimeoutMs;
   }
 
+  @Deprecated
   public PinotThirdEyeDataSourceConfig setBrokerResponseTimeoutMs(
       final Integer brokerResponseTimeoutMs) {
     this.brokerResponseTimeoutMs = brokerResponseTimeoutMs;

@@ -159,4 +159,9 @@ public abstract class AbstractManagerImpl<E extends AbstractDTO> implements Abst
   public long count(final Predicate predicate) {
     return genericPojoDao.count(predicate, dtoClass);
   }
+
+  @Override
+  public void registerDatabaseMetrics() {
+    // do nothing by default
+  }
 }

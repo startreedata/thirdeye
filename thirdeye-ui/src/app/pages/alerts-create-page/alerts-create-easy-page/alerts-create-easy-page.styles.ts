@@ -52,6 +52,7 @@ export const easyAlertStyles = makeStyles((theme) => ({
         backgroundColor: "#f3f9ff",
         textWrap: "nowrap",
         textTransform: "none",
+        marginLeft: theme.spacing(1),
     },
     algorithmContainer: {
         marginBottom: theme.spacing(2),

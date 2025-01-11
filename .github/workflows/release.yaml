@@ -29,7 +29,7 @@ jobs:
       - name: Release UI
         run: |
           cd thirdeye-ui
-          npm ci
+          npm ci --legacy-peer-deps
           npm run build
           export GH_SHA=$(git log -1 --format="%H")
           npm run release
@@ -66,10 +66,10 @@ jobs:
     steps:
       - name: Pull repository
         uses: actions/checkout@v4
-      - name: Install JDK 17
+      - name: Install JDK 21
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: 'temurin'
       - name: Set git ci user info
         run: |

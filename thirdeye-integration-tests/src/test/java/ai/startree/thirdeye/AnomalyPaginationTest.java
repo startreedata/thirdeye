@@ -31,15 +31,15 @@ import ai.startree.thirdeye.spi.api.PlanNodeApi;
 import ai.startree.thirdeye.spi.api.StatusListApi;
 import ai.startree.thirdeye.spi.api.ThirdEyeCrudApi;
 import io.dropwizard.testing.DropwizardTestSupport;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation.Builder;
+import jakarta.ws.rs.core.GenericType;
+import jakarta.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.GenericType;
-import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
@@ -83,7 +83,7 @@ public class AnomalyPaginationTest {
             .setLastTimestamp(new Date())
             .setTemplate(new AlertTemplateApi().setNodes(List.of(new PlanNodeApi()))))))
         .readEntity(new GenericType<List<AlertApi>>() {})
-        .get(0)
+        .getFirst()
         .getId();
 
     final List<AnomalyApi> anomalies = new ArrayList<>();
@@ -144,7 +144,7 @@ public class AnomalyPaginationTest {
     final StatusListApi results = response.readEntity(ERROR_LIST_TYPE);
     assertThat(response.getStatus()).isEqualTo(400);
     assertThat(results.getList()).isNotEmpty();
-    assertThat(results.getList().get(0).getCode()).isEqualTo(ERR_NEGATIVE_LIMIT_VALUE);
+    assertThat(results.getList().getFirst().getCode()).isEqualTo(ERR_NEGATIVE_LIMIT_VALUE);
   }
 
   @Test
@@ -153,7 +153,7 @@ public class AnomalyPaginationTest {
     final StatusListApi results = response.readEntity(ERROR_LIST_TYPE);
     assertThat(response.getStatus()).isEqualTo(400);
     assertThat(results.getList()).isNotEmpty();
-    assertThat(results.getList().get(0).getCode()).isEqualTo(ERR_NEGATIVE_OFFSET_VALUE);
+    assertThat(results.getList().getFirst().getCode()).isEqualTo(ERR_NEGATIVE_OFFSET_VALUE);
   }
 
   @Test
@@ -162,7 +162,7 @@ public class AnomalyPaginationTest {
     final StatusListApi results = response.readEntity(ERROR_LIST_TYPE);
     assertThat(response.getStatus()).isEqualTo(400);
     assertThat(results.getList()).isNotEmpty();
-    assertThat(results.getList().get(0).getCode()).isEqualTo(ERR_OFFSET_WITHOUT_LIMIT);
+    assertThat(results.getList().getFirst().getCode()).isEqualTo(ERR_OFFSET_WITHOUT_LIMIT);
   }
 
   @Test

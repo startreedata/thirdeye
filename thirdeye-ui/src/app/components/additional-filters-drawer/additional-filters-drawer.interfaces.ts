@@ -14,7 +14,7 @@
  */
 
 import { TemplatePropertiesObject } from "../../rest/dto/alert.interfaces";
-import { AnomaliesFilterConfiguratorRenderConfigs } from "../alert-wizard-v3/anomalies-filter-panel/anomalies-filter-panel.interfaces";
+import { PropertyRenderConfig } from "../alert-wizard-v2/alert-template/alert-template-properties-builder/alert-template-properties-builder.interfaces";
 
 export interface AdditonalFiltersDrawerProps {
     defaultValues: TemplatePropertiesObject;
@@ -22,5 +22,8 @@ export interface AdditonalFiltersDrawerProps {
     onApply: (fieldData: TemplatePropertiesObject) => void;
     emptyMessage?: React.ReactNode;
     onClose: () => void;
-    availableConfigurations: AnomaliesFilterConfiguratorRenderConfigs[];
+    availableConfigurations: Record<
+        string,
+        Record<string, PropertyRenderConfig[]>
+    >;
 }

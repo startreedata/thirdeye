@@ -121,7 +121,7 @@ public class ThresholdPostProcessorTest {
       if (isLabeled) {
         final List<AnomalyLabelDTO> anomalyLabels = anomaly.getAnomalyLabels();
         assertThat(anomalyLabels).hasSize(1);
-        final AnomalyLabelDTO label = anomalyLabels.get(0);
+        final AnomalyLabelDTO label = anomalyLabels.getFirst();
         assertThat(label.isIgnore()).isEqualTo(ignoreMode);
         assertThat(label.getName()).isEqualTo(labelName(min, max, metric1));
       } else {
@@ -211,7 +211,7 @@ public class ThresholdPostProcessorTest {
       if (isLabeled) {
         final List<AnomalyLabelDTO> anomalyLabels = anomaly.getAnomalyLabels();
         assertThat(anomalyLabels).hasSize(1);
-        final AnomalyLabelDTO label = anomalyLabels.get(0);
+        final AnomalyLabelDTO label = anomalyLabels.getFirst();
         assertThat(label.isIgnore()).isEqualTo(true);
         assertThat(label.getName()).isEqualTo(labelName(min, max, metric1));
       } else {

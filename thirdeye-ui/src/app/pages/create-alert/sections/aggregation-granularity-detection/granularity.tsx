@@ -72,6 +72,10 @@ export const SelectGranularity = (): JSX.Element => {
             value: GranularityValue.FIFTEEN_MINUTES,
         },
         {
+            label: t("label.10-minutes"),
+            value: GranularityValue.TEN_MINUTES,
+        },
+        {
             label: t("label.5-minutes"),
             value: GranularityValue.FIVE_MINUTES,
         },
@@ -151,7 +155,7 @@ export const SelectGranularity = (): JSX.Element => {
                 </Typography>
                 <Typography variant="body2">
                     {t(
-                        "label.select-the-level-of-detail-at-which-data-is-aggregated-or-stored-in-the-time-series-data"
+                        "label.select-the-time-increment-that-the-data-is-aggregated-to"
                     )}
                 </Typography>
             </Box>

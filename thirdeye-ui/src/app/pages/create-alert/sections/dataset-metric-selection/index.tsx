@@ -46,9 +46,7 @@ export const SelectDatasetAndMetric = (): JSX.Element => {
             <Grid container>
                 <Grid item xs={4}>
                     <InputSectionV2
-                        description={t(
-                            "message.select-dataset-to-monitor-and-detect-anomalies"
-                        )}
+                        description={t("message.select-a-dataset-to-monitor")}
                         inputComponent={
                             <Autocomplete<DatasetInfo>
                                 fullWidth
@@ -106,7 +104,7 @@ export const SelectDatasetAndMetric = (): JSX.Element => {
                 <Grid item xs={4}>
                     <InputSectionV2
                         description={t(
-                            "message.select-metric-to-identify-unusual-changes-when-it-occurs"
+                            "message.select-a-metric-to-detect-anomalies"
                         )}
                         inputComponent={
                             <Autocomplete<string>

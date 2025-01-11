@@ -105,7 +105,7 @@ public class FilterEngine {
       } else if (call.getClass() == SqlOrderBy.class) {
         final SqlOrderBy orderByNode = (SqlOrderBy) call;
         // element of index 0 is the select node
-        selectNode = (SqlSelect) orderByNode.getOperandList().get(0);
+        selectNode = (SqlSelect) orderByNode.getOperandList().getFirst();
       } else if (call.getClass() == SqlWith.class) {
         final SqlWith withNode = (SqlWith) call;
         // element of index 1 is the select node - in simple with + select queries

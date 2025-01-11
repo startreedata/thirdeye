@@ -25,13 +25,13 @@ import ai.startree.thirdeye.aspect.TimeProvider;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.core.MultivaluedHashMap;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
@@ -112,7 +112,7 @@ public class SchedulingTest {
     response = client.request("api/data-sources")
         .post(Entity.json(List.of(pinotDataSourceApi)));
     assert200(response);
-    final DataSourceApi dataSourceInResponse = response.readEntity(DATASOURCE_LIST_TYPE).get(0);
+    final DataSourceApi dataSourceInResponse = response.readEntity(DATASOURCE_LIST_TYPE).getFirst();
     pinotDataSourceApi.setId(dataSourceInResponse.getId());
 
     // create dataset
@@ -133,7 +133,7 @@ public class SchedulingTest {
         .post(Entity.json(List.of(ALERT_API)));
     assertThat(createResponse.getStatus()).isEqualTo(200);
     final List<AlertApi> alerts = createResponse.readEntity(ALERT_LIST_TYPE);
-    alertId = alerts.get(0).getId();
+    alertId = alerts.getFirst().getId();
 
     // time advancing should not impact lastTimestamp
     CLOCK.tick(5);

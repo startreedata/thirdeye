@@ -16,14 +16,14 @@ package ai.startree.thirdeye.auth;
 import static ai.startree.thirdeye.spi.Constants.AUTH_BEARER;
 import static ai.startree.thirdeye.spi.Constants.NO_AUTH_USER;
 
+import jakarta.annotation.Priority;
+import jakarta.ws.rs.Priorities;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.container.ContainerRequestFilter;
+import jakarta.ws.rs.core.HttpHeaders;
 import java.io.IOException;
-import javax.annotation.Priority;
-import javax.ws.rs.Priorities;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerRequestFilter;
-import javax.ws.rs.core.HttpHeaders;
 
-@Priority(Priorities.AUTHENTICATION-1)
+@Priority(Priorities.AUTHENTICATION - 1)
 public class AuthDisabledRequestFilter implements ContainerRequestFilter {
 
   @Override

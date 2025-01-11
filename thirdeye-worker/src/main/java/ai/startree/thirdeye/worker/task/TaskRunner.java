@@ -15,11 +15,12 @@ package ai.startree.thirdeye.worker.task;
 
 import ai.startree.thirdeye.spi.task.TaskInfo;
 import java.util.List;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Interface for task runner of various types of executors
  */
 public interface TaskRunner {
 
-  List<TaskResult> execute(TaskInfo taskInfo, TaskContext taskContext) throws Exception;
+  List<TaskResult> execute(TaskInfo taskInfo, TaskContext taskContext, @Nullable String namespace) throws Exception;
 }

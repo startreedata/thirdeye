@@ -69,6 +69,7 @@ export const NamespaceConfiguration = (): JSX.Element => {
                         <Box display="flex" gridGap={12}>
                             <Button
                                 color="primary"
+                                data-testId="update-settings"
                                 disabled={isUpdateDisabled}
                                 variant="outlined"
                                 onClick={handleUpdate}
@@ -77,6 +78,7 @@ export const NamespaceConfiguration = (): JSX.Element => {
                             </Button>
                             <Button
                                 color="primary"
+                                data-testId="reset-settings"
                                 variant="outlined"
                                 onClick={handleReset}
                             >

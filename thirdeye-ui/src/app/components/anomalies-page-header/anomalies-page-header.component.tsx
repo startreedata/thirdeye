@@ -86,6 +86,7 @@ export const AnomaliesPageHeader: FunctionComponent = () => {
                         <Button
                             color="primary"
                             component={RouterLink}
+                            data-testId="create-anomaly-btn"
                             to={getAnomaliesCreatePath()}
                         >
                             {t("label.create")}

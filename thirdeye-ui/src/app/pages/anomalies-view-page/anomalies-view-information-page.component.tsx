@@ -80,6 +80,7 @@ export const AnomaliesViewInformationPage: FunctionComponent = () => {
         enumerationItem,
         getInvestigationsRequestStatus,
         investigations,
+        alert,
     } = containerContext;
 
     const [showV1Link, setShowV1Link] = useState(true);
@@ -149,8 +150,8 @@ export const AnomaliesViewInformationPage: FunctionComponent = () => {
                     enumerationItemSearchParams
                 ),
                 label: enumerationItem
-                    ? `${anomaly.alert.name} (${enumerationItem.name})`
-                    : anomaly.alert.name,
+                    ? `${alert?.name} (${enumerationItem.name})`
+                    : alert?.name,
             });
         } else {
             crumbs.push({
@@ -163,7 +164,7 @@ export const AnomaliesViewInformationPage: FunctionComponent = () => {
         });
 
         return crumbs;
-    }, [anomaly, enumerationItem]);
+    }, [anomaly, enumerationItem, alert]);
 
     const getPageTitle = (): string => {
         let pageTitle = getAnomalyName(anomaly);
@@ -211,6 +212,7 @@ export const AnomaliesViewInformationPage: FunctionComponent = () => {
                         />
                         <Button
                             component="button"
+                            data-testId="delete-anomaly-btn"
                             variant="contained"
                             onClick={handleAnomalyDelete}
                         >

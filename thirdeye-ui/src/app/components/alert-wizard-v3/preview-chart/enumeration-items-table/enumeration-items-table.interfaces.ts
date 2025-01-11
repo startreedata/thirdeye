@@ -21,10 +21,10 @@ export interface EnumerationItemsTableProps {
     onDeleteClick: (detectionEvaluation: DetectionEvaluation) => void;
     timezone: string | undefined;
     hideTime: boolean;
+    searchTerm?: string;
     showOnlyActivity?: boolean;
     hideDelete?: boolean;
     alert?: any;
     evaluationTimeRange: TimeRange;
     legendsPlacement?: `${LegendPlacement}`;
-    showDimensionSearch?: boolean;
 }

@@ -27,8 +27,8 @@ from retry.api import retry_call
 from setup_local.launch_backend import setup_and_launch_thirdeye_backend
 from setup_local.launch_frontend import launch_thirdeye_frontend
 
-PINOT = 'apachepinot/pinot:1.1.0'
-PINOT_ARM64 = 'apachepinot/pinot:1.1.0'
+PINOT = 'apachepinot/pinot:1.2.0'
+PINOT_ARM64 = 'apachepinot/pinot:1.2.0'
 TE_UI_DIR = 'thirdeye-ui'
 
 args_parser = argparse.ArgumentParser()

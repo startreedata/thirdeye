@@ -23,6 +23,10 @@ public class DaoFilter {
   private Long offset;
   private String orderByKey;
   private boolean isDesc = false;
+  
+  // for instance: Connection.TRANSACTION_READ_UNCOMMITTED - if not set, the transaction isolation should not be set
+  // NOTE: this parameter is not supported by all DAOs yet
+  private Integer transactionIsolationLevel = null; 
 
   public Predicate getPredicate() {
     return predicate;
@@ -76,6 +80,15 @@ public class DaoFilter {
 
   public DaoFilter setDesc(final boolean desc) {
     isDesc = desc;
+    return this;
+  }
+
+  public Integer getTransactionIsolationLevel() {
+    return transactionIsolationLevel;
+  }
+
+  public DaoFilter setTransactionIsolationLevel(final Integer transactionIsolationLevel) {
+    this.transactionIsolationLevel = transactionIsolationLevel;
     return this;
   }
 }

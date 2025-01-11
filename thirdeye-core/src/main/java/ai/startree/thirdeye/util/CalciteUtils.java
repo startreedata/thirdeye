@@ -235,9 +235,9 @@ public class CalciteUtils {
     if (predicates.isEmpty()) {
       return null;
     } else if (predicates.size() == 1) {
-      return predicates.get(0);
+      return predicates.getFirst();
     }
-    return addPredicates(predicates.get(0), predicates.subList(1, predicates.size()));
+    return addPredicates(predicates.getFirst(), predicates.subList(1, predicates.size()));
   }
 
   /**

@@ -14,6 +14,8 @@
 package ai.startree.thirdeye.worker.task.runner;
 
 import static ai.startree.thirdeye.spi.Constants.METRICS_TIMER_PERCENTILES;
+import static ai.startree.thirdeye.spi.util.MetricsUtils.NAMESPACE_TAG;
+import static ai.startree.thirdeye.spi.util.MetricsUtils.namespaceTagValueOf;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static ai.startree.thirdeye.util.DetectionIntervalUtils.computeCorrectedInterval;
 import static com.google.common.base.Preconditions.checkState;
@@ -40,6 +42,7 @@ import io.micrometer.core.instrument.Timer;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
@@ -51,13 +54,13 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
 
   private final Logger LOG = LoggerFactory.getLogger(DetectionPipelineTaskRunner.class);
 
+  private final static String DETECTION_TASK_TIMER_NAME = "thirdeye_detection_task";
+  private final static String DETECTION_TASK_TIMER_DESCRIPTION = "Start: A detectionPipeline task info is passed for execution. End: the task is finished: detection pipeline is run, alert watermark is saved and results are persisted. Tag exception=true means an exception was thrown by the method call.";
+
   private final AlertManager alertManager;
   private final AnomalyManager anomalyManager;
   private final PlanExecutor planExecutor;
   private final AlertTemplateRenderer alertTemplateRenderer;
-  
-  private final Timer detectionTaskTimerOfSuccess;
-  private final Timer detectionTaskTimerOfException;
 
   @Inject
   public DetectionPipelineTaskRunner(final AlertManager alertManager,
@@ -68,23 +71,13 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
     this.anomalyManager = anomalyManager;
     this.planExecutor = planExecutor;
     this.alertTemplateRenderer = alertTemplateRenderer;
-    
-    this.detectionTaskTimerOfSuccess = Timer
-        .builder("thirdeye_detection_task")
-        .publishPercentiles(METRICS_TIMER_PERCENTILES)
-        .tag("exception", "false")
-        .description("Start: A detectionPipeline task info is passed for execution. End: the task is finished: detection pipeline is run, alert watermark is saved and results are persisted. Tag exception=true means an exception was thrown by the method call.")
-        .register(Metrics.globalRegistry);
-    this.detectionTaskTimerOfException = Timer
-        .builder("thirdeye_detection_task")
-        .publishPercentiles(METRICS_TIMER_PERCENTILES)
-        .tag("exception", "true")
-        .register(Metrics.globalRegistry);
   }
 
   @Override
-  public List<TaskResult> execute(final TaskInfo taskInfo, final TaskContext taskContext)
-      throws Exception {
+  public List<TaskResult> execute(final TaskInfo taskInfo, final TaskContext taskContext,
+      @Nullable String namespace) throws Exception {
+    final Timer detectionTaskTimerOfSuccess = getDetectionTaskTimer(namespace, false);
+    final Timer detectionTaskTimerOfException = getDetectionTaskTimer(namespace, true);
     final Timer.Sample sample = Timer.start(Metrics.globalRegistry);
     try {
       final List<TaskResult> result = execute0((DetectionPipelineTaskInfo) taskInfo);
@@ -166,5 +159,14 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
     checkState(detectionPipelineResultMap.size() == 1,
         "Only a single output from the pipeline is supported at the moment.");
     return detectionPipelineResultMap.values().iterator().next();
+  }
+
+  private Timer getDetectionTaskTimer(final @Nullable String namespace, final Boolean exception) {
+    return Timer.builder(DETECTION_TASK_TIMER_NAME)
+        .description(DETECTION_TASK_TIMER_DESCRIPTION)
+        .publishPercentiles(METRICS_TIMER_PERCENTILES)
+        .tag("exception", exception ? "true" : "false")
+        .tag(NAMESPACE_TAG, namespaceTagValueOf(namespace))
+        .register(Metrics.globalRegistry);
   }
 }

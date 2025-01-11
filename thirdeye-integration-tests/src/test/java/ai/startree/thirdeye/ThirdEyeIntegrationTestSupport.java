@@ -23,9 +23,10 @@ import ai.startree.thirdeye.datalayer.util.DatabaseConfiguration;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
 import com.google.inject.Injector;
 import io.dropwizard.testing.DropwizardTestSupport;
+import jakarta.ws.rs.client.Client;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import javax.ws.rs.client.Client;
+import org.apache.pinot.testcontainer.PinotContainer.PinotVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,8 +44,8 @@ public class ThirdEyeIntegrationTestSupport {
   }
 
   public void setup() throws Exception {
-    pinotDataSourceFuture = PinotDataSourceManager.getPinotDataSourceApi();
-    dbConfiguration = MySqlTestDatabase.sharedDatabaseConfiguration();
+    pinotDataSourceFuture = PinotDataSourceManager.getPinotDataSourceApi(PinotVersion.recommendedVersion());
+    dbConfiguration = MySqlTestDatabase.newDatabaseConfiguration();
 
     if (useLocalMysqlInstance()) {
       MySqlTestDatabase.cleanSharedDatabase();

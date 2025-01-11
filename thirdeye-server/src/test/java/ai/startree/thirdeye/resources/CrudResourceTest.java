@@ -40,16 +40,16 @@ import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import com.google.common.collect.ImmutableMap;
+import jakarta.ws.rs.ForbiddenException;
+import jakarta.ws.rs.core.MultivaluedHashMap;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.ws.rs.ForbiddenException;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import org.mockito.stubbing.Answer;
 import org.testng.annotations.Test;
 
@@ -71,7 +71,7 @@ public class CrudResourceTest {
         new ThirdEyeAuthorizerProvider.AlwaysAllowAuthorizer(Map.of()));
 
     final List<String> emails = List.of("tester1@testing.com", "tester2@testing.com");
-    final ThirdEyeServerPrincipal owner = getPrincipal(emails.get(0));
+    final ThirdEyeServerPrincipal owner = getPrincipal(emails.getFirst());
     final DummyApi api = new DummyApi().setData("testData");
 
     final Timestamp before = new Timestamp(1671476530000L);
@@ -80,9 +80,9 @@ public class CrudResourceTest {
 
     assertThat(response).isNotNull();
     assertThat(response.isEmpty()).isFalse();
-    final DummyApi responseApi = response.get(0);
-    assertThat(responseApi.getCreatedBy()).isEqualTo(emails.get(0));
-    assertThat(responseApi.getUpdatedBy()).isEqualTo(emails.get(0));
+    final DummyApi responseApi = response.getFirst();
+    assertThat(responseApi.getCreatedBy()).isEqualTo(emails.getFirst());
+    assertThat(responseApi.getUpdatedBy()).isEqualTo(emails.getFirst());
     assertThat(responseApi.getCreateTime().after(before)).isTrue();
     assertThat(responseApi.getCreateTime()).isEqualTo(responseApi.getUpdateTime());
   }
@@ -119,7 +119,7 @@ public class CrudResourceTest {
 
     assertThat(response).isNotNull();
     assertThat(response.isEmpty()).isFalse();
-    final DummyApi responseApi = response.get(0);
+    final DummyApi responseApi = response.getFirst();
     assertThat(responseApi.getData()).isEqualTo("updateTestData");
     assertThat(responseApi.getCreatedBy()).isEqualTo(owner.getName());
     assertThat(responseApi.getUpdatedBy()).isEqualTo(updater.getName());
@@ -166,7 +166,7 @@ public class CrudResourceTest {
       final List<DummyApi> entities = ((Stream<DummyApi>) resp.getEntity()).collect(
           Collectors.toList());
       assertThat(1).isEqualTo(entities.size());
-      assertThat(2L).isEqualTo(entities.get(0).getId());
+      assertThat(2L).isEqualTo(entities.getFirst().getId());
     }
   }
 

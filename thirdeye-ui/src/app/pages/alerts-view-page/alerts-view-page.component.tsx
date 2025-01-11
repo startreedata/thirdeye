@@ -33,7 +33,6 @@ import React, {
 import { useTranslation } from "react-i18next";
 import { useParams, useSearchParams } from "react-router-dom";
 import { AlertAccuracyColored } from "../../components/alert-accuracy-colored/alert-accuracy-colored.component";
-import { AlertAddConfigurationModal } from "../../components/alert-add-configuration-modal/alert-add-configration-modal.component";
 import { AlertChart } from "../../components/alert-view/alert-chart/alert-chart.component";
 import { AlertOptionsButton } from "../../components/alert-view/alert-options-button/alert-options-button.component";
 import { EnumerationItemsTable } from "../../components/alert-view/enumeration-items-table/enumeration-items-table.component";
@@ -74,7 +73,6 @@ import { AlertsViewPageParams } from "./alerts-view-page.interfaces";
 import {
     CONCAT_SEPARATOR,
     QUERY_PARAM_KEY_ANOMALIES_RETRY,
-    QUERY_PARAM_KEY_FOR_NOTIFICATION,
     QUERY_PARAM_KEY_FOR_SEARCH,
     QUERY_PARAM_KEY_FOR_SORT,
     QUERY_PARAM_KEY_FOR_SORT_KEY,
@@ -99,9 +97,6 @@ export const AlertsViewPage: FunctionComponent = () => {
     const { alertInsight, getAlertInsight } = useGetAlertInsight();
 
     const [searchParams, setSearchParams] = useSearchParams();
-
-    const [openAlertAddConfigurationModal, setOpenAlertAddConfigurationModal] =
-        useState(!!searchParams.get(QUERY_PARAM_KEY_FOR_NOTIFICATION));
 
     const [expanded, setExpanded] = useState<string[]>(
         searchParams.has(QUERY_PARAM_KEY_FOR_EXPANDED)
@@ -578,13 +573,6 @@ export const AlertsViewPage: FunctionComponent = () => {
                         )}
                     </LoadingErrorStateSwitch>
                 </Grid>
-                <AlertAddConfigurationModal
-                    alertId={alertId || ""}
-                    open={openAlertAddConfigurationModal}
-                    onClose={() => {
-                        setOpenAlertAddConfigurationModal(false);
-                    }}
-                />
                 {/* {alertId && searchParams.has(QUERY_PARAM_KEY_ALERT_TYPE) && (
                     <AlertAddConfigrationModal alertId={alertId} />
                 )} */}

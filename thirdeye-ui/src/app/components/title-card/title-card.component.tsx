@@ -19,11 +19,19 @@ import { titleCardStyles } from "./title-card.styles";
 
 const TitleCard: FunctionComponent<TitleCardProps> = (props) => {
     const classes = titleCardStyles();
+    const dataTestId = props.datatestId || "card-container";
 
     return (
-        <Card className={classes.card}>
-            <div className={classes.header}>{props.title}</div>
-            <CardContent>{props.content}</CardContent>
+        <Card className={classes.card} data-testId={dataTestId}>
+            <div
+                className={classes.header}
+                data-testId={`${dataTestId}-header`}
+            >
+                {props.title}
+            </div>
+            <CardContent data-testId={`${dataTestId}-content`}>
+                {props.content}
+            </CardContent>
         </Card>
     );
 };

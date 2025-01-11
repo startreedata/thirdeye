@@ -22,6 +22,9 @@ export const graphOptionsStyles = makeStyles((theme) => ({
         padding: "24px",
         width: "100%",
         alignItems: "center",
+        borderBottom: 0,
+        borderBottomLeftRadius: 0,
+        borderBottomRightRadius: 0,
     },
     algorithmContainer: {
         marginBottom: theme.spacing(2),

@@ -53,6 +53,7 @@ public enum ThirdEyeStatus {
   ERR_TIMEOUT("Operation timed out!"),
   ERR_UNEXPECTED_QUERY_PARAM("Unexpected Query Param. Allowed values: %s"),
   ERR_UNKNOWN("%s"),
+  ERR_EXECUTION_RCA_ALGORITHM("RCA Algorithm Execution Failed. Error: %s"),
   ERR_UNKNOWN_RCA_ALGORITHM("Unknown error running the rca algorithm: %s"),
   ERR_CALCITE_FILTERING("Failed running Calcite filtering query with filter: %s"),
   ERR_INVALID_PARAMS_COMPONENTS("Invalid param components: %s for Class %s"),
@@ -61,6 +62,8 @@ public enum ThirdEyeStatus {
   ERR_NEGATIVE_LIMIT_VALUE("Negative 'limit' value provided."),
   ERR_NEGATIVE_OFFSET_VALUE("Negative 'offset' value provided."),
   ERR_OFFSET_WITHOUT_LIMIT("'offset' value provided without 'limit' value."),
+  ERR_PINOT_QUERY_QUOTA_EXCEEDED("Pinot Query Quota Exceeded. Error: %s. SQL: %s"),
+  ERR_PINOT_QUERY_EXECUTION("Pinot Query Execution Failed. Error: %s. SQL: %s"),
 
   OK("OK"),
   ;

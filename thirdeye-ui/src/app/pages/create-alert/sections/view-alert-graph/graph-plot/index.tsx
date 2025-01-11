@@ -23,10 +23,6 @@ import {
     PageContentsCardV1,
     useNotificationProviderV1,
 } from "../../../../../platform/components";
-import { AlertJsonEditorModal } from "../../../../../components/alert-json-editor-modal/alert-json-editor-modal.component";
-import { InputSection } from "../../../../../components/form-basics/input-section/input-section.component";
-import { ParseMarkdown } from "../../../../../components/parse-markdown/parse-markdown.component";
-import { SpecificPropertiesRenderer } from "../../../../../components/alert-wizard-v3/threshold-setup/specific-properties-renderer/specific-properties-renderer.component";
 import { PreviewChartMain } from "../../../../../components/preview-chart";
 // state
 import { EnumerationItem, useCreateAlertStore } from "../../../hooks/state";
@@ -47,6 +43,7 @@ import { notifyIfErrors } from "../../../../../utils/notifications/notifications
 
 // apis
 import { useGetEvaluation } from "../../../../../rest/alerts/alerts.actions";
+import { RequiredProperties } from "./required-properties";
 
 export const GraphPlot = (): JSX.Element => {
     const { t } = useTranslation();
@@ -104,23 +101,6 @@ export const GraphPlot = (): JSX.Element => {
 
         return [];
     }, [(workingAlert as EditableAlert).template?.name]);
-
-    const handleExtraPropertyChange = (
-        propertyName: string,
-        newValue: string
-    ): void => {
-        const newTemplateProperties = {
-            templateProperties: {
-                ...(workingAlert as EditableAlert).templateProperties,
-                [propertyName]: newValue,
-            },
-        };
-        setWorkingAlert({
-            ...workingAlert,
-            templateProperties: newTemplateProperties.templateProperties,
-        });
-        setIsEvaluationDataStale(true);
-    };
 
     const handleReload = (): void => {
         const clonedAlert = cloneDeep(workingAlert) as EditableAlert;
@@ -188,15 +168,6 @@ export const GraphPlot = (): JSX.Element => {
                                     })}
                             </Typography>
                         </Grid>
-                        <Grid item>
-                            <AlertJsonEditorModal
-                                isReadOnly
-                                alert={workingAlert as EditableAlert}
-                                onSubmitChanges={() => {
-                                    // handleAlertUpdate();
-                                }}
-                            />
-                        </Grid>
                     </Grid>
 
                     {inputFieldConfigs.length > 0 && (
@@ -205,50 +176,7 @@ export const GraphPlot = (): JSX.Element => {
                         </Grid>
                     )}
 
-                    <Box display="flex" flexDirection="row">
-                        {inputFieldConfigs.length > 0 &&
-                            inputFieldConfigs.map((config) => {
-                                return (
-                                    <InputSection
-                                        gridItemProps={{ xs: 6 }}
-                                        inputComponent={
-                                            <>
-                                                <SpecificPropertiesRenderer
-                                                    inputFieldConfig={config}
-                                                    selectedTemplateProperties={
-                                                        (
-                                                            workingAlert as EditableAlert
-                                                        ).templateProperties
-                                                    }
-                                                    onAlertPropertyChange={
-                                                        handleExtraPropertyChange
-                                                    }
-                                                />
-                                                {!!config.description && (
-                                                    <Typography variant="caption">
-                                                        <ParseMarkdown>
-                                                            {config.description}
-                                                        </ParseMarkdown>
-                                                    </Typography>
-                                                )}
-                                            </>
-                                        }
-                                        key={config.templatePropertyName}
-                                        labelComponent={
-                                            <Typography
-                                                style={{ fontWeight: "bold" }}
-                                                variant="body2"
-                                            >
-                                                {config.label}
-                                                <span style={{ color: "red" }}>
-                                                    *
-                                                </span>
-                                            </Typography>
-                                        }
-                                    />
-                                );
-                            })}
-                    </Box>
+                    <RequiredProperties />
 
                     <Grid item xs={12}>
                         <Box marginBottom={2} marginTop={2} padding={1}>

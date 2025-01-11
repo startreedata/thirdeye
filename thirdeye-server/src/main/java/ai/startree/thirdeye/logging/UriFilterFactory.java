@@ -19,9 +19,9 @@ import ch.qos.logback.core.spi.FilterReply;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import io.dropwizard.logging.common.filter.FilterFactory;
+import jakarta.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.Set;
-import javax.validation.constraints.NotNull;
 
 // TODO: shounak. Remove this class and META-INF/services/io.dropwizard.logging.filter.FilterFactory file once dropwizard is upgraded to v2.1.x
 

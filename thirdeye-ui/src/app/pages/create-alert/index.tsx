@@ -16,12 +16,6 @@
 import React, { useEffect } from "react";
 import { Box, Grid } from "@material-ui/core";
 
-// app components
-import { PageContentsCardV1 } from "../../platform/components";
-
-// styles
-import { easyAlertStyles } from "./styles";
-
 // sections
 import {
     CreateAlertHeader,
@@ -37,9 +31,9 @@ import { useGetAlertTemplates } from "../../rest/alert-templates/alert-templates
 
 // state
 import { useCreateAlertStore } from "./hooks/state";
+import { MainLayout } from "../../platform/components/layout/main/page.component";
 
 export const CreateAlert = (): JSX.Element => {
-    const componentStyles = easyAlertStyles();
     const { setAlertTemplates, selectedMetric } = useCreateAlertStore();
     const { alertTemplates, getAlertTemplates } = useGetAlertTemplates();
 
@@ -52,29 +46,25 @@ export const CreateAlert = (): JSX.Element => {
     }, [alertTemplates]);
 
     return (
-        <>
-            <Grid item xs={12}>
-                <PageContentsCardV1 className={componentStyles.container}>
-                    <Grid container>
-                        <Grid item xs={12}>
-                            <Box marginBottom={2}>
-                                <Grid
-                                    container
-                                    alignContent="center"
-                                    justifyContent="space-between"
-                                >
-                                    <CreateAlertHeader />
-                                    <SelectDatasetAndMetric />
-                                    <AlertProperties />
-                                    <ViewAlertGraph />
-                                    <SubscribeNotification />
-                                    {selectedMetric && <CreateActionButtons />}
-                                </Grid>
-                            </Box>
+        <MainLayout>
+            <Grid container>
+                <Grid item xs={12}>
+                    <Box marginBottom={2}>
+                        <Grid
+                            container
+                            alignContent="center"
+                            justifyContent="space-between"
+                        >
+                            <CreateAlertHeader />
+                            <SelectDatasetAndMetric />
+                            <AlertProperties />
+                            <ViewAlertGraph />
+                            <SubscribeNotification />
+                            {selectedMetric && <CreateActionButtons />}
                         </Grid>
-                    </Grid>
-                </PageContentsCardV1>
+                    </Box>
+                </Grid>
             </Grid>
-        </>
+        </MainLayout>
     );
 };

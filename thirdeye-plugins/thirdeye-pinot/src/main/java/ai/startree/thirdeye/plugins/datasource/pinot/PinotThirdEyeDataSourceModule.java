@@ -21,9 +21,9 @@ import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
+import jakarta.inject.Singleton;
 import java.util.Map;
 import java.util.Set;
-import javax.inject.Singleton;
 import org.apache.http.HttpHeaders;
 
 public class PinotThirdEyeDataSourceModule extends AbstractModule {

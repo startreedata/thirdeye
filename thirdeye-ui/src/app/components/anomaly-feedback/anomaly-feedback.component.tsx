@@ -76,7 +76,9 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
             showDialog({
                 type: DialogType.ALERT,
                 contents: t("message.change-confirmation-to", {
-                    value: `"${ALL_OPTIONS_TO_DESCRIPTIONS[newSelectedFeedbackType]}"`,
+                    value: `"${
+                        ALL_OPTIONS_TO_DESCRIPTIONS(t)[newSelectedFeedbackType]
+                    }"`,
                 }),
                 okButtonText: t("label.change"),
                 cancelButtonText: t("label.cancel"),
@@ -179,10 +181,10 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
     }, [anomalyFeedback]);
 
     const shortcutCreateMenuItems = Object.keys(
-        ALL_OPTIONS_TO_DESCRIPTIONS
+        ALL_OPTIONS_TO_DESCRIPTIONS(t)
     ).map((optionKey: string) => ({
         id: optionKey,
-        text: ALL_OPTIONS_TO_DESCRIPTIONS[optionKey],
+        text: ALL_OPTIONS_TO_DESCRIPTIONS(t)[optionKey],
     }));
 
     return (
@@ -199,7 +201,7 @@ export const AnomalyFeedback: FunctionComponent<AnomalyFeedbackProps> = ({
                         }
                     >
                         <Button color="primary" variant="outlined">
-                            {ALL_OPTIONS_WITH_NO_FEEDBACK[currentlySelected]}
+                            {ALL_OPTIONS_WITH_NO_FEEDBACK(t)[currentlySelected]}
                         </Button>
                         <Button
                             color="primary"

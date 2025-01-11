@@ -33,7 +33,10 @@ import {
     QUERY_PARAM_KEY_ALERT_TYPE,
     QUERY_PARAM_KEY_ANOMALIES_RETRY,
 } from "../../../alerts-view-page/alerts-view-page.utils";
-import { getAlertsAlertPath } from "../../../../utils/routes/routes.util";
+import {
+    getAlertsAlertPath,
+    getHomePath,
+} from "../../../../utils/routes/routes.util";
 
 // app components
 import { DialogType } from "../../../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
@@ -57,6 +60,9 @@ import {
     createSubscriptionGroup,
     updateSubscriptionGroups,
 } from "../../../../rest/subscription-groups/subscription-groups.rest";
+import { useGetAlertsCount } from "../../../../rest/alerts/alerts.actions";
+import { QUERY_PARAM_KEYS } from "../../../../utils/constants/constants.util";
+import { useAppBarConfigProvider } from "../../../../components/app-bar/app-bar-config-provider/app-bar-config-provider.component";
 
 type CreateAlertModalModalProps = {
     onCancel: () => void;
@@ -68,6 +74,11 @@ export const ConfirmationModal: FunctionComponent<CreateAlertModalModalProps> =
         const { t } = useTranslation();
         const navigate = useNavigate();
         const { notify } = useNotificationProviderV1();
+        const { setShowAppNavBar } = useAppBarConfigProvider();
+        const { alertsCount, getAlertsCount } = useGetAlertsCount();
+        useEffect(() => {
+            getAlertsCount();
+        }, []);
         const {
             workingAlert,
             setWorkingAlert,
@@ -236,14 +247,22 @@ export const ConfirmationModal: FunctionComponent<CreateAlertModalModalProps> =
                     ) {
                         await handleAlertSubscriptionAssociation(newAlert);
                     }
-                    const searchParamsToSet = new URLSearchParams([
-                        [QUERY_PARAM_KEY_ANOMALIES_RETRY, "true"],
-                        [QUERY_PARAM_KEY_ALERT_TYPE, "create"],
-                    ]);
                     resetCreateAlertState();
-                    navigate(
-                        getAlertsAlertPath(newAlert.id!, searchParamsToSet)
-                    );
+                    if (alertsCount) {
+                        const searchParamsToSet = new URLSearchParams([
+                            [QUERY_PARAM_KEY_ANOMALIES_RETRY, "true"],
+                            [QUERY_PARAM_KEY_ALERT_TYPE, "create"],
+                        ]);
+                        navigate(
+                            getAlertsAlertPath(newAlert.id!, searchParamsToSet)
+                        );
+                    } else {
+                        const queryParams = new URLSearchParams([
+                            [QUERY_PARAM_KEYS.SHOW_FIRST_ALERT_SUCCESS, "true"],
+                        ]);
+                        setShowAppNavBar(true);
+                        navigate(`${getHomePath()}?${queryParams.toString()}`);
+                    }
                 }
             }
         };

@@ -103,7 +103,7 @@ public class MySqlTestDatabase {
     }
   }
 
-  public static DatabaseConfiguration newDatabaseConfiguration() {
+  public static synchronized DatabaseConfiguration newDatabaseConfiguration() {
     if (persistenceDbContainer == null) {
       // init docker container
       persistenceDbContainer = new MySQLContainer<>(MYSQL_DOCKER_IMAGE).withPassword(PASSWORD);

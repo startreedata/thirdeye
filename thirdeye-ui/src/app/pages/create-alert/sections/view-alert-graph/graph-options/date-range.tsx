@@ -50,6 +50,7 @@ export const DateRange = (): JSX.Element => {
         alertInsight,
         workingAlert,
         setWorkingAlertEvaluation,
+        selectedTimeRange,
         setSelectedTimeRange,
         apiState,
         setApiState,
@@ -109,8 +110,8 @@ export const DateRange = (): JSX.Element => {
                 hideQuickExtend
                 btnGroupColor="default"
                 defaultTimeRange={{
-                    startTime: alertInsight!.defaultStartTime!,
-                    endTime: alertInsight!.defaultEndTime!,
+                    startTime: selectedTimeRange!.startTime,
+                    endTime: selectedTimeRange!.endTime!,
                     timeRange: TimeRange.CUSTOM,
                 }}
                 maxDate={alertInsight?.datasetEndTime}

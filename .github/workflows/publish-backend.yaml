@@ -17,10 +17,10 @@ jobs:
     steps:
       - name: Pull repository
         uses: actions/checkout@v4
-      - name: Install JDK 17
+      - name: Install JDK 21
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: 'temurin'
       - name: Cache - restore local Maven repository
         id: cache-restore
@@ -58,15 +58,6 @@ jobs:
       - name: Publish backend artefacts
         run: |
           ./mvnw -B -Prelease -DskipTests deploy -U
-      - name: Cache - save local Maven repository
-        uses: actions/cache/save@v3
-        # save to cache only if necessary - cache even if failed (useful if some steps are flaky)
-        if: steps.cache-restore.outputs.cache-hit != 'true' && ( failure() || success())
-        with:
-          path: |
-            ~/.m2/repository
-            ~/.m2/wrapper
-          key: publish-${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
 
       # build and publish docker image
       - name: Login in Docker registry
@@ -97,6 +88,17 @@ jobs:
           repository: startreedata/startree-thirdeye
           event-type: community-te-release
           client-payload: '{"community_version": "${{ steps.release-version.outputs.RELEASE_VERSION }}"}'
+      
+      # caching after all other steps are done because this can take time, except the slack success notification because we want to know if the caching failed    
+      - name: Cache - save local Maven repository
+        uses: actions/cache/save@v3
+        # save to cache only if necessary - cache even if failed (useful if some steps are flaky)
+        if: steps.cache-restore.outputs.cache-hit != 'true' && ( failure() || success())
+        with:
+          path: |
+            ~/.m2/repository
+            ~/.m2/wrapper
+          key: publish-${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
 
       - name: Slack - Notify Success
         uses: rtCamp/action-slack-notify@v2

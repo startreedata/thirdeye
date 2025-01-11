@@ -19,7 +19,7 @@ import { ColorV1 } from "../../platform/utils/material-ui/color.util";
 export const useAdditonalFiltersDrawerStyles = makeStyles((theme) => ({
     drawerPaper: {
         backgroundColor: theme.palette.background.paper,
-        maxWidth: 280,
+        maxWidth: 560,
         width: "100%",
 
         "& form": {
@@ -43,6 +43,11 @@ export const useAdditonalFiltersDrawerStyles = makeStyles((theme) => ({
         flex: "1 1 auto",
         overflowY: "auto",
         height: 0,
+    },
+    heading: {
+        fontSize: theme.typography.pxToRem(15),
+        fontWeight: 500,
+        color: PaletteV1.NavBarBackgroundColor,
     },
     footer: {
         padding: "10px 12px",
@@ -68,6 +73,8 @@ export const useAdditonalFiltersDrawerStyles = makeStyles((theme) => ({
         display: "flex",
         flexDirection: "column",
         gap: 4,
+        height: "max-content",
+        width: "100%",
     },
     formLabel: {
         display: "flex",

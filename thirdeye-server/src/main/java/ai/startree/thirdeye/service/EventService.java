@@ -27,9 +27,9 @@ import ai.startree.thirdeye.spi.datalayer.dto.AnomalyDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.EventDTO;
 import com.google.common.collect.ImmutableMap;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.List;
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,6 +91,6 @@ public class EventService extends CrudService<EventApi, EventDTO> {
       LOG.error("Failed to create event from an anomaly. List of created entities is not of size 1. Returned list: {}", created);
       throw new RuntimeException("Failed to create event from anomaly. Number of anomalies created: " + created.size());
     }
-    return created.get(0);
+    return created.getFirst();
   }
 }

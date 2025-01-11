@@ -19,7 +19,7 @@
   <parent>
     <groupId>ai.startree.thirdeye</groupId>
     <artifactId>thirdeye</artifactId>
-    <version>1.364.0-SNAPSHOT</version>
+    <version>1.402.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>thirdeye-benchmarks</artifactId>
@@ -27,7 +27,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jmh.version>1.37</jmh.version>
-    <javac.target>17</javac.target>
+    <javac.target>21</javac.target>
     <uberjar.name>benchmarks</uberjar.name>
   </properties>
   

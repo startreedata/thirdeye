@@ -27,7 +27,10 @@ import {
     useNotificationProviderV1,
 } from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
-import { useGetAlertInsight } from "../../rest/alerts/alerts.actions";
+import {
+    useGetAlert,
+    useGetAlertInsight,
+} from "../../rest/alerts/alerts.actions";
 import { useGetAnomaly } from "../../rest/anomalies/anomaly.actions";
 import { Anomaly, AnomalyFeedback } from "../../rest/dto/anomaly.interfaces";
 import { useGetEnumerationItem } from "../../rest/enumeration-items/enumeration-items.actions";
@@ -51,6 +54,7 @@ export const AnomaliesViewContainerPage: FunctionComponent = () => {
         status: getInvestigationsRequestStatus,
     } = useGetInvestigations();
     const { alertInsight, getAlertInsight } = useGetAlertInsight();
+    const { alert, getAlert } = useGetAlert();
     const [currentAnomaly, setCurrentAnomaly] = useState<Anomaly>();
     const { notify } = useNotificationProviderV1();
     const { t } = useTranslation();
@@ -58,6 +62,10 @@ export const AnomaliesViewContainerPage: FunctionComponent = () => {
     useEffect(() => {
         !!fetchedAnomaly &&
             getAlertInsight({ alertId: fetchedAnomaly.alert.id });
+    }, [fetchedAnomaly]);
+
+    useEffect(() => {
+        !!fetchedAnomaly && getAlert(fetchedAnomaly.alert.id);
     }, [fetchedAnomaly]);
 
     useEffect(() => {
@@ -155,6 +163,7 @@ export const AnomaliesViewContainerPage: FunctionComponent = () => {
                     alertInsight,
                     getInvestigationsRequestStatus,
                     investigations,
+                    alert,
                 }}
             />
         </LoadingErrorStateSwitch>

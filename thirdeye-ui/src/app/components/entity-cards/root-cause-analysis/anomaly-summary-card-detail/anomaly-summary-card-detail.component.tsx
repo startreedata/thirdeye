@@ -20,10 +20,18 @@ export const AnomalySummaryCardDetail: FunctionComponent<AnomalySummaryCardDetai
     ({ label, value, valueClassName }) => {
         return (
             <>
-                <Typography className={valueClassName} variant="subtitle1">
+                <Typography
+                    className={valueClassName}
+                    data-testId="value"
+                    variant="subtitle1"
+                >
                     {value}
                 </Typography>
-                <Typography color="textSecondary" variant="body2">
+                <Typography
+                    color="textSecondary"
+                    data-testId="label"
+                    variant="body2"
+                >
                     {label}
                 </Typography>
             </>

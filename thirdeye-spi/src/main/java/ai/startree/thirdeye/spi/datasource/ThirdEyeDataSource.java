@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.spi.datasource;
 
+import ai.startree.thirdeye.spi.api.DemoDatasetApi;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
@@ -86,5 +87,20 @@ public interface ThirdEyeDataSource {
 
   default SqlExpressionBuilder getSqlExpressionBuilder() {
     return null;
+  }
+
+  /**
+   * Return a list of demo dataset that can be created in the DBMS of this datasource.
+   */
+  default List<DemoDatasetApi> availableDemoDatasets() {
+    return List.of();
+  }
+
+  /**
+   * Create the input demo dataset. 
+   * Returns the dataset name that can then be consumed by {@link ThirdEyeDataSource#getDataset}   
+   */
+  default String createDemoDataset(final String identifier) {
+    throw new UnsupportedOperationException("Creating demo dataset is not supported");
   }
 }

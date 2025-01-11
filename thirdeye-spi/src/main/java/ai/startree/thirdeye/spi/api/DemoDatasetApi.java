@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.spi.api;
 
-public class DemoDatasetApi {
+public class DemoDatasetApi implements ThirdEyeApi {
 
   /**
    * Should be unique per ThirdEyeDataSource implementation.

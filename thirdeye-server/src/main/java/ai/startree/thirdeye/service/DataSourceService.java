@@ -28,6 +28,8 @@ import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
 import ai.startree.thirdeye.spi.api.DatasetApi;
+import ai.startree.thirdeye.spi.api.DemoDatasetApi;
+import ai.startree.thirdeye.spi.api.ThirdEyeApi;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
@@ -42,6 +44,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Singleton
@@ -188,5 +191,16 @@ public class DataSourceService extends CrudService<DataSourceApi, DataSourceDTO>
     authorizationManager.ensureCanRead(principal, sampleDataset);
 
     return authorizationManager.generateDatasourceConnection(principal);
+  }
+
+  public List<DemoDatasetApi> getAvailableDemoDatasets(final ThirdEyeServerPrincipal principal,
+      final @NonNull Long dataSourceId) {
+    // TO IMPLEMENT
+    throw new UnsupportedOperationException();
+  }
+
+  public ThirdEyeApi createDemoDataset(final ThirdEyeServerPrincipal principal,
+      final @NonNull Long dataSourceId, final @NonNull String demoDatasetId) {
+    return null;
   }
 }

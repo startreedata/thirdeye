@@ -17,6 +17,7 @@ import static ai.startree.thirdeye.spi.Constants.DEFAULT_CHRONOLOGY;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
+import ai.startree.thirdeye.plugins.datasource.pinot.DemoConfigs.DemoDatasetConfig;
 import ai.startree.thirdeye.plugins.datasource.pinot.restclient.PinotControllerRestClient;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
@@ -37,6 +38,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.spi.data.DateTimeFieldSpec;
 import org.apache.pinot.spi.data.MetricFieldSpec;
 import org.apache.pinot.spi.data.Schema;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -122,10 +124,7 @@ public class PinotDatasetReader {
     pinotControllerRestClient.close();
   }
 
-  /**
-   * Adds a new dataset to the thirdeye database
-   */
-  private DatasetConfigDTO toDatasetConfigDTO(final String dataset,
+  private static DatasetConfigDTO toDatasetConfigDTO(final String dataset,
       final Schema schema,
       final String timeColumnName,
       final Map<String, String> customConfigs,
@@ -186,5 +185,17 @@ public class PinotDatasetReader {
     }
 
     return metricConfigDTO;
+  }
+
+  public @NonNull String createDemoDataset(final DemoDatasetConfig demoDatasetConfig) throws IOException {
+    final String tableName = pinotControllerRestClient.postSchema(demoDatasetConfig.schema(), false, false);
+    final String tableNameWithType = pinotControllerRestClient.postTable(demoDatasetConfig.tableConfig());
+    pinotControllerRestClient.postIngestFromFile(
+        tableNameWithType,
+        demoDatasetConfig.batchConfigMapStr(),
+        demoDatasetConfig.s3SourceUri()
+    );
+    
+    return tableName;
   }
 }

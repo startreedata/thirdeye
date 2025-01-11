@@ -1,0 +1,4 @@
+{
+  "inputFormat":"csv",
+  "recordReader.prop.delimiter":","
+}

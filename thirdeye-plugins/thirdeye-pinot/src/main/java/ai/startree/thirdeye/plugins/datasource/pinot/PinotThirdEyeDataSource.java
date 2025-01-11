@@ -14,7 +14,9 @@
 package ai.startree.thirdeye.plugins.datasource.pinot;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static com.google.common.base.Preconditions.checkArgument;
 
+import ai.startree.thirdeye.plugins.datasource.pinot.DemoConfigs.DemoDatasetConfig;
 import ai.startree.thirdeye.plugins.datasource.pinot.resultset.ThirdEyeResultSet;
 import ai.startree.thirdeye.plugins.datasource.pinot.resultset.ThirdEyeResultSetGroup;
 import ai.startree.thirdeye.spi.Constants;
@@ -58,7 +60,6 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   public static final String HTTP_SCHEME = "http";
   public static final String HTTPS_SCHEME = "https";
   private static final Logger LOG = LoggerFactory.getLogger(PinotThirdEyeDataSource.class);
-  public static final String PINOT_DEMO_PAGEVIEWS = "pinot-demo-pageviews";
 
   private final String name;
   private final DataSourceDTO dataSourceDTO;
@@ -299,18 +300,17 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
 
   @Override
   public @NonNull List<DemoDatasetApi> availableDemoDatasets() {
-    return List.of(
-        new DemoDatasetApi()
-            .setId(PINOT_DEMO_PAGEVIEWS)
-            .setName("eCommerce Website Pageviews")
-            .setDescription("8 months of e-commerce data at daily granularity.")
-    );
+    return DemoConfigs.DEMO_DATASETS;
   }
 
   @Override
   public @NonNull String createDemoDataset(final @NonNull String identifier) {
-    // a map of schema, config will be used for simplicity
-    // TO IMPLEMENT
-    return null;
+    final DemoDatasetConfig config = DemoConfigs.DEMO_DATASET_CONFIGS.get(identifier);
+    checkArgument(config != null, "Invalid demo dataset identifier: %s", identifier);
+    try {
+      return datasetReader.createDemoDataset(config);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 }

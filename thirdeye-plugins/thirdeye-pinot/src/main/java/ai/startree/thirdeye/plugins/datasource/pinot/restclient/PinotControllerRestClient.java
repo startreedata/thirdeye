@@ -25,6 +25,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -35,10 +36,14 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.util.EntityUtils;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.pinot.spi.config.table.TableConfig;
 import org.apache.pinot.spi.data.Schema;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,12 +92,7 @@ public class PinotControllerRestClient {
           .map(GetTablesResponseApi::getTables)
           .orElse(Collections.emptyList());
     } finally {
-      if (tablesRes != null) {
-        if (tablesRes.getEntity() != null) {
-          EntityUtils.consume(tablesRes.getEntity());
-        }
-        tablesRes.close();
-      }
+      HttpUtils.safeClose(tablesRes);
     }
   }
 
@@ -100,22 +100,18 @@ public class PinotControllerRestClient {
    * Checks if /mytables endpoint is available
    * else falls back to /tables endpoint
    */
-  private String getPinotAllTablesEndpoint() throws IOException  {
+  private String getPinotAllTablesEndpoint() throws IOException {
     final HttpHead mytablesReq = new HttpHead(PINOT_MY_TABLES_ENDPOINT);
     CloseableHttpResponse mytablesRes = null;
     try {
-      mytablesRes = pinotControllerRestClientSupplier.get().execute(pinotControllerHost, mytablesReq);
+      mytablesRes = pinotControllerRestClientSupplier.get()
+          .execute(pinotControllerHost, mytablesReq);
       if (mytablesRes.getStatusLine().getStatusCode() != HttpStatus.SC_NOT_FOUND) {
         return PINOT_MY_TABLES_ENDPOINT;
       }
       return PINOT_TABLES_ENDPOINT;
     } finally {
-      if (mytablesRes != null) {
-        if (mytablesRes.getEntity() != null) {
-          EntityUtils.consume(mytablesRes.getEntity());
-        }
-        mytablesRes.close();
-      }
+      HttpUtils.safeClose(mytablesRes);
     }
   }
 
@@ -150,12 +146,7 @@ public class PinotControllerRestClient {
     } catch (final Exception e) {
       LOG.error("Exception in retrieving schema collections, skipping {}", dataset, e);
     } finally {
-      if (schemaRes != null) {
-        if (schemaRes.getEntity() != null) {
-          EntityUtils.consume(schemaRes.getEntity());
-        }
-        schemaRes.close();
-      }
+      HttpUtils.safeClose(schemaRes);
     }
     return schema;
   }
@@ -175,12 +166,7 @@ public class PinotControllerRestClient {
     } catch (final Exception e) {
       LOG.error("Exception in loading dataset {}", dataset, e);
     } finally {
-      if (response != null) {
-        if (response.getEntity() != null) {
-          EntityUtils.consume(response.getEntity());
-        }
-        response.close();
-      }
+      HttpUtils.safeClose(response);
     }
 
     JsonNode tableJson = null;
@@ -222,15 +208,85 @@ public class PinotControllerRestClient {
       LOG.error("Exception in updating table config of dataset {}", dataset, e);
       throw e;
     } finally {
-      if (response != null) {
-        if (response.getEntity() != null) {
-          EntityUtils.consume(response.getEntity());
-        }
-        response.close();
-      }
+      HttpUtils.safeClose(response);
     }
 
     return ;
+  }
+
+  // schema name should always be equal to table name without the type
+  public @NonNull String postSchema(final Schema schema, final boolean override,
+      final boolean force) throws IOException {
+    final HttpPost request = new HttpPost(
+        "/schemas?override=%s&force=%s".formatted(override, force));
+    request.setEntity(MultipartEntityBuilder.create()
+        .addTextBody("file", schema.toJsonObject().toString(), ContentType.DEFAULT_TEXT)
+        .build());
+
+    CloseableHttpResponse response = null;
+    try {
+      response = pinotControllerRestClientSupplier.get().execute(pinotControllerHost, request);
+      if (response.getStatusLine().getStatusCode() != 200) {
+        throw new RuntimeException("Failed to create %s schema : %s"
+            .formatted(schema.getSchemaName(), response.getStatusLine().toString()));
+      }
+    } catch (final Exception e) {
+      LOG.error("Exception in creating schema {}.", schema, e);
+      throw e;
+    } finally {
+      HttpUtils.safeClose(response);
+    }
+    return schema.getSchemaName();
+  }
+
+  // returns the table name with type. Eg pageviews_OFFLINE
+  public @NonNull String postTable(final TableConfig tableConfig) throws IOException {
+    final HttpPost request = new HttpPost("/tables");
+    request.setEntity(new StringEntity(tableConfig.toJsonString()));
+
+    CloseableHttpResponse response = null;
+    try {
+      response = pinotControllerRestClientSupplier.get().execute(pinotControllerHost, request);
+      if (response.getStatusLine().getStatusCode() != 200) {
+        throw new RuntimeException("Failed to create %s table : %s"
+            .formatted(tableConfig.getTableName(), response.getStatusLine().toString()));
+      }
+    } catch (final Exception e) {
+      LOG.error("Exception in creating table {}.", tableConfig, e);
+      throw e;
+    } finally {
+      HttpUtils.safeClose(response);
+    }
+    return tableConfig.getTableName();
+  }
+  
+  // note: this is slow because this is downloading the file before sending it to Pinot
+  // see discussion here https://startreedata.slack.com/archives/C019DPR16JW/p1736590160817849?thread_ts=1736537370.189139&cid=C019DPR16JW
+  // don't want to introduce a caching on disk strategy, I think the issue should be fixed on Pinot side
+  public void postIngestFromFile(final @NonNull String tableNameWithType,
+      final @NonNull String batchConfigMapStr, final @NonNull String sourceURIStr)
+      throws IOException {
+    final HttpPost request = new HttpPost(
+        "/ingestFromFile?tableNameWithType=%s&batchConfigMapStr=%s"
+            .formatted(tableNameWithType,
+                URLEncoder.encode(batchConfigMapStr, StandardCharsets.UTF_8)));
+    request.setEntity(MultipartEntityBuilder.create()
+            .addBinaryBody("file", URI.create(sourceURIStr).toURL().openStream())
+        .build());
+
+    CloseableHttpResponse response = null;
+    try {
+      response = pinotControllerRestClientSupplier.get().execute(pinotControllerHost, request);
+      if (response.getStatusLine().getStatusCode() != 200) {
+        throw new RuntimeException("Failed to load data to table %s : %s"
+            .formatted(tableNameWithType, response.getStatusLine().toString()));
+      }
+    } catch (final Exception e) {
+      LOG.error("Exception in loading data to table {}.", tableNameWithType, e);
+      throw e;
+    } finally {
+      HttpUtils.safeClose(response);
+    }
   }
 
   /**

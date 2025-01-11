@@ -19,6 +19,7 @@ import ai.startree.thirdeye.plugins.datasource.pinot.resultset.ThirdEyeResultSet
 import ai.startree.thirdeye.plugins.datasource.pinot.resultset.ThirdEyeResultSetGroup;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.ThirdEyeException;
+import ai.startree.thirdeye.spi.api.DemoDatasetApi;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datasource.DataSourceRequest;
@@ -46,6 +47,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.FileUtils;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -291,5 +293,21 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   @Override
   public SqlExpressionBuilder getSqlExpressionBuilder() {
     return sqlExpressionBuilder;
+  }
+
+
+  @Override
+  public @NonNull List<DemoDatasetApi> availableDemoDatasets() {
+    return List.of(
+        new DemoDatasetApi()
+            .setId("pinot-demo-pageviews")
+            .setName("eCommerce Website Pageviews")
+            .setDescription("8 months of e-commerce data at daily granularity.")
+    );
+  }
+
+  @Override
+  public @NonNull String createDemoDataset(final @NonNull String identifier) {
+    return ThirdEyeDataSource.super.createDemoDataset(identifier);
   }
 }

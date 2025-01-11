@@ -98,10 +98,9 @@ public interface ThirdEyeDataSource {
   }
 
   /**
-   * Create the input demo dataset. 
+   * Create the input demo dataset in the DBMS.
    * Returns the dataset name that can then be consumed by {@link ThirdEyeDataSource#getDataset}
-   * This method is expected to be synchronous. 
-   * We assume only small toy datasets are created with this method. 
+   * This method is expected to be blocking, synchronous. We assume only small toy datasets are created with this method. 
    */
   default @NonNull String createDemoDataset(final @NonNull String identifier) {
     throw new UnsupportedOperationException("Creating demo dataset is not supported");

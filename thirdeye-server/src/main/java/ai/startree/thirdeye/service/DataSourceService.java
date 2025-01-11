@@ -195,12 +195,25 @@ public class DataSourceService extends CrudService<DataSourceApi, DataSourceDTO>
 
   public List<DemoDatasetApi> getAvailableDemoDatasets(final ThirdEyeServerPrincipal principal,
       final @NonNull Long dataSourceId) {
-    // TO IMPLEMENT
-    throw new UnsupportedOperationException();
+    final DataSourceDTO dataSourceDto = dtoManager.findById(dataSourceId);
+    checkArgument(dataSourceDto != null, "Could not find datasource with id %s", dataSourceId);
+    authorizationManager.ensureNamespace(principal, dataSourceDto);
+    authorizationManager.ensureCanRead(principal, dataSourceDto);
+    final ThirdEyeDataSource dataSource = dataSourceCache.getDataSource(dataSourceDto);
+    return dataSource.availableDemoDatasets();
   }
 
   public ThirdEyeApi createDemoDataset(final ThirdEyeServerPrincipal principal,
       final @NonNull Long dataSourceId, final @NonNull String demoDatasetId) {
-    return null;
+    final DataSourceDTO dataSourceDto = dtoManager.findById(dataSourceId);
+    checkArgument(dataSourceDto != null, "Could not find datasource with id %s", dataSourceId);
+    authorizationManager.ensureNamespace(principal, dataSourceDto);
+    // assuming the right to create a datasource gives the right to create a dataset in pinot 
+    authorizationManager.ensureCanCreate(principal, dataSourceDto);
+    final ThirdEyeDataSource dataSource = dataSourceCache.getDataSource(dataSourceDto);
+    final String datasetName = dataSource.createDemoDataset(demoDatasetId);
+    final DatasetConfigDTO datasetConfigDTO = dataSourceOnboarder.onboardDataset(dataSourceDto,
+        datasetName);
+    return ApiBeanMapper.toApi(datasetConfigDTO);
   }
 }

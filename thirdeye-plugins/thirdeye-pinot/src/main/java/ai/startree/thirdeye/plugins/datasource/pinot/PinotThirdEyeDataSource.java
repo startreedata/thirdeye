@@ -58,6 +58,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   public static final String HTTP_SCHEME = "http";
   public static final String HTTPS_SCHEME = "https";
   private static final Logger LOG = LoggerFactory.getLogger(PinotThirdEyeDataSource.class);
+  public static final String PINOT_DEMO_PAGEVIEWS = "pinot-demo-pageviews";
 
   private final String name;
   private final DataSourceDTO dataSourceDTO;
@@ -300,7 +301,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   public @NonNull List<DemoDatasetApi> availableDemoDatasets() {
     return List.of(
         new DemoDatasetApi()
-            .setId("pinot-demo-pageviews")
+            .setId(PINOT_DEMO_PAGEVIEWS)
             .setName("eCommerce Website Pageviews")
             .setDescription("8 months of e-commerce data at daily granularity.")
     );
@@ -308,6 +309,8 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
 
   @Override
   public @NonNull String createDemoDataset(final @NonNull String identifier) {
-    return ThirdEyeDataSource.super.createDemoDataset(identifier);
+    // a map of schema, config will be used for simplicity
+    // TO IMPLEMENT
+    return null;
   }
 }

@@ -30,6 +30,7 @@ import static ai.startree.thirdeye.ThirdEyeTestClient.ALERT_LIST_TYPE;
 import static ai.startree.thirdeye.ThirdEyeTestClient.ALERT_TEMPLATE_LIST_TYPE;
 import static ai.startree.thirdeye.ThirdEyeTestClient.ANOMALIES_LIST_TYPE;
 import static ai.startree.thirdeye.ThirdEyeTestClient.DATASOURCE_LIST_TYPE;
+import static ai.startree.thirdeye.ThirdEyeTestClient.DEMO_DATASET_LIST_TYPE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.config.ThirdEyeServerConfiguration;
@@ -46,6 +47,8 @@ import ai.startree.thirdeye.spi.api.AnomalyLabelApi;
 import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
 import ai.startree.thirdeye.spi.api.CountApi;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
+import ai.startree.thirdeye.spi.api.DatasetApi;
+import ai.startree.thirdeye.spi.api.DemoDatasetApi;
 import ai.startree.thirdeye.spi.api.DetectionEvaluationApi;
 import ai.startree.thirdeye.spi.api.DimensionAnalysisResultApi;
 import ai.startree.thirdeye.spi.api.EmailSchemeApi;
@@ -162,6 +165,7 @@ public class HappyPathTest implements ITest {
   }
 
   private DataSourceApi pinotDataSourceApi;
+  private DemoDatasetApi demoDatasetApi;
   private DropwizardTestSupport<ThirdEyeServerConfiguration> SUPPORT;
   private Client client;
 
@@ -285,6 +289,32 @@ public class HappyPathTest implements ITest {
     final Response response = request("api/data-sources/onboard-dataset/").post(
         Entity.form(formData));
     assert200(response);
+  }
+
+  @Test(dependsOnMethods = "testCreateDataset")
+  public void testGetDemoDatasets() {
+    final Response response = request(
+        "api/data-sources/%s/demo-datasets/".formatted(pinotDataSourceApi.getId())).get();
+    assert200(response);
+    final List<DemoDatasetApi> demoDatasets = response.readEntity(DEMO_DATASET_LIST_TYPE);
+    for (final DemoDatasetApi demo : demoDatasets) {
+      assertThat(demo.getId()).isNotEmpty();
+      assertThat(demo.getDescription()).isNotEmpty();
+      assertThat(demo.getName()).isNotEmpty();
+    }
+    demoDatasetApi = demoDatasets.getFirst();
+  }
+
+  @Test(dependsOnMethods = "testGetDemoDatasets")
+  public void testCreateDemoDatasets() {
+    final MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
+    formData.add("demoDatasetId", String.valueOf(demoDatasetApi.getId()));
+    final Response response = request(
+        "api/data-sources/%s/demo-datasets/".formatted(pinotDataSourceApi.getId())).post(
+        Entity.form(formData));
+    assert200(response);
+    final DatasetApi dataset = response.readEntity(DatasetApi.class);
+    assertThat(dataset.getId()).isNotNull();
   }
 
   @Test(dependsOnMethods = "testCreateDataset", timeOut = 12000)

@@ -15,6 +15,7 @@ package ai.startree.thirdeye.service;
 
 import static ai.startree.thirdeye.ResourceUtils.badRequest;
 import static ai.startree.thirdeye.ResourceUtils.ensure;
+import static ai.startree.thirdeye.ResourceUtils.notFoundError;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DUPLICATE_NAME;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -196,7 +197,9 @@ public class DataSourceService extends CrudService<DataSourceApi, DataSourceDTO>
   public List<DemoDatasetApi> getAvailableDemoDatasets(final ThirdEyeServerPrincipal principal,
       final @NonNull Long dataSourceId) {
     final DataSourceDTO dataSourceDto = dtoManager.findById(dataSourceId);
-    checkArgument(dataSourceDto != null, "Could not find datasource with id %s", dataSourceId);
+    if (dataSourceDto == null) {
+      throw notFoundError(ThirdEyeStatus.ERR_DATASOURCE_NOT_FOUND, dataSourceId);
+    }
     authorizationManager.ensureNamespace(principal, dataSourceDto);
     authorizationManager.ensureCanRead(principal, dataSourceDto);
     final ThirdEyeDataSource dataSource = dataSourceCache.getDataSource(dataSourceDto);
@@ -206,7 +209,9 @@ public class DataSourceService extends CrudService<DataSourceApi, DataSourceDTO>
   public ThirdEyeApi createDemoDataset(final ThirdEyeServerPrincipal principal,
       final @NonNull Long dataSourceId, final @NonNull String demoDatasetId) {
     final DataSourceDTO dataSourceDto = dtoManager.findById(dataSourceId);
-    checkArgument(dataSourceDto != null, "Could not find datasource with id %s", dataSourceId);
+    if (dataSourceDto == null) {
+      throw notFoundError(ThirdEyeStatus.ERR_DATASOURCE_NOT_FOUND, dataSourceId);
+    }
     authorizationManager.ensureNamespace(principal, dataSourceDto);
     // assuming the right to create a datasource gives the right to create a dataset in pinot 
     authorizationManager.ensureCanCreate(principal, dataSourceDto);

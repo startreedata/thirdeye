@@ -17,6 +17,8 @@ import static ai.startree.thirdeye.spi.Constants.VANILLA_OBJECT_MAPPER;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 
 import ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSourceConfig;
+import ai.startree.thirdeye.spi.ThirdEyeException;
+import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -227,8 +229,18 @@ public class PinotControllerRestClient {
     try {
       response = pinotControllerRestClientSupplier.get().execute(pinotControllerHost, request);
       if (response.getStatusLine().getStatusCode() != 200) {
-        throw new RuntimeException("Failed to create %s schema : %s"
-            .formatted(schema.getSchemaName(), response.getStatusLine().toString()));
+        switch (response.getStatusLine().getStatusCode()) {
+          case 409:
+            throw new ThirdEyeException(
+                ThirdEyeStatus.ERR_DATASOURCE_DEMO_TABLE_CREATION_CONFLICT_ERROR,
+                schema.getSchemaName(),
+                "Failed to create %s schema in Pinot because of a conflict. Schema %s already exists?"
+                    .formatted(schema.getSchemaName(), schema.getSchemaName()));
+          default:
+            throw new ThirdEyeException(ThirdEyeStatus.ERR_DATASOURCE_DEMO_TABLE_CREATION_UNKNOWN_ERROR,
+                "Failed to create %s schema in Pinot: %s".formatted(schema.getSchemaName(),
+                    response.getStatusLine().toString()));
+        }
       }
     } catch (final Exception e) {
       LOG.error("Exception in creating schema {}.", schema, e);
@@ -248,8 +260,18 @@ public class PinotControllerRestClient {
     try {
       response = pinotControllerRestClientSupplier.get().execute(pinotControllerHost, request);
       if (response.getStatusLine().getStatusCode() != 200) {
-        throw new RuntimeException("Failed to create %s table : %s"
-            .formatted(tableConfig.getTableName(), response.getStatusLine().toString()));
+        switch (response.getStatusLine().getStatusCode()) {
+          case 409:
+            throw new ThirdEyeException(
+                ThirdEyeStatus.ERR_DATASOURCE_DEMO_TABLE_CREATION_CONFLICT_ERROR,
+                tableConfig.getTableName(),
+                "Failed to create %s table in Pinot because of a conflict. Table %s already exists?"
+                    .formatted(tableConfig.getTableName(), tableConfig.getTableName()));
+          default:
+            throw new ThirdEyeException(ThirdEyeStatus.ERR_DATASOURCE_DEMO_TABLE_CREATION_UNKNOWN_ERROR,
+                "Failed to create %s table in Pinot: %s".formatted(tableConfig.getTableName(),
+                    response.getStatusLine().toString()));
+        }
       }
     } catch (final Exception e) {
       LOG.error("Exception in creating table {}.", tableConfig, e);

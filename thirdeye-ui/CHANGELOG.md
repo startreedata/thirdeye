@@ -1,3 +1,17 @@
+## [2.59.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.58.0...thirdeye-ui-2.59.0) (2025-01-14)
+
+
+### Features
+
+* [TE-2610](https://cortexdata.atlassian.net/browse/TE-2610) show workspace switcher if workspace count is more than 0 ([e14ebf480](https://github.com/startreedata/thirdeye/commit/e14ebf48049922d3ff75b7c3e3289c09f08f9763))
+
+
+### Bug Fixes
+
+* [TE-2609](https://cortexdata.atlassian.net/browse/TE-2609) simple alert create subscription group fix ([1889dd769](https://github.com/startreedata/thirdeye/commit/1889dd7694faad8264fc2805fc4b7617496b23ae))
+* [TE-2617](https://cortexdata.atlassian.net/browse/TE-2617) fix evaluate API error in create alert flow on date range change ([d6fbe2dd1](https://github.com/startreedata/thirdeye/commit/d6fbe2dd1a844b6b1668f4a6cead641f47655a0f))
+* Add the final api assertion in create alert flow ([be823713e](https://github.com/startreedata/thirdeye/commit/be823713efa7ca31074af498280fe6ac1867d435))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

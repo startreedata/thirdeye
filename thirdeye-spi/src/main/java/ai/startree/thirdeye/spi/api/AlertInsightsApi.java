@@ -36,6 +36,12 @@ public class AlertInsightsApi {
    * safe value is put in the datasetEndTime field.
    */
   private Long suspiciousDatasetEndTime;
+
+  /**
+   * If the datasetStartTime fetched from the database looks incorrect, it is stored in this field. A
+   * safer value is put in the datasetStartTime field.
+   */
+  private Long suspiciousDatasetStartTime;
   /**
    * Recommended start time and end time to use in the UI time selector if no time
    * is set.
@@ -117,6 +123,15 @@ public class AlertInsightsApi {
   public AlertInsightsApi setDefaultCron(
       final String defaultCron) {
     this.defaultCron = defaultCron;
+    return this;
+  }
+
+  public Long getSuspiciousDatasetStartTime() {
+    return suspiciousDatasetStartTime;
+  }
+
+  public AlertInsightsApi setSuspiciousDatasetStartTime(final Long suspiciousDatasetStartTime) {
+    this.suspiciousDatasetStartTime = suspiciousDatasetStartTime;
     return this;
   }
 }

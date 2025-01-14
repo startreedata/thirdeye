@@ -108,6 +108,16 @@ public class PinotDatasetReader {
         dataSourceName);
   }
 
+  public void prepareDatasetForOnboarding(final String datasetName)
+      throws IOException {
+    final JsonNode tableConfigJson = pinotControllerRestClient
+        .getTableConfigFromPinotEndpoint(datasetName);
+    checkArgument(tableConfigJson != null && !tableConfigJson.isNull(),
+        "Onboarding Preparation Error: table config is null for pinot table: " + datasetName);
+
+    pinotControllerRestClient.updateTableMaxQPSQuota(datasetName, tableConfigJson);
+  }
+
   public void close() {
     pinotControllerRestClient.close();
   }

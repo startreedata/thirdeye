@@ -98,19 +98,17 @@ export const WorkspaceSwitcher = ({
                     value={selectedWorkspace.id || ""}
                     onClick={() => setOpen(!open)}
                 >
-                    {workspaces.length > 1 && (
-                        <ListItem>
-                            <TextField
-                                fullWidth
-                                placeholder="Search workspace"
-                                onChange={(e) => {
-                                    handleFilter(e.target.value);
-                                }}
-                                // prevent selecting search box
-                                onClick={(e) => e.stopPropagation()}
-                            />
-                        </ListItem>
-                    )}
+                    <ListItem>
+                        <TextField
+                            fullWidth
+                            placeholder="Search workspace"
+                            onChange={(e) => {
+                                handleFilter(e.target.value);
+                            }}
+                            // prevent selecting search box
+                            onClick={(e) => e.stopPropagation()}
+                        />
+                    </ListItem>
                     <div style={{ maxHeight: "400px", overflow: "auto" }}>
                         {filteredWorkspaces.map((workspace, index) => (
                             <MenuItem

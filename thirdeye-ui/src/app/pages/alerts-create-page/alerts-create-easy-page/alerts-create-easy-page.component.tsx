@@ -100,6 +100,7 @@ import { getAlertsAllPath } from "../../../utils/routes/routes.util";
 import { AlertCreatedGuidedPageOutletContext } from "../../alerts-create-guided-page/alerts-create-guided-page.interfaces";
 import { SETUP_DETAILS_TEST_IDS } from "../../alerts-create-guided-page/setup-details/setup-details-page.interface";
 import { easyAlertStyles } from "./alerts-create-easy-page.styles";
+import { generateInputFieldConfigsForAlertTemplate } from "../../../components/alert-wizard-v3/threshold-setup/threshold-setup.utils";
 
 const PROPERTIES_TO_COPY = [
     "dataSource",
@@ -644,7 +645,29 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
     ): void => {
         const copiedAlert = { ...alertConfigForPreview, ...(alert ?? {}) };
         delete copiedAlert.id;
-        getEvaluation(createAlertEvaluation(copiedAlert, start, end));
+        if (selectedAlertTemplate && algorithmOption) {
+            const requiredProperties =
+                generateInputFieldConfigsForAlertTemplate(
+                    selectedAlertTemplate
+                );
+            const requiredPropertiesName = requiredProperties.map(
+                (requiredProperty) => requiredProperty.templatePropertyName
+            );
+            const alertProperties = alert?.templateProperties;
+            if (alertProperties) {
+                if (
+                    requiredPropertiesName.every(
+                        (requiredProperty) => alertProperties[requiredProperty]
+                    )
+                ) {
+                    getEvaluation(
+                        createAlertEvaluation(copiedAlert, start, end)
+                    );
+                }
+            }
+        } else {
+            getEvaluation(createAlertEvaluation(copiedAlert, start, end));
+        }
     };
     // Update the preview config if selections change
     useEffect(() => {
@@ -897,7 +920,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
         onAlertPropertyChange(workingAlert);
     };
 
-    const NotificationView = (): JSX.Element => {
+    const notificationView = (): JSX.Element => {
         return (
             <Grid item xs={12}>
                 <PageContentsCardV1 className={classes.notificationContainer}>
@@ -1875,7 +1898,8 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                             ) => {
                                                                                                 fetchAlertEvaluation(
                                                                                                     newStart,
-                                                                                                    newEnd
+                                                                                                    newEnd,
+                                                                                                    alert
                                                                                                 );
                                                                                             }}
                                                                                         />
@@ -2102,7 +2126,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                 marginTop={2}
                                                                 width="100%"
                                                             >
-                                                                <NotificationView />
+                                                                {notificationView()}
                                                             </Box>
                                                         </Grid>
                                                     )}

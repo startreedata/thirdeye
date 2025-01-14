@@ -185,6 +185,8 @@ public class AlertInsightsProvider {
     final Interval safeInterval = new Interval(0L, maximumPossibleEndTime);
     final Future<@Nullable Long> safeMaxTimeFuture = minMaxTimeLoader.fetchMaxTimeAsync(
         dataSourceDTO, datasetConfigDTO, safeInterval);
+    final Future<@Nullable Long> safeMinTimeFuture = minMaxTimeLoader.fetchMinTimeAsync(
+        dataSourceDTO, datasetConfigDTO, safeInterval);
 
     // process futures
     // process startTime
@@ -195,7 +197,22 @@ public class AlertInsightsProvider {
               datasetConfigDTO.getDataset())));
       return;
     }
-    insights.setDatasetStartTime(datasetStartTime);
+    if (datasetStartTime > 0) {
+      insights.setDatasetStartTime(datasetStartTime);
+    } else {
+      LOG.warn(
+          "Dataset minTime is negative: {}. Most likely a data issue in the dataset. Rerunning query with a filter time >= 0 to get a safe minTime.",
+          datasetStartTime);
+      insights.setSuspiciousDatasetStartTime(datasetStartTime);
+      final @Nullable Long safeMinTime = safeMinTimeFuture.get(FETCH_TIMEOUT_MILLIS, MILLISECONDS);
+      if (safeMinTime == null) {
+        insights.setAnalysisRunInfo(AnalysisRunInfo.failure(String.format(
+            "Failed to fetch dataset safe start time. The time configuration of the table %s may be incorrect.",
+            datasetConfigDTO.getDataset())));
+      } else {
+        insights.setDatasetStartTime(safeMinTime);
+      }
+    }
 
     // process endTime
     final @Nullable Long datasetMaxTime = maxTimeFuture.get(FETCH_TIMEOUT_MILLIS, MILLISECONDS);

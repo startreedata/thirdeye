@@ -24,7 +24,6 @@ import ai.startree.thirdeye.spi.api.DataSourceApi;
 import com.google.inject.Injector;
 import io.dropwizard.testing.DropwizardTestSupport;
 import jakarta.ws.rs.client.Client;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import org.apache.pinot.testcontainer.PinotContainer.PinotVersion;
 import org.slf4j.Logger;
@@ -76,7 +75,7 @@ public class ThirdEyeIntegrationTestSupport {
   }
 
   public DataSourceApi getPinotDataSourceApi()
-      throws ExecutionException, InterruptedException {
+      throws Exception {
     return pinotDataSourceFuture.get();
   }
 

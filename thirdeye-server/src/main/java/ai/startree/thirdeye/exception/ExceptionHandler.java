@@ -18,7 +18,6 @@ import static ai.startree.thirdeye.ResourceUtils.statusApi;
 import static ai.startree.thirdeye.ResourceUtils.statusListApi;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_ALERT_PIPELINE_EXECUTION;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_EXECUTION_RCA_ALGORITHM;
-import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_TIMEOUT;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_UNKNOWN;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_UNKNOWN_RCA_ALGORITHM;
 import static java.util.Objects.requireNonNull;
@@ -32,7 +31,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -43,7 +41,6 @@ public class ExceptionHandler {
 
   // do not use Map.of. Order is important. ImmutableMap conserves order
   private static final Map<Class<?>, Function<Throwable, StatusApi>> ALERT_HANDLERS = ImmutableMap.<Class<?>, Function<Throwable, StatusApi>>builder()
-      .put(TimeoutException.class, e -> statusApi(ERR_TIMEOUT))
       .put(ExecutionException.class,
           e -> statusApi(ERR_ALERT_PIPELINE_EXECUTION, e.getCause().getMessage()))
       .put(ThirdEyeException.class,
@@ -56,7 +53,6 @@ public class ExceptionHandler {
       .build();
 
   private static final Map<Class<?>, Function<Throwable, StatusApi>> RCA_HANDLERS = ImmutableMap.<Class<?>, Function<Throwable, StatusApi>>builder()
-      .put(TimeoutException.class, e -> statusApi(ERR_TIMEOUT))
       .put(ExecutionException.class,
           e -> {
             Throwable cause = e.getCause();

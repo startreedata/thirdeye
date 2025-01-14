@@ -65,7 +65,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.quartz.CronExpression;
@@ -263,7 +262,7 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
   public AlertEvaluationApi evaluate(
       final ThirdEyeServerPrincipal principal,
       final AlertEvaluationApi request
-  ) throws ExecutionException {
+  ) throws Exception {
     final long safeEndTime = safeEndTime(request.getEnd().getTime());
     request.setEnd(new Date(safeEndTime));
 

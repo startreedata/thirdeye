@@ -48,7 +48,6 @@ import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -155,7 +154,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   public Response evaluate(
       @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
       @Schema(example = EVALUATE_SWAGGER_EXAMPLE) final AlertEvaluationApi request
-  ) throws ExecutionException {
+  ) throws Exception {
     ensureExists(request.getStart(), "start");
     ensureExists(request.getEnd(), "end");
     ensureExists(request.getAlert(), "alert");

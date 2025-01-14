@@ -14,11 +14,14 @@
 package ai.startree.thirdeye.plugins.datasource.pinot;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static com.google.common.base.Preconditions.checkArgument;
 
+import ai.startree.thirdeye.plugins.datasource.pinot.DemoConfigs.DemoDatasetConfig;
 import ai.startree.thirdeye.plugins.datasource.pinot.resultset.ThirdEyeResultSet;
 import ai.startree.thirdeye.plugins.datasource.pinot.resultset.ThirdEyeResultSetGroup;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.ThirdEyeException;
+import ai.startree.thirdeye.spi.api.DemoDatasetApi;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datasource.DataSourceRequest;
@@ -46,6 +49,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.FileUtils;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -291,5 +295,22 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   @Override
   public SqlExpressionBuilder getSqlExpressionBuilder() {
     return sqlExpressionBuilder;
+  }
+
+
+  @Override
+  public @NonNull List<DemoDatasetApi> availableDemoDatasets() {
+    return DemoConfigs.DEMO_DATASETS;
+  }
+
+  @Override
+  public @NonNull String createDemoDataset(final @NonNull String identifier) {
+    final DemoDatasetConfig config = DemoConfigs.DEMO_DATASET_CONFIGS.get(identifier);
+    checkArgument(config != null, "Invalid demo dataset identifier: %s", identifier);
+    try {
+      return datasetReader.createDemoDataset(config);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 }

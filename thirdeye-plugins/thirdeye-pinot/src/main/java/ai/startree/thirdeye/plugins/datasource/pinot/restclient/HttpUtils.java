@@ -11,19 +11,20 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye;
+package ai.startree.thirdeye.plugins.datasource.pinot.restclient;
 
-public class DataProviderException extends RuntimeException {
+import java.io.IOException;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.util.EntityUtils;
 
-  public DataProviderException() {
-    super();
-  }
-
-  public DataProviderException(final String msg, final Exception e) {
-    super(msg, e);
-  }
-
-  public DataProviderException(final Throwable e) {
-    super(e);
+public class HttpUtils {
+  
+  public static void safeClose(final CloseableHttpResponse response) throws IOException {
+    if (response != null) {
+      if (response.getEntity() != null) {
+        EntityUtils.consume(response.getEntity());
+      }
+      response.close();
+    }
   }
 }

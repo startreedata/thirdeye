@@ -20,6 +20,7 @@ import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
+import ai.startree.thirdeye.spi.api.DemoDatasetApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import ai.startree.thirdeye.spi.api.TaskApi;
 import ai.startree.thirdeye.spi.task.TaskStatus;
@@ -36,6 +37,7 @@ public class ThirdEyeTestClient {
   public static final GenericType<List<AlertTemplateApi>> ALERT_TEMPLATE_LIST_TYPE = new GenericType<>() {};
   public static final GenericType<List<DataSourceApi>> DATASOURCE_LIST_TYPE = new GenericType<>() {};
   public static final GenericType<List<SubscriptionGroupApi>> SUBSCRIPTION_GROUP_LIST_TYPE = new GenericType<>() {};
+  public static final GenericType<List<DemoDatasetApi>> DEMO_DATASET_LIST_TYPE = new GenericType<>() {};
   public static final GenericType<List<TaskApi>> TASK_LIST_TYPE = new GenericType<>() {};
   private final Client client;
   private final int port;

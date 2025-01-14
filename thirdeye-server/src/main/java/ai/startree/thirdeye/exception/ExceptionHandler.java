@@ -11,20 +11,18 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.core;
+package ai.startree.thirdeye.exception;
 
 import static ai.startree.thirdeye.ResourceUtils.serverError;
 import static ai.startree.thirdeye.ResourceUtils.statusApi;
 import static ai.startree.thirdeye.ResourceUtils.statusListApi;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_ALERT_PIPELINE_EXECUTION;
-import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DATA_UNAVAILABLE;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_EXECUTION_RCA_ALGORITHM;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_TIMEOUT;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_UNKNOWN;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_UNKNOWN_RCA_ALGORITHM;
 import static java.util.Objects.requireNonNull;
 
-import ai.startree.thirdeye.DataProviderException;
 import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.api.ExceptionApi;
 import ai.startree.thirdeye.spi.api.StackTraceElementApi;
@@ -40,12 +38,12 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Deprecated // rely on ThirdEyeExceptionMapper instead. TODO CYRIL write the necessary ExceptionMappers and get rid of this class
 public class ExceptionHandler {
 
   // do not use Map.of. Order is important. ImmutableMap conserves order
   private static final Map<Class<?>, Function<Throwable, StatusApi>> ALERT_HANDLERS = ImmutableMap.<Class<?>, Function<Throwable, StatusApi>>builder()
       .put(TimeoutException.class, e -> statusApi(ERR_TIMEOUT))
-      .put(DataProviderException.class, e -> statusApi(ERR_DATA_UNAVAILABLE, e.getMessage()))
       .put(ExecutionException.class,
           e -> statusApi(ERR_ALERT_PIPELINE_EXECUTION, e.getCause().getMessage()))
       .put(ThirdEyeException.class,

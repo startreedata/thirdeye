@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye.json;
+package ai.startree.thirdeye.exception;
 
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_INVALID_JSON_FORMAT;
 

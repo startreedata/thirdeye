@@ -21,33 +21,42 @@ import ai.startree.thirdeye.spi.api.StatusListApi;
 import io.dropwizard.jersey.errors.LoggingExceptionMapper;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 @Provider
-public class ThrowableExceptionMapper extends LoggingExceptionMapper<Throwable> {
+public class GenericExceptionMapper<E extends Throwable> extends LoggingExceptionMapper<E> implements
+    ExceptionMapper<E> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(ThrowableExceptionMapper.class);
+  private final Class<E> clazz;
+  private final ThirdEyeStatus status;
+  private final Logger logger;
 
-  public ThrowableExceptionMapper() {
+  public GenericExceptionMapper(final Class<E> clazz, final ThirdEyeStatus status) {
+    this.clazz = clazz;
+    this.status = status;
+    this.logger = LoggerFactory.getLogger(GenericExceptionMapper.class.toString() + "." + clazz.getSimpleName());
   }
 
   @Override
-  public Response toResponse(final Throwable exception) {
-    LOGGER.debug(
-        "Request failed because of an unknown Throwable. Returning error code {}", ThirdEyeStatus.ERR_UNKNOWN.getRecommendedStatusCode());
+  public Response toResponse(final E exception) {
+    logger.debug(
+        "Request failed because of a {}. Returning error code {}",
+        clazz.getSimpleName(),
+        status.getRecommendedStatusCode());
     final StatusApi statusApi = new StatusApi()
-        .setCode(ThirdEyeStatus.ERR_UNKNOWN)
+        .setCode(status)
         .setMsg(exception.getMessage())
         // TODO cyril put this behind a boolean - in some environments we should not return this
         .setException(toExceptionApi(exception));
-    final StatusListApi status = new StatusListApi().setList(List.of(statusApi));
-    return Response.status(ThirdEyeStatus.ERR_UNKNOWN.getRecommendedStatusCode())
+    final StatusListApi statusList = new StatusListApi().setList(List.of(statusApi));
+    return Response.status(status.getRecommendedStatusCode())
         .type(MediaType.APPLICATION_JSON_TYPE)
-        .entity(status)
+        .entity(statusList)
         .build();
   }
+  
 }

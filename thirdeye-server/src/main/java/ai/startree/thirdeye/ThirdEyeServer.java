@@ -27,6 +27,8 @@ import ai.startree.thirdeye.datalayer.DataSourceBuilder;
 import ai.startree.thirdeye.detectionpipeline.PlanExecutor;
 import ai.startree.thirdeye.exception.ThirdEyeExceptionMapper;
 import ai.startree.thirdeye.exception.ThirdEyeJsonProcessingExceptionMapper;
+import ai.startree.thirdeye.exception.ThrowableExceptionMapper;
+import ai.startree.thirdeye.exception.TimeoutExceptionMapper;
 import ai.startree.thirdeye.healthcheck.DatabaseHealthCheck;
 import ai.startree.thirdeye.resources.root.RootResource;
 import ai.startree.thirdeye.scheduler.SchedulerService;
@@ -152,6 +154,8 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
     registerResources(env.jersey());
     env.jersey().register(new ThirdEyeJsonProcessingExceptionMapper());
     env.jersey().register(new ThirdEyeExceptionMapper());
+    env.jersey().register(new TimeoutExceptionMapper());
+    env.jersey().register(new ThrowableExceptionMapper());
 
     // Persistence layer connectivity health check registry
     env.healthChecks().register("database", injector.getInstance(DatabaseHealthCheck.class));

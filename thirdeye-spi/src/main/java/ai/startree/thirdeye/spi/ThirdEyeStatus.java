@@ -17,6 +17,7 @@ public enum ThirdEyeStatus {
 
   ERR_UNAUTHENTICATED(401,"User authentication failed!"),
   ERR_ALERT_PIPELINE_EXECUTION(null,"Pipeline Failed! Error: %s"),
+  ERR_ALERT_INSIGHTS(500,"Failed to get insights from alert configuration. Error: %s"),
   ERR_AUTH_SERVER_NOT_RESPONDING(500,"Auth server is not responding. Auth Server URL : %s"),
   ERR_CONFIG(null,"Configuration Error! %s"),
   ERR_CRON_INVALID(null,"Failed to parse cron expression: %s"),

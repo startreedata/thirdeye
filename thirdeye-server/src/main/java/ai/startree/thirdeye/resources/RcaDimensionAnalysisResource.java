@@ -13,8 +13,6 @@
  */
 package ai.startree.thirdeye.resources;
 
-import static ai.startree.thirdeye.exception.ExceptionHandler.handleRcaAlgorithmException;
-
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.service.RcaDimensionAnalysisService;
 import ai.startree.thirdeye.spi.Constants;
@@ -34,7 +32,6 @@ import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -92,9 +89,8 @@ public class RcaDimensionAnalysisResource {
               + "An example of a hierarchical group is {continent, country}. "
               + "Parameter format is [[\"continent\",\"country\"], [\"dim1\", \"dim2\", \"dim3\"]]")
       @QueryParam("hierarchies") @DefaultValue(DEFAULT_HIERARCHIES) String hierarchiesPayload
-  ) {
-    try {
-      return Response.ok(rcaDimensionAnalysisService.dataCubeSummary(
+  ) throws Exception {
+    return Response.ok(rcaDimensionAnalysisService.dataCubeSummary(
           principal,
           anomalyId,
           baselineOffset,
@@ -105,11 +101,5 @@ public class RcaDimensionAnalysisResource {
           dimensions,
           excludedDimensions,
           hierarchiesPayload)).build();
-    } catch (final WebApplicationException e) {
-      throw e;
-    } catch (final Exception e) {
-      handleRcaAlgorithmException(e);
-    }
-    return null;
   }
 }

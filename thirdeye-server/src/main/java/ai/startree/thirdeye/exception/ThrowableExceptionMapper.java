@@ -23,29 +23,29 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Provider;
 import java.util.List;
-import java.util.concurrent.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 @Provider
-public class TimeoutExceptionMapper extends LoggingExceptionMapper<TimeoutException> {
+public class ThrowableExceptionMapper extends LoggingExceptionMapper<Throwable> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(TimeoutExceptionMapper.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(ThrowableExceptionMapper.class);
 
-  public TimeoutExceptionMapper() {
+  public ThrowableExceptionMapper() {
   }
 
   @Override
-  public Response toResponse(final TimeoutException exception) {
+  public Response toResponse(final Throwable exception) {
     LOGGER.debug(
-        "Request failed because of a TimeoutException. Returning error code {}", ThirdEyeStatus.ERR_TIMEOUT.getRecommendedStatusCode());
+        "Request failed because of an unknown Throwable. Returning error code {}", ThirdEyeStatus.ERR_UNKNOWN.getRecommendedStatusCode());
     final StatusApi statusApi = new StatusApi()
-        .setCode(ThirdEyeStatus.ERR_TIMEOUT)
+        .setCode(ThirdEyeStatus.ERR_UNKNOWN)
         .setMsg(exception.getMessage())
         // TODO cyril put this behind a boolean - in some environments we should not return this
         .setException(toExceptionApi(exception));
     final StatusListApi status = new StatusListApi().setList(List.of(statusApi));
-    return Response.status(ThirdEyeStatus.ERR_TIMEOUT.getRecommendedStatusCode())
+    return Response.status(ThirdEyeStatus.ERR_UNKNOWN.getRecommendedStatusCode())
         .type(MediaType.APPLICATION_JSON_TYPE)
         .entity(status)
         .build();

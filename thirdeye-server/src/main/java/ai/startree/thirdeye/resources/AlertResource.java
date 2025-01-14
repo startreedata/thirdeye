@@ -114,7 +114,7 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   @Produces(MediaType.APPLICATION_JSON)
   public Response getInsights(
       @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
-      final AlertInsightsRequestApi request) throws Throwable {
+      final AlertInsightsRequestApi request) {
     final AlertApi alert = request.getAlert();
     ensureExists(alert);
     return Response.ok(alertService.getInsights(principal, request)).build();

@@ -21,31 +21,32 @@ import ai.startree.thirdeye.spi.api.StatusListApi;
 import io.dropwizard.jersey.errors.LoggingExceptionMapper;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This mapper has lesser priority than all others.
+ * Most Exceptions thrown implemented in this code base should be wrapped inside a ThirdEyeException
+ * and will benefit from the ThirdEyeExceptionMapper
+ * Complete this class only for exceptions that are hard to wrap with a ThirdEyeException.
+ */
 @Provider
-public class GenericExceptionMapper<E extends Throwable> extends LoggingExceptionMapper<E> implements
-    ExceptionMapper<E> {
+public class GenericExceptionMapper extends LoggingExceptionMapper<Throwable> {
 
-  private final Class<E> clazz;
-  private final ThirdEyeStatus status;
-  private final Logger logger;
+  private static final Logger LOG = LoggerFactory.getLogger(GenericExceptionMapper.class);
 
-  public GenericExceptionMapper(final Class<E> clazz, final ThirdEyeStatus status) {
-    this.clazz = clazz;
-    this.status = status;
-    this.logger = LoggerFactory.getLogger(GenericExceptionMapper.class.toString() + "." + clazz.getSimpleName());
+  public GenericExceptionMapper() {
   }
 
   @Override
-  public Response toResponse(final E exception) {
-    logger.debug(
+  public Response toResponse(final Throwable exception) {
+    final ThirdEyeStatus status = statusFor(exception);
+    LOG.debug(
         "Request failed because of a {}. Returning error code {}",
-        clazz.getSimpleName(),
+        exception.getClass().getSimpleName(),
         status.getRecommendedStatusCode());
     final StatusApi statusApi = new StatusApi()
         .setCode(status)
@@ -58,5 +59,12 @@ public class GenericExceptionMapper<E extends Throwable> extends LoggingExceptio
         .entity(statusList)
         .build();
   }
-  
+
+  private static ThirdEyeStatus statusFor(final Throwable exception) {
+    if (exception instanceof TimeoutException) {
+      return ThirdEyeStatus.ERR_TIMEOUT;
+    } else {
+      return ThirdEyeStatus.ERR_UNKNOWN;
+    }
+  }
 }

@@ -34,7 +34,6 @@ import ai.startree.thirdeye.scheduler.SchedulerService;
 import ai.startree.thirdeye.scheduler.events.MockEventsLoader;
 import ai.startree.thirdeye.service.ResourcesBootstrapService;
 import ai.startree.thirdeye.spi.Constants;
-import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.datalayer.bao.AbstractManager;
 import ai.startree.thirdeye.worker.task.TaskDriver;
 import ch.qos.logback.classic.Level;
@@ -80,7 +79,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.TimeoutException;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
@@ -155,8 +153,7 @@ public class ThirdEyeServer extends Application<ThirdEyeServerConfiguration> {
     registerResources(env.jersey());
     env.jersey().register(new ThirdEyeJsonProcessingExceptionMapper());
     env.jersey().register(new ThirdEyeExceptionMapper());
-    env.jersey().register(new GenericExceptionMapper<>(TimeoutException.class, ThirdEyeStatus.ERR_TIMEOUT));
-    env.jersey().register(new GenericExceptionMapper<>(Throwable.class, ThirdEyeStatus.ERR_UNKNOWN));
+    env.jersey().register(new GenericExceptionMapper());
 
     // Persistence layer connectivity health check registry
     env.healthChecks().register("database", injector.getInstance(DatabaseHealthCheck.class));

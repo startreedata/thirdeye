@@ -48,7 +48,6 @@ import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.List;
-import java.util.concurrent.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -142,13 +141,11 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
   // can be moved to CrudResource if /validate is needed for other entities.
   public Response validateMultiple(
       @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
-      final List<AlertApi> list) throws TimeoutException {
-    throw new TimeoutException("a timeout happened");
-    
-    //ensureExists(list, "Invalid request");
+      final List<AlertApi> list) {
+    ensureExists(list, "Invalid request");
 
-    //alertService.validateMultiple(principal, list);
-    //return Response.ok().build();
+    alertService.validateMultiple(principal, list);
+    return Response.ok().build();
   }
 
   @Path("evaluate")

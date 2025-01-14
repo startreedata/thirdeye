@@ -241,7 +241,7 @@ public class PinotControllerRestClient {
 
   // returns the table name with type. Eg pageviews_OFFLINE
   public @NonNull String postTable(final TableConfig tableConfig) throws IOException {
-    final HttpPost request = new HttpPost("/tables");
+    final HttpPost request = new HttpPost(PINOT_TABLES_ENDPOINT);
     request.setEntity(new StringEntity(tableConfig.toJsonString()));
 
     CloseableHttpResponse response = null;

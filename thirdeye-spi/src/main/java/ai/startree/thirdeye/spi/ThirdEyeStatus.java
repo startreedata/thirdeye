@@ -15,9 +15,10 @@ package ai.startree.thirdeye.spi;
 
 public enum ThirdEyeStatus {
 
-  ERR_UNAUTHENTICATED(null,"User authentication failed!"),
+  ERR_UNAUTHENTICATED(401,"User authentication failed!"),
   ERR_ALERT_PIPELINE_EXECUTION(null,"Pipeline Failed! Error: %s"),
-  ERR_AUTH_SERVER_NOT_RESPONDING(null,"Auth server is not responding. Auth Server URL : %s"),
+  ERR_ALERT_INSIGHTS(500,"Failed to get insights from alert configuration. Error: %s"),
+  ERR_AUTH_SERVER_NOT_RESPONDING(500,"Auth server is not responding. Auth Server URL : %s"),
   ERR_CONFIG(null,"Configuration Error! %s"),
   ERR_CRON_INVALID(null,"Failed to parse cron expression: %s"),
   ERR_CRON_FREQUENCY_TOO_HIGH(
@@ -53,8 +54,8 @@ public enum ThirdEyeStatus {
   ERR_OPERATION_UNSUPPORTED(null,"Operation not supported. %s"),
   ERR_TEMPLATE_MISSING_PROPERTY(
       null,"Failed to apply templateProperties to template. Missing property: %s"),
-  ERR_TIMEOUT(null,"Operation timed out!"),
-  ERR_UNEXPECTED_QUERY_PARAM(null,"Unexpected Query Param. Allowed values: %s"),
+  ERR_TIMEOUT(500,"Operation timed out."),
+  ERR_UNEXPECTED_QUERY_PARAM(400,"Unexpected Query Param. Allowed values: %s"),
   ERR_UNKNOWN(500, "%s"),
   ERR_EXECUTION_RCA_ALGORITHM(null,"RCA Algorithm Execution Failed. Error: %s"),
   ERR_UNKNOWN_RCA_ALGORITHM(null,"Unknown error running the rca algorithm: %s"),

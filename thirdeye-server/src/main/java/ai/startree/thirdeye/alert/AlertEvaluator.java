@@ -15,7 +15,6 @@ package ai.startree.thirdeye.alert;
 
 import static ai.startree.thirdeye.ResourceUtils.ensure;
 import static ai.startree.thirdeye.alert.AlertEvaluatorResponseMapper.toAlertEvaluationApi;
-import static ai.startree.thirdeye.exception.ExceptionHandler.handleAlertEvaluationException;
 import static ai.startree.thirdeye.mapper.ApiBeanMapper.toAlertTemplateApi;
 import static ai.startree.thirdeye.spi.util.SpiUtils.bool;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
@@ -35,10 +34,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import jakarta.ws.rs.WebApplicationException;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -82,20 +79,7 @@ public class AlertEvaluator {
 
   // does not resolve namespace - assumes namespace is set in the request by the consumer 
   @VisibleForTesting
-  public AlertEvaluationApi evaluate(final AlertEvaluationApi request)
-      throws ExecutionException {
-    try {
-      return evaluate0(request);
-    } catch (final WebApplicationException e) {
-      throw e;
-    } catch (final Exception e) {
-      handleAlertEvaluationException(e);
-    }
-    return null;
-  }
-
-  private AlertEvaluationApi evaluate0(final AlertEvaluationApi request)
-      throws Exception {
+  public AlertEvaluationApi evaluate(final AlertEvaluationApi request) throws Exception {
     final long startTime = request.getStart().getTime();
     final long endTime = request.getEnd().getTime();
     final String namespace = optional(request.getAlert().getAuth()).map(

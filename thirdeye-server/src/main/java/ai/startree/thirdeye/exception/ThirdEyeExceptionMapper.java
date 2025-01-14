@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.exception;
 
-import static ai.startree.thirdeye.exception.ExceptionHandler.toExceptionApi;
+import static ai.startree.thirdeye.exception.ExceptionUtils.toExceptionApi;
 
 import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.api.StatusApi;

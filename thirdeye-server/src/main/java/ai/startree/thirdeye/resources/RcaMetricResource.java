@@ -14,7 +14,6 @@
 package ai.startree.thirdeye.resources;
 
 import static ai.startree.thirdeye.ResourceUtils.respondOk;
-import static ai.startree.thirdeye.exception.ExceptionHandler.handleRcaAlgorithmException;
 
 import ai.startree.thirdeye.auth.ThirdEyeServerPrincipal;
 import ai.startree.thirdeye.service.RcaMetricService;
@@ -35,7 +34,6 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -93,26 +91,19 @@ public class RcaMetricResource {
 
       @Parameter(description = "limit results to the top k elements, plus 'OTHER' rollup element")
       @QueryParam("limit") Integer limit
-  ) {
-    try {
-      if (limit == null) {
-        limit = LIMIT_DEFAULT;
-      }
-      final HeatMapResponseApi resultApi = rcaMetricService.computeHeatmap(
-          principal,
-          anomalyId,
-          baselineOffset,
-          filters,
-          dimensions,
-          excludedDimensions,
-          limit);
-
-      return respondOk(resultApi);
-    } catch (final WebApplicationException e) {
-      throw e;
-    } catch (final Exception e) {
-      handleRcaAlgorithmException(e);
+  ) throws Exception {
+    if (limit == null) {
+      limit = LIMIT_DEFAULT;
     }
-    return null;
+    final HeatMapResponseApi resultApi = rcaMetricService.computeHeatmap(
+        principal,
+        anomalyId,
+        baselineOffset,
+        filters,
+        dimensions,
+        excludedDimensions,
+        limit);
+
+    return respondOk(resultApi);
   }
 }

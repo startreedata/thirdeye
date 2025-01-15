@@ -27,10 +27,15 @@ import {
     generateDateRangeMonthsFromNow,
 } from "../../utils/routes/routes.util";
 
+// const AlertsAllPage = lazy(() =>
+// import(
+// /*webpackChunkName:"alerts-all-page"*/"../../pages/alerts-all-page-v2/alerts-all-page.component"
+// ).then((module) => ({ default: module.AlertsAllPage }))
+// );
 const AlertsAllPage = lazy(() =>
     import(
-        /* webpackChunkName: "alerts-all-page" */ "../../pages/alerts-all-page-v2/alerts-all-page.component"
-    ).then((module) => ({ default: module.AlertsAllPage }))
+        /* webpackChunkName: "alerts-all-page" */ "../../pages/revamp/alert-list"
+    ).then((module) => ({ default: module.AlertListPage }))
 );
 
 const AlertsViewPage = lazy(() =>

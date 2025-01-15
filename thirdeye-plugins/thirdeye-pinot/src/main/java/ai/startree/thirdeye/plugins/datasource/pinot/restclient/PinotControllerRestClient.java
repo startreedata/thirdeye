@@ -19,7 +19,6 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSourceConfig;
 import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.ThirdEyeStatus;
-import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
@@ -42,6 +41,7 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.pinot.spi.config.table.TableConfig;
 import org.apache.pinot.spi.data.Schema;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,15 +59,12 @@ public class PinotControllerRestClient {
 
   private final HttpHost pinotControllerHost;
   private final PinotControllerHttpClientProvider pinotControllerRestClientSupplier;
-  private final ThirdEyeDataSourceContext context;
 
-  public PinotControllerRestClient(final PinotThirdEyeDataSourceConfig config,
-      final ThirdEyeDataSourceContext context) {
+  public PinotControllerRestClient(final PinotThirdEyeDataSourceConfig config) {
     pinotControllerHost = new HttpHost(config.getControllerHost(),
         config.getControllerPort(),
         config.getControllerConnectionScheme());
     this.pinotControllerRestClientSupplier = new PinotControllerHttpClientProvider(config);
-    this.context = context;
   }
 
   public List<String> getAllTablesFromPinot() throws IOException {
@@ -174,16 +171,16 @@ public class PinotControllerRestClient {
     return tableJson;
   }
 
-  public void updateTableMaxQPSQuota(final String dataset, final JsonNode tableJson) throws IOException {
-    final Integer customMaxQPSQuota = context.getQuotasConfiguration().getPinotMaxQPSQuotaOverride();
-    if (customMaxQPSQuota == null || customMaxQPSQuota <= 0) {
+  public void updateTableMaxQPSQuota(final String dataset, final JsonNode tableJson, 
+      final @Nullable Integer maxQpsQuota) throws IOException {
+    if (maxQpsQuota == null || maxQpsQuota <= 0) {
       return;
     }
 
     // update quota if it exists
     final JsonNode quotaJson = tableJson.get(TABLE_CONFIG_QUOTA_KEY);
     if (quotaJson != null) {
-      ((ObjectNode) quotaJson).put(TABLE_CONFIG_QUOTA_MAX_QPS_KEY, Integer.toString(customMaxQPSQuota));
+      ((ObjectNode) quotaJson).put(TABLE_CONFIG_QUOTA_MAX_QPS_KEY, Integer.toString(maxQpsQuota));
     } else {
       LOG.error("quota not configured for dataset {} while onboarding. skipping max qps override", dataset);
       return;

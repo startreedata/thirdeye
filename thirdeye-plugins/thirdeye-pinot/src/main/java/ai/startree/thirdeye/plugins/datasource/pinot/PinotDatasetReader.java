@@ -56,10 +56,12 @@ public class PinotDatasetReader {
   private static final String BYTES_STRING = "BYTES";
 
   private final PinotControllerRestClient pinotControllerRestClient;
+  private final ThirdEyeDataSourceContext context;
 
   @Inject
   public PinotDatasetReader(final PinotThirdEyeDataSourceConfig config, final ThirdEyeDataSourceContext context) {
-    this.pinotControllerRestClient = new PinotControllerRestClient(config, context);
+    this.pinotControllerRestClient = new PinotControllerRestClient(config);
+    this.context = context;
   }
 
   public List<String> getAllTableNames() throws IOException {
@@ -117,7 +119,8 @@ public class PinotDatasetReader {
     checkArgument(tableConfigJson != null && !tableConfigJson.isNull(),
         "Onboarding Preparation Error: table config is null for pinot table: " + datasetName);
 
-    pinotControllerRestClient.updateTableMaxQPSQuota(datasetName, tableConfigJson);
+    pinotControllerRestClient.updateTableMaxQPSQuota(datasetName, tableConfigJson, 
+        context.getQuotasConfiguration().getPinotMaxQPSQuotaOverride());
   }
 
   public void close() {

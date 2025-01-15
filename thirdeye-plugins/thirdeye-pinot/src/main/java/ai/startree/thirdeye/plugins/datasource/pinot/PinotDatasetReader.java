@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.plugins.datasource.pinot;
 
 import static ai.startree.thirdeye.spi.Constants.DEFAULT_CHRONOLOGY;
+import static ai.startree.thirdeye.spi.Constants.VANILLA_OBJECT_MAPPER;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
@@ -26,12 +27,14 @@ import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
 import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import ai.startree.thirdeye.spi.metric.MetricType;
 import ai.startree.thirdeye.spi.util.SpiUtils;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Preconditions;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -43,8 +46,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// todo cyril DI with a single dep is often an anti-pattern - merge PinotDatasetReader and PinotControllerRestClient together
-// also some things happening in PinotThirdEyeDataSource could be abstracted in the merge of the 2 classes above
 @Singleton
 public class PinotDatasetReader {
 
@@ -93,16 +94,14 @@ public class PinotDatasetReader {
     checkArgument(tableConfigJson != null && !tableConfigJson.isNull(),
         "Onboarding Error: table config is null for pinot table: " + tableName);
 
-    final String timeColumnName = pinotControllerRestClient
-        .extractTimeColumnFromPinotTable(tableConfigJson);
+    final String timeColumnName = timeColumnFromTableConfig(tableConfigJson);
     // rewrite above if to throw exception instead of returning null
     checkArgument(timeColumnName != null,
         "Onboarding Error: time column is null for pinot table: " + tableName);
     checkArgument(schema.getSpecForTimeColumn(timeColumnName) != null,
         "Onboarding Error: unable to get time column spec in schema for pinot table: " + tableName);
 
-    final Map<String, String> pinotCustomProperties = PinotControllerRestClient
-        .extractCustomConfigsFromPinotTable(tableConfigJson);
+    final Map<String, String> pinotCustomProperties = customConfigsFromTableConfig(tableConfigJson);
 
     return toDatasetConfigDTO(tableName,
         schema,
@@ -198,5 +197,25 @@ public class PinotDatasetReader {
     );
     
     return tableName;
+  }
+
+  private static String timeColumnFromTableConfig(final JsonNode tableConfigJson) {
+    final JsonNode timeColumnNode = tableConfigJson.get("segmentsConfig").get("timeColumnName");
+    return (timeColumnNode != null && !timeColumnNode.isNull()) ? timeColumnNode.asText() : null;
+  }
+
+  /**
+   * Returns the map of custom configs of the given dataset from the Pinot table config json.
+   */
+  private static Map<String, String> customConfigsFromTableConfig(final JsonNode tableConfigJson) {
+
+    Map<String, String> customConfigs = Collections.emptyMap();
+    try {
+      final JsonNode jsonNode = tableConfigJson.get("metadata").get("customConfigs");
+      customConfigs = VANILLA_OBJECT_MAPPER.convertValue(jsonNode, new TypeReference<>() {});
+    } catch (final Exception e) {
+      LOG.warn("Failed to get custom config from table: {}. Exception:", tableConfigJson, e);
+    }
+    return customConfigs;
   }
 }

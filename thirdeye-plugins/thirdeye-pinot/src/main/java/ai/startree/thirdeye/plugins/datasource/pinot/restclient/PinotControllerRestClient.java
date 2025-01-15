@@ -20,7 +20,6 @@ import ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSourceConf
 import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
@@ -30,7 +29,6 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -304,26 +302,6 @@ public class PinotControllerRestClient {
     } finally {
       HttpUtils.safeClose(response);
     }
-  }
-
-  /**
-   * Returns the map of custom configs of the given dataset from the Pinot table config json.
-   */
-  public static Map<String, String> extractCustomConfigsFromPinotTable(final JsonNode tableConfigJson) {
-
-    Map<String, String> customConfigs = Collections.emptyMap();
-    try {
-      final JsonNode jsonNode = tableConfigJson.get("metadata").get("customConfigs");
-      customConfigs = VANILLA_OBJECT_MAPPER.convertValue(jsonNode, new TypeReference<>() {});
-    } catch (final Exception e) {
-      LOG.warn("Failed to get custom config from table: {}. Exception:", tableConfigJson, e);
-    }
-    return customConfigs;
-  }
-
-  public String extractTimeColumnFromPinotTable(final JsonNode tableConfigJson) {
-    final JsonNode timeColumnNode = tableConfigJson.get("segmentsConfig").get("timeColumnName");
-    return (timeColumnNode != null && !timeColumnNode.isNull()) ? timeColumnNode.asText() : null;
   }
 
   public void close() {

@@ -190,9 +190,9 @@ public class TestNamespaceConfigurationManager {
         .isEqualTo(dto2.getTimeConfiguration().getMinimumOnboardingStartTime());
     assertThat(dto1.getTemplateConfiguration().getSqlLimitStatement())
         .isEqualTo(dto2.getTemplateConfiguration().getSqlLimitStatement());
-    assertThat(dto1.getTaskQuotasConfiguration().getDetectionTaskQuota())
-        .isEqualTo(dto2.getTaskQuotasConfiguration().getDetectionTaskQuota());
-    assertThat(dto1.getTaskQuotasConfiguration().getNotificationTaskQuota())
-        .isEqualTo(dto2.getTaskQuotasConfiguration().getNotificationTaskQuota());
+    assertThat(dto1.getQuotasConfiguration().getTaskQuotasConfiguration().getMaximumDetectionTasksPerMonth()).
+        isEqualTo(dto2.getQuotasConfiguration().getTaskQuotasConfiguration().getMaximumDetectionTasksPerMonth());
+    assertThat(dto1.getQuotasConfiguration().getTaskQuotasConfiguration().getMaximumNotificationTasksPerMonth()).
+        isEqualTo(dto2.getQuotasConfiguration().getTaskQuotasConfiguration().getMaximumNotificationTasksPerMonth());
   }
 }

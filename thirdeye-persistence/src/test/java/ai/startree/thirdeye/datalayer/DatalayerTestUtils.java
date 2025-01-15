@@ -13,16 +13,15 @@
  */
 package ai.startree.thirdeye.datalayer;
 
-import static ai.startree.thirdeye.spi.Constants.DEFAULT_CHRONOLOGY;
 import static java.util.stream.Collectors.toSet;
 
-import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.NamespaceConfigurationDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.QuotasConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskQuotasConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TemplateConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TimeConfigurationDTO;
@@ -71,7 +70,8 @@ public class DatalayerTestUtils {
     dto.setTimeConfiguration(new TimeConfigurationDTO());
     dto.setAuth(new AuthorizationConfigurationDTO().setNamespace(namespace));
     dto.setTemplateConfiguration(new TemplateConfigurationDTO());
-    dto.setTaskQuotasConfiguration(new TaskQuotasConfigurationDTO());
+    dto.setQuotasConfiguration(new QuotasConfigurationDTO()
+        .setTaskQuotasConfiguration(new TaskQuotasConfigurationDTO()));
     return dto;
   }
 }

@@ -56,6 +56,7 @@ import ai.startree.thirdeye.spi.api.HeatMapResponseApi;
 import ai.startree.thirdeye.spi.api.NamespaceConfigurationApi;
 import ai.startree.thirdeye.spi.api.NotificationSchemesApi;
 import ai.startree.thirdeye.spi.api.PlanNodeApi;
+import ai.startree.thirdeye.spi.api.QuotasConfigurationApi;
 import ai.startree.thirdeye.spi.api.RcaInvestigationApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import ai.startree.thirdeye.spi.api.TaskQuotasConfigurationApi;
@@ -741,7 +742,8 @@ public class HappyPathTest implements ITest {
     updatedCfg.setAuth(new AuthorizationConfigurationApi());
     updatedCfg.setId(namespaceConfigurationId);
     updatedCfg.setTemplateConfiguration(new TemplateConfigurationApi());
-    updatedCfg.setTaskQuotasConfiguration(new TaskQuotasConfigurationApi());
+    updatedCfg.setQuotasConfiguration(new QuotasConfigurationApi()
+        .setTaskQuotasConfiguration(new TaskQuotasConfigurationApi()));
     final Response response = request("api/workspace-configuration").put(
         Entity.json(updatedCfg));
     assertThat(response.getStatus()).isEqualTo(200);

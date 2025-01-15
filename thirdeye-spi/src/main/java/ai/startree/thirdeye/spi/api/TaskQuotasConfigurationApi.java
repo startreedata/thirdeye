@@ -15,24 +15,26 @@ package ai.startree.thirdeye.spi.api;
 
 public class TaskQuotasConfigurationApi {
 
-  private Long DetectionTaskQuota;
-  private Long NotificationTaskQuota;
+  private Long maximumDetectionTasksPerMonth;
+  private Long maximumNotificationTasksPerMonth;
 
-  public Long getDetectionTaskQuota() {
-    return DetectionTaskQuota;
+  public Long getMaximumDetectionTasksPerMonth() {
+    return maximumDetectionTasksPerMonth;
   }
 
-  public TaskQuotasConfigurationApi setDetectionTaskQuota(final Long detectionTaskQuota) {
-    this.DetectionTaskQuota = detectionTaskQuota;
+  public TaskQuotasConfigurationApi setMaximumDetectionTasksPerMonth(
+      final Long maximumDetectionTasksPerMonth) {
+    this.maximumDetectionTasksPerMonth = maximumDetectionTasksPerMonth;
     return this;
   }
 
-  public Long getNotificationTaskQuota() {
-    return NotificationTaskQuota;
+  public Long getMaximumNotificationTasksPerMonth() {
+    return maximumNotificationTasksPerMonth;
   }
 
-  public TaskQuotasConfigurationApi setNotificationTaskQuota(final Long notificationTaskQuota) {
-    this.NotificationTaskQuota = notificationTaskQuota;
+  public TaskQuotasConfigurationApi setMaximumNotificationTasksPerMonth(
+      final Long maximumNotificationTasksPerMonth) {
+    this.maximumNotificationTasksPerMonth = maximumNotificationTasksPerMonth;
     return this;
   }
 }

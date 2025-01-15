@@ -23,6 +23,7 @@ import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.NamespaceConfigurationManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.NamespaceConfigurationDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.QuotasConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskQuotasConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TemplateConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TimeConfigurationDTO;
@@ -85,9 +86,14 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
       existingNamespaceConfig.setTemplateConfiguration(defaultTemplateConfiguration());
       updated = true;
     }
-    if (force || existingNamespaceConfig.getTaskQuotasConfiguration() == null) {
-      existingNamespaceConfig.setTaskQuotasConfiguration(defaultTaskQuotasConfiguration());
+    if (force || existingNamespaceConfig.getQuotasConfiguration() == null) {
+      existingNamespaceConfig.setQuotasConfiguration(defaultQuotasConfiguration());
       updated = true;
+    }
+    if (force || (existingNamespaceConfig.getQuotasConfiguration() != null &&
+        existingNamespaceConfig.getQuotasConfiguration().getTaskQuotasConfiguration() == null)) {
+      existingNamespaceConfig.getQuotasConfiguration()
+          .setTaskQuotasConfiguration(defaultTaskQuotasConfiguration());
     }
     return updated;
   }
@@ -156,7 +162,7 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
     namespaceConfigurationDTO
         .setTimeConfiguration(defaultTimeConfiguration())
         .setTemplateConfiguration(defaultTemplateConfiguration())
-        .setTaskQuotasConfiguration(defaultTaskQuotasConfiguration())
+        .setQuotasConfiguration(defaultQuotasConfiguration())
         .setAuth(new AuthorizationConfigurationDTO().setNamespace(namespace));
     return namespaceConfigurationDTO;
   }
@@ -215,8 +221,15 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
         .orElse(new TemplateConfigurationDTO());
   }
 
+  private QuotasConfigurationDTO defaultQuotasConfiguration() {
+    return optional(defaultNamespaceConfiguration.getQuotasConfiguration())
+        .orElse(new QuotasConfigurationDTO()
+            .setTaskQuotasConfiguration(new TaskQuotasConfigurationDTO()));
+  }
+
   private TaskQuotasConfigurationDTO defaultTaskQuotasConfiguration() {
-    return optional(defaultNamespaceConfiguration.getTaskQuotasConfiguration())
+    return optional(defaultNamespaceConfiguration.getQuotasConfiguration())
+        .map(QuotasConfigurationDTO::getTaskQuotasConfiguration)
         .orElse(new TaskQuotasConfigurationDTO());
   }
 }

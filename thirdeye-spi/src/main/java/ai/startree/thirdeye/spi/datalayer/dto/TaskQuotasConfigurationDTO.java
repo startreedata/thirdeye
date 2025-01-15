@@ -18,27 +18,28 @@ public class TaskQuotasConfigurationDTO {
   /**
    * Monthly quota for number of detection task runs
    */
-  private Long DetectionTaskQuota;
+  private Long maximumDetectionTasksPerMonth;
   /**
    * Monthly quota for number of notification task runs
    */
-  private Long NotificationTaskQuota;
+  private Long maximumNotificationTasksPerMonth;
 
-  public Long getDetectionTaskQuota() {
-    return DetectionTaskQuota;
+  public Long getMaximumDetectionTasksPerMonth() {
+    return maximumDetectionTasksPerMonth;
   }
 
-  public TaskQuotasConfigurationDTO setDetectionTaskQuota(final Long detectionTaskQuota) {
-    this.DetectionTaskQuota = detectionTaskQuota;
+  public TaskQuotasConfigurationDTO setMaximumDetectionTasksPerMonth(
+      final Long maximumDetectionTasksPerMonth) {
+    this.maximumDetectionTasksPerMonth = maximumDetectionTasksPerMonth;
     return this;
   }
 
-  public Long getNotificationTaskQuota() {
-    return NotificationTaskQuota;
+  public Long getMaximumNotificationTasksPerMonth() {
+    return maximumNotificationTasksPerMonth;
   }
 
-  public TaskQuotasConfigurationDTO setNotificationTaskQuota(final Long notificationTaskQuota) {
-    this.NotificationTaskQuota = notificationTaskQuota;
+  public TaskQuotasConfigurationDTO setMaximumNotificationTasksPerMonth(final Long maximumNotificationTasksPerMonth) {
+    this.maximumNotificationTasksPerMonth = maximumNotificationTasksPerMonth;
     return this;
   }
 }

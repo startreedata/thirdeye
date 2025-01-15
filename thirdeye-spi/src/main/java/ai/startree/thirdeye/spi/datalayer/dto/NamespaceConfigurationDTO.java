@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.spi.datalayer.dto;
 
+import ai.startree.thirdeye.spi.api.QuotasConfigurationApi;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -25,7 +26,7 @@ public class NamespaceConfigurationDTO extends AbstractDTO {
   
   private TemplateConfigurationDTO templateConfiguration;
 
-  private TaskQuotasConfigurationDTO taskQuotasConfiguration;
+  private QuotasConfigurationDTO quotasConfiguration;
 
   public TimeConfigurationDTO getTimeConfiguration() {
     return timeConfiguration;
@@ -47,13 +48,13 @@ public class NamespaceConfigurationDTO extends AbstractDTO {
     return this;
   }
 
-  public TaskQuotasConfigurationDTO getTaskQuotasConfiguration() {
-    return taskQuotasConfiguration;
+  public QuotasConfigurationDTO getQuotasConfiguration() {
+    return quotasConfiguration;
   }
 
-  public NamespaceConfigurationDTO setTaskQuotasConfiguration(
-      final TaskQuotasConfigurationDTO taskQuotasConfiguration) {
-    this.taskQuotasConfiguration = taskQuotasConfiguration;
+  public NamespaceConfigurationDTO setQuotasConfiguration(
+      final QuotasConfigurationDTO quotasConfiguration) {
+    this.quotasConfiguration = quotasConfiguration;
     return this;
   }
 }

@@ -23,6 +23,7 @@ import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.NamespaceConfigurationManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.NamespaceConfigurationDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.TaskQuotasConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TemplateConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TimeConfigurationDTO;
 import com.google.inject.Inject;
@@ -82,6 +83,10 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
     }
     if (force || existingNamespaceConfig.getTemplateConfiguration() == null) {
       existingNamespaceConfig.setTemplateConfiguration(defaultTemplateConfiguration());
+      updated = true;
+    }
+    if (force || existingNamespaceConfig.getTaskQuotasConfiguration() == null) {
+      existingNamespaceConfig.setTaskQuotasConfiguration(defaultTaskQuotasConfiguration());
       updated = true;
     }
     return updated;
@@ -151,6 +156,7 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
     namespaceConfigurationDTO
         .setTimeConfiguration(defaultTimeConfiguration())
         .setTemplateConfiguration(defaultTemplateConfiguration())
+        .setTaskQuotasConfiguration(defaultTaskQuotasConfiguration())
         .setAuth(new AuthorizationConfigurationDTO().setNamespace(namespace));
     return namespaceConfigurationDTO;
   }
@@ -207,5 +213,10 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
   private TemplateConfigurationDTO defaultTemplateConfiguration() {
     return optional(defaultNamespaceConfiguration.getTemplateConfiguration())
         .orElse(new TemplateConfigurationDTO());
+  }
+
+  private TaskQuotasConfigurationDTO defaultTaskQuotasConfiguration() {
+    return optional(defaultNamespaceConfiguration.getTaskQuotasConfiguration())
+        .orElse(new TaskQuotasConfigurationDTO());
   }
 }

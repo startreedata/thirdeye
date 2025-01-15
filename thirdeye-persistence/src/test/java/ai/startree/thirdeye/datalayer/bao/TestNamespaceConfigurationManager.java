@@ -188,5 +188,11 @@ public class TestNamespaceConfigurationManager {
         .isEqualTo(dto2.getTimeConfiguration().getTimezone());
     assertThat(dto1.getTimeConfiguration().getMinimumOnboardingStartTime())
         .isEqualTo(dto2.getTimeConfiguration().getMinimumOnboardingStartTime());
+    assertThat(dto1.getTemplateConfiguration().getSqlLimitStatement())
+        .isEqualTo(dto2.getTemplateConfiguration().getSqlLimitStatement());
+    assertThat(dto1.getTaskQuotasConfiguration().getDetectionTaskQuota())
+        .isEqualTo(dto2.getTaskQuotasConfiguration().getDetectionTaskQuota());
+    assertThat(dto1.getTaskQuotasConfiguration().getNotificationTaskQuota())
+        .isEqualTo(dto2.getTaskQuotasConfiguration().getNotificationTaskQuota());
   }
 }

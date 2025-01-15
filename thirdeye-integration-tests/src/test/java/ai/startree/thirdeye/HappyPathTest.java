@@ -58,6 +58,8 @@ import ai.startree.thirdeye.spi.api.NotificationSchemesApi;
 import ai.startree.thirdeye.spi.api.PlanNodeApi;
 import ai.startree.thirdeye.spi.api.RcaInvestigationApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
+import ai.startree.thirdeye.spi.api.TaskQuotasConfigurationApi;
+import ai.startree.thirdeye.spi.api.TemplateConfigurationApi;
 import ai.startree.thirdeye.spi.api.TimeConfigurationApi;
 import ai.startree.thirdeye.spi.detection.AnomalyCause;
 import ai.startree.thirdeye.spi.detection.AnomalyFeedbackType;
@@ -738,6 +740,8 @@ public class HappyPathTest implements ITest {
             .setMinimumOnboardingStartTime(996684800000L));
     updatedCfg.setAuth(new AuthorizationConfigurationApi());
     updatedCfg.setId(namespaceConfigurationId);
+    updatedCfg.setTemplateConfiguration(new TemplateConfigurationApi());
+    updatedCfg.setTaskQuotasConfiguration(new TaskQuotasConfigurationApi());
     final Response response = request("api/workspace-configuration").put(
         Entity.json(updatedCfg));
     assertThat(response.getStatus()).isEqualTo(200);

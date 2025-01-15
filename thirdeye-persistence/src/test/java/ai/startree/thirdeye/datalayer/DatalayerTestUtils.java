@@ -23,6 +23,8 @@ import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.NamespaceConfigurationDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.TaskQuotasConfigurationDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.TemplateConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TimeConfigurationDTO;
 import ai.startree.thirdeye.spi.metric.MetricType;
 import ai.startree.thirdeye.spi.util.SpiUtils;
@@ -66,12 +68,10 @@ public class DatalayerTestUtils {
 
   public static NamespaceConfigurationDTO buildNamespaceConfiguration(String namespace) {
     final NamespaceConfigurationDTO dto = new NamespaceConfigurationDTO();
-    dto.setTimeConfiguration(new TimeConfigurationDTO()
-        .setDateTimePattern(Constants.NOTIFICATIONS_DEFAULT_DATE_PATTERN)
-        .setTimezone(DEFAULT_CHRONOLOGY.getZone())
-        .setMinimumOnboardingStartTime(946684800000L));
-    dto.setAuth(new AuthorizationConfigurationDTO()
-        .setNamespace(namespace));
+    dto.setTimeConfiguration(new TimeConfigurationDTO());
+    dto.setAuth(new AuthorizationConfigurationDTO().setNamespace(namespace));
+    dto.setTemplateConfiguration(new TemplateConfigurationDTO());
+    dto.setTaskQuotasConfiguration(new TaskQuotasConfigurationDTO());
     return dto;
   }
 }

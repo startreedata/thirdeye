@@ -22,6 +22,7 @@ import ai.startree.thirdeye.plugins.datasource.pinot.restclient.PinotControllerR
 import ai.startree.thirdeye.spi.datalayer.Templatable;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
+import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
 import ai.startree.thirdeye.spi.metric.MetricAggFunction;
 import ai.startree.thirdeye.spi.metric.MetricType;
 import ai.startree.thirdeye.spi.util.SpiUtils;
@@ -56,8 +57,8 @@ public class PinotDatasetReader {
   private final PinotControllerRestClient pinotControllerRestClient;
 
   @Inject
-  public PinotDatasetReader(final PinotControllerRestClient pinotControllerRestClient) {
-    this.pinotControllerRestClient = pinotControllerRestClient;
+  public PinotDatasetReader(final PinotThirdEyeDataSourceConfig config, final ThirdEyeDataSourceContext context) {
+    this.pinotControllerRestClient = new PinotControllerRestClient(config, context);
   }
 
   public List<String> getAllTableNames() throws IOException {

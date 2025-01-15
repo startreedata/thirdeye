@@ -23,8 +23,6 @@ import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSourceContext;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -49,7 +47,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Singleton
 public class PinotControllerRestClient {
 
   private static final Logger LOG = LoggerFactory.getLogger(PinotControllerRestClient.class);
@@ -66,10 +63,8 @@ public class PinotControllerRestClient {
   private final PinotControllerHttpClientProvider pinotControllerRestClientSupplier;
   private final ThirdEyeDataSourceContext context;
 
-  @Inject
   public PinotControllerRestClient(final PinotThirdEyeDataSourceConfig config,
       final ThirdEyeDataSourceContext context) {
-
     pinotControllerHost = new HttpHost(config.getControllerHost(),
         config.getControllerPort(),
         config.getControllerConnectionScheme());

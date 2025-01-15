@@ -13,21 +13,39 @@
  */
 package ai.startree.thirdeye.plugins.datasource.pinot.restclient;
 
+import static ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSource.HTTPS_SCHEME;
+import static ai.startree.thirdeye.spi.Constants.TWO_DIGITS_FORMATTER;
 import static ai.startree.thirdeye.spi.Constants.VANILLA_OBJECT_MAPPER;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static java.util.Objects.requireNonNull;
 
+import ai.startree.thirdeye.plugins.datasource.pinot.PinotOauthUtils;
 import ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSourceConfig;
 import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
+import javax.net.ssl.SSLContext;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -35,9 +53,16 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.ssl.SSLContextBuilder;
+import org.apache.http.ssl.TrustStrategy;
 import org.apache.pinot.spi.config.table.TableConfig;
 import org.apache.pinot.spi.data.Schema;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -57,14 +82,85 @@ public class PinotControllerRestClient {
   private static final String TABLE_CONFIG_QUOTA_KEY = "quota";
   private static final String TABLE_CONFIG_QUOTA_MAX_QPS_KEY = "maxQueriesPerSecond";
 
-  private final HttpHost pinotControllerHost;
-  private final PinotControllerHttpClientProvider pinotControllerRestClientSupplier;
+  private static final ExecutorService CONNECTION_CLOSER_EXECUTOR = Executors.newSingleThreadExecutor(
+      new ThreadFactoryBuilder().setNameFormat("pinot-controller-client-connection-closer").build());
 
+  private final HttpHost pinotControllerHost;
+
+  private final PinotThirdEyeDataSourceConfig config;
+  private CloseableHttpClient pinotControllerClient = null;
+  private String currentToken = null;
+  
   public PinotControllerRestClient(final PinotThirdEyeDataSourceConfig config) {
-    pinotControllerHost = new HttpHost(config.getControllerHost(),
+    this.config = config;
+    this.pinotControllerHost = new HttpHost(config.getControllerHost(),
         config.getControllerPort(),
         config.getControllerConnectionScheme());
-    this.pinotControllerRestClientSupplier = new PinotControllerHttpClientProvider(config);
+  }
+
+  // FIXME ASAP - pinotControllerClient being closed is not managed - add this logic - consider using org.asynchttpclient for consistency with Pinot and remove httpcomponents dependency
+  private CloseableHttpClient getHttpClient() {
+    if (config.isOAuthEnabled()) {
+      // fixme cyril - at every call this reads a file 
+      final String newToken = requireNonNull(PinotOauthUtils.getOauthToken(config.getOauth()), "token supplied is null");
+      if (pinotControllerClient == null || !Objects.equals(currentToken, newToken)) {
+        // need to update the authorization token 
+        // closing old connection is a lower priority - do it async
+        closeClientAsync(pinotControllerClient);
+
+        currentToken = newToken;
+        final Map<String, String> additionalHeaders = Map.of(HttpHeaders.AUTHORIZATION, currentToken);
+        pinotControllerClient = createHttpClient(config, additionalHeaders);
+      }
+    } else {
+      if (pinotControllerClient == null) {
+        pinotControllerClient = createHttpClient(config, Map.of());
+      }
+    }
+
+    return pinotControllerClient;
+  }
+
+  private static CloseableHttpClient createHttpClient(
+      final PinotThirdEyeDataSourceConfig config, final @NonNull Map<String, String> additionalHeaders) {
+    final HttpClientBuilder builder = HttpClients.custom();
+
+    // set headers
+    final Map<String, String> mergedHeaders = new HashMap<>();
+    optional(config.getHeaders()).ifPresent(mergedHeaders::putAll);
+    mergedHeaders.putAll(additionalHeaders);
+    builder.setDefaultHeaders(mergedHeaders.entrySet()
+        .stream()
+        .map(e -> new BasicHeader(e.getKey(), e.getValue()))
+        .collect(Collectors.toList()));
+
+    // set ssl context if necessary
+    if (HTTPS_SCHEME.equals(config.getControllerConnectionScheme())) {
+      builder.setSSLContext(httpsSslContext()).setSSLHostnameVerifier(new NoopHostnameVerifier());
+    }
+
+    return builder.build();
+  }
+
+  private void closeClientAsync(final CloseableHttpClient httpClient) {
+    if (httpClient != null) {
+      CONNECTION_CLOSER_EXECUTOR.submit(() -> this.closeClient(httpClient));
+    }
+  }
+
+  private void closeClient(final CloseableHttpClient httpClient) {
+    try {
+      final long startTime = System.nanoTime();
+      if (httpClient != null) {
+        httpClient.close();
+        LOG.info("Successfully closed pinot controller client. took {}ms",
+            TWO_DIGITS_FORMATTER.format((System.nanoTime() - startTime) / 1e6));
+      }
+    } catch (final IOException e) {
+      LOG.warn("Failed to close pinot controller client", e);
+    } catch (final Exception e) {
+      LOG.error("Failed to close pinot controller client", e);
+    }
   }
 
   public List<String> getAllTablesFromPinot() throws IOException {
@@ -73,7 +169,7 @@ public class PinotControllerRestClient {
     LOG.debug("Retrieving datasets: {}", tablesReq);
     CloseableHttpResponse tablesRes = null;
     try {
-      tablesRes = pinotControllerRestClientSupplier.get().execute(pinotControllerHost, tablesReq);
+      tablesRes =  getHttpClient().execute(pinotControllerHost, tablesReq);
       if (tablesRes.getStatusLine().getStatusCode() != 200) {
         throw new IllegalStateException(tablesRes.getStatusLine().toString());
       }
@@ -96,7 +192,7 @@ public class PinotControllerRestClient {
     final HttpHead mytablesReq = new HttpHead(PINOT_MY_TABLES_ENDPOINT);
     CloseableHttpResponse mytablesRes = null;
     try {
-      mytablesRes = pinotControllerRestClientSupplier.get()
+      mytablesRes =  getHttpClient()
           .execute(pinotControllerHost, mytablesReq);
       if (mytablesRes.getStatusLine().getStatusCode() != HttpStatus.SC_NOT_FOUND) {
         return PINOT_MY_TABLES_ENDPOINT;
@@ -128,7 +224,7 @@ public class PinotControllerRestClient {
         String.format(endpointTemplate, URLEncoder.encode(dataset, StandardCharsets.UTF_8)));
     CloseableHttpResponse schemaRes = null;
     try {
-      schemaRes = pinotControllerRestClientSupplier.get().execute(pinotControllerHost, schemaReq);
+      schemaRes =  getHttpClient().execute(pinotControllerHost, schemaReq);
       if (schemaRes.getStatusLine().getStatusCode() != 200) {
         LOG.error("Schema {} not found, {}", dataset, schemaRes.getStatusLine().toString());
       } else {
@@ -149,7 +245,7 @@ public class PinotControllerRestClient {
     // Retrieve table config
     JsonNode tables = null;
     try {
-      response = pinotControllerRestClientSupplier.get().execute(pinotControllerHost, request);
+      response =  getHttpClient().execute(pinotControllerHost, request);
       if (response.getStatusLine().getStatusCode() != 200) {
         throw new IllegalStateException(response.getStatusLine().toString());
       }
@@ -192,7 +288,7 @@ public class PinotControllerRestClient {
 
     CloseableHttpResponse response = null;
     try {
-      response = pinotControllerRestClientSupplier.get().execute(pinotControllerHost, request);
+      response =  getHttpClient().execute(pinotControllerHost, request);
       if (response.getStatusLine().getStatusCode() != 200) {
         throw new IllegalStateException(response.getStatusLine().toString());
       }
@@ -217,7 +313,7 @@ public class PinotControllerRestClient {
 
     CloseableHttpResponse response = null;
     try {
-      response = pinotControllerRestClientSupplier.get().execute(pinotControllerHost, request);
+      response =  getHttpClient().execute(pinotControllerHost, request);
       if (response.getStatusLine().getStatusCode() != 200) {
         switch (response.getStatusLine().getStatusCode()) {
           case 409:
@@ -248,7 +344,7 @@ public class PinotControllerRestClient {
 
     CloseableHttpResponse response = null;
     try {
-      response = pinotControllerRestClientSupplier.get().execute(pinotControllerHost, request);
+      response =  getHttpClient().execute(pinotControllerHost, request);
       if (response.getStatusLine().getStatusCode() != 200) {
         switch (response.getStatusLine().getStatusCode()) {
           case 409:
@@ -288,7 +384,7 @@ public class PinotControllerRestClient {
 
     CloseableHttpResponse response = null;
     try {
-      response = pinotControllerRestClientSupplier.get().execute(pinotControllerHost, request);
+      response =  getHttpClient().execute(pinotControllerHost, request);
       if (response.getStatusLine().getStatusCode() != 200) {
         throw new RuntimeException("Failed to load data to table %s : %s"
             .formatted(tableNameWithType, response.getStatusLine().toString()));
@@ -302,6 +398,38 @@ public class PinotControllerRestClient {
   }
 
   public void close() {
-    pinotControllerRestClientSupplier.close();
+    if (pinotControllerClient != null) {
+      try {
+        pinotControllerClient.close();
+      } catch (IOException e) {
+        LOG.error("Exception closing pinotControllerClient", e);
+      }
+    }
+  }
+
+  // SSL context that accepts all SSL certificate.
+  private static SSLContext httpsSslContext() {
+    try {
+      return new SSLContextBuilder()
+          .loadTrustMaterial(null, new AcceptAllTrustStrategy())
+          .build();
+    } catch (final NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
+      // This section shouldn't happen because we use Accept All Strategy
+      LOG.error("Failed to generate SSL context for Pinot in https.", e);
+      throw new RuntimeException(e);
+    }
+  }
+
+
+  /**
+   * This class accepts (i.e., ignores) all SSL certificate.
+   */
+  private static class AcceptAllTrustStrategy implements TrustStrategy {
+
+    @Override
+    public boolean isTrusted(final X509Certificate[] x509Certificates, final String s)
+        throws CertificateException {
+      return true;
+    }
   }
 }

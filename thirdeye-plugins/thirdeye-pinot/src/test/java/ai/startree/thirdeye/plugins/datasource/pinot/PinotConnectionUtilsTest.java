@@ -28,7 +28,7 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.testng.annotations.Test;
 
-public class PinotConnectionProviderTest {
+public class PinotConnectionUtilsTest {
 
   @Test
   public void testGetCallOnce() {

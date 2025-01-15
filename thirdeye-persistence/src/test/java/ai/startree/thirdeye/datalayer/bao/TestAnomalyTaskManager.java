@@ -145,7 +145,7 @@ public class TestAnomalyTaskManager {
     Assert.assertEquals(anomalyTask.getStartTime(), taskStartTime);
   }
 
-  TaskDTO getTestTaskSpec(final long refId) throws JsonProcessingException {
+  private TaskDTO getTestTaskSpec(final long refId) throws JsonProcessingException {
     TaskDTO taskSpec = new TaskDTO();
     taskSpec.setJobName("Test_Anomaly_Task");
     taskSpec.setStatus(TaskStatus.WAITING);

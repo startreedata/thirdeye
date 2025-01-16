@@ -19,14 +19,23 @@ import static ai.startree.thirdeye.spi.Constants.CRON_TIMEZONE;
 import static ai.startree.thirdeye.spi.util.TimeUtils.maximumTriggersPerMinute;
 import static com.google.common.base.Preconditions.checkArgument;
 
+import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AbstractManager;
+import ai.startree.thirdeye.spi.datalayer.bao.NamespaceConfigurationManager;
+import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.NamespaceConfigurationDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.NamespaceQuotasConfigurationDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.TaskQuotasConfigurationDTO;
 import ai.startree.thirdeye.spi.task.TaskType;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.Job;
 import org.quartz.JobBuilder;
@@ -53,6 +62,8 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
   private final Class<? extends Job> jobClazz;
   private final CronGetter<E> cronGetter;
   private final isActiveGetter<E> isActiveGetter;
+  private final TaskManager taskManager;
+  private final NamespaceConfigurationManager namespaceConfigurationManager;
 
   public TaskCronSchedulerRunnable(
       final AbstractManager<E> entityDao,
@@ -63,7 +74,9 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
       final Class<? extends Job> jobClazz,
       final GuiceJobFactory guiceJobFactory,
       final int cronMaxTriggersPerMinute,
-      final Class<?> loggerClass) {
+      final Class<?> loggerClass,
+      final TaskManager taskManager,
+      final NamespaceConfigurationManager namespaceConfigurationManager) {
     try {
       scheduler = StdSchedulerFactory.getDefaultScheduler();
       scheduler.setJobFactory(guiceJobFactory);
@@ -80,6 +93,8 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
     this.cronMaxTriggersPerMinute = cronMaxTriggersPerMinute;
     this.log = LoggerFactory.getLogger(loggerClass);
     this.groupMatcher = GroupMatcher.jobGroupEquals(taskType.toString());
+    this.taskManager = taskManager;
+    this.namespaceConfigurationManager = namespaceConfigurationManager;
   }
 
   @Override
@@ -97,6 +112,9 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
   }
 
   private void updateSchedules() throws SchedulerException {
+
+    final HashMap<String, Boolean> namespaceToQuotaExceededMap = getNamespaceToQuotaExceededMap();
+
     // TODO CYRIL scale - loading all entities is expensive - only the id and the cron are necessary - requires custom SQL (JOOQ)
     // FIXME CYRIL SCALE - No need for a strong isolation level here - the default isolation level lock all entities until the query is finished, blocking progress of tasks and potentially some update/delete operations in the UI.
     //   dirty reads are be fine, this logic runs every minute
@@ -107,6 +125,7 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
     allEntities.forEach(this::schedule);
 
     // cleanup schedules of deleted and deactivated entities
+    // or entities whose workspace has exceeded quotas
     final Map<Long, E> idToEntity = allEntities.stream()
         .collect(Collectors.toMap(AbstractDTO::getId, e -> e));
     final Set<JobKey> scheduledJobKeys = scheduler.getJobKeys(groupMatcher);
@@ -114,6 +133,7 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
       try {
         final Long id = getIdFromJobKey(jobKey);
         final E entity = idToEntity.get(id);
+        final String entityNamespace = entity.namespace();
         if (entity == null) {
           log.info("{} with id {} does not exist anymore. Stopping the scheduled {} job.",
               entityName, id, taskType);
@@ -121,11 +141,47 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
         } else if (!isActive(entity)) {
           log.info("{} with id {} is deactivated. Stopping the scheduled {} job.", entityName, id, taskType);
           stopJob(jobKey);
+        } else if (namespaceToQuotaExceededMap.getOrDefault(entityNamespace, false)) {
+          log.info("workspace {} corresponding to {} with id {} has exceeded monthly quota. Stopping scheduled {} job.",
+              entityNamespace, entityName, id, taskType);
+          stopJob(jobKey);
         }
       } catch (final Exception e) {
         log.error("Error removing job key {}", jobKey, e);
       }
     }
+  }
+
+  private HashMap<String, Boolean> getNamespaceToQuotaExceededMap() {
+    HashMap<String, Boolean> m = new HashMap<>();
+    List<NamespaceConfigurationDTO> namespaceCfgs = namespaceConfigurationManager.findAll();
+
+    for (NamespaceConfigurationDTO namespaceCfg : namespaceCfgs) {
+      String namespace = namespaceCfg.namespace();
+      long taskCount = getTasksCountForNamespace(namespaceCfg.namespace());
+      Long monthlyTasksLimit = getMonthlyTasksLimit(namespaceCfg);
+      m.put(namespace, monthlyTasksLimit != null && taskCount <= monthlyTasksLimit);
+    }
+
+    return m;
+  }
+
+  private Long getMonthlyTasksLimit(final @NonNull NamespaceConfigurationDTO config) {
+    return Optional.of(config)
+        .map(NamespaceConfigurationDTO::getNamespaceQuotasConfiguration)
+        .map(NamespaceQuotasConfigurationDTO::getTaskQuotasConfiguration)
+        .map(taskType == TaskType.DETECTION ?
+            TaskQuotasConfigurationDTO::getMaximumDetectionTasksPerMonth
+            : TaskQuotasConfigurationDTO::getMaximumNotificationTasksPerMonth)
+        .orElse(null);
+  }
+
+  private long getTasksCountForNamespace(String namespace) {
+    Predicate predicate = Predicate.AND(
+        Predicate.EQ("namespace", namespace),
+        Predicate.EQ("type", taskType)
+    );
+    return taskManager.count(predicate);
   }
 
   private void schedule(final E entity) {
@@ -172,7 +228,6 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
     scheduler.deleteJob(jobKey);
     log.info("Stopped {} job {}", taskType, jobKey.getName());
   }
-
 
   private Trigger buildTrigger(final E config) {
     final String cron = cronOf(config);

@@ -16,7 +16,9 @@ package ai.startree.thirdeye.scheduler;
 import static ai.startree.thirdeye.spi.util.ExecutorUtils.shutdownExecutionService;
 
 import ai.startree.thirdeye.scheduler.job.NotificationPipelineJob;
+import ai.startree.thirdeye.spi.datalayer.bao.NamespaceConfigurationManager;
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
+import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.SubscriptionGroupDTO;
 import ai.startree.thirdeye.spi.task.TaskType;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -43,17 +45,24 @@ public class SubscriptionCronScheduler {
   private final SubscriptionGroupManager subscriptionGroupManager;
   private TaskCronSchedulerRunnable<SubscriptionGroupDTO> runnable;
 
+  private final TaskManager taskManager;
+  private final NamespaceConfigurationManager namespaceConfigurationManager;
+
   @Inject
   public SubscriptionCronScheduler(
       final SubscriptionGroupManager subscriptionGroupManager,
       final ThirdEyeSchedulerConfiguration configuration,
-      final GuiceJobFactory guiceJobFactory) {
+      final GuiceJobFactory guiceJobFactory,
+      final TaskManager taskManager,
+      final NamespaceConfigurationManager namespaceConfigurationManager) {
     this.configuration = configuration;
     this.guiceJobFactory = guiceJobFactory;
     executorService = Executors.newSingleThreadScheduledExecutor(
         new ThreadFactoryBuilder().setNameFormat("subscription-scheduler-%d").build());
     
     this.subscriptionGroupManager = subscriptionGroupManager;
+    this.taskManager = taskManager;
+    this.namespaceConfigurationManager = namespaceConfigurationManager;
   }
 
   public void start() throws SchedulerException {
@@ -66,7 +75,9 @@ public class SubscriptionCronScheduler {
         NotificationPipelineJob.class,
         guiceJobFactory,
         SUBSCRIPTION_SCHEDULER_CRON_MAX_TRIGGERS_PER_MINUTE,
-        this.getClass()
+        this.getClass(),
+        taskManager,
+        namespaceConfigurationManager
     );
     executorService.scheduleWithFixedDelay(runnable,
         0,

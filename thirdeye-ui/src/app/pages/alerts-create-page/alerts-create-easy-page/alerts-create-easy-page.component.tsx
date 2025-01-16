@@ -101,7 +101,6 @@ import { AlertCreatedGuidedPageOutletContext } from "../../alerts-create-guided-
 import { SETUP_DETAILS_TEST_IDS } from "../../alerts-create-guided-page/setup-details/setup-details-page.interface";
 import { easyAlertStyles } from "./alerts-create-easy-page.styles";
 import { generateInputFieldConfigsForAlertTemplate } from "../../../components/alert-wizard-v3/threshold-setup/threshold-setup.utils";
-import { NavigateAlertCreationFlowsDropdown } from "../../../components/alert-wizard-v3/navigate-alert-creation-flows-dropdown/navigate-alert-creation-flows-dropdown-v2";
 
 const PROPERTIES_TO_COPY = [
     "dataSource",
@@ -978,17 +977,6 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
             <Grid item xs={12}>
                 <PageContentsCardV1 className={classes.container}>
                     <Grid container>
-                        <Grid item xs={12}>
-                            <Grid
-                                container
-                                alignContent="center"
-                                justifyContent="flex-end"
-                            >
-                                <Grid item>
-                                    <NavigateAlertCreationFlowsDropdown />
-                                </Grid>
-                            </Grid>
-                        </Grid>
                         <Grid item xs={12}>
                             <Box marginBottom={2}>
                                 <Grid

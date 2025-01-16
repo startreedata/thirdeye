@@ -15,7 +15,6 @@
 import { FormHelperText, Grid, TextField } from "@material-ui/core";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { NavigateAlertCreationFlowsDropdown } from "../../alert-wizard-v3/navigate-alert-creation-flows-dropdown/navigate-alert-creation-flows-dropdown-v2";
 import { InputSectionV2 } from "../../form-basics/input-section-v2/input-section-v2.component";
 import { AlertDetailsProps } from "./alert-details.interfaces";
 import { AlertFrequency } from "./alert-frequency-v2/alert-frequency.component";
@@ -48,13 +47,6 @@ function AlertDetails({
 
     return (
         <Grid container>
-            <Grid item xs={12}>
-                <Grid container alignContent="center" justifyContent="flex-end">
-                    <Grid item>
-                        <NavigateAlertCreationFlowsDropdown />
-                    </Grid>
-                </Grid>
-            </Grid>
             <Grid item xs={4}>
                 <InputSectionV2
                     inputComponent={

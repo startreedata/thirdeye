@@ -29,7 +29,6 @@ import { THIRDEYE_DOC_LINK } from "../../../utils/constants/constants.util";
 import { validateJSON } from "../../../utils/validation/validation.util";
 import { HelpDrawerV1 } from "../../help-drawer-v1/help-drawer-v1.component";
 import { AlertJsonProps } from "./alert-json.interfaces";
-import { NavigateAlertCreationFlowsDropdown } from "../../alert-wizard-v3/navigate-alert-creation-flows-dropdown/navigate-alert-creation-flows-dropdown-v2";
 
 export const AlertJson: FunctionComponent<AlertJsonProps> = ({
     alert,
@@ -64,13 +63,6 @@ export const AlertJson: FunctionComponent<AlertJsonProps> = ({
 
     return (
         <Grid container>
-            <Grid item xs={12}>
-                <Grid container alignContent="center" justifyContent="flex-end">
-                    <Grid item>
-                        <NavigateAlertCreationFlowsDropdown />
-                    </Grid>
-                </Grid>
-            </Grid>
             <Grid item xs={12}>
                 <Grid
                     container

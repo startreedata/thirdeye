@@ -22,7 +22,7 @@ public class NamespaceConfigurationApi implements ThirdEyeCrudApi<NamespaceConfi
   
   private TemplateConfigurationApi templateConfiguration;
   
-  private QuotasConfigurationApi quotasConfiguration;
+  private NamespaceQuotasConfigurationApi namespaceQuotasConfiguration;
 
   public TimeConfigurationApi getTimeConfiguration() {
     return timeConfiguration;
@@ -62,13 +62,13 @@ public class NamespaceConfigurationApi implements ThirdEyeCrudApi<NamespaceConfi
     return this;
   }
 
-  public QuotasConfigurationApi getQuotasConfiguration() {
-    return quotasConfiguration;
+  public NamespaceQuotasConfigurationApi getNamespaceQuotasConfiguration() {
+    return namespaceQuotasConfiguration;
   }
 
-  public NamespaceConfigurationApi setQuotasConfiguration(
-      final QuotasConfigurationApi quotasConfiguration) {
-    this.quotasConfiguration = quotasConfiguration;
+  public NamespaceConfigurationApi setNamespaceQuotasConfiguration(
+      final NamespaceQuotasConfigurationApi namespaceQuotasConfiguration) {
+    this.namespaceQuotasConfiguration = namespaceQuotasConfiguration;
     return this;
   }
 }

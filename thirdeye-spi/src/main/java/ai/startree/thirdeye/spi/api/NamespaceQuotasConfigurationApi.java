@@ -15,7 +15,7 @@ package ai.startree.thirdeye.spi.api;
 
 import java.util.Objects;
 
-public class QuotasConfigurationApi {
+public class NamespaceQuotasConfigurationApi {
 
   private TaskQuotasConfigurationApi taskQuotasConfiguration;
 
@@ -23,7 +23,7 @@ public class QuotasConfigurationApi {
     return taskQuotasConfiguration;
   }
 
-  public QuotasConfigurationApi setTaskQuotasConfiguration(
+  public NamespaceQuotasConfigurationApi setTaskQuotasConfiguration(
       final TaskQuotasConfigurationApi taskQuotasConfiguration) {
     this.taskQuotasConfiguration = taskQuotasConfiguration;
     return this;
@@ -37,7 +37,7 @@ public class QuotasConfigurationApi {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    final QuotasConfigurationApi that = (QuotasConfigurationApi) o;
+    final NamespaceQuotasConfigurationApi that = (NamespaceQuotasConfigurationApi) o;
     return Objects.equals(taskQuotasConfiguration, that.taskQuotasConfiguration);
   }
 

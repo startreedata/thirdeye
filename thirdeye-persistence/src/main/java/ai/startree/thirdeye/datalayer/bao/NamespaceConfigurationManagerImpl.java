@@ -23,7 +23,7 @@ import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.NamespaceConfigurationManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.NamespaceConfigurationDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.QuotasConfigurationDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.NamespaceQuotasConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskQuotasConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TemplateConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TimeConfigurationDTO;
@@ -86,13 +86,13 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
       existingNamespaceConfig.setTemplateConfiguration(defaultTemplateConfiguration());
       updated = true;
     }
-    if (force || existingNamespaceConfig.getQuotasConfiguration() == null) {
-      existingNamespaceConfig.setQuotasConfiguration(defaultQuotasConfiguration());
+    if (force || existingNamespaceConfig.getNamespaceQuotasConfiguration() == null) {
+      existingNamespaceConfig.setNamespaceQuotasConfiguration(defaultNamespaceQuotasConfiguration());
       updated = true;
     }
-    if (force || (existingNamespaceConfig.getQuotasConfiguration() != null &&
-        existingNamespaceConfig.getQuotasConfiguration().getTaskQuotasConfiguration() == null)) {
-      existingNamespaceConfig.getQuotasConfiguration()
+    if (force || (existingNamespaceConfig.getNamespaceQuotasConfiguration() != null &&
+        existingNamespaceConfig.getNamespaceQuotasConfiguration().getTaskQuotasConfiguration() == null)) {
+      existingNamespaceConfig.getNamespaceQuotasConfiguration()
           .setTaskQuotasConfiguration(defaultTaskQuotasConfiguration());
     }
     return updated;
@@ -162,7 +162,7 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
     namespaceConfigurationDTO
         .setTimeConfiguration(defaultTimeConfiguration())
         .setTemplateConfiguration(defaultTemplateConfiguration())
-        .setQuotasConfiguration(defaultQuotasConfiguration())
+        .setNamespaceQuotasConfiguration(defaultNamespaceQuotasConfiguration())
         .setAuth(new AuthorizationConfigurationDTO().setNamespace(namespace));
     return namespaceConfigurationDTO;
   }
@@ -221,15 +221,15 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
         .orElse(new TemplateConfigurationDTO());
   }
 
-  private QuotasConfigurationDTO defaultQuotasConfiguration() {
-    return optional(defaultNamespaceConfiguration.getQuotasConfiguration())
-        .orElse(new QuotasConfigurationDTO()
+  private NamespaceQuotasConfigurationDTO defaultNamespaceQuotasConfiguration() {
+    return optional(defaultNamespaceConfiguration.getNamespaceQuotasConfiguration())
+        .orElse(new NamespaceQuotasConfigurationDTO()
             .setTaskQuotasConfiguration(new TaskQuotasConfigurationDTO()));
   }
 
   private TaskQuotasConfigurationDTO defaultTaskQuotasConfiguration() {
-    return optional(defaultNamespaceConfiguration.getQuotasConfiguration())
-        .map(QuotasConfigurationDTO::getTaskQuotasConfiguration)
+    return optional(defaultNamespaceConfiguration.getNamespaceQuotasConfiguration())
+        .map(NamespaceQuotasConfigurationDTO::getTaskQuotasConfiguration)
         .orElse(new TaskQuotasConfigurationDTO());
   }
 }

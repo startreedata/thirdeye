@@ -21,7 +21,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.NamespaceConfigurationDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.QuotasConfigurationDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.NamespaceQuotasConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskQuotasConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TemplateConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TimeConfigurationDTO;
@@ -70,7 +70,7 @@ public class DatalayerTestUtils {
     dto.setTimeConfiguration(new TimeConfigurationDTO());
     dto.setAuth(new AuthorizationConfigurationDTO().setNamespace(namespace));
     dto.setTemplateConfiguration(new TemplateConfigurationDTO());
-    dto.setQuotasConfiguration(new QuotasConfigurationDTO()
+    dto.setNamespaceQuotasConfiguration(new NamespaceQuotasConfigurationDTO()
         .setTaskQuotasConfiguration(new TaskQuotasConfigurationDTO()));
     return dto;
   }

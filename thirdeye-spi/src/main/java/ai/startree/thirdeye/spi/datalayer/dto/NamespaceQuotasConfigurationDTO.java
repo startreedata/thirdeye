@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.spi.datalayer.dto;
 
-public class QuotasConfigurationDTO {
+public class NamespaceQuotasConfigurationDTO {
 
   private TaskQuotasConfigurationDTO taskQuotasConfiguration;
 
@@ -21,7 +21,7 @@ public class QuotasConfigurationDTO {
     return taskQuotasConfiguration;
   }
 
-  public QuotasConfigurationDTO setTaskQuotasConfiguration(
+  public NamespaceQuotasConfigurationDTO setTaskQuotasConfiguration(
       final TaskQuotasConfigurationDTO taskQuotasConfiguration) {
     this.taskQuotasConfiguration = taskQuotasConfiguration;
     return this;

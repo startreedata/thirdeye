@@ -83,10 +83,7 @@ public class NamespaceConfigurationService {
       NamespaceConfigurationApi updated) {
     if (!Objects.equals(existing.getId(), updated.getId()) ||
         !Objects.equals(existing.getAuth().getNamespace(), updated.getAuth().getNamespace()) ||
-        !Objects.equals(existing.getQuotasConfiguration().getTaskQuotasConfiguration().getMaximumDetectionTasksPerMonth(),
-            updated.getQuotasConfiguration().getTaskQuotasConfiguration().getMaximumNotificationTasksPerMonth()) ||
-        !Objects.equals(existing.getQuotasConfiguration().getTaskQuotasConfiguration().getMaximumNotificationTasksPerMonth(),
-            updated.getQuotasConfiguration().getTaskQuotasConfiguration().getMaximumNotificationTasksPerMonth())) {
+        !Objects.equals(existing.getQuotasConfiguration(), updated.getQuotasConfiguration())) {
       throw badRequest(
           ThirdEyeStatus.ERR_NAMESPACE_CONFIGURATION_VALIDATION_FAILED,
           existing.namespace(),

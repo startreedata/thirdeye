@@ -13,6 +13,8 @@
  */
 package ai.startree.thirdeye.spi.api;
 
+import java.util.Objects;
+
 public class TaskQuotasConfigurationApi {
 
   private Long maximumDetectionTasksPerMonth;
@@ -36,5 +38,24 @@ public class TaskQuotasConfigurationApi {
       final Long maximumNotificationTasksPerMonth) {
     this.maximumNotificationTasksPerMonth = maximumNotificationTasksPerMonth;
     return this;
+  }
+
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    final TaskQuotasConfigurationApi that = (TaskQuotasConfigurationApi) o;
+    return Objects.equals(maximumDetectionTasksPerMonth, that.maximumDetectionTasksPerMonth)
+        && Objects.equals(maximumNotificationTasksPerMonth,
+        that.maximumNotificationTasksPerMonth);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(maximumDetectionTasksPerMonth, maximumNotificationTasksPerMonth);
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 StarTree Inc
+ * Copyright 2025 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -12,15 +12,12 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { makeStyles } from "@material-ui/core";
 
-export interface WizardBottomBarProps {
-    handleBackClick?: () => void;
-    handleNextClick?: () => void;
-    nextButtonLabel?: string;
-    backButtonLabel?: string;
-    backBtnLink?: string;
-    nextBtnLink?: string;
-    nextButtonIsDisabled?: boolean;
-    doNotWrapInContainer?: boolean;
-    isLoading?: boolean;
-}
+export const useOnBoardDatasetStyles = makeStyles({
+    container: {
+        "& .MuiDivider-vertical": {
+            height: "auto",
+        },
+    },
+});

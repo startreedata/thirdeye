@@ -13,9 +13,13 @@
  * the License.
  */
 import { useHTTPAction } from "../create-rest-action";
-import { Dataset } from "../dto/dataset.interfaces";
-import { GetDataset, GetDatasets } from "./dataset.interfaces";
-import { getAllDatasets, getDataset as getDatasetREST } from "./datasets.rest";
+import { Dataset, DemoDataset } from "../dto/dataset.interfaces";
+import { GetDataset, GetDatasets, GetDemoDatasets } from "./dataset.interfaces";
+import {
+    getAllDatasets,
+    getDataset as getDatasetREST,
+    getDemoDatasets as getDemoDatasetsREST,
+} from "./datasets.rest";
 
 export const useGetDataset = (): GetDataset => {
     const { data, makeRequest, status, errorMessages, resetData } =
@@ -37,4 +41,23 @@ export const useGetDatasets = (): GetDatasets => {
     };
 
     return { datasets: data, getDatasets, status, errorMessages, resetData };
+};
+
+export const useGetDemoDatasets = (): GetDemoDatasets => {
+    const { data, makeRequest, status, errorMessages, resetData } =
+        useHTTPAction<DemoDataset[]>(getDemoDatasetsREST);
+
+    const getDemoDatasets = (
+        id: number
+    ): Promise<DemoDataset[] | undefined> => {
+        return makeRequest(id);
+    };
+
+    return {
+        datasets: data,
+        getDemoDatasets,
+        status,
+        errorMessages,
+        resetData,
+    };
 };

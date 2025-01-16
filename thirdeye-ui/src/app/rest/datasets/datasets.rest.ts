@@ -13,13 +13,33 @@
  * the License.
  */
 import axios from "axios";
-import { Dataset } from "../dto/dataset.interfaces";
+import { Dataset, DemoDataset } from "../dto/dataset.interfaces";
 
 const BASE_URL_DATASETS = "/api/datasets";
 const BASE_URL_DATASOURCE = "/api/data-sources";
 
 export const getDataset = async (id: number): Promise<Dataset> => {
     const response = await axios.get(`${BASE_URL_DATASETS}/${id}`);
+
+    return response.data;
+};
+
+export const getDemoDatasets = async (id: number): Promise<DemoDataset[]> => {
+    const response = await axios.get(
+        `${BASE_URL_DATASOURCE}/${id}/demo-datasets`
+    );
+
+    return response.data;
+};
+
+export const createDemoDatasets = async (
+    demoDatasetId: string,
+    datasourceId: number
+): Promise<Dataset[]> => {
+    const response = await axios.post(
+        `${BASE_URL_DATASOURCE}/${datasourceId}/demo-datasets`,
+        { demoDatasetId }
+    );
 
     return response.data;
 };

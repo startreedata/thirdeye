@@ -23,7 +23,9 @@ public class NamespaceConfigurationDTO extends AbstractDTO {
 
   TimeConfigurationDTO timeConfiguration;
   
-  private TemplateConfigurationDTO templateConfiguration; 
+  private TemplateConfigurationDTO templateConfiguration;
+
+  private NamespaceQuotasConfigurationDTO namespaceQuotasConfiguration;
 
   public TimeConfigurationDTO getTimeConfiguration() {
     return timeConfiguration;
@@ -42,6 +44,16 @@ public class NamespaceConfigurationDTO extends AbstractDTO {
   public NamespaceConfigurationDTO setTemplateConfiguration(
       final TemplateConfigurationDTO templateConfiguration) {
     this.templateConfiguration = templateConfiguration;
+    return this;
+  }
+
+  public NamespaceQuotasConfigurationDTO getNamespaceQuotasConfiguration() {
+    return namespaceQuotasConfiguration;
+  }
+
+  public NamespaceConfigurationDTO setNamespaceQuotasConfiguration(
+      final NamespaceQuotasConfigurationDTO namespaceQuotasConfiguration) {
+    this.namespaceQuotasConfiguration = namespaceQuotasConfiguration;
     return this;
   }
 }

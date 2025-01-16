@@ -1,3 +1,10 @@
+### [2.59.1](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.59.0...thirdeye-ui-2.59.1) (2025-01-16)
+
+
+### Bug Fixes
+
+* e2e test fix ([d55d6dc92](https://github.com/startreedata/thirdeye/commit/d55d6dc924c89cb7162a989be6aadec70574de4d))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

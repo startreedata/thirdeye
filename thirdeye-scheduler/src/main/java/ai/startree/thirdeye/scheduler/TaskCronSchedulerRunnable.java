@@ -28,6 +28,8 @@ import ai.startree.thirdeye.spi.datalayer.dto.NamespaceConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.NamespaceQuotasConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskQuotasConfigurationDTO;
 import ai.startree.thirdeye.spi.task.TaskType;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -177,9 +179,22 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
   }
 
   private long getTasksCountForNamespace(String namespace) {
+    LocalDate currentDate = LocalDate.now();
+    long startOfMonthTimestamp = currentDate.withDayOfMonth(1)
+        .atStartOfDay(ZoneId.systemDefault())
+        .toInstant()
+        .toEpochMilli();
+    long endOfMonthTimestamp = currentDate.withDayOfMonth(currentDate.lengthOfMonth())
+        .atTime(23, 59, 59, 999_999_999) // End of the day
+        .atZone(ZoneId.systemDefault())
+        .toInstant()
+        .toEpochMilli();
+
     Predicate predicate = Predicate.AND(
         Predicate.EQ("namespace", namespace),
-        Predicate.EQ("type", taskType)
+        Predicate.EQ("type", taskType),
+        Predicate.GE("startTime", startOfMonthTimestamp),
+        Predicate.LE("startTime", endOfMonthTimestamp)
     );
     return taskManager.count(predicate);
   }

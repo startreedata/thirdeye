@@ -120,7 +120,7 @@ export const PageHeader: FunctionComponent<PageHeaderProps> = ({
                             <Grid item {...(headerGridContainerProps || {})}>
                                 {title && (
                                     <Typography variant="h4">
-                                        {title}
+                                        <b>{title}</b>
                                     </Typography>
                                 )}
                                 {children}

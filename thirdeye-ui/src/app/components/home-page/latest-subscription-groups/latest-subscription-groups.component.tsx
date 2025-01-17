@@ -14,6 +14,7 @@
  */
 import {
     Box,
+    Grid,
     Link,
     TableBody,
     TableCell,
@@ -83,11 +84,28 @@ export const LatestSubscriptionGroups: React.FunctionComponent<LatestSubscriptio
 
         return (
             <>
-                <Typography className={styles.title} variant="h5">
-                    {t("label.latest-entity", {
-                        entity: t("label.subscription-groups"),
-                    })}
-                </Typography>
+                <Grid container justifyContent="space-between">
+                    <Grid item>
+                        <Typography className={styles.title} variant="h5">
+                            {t("label.latest-entity", {
+                                entity: t("label.subscription-groups"),
+                            })}
+                        </Typography>
+                    </Grid>
+                    <Grid item>
+                        <Link
+                            className={styles.allAlertsLink}
+                            component={RouterLink}
+                            to={getSubscriptionGroupsAllPath()}
+                        >
+                            {t("label.view-all-entities", {
+                                entity: t("label.subscriptions"),
+                            })}
+                            <ArrowForward className={styles.alertsLinkIcon} />
+                        </Link>
+                    </Grid>
+                </Grid>
+
                 <LoadingErrorStateSwitch
                     errorState={
                         <NoDataIndicator>
@@ -160,16 +178,6 @@ export const LatestSubscriptionGroups: React.FunctionComponent<LatestSubscriptio
                         </TableBody>
                     </TitleCardTable>
                 </LoadingErrorStateSwitch>
-                <Link
-                    className={styles.allAlertsLink}
-                    component={RouterLink}
-                    to={getSubscriptionGroupsAllPath()}
-                >
-                    {t("label.show-entities", {
-                        entity: t("label.subscriptions"),
-                    })}
-                    <ArrowForward className={styles.alertsLinkIcon} />
-                </Link>
             </>
         );
     };

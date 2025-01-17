@@ -235,20 +235,7 @@ export const RecentFailures: FunctionComponent = () => {
     return (
         <>
             <Grid container alignItems="center" justifyContent="space-between">
-                <Grid item>
-                    <Typography variant="h5">
-                        {t("label.recent-anomaly-detection-failures")}
-                    </Typography>
-                    <Typography variant="body1">
-                        <LoadingErrorStateSwitch
-                            isError={false}
-                            isLoading={isLoading}
-                            loadingState={<SkeletonV1 animation="pulse" />}
-                        >
-                            {t("label.latest-errors-in-your-alerts")}
-                        </LoadingErrorStateSwitch>
-                    </Typography>
-                </Grid>
+                <Grid item />
                 <Grid item>
                     <TimeRangeSelectorButton
                         end={endTime}

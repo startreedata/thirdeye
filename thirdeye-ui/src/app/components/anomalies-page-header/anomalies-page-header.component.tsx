@@ -20,10 +20,8 @@ import { Link as RouterLink, useLocation } from "react-router-dom";
 import { PageHeaderActionsV1 } from "../../platform/components";
 import {
     AppRouteRelative,
-    getAnomaliesAllPath,
     getAnomaliesCreatePath,
 } from "../../utils/routes/routes.util";
-import { Crumb } from "../breadcrumbs/breadcrumbs.interfaces";
 import { anomaliesBasicHelpCards } from "../help-drawer-v1/help-drawer-card-contents.utils";
 import { HelpDrawerV1 } from "../help-drawer-v1/help-drawer-v1.component";
 import { PageHeader } from "../page-header/page-header.component";
@@ -31,22 +29,6 @@ import { PageHeader } from "../page-header/page-header.component";
 export const AnomaliesPageHeader: FunctionComponent = () => {
     const { search, pathname } = useLocation();
     const { t } = useTranslation();
-    const crumbs: Crumb[] = [
-        {
-            label: t("label.anomalies"),
-            link: getAnomaliesAllPath(),
-        },
-    ];
-
-    if (pathname.indexOf(AppRouteRelative.ANOMALIES_METRICS_REPORT) > -1) {
-        crumbs.push({
-            label: t("label.metrics-report"),
-        });
-    } else if (pathname.indexOf(AppRouteRelative.ANOMALIES_LIST) > -1) {
-        crumbs.push({
-            label: t("label.anomalies-list"),
-        });
-    }
 
     const selectedSubNavigation: number =
         [
@@ -57,7 +39,6 @@ export const AnomaliesPageHeader: FunctionComponent = () => {
     return (
         <>
             <PageHeader
-                breadcrumbs={crumbs}
                 customActions={
                     <PageHeaderActionsV1>
                         <HelpDrawerV1

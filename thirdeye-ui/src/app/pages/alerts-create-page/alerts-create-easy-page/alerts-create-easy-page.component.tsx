@@ -1133,7 +1133,7 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                                   ) =>
                                                                                       m.name
                                                                               );
-                                                                          a.unshift(
+                                                                          a.push(
                                                                               t(
                                                                                   "label.custom-metric-aggregation"
                                                                               )

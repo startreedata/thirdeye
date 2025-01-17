@@ -256,22 +256,48 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
                                             mt={2}
                                         >
                                             <FormGroup>
-                                                <Button
-                                                    color="primary"
-                                                    variant="text"
-                                                    onClick={() => {
-                                                        tables &&
-                                                            setSelectedDatasets(
-                                                                tables.map(
-                                                                    ({
-                                                                        name,
-                                                                    }) => name
-                                                                )
-                                                            );
-                                                    }}
+                                                <Grid
+                                                    container
+                                                    justifyContent="space-evenly"
                                                 >
-                                                    {t("label.select-all")}
-                                                </Button>
+                                                    <Grid item>
+                                                        <Button
+                                                            color="primary"
+                                                            variant="text"
+                                                            onClick={() => {
+                                                                tables &&
+                                                                    setSelectedDatasets(
+                                                                        tables.map(
+                                                                            ({
+                                                                                name,
+                                                                            }) =>
+                                                                                name
+                                                                        )
+                                                                    );
+                                                            }}
+                                                        >
+                                                            {t(
+                                                                "label.select-all"
+                                                            )}
+                                                        </Button>
+                                                    </Grid>
+                                                    <Grid item>
+                                                        <Button
+                                                            color="primary"
+                                                            variant="text"
+                                                            onClick={() => {
+                                                                setSelectedDatasets(
+                                                                    []
+                                                                );
+                                                            }}
+                                                        >
+                                                            {t(
+                                                                "label.deselect-all"
+                                                            )}
+                                                        </Button>
+                                                    </Grid>
+                                                </Grid>
+
                                                 <Divider />
 
                                                 {tables?.map((dataset) => (

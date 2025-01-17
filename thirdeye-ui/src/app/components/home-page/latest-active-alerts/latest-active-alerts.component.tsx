@@ -14,6 +14,7 @@
  */
 import {
     Box,
+    Grid,
     Link,
     TableBody,
     TableCell,
@@ -48,9 +49,26 @@ export const LatestActiveAlerts: React.FunctionComponent<LatestActiveAlertsProps
 
         return (
             <>
-                <Typography className={styles.title} variant="h5">
-                    {t("label.latest-active-alerts")}
-                </Typography>
+                <Grid container justifyContent="space-between">
+                    <Grid item>
+                        <Typography className={styles.title} variant="h5">
+                            {t("label.latest-active-alerts")}
+                        </Typography>
+                    </Grid>
+                    <Grid item>
+                        <Link
+                            className={styles.allAlertsLink}
+                            component={RouterLink}
+                            to={getAlertsAllPath()}
+                        >
+                            {t("label.view-all-entities", {
+                                entity: t("label.alerts"),
+                            })}
+                            <ArrowForward className={styles.alertsLinkIcon} />
+                        </Link>
+                    </Grid>
+                </Grid>
+
                 <LoadingErrorStateSwitch
                     errorState={
                         <NoDataIndicator>
@@ -143,16 +161,6 @@ export const LatestActiveAlerts: React.FunctionComponent<LatestActiveAlertsProps
                         </TableBody>
                     </TitleCardTable>
                 </LoadingErrorStateSwitch>
-                <Link
-                    className={styles.allAlertsLink}
-                    component={RouterLink}
-                    to={getAlertsAllPath()}
-                >
-                    {t("label.view-all-entities", {
-                        entity: t("label.alerts"),
-                    })}
-                    <ArrowForward className={styles.alertsLinkIcon} />
-                </Link>
             </>
         );
     };

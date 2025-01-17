@@ -13,7 +13,7 @@
  * the License.
  */
 
-import { Box, Button, Grid, Typography } from "@material-ui/core";
+import { Box, Grid, Typography } from "@material-ui/core";
 import React, { FunctionComponent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet, useLocation } from "react-router-dom";
@@ -73,7 +73,6 @@ export const WelcomeOnboardDatasourceWizard: FunctionComponent = () => {
         <PageV1>
             <PageHeader
                 transparentBackground
-                customActions={<Button>{t("label.help")}</Button>}
                 subtitle={t(
                     "message.connect-to-startree-cloud-data-or-add-your-own-pinot-datasource"
                 )}

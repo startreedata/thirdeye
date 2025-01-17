@@ -23,11 +23,13 @@ import CreateAlertImage from "../../../../assets/images/create-alert.png";
 import GettingStartedImage from "../../../../assets/images/getting-started.png";
 import InvestigateAnomaliesImage from "../../../../assets/images/investigate-anomalies.png";
 import { THIRDEYE_DOC_LINK } from "../../../utils/constants/constants.util";
+import { useLatestSubscriptionGroupsStyles } from "../latest-subscription-groups/latest-subscription-groups.styles";
 import { useRecommendedDocumentationV2Styles } from "./recommended-documentation-v2.styles";
 
 export const RecommendedDocumentationV2: FunctionComponent = () => {
     const { t } = useTranslation();
     const styles = useRecommendedDocumentationV2Styles();
+    const linkStyles = useLatestSubscriptionGroupsStyles();
 
     const items = useMemo(
         () => [
@@ -80,25 +82,24 @@ export const RecommendedDocumentationV2: FunctionComponent = () => {
                     </Grid>
                     <Grid item>
                         <Link
+                            className={linkStyles.allAlertsLink}
                             component={Link}
                             href={THIRDEYE_DOC_LINK}
                             target="_blank"
                         >
-                            <Button color="primary" variant="text">
-                                <Grid container alignItems="center">
-                                    <Grid item>
-                                        {t("label.view-all-entities", {
-                                            entity: t("label.documentation"),
-                                        })}
-                                    </Grid>
-                                    <Grid item>
-                                        <ArrowForward
-                                            color="primary"
-                                            fontSize="small"
-                                        />
-                                    </Grid>
+                            <Grid container alignItems="center">
+                                <Grid item>
+                                    {t("label.view-all-entities", {
+                                        entity: t("label.documentation"),
+                                    })}
                                 </Grid>
-                            </Button>
+                                <Grid item>
+                                    <ArrowForward
+                                        color="primary"
+                                        fontSize="small"
+                                    />
+                                </Grid>
+                            </Grid>
                         </Link>
                     </Grid>
                 </Grid>

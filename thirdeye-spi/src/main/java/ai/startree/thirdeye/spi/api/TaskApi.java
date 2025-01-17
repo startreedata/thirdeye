@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.spi.api;
 
 import ai.startree.thirdeye.spi.task.TaskStatus;
+import ai.startree.thirdeye.spi.task.TaskSubType;
 import ai.startree.thirdeye.spi.task.TaskType;
 import java.sql.Timestamp;
 import java.util.Date;
@@ -24,6 +25,7 @@ public class TaskApi implements ThirdEyeCrudApi<TaskApi> {
   private Date created;
   private Date updated;
   private TaskType taskType;
+  private TaskSubType taskSubType;
   private Long workerId;
   private JobApi job;
   private TaskStatus status;
@@ -165,6 +167,15 @@ public class TaskApi implements ThirdEyeCrudApi<TaskApi> {
   public TaskApi setAuth(
       final AuthorizationConfigurationApi auth) {
     this.auth = auth;
+    return this;
+  }
+
+  public TaskSubType getTaskSubType() {
+    return taskSubType;
+  }
+
+  public TaskApi setTaskSubType(final TaskSubType taskSubType) {
+    this.taskSubType = taskSubType;
     return this;
   }
 }

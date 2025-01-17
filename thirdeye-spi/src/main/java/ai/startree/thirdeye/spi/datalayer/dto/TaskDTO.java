@@ -14,6 +14,7 @@
 package ai.startree.thirdeye.spi.datalayer.dto;
 
 import ai.startree.thirdeye.spi.task.TaskStatus;
+import ai.startree.thirdeye.spi.task.TaskSubType;
 import ai.startree.thirdeye.spi.task.TaskType;
 import java.sql.Timestamp;
 import java.util.Objects;
@@ -26,6 +27,7 @@ import java.util.Objects;
 public class TaskDTO extends AbstractDTO {
 
   private TaskType taskType;
+  private TaskSubType taskSubType;
   private Long workerId;
   private Long jobId;
   private String jobName;
@@ -163,5 +165,14 @@ public class TaskDTO extends AbstractDTO {
   @Override
   public int hashCode() {
     return Objects.hash(getId(), status, startTime, endTime, taskInfo);
+  }
+
+  public TaskSubType getTaskSubType() {
+    return taskSubType;
+  }
+
+  public TaskDTO setTaskSubType(final TaskSubType taskSubType) {
+    this.taskSubType = taskSubType;
+    return this;
   }
 }

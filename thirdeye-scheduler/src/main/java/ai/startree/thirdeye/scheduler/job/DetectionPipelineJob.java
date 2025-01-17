@@ -16,6 +16,7 @@ package ai.startree.thirdeye.scheduler.job;
 import static ai.startree.thirdeye.scheduler.JobUtils.BACKPRESSURE_COUNTERS;
 import static ai.startree.thirdeye.scheduler.JobUtils.FAILED_TASK_CREATION_COUNTERS;
 import static ai.startree.thirdeye.scheduler.JobUtils.getIdFromJobKey;
+import static ai.startree.thirdeye.spi.task.TaskSubType.DETECTION_TRIGGERED_BY_CRON;
 import static ai.startree.thirdeye.spi.task.TaskType.DETECTION;
 import static ai.startree.thirdeye.spi.util.AlertMetadataUtils.getDateTimeZone;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
@@ -29,7 +30,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.AlertTemplateDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DetectionPipelineTaskInfo;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
-import ai.startree.thirdeye.spi.task.TaskType;
 import ai.startree.thirdeye.spi.util.TimeUtils;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
@@ -87,9 +87,9 @@ public class DetectionPipelineJob implements Job {
         BACKPRESSURE_COUNTERS.get(DETECTION).increment();
         return;
       }
-      final TaskDTO taskDTO = taskManager.createTaskDto(taskInfo, TaskType.DETECTION,
-          alert.getAuth());
-      LOG.info("Created {} task {} with settings {}", TaskType.DETECTION, taskDTO.getId(),
+      final TaskDTO taskDTO = taskManager.createTaskDto(taskInfo, DETECTION,
+          DETECTION_TRIGGERED_BY_CRON, alert.getAuth());
+      LOG.info("Created {} task {} with settings {}", DETECTION, taskDTO.getId(),
           taskDTO);
     } catch (Exception e) {
       LOG.error(

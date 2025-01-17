@@ -17,6 +17,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskInfo;
 import ai.startree.thirdeye.spi.task.TaskStatus;
+import ai.startree.thirdeye.spi.task.TaskSubType;
 import ai.startree.thirdeye.spi.task.TaskType;
 import java.sql.Timestamp;
 import java.time.Duration;
@@ -31,7 +32,7 @@ import java.util.List;
 public interface TaskManager extends AbstractManager<TaskDTO> {
 
   TaskDTO createTaskDto(final TaskInfo taskInfo, final TaskType taskType,
-      final AuthorizationConfigurationDTO auth) throws Exception;
+      final TaskSubType taskSubType, final AuthorizationConfigurationDTO auth) throws Exception;
 
   @Deprecated // use acquireNextTaskToRun instead
   TaskDTO findNextTaskToRun();

@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Grid, Link, Typography } from "@material-ui/core";
+import { Box, Grid, Link } from "@material-ui/core";
 import { sortBy } from "lodash";
 import React, { FunctionComponent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
@@ -248,7 +248,7 @@ export const RecentFailures: FunctionComponent = () => {
                 </Grid>
             </Grid>
             <Box paddingTop={2} />
-            <PageContentsCardV1>
+            <PageContentsCardV1 disablePadding>
                 <LoadingErrorStateSwitch
                     errorState={
                         <Box
@@ -278,7 +278,7 @@ export const RecentFailures: FunctionComponent = () => {
                         </>
                     }
                 >
-                    <Box height="100vh">
+                    <Box height="90vh">
                         <DataGridV1<any>
                             disableSearch
                             disableSelection

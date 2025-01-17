@@ -19,6 +19,7 @@ export const useTitleCardTableStyles = makeStyles((theme) => ({
     table: {
         borderRadius: theme.shape.borderRadius,
         border: `1px solid ${PaletteV1.BorderColorGrey}`,
+        borderCollapse: "separate",
     },
     header: {
         backgroundColor: PaletteV1.BackgroundColorLight,

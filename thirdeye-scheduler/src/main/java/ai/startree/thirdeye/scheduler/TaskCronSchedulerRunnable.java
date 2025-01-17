@@ -68,7 +68,7 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
   private final isActiveGetter<E> isActiveGetter;
   private final TaskManager taskManager;
   private final NamespaceConfigurationManager namespaceConfigurationManager;
-  private final Duration NAMESPACE_QUOTA_EXCEEDED_CACHE_TIMEOUT = Duration.ofMinutes(5);
+  private final long namespaceQuotaMapRefreshDelay;
 
   public TaskCronSchedulerRunnable(
       final AbstractManager<E> entityDao,
@@ -81,7 +81,8 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
       final int cronMaxTriggersPerMinute,
       final Class<?> loggerClass,
       final TaskManager taskManager,
-      final NamespaceConfigurationManager namespaceConfigurationManager) {
+      final NamespaceConfigurationManager namespaceConfigurationManager,
+      final long namespaceQuotaMapRefreshDelay) {
     try {
       scheduler = StdSchedulerFactory.getDefaultScheduler();
       scheduler.setJobFactory(guiceJobFactory);
@@ -100,6 +101,7 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
     this.groupMatcher = GroupMatcher.jobGroupEquals(taskType.toString());
     this.taskManager = taskManager;
     this.namespaceConfigurationManager = namespaceConfigurationManager;
+    this.namespaceQuotaMapRefreshDelay = namespaceQuotaMapRefreshDelay;
   }
 
   @Override
@@ -119,7 +121,7 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
   private void updateSchedules() throws SchedulerException {
 
     final Supplier<HashMap<String, Boolean>> namespaceToQuotaExceededMap = scheduledRefreshSupplier(
-        this::getNamespaceToQuotaExceededMap, NAMESPACE_QUOTA_EXCEEDED_CACHE_TIMEOUT);
+        this::getNamespaceToQuotaExceededMap, Duration.ofSeconds(namespaceQuotaMapRefreshDelay));
 
     // TODO CYRIL scale - loading all entities is expensive - only the id and the cron are necessary - requires custom SQL (JOOQ)
     // FIXME CYRIL SCALE - No need for a strong isolation level here - the default isolation level lock all entities until the query is finished, blocking progress of tasks and potentially some update/delete operations in the UI.

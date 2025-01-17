@@ -77,7 +77,8 @@ public class SubscriptionCronScheduler {
         SUBSCRIPTION_SCHEDULER_CRON_MAX_TRIGGERS_PER_MINUTE,
         this.getClass(),
         taskManager,
-        namespaceConfigurationManager
+        namespaceConfigurationManager,
+        configuration.getNamespaceQuotaMapRefreshDelay()
     );
     executorService.scheduleWithFixedDelay(runnable,
         0,

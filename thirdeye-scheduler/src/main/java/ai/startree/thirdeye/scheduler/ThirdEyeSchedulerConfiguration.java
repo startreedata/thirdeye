@@ -28,6 +28,7 @@ public class ThirdEyeSchedulerConfiguration {
   private boolean detectionAlert = false;
   private boolean dataAvailabilityEventListener = false;
   private int alertUpdateDelay = 60;
+  private int namespaceQuotaMapRefreshDelay = 600;
 
   // TODO spyne: consolidate all the update delays into a single configuration after consolidating the core scheduler code
   private int subscriptionGroupUpdateDelay = 60;
@@ -113,6 +114,16 @@ public class ThirdEyeSchedulerConfiguration {
 
   public ThirdEyeSchedulerConfiguration setAlertUpdateDelay(final int alertUpdateDelay) {
     this.alertUpdateDelay = alertUpdateDelay;
+    return this;
+  }
+
+  public int getNamespaceQuotaMapRefreshDelay() {
+    return namespaceQuotaMapRefreshDelay;
+  }
+
+  public ThirdEyeSchedulerConfiguration setNamespaceQuotaMapRefreshDelay(
+      final int namespaceQuotaMapRefreshDelay) {
+    this.namespaceQuotaMapRefreshDelay = namespaceQuotaMapRefreshDelay;
     return this;
   }
 

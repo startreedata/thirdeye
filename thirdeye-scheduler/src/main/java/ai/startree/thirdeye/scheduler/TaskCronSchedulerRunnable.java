@@ -124,7 +124,7 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
     final List<E> allEntities = entityDao.findAll();
 
     // schedule active entities
-    allEntities.forEach(this::schedule);
+    allEntities.forEach(e -> schedule(e, namespaceToQuotaExceededMap));
 
     // cleanup schedules of deleted and deactivated entities
     // or entities whose workspace has exceeded quotas
@@ -199,9 +199,17 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
     return taskManager.count(predicate);
   }
 
-  private void schedule(final E entity) {
+  private void schedule(final E entity,
+      final HashMap<String, Boolean> namespaceToQuotaExceededMap) {
     if (!isActive(entity)) {
       log.debug("{}: {} is inactive. Skipping.", entityName, entity.getId());
+      return;
+    }
+
+    final String entityNamespace = entity.namespace();
+    if (namespaceToQuotaExceededMap.getOrDefault(entityNamespace, false)) {
+      log.info("workspace {} corresponding to {} with id {} has exceeded monthly quota. Skipping scheduling {} job.",
+          entityNamespace, entityName, entity.getId(), taskType);
       return;
     }
 

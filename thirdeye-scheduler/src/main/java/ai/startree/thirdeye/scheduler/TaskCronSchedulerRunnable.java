@@ -16,6 +16,7 @@ package ai.startree.thirdeye.scheduler;
 import static ai.startree.thirdeye.scheduler.JobUtils.currentCron;
 import static ai.startree.thirdeye.scheduler.JobUtils.getIdFromJobKey;
 import static ai.startree.thirdeye.spi.Constants.CRON_TIMEZONE;
+import static ai.startree.thirdeye.spi.util.MetricsUtils.scheduledRefreshSupplier;
 import static ai.startree.thirdeye.spi.util.TimeUtils.maximumTriggersPerMinute;
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -26,16 +27,17 @@ import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.NamespaceConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.NamespaceQuotasConfigurationDTO;
-import ai.startree.thirdeye.spi.datalayer.dto.TaskQuotasConfigurationDTO;
 import ai.startree.thirdeye.spi.task.TaskType;
+import java.time.Duration;
 import java.time.LocalDate;
-import java.time.ZoneId;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.quartz.CronScheduleBuilder;
@@ -66,6 +68,7 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
   private final isActiveGetter<E> isActiveGetter;
   private final TaskManager taskManager;
   private final NamespaceConfigurationManager namespaceConfigurationManager;
+  private final Duration NAMESPACE_QUOTA_EXCEEDED_CACHE_TIMEOUT = Duration.ofMinutes(5);
 
   public TaskCronSchedulerRunnable(
       final AbstractManager<E> entityDao,
@@ -115,7 +118,8 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
 
   private void updateSchedules() throws SchedulerException {
 
-    final HashMap<String, Boolean> namespaceToQuotaExceededMap = getNamespaceToQuotaExceededMap();
+    final Supplier<HashMap<String, Boolean>> namespaceToQuotaExceededMap = scheduledRefreshSupplier(
+        this::getNamespaceToQuotaExceededMap, NAMESPACE_QUOTA_EXCEEDED_CACHE_TIMEOUT);
 
     // TODO CYRIL scale - loading all entities is expensive - only the id and the cron are necessary - requires custom SQL (JOOQ)
     // FIXME CYRIL SCALE - No need for a strong isolation level here - the default isolation level lock all entities until the query is finished, blocking progress of tasks and potentially some update/delete operations in the UI.
@@ -124,7 +128,7 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
     final List<E> allEntities = entityDao.findAll();
 
     // schedule active entities
-    allEntities.forEach(e -> schedule(e, namespaceToQuotaExceededMap));
+    allEntities.forEach(e -> schedule(e, namespaceToQuotaExceededMap.get()));
 
     // cleanup schedules of deleted and deactivated entities
     // or entities whose workspace has exceeded quotas
@@ -143,7 +147,7 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
         } else if (!isActive(entity)) {
           log.info("{} with id {} is deactivated. Stopping the scheduled {} job.", entityName, id, taskType);
           stopJob(jobKey);
-        } else if (namespaceToQuotaExceededMap.getOrDefault(entityNamespace, false)) {
+        } else if (namespaceToQuotaExceededMap.get().getOrDefault(entityNamespace, false)) {
           log.info("workspace {} corresponding to {} with id {} has exceeded monthly quota. Stopping scheduled {} job.",
               entityNamespace, entityName, id, taskType);
           stopJob(jobKey);
@@ -159,10 +163,13 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
     List<NamespaceConfigurationDTO> namespaceCfgs = namespaceConfigurationManager.findAll();
 
     for (NamespaceConfigurationDTO namespaceCfg : namespaceCfgs) {
+      Long monthlyTasksLimit = getMonthlyTasksLimit(namespaceCfg);
+      if (monthlyTasksLimit == null || monthlyTasksLimit <= 0) {
+        continue;
+      }
       String namespace = namespaceCfg.namespace();
       long taskCount = getTasksCountForNamespace(namespaceCfg.namespace());
-      Long monthlyTasksLimit = getMonthlyTasksLimit(namespaceCfg);
-      m.put(namespace, monthlyTasksLimit != null && taskCount <= monthlyTasksLimit);
+      m.put(namespace, taskCount >= monthlyTasksLimit);
     }
 
     return m;
@@ -172,29 +179,19 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
     return Optional.of(config)
         .map(NamespaceConfigurationDTO::getNamespaceQuotasConfiguration)
         .map(NamespaceQuotasConfigurationDTO::getTaskQuotasConfiguration)
-        .map(taskType == TaskType.DETECTION ?
-            TaskQuotasConfigurationDTO::getMaximumDetectionTasksPerMonth
-            : TaskQuotasConfigurationDTO::getMaximumNotificationTasksPerMonth)
+        .map(taskQuotasConfig -> switch (taskType) {
+          case DETECTION -> taskQuotasConfig.getMaximumDetectionTasksPerMonth();
+          case NOTIFICATION -> taskQuotasConfig.getMaximumNotificationTasksPerMonth();
+        })
         .orElse(null);
   }
 
   private long getTasksCountForNamespace(String namespace) {
-    LocalDate currentDate = LocalDate.now();
-    long startOfMonthTimestamp = currentDate.withDayOfMonth(1)
-        .atStartOfDay(ZoneId.systemDefault())
-        .toInstant()
-        .toEpochMilli();
-    long endOfMonthTimestamp = currentDate.withDayOfMonth(currentDate.lengthOfMonth())
-        .atTime(23, 59, 59, 999_999_999) // End of the day
-        .atZone(ZoneId.systemDefault())
-        .toInstant()
-        .toEpochMilli();
-
+    LocalDateTime startOfMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay();
     Predicate predicate = Predicate.AND(
         Predicate.EQ("namespace", namespace),
         Predicate.EQ("type", taskType),
-        Predicate.GE("startTime", startOfMonthTimestamp),
-        Predicate.LE("startTime", endOfMonthTimestamp)
+        Predicate.GE("createTime", startOfMonth)
     );
     return taskManager.count(predicate);
   }

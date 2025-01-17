@@ -74,7 +74,7 @@ public class DetectionCronScheduler {
         this.getClass(),
         taskManager,
         namespaceConfigurationManager,
-        configuration.getNamespaceQuotaMapRefreshDelay()
+        configuration.getNamespaceQuotaCacheDurationSeconds()
     );
     executorService.scheduleWithFixedDelay(runnable,
         0, 

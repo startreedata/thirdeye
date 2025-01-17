@@ -28,9 +28,11 @@ import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.NamespaceConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.NamespaceQuotasConfigurationDTO;
 import ai.startree.thirdeye.spi.task.TaskType;
+import com.google.common.collect.ImmutableMap;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,7 +70,7 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
   private final isActiveGetter<E> isActiveGetter;
   private final TaskManager taskManager;
   private final NamespaceConfigurationManager namespaceConfigurationManager;
-  private final long namespaceQuotaMapRefreshDelay;
+  private final Supplier<HashMap<String, Boolean>> namespaceToQuotaExceededSupplier;
 
   public TaskCronSchedulerRunnable(
       final AbstractManager<E> entityDao,
@@ -82,7 +84,7 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
       final Class<?> loggerClass,
       final TaskManager taskManager,
       final NamespaceConfigurationManager namespaceConfigurationManager,
-      final long namespaceQuotaMapRefreshDelay) {
+      final long namespaceQuotaCacheDurationSeconds) {
     try {
       scheduler = StdSchedulerFactory.getDefaultScheduler();
       scheduler.setJobFactory(guiceJobFactory);
@@ -101,7 +103,8 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
     this.groupMatcher = GroupMatcher.jobGroupEquals(taskType.toString());
     this.taskManager = taskManager;
     this.namespaceConfigurationManager = namespaceConfigurationManager;
-    this.namespaceQuotaMapRefreshDelay = namespaceQuotaMapRefreshDelay;
+    this.namespaceToQuotaExceededSupplier = scheduledRefreshSupplier(
+        this::getNamespaceToQuotaExceededMap, Duration.ofSeconds(namespaceQuotaCacheDurationSeconds));
   }
 
   @Override
@@ -119,18 +122,17 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
   }
 
   private void updateSchedules() throws SchedulerException {
-
-    final Supplier<HashMap<String, Boolean>> namespaceToQuotaExceededMap = scheduledRefreshSupplier(
-        this::getNamespaceToQuotaExceededMap, Duration.ofSeconds(namespaceQuotaMapRefreshDelay));
-
     // TODO CYRIL scale - loading all entities is expensive - only the id and the cron are necessary - requires custom SQL (JOOQ)
     // FIXME CYRIL SCALE - No need for a strong isolation level here - the default isolation level lock all entities until the query is finished, blocking progress of tasks and potentially some update/delete operations in the UI.
     //   dirty reads are be fine, this logic runs every minute
     //   also only fetch only active entities directly and remove is active from Schedulable interface 
     final List<E> allEntities = entityDao.findAll();
 
+    final HashMap<String, Boolean>
+        cachedNamespaceToQuotaExceeded = namespaceToQuotaExceededSupplier.get();
+
     // schedule active entities
-    allEntities.forEach(e -> schedule(e, namespaceToQuotaExceededMap.get()));
+    allEntities.forEach(e -> schedule(e, cachedNamespaceToQuotaExceeded));
 
     // cleanup schedules of deleted and deactivated entities
     // or entities whose workspace has exceeded quotas
@@ -149,7 +151,7 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
         } else if (!isActive(entity)) {
           log.info("{} with id {} is deactivated. Stopping the scheduled {} job.", entityName, id, taskType);
           stopJob(jobKey);
-        } else if (namespaceToQuotaExceededMap.get().getOrDefault(entityNamespace, false)) {
+        } else if (cachedNamespaceToQuotaExceeded.getOrDefault(entityNamespace, false)) {
           log.info("workspace {} corresponding to {} with id {} has exceeded monthly quota. Stopping scheduled {} job.",
               entityNamespace, entityName, id, taskType);
           stopJob(jobKey);
@@ -161,16 +163,16 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
   }
 
   private HashMap<String, Boolean> getNamespaceToQuotaExceededMap() {
-    HashMap<String, Boolean> m = new HashMap<>();
-    List<NamespaceConfigurationDTO> namespaceCfgs = namespaceConfigurationManager.findAll();
+    final HashMap<String, Boolean> m = new HashMap<>();
+    final List<NamespaceConfigurationDTO> namespaceCfgs = namespaceConfigurationManager.findAll();
 
     for (NamespaceConfigurationDTO namespaceCfg : namespaceCfgs) {
-      Long monthlyTasksLimit = getMonthlyTasksLimit(namespaceCfg);
+      final Long monthlyTasksLimit = getMonthlyTasksLimit(namespaceCfg);
       if (monthlyTasksLimit == null || monthlyTasksLimit <= 0) {
         continue;
       }
-      String namespace = namespaceCfg.namespace();
-      long taskCount = getTasksCountForNamespace(namespaceCfg.namespace());
+      final String namespace = namespaceCfg.namespace();
+      final long taskCount = getTasksCountForNamespace(namespaceCfg.namespace());
       m.put(namespace, taskCount >= monthlyTasksLimit);
     }
 
@@ -188,9 +190,9 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
         .orElse(null);
   }
 
-  private long getTasksCountForNamespace(String namespace) {
-    LocalDateTime startOfMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay();
-    Predicate predicate = Predicate.AND(
+  private long getTasksCountForNamespace(final String namespace) {
+    final LocalDateTime startOfMonth = LocalDate.now(ZoneOffset.UTC).withDayOfMonth(1).atStartOfDay();
+    final Predicate predicate = Predicate.AND(
         Predicate.EQ("namespace", namespace),
         Predicate.EQ("type", taskType),
         Predicate.GE("createTime", startOfMonth)

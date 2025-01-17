@@ -82,6 +82,7 @@ public class TaskManagerImpl implements TaskManager {
 
     final TaskDTO task = new TaskDTO()
         .setTaskType(taskType)
+        .setTaskSubType(taskSubType)
         .setJobName(taskType.toString() + "_" + taskInfo.getRefId())
         .setStatus(TaskStatus.WAITING)
         .setTaskInfo(taskInfoJson)

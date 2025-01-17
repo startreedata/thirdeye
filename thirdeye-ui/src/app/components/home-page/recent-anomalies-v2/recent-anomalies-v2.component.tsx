@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Button, Grid, Link, Typography } from "@material-ui/core";
+import { Box, Grid, Link, Typography } from "@material-ui/core";
 import TableCell from "@material-ui/core/TableCell";
 import TableRow from "@material-ui/core/TableRow";
 import { capitalize, sortBy } from "lodash";
@@ -32,9 +32,12 @@ import {
 } from "../title-card-table/title-card-table.component";
 import { AnomalyRowV2 } from "./anomaly-row-v2/anomaly-row-v2.component";
 import { useFetchQuery } from "../../../rest/hooks/useFetchQuery";
+import { useLatestSubscriptionGroupsStyles } from "../latest-subscription-groups/latest-subscription-groups.styles";
+import { ArrowForward } from "@material-ui/icons";
 
 export const RecentAnomaliesV2: FunctionComponent = () => {
     const { t } = useTranslation();
+    const styles = useLatestSubscriptionGroupsStyles();
 
     const startTime = DateTime.local()
         .minus({ month: 1 })
@@ -67,7 +70,7 @@ export const RecentAnomaliesV2: FunctionComponent = () => {
 
     return (
         <>
-            <Grid container direction="row">
+            <Grid container alignItems="center" justifyContent="space-between">
                 <Grid item>
                     <Typography style={{ marginBottom: 8 }} variant="h5">
                         {t("label.recent-entity", {
@@ -76,12 +79,15 @@ export const RecentAnomaliesV2: FunctionComponent = () => {
                     </Typography>
                 </Grid>
                 <Grid item>
-                    <Link component={RouterLink} to={getAnomaliesAllPath()}>
-                        <Button color="primary" size="large" variant="outlined">
-                            {t("label.view-all-entities", {
-                                entity: t("label.anomalies"),
-                            })}
-                        </Button>
+                    <Link
+                        className={styles.allAlertsLink}
+                        component={RouterLink}
+                        to={getAnomaliesAllPath()}
+                    >
+                        {t("label.view-all-entities", {
+                            entity: t("label.anomalies"),
+                        })}
+                        <ArrowForward className={styles.alertsLinkIcon} />
                     </Link>
                 </Grid>
             </Grid>

@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Grid, Link, Typography } from "@material-ui/core";
+import { Box, Grid, Link } from "@material-ui/core";
 import { sortBy } from "lodash";
 import React, { FunctionComponent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
@@ -235,20 +235,7 @@ export const RecentFailures: FunctionComponent = () => {
     return (
         <>
             <Grid container alignItems="center" justifyContent="space-between">
-                <Grid item>
-                    <Typography variant="h5">
-                        {t("label.recent-anomaly-detection-failures")}
-                    </Typography>
-                    <Typography variant="body1">
-                        <LoadingErrorStateSwitch
-                            isError={false}
-                            isLoading={isLoading}
-                            loadingState={<SkeletonV1 animation="pulse" />}
-                        >
-                            {t("label.latest-errors-in-your-alerts")}
-                        </LoadingErrorStateSwitch>
-                    </Typography>
-                </Grid>
+                <Grid item />
                 <Grid item>
                     <TimeRangeSelectorButton
                         end={endTime}
@@ -261,7 +248,7 @@ export const RecentFailures: FunctionComponent = () => {
                 </Grid>
             </Grid>
             <Box paddingTop={2} />
-            <PageContentsCardV1>
+            <PageContentsCardV1 disablePadding>
                 <LoadingErrorStateSwitch
                     errorState={
                         <Box
@@ -291,7 +278,7 @@ export const RecentFailures: FunctionComponent = () => {
                         </>
                     }
                 >
-                    <Box height="100vh">
+                    <Box height="90vh">
                         <DataGridV1<any>
                             disableSearch
                             disableSelection

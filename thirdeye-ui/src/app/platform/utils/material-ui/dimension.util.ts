@@ -26,7 +26,7 @@ export const DimensionV1 = {
     PopoverElevation: 5,
     PopoverBorderRadius: 0,
     CardBorderRadius: 0,
-    BorderRadiusDefault: 4,
+    BorderRadiusDefault: 8,
     GridSpacingDefault: 2,
     PageGridSpacing: 3,
     ToolbarHeight: 56,

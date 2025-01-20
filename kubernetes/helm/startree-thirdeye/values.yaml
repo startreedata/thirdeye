@@ -147,6 +147,10 @@ defaultWorkspaceConfiguration:
     minimumOnboardingStartTime: 946684800000
   templateConfiguration:
     sqlLimitStatement: 100000000
+  namespaceQuotasConfiguration:
+    taskQuotasConfiguration:
+      maximumDetectionTasksPerMonth: 0
+      maximumNotificationTasksPerMonth: 0
 
 rca:
   topContributors:

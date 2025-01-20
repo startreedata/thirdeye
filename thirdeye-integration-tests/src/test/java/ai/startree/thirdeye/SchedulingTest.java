@@ -19,18 +19,25 @@ import static ai.startree.thirdeye.PinotDataSourceManager.PINOT_DATASET_NAME;
 import static ai.startree.thirdeye.ThirdEyeTestClient.ALERT_LIST_TYPE;
 import static ai.startree.thirdeye.ThirdEyeTestClient.ANOMALIES_LIST_TYPE;
 import static ai.startree.thirdeye.ThirdEyeTestClient.DATASOURCE_LIST_TYPE;
+import static ai.startree.thirdeye.ThirdEyeTestClient.TASK_LIST_TYPE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.startree.thirdeye.aspect.TimeProvider;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
+import ai.startree.thirdeye.spi.api.TaskApi;
+import ai.startree.thirdeye.spi.task.TaskStatus;
+import ai.startree.thirdeye.spi.task.TaskSubType;
+import ai.startree.thirdeye.spi.task.TaskType;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,6 +78,7 @@ public class SchedulingTest {
   private static final long MARCH_26_2020_05H00 = 1585198800_000L;
   // = MARCH_26_2020_05H00 - delay P3D and floor granularity P1D (see config in alert json)
   private static final long MARCH_23_2020_00H00 = 1584921600_000L;
+  public static final Set<TaskStatus> TASK_PENDING_STATUSES = Set.of(TaskStatus.WAITING, TaskStatus.RUNNING);
 
   static {
     try {
@@ -86,6 +94,7 @@ public class SchedulingTest {
   private ThirdEyeTestClient client;
   private long alertId;
   private DataSourceApi pinotDataSourceApi;
+  private Long onboardingTaskId;
 
   @BeforeClass
   public void beforeClass() throws Exception {
@@ -144,11 +153,23 @@ public class SchedulingTest {
   }
 
   @Test(dependsOnMethods = "testCreateAlertLastTimestamp", timeOut = 60000L)
+  public void testTaskIsCreated() throws Exception {
+    final List<TaskApi> tasks = getTasks();
+    assertThat(tasks).hasSize(1);
+    final TaskApi task = tasks.getFirst();
+    assertThat(task.getTaskType()).isEqualTo(TaskType.DETECTION);
+    assertThat(task.getTaskSubType()).isEqualTo(TaskSubType.DETECTION_HISTORICAL_DATA_AFTER_CREATE);
+    onboardingTaskId = task.getId(); 
+  }
+
+  @Test(dependsOnMethods = "testTaskIsCreated", timeOut = 60000L)
   public void testOnboardingLastTimestamp() throws Exception {
-    // wait for anomalies - proxy to know when the onboarding task has run
-    while (getAnomalies().isEmpty()) {
+    // wait for onboarding task to be completed
+    TaskApi onboardingTask = getTask(onboardingTaskId);
+    while (TASK_PENDING_STATUSES.contains(onboardingTask.getStatus())) {
       // see taskDriver server config for optimization
       Thread.sleep(1000);
+      onboardingTask = getTask(onboardingTaskId); 
     }
 
     // check that lastTimestamp is the endTime of the Onboarding task: March 21 1H
@@ -158,9 +179,6 @@ public class SchedulingTest {
 
   @Test(dependsOnMethods = "testOnboardingLastTimestamp", timeOut = 60000L)
   public void testAfterDetectionCronLastTimestamp() throws InterruptedException {
-    // get current number of anomalies
-    final int numAnomaliesBeforeDetectionRun = getAnomalies().size();
-
     // advance detection time to March 22, 2020, 00:00:00 UTC
     // this should trigger the cron - and a new anomaly is expected on [March 21 - March 22]
     CLOCK.useMockTime(MARCH_25_2020_05H00);
@@ -169,10 +187,13 @@ public class SchedulingTest {
     // give thread to detectionCronScheduler and to quartz scheduler - (quartz idle time is weaved to 100 ms for test speed)
     Thread.sleep(1000);
 
-    // wait for the new anomaly to be created - proxy to know when the detection has run
-    while (getAnomalies().size() == numAnomaliesBeforeDetectionRun) {
+    // wait for the new task to be created - proxy to know when the detection is triggered
+    List<TaskApi> tasks = getTasks();
+    while (tasks.size() == 1 || TASK_PENDING_STATUSES.contains(tasks.getLast().getStatus())) {
       Thread.sleep(1000);
+      tasks = getTasks();
     }
+     assertThat(tasks.getLast().getTaskSubType()).isEqualTo(TaskSubType.DETECTION_TRIGGERED_BY_CRON);
 
     // check that lastTimestamp after detection is the runTime of the cron
     final long alertLastTimestamp = getAlertLastTimestamp();
@@ -219,6 +240,20 @@ public class SchedulingTest {
     final Response response = client.request("api/anomalies").get();
     assert200(response);
     return response.readEntity(ANOMALIES_LIST_TYPE);
+  }
+
+  private List<TaskApi> getTasks() {
+    final Response response = client.request("api/tasks").get();
+    assert200(response);
+    final List<TaskApi> taskApis = response.readEntity(TASK_LIST_TYPE);
+    taskApis.sort(Comparator.comparingLong(TaskApi::getId));
+    return taskApis;
+  }
+
+  private TaskApi getTask(final long id) {
+    final Response response = client.request("api/tasks/" + id).get();
+    assert200(response);
+    return response.readEntity(TaskApi.class);
   }
 
   private long getAlertLastTimestamp() {

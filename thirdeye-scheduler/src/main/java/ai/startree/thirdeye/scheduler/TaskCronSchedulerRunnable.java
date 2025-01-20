@@ -40,6 +40,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.quartz.CronScheduleBuilder;
@@ -58,7 +59,8 @@ import org.slf4j.LoggerFactory;
 
 public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnable {
 
-  private static final String NULL_NAMESPACE_KEY = "__null__";
+  private static final String NULL_NAMESPACE_KEY = "__NULL_NAMESPACE_" +
+      RandomStringUtils.randomAlphanumeric(10).toUpperCase();
 
   private final Logger log;
   private final Scheduler scheduler;
@@ -145,7 +147,6 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
       try {
         final Long id = getIdFromJobKey(jobKey);
         final E entity = idToEntity.get(id);
-        final String entityNamespace = nonNullNamespace(entity.namespace());
         if (entity == null) {
           log.info("{} with id {} does not exist anymore. Stopping the scheduled {} job.",
               entityName, id, taskType);
@@ -153,9 +154,9 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
         } else if (!isActive(entity)) {
           log.info("{} with id {} is deactivated. Stopping the scheduled {} job.", entityName, id, taskType);
           stopJob(jobKey);
-        } else if (cachedNamespaceToQuotaExceeded.getOrDefault(entityNamespace, false)) {
+        } else if (cachedNamespaceToQuotaExceeded.getOrDefault(nonNullNamespace(entity.namespace()), false)) {
           log.info("workspace {} corresponding to {} with id {} has exceeded monthly quota. Stopping scheduled {} job.",
-              entityNamespace, entityName, id, taskType);
+              nonNullNamespace(entity.namespace()), entityName, id, taskType);
           stopJob(jobKey);
         }
       } catch (final Exception e) {

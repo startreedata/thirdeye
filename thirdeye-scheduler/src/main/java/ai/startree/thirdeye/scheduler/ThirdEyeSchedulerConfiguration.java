@@ -28,7 +28,7 @@ public class ThirdEyeSchedulerConfiguration {
   private boolean detectionAlert = false;
   private boolean dataAvailabilityEventListener = false;
   private int alertUpdateDelay = 60;
-  private int namespaceQuotaCacheDurationSeconds = 600;
+  private int namespaceQuotaCacheDurationSeconds = 300;
 
   // TODO spyne: consolidate all the update delays into a single configuration after consolidating the core scheduler code
   private int subscriptionGroupUpdateDelay = 60;

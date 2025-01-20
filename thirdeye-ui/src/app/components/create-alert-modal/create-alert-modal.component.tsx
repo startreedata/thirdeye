@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Grid, TextField, Typography } from "@material-ui/core";
+import { Grid, TextField } from "@material-ui/core";
 import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useOutletContext } from "react-router-dom";
@@ -155,18 +155,6 @@ export const CreateAlertModal: FunctionComponent<CreateAlertModalModalProps> =
                     />
                 </Grid>
                 <Grid container>
-                    <Grid item xs={12}>
-                        <Box marginBottom={2}>
-                            <Typography variant="h6">
-                                {t("label.dimensions-recommender")}
-                            </Typography>
-                            <Typography variant="body2">
-                                {t(
-                                    "message.automatically-detects-dimensions-based-on-your-selection"
-                                )}
-                            </Typography>
-                        </Box>
-                    </Grid>
                     <CronEditor
                         fullWidth
                         cron={alert.cron}

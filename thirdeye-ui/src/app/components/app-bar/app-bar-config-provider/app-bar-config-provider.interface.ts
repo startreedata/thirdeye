@@ -21,4 +21,5 @@ export interface AppBarConfigProviderProps {
 
 export interface AppBarConfigProviderPropsContextProps {
     setShowAppNavBar: (flag: boolean) => void;
+    remainingQuota: { notification: number; detection: number } | null;
 }

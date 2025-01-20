@@ -28,7 +28,6 @@ import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.NamespaceConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.NamespaceQuotasConfigurationDTO;
 import ai.startree.thirdeye.spi.task.TaskType;
-import com.google.common.collect.ImmutableMap;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -42,6 +41,7 @@ import java.util.TimeZone;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.Job;
 import org.quartz.JobBuilder;
@@ -57,7 +57,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnable {
-  
+
+  private static final String NULL_NAMESPACE_KEY = "__null__";
+
   private final Logger log;
   private final Scheduler scheduler;
   private final TaskType taskType;
@@ -70,7 +72,7 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
   private final isActiveGetter<E> isActiveGetter;
   private final TaskManager taskManager;
   private final NamespaceConfigurationManager namespaceConfigurationManager;
-  private final Supplier<HashMap<String, Boolean>> namespaceToQuotaExceededSupplier;
+  private final Supplier<Map<String, Boolean>> namespaceToQuotaExceededSupplier;
 
   public TaskCronSchedulerRunnable(
       final AbstractManager<E> entityDao,
@@ -128,7 +130,7 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
     //   also only fetch only active entities directly and remove is active from Schedulable interface 
     final List<E> allEntities = entityDao.findAll();
 
-    final HashMap<String, Boolean>
+    final Map<String, Boolean>
         cachedNamespaceToQuotaExceeded = namespaceToQuotaExceededSupplier.get();
 
     // schedule active entities
@@ -143,7 +145,7 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
       try {
         final Long id = getIdFromJobKey(jobKey);
         final E entity = idToEntity.get(id);
-        final String entityNamespace = entity.namespace();
+        final String entityNamespace = nonNullNamespace(entity.namespace());
         if (entity == null) {
           log.info("{} with id {} does not exist anymore. Stopping the scheduled {} job.",
               entityName, id, taskType);
@@ -162,7 +164,7 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
     }
   }
 
-  private HashMap<String, Boolean> getNamespaceToQuotaExceededMap() {
+  private Map<String, Boolean> getNamespaceToQuotaExceededMap() {
     final HashMap<String, Boolean> m = new HashMap<>();
     final List<NamespaceConfigurationDTO> namespaceCfgs = namespaceConfigurationManager.findAll();
 
@@ -173,10 +175,10 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
       }
       final String namespace = namespaceCfg.namespace();
       final long taskCount = getTasksCountForNamespace(namespaceCfg.namespace());
-      m.put(namespace, taskCount >= monthlyTasksLimit);
+      m.put(nonNullNamespace(namespace), taskCount >= monthlyTasksLimit);
     }
 
-    return m;
+    return Map.copyOf(m);
   }
 
   private Long getMonthlyTasksLimit(final @NonNull NamespaceConfigurationDTO config) {
@@ -201,13 +203,13 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
   }
 
   private void schedule(final E entity,
-      final HashMap<String, Boolean> namespaceToQuotaExceededMap) {
+      final Map<String, Boolean> namespaceToQuotaExceededMap) {
     if (!isActive(entity)) {
       log.debug("{}: {} is inactive. Skipping.", entityName, entity.getId());
       return;
     }
 
-    final String entityNamespace = entity.namespace();
+    final String entityNamespace = nonNullNamespace(entity.namespace());
     if (namespaceToQuotaExceededMap.getOrDefault(entityNamespace, false)) {
       log.info("workspace {} corresponding to {} with id {} has exceeded monthly quota. Skipping scheduling {} job.",
           entityNamespace, entityName, entity.getId(), taskType);
@@ -273,6 +275,10 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
   
   private boolean isActive(final E entity) {
     return isActiveGetter.isActive(entity);
+  }
+
+  private static @NonNull String nonNullNamespace(@Nullable String namespace) {
+    return namespace == null ? NULL_NAMESPACE_KEY : namespace;
   }
 
   private String cronOf(final E entity) {

@@ -2204,7 +2204,9 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                     {openCreateAlertModal && (
                         <CreateAlertModal
                             defaultCron={alertInsight?.defaultCron}
-                            onCancel={() => setOpenCreateAlertModal(false)}
+                            onCancel={() => {
+                                setOpenCreateAlertModal(false);
+                            }}
                         />
                     )}
                     {!isNil(selectedTable?.dataset?.id) && (

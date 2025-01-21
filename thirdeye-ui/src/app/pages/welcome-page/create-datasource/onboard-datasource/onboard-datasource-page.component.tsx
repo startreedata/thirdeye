@@ -18,7 +18,6 @@ import {
     FormControl,
     FormControlLabel,
     FormLabel,
-    Grid,
     Radio,
     RadioGroup,
     Typography,
@@ -40,7 +39,6 @@ import {
     JSONEditorV1,
     NotificationTypeV1,
     PageContentsCardV1,
-    PageContentsGridV1,
     useNotificationProviderV1,
 } from "../../../../platform/components";
 import { ActionStatus } from "../../../../rest/actions.interfaces";
@@ -68,7 +66,6 @@ import {
 
 export const WelcomeSelectDatasource: FunctionComponent = () => {
     const navigate = useNavigate();
-
     const [editedDatasource, setEditedDatasource] = useState<Datasource>(
         createDefaultDatasource()
     );
@@ -241,43 +238,52 @@ export const WelcomeSelectDatasource: FunctionComponent = () => {
 
     return (
         <>
-            <PageContentsGridV1>
-                <Grid item xs={12}>
-                    <PageContentsCardV1>
-                        <Box px={2} py={2}>
-                            <Typography variant="h5">
-                                {t("message.select-entity", {
-                                    entity: t("label.datasource"),
-                                })}
-                            </Typography>
-                            <Typography variant="body2">
-                                {capitalize(
-                                    t(
-                                        "message.you-can-always-add-remove-or-change-entity-in-the-configuration-section",
-                                        { entity: t("label.datasource") }
-                                    )
-                                )}
-                            </Typography>
-                        </Box>
+            <Box alignContent="center" display="flex" flexDirection="column">
+                <PageContentsCardV1>
+                    <Typography
+                        align="center"
+                        style={{ marginLeft: "-20px" }}
+                        variant="h5"
+                    >
+                        {t("message.select-entity", {
+                            entity: t("label.datasource"),
+                        })}
+                    </Typography>
+                    <Typography align="center" variant="body2">
+                        {capitalize(
+                            t(
+                                "message.you-can-always-add-remove-or-change-entity-in-the-configuration-section",
+                                { entity: t("label.datasource") }
+                            )
+                        )}
+                    </Typography>
 
-                        <LoadingErrorStateSwitch
-                            wrapInCard
-                            wrapInGrid
-                            isError={datasourcesStatus === ActionStatus.Error}
-                            isLoading={
-                                datasourcesStatus === ActionStatus.Working ||
-                                datasourcesStatus === ActionStatus.Initial ||
-                                recommendedDatasourcesStatus ===
-                                    ActionStatus.Working
-                            }
-                        >
-                            {datasourceGroups.map((datasourceGroup) => (
-                                <>
-                                    {datasourceGroup.options.length > 0 && (
+                    <LoadingErrorStateSwitch
+                        wrapInCard
+                        wrapInGrid
+                        isError={datasourcesStatus === ActionStatus.Error}
+                        isLoading={
+                            datasourcesStatus === ActionStatus.Working ||
+                            datasourcesStatus === ActionStatus.Initial ||
+                            recommendedDatasourcesStatus ===
+                                ActionStatus.Working
+                        }
+                    >
+                        {datasourceGroups.map((datasourceGroup) => (
+                            <>
+                                {datasourceGroup.options.length > 0 && (
+                                    <Box
+                                        display="flex"
+                                        justifyContent="center"
+                                        key={datasourceGroup.key}
+                                        marginTop="20px"
+                                        px={2}
+                                        py={1}
+                                    >
                                         <Box
-                                            key={datasourceGroup.key}
-                                            px={2}
-                                            py={1}
+                                            display="flex"
+                                            justifyContent="start"
+                                            minWidth="220px"
                                         >
                                             <FormControl component="fieldset">
                                                 <FormLabel
@@ -320,21 +326,21 @@ export const WelcomeSelectDatasource: FunctionComponent = () => {
                                                 </RadioGroup>
                                             </FormControl>
                                         </Box>
-                                    )}
-                                </>
-                            ))}
-                        </LoadingErrorStateSwitch>
+                                    </Box>
+                                )}
+                            </>
+                        ))}
+                    </LoadingErrorStateSwitch>
 
-                        {selectedDatasourceValue === ADD_NEW_DATASOURCE ? (
-                            <JSONEditorV1<Datasource>
-                                hideValidationSuccessIcon
-                                value={editedDatasource}
-                                onChange={handleDatasourceChange}
-                            />
-                        ) : null}
-                    </PageContentsCardV1>
-                </Grid>
-            </PageContentsGridV1>
+                    {selectedDatasourceValue === ADD_NEW_DATASOURCE ? (
+                        <JSONEditorV1<Datasource>
+                            hideValidationSuccessIcon
+                            value={editedDatasource}
+                            onChange={handleDatasourceChange}
+                        />
+                    ) : null}
+                </PageContentsCardV1>
+            </Box>
             <WizardBottomBar
                 backBtnLink={AppRoute.WELCOME}
                 handleNextClick={handleNext}

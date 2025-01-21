@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Grid, TextField, Typography } from "@material-ui/core";
+import { Grid, TextField } from "@material-ui/core";
 import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useOutletContext } from "react-router-dom";
@@ -27,12 +27,14 @@ import { CronEditor } from "../cron-editor-v1/cron-editor-v2.component";
 import { InputSectionV2 } from "../form-basics/input-section-v2/input-section-v2.component";
 import { Modal } from "../modal/modal.component";
 import { CreateAlertModalModalProps } from "./create-alert-modal.interfaces";
+import { useAppBarConfigProvider } from "../app-bar/app-bar-config-provider/app-bar-config-provider.component";
 
 export const CreateAlertModal: FunctionComponent<CreateAlertModalModalProps> =
     ({ onCancel, defaultCron }) => {
         const { t } = useTranslation();
 
         const navigate = useNavigate();
+        const { remainingQuota } = useAppBarConfigProvider();
 
         const {
             alert,
@@ -68,7 +70,34 @@ export const CreateAlertModal: FunctionComponent<CreateAlertModalModalProps> =
             }
         }, [defaultCron]);
 
-        const onCreateAlertClick: () => void = async () => {
+        const checkQuota = (): void => {
+            if (
+                remainingQuota?.notification &&
+                remainingQuota?.notification <= 0
+            ) {
+                showDialog({
+                    type: DialogType.ALERT,
+                    contents: (
+                        <>
+                            <div>{t("message.quota-expired-detection")}</div>
+                            <div>
+                                {t("message.contact-support", {
+                                    message:
+                                        "For questions or to request a higher quota,",
+                                })}
+                            </div>
+                        </>
+                    ),
+                    okButtonText: t("label.confirm"),
+                    cancelButtonText: t("label.cancel"),
+                    onOk: () => handleCreateAlertClick(alert),
+                });
+            } else {
+                handleCreateAlertClick(alert);
+            }
+        };
+
+        const onCreateAlertClick: () => boolean = () => {
             if (
                 alert.templateProperties.monitoringGranularity &&
                 (alert.templateProperties.monitoringGranularity ===
@@ -83,12 +112,14 @@ export const CreateAlertModal: FunctionComponent<CreateAlertModalModalProps> =
                     ),
                     okButtonText: t("label.confirm"),
                     cancelButtonText: t("label.cancel"),
-                    onOk: () => handleCreateAlertClick(alert),
+                    onOk: () => checkQuota(),
+                    keepDialogOnOk: true,
                 });
             } else {
-                handleCreateAlertClick(alert);
+                checkQuota();
             }
-            onCancel();
+
+            return false;
         };
 
         return (
@@ -155,18 +186,6 @@ export const CreateAlertModal: FunctionComponent<CreateAlertModalModalProps> =
                     />
                 </Grid>
                 <Grid container>
-                    <Grid item xs={12}>
-                        <Box marginBottom={2}>
-                            <Typography variant="h6">
-                                {t("label.dimensions-recommender")}
-                            </Typography>
-                            <Typography variant="body2">
-                                {t(
-                                    "message.automatically-detects-dimensions-based-on-your-selection"
-                                )}
-                            </Typography>
-                        </Box>
-                    </Grid>
                     <CronEditor
                         fullWidth
                         cron={alert.cron}

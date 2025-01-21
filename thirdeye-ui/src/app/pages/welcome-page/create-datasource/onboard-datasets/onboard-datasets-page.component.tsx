@@ -13,14 +13,7 @@
  * the License.
  */
 
-import {
-    Box,
-    Button,
-    Divider,
-    FormGroup,
-    Grid,
-    Typography,
-} from "@material-ui/core";
+import { Box, Button, Divider, Typography } from "@material-ui/core";
 import type { AxiosError } from "axios";
 import { capitalize, isEmpty } from "lodash";
 import React, {
@@ -33,16 +26,17 @@ import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { EmptyStateSwitch } from "../../../../components/page-states/empty-state-switch/empty-state-switch.component";
 import { LoadingErrorStateSwitch } from "../../../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
-import { SelectDatasetOption } from "../../../../components/welcome-onboard-datasource/select-dataset-option/select-dataset-option.component";
 import { WizardBottomBar } from "../../../../components/welcome-onboard-datasource/wizard-bottom-bar/wizard-bottom-bar.component";
 import {
     NotificationTypeV1,
     PageContentsCardV1,
-    PageContentsGridV1,
     useNotificationProviderV1,
 } from "../../../../platform/components";
 import { ActionStatus } from "../../../../rest/actions.interfaces";
-import { onBoardDataset } from "../../../../rest/datasets/datasets.rest";
+import {
+    createDemoDatasets,
+    onBoardDataset,
+} from "../../../../rest/datasets/datasets.rest";
 import {
     useGetDatasource,
     useGetTablesForDatasourceID,
@@ -56,9 +50,20 @@ import {
 import { ONBOARD_DATASETS_TEST_IDS } from "./onboard-datasets-page.interface";
 import { Alert } from "@material-ui/lab";
 import InfoOutlined from "@material-ui/icons/InfoOutlined";
+import { useGetDemoDatasets } from "../../../../rest/datasets/datasets.actions";
+import { DatasetList } from "./dataset-list";
+import { useOnBoardDatasetStyles } from "./styles";
 
 export const WelcomeSelectDatasets: FunctionComponent = () => {
+    const classes = useOnBoardDatasetStyles();
     const [selectedDatasets, setSelectedDatasets] = useState<string[]>([]);
+    const [selectedDemoDatasets, setSelectedDemoDatasets] = useState<string[]>(
+        []
+    );
+    const [isLoading, setIsLoading] = useState(false);
+    const [onboardingError, setOnboardingError] = useState<AxiosError | null>(
+        null
+    );
     const { notify } = useNotificationProviderV1();
     const { t } = useTranslation();
     const navigate = useNavigate();
@@ -78,21 +83,45 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
         errorMessages: getDatSourceErrorMessages,
     } = useGetDatasource();
 
-    const handleToggleCheckbox = useCallback(
-        (event: React.ChangeEvent<HTMLInputElement>): void => {
+    const {
+        datasets: demoDatasets,
+        getDemoDatasets,
+        status: getDemoDatasetsStatus,
+        errorMessages: getDemoDatasetsErrorMessages,
+    } = useGetDemoDatasets();
+
+    const handleDatasetSelect = useCallback(
+        (
+            event: React.ChangeEvent<HTMLInputElement>,
+            datasetType: "selectedSourceDatasets" | "demoDatasets"
+        ): void => {
             const { name, checked } = event.target;
 
             if (!name) {
                 return;
             }
 
-            setSelectedDatasets((currentlySelected) => {
-                if (!checked) {
-                    return currentlySelected.filter((item) => item !== name);
-                }
+            if (datasetType === "selectedSourceDatasets") {
+                setSelectedDatasets((currentlySelected) => {
+                    if (!checked) {
+                        return currentlySelected.filter(
+                            (item) => item !== name
+                        );
+                    }
 
-                return [...currentlySelected, name];
-            });
+                    return [...currentlySelected, name];
+                });
+            } else {
+                setSelectedDemoDatasets((currentlySelected) => {
+                    if (!checked) {
+                        return currentlySelected.filter(
+                            (item) => item !== name
+                        );
+                    }
+
+                    return [...currentlySelected, name];
+                });
+            }
         },
         []
     );
@@ -100,6 +129,7 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
     useEffect(() => {
         if (datasourceId) {
             getDatasource(Number(datasourceId));
+            getDemoDatasets(Number(datasourceId));
             getTableForDatasourceID(Number(datasourceId)).then((datasets) => {
                 if (!datasets) {
                     return;
@@ -134,6 +164,17 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
 
     useEffect(() => {
         notifyIfErrors(
+            getDemoDatasetsStatus,
+            getDemoDatasetsErrorMessages,
+            notify,
+            t("message.error-while-fetching", {
+                entity: t("label.demo-datasets"),
+            })
+        );
+    }, [getDemoDatasetsStatus]);
+
+    useEffect(() => {
+        notifyIfErrors(
             getTablesStatus,
             errorMessages,
             notify,
@@ -145,10 +186,27 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
         );
     }, [getTablesStatus]);
 
+    useEffect(() => {
+        if (onboardingError) {
+            notifyIfErrors(
+                ActionStatus.Error,
+                getErrorMessages(onboardingError),
+                notify,
+                t("message.onboard-error", {
+                    entity: t("label.dataset"),
+                })
+            );
+        }
+    }, [onboardingError]);
+
     const handleOnboardDatasets = useCallback(
-        (datasetNames: string[], datasourceId: string) =>
-            Promise.all(
-                datasetNames.map((datasetName) =>
+        (
+            datasetNames: string[],
+            selectedDemoDatasets: string[],
+            datasourceId: string
+        ) =>
+            Promise.all([
+                ...datasetNames.map((datasetName) =>
                     onBoardDataset(datasetName, datasourceId)
                         .then(() => {
                             notify(
@@ -163,19 +221,39 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
                             return Promise.resolve();
                         })
                         .catch((error: AxiosError) => {
-                            notifyIfErrors(
-                                ActionStatus.Error,
-                                getErrorMessages(error),
-                                notify,
-                                t("message.onboard-error", {
+                            return Promise.reject(error);
+                        })
+                ),
+                ...selectedDemoDatasets?.map((datasetId) =>
+                    createDemoDatasets(datasetId!, Number(datasourceId))
+                        .then(() => {
+                            notify(
+                                NotificationTypeV1.Success,
+                                t("message.onboard-success", {
                                     entity: t("label.dataset"),
                                 })
                             );
+                            // Redirect to welcome landing
+                            navigate(getWelcomeLandingPath());
 
-                            return Promise.reject();
+                            return Promise.resolve();
                         })
-                )
-            ),
+                        .catch((error: AxiosError) => {
+                            return Promise.reject(error);
+                        })
+                ),
+            ])
+                .then(() => {
+                    setOnboardingError(null);
+                })
+                .catch((error) => {
+                    setOnboardingError(error);
+
+                    return Promise.reject();
+                })
+                .finally(() => {
+                    setIsLoading(false);
+                }),
         []
     );
 
@@ -183,132 +261,183 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
         if (!datasourceId) {
             return;
         }
-
-        handleOnboardDatasets(selectedDatasets, datasourceId).then(() => {
+        const selectedDemoDatasetsIds = selectedDemoDatasets
+            .map(
+                (datasetName) =>
+                    demoDatasets?.find(
+                        (dataset) => dataset.name === datasetName
+                    )?.id
+            )
+            ?.filter((id): id is string => id !== undefined);
+        setIsLoading(true);
+        handleOnboardDatasets(
+            selectedDatasets,
+            selectedDemoDatasetsIds,
+            datasourceId
+        ).then(() => {
+            setIsLoading(false);
             navigate(getWelcomeLandingPath());
         });
-    }, [selectedDatasets, datasourceId]);
+    }, [selectedDatasets, datasourceId, selectedDemoDatasets]);
 
     const isNextButtonDisabled =
-        tables?.length === 0 || isEmpty(selectedDatasets);
+        (tables?.length === 0 && demoDatasets?.length === 0) ||
+        (isEmpty(selectedDatasets) && isEmpty(selectedDemoDatasets));
 
     return (
         <>
-            <PageContentsGridV1>
-                <Grid item xs={12}>
-                    <LoadingErrorStateSwitch
-                        wrapInCard
-                        wrapInGrid
-                        isError={getTablesStatus === ActionStatus.Error}
-                        isLoading={
-                            getTablesStatus === ActionStatus.Working ||
-                            getTablesStatus === ActionStatus.Initial
-                        }
-                    >
-                        <PageContentsCardV1>
-                            <Box px={2} py={2}>
-                                <Typography variant="h5">
-                                    {t(
-                                        "message.onboard-datasource-onboard-datasets-for",
-                                        {
-                                            datasetName: datasource?.name,
-                                        }
-                                    )}
-                                </Typography>
-                                <Typography variant="body2">
-                                    {t(
-                                        "message.select-the-datasets-you-want-to-include-in-your-configuration"
-                                    )}
-                                </Typography>
-                                <LoadingErrorStateSwitch
-                                    wrapInCard
-                                    wrapInGrid
-                                    isError={
-                                        getTablesStatus === ActionStatus.Error
+            <Box
+                alignContent="center"
+                className={classes.container}
+                display="flex"
+                flexDirection="column"
+            >
+                <LoadingErrorStateSwitch
+                    wrapInCard
+                    wrapInGrid
+                    isError={getTablesStatus === ActionStatus.Error}
+                    isLoading={
+                        getTablesStatus === ActionStatus.Working ||
+                        getTablesStatus === ActionStatus.Initial
+                    }
+                >
+                    <PageContentsCardV1>
+                        <Box
+                            alignContent="center"
+                            display="flex"
+                            flexDirection="column"
+                        >
+                            <Typography align="center" variant="h5">
+                                {t("message.select-your-datasets")}
+                            </Typography>
+                            <Typography align="center" variant="body2">
+                                {t("message.add-data-to-te-from-source")}
+                            </Typography>
+                            <LoadingErrorStateSwitch
+                                wrapInCard
+                                wrapInGrid
+                                isError={getTablesStatus === ActionStatus.Error}
+                                isLoading={
+                                    getTablesStatus === ActionStatus.Working
+                                }
+                            >
+                                <EmptyStateSwitch
+                                    emptyState={
+                                        <Box p={5}>
+                                            <Alert
+                                                icon={<InfoOutlined />}
+                                                severity="info"
+                                                variant="outlined"
+                                            >
+                                                {t(
+                                                    "message.no-datasets-available-in-datasource"
+                                                )}
+                                            </Alert>
+                                        </Box>
                                     }
-                                    isLoading={
-                                        getTablesStatus === ActionStatus.Working
+                                    isEmpty={
+                                        isEmpty(tables) && isEmpty(demoDatasets)
                                     }
                                 >
-                                    <EmptyStateSwitch
-                                        emptyState={
-                                            <Box p={5}>
-                                                <Alert
-                                                    icon={<InfoOutlined />}
-                                                    severity="info"
-                                                    variant="outlined"
-                                                >
-                                                    {t(
-                                                        "message.no-datasets-available-in-datasource"
-                                                    )}
-                                                </Alert>
-                                            </Box>
+                                    <Box
+                                        data-testid={
+                                            ONBOARD_DATASETS_TEST_IDS.DATASETS_OPTIONS_CONTAINER
                                         }
-                                        isEmpty={isEmpty(tables)}
+                                        display="flex"
+                                        gridGap="64px"
+                                        id="datasets-options-container"
+                                        justifyContent="center"
+                                        mt={2}
                                     >
-                                        <Box
-                                            alignItems="flexStart"
-                                            data-testid={
-                                                ONBOARD_DATASETS_TEST_IDS.DATASETS_OPTIONS_CONTAINER
+                                        <div
+                                            className={
+                                                classes.datasetListContainer
                                             }
-                                            display="flex"
-                                            id="datasets-options-container"
-                                            mt={2}
                                         >
-                                            <FormGroup>
-                                                <Button
-                                                    color="primary"
-                                                    variant="text"
-                                                    onClick={() => {
-                                                        tables &&
-                                                            setSelectedDatasets(
-                                                                tables.map(
-                                                                    ({
-                                                                        name,
-                                                                    }) => name
-                                                                )
-                                                            );
-                                                    }}
-                                                >
-                                                    {t("label.select-all")}
-                                                </Button>
-                                                <Divider />
-
-                                                {tables?.map((dataset) => (
-                                                    <SelectDatasetOption
-                                                        checked={selectedDatasets.includes(
-                                                            dataset.name
-                                                        )}
-                                                        key={dataset.name}
-                                                        labelPrimaryText={
-                                                            dataset.name
-                                                        }
-                                                        labelSecondaryText={t(
-                                                            "label.num-dimensions",
-                                                            {
-                                                                num: dataset
-                                                                    .dimensions
-                                                                    .length,
-                                                            }
-                                                        )}
-                                                        name={dataset.name}
-                                                        onChange={
-                                                            handleToggleCheckbox
-                                                        }
-                                                    />
-                                                ))}
-                                            </FormGroup>
-                                        </Box>
-                                    </EmptyStateSwitch>
-                                </LoadingErrorStateSwitch>
-                            </Box>
-                        </PageContentsCardV1>
-                    </LoadingErrorStateSwitch>
-                </Grid>
-            </PageContentsGridV1>
+                                            <DatasetList
+                                                datasetGroup={datasource?.name}
+                                                datasets={tables}
+                                                selectedDatasets={
+                                                    selectedDatasets
+                                                }
+                                                onSelectDataset={(
+                                                    e: React.ChangeEvent<HTMLInputElement>
+                                                ) =>
+                                                    handleDatasetSelect(
+                                                        e,
+                                                        "selectedSourceDatasets"
+                                                    )
+                                                }
+                                            />
+                                        </div>
+                                        <div
+                                            className={
+                                                classes.datasetListContainer
+                                            }
+                                        >
+                                            <DatasetList
+                                                datasetGroup="Sample Datasets"
+                                                datasets={demoDatasets}
+                                                selectedDatasets={
+                                                    selectedDemoDatasets
+                                                }
+                                                onSelectDataset={(
+                                                    e: React.ChangeEvent<HTMLInputElement>
+                                                ) =>
+                                                    handleDatasetSelect(
+                                                        e,
+                                                        "demoDatasets"
+                                                    )
+                                                }
+                                            />
+                                        </div>
+                                    </Box>
+                                    <Box display="flex" justifyContent="center">
+                                        <Button
+                                            color="primary"
+                                            variant="text"
+                                            onClick={() => {
+                                                tables &&
+                                                    setSelectedDatasets(
+                                                        tables.map(
+                                                            ({ name }) => name
+                                                        )
+                                                    );
+                                                demoDatasets &&
+                                                    setSelectedDemoDatasets(
+                                                        demoDatasets.map(
+                                                            ({ name }) => name
+                                                        )
+                                                    );
+                                            }}
+                                        >
+                                            {t("label.select-all")}
+                                        </Button>
+                                        <Divider
+                                            orientation="vertical"
+                                            variant="middle"
+                                        />
+                                        <Button
+                                            color="primary"
+                                            variant="text"
+                                            onClick={() => {
+                                                setSelectedDatasets([]);
+                                                setSelectedDemoDatasets([]);
+                                            }}
+                                        >
+                                            {t("label.deselect-all")}
+                                        </Button>
+                                    </Box>
+                                </EmptyStateSwitch>
+                            </LoadingErrorStateSwitch>
+                        </Box>
+                    </PageContentsCardV1>
+                </LoadingErrorStateSwitch>
+            </Box>
             <WizardBottomBar
                 backBtnLink={AppRoute.WELCOME_ONBOARD_DATASOURCE}
                 handleNextClick={handleNext}
+                isLoading={isLoading}
                 nextButtonIsDisabled={isNextButtonDisabled}
                 nextButtonLabel={t("label.onboard-entity", {
                     entity: t("label.datasets"),

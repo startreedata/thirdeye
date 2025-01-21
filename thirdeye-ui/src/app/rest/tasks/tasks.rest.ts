@@ -14,7 +14,7 @@
  */
 import axios from "axios";
 import { Task } from "../dto/taks.interface";
-import { GetTasksProps } from "./tasks.interfaces";
+import { GetTasksCountProps, GetTasksProps } from "./tasks.interfaces";
 
 const BASE_URL_TASKS = "/api/tasks";
 const LIST_SEPARATOR = ",";
@@ -22,6 +22,7 @@ const LIST_SEPARATOR = ",";
 export const getTasks = async ({
     status,
     type,
+    taskSubType,
     startTime,
     endTime,
     alertOrSubGroupId,
@@ -42,6 +43,10 @@ export const getTasks = async ({
         queryParams.set("type", `[in]${type.join(LIST_SEPARATOR)}`);
     }
 
+    if (taskSubType) {
+        queryParams.set("taskSubType", taskSubType);
+    }
+
     if (startTime) {
         queryParams.append("startTime", `[gte]${startTime}`);
     }
@@ -60,6 +65,26 @@ export const getTasks = async ({
 
     const response = await axios.get(
         `${BASE_URL_TASKS}?${queryParams.toString()}`
+    );
+
+    return response.data;
+};
+
+export const getTaskCount = async ({
+    type,
+    startTime,
+}: GetTasksCountProps): Promise<{ count: number }> => {
+    const queryParams = new URLSearchParams();
+    if (type) {
+        queryParams.set("type", type);
+    }
+
+    if (startTime) {
+        queryParams.append("startTime", `[gte]${startTime}`);
+    }
+
+    const response = await axios.get(
+        `${BASE_URL_TASKS}/count?${queryParams.toString()}`
     );
 
     return response.data;

@@ -77,6 +77,8 @@ import {
     QUERY_PARAM_KEY_FOR_SORT,
     QUERY_PARAM_KEY_FOR_SORT_KEY,
 } from "./alerts-view-page.utils";
+// import { getTasks } from "../../rest/tasks/tasks.rest";
+// import { TaskStatus, TaskSubtype } from "../../rest/dto/taks.interface";
 
 export const AlertsViewPage: FunctionComponent = () => {
     const { t } = useTranslation();
@@ -113,6 +115,50 @@ export const AlertsViewPage: FunctionComponent = () => {
         [searchParams]
     );
 
+    // const fetchDetectionTaskForAlert = async () => {
+    //     let taskSubType: TaskSubtype| undefined
+    //     if(searchParams.get('update')){
+    //         taskSubType = TaskSubtype.DETECTION_HISTORICAL_DATA_AFTER_UPDATE
+    //     } else if(searchParams.has(QUERY_PARAM_KEY_ANOMALIES_RETRY)){
+    //         taskSubType = TaskSubtype.DETECTION_HISTORICAL_DATA_AFTER_CREATE
+    //     }
+    //     if(taskSubType){
+    //         try {
+    //             const taskStatus = await getTasks({
+    //                 taskSubType: taskSubType,
+    //                 alertOrSubGroupId: Number(alertId),
+    //                 status: [TaskStatus.RUNNING, TaskStatus.WAITING]
+    //             })
+    //             if(taskStatus){
+    //                 setRefreshAttempts(refreshAttempts+1)
+    //                 setTimeout(()=>{
+    //                     fetchDetectionTaskForAlert()
+    //                 }, 5000)
+    //             } else {
+    //                 setRefreshAttempts(0)
+    //                 getAnomaliesQuery.refetch()
+    //             }
+    //         } catch(e) {
+    //             notifyIfErrors(
+    //                 ActionStatus.Error,
+    //                 getErrorMessages(e as AxiosError),
+    //                 notify,
+    //                 t("message.error-while-fetching", {
+    //                     entity: t("label.tasks"),
+    //                 })
+    //             );
+    //         }
+    //     } else {
+    //         getAnomaliesQuery.refetch()
+    //     }
+    // }
+
+    // useEffect(()=> {
+    //     if(alertId){
+    //         fetchDetectionTaskForAlert()
+    //     }
+    // }, [alertId])
+
     const {
         alert: alertThatWasReset,
         resetAlert,
@@ -143,6 +189,7 @@ export const AlertsViewPage: FunctionComponent = () => {
                 endTime,
             });
         },
+        // enabled: false
     });
 
     const [searchTerm, sortOrder, sortKey] = useMemo(
@@ -231,8 +278,8 @@ export const AlertsViewPage: FunctionComponent = () => {
      */
     useEffect(() => {
         if (
-            getAnomaliesQuery.data &&
-            getAnomaliesQuery.data.length === 0 &&
+            // getAnomaliesQuery.data &&
+            // getAnomaliesQuery.data.length === 0 &&
             searchParams.has(QUERY_PARAM_KEY_ANOMALIES_RETRY)
         ) {
             // If not in reset flow, assume alert was just created
@@ -492,6 +539,11 @@ export const AlertsViewPage: FunctionComponent = () => {
                     >
                         <AlertViewSubHeader
                             alert={getAlertQuery.data as Alert}
+                            anomalyInfoStatus={
+                                getAnomaliesQuery.isFetching
+                                    ? { loading: getAnomaliesQuery.isFetching }
+                                    : undefined
+                            }
                         />
                     </LoadingErrorStateSwitch>
                 </Grid>

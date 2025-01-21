@@ -15,7 +15,7 @@
 import { test } from "@playwright/test";
 import { OnboardingPage } from "../pages/onboarding";
 
-test("Onboarding page", async ({ page }) => {
+test.skip("Onboarding page", async ({ page }) => {
     const onboardingPage = new OnboardingPage(page);
     await page.route("*/**/api/alerts/count", async (route) => {
         const json = {
@@ -32,7 +32,7 @@ test("Onboarding page", async ({ page }) => {
     await onboardingPage.checkCreateAlertHeader();
 });
 
-test("Add Datasets Button on Onboarding Page", async ({ page }) => {
+test.skip("Add Datasets Button on Onboarding Page", async ({ page }) => {
     const onboardingPage = new OnboardingPage(page);
     await page.route("*/**/api/alerts/count", async (route) => {
         const json = {

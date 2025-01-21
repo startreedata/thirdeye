@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 StarTree Inc
+ * Copyright 2025 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -12,9 +12,16 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Alert } from "../../../rest/dto/alert.interfaces";
+import { makeStyles } from "@material-ui/core";
 
-export interface AlertViewSubHeaderProps {
-    alert: Alert;
-    anomalyInfoStatus?: { loading: boolean; loadingtext?: string };
-}
+export const useOnBoardDatasetStyles = makeStyles({
+    container: {
+        "& .MuiDivider-vertical": {
+            height: "auto",
+        },
+    },
+    datasetListContainer: {
+        maxHeight: "330px",
+        overflow: "auto",
+    },
+});

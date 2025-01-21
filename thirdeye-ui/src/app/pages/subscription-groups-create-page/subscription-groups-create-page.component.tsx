@@ -43,7 +43,7 @@ export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
     const { showDialog } = useDialogProviderV1();
 
     const checkQuota = (subscriptionGroup: SubscriptionGroup): void => {
-        if (remainingQuota?.notification && remainingQuota.notification <= 0) {
+        if (remainingQuota && remainingQuota.notification <= 0) {
             showDialog({
                 type: DialogType.ALERT,
                 contents: (

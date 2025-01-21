@@ -45,9 +45,13 @@ export const DatasetList = ({
                     checked={selectedDatasets.includes(dataset.name)}
                     key={dataset.name}
                     labelPrimaryText={dataset.name}
-                    labelSecondaryText={t("label.num-dimensions", {
-                        num: dataset.dimensions?.length,
-                    })}
+                    labelSecondaryText={
+                        dataset.dimensions?.length
+                            ? t("label.num-dimensions", {
+                                  num: dataset.dimensions?.length,
+                              })
+                            : ""
+                    }
                     name={dataset.name}
                     onChange={onSelectDataset}
                 />

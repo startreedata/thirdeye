@@ -245,17 +245,10 @@ export const WelcomeSelectDatasource: FunctionComponent = () => {
                         style={{ marginLeft: "-20px" }}
                         variant="h5"
                     >
-                        {t("message.select-entity", {
-                            entity: t("label.datasource"),
-                        })}
+                        Select your data source
                     </Typography>
                     <Typography align="center" variant="body2">
-                        {capitalize(
-                            t(
-                                "message.you-can-always-add-remove-or-change-entity-in-the-configuration-section",
-                                { entity: t("label.datasource") }
-                            )
-                        )}
+                        {capitalize(t("message.te-will-monitor-your-data"))}
                     </Typography>
 
                     <LoadingErrorStateSwitch

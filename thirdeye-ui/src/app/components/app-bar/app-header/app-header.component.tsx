@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import React, { ReactElement } from "react";
+import React, { ReactElement, ReactNode } from "react";
 import { useAppHeaderStyles } from "./app-header.styles";
 import { Link, Tooltip, Typography } from "@material-ui/core";
 import { AppHeaderprops } from "./app-header.inerfaces";
@@ -20,7 +20,6 @@ import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 import { useTranslation } from "react-i18next";
 import { useNavBarV1 } from "../../../platform/stores/nav-bar-v1/nav-bar-v1.store";
 import { WorkspaceSwitcher } from "./workspace";
-import InfoIconOutlined from "@material-ui/icons/InfoOutlined";
 
 export const Appheader = ({
     isFullScreen,
@@ -38,31 +37,46 @@ export const Appheader = ({
         navBarMinimized,
     })();
 
-    const getQuotaString = (
-        type: "detection" | "notification"
-    ): string | undefined => {
-        if (quota) {
-            if (type === "detection") {
-                return `${Number(
-                    (
-                        (quota.remainingQuota.detection /
-                            quota.totalQuota.detection) *
-                        100
-                    ).toFixed(2)
-                )}%(${quota.remainingQuota.detection})`;
-            } else {
-                return `${Number(
-                    (
-                        (quota.remainingQuota.notification /
-                            quota.totalQuota.notification) *
-                        100
-                    ).toFixed(2)
-                )}%(${quota.remainingQuota.notification})`;
-            }
+    const getQuotaOverText = (): NonNullable<ReactNode> => {
+        let limitText1 = "";
+        let limitText2 = "";
+        if (
+            quota.remainingQuota.notification <= 0 &&
+            quota.remainingQuota.detection <= 0
+        ) {
+            limitText1 = `${quota.totalQuota.detection} detections and ${quota.totalQuota.notification} notifications`;
+            limitText2 = "detections and notifications";
+        } else if (quota.remainingQuota.notification <= 0) {
+            limitText1 = `${quota.totalQuota.notification} notifications`;
+            limitText2 = "notifications";
+        } else if (quota.remainingQuota.detection <= 0) {
+            limitText1 = `${quota.totalQuota.detection} detections`;
+            limitText2 = "detections";
         }
 
-        return;
+        return (
+            <div className={compoenentStyles.taskInfoPopover}>
+                <div>
+                    <Typography variant="caption">
+                        You&apos;ve reached your monthly limit of {limitText1}{" "}
+                        per month.
+                    </Typography>
+                </div>
+                <br />
+                <div>
+                    <Typography variant="caption">
+                        Your quota will be reset at the end of the month. Until
+                        then, {limitText2} will not run. To increase your quotas
+                        please reach out to support.
+                    </Typography>
+                </div>
+            </div>
+        );
     };
+
+    const showQuotaInfo =
+        quota?.remainingQuota?.notification <= 0 ||
+        quota?.remainingQuota?.detection <= 0;
 
     return (
         <div className={compoenentStyles.header}>
@@ -74,38 +88,25 @@ export const Appheader = ({
                 />
             )}
             <div className={compoenentStyles.rightInfoSpace}>
-                {quota && (
+                {showQuotaInfo && (
                     <div className={compoenentStyles.taskInfoContainer}>
-                        <Typography variant="body2">Remaining Quota</Typography>
                         <Tooltip
                             arrow
                             interactive
-                            placement="top"
-                            title={
-                                <Typography variant="caption">
-                                    {/* <ParseMarkdown {...parseMarkdownProps}> */}
-                                    {t("message.quota-usage")}
-                                    {/* </ParseMarkdown> */}
-                                </Typography>
-                            }
+                            placement="bottom-start"
+                            title={getQuotaOverText()}
                         >
-                            <InfoIconOutlined
-                                color="secondary"
-                                fontSize="small"
-                            />
-                        </Tooltip>
-                        :
-                        <div className={compoenentStyles.taskInfo}>
-                            <div>Detection: {getQuotaString("detection")}</div>
-                            <div>
-                                Notification: {getQuotaString("notification")}
+                            <div className={compoenentStyles.taskInfo}>
+                                <div className="label">
+                                    You&apos;ve hit your Monthly Task Quota(i)
+                                </div>
                             </div>
-                        </div>
+                        </Tooltip>
                     </div>
                 )}
-                <Link href="https://startree.cloud/" target="_blank">
+                <Link href="https://startree.cloud/new-user" target="_blank">
                     <div className={compoenentStyles.button}>
-                        <div>{t("label.app-header.startree-cloud")}</div>
+                        <div>{t("label.app-header.startree-console")}</div>
                         <OpenInNewIcon
                             className={compoenentStyles.icon}
                             fontSize="small"

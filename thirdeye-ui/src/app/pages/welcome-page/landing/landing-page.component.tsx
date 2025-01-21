@@ -14,7 +14,6 @@
  */
 
 import { Box, Link, Typography } from "@material-ui/core";
-import { capitalize } from "lodash";
 import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { LoadingErrorStateSwitch } from "../../../components/page-states/loading-error-state-switch/loading-error-state-switch.component";
@@ -115,17 +114,15 @@ export const WelcomeLandingPage: FunctionComponent = () => {
                                     btnTestId={
                                         WELCOME_STEP_TEST_IDS.CONFIGURE_BUTTON
                                     }
-                                    ctaContent={t("message.configure-entity", {
+                                    ctaContent={t("message.add-entity", {
                                         entity: t("label.data"),
                                     })}
                                     isComplete={hasDatasets}
                                     link={getDataConfigurationCreatePath()}
                                     subtitle={t(
-                                        "message.connect-to-startree-cloud-data-or-add-your-own-pinot-datasource"
+                                        "message.add-your-dataset-or-sample"
                                     )}
-                                    title={t(
-                                        "message.review-and-configure-data"
-                                    )}
+                                    title=""
                                 />
                                 <WelcomeStepCard
                                     btnTestId={
@@ -144,27 +141,22 @@ export const WelcomeLandingPage: FunctionComponent = () => {
                                         ])
                                     )}
                                     subtitle={t(
-                                        "message.explore-startree-thirdeye-in-one-click"
+                                        "message.create-an-alert-to-monitor"
                                     )}
-                                    title={capitalize(
-                                        t("message.create-my-first-entity", {
-                                            entity: t("label.alert"),
-                                        })
-                                    )}
+                                    title=""
                                 />
                             </Box>
                         </LoadingErrorStateSwitch>
 
                         <Box clone pb={3} pt={2} textAlign="center">
                             <Typography variant="body2">
-                                {t("message.need-help")}
+                                {t("message.need-help")}{" "}
                                 <Link
                                     color="primary"
                                     href="https://www.youtube.com/playlist?list=PLihIrF0tCXdc7xMW6549RO23CxgvRkZQO"
                                     target="_blank"
                                     underline="always"
                                 >
-                                    {" "}
                                     here
                                 </Link>
                             </Typography>

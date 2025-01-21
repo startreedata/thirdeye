@@ -71,10 +71,7 @@ export const CreateAlertModal: FunctionComponent<CreateAlertModalModalProps> =
         }, [defaultCron]);
 
         const checkQuota = (): void => {
-            if (
-                remainingQuota?.notification &&
-                remainingQuota?.notification <= 0
-            ) {
+            if (remainingQuota?.detection && remainingQuota?.detection <= 0) {
                 showDialog({
                     type: DialogType.ALERT,
                     contents: (

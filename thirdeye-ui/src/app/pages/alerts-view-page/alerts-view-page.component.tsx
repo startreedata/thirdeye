@@ -78,7 +78,7 @@ import {
     QUERY_PARAM_KEY_FOR_SORT_KEY,
 } from "./alerts-view-page.utils";
 import { getTasks } from "../../rest/tasks/tasks.rest";
-import { TaskStatus, TaskSubtype } from "../../rest/dto/taks.interface";
+import { TaskStatus } from "../../rest/dto/taks.interface";
 
 export const AlertsViewPage: FunctionComponent = () => {
     const { t } = useTranslation();

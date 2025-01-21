@@ -100,12 +100,16 @@ export const AppBarConfigProvider: FunctionComponent<AppBarConfigProviderProps> 
                     startTime: startOfMonth,
                 });
                 setRemainingQuota({
-                    notification:
+                    notification: Math.max(
                         taskQuotasConfiguration.maximumNotificationTasksPerMonth! -
-                        notificationUsage.count,
-                    detection:
+                            notificationUsage.count,
+                        0
+                    ),
+                    detection: Math.max(
                         taskQuotasConfiguration.maximumDetectionTasksPerMonth! -
-                        detectionUsage.count,
+                            detectionUsage.count,
+                        0
+                    ),
                 });
             } catch (e) {
                 notifyIfErrors(

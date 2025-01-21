@@ -224,8 +224,8 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
                             return Promise.reject(error);
                         })
                 ),
-                ...selectedDemoDatasets.map((datasetName) =>
-                    createDemoDatasets(datasetName, Number(datasourceId))
+                ...selectedDemoDatasets?.map((datasetId) =>
+                    createDemoDatasets(datasetId!, Number(datasourceId))
                         .then(() => {
                             notify(
                                 NotificationTypeV1.Success,
@@ -261,19 +261,28 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
         if (!datasourceId) {
             return;
         }
+        const selectedDemoDatasetsIds = selectedDemoDatasets
+            .map(
+                (datasetName) =>
+                    demoDatasets?.find(
+                        (dataset) => dataset.name === datasetName
+                    )?.id
+            )
+            ?.filter((id): id is string => id !== undefined);
         setIsLoading(true);
         handleOnboardDatasets(
             selectedDatasets,
-            selectedDemoDatasets,
+            selectedDemoDatasetsIds,
             datasourceId
         ).then(() => {
             setIsLoading(false);
             navigate(getWelcomeLandingPath());
         });
-    }, [selectedDatasets, datasourceId]);
+    }, [selectedDatasets, datasourceId, selectedDemoDatasets]);
 
     const isNextButtonDisabled =
-        tables?.length === 0 || isEmpty(selectedDatasets);
+        (tables?.length === 0 && demoDatasets?.length === 0) ||
+        (isEmpty(selectedDatasets) && isEmpty(selectedDemoDatasets));
 
     return (
         <>

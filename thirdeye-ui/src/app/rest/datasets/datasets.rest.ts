@@ -38,7 +38,9 @@ export const createDemoDatasets = async (
 ): Promise<Dataset[]> => {
     const response = await axios.post(
         `${BASE_URL_DATASOURCE}/${datasourceId}/demo-datasets`,
-        { demoDatasetId }
+        new URLSearchParams({
+            demoDatasetId,
+        })
     );
 
     return response.data;

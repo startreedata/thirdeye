@@ -75,9 +75,12 @@ export const AppBarConfigProvider: FunctionComponent<AppBarConfigProviderProps> 
             status === ActionStatus.Initial || status === ActionStatus.Working;
 
         useEffect(() => {
-            getWorkspaceConfiguration();
             getWorkspaces();
         }, []);
+
+        useEffect(() => {
+            getWorkspaceConfiguration();
+        }, [workspace]);
 
         const fetchAndSetQuota = async (
             taskQuotasConfiguration: TaskQuotasConfiguration

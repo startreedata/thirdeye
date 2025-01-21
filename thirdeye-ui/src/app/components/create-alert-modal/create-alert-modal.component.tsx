@@ -110,7 +110,9 @@ export const CreateAlertModal: FunctionComponent<CreateAlertModalModalProps> =
                     okButtonText: t("label.confirm"),
                     cancelButtonText: t("label.cancel"),
                     onOk: () => checkQuota(),
-                    keepDialogOnOk: true,
+                    keepDialogOnOk: !!(
+                        remainingQuota && remainingQuota?.detection <= 0
+                    ),
                 });
             } else {
                 checkQuota();

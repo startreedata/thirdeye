@@ -13,7 +13,6 @@
  * the License.
  */
 
-import { Button } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet } from "react-router-dom";
@@ -27,11 +26,8 @@ export const WelcomeOnboardDatasourceWizard: FunctionComponent = () => {
         <PageV1>
             <PageHeader
                 transparentBackground
-                customActions={<Button>{t("label.help")}</Button>}
-                subtitle={t(
-                    "message.connect-to-startree-cloud-data-or-add-your-own-pinot-datasource"
-                )}
-                title={t("message.lets-start-setting-up-your-data")}
+                subtitle={t("message.start-monitoring-your-data")}
+                title={t("message.welcome-to-thirdeye")}
             />
             <Outlet />
         </PageV1>

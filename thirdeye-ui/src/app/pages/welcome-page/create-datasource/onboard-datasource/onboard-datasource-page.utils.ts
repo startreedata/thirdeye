@@ -34,7 +34,7 @@ export const getDatasources = (
             sourceType: STARTREE_CLOUD,
         })) as DatasourceOption[]),
         {
-            label: t("message.add-new-pinot-datasource"),
+            label: t("message.custom-apache-pinot-source"),
             value: ADD_NEW_DATASOURCE,
             sourceType: OTHER_SOURCES,
         },

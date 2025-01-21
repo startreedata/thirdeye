@@ -308,7 +308,9 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
                             flexDirection="column"
                         >
                             <Typography align="center" variant="h5">
-                                {t("message.select-your-datasets")}
+                                {t("message.select-entity", {
+                                    entity: "datasets",
+                                })}
                             </Typography>
                             <Typography align="center" variant="body2">
                                 {t("message.add-data-to-te-from-source")}

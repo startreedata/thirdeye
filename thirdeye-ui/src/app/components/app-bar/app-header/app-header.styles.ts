@@ -76,6 +76,12 @@ export const useAppHeaderStyles = (
             background: "white",
             padding: "1px 8px",
             borderRadius: 5,
+            "& .label": {
+                fontWeight: "bold",
+            },
+        },
+        taskInfoPopover: {
+            padding: "10px",
         },
     });
 

@@ -12,16 +12,9 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import {
-    Box,
-    FormHelperText,
-    Grid,
-    TextField,
-    Typography,
-} from "@material-ui/core";
+import { FormHelperText, Grid, TextField } from "@material-ui/core";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { easyAlertStyles } from "../../../pages/alerts-create-page/alerts-create-easy-page/alerts-create-easy-page.styles";
 import { InputSectionV2 } from "../../form-basics/input-section-v2/input-section-v2.component";
 import { AlertDetailsProps } from "./alert-details.interfaces";
 import { AlertFrequency } from "./alert-frequency-v2/alert-frequency.component";
@@ -34,7 +27,6 @@ function AlertDetails({
     const [description, setDescription] = useState(alert.description);
     const [nameHasError, setNameHasError] = useState(false);
     const { t } = useTranslation();
-    const easyAlertClasses = easyAlertStyles();
 
     const handleNameChange = (
         e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
@@ -55,29 +47,6 @@ function AlertDetails({
 
     return (
         <Grid container>
-            <Grid item xs={12}>
-                <Box marginBottom={2} marginTop={2}>
-                    <Grid
-                        container
-                        alignContent="center"
-                        justifyContent="space-between"
-                    >
-                        <Grid item>
-                            <Typography
-                                className={easyAlertClasses.header}
-                                variant="h5"
-                            >
-                                {t("label.advanced-alert-old")}
-                            </Typography>
-                            <Typography variant="body2">
-                                {t(
-                                    "message.create-your-alert-filling-out-the-fields"
-                                )}
-                            </Typography>
-                        </Grid>
-                    </Grid>
-                </Box>
-            </Grid>
             <Grid item xs={4}>
                 <InputSectionV2
                     inputComponent={

@@ -19,19 +19,17 @@ import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { createNewStartingAlert } from "../../components/alert-wizard-v2/alert-template/alert-template.utils";
+import { NavigateAlertCreationFlowsDropdown } from "../../components/alert-wizard-v3/navigate-alert-creation-flows-dropdown/navigate-alert-creation-flows-dropdown-v2";
 import { alertsBasicHelpCards } from "../../components/help-drawer-v1/help-drawer-card-contents.utils";
 import { HelpDrawerV1 } from "../../components/help-drawer-v1/help-drawer-v1.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import {
-    HelpLinkIconV1,
     PageHeaderActionsV1,
     PageHeaderTextV1,
     PageV1,
-    TooltipV1,
     useDialogProviderV1,
 } from "../../platform/components";
 import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
-import { THIRDEYE_DOC_LINK } from "../../utils/constants/constants.util";
 import { getAlertsAllPath } from "../../utils/routes/routes.util";
 import {
     AlertsEditCreateBasePageComponentProps,
@@ -92,48 +90,41 @@ export const AlertsEditCreateBasePageComponent: FunctionComponent<AlertsEditCrea
             <PageV1>
                 <PageHeader
                     customActions={
-                        <PageHeaderActionsV1>
-                            <HelpDrawerV1
-                                cards={alertsBasicHelpCards}
-                                title={`${t("label.need-help")}?`}
-                                trigger={(handleOpen) => (
-                                    <Button
-                                        color="primary"
-                                        size="small"
-                                        variant="outlined"
-                                        onClick={handleOpen}
-                                    >
-                                        <Box component="span" mr={1}>
-                                            {t("label.need-help")}
-                                        </Box>
-                                        <Box component="span" display="flex">
-                                            <Icon
-                                                fontSize={24}
-                                                icon="mdi:question-mark-circle-outline"
-                                            />
-                                        </Box>
-                                    </Button>
-                                )}
-                            />
-                        </PageHeaderActionsV1>
+                        pageTitle === t("label.advanced-alert") ||
+                        pageTitle === t("label.json-alert-setup") ? (
+                            <NavigateAlertCreationFlowsDropdown />
+                        ) : (
+                            <PageHeaderActionsV1>
+                                <HelpDrawerV1
+                                    cards={alertsBasicHelpCards}
+                                    title={`${t("label.need-help")}?`}
+                                    trigger={(handleOpen) => (
+                                        <Button
+                                            color="primary"
+                                            size="small"
+                                            variant="outlined"
+                                            onClick={handleOpen}
+                                        >
+                                            <Box component="span" mr={1}>
+                                                {t("label.need-help")}
+                                            </Box>
+                                            <Box
+                                                component="span"
+                                                display="flex"
+                                            >
+                                                <Icon
+                                                    fontSize={24}
+                                                    icon="mdi:question-mark-circle-outline"
+                                                />
+                                            </Box>
+                                        </Button>
+                                    )}
+                                />
+                            </PageHeaderActionsV1>
+                        )
                     }
                 >
-                    <PageHeaderTextV1>
-                        {pageTitle}
-                        <TooltipV1
-                            placement="top"
-                            title={t("label.view-configuration-docs") as string}
-                        >
-                            <span>
-                                <HelpLinkIconV1
-                                    displayInline
-                                    enablePadding
-                                    externalLink
-                                    href={`${THIRDEYE_DOC_LINK}/getting-started/create-your-first-alert`}
-                                />
-                            </span>
-                        </TooltipV1>
-                    </PageHeaderTextV1>
+                    <PageHeaderTextV1>{pageTitle}</PageHeaderTextV1>
                 </PageHeader>
 
                 <AlertsSimpleAdvancedJsonContainerPage

@@ -13,9 +13,10 @@
  * the License.
  */
 import { AxiosError } from "axios/index";
-import React, { FunctionComponent, useMemo, useState } from "react";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useAppBarConfigProvider } from "../../components/app-bar/app-bar-config-provider/app-bar-config-provider.component";
 import { validateSubscriptionGroup } from "../../components/subscription-group-wizard/subscription-group-wizard.utils";
 import { useNotificationProviderV1 } from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
@@ -23,6 +24,7 @@ import { EditableAlert } from "../../rest/dto/alert.interfaces";
 import { SubscriptionGroup } from "../../rest/dto/subscription-group.interfaces";
 import { createSubscriptionGroup } from "../../rest/subscription-groups/subscription-groups.rest";
 import { handleCreateAlertClickGenerator } from "../../utils/anomalies/anomalies.util";
+import { QUERY_PARAM_KEYS } from "../../utils/constants/constants.util";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import {
@@ -36,8 +38,6 @@ import {
     QUERY_PARAM_KEY_ANOMALIES_RETRY,
 } from "../alerts-view-page/alerts-view-page.utils";
 import { AlertsCreatePageProps } from "./alerts-create-page.interfaces";
-import { QUERY_PARAM_KEYS } from "../../utils/constants/constants.util";
-import { useAppBarConfigProvider } from "../../components/app-bar/app-bar-config-provider/app-bar-config-provider.component";
 
 export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
     startingAlertConfiguration,
@@ -55,11 +55,27 @@ export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
 
     const [singleNewSubscriptionGroup, setSingleNewSubscriptionGroup] =
         useState<SubscriptionGroup>(createEmptySubscriptionGroup());
+    const [pageTitle, setPageTitle] = useState("");
+    useEffect(() => {
+        setPageTitle(
+            location.pathname.includes("advanced-v2")
+                ? t("label.advanced-alert")
+                : location.pathname.includes("easy-alert")
+                ? t("label.simple-alert-setup")
+                : location.pathname.includes("json-editor-v2")
+                ? t("label.json-alert-setup")
+                : t("label.create-entity", {
+                      entity: t("label.alert"),
+                  })
+        );
+    }, []);
 
     const createAlertAndUpdateSubscriptionGroups = useMemo(() => {
         return handleCreateAlertClickGenerator(notify, t, (savedAlert) => {
             const isNewCreateEasyAlert =
-                location.pathname.includes("easy-alert");
+                location.pathname.includes("easy-alert") ||
+                location.pathname.includes("json-editor-v2") ||
+                location.pathname.includes("advanced-v2");
             if (
                 isNewCreateEasyAlert &&
                 searchParams.get(QUERY_PARAM_KEYS.IS_FIRST_ALERT)
@@ -118,9 +134,7 @@ export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
         <AlertsEditCreateBasePageComponent
             isEditRequestInFlight={isEditRequestInFlight}
             newSubscriptionGroup={singleNewSubscriptionGroup}
-            pageTitle={t("label.create-entity", {
-                entity: t("label.alert"),
-            })}
+            pageTitle={pageTitle}
             selectedSubscriptionGroups={subscriptionGroups}
             startingAlertConfiguration={startingAlertConfiguration}
             onNewSubscriptionGroupChange={setSingleNewSubscriptionGroup}

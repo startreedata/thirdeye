@@ -69,11 +69,6 @@ export const AlertJson: FunctionComponent<AlertJsonProps> = ({
                     alignContent="center"
                     justifyContent="space-between"
                 >
-                    <Grid item>
-                        <Typography className={classes.header} variant="h5">
-                            {t("label.advanced-json-editor")}
-                        </Typography>
-                    </Grid>
                     <PageHeaderActionsV1>
                         <HelpDrawerV1
                             title={`${t("label.need-help")}?`}

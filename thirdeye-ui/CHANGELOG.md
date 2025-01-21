@@ -1,3 +1,10 @@
+### [2.60.3](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.60.2...thirdeye-ui-2.60.3) (2025-01-21)
+
+
+### Bug Fixes
+
+* TE-XXXX ui review fixes ([5b19bda18](https://github.com/startreedata/thirdeye/commit/5b19bda182fb1c58bd36bda420650317a661f636))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

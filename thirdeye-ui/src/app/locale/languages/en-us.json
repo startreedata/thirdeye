@@ -147,6 +147,7 @@
         "app-header": {
             "null-mapped-name": "Default(Not set)",
             "startree-cloud": "StarTree Cloud",
+            "startree-console": "StarTree Console",
             "workspace": "Workspace"
         },
         "apply": "Apply",

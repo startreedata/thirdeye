@@ -23,15 +23,12 @@ import { alertsBasicHelpCards } from "../../components/help-drawer-v1/help-drawe
 import { HelpDrawerV1 } from "../../components/help-drawer-v1/help-drawer-v1.component";
 import { PageHeader } from "../../components/page-header/page-header.component";
 import {
-    HelpLinkIconV1,
     PageHeaderActionsV1,
     PageHeaderTextV1,
     PageV1,
-    TooltipV1,
     useDialogProviderV1,
 } from "../../platform/components";
 import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
-import { THIRDEYE_DOC_LINK } from "../../utils/constants/constants.util";
 import { getAlertsAllPath } from "../../utils/routes/routes.util";
 import {
     AlertsEditCreateBasePageComponentProps,
@@ -118,22 +115,7 @@ export const AlertsEditCreateBasePageComponent: FunctionComponent<AlertsEditCrea
                         </PageHeaderActionsV1>
                     }
                 >
-                    <PageHeaderTextV1>
-                        {pageTitle}
-                        <TooltipV1
-                            placement="top"
-                            title={t("label.view-configuration-docs") as string}
-                        >
-                            <span>
-                                <HelpLinkIconV1
-                                    displayInline
-                                    enablePadding
-                                    externalLink
-                                    href={`${THIRDEYE_DOC_LINK}/getting-started/create-your-first-alert`}
-                                />
-                            </span>
-                        </TooltipV1>
-                    </PageHeaderTextV1>
+                    <PageHeaderTextV1>{pageTitle}</PageHeaderTextV1>
                 </PageHeader>
 
                 <AlertsSimpleAdvancedJsonContainerPage

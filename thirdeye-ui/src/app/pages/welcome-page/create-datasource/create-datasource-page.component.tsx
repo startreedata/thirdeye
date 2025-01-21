@@ -26,10 +26,8 @@ export const WelcomeOnboardDatasourceWizard: FunctionComponent = () => {
         <PageV1>
             <PageHeader
                 transparentBackground
-                subtitle={t(
-                    "message.connect-to-startree-cloud-data-or-add-your-own-pinot-datasource"
-                )}
-                title={t("message.lets-start-setting-up-your-data")}
+                subtitle={t("message.start-monitoring-your-data")}
+                title={t("message.welcome-to-thirdeye")}
             />
             <Outlet />
         </PageV1>

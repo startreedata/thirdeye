@@ -90,7 +90,7 @@ export const WelcomeLandingPage: FunctionComponent = () => {
                         </Typography>
                         <Box clone pb={2} pt={4} textAlign="center">
                             <Typography variant="h5">
-                                {t("message.custom-apache-pinot-source")}
+                                {t("message.complete-the-following-steps")}
                             </Typography>
                         </Box>
 
@@ -150,14 +150,13 @@ export const WelcomeLandingPage: FunctionComponent = () => {
 
                         <Box clone pb={3} pt={2} textAlign="center">
                             <Typography variant="body2">
-                                {t("message.need-help")}
+                                {t("message.need-help")}{" "}
                                 <Link
                                     color="primary"
                                     href="https://www.youtube.com/playlist?list=PLihIrF0tCXdc7xMW6549RO23CxgvRkZQO"
                                     target="_blank"
                                     underline="always"
                                 >
-                                    {" "}
                                     here
                                 </Link>
                             </Typography>

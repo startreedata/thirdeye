@@ -20,4 +20,8 @@ export const useOnBoardDatasetStyles = makeStyles({
             height: "auto",
         },
     },
+    datasetListContainer: {
+        maxHeight: "330px",
+        overflow: "auto",
+    },
 });

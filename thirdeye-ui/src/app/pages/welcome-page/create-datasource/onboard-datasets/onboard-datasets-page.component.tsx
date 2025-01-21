@@ -350,10 +350,9 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
                                         mt={2}
                                     >
                                         <div
-                                            style={{
-                                                maxHeight: "300px",
-                                                overflow: "auto",
-                                            }}
+                                            className={
+                                                classes.datasetListContainer
+                                            }
                                         >
                                             <DatasetList
                                                 datasetGroup={datasource?.name}
@@ -371,21 +370,27 @@ export const WelcomeSelectDatasets: FunctionComponent = () => {
                                                 }
                                             />
                                         </div>
-                                        <DatasetList
-                                            datasetGroup="Sample Datasets"
-                                            datasets={demoDatasets}
-                                            selectedDatasets={
-                                                selectedDemoDatasets
+                                        <div
+                                            className={
+                                                classes.datasetListContainer
                                             }
-                                            onSelectDataset={(
-                                                e: React.ChangeEvent<HTMLInputElement>
-                                            ) =>
-                                                handleDatasetSelect(
-                                                    e,
-                                                    "demoDatasets"
-                                                )
-                                            }
-                                        />
+                                        >
+                                            <DatasetList
+                                                datasetGroup="Sample Datasets"
+                                                datasets={demoDatasets}
+                                                selectedDatasets={
+                                                    selectedDemoDatasets
+                                                }
+                                                onSelectDataset={(
+                                                    e: React.ChangeEvent<HTMLInputElement>
+                                                ) =>
+                                                    handleDatasetSelect(
+                                                        e,
+                                                        "demoDatasets"
+                                                    )
+                                                }
+                                            />
+                                        </div>
                                     </Box>
                                     <Box display="flex" justifyContent="center">
                                         <Button

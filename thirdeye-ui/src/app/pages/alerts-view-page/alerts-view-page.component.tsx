@@ -116,12 +116,12 @@ export const AlertsViewPage: FunctionComponent = () => {
     );
 
     const fetchDetectionTaskForAlert = async (): Promise<void> => {
-        let taskSubType: TaskSubtype | undefined;
-        if (searchParams.get("update")) {
-            taskSubType = TaskSubtype.DETECTION_HISTORICAL_DATA_AFTER_UPDATE;
-        } else if (searchParams.has(QUERY_PARAM_KEY_ANOMALIES_RETRY)) {
-            taskSubType = TaskSubtype.DETECTION_HISTORICAL_DATA_AFTER_CREATE;
-        }
+        // let taskSubType: TaskSubtype | undefined;
+        // if (searchParams.get("update")) {
+        //     taskSubType = TaskSubtype.DETECTION_HISTORICAL_DATA_AFTER_UPDATE;
+        // } else if (searchParams.has(QUERY_PARAM_KEY_ANOMALIES_RETRY)) {
+        //     taskSubType = TaskSubtype.DETECTION_HISTORICAL_DATA_AFTER_CREATE;
+        // }
         if (
             searchParams.get("alert") ||
             searchParams.has(QUERY_PARAM_KEY_ANOMALIES_RETRY)

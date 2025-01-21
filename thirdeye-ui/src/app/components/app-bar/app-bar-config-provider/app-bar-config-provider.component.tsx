@@ -79,8 +79,10 @@ export const AppBarConfigProvider: FunctionComponent<AppBarConfigProviderProps> 
         }, []);
 
         useEffect(() => {
-            getWorkspaceConfiguration();
-        }, [workspace]);
+            setTimeout(() => {
+                getWorkspaceConfiguration();
+            });
+        }, [workspace.id]);
 
         const fetchAndSetQuota = async (
             taskQuotasConfiguration: TaskQuotasConfiguration

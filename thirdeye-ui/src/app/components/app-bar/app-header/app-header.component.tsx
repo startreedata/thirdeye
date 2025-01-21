@@ -20,7 +20,6 @@ import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 import { useTranslation } from "react-i18next";
 import { useNavBarV1 } from "../../../platform/stores/nav-bar-v1/nav-bar-v1.store";
 import { WorkspaceSwitcher } from "./workspace";
-import InfoIconOutlined from "@material-ui/icons/InfoOutlined";
 
 export const Appheader = ({
     isFullScreen,
@@ -49,7 +48,7 @@ export const Appheader = ({
                             quota.totalQuota.detection) *
                         100
                     ).toFixed(2)
-                )}%(${quota.remainingQuota.detection})`;
+                )}%`;
             } else {
                 return `${Number(
                     (
@@ -57,7 +56,7 @@ export const Appheader = ({
                             quota.totalQuota.notification) *
                         100
                     ).toFixed(2)
-                )}%(${quota.remainingQuota.notification})`;
+                )}%`;
             }
         }
 
@@ -76,34 +75,45 @@ export const Appheader = ({
             <div className={compoenentStyles.rightInfoSpace}>
                 {quota && (
                     <div className={compoenentStyles.taskInfoContainer}>
-                        <Typography variant="body2">Remaining Quota</Typography>
                         <Tooltip
                             arrow
                             interactive
-                            placement="top"
+                            placement="bottom-start"
                             title={
-                                <Typography variant="caption">
-                                    {/* <ParseMarkdown {...parseMarkdownProps}> */}
-                                    {t("message.quota-usage")}
-                                    {/* </ParseMarkdown> */}
-                                </Typography>
+                                <div
+                                    className={compoenentStyles.taskInfoPopover}
+                                >
+                                    <div>
+                                        <Typography variant="caption">
+                                            Detection Task:{" "}
+                                            {quota.remainingQuota.detection}{" "}
+                                            detections left
+                                        </Typography>
+                                    </div>
+                                    <div>
+                                        <Typography variant="caption">
+                                            Notification Task:{" "}
+                                            {quota.remainingQuota.notification}{" "}
+                                            notifications left
+                                        </Typography>
+                                    </div>
+                                </div>
                             }
                         >
-                            <InfoIconOutlined
-                                color="secondary"
-                                fontSize="small"
-                            />
-                        </Tooltip>
-                        :
-                        <div className={compoenentStyles.taskInfo}>
-                            <div>Detection: {getQuotaString("detection")}</div>
-                            <div>
-                                Notification: {getQuotaString("notification")}
+                            <div className={compoenentStyles.taskInfo}>
+                                <div className="label">Monthly Quota Left:</div>
+                                <div>
+                                    Detection: {getQuotaString("detection")}
+                                </div>
+                                <div>
+                                    Notification:{" "}
+                                    {getQuotaString("notification")}
+                                </div>
                             </div>
-                        </div>
+                        </Tooltip>
                     </div>
                 )}
-                <Link href="https://startree.cloud/" target="_blank">
+                <Link href="https://startree.cloud/new-user" target="_blank">
                     <div className={compoenentStyles.button}>
                         <div>{t("label.app-header.startree-cloud")}</div>
                         <OpenInNewIcon

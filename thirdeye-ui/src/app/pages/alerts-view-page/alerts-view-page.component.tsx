@@ -77,8 +77,8 @@ import {
     QUERY_PARAM_KEY_FOR_SORT,
     QUERY_PARAM_KEY_FOR_SORT_KEY,
 } from "./alerts-view-page.utils";
-// import { getTasks } from "../../rest/tasks/tasks.rest";
-// import { TaskStatus, TaskSubtype } from "../../rest/dto/taks.interface";
+import { getTasks } from "../../rest/tasks/tasks.rest";
+import { TaskStatus, TaskSubtype } from "../../rest/dto/taks.interface";
 
 export const AlertsViewPage: FunctionComponent = () => {
     const { t } = useTranslation();
@@ -115,49 +115,60 @@ export const AlertsViewPage: FunctionComponent = () => {
         [searchParams]
     );
 
-    // const fetchDetectionTaskForAlert = async () => {
-    //     let taskSubType: TaskSubtype| undefined
-    //     if(searchParams.get('update')){
-    //         taskSubType = TaskSubtype.DETECTION_HISTORICAL_DATA_AFTER_UPDATE
-    //     } else if(searchParams.has(QUERY_PARAM_KEY_ANOMALIES_RETRY)){
-    //         taskSubType = TaskSubtype.DETECTION_HISTORICAL_DATA_AFTER_CREATE
-    //     }
-    //     if(taskSubType){
-    //         try {
-    //             const taskStatus = await getTasks({
-    //                 taskSubType: taskSubType,
-    //                 alertOrSubGroupId: Number(alertId),
-    //                 status: [TaskStatus.RUNNING, TaskStatus.WAITING]
-    //             })
-    //             if(taskStatus){
-    //                 setRefreshAttempts(refreshAttempts+1)
-    //                 setTimeout(()=>{
-    //                     fetchDetectionTaskForAlert()
-    //                 }, 5000)
-    //             } else {
-    //                 setRefreshAttempts(0)
-    //                 getAnomaliesQuery.refetch()
-    //             }
-    //         } catch(e) {
-    //             notifyIfErrors(
-    //                 ActionStatus.Error,
-    //                 getErrorMessages(e as AxiosError),
-    //                 notify,
-    //                 t("message.error-while-fetching", {
-    //                     entity: t("label.tasks"),
-    //                 })
-    //             );
-    //         }
-    //     } else {
-    //         getAnomaliesQuery.refetch()
-    //     }
-    // }
+    const fetchDetectionTaskForAlert = async (): Promise<void> => {
+        let taskSubType: TaskSubtype | undefined;
+        if (searchParams.get("update")) {
+            taskSubType = TaskSubtype.DETECTION_HISTORICAL_DATA_AFTER_UPDATE;
+        } else if (searchParams.has(QUERY_PARAM_KEY_ANOMALIES_RETRY)) {
+            taskSubType = TaskSubtype.DETECTION_HISTORICAL_DATA_AFTER_CREATE;
+        }
+        if (
+            searchParams.get("alert") ||
+            searchParams.has(QUERY_PARAM_KEY_ANOMALIES_RETRY)
+        ) {
+            try {
+                const taskStatus = await getTasks({
+                    // taskSubType: taskSubType,
+                    alertOrSubGroupId: Number(alertId),
+                    status: [TaskStatus.RUNNING, TaskStatus.WAITING],
+                });
+                if (taskStatus.length) {
+                    setRefreshAttempts(refreshAttempts + 1);
+                    setTimeout(() => {
+                        fetchDetectionTaskForAlert();
+                    }, 5000);
+                } else {
+                    setRefreshAttempts(0);
+                    getAlertQuery.refetch();
+                    getEnumerationItemsQuery.refetch();
+                    getAnomaliesQuery.refetch();
+                    getAlertInsight({ alertId: Number(alertId) });
+                    fetchStats();
+                }
+            } catch (e) {
+                notifyIfErrors(
+                    ActionStatus.Error,
+                    getErrorMessages(e as AxiosError),
+                    notify,
+                    t("message.error-while-fetching", {
+                        entity: t("label.tasks"),
+                    })
+                );
+            }
+        } else {
+            getAlertQuery.refetch();
+            getEnumerationItemsQuery.refetch();
+            getAnomaliesQuery.refetch();
+            getAlertInsight({ alertId: Number(alertId) });
+            fetchStats();
+        }
+    };
 
-    // useEffect(()=> {
-    //     if(alertId){
-    //         fetchDetectionTaskForAlert()
-    //     }
-    // }, [alertId])
+    useEffect(() => {
+        if (alertId) {
+            fetchDetectionTaskForAlert();
+        }
+    }, [alertId]);
 
     const {
         alert: alertThatWasReset,
@@ -171,6 +182,7 @@ export const AlertsViewPage: FunctionComponent = () => {
         queryFn: () => {
             return getAlert(Number(alertId));
         },
+        enabled: false,
     });
 
     const getEnumerationItemsQuery = useFetchQuery({
@@ -178,6 +190,7 @@ export const AlertsViewPage: FunctionComponent = () => {
         queryFn: () => {
             return getEnumerationItems({ alertId: Number(alertId) });
         },
+        enabled: false,
     });
 
     const getAnomaliesQuery = useFetchQuery({
@@ -189,7 +202,7 @@ export const AlertsViewPage: FunctionComponent = () => {
                 endTime,
             });
         },
-        // enabled: false
+        enabled: false,
     });
 
     const [searchTerm, sortOrder, sortKey] = useMemo(

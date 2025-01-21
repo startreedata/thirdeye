@@ -83,7 +83,7 @@ export const DialogProviderV1: FunctionComponent<DialogProviderV1Props> = ({
         }
 
         dialogData.onOk && dialogData.onOk();
-        hideDialog();
+        !dialogData.keepDialogOnOk && hideDialog();
     };
 
     const dialogContext = {

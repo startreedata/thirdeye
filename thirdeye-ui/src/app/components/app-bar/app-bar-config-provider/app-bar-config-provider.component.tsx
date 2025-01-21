@@ -81,7 +81,7 @@ export const AppBarConfigProvider: FunctionComponent<AppBarConfigProviderProps> 
         useEffect(() => {
             setTimeout(() => {
                 getWorkspaceConfiguration();
-            });
+            }, 1000);
         }, [workspace.id]);
 
         const fetchAndSetQuota = async (
@@ -137,10 +137,20 @@ export const AppBarConfigProvider: FunctionComponent<AppBarConfigProviderProps> 
         }, [taskQuotasConfiguration]);
 
         useEffect(() => {
-            setTaskQuotasConfiguration(
+            const detectionQuota =
                 workspaceConfiguration?.namespaceQuotasConfiguration
-                    .taskQuotasConfiguration || null
-            );
+                    .taskQuotasConfiguration.maximumDetectionTasksPerMonth;
+            const notificationQuota =
+                workspaceConfiguration?.namespaceQuotasConfiguration
+                    .taskQuotasConfiguration.maximumNotificationTasksPerMonth;
+            if (detectionQuota && notificationQuota) {
+                setTaskQuotasConfiguration(
+                    workspaceConfiguration?.namespaceQuotasConfiguration
+                        .taskQuotasConfiguration
+                );
+            } else {
+                setTaskQuotasConfiguration(null);
+            }
         }, [workspaceConfiguration]);
 
         useEffect(() => {

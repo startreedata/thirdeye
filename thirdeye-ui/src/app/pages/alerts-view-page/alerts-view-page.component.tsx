@@ -92,6 +92,7 @@ export const AlertsViewPage: FunctionComponent = () => {
 
     // Used for the scenario when user first creates an alert but no anomalies generated yet
     const [refreshAttempts, setRefreshAttempts] = useState(0);
+    const [nextAttemptTime, setNextAttemptTime] = useState(5000);
     const [autoRefreshNotification, setAutoRefreshNotification] =
         useState<NotificationV1 | null>(null);
     const [resetStatusNotification, setResetStatusNotification] =
@@ -115,7 +116,9 @@ export const AlertsViewPage: FunctionComponent = () => {
         [searchParams]
     );
 
-    const fetchDetectionTaskForAlert = async (): Promise<void> => {
+    const fetchDetectionTaskForAlert = async (
+        retryNumber: number
+    ): Promise<void> => {
         // let taskSubType: TaskSubtype | undefined;
         // if (searchParams.get("update")) {
         //     taskSubType = TaskSubtype.DETECTION_HISTORICAL_DATA_AFTER_UPDATE;
@@ -133,12 +136,15 @@ export const AlertsViewPage: FunctionComponent = () => {
                     status: [TaskStatus.RUNNING, TaskStatus.WAITING],
                 });
                 if (taskStatus.length) {
-                    setRefreshAttempts(refreshAttempts + 1);
+                    const nextRefreshAttempts = retryNumber + 1;
                     setTimeout(() => {
-                        fetchDetectionTaskForAlert();
-                    }, 5000);
+                        setNextAttemptTime(
+                            5000 * Math.pow(2, nextRefreshAttempts)
+                        );
+                        fetchDetectionTaskForAlert(nextRefreshAttempts);
+                    }, 5000 * Math.pow(2, retryNumber));
                 } else {
-                    setRefreshAttempts(0);
+                    // setRefreshAttempts(0);
                     getAlertQuery.refetch();
                     getEnumerationItemsQuery.refetch();
                     getAnomaliesQuery.refetch();
@@ -166,7 +172,7 @@ export const AlertsViewPage: FunctionComponent = () => {
 
     useEffect(() => {
         if (alertId) {
-            fetchDetectionTaskForAlert();
+            fetchDetectionTaskForAlert(refreshAttempts);
         }
     }, [alertId]);
 
@@ -182,7 +188,7 @@ export const AlertsViewPage: FunctionComponent = () => {
         queryFn: () => {
             return getAlert(Number(alertId));
         },
-        enabled: false,
+        // enabled: false,
     });
 
     const getEnumerationItemsQuery = useFetchQuery({
@@ -190,7 +196,7 @@ export const AlertsViewPage: FunctionComponent = () => {
         queryFn: () => {
             return getEnumerationItems({ alertId: Number(alertId) });
         },
-        enabled: false,
+        // enabled: false,
     });
 
     const getAnomaliesQuery = useFetchQuery({
@@ -456,6 +462,14 @@ export const AlertsViewPage: FunctionComponent = () => {
         getAlertQuery.data?.templateProperties?.enumerationItems ||
         getAlertQuery?.data?.templateProperties.enumeratorQuery;
 
+    const getReadableTime = (ms: number): string => {
+        if (ms < 60000) {
+            return `${ms / 1000} seconds`;
+        } else {
+            return `${Math.round(ms / 60000)} minutes`;
+        }
+    };
+
     return (
         <PageV1>
             <PageHeader
@@ -553,8 +567,13 @@ export const AlertsViewPage: FunctionComponent = () => {
                         <AlertViewSubHeader
                             alert={getAlertQuery.data as Alert}
                             anomalyInfoStatus={
-                                getAnomaliesQuery.isFetching
-                                    ? { loading: getAnomaliesQuery.isFetching }
+                                getAnomaliesQuery.isLoading
+                                    ? {
+                                          loading: getAnomaliesQuery.isLoading,
+                                          loadingtext: `Anomalies are being computed. - Will check for new results in ${getReadableTime(
+                                              nextAttemptTime
+                                          )}`,
+                                      }
                                     : undefined
                             }
                         />

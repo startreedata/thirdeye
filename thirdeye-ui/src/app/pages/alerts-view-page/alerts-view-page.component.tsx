@@ -98,6 +98,7 @@ export const AlertsViewPage: FunctionComponent = () => {
     const [resetStatusNotification, setResetStatusNotification] =
         useState<NotificationV1 | null>(null);
     const { alertInsight, getAlertInsight } = useGetAlertInsight();
+    const [taskStatusLoading, setTaskStatusLoading] = useState(false);
 
     const [searchParams, setSearchParams] = useSearchParams();
 
@@ -117,7 +118,8 @@ export const AlertsViewPage: FunctionComponent = () => {
     );
 
     const fetchDetectionTaskForAlert = async (
-        retryNumber: number
+        retryNumber: number,
+        prevInterval?: NodeJS.Timeout
     ): Promise<void> => {
         // let taskSubType: TaskSubtype | undefined;
         // if (searchParams.get("update")) {
@@ -125,26 +127,37 @@ export const AlertsViewPage: FunctionComponent = () => {
         // } else if (searchParams.has(QUERY_PARAM_KEY_ANOMALIES_RETRY)) {
         //     taskSubType = TaskSubtype.DETECTION_HISTORICAL_DATA_AFTER_CREATE;
         // }
+        clearInterval(prevInterval);
         if (
             searchParams.get("alert") ||
             searchParams.has(QUERY_PARAM_KEY_ANOMALIES_RETRY)
         ) {
+            let interval: NodeJS.Timeout;
             try {
+                setTaskStatusLoading(true);
                 const taskStatus = await getTasks({
                     // taskSubType: taskSubType,
                     alertOrSubGroupId: Number(alertId),
                     status: [TaskStatus.RUNNING, TaskStatus.WAITING],
                 });
+                setTaskStatusLoading(false);
                 if (taskStatus.length) {
                     const nextRefreshAttempts = retryNumber + 1;
+                    interval = setInterval(() => {
+                        setNextAttemptTime((prevState) => prevState - 1000);
+                    }, 1000);
                     setTimeout(() => {
                         setNextAttemptTime(
                             5000 * Math.pow(2, nextRefreshAttempts)
                         );
-                        fetchDetectionTaskForAlert(nextRefreshAttempts);
+                        fetchDetectionTaskForAlert(
+                            nextRefreshAttempts,
+                            interval
+                        );
                     }, 5000 * Math.pow(2, retryNumber));
                 } else {
                     // setRefreshAttempts(0);
+                    setTaskStatusLoading(false);
                     getAlertQuery.refetch();
                     getEnumerationItemsQuery.refetch();
                     getAnomaliesQuery.refetch();
@@ -152,6 +165,7 @@ export const AlertsViewPage: FunctionComponent = () => {
                     fetchStats();
                 }
             } catch (e) {
+                setTaskStatusLoading(false);
                 notifyIfErrors(
                     ActionStatus.Error,
                     getErrorMessages(e as AxiosError),
@@ -466,7 +480,10 @@ export const AlertsViewPage: FunctionComponent = () => {
         if (ms < 60000) {
             return `${ms / 1000} seconds`;
         } else {
-            return `${Math.round(ms / 60000)} minutes`;
+            const minutes = Math.floor(ms / 60000);
+            const remainingSeconds = (ms / 1000) % 60;
+
+            return `${minutes} minutes ${remainingSeconds} seconds`;
         }
     };
 
@@ -569,10 +586,14 @@ export const AlertsViewPage: FunctionComponent = () => {
                             anomalyInfoStatus={
                                 getAnomaliesQuery.isLoading
                                     ? {
-                                          loading: getAnomaliesQuery.isLoading,
-                                          loadingtext: `Anomalies are being computed. - Will check for new results in ${getReadableTime(
-                                              nextAttemptTime
-                                          )}`,
+                                          loading:
+                                              getAnomaliesQuery.isLoading &&
+                                              taskStatusLoading,
+                                          loadingtext: taskStatusLoading
+                                              ? "Checking for computed anomalies"
+                                              : `Anomalies are being computed. - Will check for new results in ${getReadableTime(
+                                                    nextAttemptTime
+                                                )}`,
                                       }
                                     : undefined
                             }

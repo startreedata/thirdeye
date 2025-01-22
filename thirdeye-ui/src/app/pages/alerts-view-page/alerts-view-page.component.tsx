@@ -77,8 +77,8 @@ import {
     QUERY_PARAM_KEY_FOR_SORT,
     QUERY_PARAM_KEY_FOR_SORT_KEY,
 } from "./alerts-view-page.utils";
-// import { getTasks } from "../../rest/tasks/tasks.rest";
-// import { TaskStatus, TaskSubtype } from "../../rest/dto/taks.interface";
+import { getTasks } from "../../rest/tasks/tasks.rest";
+import { TaskStatus } from "../../rest/dto/taks.interface";
 
 export const AlertsViewPage: FunctionComponent = () => {
     const { t } = useTranslation();
@@ -92,11 +92,13 @@ export const AlertsViewPage: FunctionComponent = () => {
 
     // Used for the scenario when user first creates an alert but no anomalies generated yet
     const [refreshAttempts, setRefreshAttempts] = useState(0);
+    const [nextAttemptTime, setNextAttemptTime] = useState(5000);
     const [autoRefreshNotification, setAutoRefreshNotification] =
         useState<NotificationV1 | null>(null);
     const [resetStatusNotification, setResetStatusNotification] =
         useState<NotificationV1 | null>(null);
     const { alertInsight, getAlertInsight } = useGetAlertInsight();
+    const [taskStatusLoading, setTaskStatusLoading] = useState(false);
 
     const [searchParams, setSearchParams] = useSearchParams();
 
@@ -115,49 +117,78 @@ export const AlertsViewPage: FunctionComponent = () => {
         [searchParams]
     );
 
-    // const fetchDetectionTaskForAlert = async () => {
-    //     let taskSubType: TaskSubtype| undefined
-    //     if(searchParams.get('update')){
-    //         taskSubType = TaskSubtype.DETECTION_HISTORICAL_DATA_AFTER_UPDATE
-    //     } else if(searchParams.has(QUERY_PARAM_KEY_ANOMALIES_RETRY)){
-    //         taskSubType = TaskSubtype.DETECTION_HISTORICAL_DATA_AFTER_CREATE
-    //     }
-    //     if(taskSubType){
-    //         try {
-    //             const taskStatus = await getTasks({
-    //                 taskSubType: taskSubType,
-    //                 alertOrSubGroupId: Number(alertId),
-    //                 status: [TaskStatus.RUNNING, TaskStatus.WAITING]
-    //             })
-    //             if(taskStatus){
-    //                 setRefreshAttempts(refreshAttempts+1)
-    //                 setTimeout(()=>{
-    //                     fetchDetectionTaskForAlert()
-    //                 }, 5000)
-    //             } else {
-    //                 setRefreshAttempts(0)
-    //                 getAnomaliesQuery.refetch()
-    //             }
-    //         } catch(e) {
-    //             notifyIfErrors(
-    //                 ActionStatus.Error,
-    //                 getErrorMessages(e as AxiosError),
-    //                 notify,
-    //                 t("message.error-while-fetching", {
-    //                     entity: t("label.tasks"),
-    //                 })
-    //             );
-    //         }
-    //     } else {
-    //         getAnomaliesQuery.refetch()
-    //     }
-    // }
+    const fetchDetectionTaskForAlert = async (
+        retryNumber: number,
+        prevInterval?: NodeJS.Timeout
+    ): Promise<void> => {
+        // let taskSubType: TaskSubtype | undefined;
+        // if (searchParams.get("update")) {
+        //     taskSubType = TaskSubtype.DETECTION_HISTORICAL_DATA_AFTER_UPDATE;
+        // } else if (searchParams.has(QUERY_PARAM_KEY_ANOMALIES_RETRY)) {
+        //     taskSubType = TaskSubtype.DETECTION_HISTORICAL_DATA_AFTER_CREATE;
+        // }
+        clearInterval(prevInterval);
+        if (
+            searchParams.get("alert") ||
+            searchParams.has(QUERY_PARAM_KEY_ANOMALIES_RETRY)
+        ) {
+            let interval: NodeJS.Timeout;
+            try {
+                setTaskStatusLoading(true);
+                const taskStatus = await getTasks({
+                    // taskSubType: taskSubType,
+                    alertOrSubGroupId: Number(alertId),
+                    status: [TaskStatus.RUNNING, TaskStatus.WAITING],
+                });
+                setTaskStatusLoading(false);
+                if (taskStatus.length) {
+                    const nextRefreshAttempts = retryNumber + 1;
+                    interval = setInterval(() => {
+                        setNextAttemptTime((prevState) => prevState - 1000);
+                    }, 1000);
+                    setTimeout(() => {
+                        setNextAttemptTime(
+                            5000 * Math.pow(2, nextRefreshAttempts)
+                        );
+                        fetchDetectionTaskForAlert(
+                            nextRefreshAttempts,
+                            interval
+                        );
+                    }, 5000 * Math.pow(2, retryNumber));
+                } else {
+                    // setRefreshAttempts(0);
+                    setTaskStatusLoading(false);
+                    getAlertQuery.refetch();
+                    getEnumerationItemsQuery.refetch();
+                    getAnomaliesQuery.refetch();
+                    getAlertInsight({ alertId: Number(alertId) });
+                    fetchStats();
+                }
+            } catch (e) {
+                setTaskStatusLoading(false);
+                notifyIfErrors(
+                    ActionStatus.Error,
+                    getErrorMessages(e as AxiosError),
+                    notify,
+                    t("message.error-while-fetching", {
+                        entity: t("label.tasks"),
+                    })
+                );
+            }
+        } else {
+            getAlertQuery.refetch();
+            getEnumerationItemsQuery.refetch();
+            getAnomaliesQuery.refetch();
+            getAlertInsight({ alertId: Number(alertId) });
+            fetchStats();
+        }
+    };
 
-    // useEffect(()=> {
-    //     if(alertId){
-    //         fetchDetectionTaskForAlert()
-    //     }
-    // }, [alertId])
+    useEffect(() => {
+        if (alertId) {
+            fetchDetectionTaskForAlert(refreshAttempts);
+        }
+    }, [alertId]);
 
     const {
         alert: alertThatWasReset,
@@ -171,6 +202,7 @@ export const AlertsViewPage: FunctionComponent = () => {
         queryFn: () => {
             return getAlert(Number(alertId));
         },
+        // enabled: false,
     });
 
     const getEnumerationItemsQuery = useFetchQuery({
@@ -178,6 +210,7 @@ export const AlertsViewPage: FunctionComponent = () => {
         queryFn: () => {
             return getEnumerationItems({ alertId: Number(alertId) });
         },
+        // enabled: false,
     });
 
     const getAnomaliesQuery = useFetchQuery({
@@ -189,7 +222,7 @@ export const AlertsViewPage: FunctionComponent = () => {
                 endTime,
             });
         },
-        // enabled: false
+        enabled: false,
     });
 
     const [searchTerm, sortOrder, sortKey] = useMemo(
@@ -443,6 +476,17 @@ export const AlertsViewPage: FunctionComponent = () => {
         getAlertQuery.data?.templateProperties?.enumerationItems ||
         getAlertQuery?.data?.templateProperties.enumeratorQuery;
 
+    const getReadableTime = (ms: number): string => {
+        if (ms < 60000) {
+            return `${ms / 1000} seconds`;
+        } else {
+            const minutes = Math.floor(ms / 60000);
+            const remainingSeconds = (ms / 1000) % 60;
+
+            return `${minutes} minutes ${remainingSeconds} seconds`;
+        }
+    };
+
     return (
         <PageV1>
             <PageHeader
@@ -540,8 +584,17 @@ export const AlertsViewPage: FunctionComponent = () => {
                         <AlertViewSubHeader
                             alert={getAlertQuery.data as Alert}
                             anomalyInfoStatus={
-                                getAnomaliesQuery.isFetching
-                                    ? { loading: getAnomaliesQuery.isFetching }
+                                getAnomaliesQuery.isLoading
+                                    ? {
+                                          loading:
+                                              getAnomaliesQuery.isLoading &&
+                                              taskStatusLoading,
+                                          loadingtext: taskStatusLoading
+                                              ? "Checking for computed anomalies"
+                                              : `Anomalies are being computed. - Will check for new results in ${getReadableTime(
+                                                    nextAttemptTime
+                                                )}`,
+                                      }
                                     : undefined
                             }
                         />

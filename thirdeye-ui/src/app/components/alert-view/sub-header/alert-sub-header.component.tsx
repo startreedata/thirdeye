@@ -76,10 +76,12 @@ export const AlertViewSubHeader: FunctionComponent<AlertViewSubHeaderProps> = ({
                                         display="flex"
                                         gridGap="4px"
                                     >
-                                        <CircularProgress
-                                            color="inherit"
-                                            size={15}
-                                        />
+                                        {anomalyInfoStatus.loading && (
+                                            <CircularProgress
+                                                color="inherit"
+                                                size={15}
+                                            />
+                                        )}
                                         {anomalyInfoStatus?.loadingtext ||
                                             "Computing anomalies..."}
                                     </Box>

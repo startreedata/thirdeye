@@ -1,3 +1,15 @@
+## [2.61.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.60.4...thirdeye-ui-2.61.0) (2025-01-22)
+
+
+### Features
+
+* TE-XXXX fetch alert details post task api response ([14217a759](https://github.com/startreedata/thirdeye/commit/14217a75905112a134ba965cf2a2cb6311a58511))
+
+
+### Bug Fixes
+
+* TE-XXXX remove moal after first alert creation ([71d49168f](https://github.com/startreedata/thirdeye/commit/71d49168f76e39e68a94421347ce5d504bd9cca5))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

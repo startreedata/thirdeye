@@ -65,7 +65,7 @@ export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
                 searchParams.get(QUERY_PARAM_KEYS.IS_FIRST_ALERT)
             ) {
                 const queryParams = new URLSearchParams([
-                    [QUERY_PARAM_KEYS.SHOW_FIRST_ALERT_SUCCESS, "true"],
+                    [QUERY_PARAM_KEYS.SHOW_FIRST_ALERT_SUCCESS, "false"],
                 ]);
                 setShowAppNavBar(true);
                 navigate(`${getHomePath()}?${queryParams.toString()}`);

@@ -1,3 +1,10 @@
+### [2.60.4](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.60.3...thirdeye-ui-2.60.4) (2025-01-22)
+
+
+### Bug Fixes
+
+* TE-XXXX create alert redirect modal persist fix ([44a3235fa](https://github.com/startreedata/thirdeye/commit/44a3235fa346879d8b3b65eca7faff2d373ab17a))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

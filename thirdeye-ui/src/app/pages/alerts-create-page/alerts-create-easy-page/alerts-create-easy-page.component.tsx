@@ -1065,8 +1065,13 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                             {t(
                                                                                 "message.num-metrics",
                                                                                 {
-                                                                                    num: option
-                                                                                        .metrics
+                                                                                    num: option.metrics.filter(
+                                                                                        (
+                                                                                            metric
+                                                                                        ) =>
+                                                                                            metric.id !==
+                                                                                            -1
+                                                                                    )
                                                                                         .length,
                                                                                 }
                                                                             )}

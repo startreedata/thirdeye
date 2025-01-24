@@ -8,6 +8,7 @@ on:
       -opened
       -edited
       -ready_for_review
+      - synchronize
     branches:
       - master
   workflow_dispatch:

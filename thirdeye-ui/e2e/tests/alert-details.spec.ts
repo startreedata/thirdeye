@@ -51,3 +51,12 @@ test("Active and Deactivate alerts", async ({ page }) => {
     await alertDetailsPage.resolveApis();
     await alertDetailsPage.checkAlertIsActiveOrDeactive(true);
 });
+
+test("User can select date range for anomalies", async ({ page }) => {
+    const alertDetailsPage = new AlertDetailsPage(page);
+    await alertDetailsPage.goToAlertDetailsPage();
+    await alertDetailsPage.resolveApis();
+    await alertDetailsPage.openFirstAlert();
+    await alertDetailsPage.resolveDetailsPageApis();
+    await alertDetailsPage.applyDateChange();
+});

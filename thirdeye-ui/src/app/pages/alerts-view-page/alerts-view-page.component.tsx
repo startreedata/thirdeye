@@ -121,12 +121,6 @@ export const AlertsViewPage: FunctionComponent = () => {
         retryNumber: number,
         prevInterval?: NodeJS.Timeout
     ): Promise<void> => {
-        // let taskSubType: TaskSubtype | undefined;
-        // if (searchParams.get("update")) {
-        //     taskSubType = TaskSubtype.DETECTION_HISTORICAL_DATA_AFTER_UPDATE;
-        // } else if (searchParams.has(QUERY_PARAM_KEY_ANOMALIES_RETRY)) {
-        //     taskSubType = TaskSubtype.DETECTION_HISTORICAL_DATA_AFTER_CREATE;
-        // }
         clearInterval(prevInterval);
         if (
             searchParams.get("alert") ||
@@ -136,7 +130,6 @@ export const AlertsViewPage: FunctionComponent = () => {
             try {
                 setTaskStatusLoading(true);
                 const taskStatus = await getTasks({
-                    // taskSubType: taskSubType,
                     alertOrSubGroupId: Number(alertId),
                     status: [TaskStatus.RUNNING, TaskStatus.WAITING],
                 });
@@ -156,13 +149,13 @@ export const AlertsViewPage: FunctionComponent = () => {
                         );
                     }, 5000 * Math.pow(2, retryNumber));
                 } else {
-                    // setRefreshAttempts(0);
                     setTaskStatusLoading(false);
                     getAlertQuery.refetch();
                     getEnumerationItemsQuery.refetch();
                     getAnomaliesQuery.refetch();
                     getAlertInsight({ alertId: Number(alertId) });
                     fetchStats();
+                    setNextAttemptTime(0);
                 }
             } catch (e) {
                 setTaskStatusLoading(false);
@@ -181,6 +174,7 @@ export const AlertsViewPage: FunctionComponent = () => {
             getAnomaliesQuery.refetch();
             getAlertInsight({ alertId: Number(alertId) });
             fetchStats();
+            setNextAttemptTime(0);
         }
     };
 
@@ -202,7 +196,6 @@ export const AlertsViewPage: FunctionComponent = () => {
         queryFn: () => {
             return getAlert(Number(alertId));
         },
-        // enabled: false,
     });
 
     const getEnumerationItemsQuery = useFetchQuery({
@@ -210,7 +203,6 @@ export const AlertsViewPage: FunctionComponent = () => {
         queryFn: () => {
             return getEnumerationItems({ alertId: Number(alertId) });
         },
-        // enabled: false,
     });
 
     const getAnomaliesQuery = useFetchQuery({
@@ -224,6 +216,16 @@ export const AlertsViewPage: FunctionComponent = () => {
         },
         enabled: false,
     });
+
+    const handleRefetchAnomalies = (): void => {
+        getAnomaliesQuery.refetch();
+    };
+
+    useEffect(() => {
+        if (nextAttemptTime === 0) {
+            handleRefetchAnomalies();
+        }
+    }, [startTime, endTime]);
 
     const [searchTerm, sortOrder, sortKey] = useMemo(
         () => [

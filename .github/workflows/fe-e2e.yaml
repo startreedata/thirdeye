@@ -5,9 +5,9 @@ on:
       - master
   pull_request:
     types:
-      -opened
-      -edited
-      -ready_for_review
+      - opened
+      - edited
+      - ready_for_review
       - synchronize
     branches:
       - master

@@ -47,7 +47,7 @@ public class GenericExceptionMapper extends LoggingExceptionMapper<Throwable> {
     LOG.debug(
         "Request failed because of a {}. Returning error code {}",
         exception.getClass().getSimpleName(),
-        status.getRecommendedStatusCode());
+        status.getRecommendedStatusCode(), exception);
     final StatusApi statusApi = new StatusApi()
         .setCode(status)
         .setMsg(exception.getMessage())

@@ -1,0 +1,241 @@
+/*
+ * Copyright 2024 StarTree Inc
+ *
+ * Licensed under the StarTree Community License (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at http://www.startree.ai/legal/startree-community-license
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
+ * either express or implied.
+ * See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package ai.startree.thirdeye;
+
+import static ai.startree.thirdeye.DropwizardTestUtils.loadAlertApi;
+import static ai.startree.thirdeye.HappyPathTest.assert200;
+import static ai.startree.thirdeye.PinotDataSourceManager.PINOT_DATASET_NAME;
+import static ai.startree.thirdeye.ThirdEyeTestClient.ALERT_LIST_TYPE;
+import static ai.startree.thirdeye.ThirdEyeTestClient.DATASOURCE_LIST_TYPE;
+import static ai.startree.thirdeye.ThirdEyeTestClient.TASK_LIST_TYPE;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import ai.startree.thirdeye.aspect.TimeProvider;
+import ai.startree.thirdeye.spi.api.AlertApi;
+import ai.startree.thirdeye.spi.api.DataSourceApi;
+import ai.startree.thirdeye.spi.api.EmailSchemeApi;
+import ai.startree.thirdeye.spi.api.NamespaceConfigurationApi;
+import ai.startree.thirdeye.spi.api.NotificationSchemesApi;
+import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
+import ai.startree.thirdeye.spi.api.TaskApi;
+import ai.startree.thirdeye.spi.task.TaskSubType;
+import ai.startree.thirdeye.spi.task.TaskType;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.core.MultivaluedHashMap;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
+import java.io.IOException;
+import java.util.Comparator;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+
+/**
+ * Scheduler Tasks Quota tests
+ * - create datasource, dataset
+ * - verify task quotas
+ * - create alert and ensure first detection task creation
+ * - create subscription group
+ * - wait for detection and notification tasks to schedule & run
+ * - verify that quota has been hit and no new tasks are being created
+ * - create another task and subscription group
+ * - verify that no new tasks are created except historical after create detection type
+ */
+public class SchedulerQuotaTest {
+
+  private static final Logger log = LoggerFactory.getLogger(SchedulerQuotaTest.class);
+
+  private static final AlertApi ALERT_API;
+
+  private static final TimeProvider CLOCK = TimeProvider.instance();
+  private final ThirdEyeIntegrationTestSupport support = new ThirdEyeIntegrationTestSupport(
+      "schedulingquota/config/server.yaml"
+  );
+  private ThirdEyeTestClient client;
+  private DataSourceApi pinotDataSourceApi;
+  private long alertId;
+
+  static {
+    try {
+      ALERT_API = loadAlertApi("/schedulingquota/payloads/alert.json");
+    } catch (final IOException e) {
+      throw new RuntimeException(String.format("Could not load quota alert json: %s", e));
+    }
+  }
+
+  @BeforeClass
+  public void beforeClass() throws Exception {
+    // ensure time is controlled via the TimeProvider CLOCK - ie weaving is working correctly
+    assertThat(CLOCK.isTimeMockWorking()).isTrue();
+
+    support.setup();
+    pinotDataSourceApi = support.getPinotDataSourceApi();
+    client = support.getClient();
+  }
+
+  @AfterClass(alwaysRun = true)
+  public void afterClass() {
+    CLOCK.useSystemTime();
+    support.tearDown();
+  }
+
+  @Test
+  public void setUpData() {
+    Response response = client.request("internal/ping").get();
+    assert200(response);
+
+    // create datasource
+    response = client.request("api/data-sources")
+        .post(Entity.json(List.of(pinotDataSourceApi)));
+    assert200(response);
+    final DataSourceApi dataSourceInResponse = response.readEntity(DATASOURCE_LIST_TYPE).getFirst();
+    pinotDataSourceApi.setId(dataSourceInResponse.getId());
+
+    // create dataset
+    final MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
+    formData.add("dataSourceId", String.valueOf(pinotDataSourceApi.getId()));
+    formData.add("datasetName", PINOT_DATASET_NAME);
+    response = client.request("api/data-sources/onboard-dataset/")
+        .post(Entity.form(formData));
+    assert200(response);
+  }
+
+  @Test(dependsOnMethods = "setUpData")
+  public void testVerifyTaskQuotas() {
+    final Response response = client.request("api/workspace-configuration").get();
+    assertThat(response.getStatus()).isEqualTo(200);
+    final NamespaceConfigurationApi gotCfgApi = response.readEntity(
+        NamespaceConfigurationApi.class);
+    assertThat(gotCfgApi.getNamespaceQuotasConfiguration().getTaskQuotasConfiguration()
+        .getMaximumDetectionTasksPerMonth()).isEqualTo(3);
+    assertThat(gotCfgApi.getNamespaceQuotasConfiguration().getTaskQuotasConfiguration()
+        .getMaximumNotificationTasksPerMonth()).isEqualTo(2);
+  }
+
+  @Test(dependsOnMethods = "testVerifyTaskQuotas")
+  public void testTaskIsCreated() {
+    // create alert that schedules every 10 seconds
+    final Response response = client.request("api/alerts")
+        .post(Entity.json(List.of(ALERT_API)));
+    assert200(response);
+    alertId = response.readEntity(ALERT_LIST_TYPE).getFirst().getId();
+  }
+
+  @Test(dependsOnMethods = "testTaskIsCreated")
+  public void testSubscriptionGroupIsCreated() {
+    // create subscription group that notifies every 10 seconds
+    final SubscriptionGroupApi subscriptionGroupApi = getSubscriptionGroupApi(
+        "testSubscriptionFirst", alertId);;
+    final Response response = client.request("api/subscription-groups").post(
+        Entity.json(List.of(subscriptionGroupApi)));
+    assert200(response);
+  }
+
+  @Test(dependsOnMethods = "testSubscriptionGroupIsCreated")
+  public void testTasksAfterEntityCreation() {
+    final List<TaskApi> tasks = getTasks();
+    assertThat(tasks).hasSize(1);
+    final TaskApi task = tasks.getFirst();
+    assertThat(task.getTaskType()).isEqualTo(TaskType.DETECTION);
+    assertThat(task.getTaskSubType()).isEqualTo(TaskSubType.DETECTION_HISTORICAL_DATA_AFTER_CREATE);
+  }
+
+  @Test(dependsOnMethods = "testTasksAfterEntityCreation")
+  public void testTasksAfterDelay() throws InterruptedException {
+    // give thread to detectionCronScheduler and notificationTaskScheduler
+    // both schedulers run every 5 seconds
+    // both alert and subscription group has cron for every 10 seconds
+    Thread.sleep(30000);
+
+    // no more than 3 detection tasks and 2 notification tasks must've been scheduled
+    // due to detection quota of 3 and notification quota of 2
+    final List<TaskApi> tasks = getTasks();
+    final AtomicInteger detectionTasksCount = new AtomicInteger();
+    final AtomicInteger notificationTasksCount = new AtomicInteger();
+    tasks.forEach(task -> {
+      switch (task.getTaskType()) {
+        case DETECTION -> detectionTasksCount.getAndIncrement();
+        case NOTIFICATION -> notificationTasksCount.getAndIncrement();
+      }
+    });
+    assertThat(detectionTasksCount.get()).isEqualTo(3);
+    assertThat(notificationTasksCount.get()).isEqualTo(2);
+    assertThat(tasks).hasSize(5);
+  }
+
+  @Test(dependsOnMethods = "testTasksAfterDelay")
+  public void testAnotherTaskIsCreated() {
+    // create another alert that schedules every 10 seconds
+    final Response response = client.request("api/alerts")
+        .post(Entity.json(List.of(ALERT_API.setName("simple-threshold-pageviews-second"))));
+    assert200(response);
+
+    final List<TaskApi> tasks = getTasks();
+    final TaskApi task = tasks.getLast();
+    assertThat(task.getTaskType()).isEqualTo(TaskType.DETECTION);
+    assertThat(task.getTaskSubType()).isEqualTo(TaskSubType.DETECTION_HISTORICAL_DATA_AFTER_CREATE);
+  }
+
+  @Test(dependsOnMethods = "testAnotherTaskIsCreated")
+  public void testAnotherSubscriptionGroupIsCreated() {
+    // create another subscription group that notifies every 10 seconds
+    final SubscriptionGroupApi subscriptionGroupApi = getSubscriptionGroupApi(
+        "testSubscriptionSecond", alertId);
+    final Response response = client.request("api/subscription-groups").post(
+        Entity.json(List.of(subscriptionGroupApi)));
+    assert200(response);
+  }
+
+  @Test(dependsOnMethods = "testAnotherSubscriptionGroupIsCreated")
+  public void testTasksAfterSecondDelay() throws InterruptedException {
+    // give thread to detectionCronScheduler and notificationTaskScheduler again
+    Thread.sleep(15000);
+
+    // no new task will be created except the historical after create detection type
+    // which is created through crud service flow and doesn't have quota control
+    // regular cron tasks stop creating because quota for both has already crossed
+    final List<TaskApi> tasks = getTasks();
+    final AtomicInteger detectionTasksCount = new AtomicInteger();
+    final AtomicInteger notificationTasksCount = new AtomicInteger();
+    tasks.forEach(task -> {
+      switch (task.getTaskType()) {
+        case DETECTION -> detectionTasksCount.getAndIncrement();
+        case NOTIFICATION -> notificationTasksCount.getAndIncrement();
+      }
+    });
+    assertThat(detectionTasksCount.get()).isEqualTo(4);
+    assertThat(notificationTasksCount.get()).isEqualTo(2);
+    assertThat(tasks).hasSize(6);
+  }
+
+  private List<TaskApi> getTasks() {
+    final Response response = client.request("api/tasks").get();
+    assert200(response);
+    final List<TaskApi> taskApis = response.readEntity(TASK_LIST_TYPE);
+    taskApis.sort(Comparator.comparingLong(TaskApi::getId));
+    return taskApis;
+  }
+
+  private SubscriptionGroupApi getSubscriptionGroupApi(String name, Long alertId) {
+    return new SubscriptionGroupApi().setName(name)
+        .setCron("*/10 * * * * ?")
+        .setNotificationSchemes(new NotificationSchemesApi().setEmail(
+            new EmailSchemeApi().setTo(List.of("analyst@fake.mail"))))
+        .setAlerts(List.of(new AlertApi().setId(alertId)));
+  }
+}

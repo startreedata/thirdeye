@@ -44,7 +44,7 @@ public class GenericExceptionMapper extends LoggingExceptionMapper<Throwable> {
   @Override
   public Response toResponse(final Throwable exception) {
     final ThirdEyeStatus status = statusFor(exception);
-    LOG.debug(
+    LOG.error(
         "Request failed because of a {}. Returning error code {}",
         exception.getClass().getSimpleName(),
         status.getRecommendedStatusCode(), exception);

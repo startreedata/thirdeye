@@ -26,21 +26,11 @@ public interface Operator {
 
   String getOperatorName();
 
-  void setProperty(String key, Object value);
-
-
   /**
    * Set keyed input
-   * @param key
-   * @param input
    */
+  @SuppressWarnings("unused") // used in enterprise TE
   void setInput(String key, OperatorResult input);
-
-  /**
-   * Get keyed output
-   * @param key
-   */
-  OperatorResult getOutput(String key);
 
   /**
    * Get all keyed outputs

@@ -14,6 +14,7 @@
  */
 import { test } from "@playwright/test";
 import { AlertListPage } from "../pages/alert-list";
+test.describe.configure({ mode: "serial" });
 
 let alertListPage;
 test.beforeEach(async ({ page }) => {

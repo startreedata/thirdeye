@@ -3,11 +3,20 @@ on:
   push:
     branches:
       - master
+  pull_request:
+    types:
+      - opened
+      - edited
+      - ready_for_review
+      - synchronize
+    branches:
+      - master
   workflow_dispatch:
 jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
     steps:
       - name: Pull Repository
         uses: actions/checkout@v4

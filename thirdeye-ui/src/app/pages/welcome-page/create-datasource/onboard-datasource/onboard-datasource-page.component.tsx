@@ -276,7 +276,9 @@ export const WelcomeSelectDatasource: FunctionComponent = () => {
                                         <Box
                                             display="flex"
                                             justifyContent="start"
-                                            minWidth="220px"
+                                            marginLeft="50px"
+                                            minWidth="250px"
+                                            width="250px"
                                         >
                                             <FormControl component="fieldset">
                                                 <FormLabel

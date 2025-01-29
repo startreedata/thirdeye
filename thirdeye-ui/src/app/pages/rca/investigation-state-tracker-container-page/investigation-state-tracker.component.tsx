@@ -129,8 +129,8 @@ export const InvestigationStateTracker: FunctionComponent = () => {
                     enumerationItemSearchParams
                 ),
                 label: enumerationItem
-                    ? `${anomaly.alert.name} (${enumerationItem.name})`
-                    : anomaly.alert.name,
+                    ? `${alert?.name} (${enumerationItem.name})`
+                    : alert?.name,
             });
         } else {
             crumbs.push({
@@ -148,7 +148,7 @@ export const InvestigationStateTracker: FunctionComponent = () => {
         });
 
         return crumbs;
-    }, [anomaly, enumerationItem]);
+    }, [anomaly, enumerationItem, alert]);
 
     useEffect(() => {
         getAnomaly(Number(anomalyId));

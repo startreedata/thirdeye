@@ -16,11 +16,14 @@ interface WorkspaceDropdownOptions {
     id: string;
 }
 
+type Quota = { notification: number; detection: number };
+
 export interface AppHeaderprops {
     workspaces: WorkspaceDropdownOptions[] | undefined;
     selectedWorkspace: WorkspaceDropdownOptions;
     onWorkspaceChange: (workspace: WorkspaceDropdownOptions) => void;
     isFullScreen: boolean;
+    quota: { remainingQuota: Quota; totalQuota: Quota } | null | any;
 }
 
 export interface AppHeaderStyleProps {

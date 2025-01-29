@@ -14,13 +14,12 @@
 package ai.startree.thirdeye.service.alert;
 
 import static ai.startree.thirdeye.ResourceUtils.ensureExists;
-import static ai.startree.thirdeye.ResourceUtils.serverError;
 import static ai.startree.thirdeye.mapper.ApiBeanMapper.toAlertDto;
 import static ai.startree.thirdeye.mapper.ApiBeanMapper.toAlertTemplateApi;
 import static ai.startree.thirdeye.spi.Constants.UTC_TIMEZONE;
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_ALERT_INSIGHTS;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DATASET_NOT_FOUND_IN_NAMESPACE;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_CONFIGURATION_FIELD;
-import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_UNKNOWN;
 import static ai.startree.thirdeye.spi.util.AlertMetadataUtils.getDelay;
 import static ai.startree.thirdeye.spi.util.AlertMetadataUtils.getGranularity;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
@@ -119,8 +118,7 @@ public class AlertInsightsProvider {
     } catch (final Exception e) {
       // todo cyril for debug - can be removed later
       LOG.error("An error happened when trying to get insights for alert {}", alertApi, e);
-      // can do better exception handling if necessary - see handleAlertEvaluationException
-      throw serverError(ERR_UNKNOWN, e);
+      throw new ThirdEyeException(e, ERR_ALERT_INSIGHTS, e.getMessage());
     }
   }
 
@@ -135,8 +133,7 @@ public class AlertInsightsProvider {
     } catch (final WebApplicationException e) {
       throw e;
     } catch (final Exception e) {
-      // can do better exception handling if necessary - see handleAlertEvaluationException
-      throw serverError(ERR_UNKNOWN, e);
+      throw new ThirdEyeException(e, ERR_ALERT_INSIGHTS, e.getMessage());
     }
   }
 
@@ -185,6 +182,8 @@ public class AlertInsightsProvider {
     final Interval safeInterval = new Interval(0L, maximumPossibleEndTime);
     final Future<@Nullable Long> safeMaxTimeFuture = minMaxTimeLoader.fetchMaxTimeAsync(
         dataSourceDTO, datasetConfigDTO, safeInterval);
+    final Future<@Nullable Long> safeMinTimeFuture = minMaxTimeLoader.fetchMinTimeAsync(
+        dataSourceDTO, datasetConfigDTO, safeInterval);
 
     // process futures
     // process startTime
@@ -195,7 +194,22 @@ public class AlertInsightsProvider {
               datasetConfigDTO.getDataset())));
       return;
     }
-    insights.setDatasetStartTime(datasetStartTime);
+    if (datasetStartTime > 0) {
+      insights.setDatasetStartTime(datasetStartTime);
+    } else {
+      LOG.warn(
+          "Dataset minTime is negative: {}. Most likely a data issue in the dataset. Rerunning query with a filter time >= 0 to get a safe minTime.",
+          datasetStartTime);
+      insights.setSuspiciousDatasetStartTime(datasetStartTime);
+      final @Nullable Long safeMinTime = safeMinTimeFuture.get(FETCH_TIMEOUT_MILLIS, MILLISECONDS);
+      if (safeMinTime == null) {
+        insights.setAnalysisRunInfo(AnalysisRunInfo.failure(String.format(
+            "Failed to fetch dataset safe start time. The time configuration of the table %s may be incorrect.",
+            datasetConfigDTO.getDataset())));
+      } else {
+        insights.setDatasetStartTime(safeMinTime);
+      }
+    }
 
     // process endTime
     final @Nullable Long datasetMaxTime = maxTimeFuture.get(FETCH_TIMEOUT_MILLIS, MILLISECONDS);

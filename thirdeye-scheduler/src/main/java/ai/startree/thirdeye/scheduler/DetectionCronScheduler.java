@@ -17,6 +17,8 @@ import static ai.startree.thirdeye.spi.util.ExecutorUtils.shutdownExecutionServi
 
 import ai.startree.thirdeye.scheduler.job.DetectionPipelineJob;
 import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
+import ai.startree.thirdeye.spi.datalayer.bao.NamespaceConfigurationManager;
+import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
 import ai.startree.thirdeye.spi.task.TaskType;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -39,17 +41,24 @@ public class DetectionCronScheduler {
   private final AlertManager alertManager;
   private TaskCronSchedulerRunnable<AlertDTO> runnable;
 
+  private final TaskManager taskManager;
+  private final NamespaceConfigurationManager namespaceConfigurationManager;
+
   @Inject
   public DetectionCronScheduler(
       final AlertManager alertManager,
       final ThirdEyeSchedulerConfiguration configuration,
-      final GuiceJobFactory guiceJobFactory) {
+      final GuiceJobFactory guiceJobFactory,
+      final TaskManager taskManager,
+      final NamespaceConfigurationManager namespaceConfigurationManager) {
     this.configuration = configuration;
     this.guiceJobFactory = guiceJobFactory;
     executorService = Executors.newSingleThreadScheduledExecutor(
         new ThreadFactoryBuilder().setNameFormat("detection-cron-%d").build());
     
     this.alertManager = alertManager;
+    this.taskManager = taskManager;
+    this.namespaceConfigurationManager = namespaceConfigurationManager;
   }
 
   public void start() throws SchedulerException {
@@ -62,7 +71,10 @@ public class DetectionCronScheduler {
         DetectionPipelineJob.class,
         guiceJobFactory,
         DETECTION_SCHEDULER_CRON_MAX_TRIGGERS_PER_MINUTE,
-        this.getClass()
+        this.getClass(),
+        taskManager,
+        namespaceConfigurationManager,
+        configuration.getNamespaceQuotaCacheDurationSeconds()
     );
     executorService.scheduleWithFixedDelay(runnable,
         0, 

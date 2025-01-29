@@ -95,16 +95,6 @@ public abstract class DetectionPipelineOperator implements Operator {
   }
 
   @Override
-  public void setProperty(final String key, final Object value) {
-    planNode.getParams().putValue(key, value);
-  }
-
-  @Override
-  public OperatorResult getOutput(final String key) {
-    return resultMap.get(key);
-  }
-
-  @Override
   public Map<String, OperatorResult> getOutputs() {
     return resultMap;
   }

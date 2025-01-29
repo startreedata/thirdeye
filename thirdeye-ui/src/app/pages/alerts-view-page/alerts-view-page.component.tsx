@@ -77,6 +77,8 @@ import {
     QUERY_PARAM_KEY_FOR_SORT,
     QUERY_PARAM_KEY_FOR_SORT_KEY,
 } from "./alerts-view-page.utils";
+import { getTasks } from "../../rest/tasks/tasks.rest";
+import { TaskStatus } from "../../rest/dto/taks.interface";
 
 export const AlertsViewPage: FunctionComponent = () => {
     const { t } = useTranslation();
@@ -90,11 +92,13 @@ export const AlertsViewPage: FunctionComponent = () => {
 
     // Used for the scenario when user first creates an alert but no anomalies generated yet
     const [refreshAttempts, setRefreshAttempts] = useState(0);
+    const [nextAttemptTime, setNextAttemptTime] = useState(5000);
     const [autoRefreshNotification, setAutoRefreshNotification] =
         useState<NotificationV1 | null>(null);
     const [resetStatusNotification, setResetStatusNotification] =
         useState<NotificationV1 | null>(null);
     const { alertInsight, getAlertInsight } = useGetAlertInsight();
+    const [taskStatusLoading, setTaskStatusLoading] = useState(false);
 
     const [searchParams, setSearchParams] = useSearchParams();
 
@@ -112,6 +116,73 @@ export const AlertsViewPage: FunctionComponent = () => {
         ],
         [searchParams]
     );
+
+    const fetchDetectionTaskForAlert = async (
+        retryNumber: number,
+        prevInterval?: NodeJS.Timeout
+    ): Promise<void> => {
+        clearInterval(prevInterval);
+        if (
+            searchParams.get("alert") ||
+            searchParams.has(QUERY_PARAM_KEY_ANOMALIES_RETRY)
+        ) {
+            let interval: NodeJS.Timeout;
+            try {
+                setTaskStatusLoading(true);
+                const taskStatus = await getTasks({
+                    alertOrSubGroupId: Number(alertId),
+                    status: [TaskStatus.RUNNING, TaskStatus.WAITING],
+                });
+                setTaskStatusLoading(false);
+                if (taskStatus.length) {
+                    const nextRefreshAttempts = retryNumber + 1;
+                    interval = setInterval(() => {
+                        setNextAttemptTime((prevState) => prevState - 1000);
+                    }, 1000);
+                    setTimeout(() => {
+                        setNextAttemptTime(
+                            5000 * Math.pow(2, nextRefreshAttempts)
+                        );
+                        fetchDetectionTaskForAlert(
+                            nextRefreshAttempts,
+                            interval
+                        );
+                    }, 5000 * Math.pow(2, retryNumber));
+                } else {
+                    setTaskStatusLoading(false);
+                    getAlertQuery.refetch();
+                    getEnumerationItemsQuery.refetch();
+                    getAnomaliesQuery.refetch();
+                    getAlertInsight({ alertId: Number(alertId) });
+                    fetchStats();
+                    setNextAttemptTime(0);
+                }
+            } catch (e) {
+                setTaskStatusLoading(false);
+                notifyIfErrors(
+                    ActionStatus.Error,
+                    getErrorMessages(e as AxiosError),
+                    notify,
+                    t("message.error-while-fetching", {
+                        entity: t("label.tasks"),
+                    })
+                );
+            }
+        } else {
+            getAlertQuery.refetch();
+            getEnumerationItemsQuery.refetch();
+            getAnomaliesQuery.refetch();
+            getAlertInsight({ alertId: Number(alertId) });
+            fetchStats();
+            setNextAttemptTime(0);
+        }
+    };
+
+    useEffect(() => {
+        if (alertId) {
+            fetchDetectionTaskForAlert(refreshAttempts);
+        }
+    }, [alertId]);
 
     const {
         alert: alertThatWasReset,
@@ -143,7 +214,18 @@ export const AlertsViewPage: FunctionComponent = () => {
                 endTime,
             });
         },
+        enabled: false,
     });
+
+    const handleRefetchAnomalies = (): void => {
+        getAnomaliesQuery.refetch();
+    };
+
+    useEffect(() => {
+        if (nextAttemptTime === 0) {
+            handleRefetchAnomalies();
+        }
+    }, [startTime, endTime]);
 
     const [searchTerm, sortOrder, sortKey] = useMemo(
         () => [
@@ -231,8 +313,8 @@ export const AlertsViewPage: FunctionComponent = () => {
      */
     useEffect(() => {
         if (
-            getAnomaliesQuery.data &&
-            getAnomaliesQuery.data.length === 0 &&
+            // getAnomaliesQuery.data &&
+            // getAnomaliesQuery.data.length === 0 &&
             searchParams.has(QUERY_PARAM_KEY_ANOMALIES_RETRY)
         ) {
             // If not in reset flow, assume alert was just created
@@ -396,6 +478,17 @@ export const AlertsViewPage: FunctionComponent = () => {
         getAlertQuery.data?.templateProperties?.enumerationItems ||
         getAlertQuery?.data?.templateProperties.enumeratorQuery;
 
+    const getReadableTime = (ms: number): string => {
+        if (ms < 60000) {
+            return `${ms / 1000} seconds`;
+        } else {
+            const minutes = Math.floor(ms / 60000);
+            const remainingSeconds = (ms / 1000) % 60;
+
+            return `${minutes} minutes ${remainingSeconds} seconds`;
+        }
+    };
+
     return (
         <PageV1>
             <PageHeader
@@ -492,6 +585,20 @@ export const AlertsViewPage: FunctionComponent = () => {
                     >
                         <AlertViewSubHeader
                             alert={getAlertQuery.data as Alert}
+                            anomalyInfoStatus={
+                                getAnomaliesQuery.isLoading
+                                    ? {
+                                          loading:
+                                              getAnomaliesQuery.isLoading &&
+                                              taskStatusLoading,
+                                          loadingtext: taskStatusLoading
+                                              ? "Checking for computed anomalies"
+                                              : `Anomalies are being computed. - Will check for new results in ${getReadableTime(
+                                                    nextAttemptTime
+                                                )}`,
+                                      }
+                                    : undefined
+                            }
                         />
                     </LoadingErrorStateSwitch>
                 </Grid>

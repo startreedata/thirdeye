@@ -13,88 +13,22 @@
  * the License.
  */
 
-import { Box, Button, Grid, Typography } from "@material-ui/core";
-import React, { FunctionComponent, useMemo } from "react";
+import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import { PageHeader } from "../../../components/page-header/page-header.component";
-import {
-    PageContentsCardV1,
-    PageContentsGridV1,
-    PageV1,
-    StepperV1,
-} from "../../../platform/components";
-import { AppRouteRelative } from "../../../utils/routes/routes.util";
-
-const STEPS = [
-    {
-        subPath: AppRouteRelative.WELCOME_ONBOARD_DATASOURCE_DATASOURCE,
-        translationLabel: "select-datasource",
-    },
-    {
-        subPath: AppRouteRelative.WELCOME_ONBOARD_DATASOURCE_DATASETS,
-        translationLabel: "onboard-datasource-onboard-datasets",
-    },
-] as const;
+import { PageV1 } from "../../../platform/components";
 
 export const WelcomeOnboardDatasourceWizard: FunctionComponent = () => {
     const { t } = useTranslation();
-    const { pathname } = useLocation();
-
-    const activeStep = useMemo(() => {
-        // Tries to extract the last part of the url for
-        // Uses the whole url if nothing comes up
-        // This is required since the first url substring ("dataset")
-        // is a part of the greater url for this module
-        const urlPath: string =
-            pathname.split("/").filter(Boolean).pop() || pathname;
-
-        const activeStepDefinition = STEPS.find((candidate) =>
-            candidate.subPath.includes(urlPath)
-        );
-
-        // Fallback
-        if (!activeStepDefinition) {
-            return STEPS[0].subPath;
-        }
-
-        return activeStepDefinition.subPath;
-    }, [pathname]);
-
-    const getStepLabel = (step: string): string => {
-        const stepDefinition = STEPS.find(
-            (candidate) => candidate.subPath === step
-        );
-
-        return t(`message.${stepDefinition?.translationLabel}`);
-    };
 
     return (
         <PageV1>
             <PageHeader
                 transparentBackground
-                customActions={<Button>{t("label.help")}</Button>}
-                subtitle={t(
-                    "message.connect-to-startree-cloud-data-or-add-your-own-pinot-datasource"
-                )}
-                title={t("message.lets-start-setting-up-your-data")}
+                subtitle={t("message.start-monitoring-your-data")}
+                title={t("message.welcome-to-thirdeye")}
             />
-            <PageContentsGridV1>
-                <Grid item xs={12}>
-                    <PageContentsCardV1>
-                        <Box pb={0} pt={2} px={2}>
-                            <Typography variant="h5">
-                                {t("message.complete-the-following-steps")}
-                            </Typography>
-                            <StepperV1
-                                activeStep={activeStep}
-                                stepLabelFn={getStepLabel}
-                                steps={STEPS.map((item) => item.subPath)}
-                            />
-                        </Box>
-                    </PageContentsCardV1>
-                </Grid>
-            </PageContentsGridV1>
             <Outlet />
         </PageV1>
     );

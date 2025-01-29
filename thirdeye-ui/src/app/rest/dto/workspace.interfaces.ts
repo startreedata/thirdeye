@@ -16,6 +16,11 @@ export interface Workspace {
     id: string | null;
 }
 
+export type TaskQuotasConfiguration = {
+    maximumDetectionTasksPerMonth: null | number;
+    maximumNotificationTasksPerMonth: null | number;
+};
+
 export interface WorkspaceConfiguration {
     id: number;
     auth: {
@@ -28,5 +33,8 @@ export interface WorkspaceConfiguration {
     };
     templateConfiguration: {
         sqlLimitStatement: number;
+    };
+    namespaceQuotasConfiguration: {
+        taskQuotasConfiguration: TaskQuotasConfiguration;
     };
 }

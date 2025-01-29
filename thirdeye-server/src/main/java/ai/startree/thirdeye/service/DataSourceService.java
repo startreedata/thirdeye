@@ -15,6 +15,7 @@ package ai.startree.thirdeye.service;
 
 import static ai.startree.thirdeye.ResourceUtils.badRequest;
 import static ai.startree.thirdeye.ResourceUtils.ensure;
+import static ai.startree.thirdeye.ResourceUtils.notFoundError;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DUPLICATE_NAME;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -28,6 +29,8 @@ import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
 import ai.startree.thirdeye.spi.api.DataSourceApi;
 import ai.startree.thirdeye.spi.api.DatasetApi;
+import ai.startree.thirdeye.spi.api.DemoDatasetApi;
+import ai.startree.thirdeye.spi.api.ThirdEyeApi;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
@@ -42,6 +45,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Singleton
@@ -188,5 +192,33 @@ public class DataSourceService extends CrudService<DataSourceApi, DataSourceDTO>
     authorizationManager.ensureCanRead(principal, sampleDataset);
 
     return authorizationManager.generateDatasourceConnection(principal);
+  }
+
+  public List<DemoDatasetApi> getAvailableDemoDatasets(final ThirdEyeServerPrincipal principal,
+      final @NonNull Long dataSourceId) {
+    final DataSourceDTO dataSourceDto = dtoManager.findById(dataSourceId);
+    if (dataSourceDto == null) {
+      throw notFoundError(ThirdEyeStatus.ERR_DATASOURCE_NOT_FOUND, dataSourceId);
+    }
+    authorizationManager.ensureNamespace(principal, dataSourceDto);
+    authorizationManager.ensureCanRead(principal, dataSourceDto);
+    final ThirdEyeDataSource dataSource = dataSourceCache.getDataSource(dataSourceDto);
+    return dataSource.availableDemoDatasets();
+  }
+
+  public ThirdEyeApi createDemoDataset(final ThirdEyeServerPrincipal principal,
+      final @NonNull Long dataSourceId, final @NonNull String demoDatasetId) {
+    final DataSourceDTO dataSourceDto = dtoManager.findById(dataSourceId);
+    if (dataSourceDto == null) {
+      throw notFoundError(ThirdEyeStatus.ERR_DATASOURCE_NOT_FOUND, dataSourceId);
+    }
+    authorizationManager.ensureNamespace(principal, dataSourceDto);
+    // assuming the right to create a datasource gives the right to create a dataset in pinot 
+    authorizationManager.ensureCanCreate(principal, dataSourceDto);
+    final ThirdEyeDataSource dataSource = dataSourceCache.getDataSource(dataSourceDto);
+    final String datasetName = dataSource.createDemoDataset(demoDatasetId);
+    final DatasetConfigDTO datasetConfigDTO = dataSourceOnboarder.onboardDataset(dataSourceDto,
+        datasetName);
+    return ApiBeanMapper.toApi(datasetConfigDTO);
   }
 }

@@ -15,6 +15,7 @@ package ai.startree.thirdeye.datasource.cache;
 
 import static ai.startree.thirdeye.spi.Constants.METRICS_TIMER_PERCENTILES;
 
+import ai.startree.thirdeye.spi.api.DemoDatasetApi;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datasource.DataSourceRequest;
 import ai.startree.thirdeye.spi.datasource.ThirdEyeDataSource;
@@ -24,6 +25,7 @@ import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import io.micrometer.core.instrument.Metrics;
 import java.util.List;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * This class intercepts all data source calls and helps with telemetry, etc.
@@ -97,5 +99,15 @@ public class MeteredDataSource implements ThirdEyeDataSource {
   @Override
   public void close() throws Exception {
     delegate.close();
+  }
+
+  @Override
+  public @NonNull List<DemoDatasetApi> availableDemoDatasets() {
+    return delegate.availableDemoDatasets();
+  }
+
+  @Override
+  public @NonNull String createDemoDataset(final @NonNull String identifier) {
+    return delegate.createDemoDataset(identifier);
   }
 }

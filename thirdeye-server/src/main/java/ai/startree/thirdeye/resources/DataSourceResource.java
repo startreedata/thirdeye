@@ -39,6 +39,7 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
+import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.FormParam;
@@ -86,6 +87,29 @@ public class DataSourceResource extends CrudResource<DataSourceApi, DataSourceDT
       @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
       @PathParam("id") Long id) {
     return respondOk(dataSourceService.getDatasets(principal, id));
+  }
+
+  @GET
+  @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+  @Path("/{id}/demo-datasets")
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response onboardDataset(
+      @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
+      @PathParam("id") @NotNull Long dataSourceId) {
+    return respondOk(dataSourceService.getAvailableDemoDatasets(principal, dataSourceId));
+  }
+
+  @POST
+  @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+  @Path("/{id}/demo-datasets")
+  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response onboardDataset(
+      @Parameter(hidden = true) @Auth ThirdEyeServerPrincipal principal,
+      @PathParam("id") @NotNull Long dataSourceId,
+      @FormParam("demoDatasetId") @NotNull String demoDatasetId) {
+    return respondOk(dataSourceService.createDemoDataset(principal, dataSourceId, demoDatasetId));
   }
 
   @POST

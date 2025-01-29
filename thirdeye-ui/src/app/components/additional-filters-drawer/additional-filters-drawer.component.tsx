@@ -238,7 +238,8 @@ export const AdditonalFiltersDrawer: FunctionComponent<AdditonalFiltersDrawerPro
                                                                                             step
                                                                                                 .metadata
                                                                                                 .name
-                                                                                        ]
+                                                                                        ] ||
+                                                                                        step.value
                                                                                     }
                                                                                     onChange={(
                                                                                         newValue
@@ -331,7 +332,8 @@ export const AdditonalFiltersDrawer: FunctionComponent<AdditonalFiltersDrawerPro
                                                                                                         step
                                                                                                             .metadata
                                                                                                             .name
-                                                                                                    ]
+                                                                                                    ] ||
+                                                                                                    step.value
                                                                                                 }
                                                                                                 onChange={(
                                                                                                     newValue

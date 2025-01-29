@@ -82,11 +82,12 @@ public class NamespaceConfigurationService {
   protected void validateUpdate(NamespaceConfigurationApi existing,
       NamespaceConfigurationApi updated) {
     if (!Objects.equals(existing.getId(), updated.getId()) ||
-        !Objects.equals(existing.getAuth().getNamespace(), updated.getAuth().getNamespace())) {
+        !Objects.equals(existing.getAuth().getNamespace(), updated.getAuth().getNamespace()) ||
+        !Objects.equals(existing.getNamespaceQuotasConfiguration(), updated.getNamespaceQuotasConfiguration())) {
       throw badRequest(
           ThirdEyeStatus.ERR_NAMESPACE_CONFIGURATION_VALIDATION_FAILED,
           existing.namespace(),
-          "Updating Id or auth is not allowed for Namespace Configuration");
+          "Updating Id, auth, or NamespaceQuotasConfiguration is not allowed for Namespace Configuration");
     }
   }
 }

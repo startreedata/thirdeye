@@ -12,7 +12,14 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Button, Grid, Typography, useTheme } from "@material-ui/core";
+import {
+    Box,
+    Button,
+    CircularProgress,
+    Grid,
+    Typography,
+    useTheme,
+} from "@material-ui/core";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import HighlightOffIcon from "@material-ui/icons/HighlightOff";
 import React, { FunctionComponent } from "react";
@@ -30,6 +37,7 @@ import { AlertViewSubHeaderProps } from "./alert-sub-header.interfaces";
 
 export const AlertViewSubHeader: FunctionComponent<AlertViewSubHeaderProps> = ({
     alert,
+    anomalyInfoStatus,
 }) => {
     const navigate = useNavigate();
     const { t } = useTranslation();
@@ -59,6 +67,27 @@ export const AlertViewSubHeader: FunctionComponent<AlertViewSubHeaderProps> = ({
                                 </Box>
                             </Typography>
                         </Grid>
+                        {anomalyInfoStatus && (
+                            <Grid item>
+                                <Typography variant="h6">
+                                    <Box
+                                        alignItems="center"
+                                        color={theme.palette.grey[600]}
+                                        display="flex"
+                                        gridGap="4px"
+                                    >
+                                        {anomalyInfoStatus.loading && (
+                                            <CircularProgress
+                                                color="inherit"
+                                                size={15}
+                                            />
+                                        )}
+                                        {anomalyInfoStatus?.loadingtext ||
+                                            "Computing anomalies..."}
+                                    </Box>
+                                </Typography>
+                            </Grid>
+                        )}
                     </Grid>
                 )}
                 {!alert.active && (

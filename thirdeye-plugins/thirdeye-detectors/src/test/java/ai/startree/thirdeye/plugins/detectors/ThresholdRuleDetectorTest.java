@@ -170,7 +170,7 @@ public class ThresholdRuleDetectorTest {
         BooleanSeries.FALSE, // not an anomaly because equal to minValue and default is to be inclusive of the min
         BooleanSeries.FALSE,
         BooleanSeries.FALSE,
-        BooleanSeries.TRUE, // anomaly because equal to maxValue maxInclusive is set to false
+        BooleanSeries.TRUE, // anomaly because equal to maxValue and maxInclusive is set to false
         BooleanSeries.TRUE);
     assertThat(outputAnomalySeries).isEqualTo(expectedAnomalySeries);
   }

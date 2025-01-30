@@ -69,8 +69,8 @@ scheduler:
   # Run the Quartz Scheduler.
   # Only 1 instance of scheduler should run. This responsibility is currently on the user!!
   enabled: true
-  alertUpdateDelay: 5
-  subscriptionGroupUpdateDelay: 5
+  alertUpdateDelay: 1
+  subscriptionGroupUpdateDelay: 1
 
   detectionPipeline: true
   detectionAlert: true
@@ -90,6 +90,6 @@ defaultWorkspaceConfiguration:
     sqlLimitStatement: 100_000_001
   namespaceQuotasConfiguration:
     taskQuotasConfiguration:
-      maximumDetectionTasksPerMonth: 3
-      maximumNotificationTasksPerMonth: 2
+      maximumDetectionTasksPerMonth: 2
+      maximumNotificationTasksPerMonth: 1
 

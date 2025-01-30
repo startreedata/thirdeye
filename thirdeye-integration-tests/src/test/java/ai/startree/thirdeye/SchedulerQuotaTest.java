@@ -122,9 +122,9 @@ public class SchedulerQuotaTest {
     final NamespaceConfigurationApi gotCfgApi = response.readEntity(
         NamespaceConfigurationApi.class);
     assertThat(gotCfgApi.getNamespaceQuotasConfiguration().getTaskQuotasConfiguration()
-        .getMaximumDetectionTasksPerMonth()).isEqualTo(3);
+        .getMaximumDetectionTasksPerMonth()).isEqualTo(2);
     assertThat(gotCfgApi.getNamespaceQuotasConfiguration().getTaskQuotasConfiguration()
-        .getMaximumNotificationTasksPerMonth()).isEqualTo(2);
+        .getMaximumNotificationTasksPerMonth()).isEqualTo(1);
   }
 
   @Test(dependsOnMethods = "testVerifyTaskQuotas")
@@ -158,9 +158,9 @@ public class SchedulerQuotaTest {
   @Test(dependsOnMethods = "testTasksAfterEntityCreation")
   public void testTasksAfterDelay() throws InterruptedException {
     // give thread to detectionCronScheduler and notificationTaskScheduler
-    // both schedulers run every 5 seconds
+    // both schedulers run every second
     // both alert and subscription group has cron for every 10 seconds
-    Thread.sleep(30000);
+    Thread.sleep(20000);
 
     // no more than 3 detection tasks and 2 notification tasks must've been scheduled
     // due to detection quota of 3 and notification quota of 2
@@ -173,9 +173,9 @@ public class SchedulerQuotaTest {
         case NOTIFICATION -> notificationTasksCount.getAndIncrement();
       }
     });
-    assertThat(detectionTasksCount.get()).isEqualTo(3);
-    assertThat(notificationTasksCount.get()).isEqualTo(2);
-    assertThat(tasks).hasSize(5);
+    assertThat(detectionTasksCount.get()).isEqualTo(2);
+    assertThat(notificationTasksCount.get()).isEqualTo(1);
+    assertThat(tasks).hasSize(3);
   }
 
   @Test(dependsOnMethods = "testTasksAfterDelay")
@@ -204,7 +204,7 @@ public class SchedulerQuotaTest {
   @Test(dependsOnMethods = "testAnotherSubscriptionGroupIsCreated")
   public void testTasksAfterSecondDelay() throws InterruptedException {
     // give thread to detectionCronScheduler and notificationTaskScheduler again
-    Thread.sleep(15000);
+    Thread.sleep(10000);
 
     // no new task will be created except the historical after create detection type
     // which is created through crud service flow and doesn't have quota control
@@ -218,9 +218,9 @@ public class SchedulerQuotaTest {
         case NOTIFICATION -> notificationTasksCount.getAndIncrement();
       }
     });
-    assertThat(detectionTasksCount.get()).isEqualTo(4);
-    assertThat(notificationTasksCount.get()).isEqualTo(2);
-    assertThat(tasks).hasSize(6);
+    assertThat(detectionTasksCount.get()).isEqualTo(3);
+    assertThat(notificationTasksCount.get()).isEqualTo(1);
+    assertThat(tasks).hasSize(4);
   }
 
   private List<TaskApi> getTasks() {

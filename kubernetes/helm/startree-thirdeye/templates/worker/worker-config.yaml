@@ -128,6 +128,11 @@ data:
         minimumOnboardingStartTime: {{ .Values.defaultWorkspaceConfiguration.timeConfiguration.minimumOnboardingStartTime }}
       templateConfiguration:
         sqlLimitStatement: {{ .Values.defaultWorkspaceConfiguration.templateConfiguration.sqlLimitStatement }}
+      namespaceQuotasConfiguration:
+        taskQuotasConfiguration:
+          maximumDetectionTasksPerMonth: {{ .Values.defaultWorkspaceConfiguration.namespaceQuotasConfiguration.taskQuotasConfiguration.maximumDetectionTasksPerMonth }}
+          maximumNotificationTasksPerMonth: {{ .Values.defaultWorkspaceConfiguration.namespaceQuotasConfiguration.taskQuotasConfiguration.maximumNotificationTasksPerMonth }}    
+
     
     rca:
       topContributors:

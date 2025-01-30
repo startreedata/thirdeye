@@ -59,6 +59,30 @@ export const useAppHeaderStyles = (
             height: "16px",
             width: "16px",
         },
+        rightInfoSpace: {
+            display: "flex",
+            gap: "10px",
+        },
+        taskInfoContainer: {
+            display: "flex",
+            gap: "5px",
+            // background: 'white',
+            // padding: '1px 8px',
+            // borderRadius: 5
+        },
+        taskInfo: {
+            display: "flex",
+            gap: "5px",
+            background: "white",
+            padding: "1px 8px",
+            borderRadius: 5,
+            "& .label": {
+                fontWeight: "bold",
+            },
+        },
+        taskInfoPopover: {
+            padding: "10px",
+        },
     });
 
 export const useWorkpsaceSwitcherStyles = makeStyles({

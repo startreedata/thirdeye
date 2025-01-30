@@ -13,11 +13,13 @@
  */
 package ai.startree.thirdeye.spi.datasource;
 
+import ai.startree.thirdeye.spi.api.DemoDatasetApi;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datasource.macro.SqlExpressionBuilder;
 import ai.startree.thirdeye.spi.datasource.macro.SqlLanguage;
 import ai.startree.thirdeye.spi.detection.v2.DataTable;
 import java.util.List;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public interface ThirdEyeDataSource {
 
@@ -86,5 +88,21 @@ public interface ThirdEyeDataSource {
 
   default SqlExpressionBuilder getSqlExpressionBuilder() {
     return null;
+  }
+
+  /**
+   * Return a list of demo dataset that can be created in the DBMS of this datasource.
+   */
+  default @NonNull List<DemoDatasetApi> availableDemoDatasets() {
+    return List.of();
+  }
+
+  /**
+   * Create the input demo dataset in the DBMS.
+   * Returns the dataset name that can then be consumed by {@link ThirdEyeDataSource#getDataset}
+   * This method is expected to be blocking, synchronous. We assume only small toy datasets are created with this method. 
+   */
+  default @NonNull String createDemoDataset(final @NonNull String identifier) {
+    throw new UnsupportedOperationException("Creating demo dataset is not supported");
   }
 }

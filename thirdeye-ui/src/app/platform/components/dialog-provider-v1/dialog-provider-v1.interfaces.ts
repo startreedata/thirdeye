@@ -46,4 +46,5 @@ export interface DialogDataV1 {
     onOk?: () => void;
     onCancel?: () => void;
     dataTestId?: string;
+    keepDialogOnOk?: boolean;
 }

@@ -1065,8 +1065,13 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                                                                             {t(
                                                                                 "message.num-metrics",
                                                                                 {
-                                                                                    num: option
-                                                                                        .metrics
+                                                                                    num: option.metrics.filter(
+                                                                                        (
+                                                                                            metric
+                                                                                        ) =>
+                                                                                            metric.id !==
+                                                                                            -1
+                                                                                    )
                                                                                         .length,
                                                                                 }
                                                                             )}
@@ -2204,7 +2209,9 @@ export const AlertsCreateEasyPage: FunctionComponent = () => {
                     {openCreateAlertModal && (
                         <CreateAlertModal
                             defaultCron={alertInsight?.defaultCron}
-                            onCancel={() => setOpenCreateAlertModal(false)}
+                            onCancel={() => {
+                                setOpenCreateAlertModal(false);
+                            }}
                         />
                     )}
                     {!isNil(selectedTable?.dataset?.id) && (

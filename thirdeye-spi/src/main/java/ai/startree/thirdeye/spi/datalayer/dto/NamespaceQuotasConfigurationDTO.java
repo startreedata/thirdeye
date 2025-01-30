@@ -11,19 +11,19 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye;
+package ai.startree.thirdeye.spi.datalayer.dto;
 
-public class DataProviderException extends RuntimeException {
+public class NamespaceQuotasConfigurationDTO {
 
-  public DataProviderException() {
-    super();
+  private TaskQuotasConfigurationDTO taskQuotasConfiguration;
+
+  public TaskQuotasConfigurationDTO getTaskQuotasConfiguration() {
+    return taskQuotasConfiguration;
   }
 
-  public DataProviderException(final String msg, final Exception e) {
-    super(msg, e);
-  }
-
-  public DataProviderException(final Throwable e) {
-    super(e);
+  public NamespaceQuotasConfigurationDTO setTaskQuotasConfiguration(
+      final TaskQuotasConfigurationDTO taskQuotasConfiguration) {
+    this.taskQuotasConfiguration = taskQuotasConfiguration;
+    return this;
   }
 }

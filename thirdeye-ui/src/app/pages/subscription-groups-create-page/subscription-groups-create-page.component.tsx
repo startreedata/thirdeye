@@ -18,6 +18,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import {
     NotificationTypeV1,
+    useDialogProviderV1,
     useNotificationProviderV1,
 } from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
@@ -31,11 +32,40 @@ import {
     getSubscriptionGroupsViewPath,
 } from "../../utils/routes/routes.util";
 import { SubscriptionGroupsWizardPage } from "../subscription-groups-wizard-page/subscription-groups-wizard-page.component";
+import { useAppBarConfigProvider } from "../../components/app-bar/app-bar-config-provider/app-bar-config-provider.component";
+import { DialogType } from "../../platform/components/dialog-provider-v1/dialog-provider-v1.interfaces";
 
 export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
     const navigate = useNavigate();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
+    const { remainingQuota } = useAppBarConfigProvider();
+    const { showDialog } = useDialogProviderV1();
+
+    const checkQuota = (subscriptionGroup: SubscriptionGroup): void => {
+        if (remainingQuota && remainingQuota.notification <= 0) {
+            showDialog({
+                type: DialogType.ALERT,
+                contents: (
+                    <>
+                        <div>{t("message.quota-expired-notification")}</div>
+                        <div>
+                            {t("message.contact-support", {
+                                message:
+                                    "For questions or to request a higher quota,",
+                            })}
+                        </div>
+                    </>
+                ),
+                okButtonText: t("label.confirm"),
+                cancelButtonText: t("label.cancel"),
+                onOk: () =>
+                    handleSubscriptionGroupWizardFinish(subscriptionGroup),
+            });
+        } else {
+            handleSubscriptionGroupWizardFinish(subscriptionGroup);
+        }
+    };
 
     const handleSubscriptionGroupWizardFinish = (
         subscriptionGroup: SubscriptionGroup
@@ -87,7 +117,7 @@ export const SubscriptionGroupsCreatePage: FunctionComponent = () => {
             pageHeaderTitle={pageHeaderTitle}
             submitButtonLabel={t("label.save")}
             onCancel={handleOnCancelClick}
-            onFinish={handleSubscriptionGroupWizardFinish}
+            onFinish={checkQuota}
         />
     );
 };

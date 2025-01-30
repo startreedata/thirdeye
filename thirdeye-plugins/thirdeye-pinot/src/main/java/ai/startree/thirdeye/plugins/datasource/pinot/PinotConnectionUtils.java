@@ -13,30 +13,17 @@
  */
 package ai.startree.thirdeye.plugins.datasource.pinot;
 
-import static ai.startree.thirdeye.plugins.datasource.pinot.PinotThirdEyeDataSource.HTTPS_SCHEME;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 
 import java.lang.reflect.Field;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.stream.Collectors;
 import javax.net.ssl.SSLContext;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicHeader;
-import org.apache.http.ssl.SSLContextBuilder;
-import org.apache.http.ssl.TrustStrategy;
 import org.apache.pinot.client.Connection;
 import org.apache.pinot.client.ConnectionFactory;
 import org.apache.pinot.client.JsonAsyncHttpPinotClientTransport;
@@ -82,27 +69,6 @@ public class PinotConnectionUtils {
       LOG.error("Fatal error. Failed to prepare Pinot Connection.isClosed method by reflection hack. Will not be able to connect to Pinot.");
       throw new RuntimeException(e);
     }
-  }
-
-  public static CloseableHttpClient createHttpClient(
-      final PinotThirdEyeDataSourceConfig config, final @NonNull Map<String, String> additionalHeaders) {
-    final HttpClientBuilder builder = HttpClients.custom();
-    
-    // set headers
-    final Map<String, String> mergedHeaders = new HashMap<>();
-    optional(config.getHeaders()).ifPresent(mergedHeaders::putAll);
-    mergedHeaders.putAll(additionalHeaders);
-    builder.setDefaultHeaders(mergedHeaders.entrySet()
-        .stream()
-        .map(e -> new BasicHeader(e.getKey(), e.getValue()))
-        .collect(Collectors.toList()));
-
-    // set ssl context if necessary
-    if (HTTPS_SCHEME.equals(config.getControllerConnectionScheme())) {
-      builder.setSSLContext(httpsSslContext()).setSSLHostnameVerifier(new NoopHostnameVerifier());
-    }
-
-    return builder.build();
   }
 
   public static Connection createConnection(final PinotThirdEyeDataSourceConfig config,
@@ -171,20 +137,6 @@ public class PinotConnectionUtils {
 
     return factory.withConnectionProperties(properties).buildTransport();
   }
-
-  // SSL context that accepts all SSL certificate. 
-  // Assume that the Pinot brokers are setup in the same internal network
-  private static SSLContext httpsSslContext() {
-    try {
-      return new SSLContextBuilder()
-          .loadTrustMaterial(null, new AcceptAllTrustStrategy())
-          .build();
-    } catch (final NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
-      // This section shouldn't happen because we use Accept All Strategy
-      LOG.error("Failed to generate SSL context for Pinot in https.", e);
-      throw new RuntimeException(e);
-    }
-  }
   
   // hack function to simulate a isClosed method that is not available in the interface provided by Connection
   // will be removed once the Connection provides a isClosed method
@@ -195,18 +147,6 @@ public class PinotConnectionUtils {
       return asyncHttpClient.isClosed();
     } catch (IllegalAccessException e) {
       throw new RuntimeException(e);
-    }
-  }
-
-  /**
-   * This class accepts (i.e., ignores) all SSL certificate.
-   */
-  private static class AcceptAllTrustStrategy implements TrustStrategy {
-
-    @Override
-    public boolean isTrusted(final X509Certificate[] x509Certificates, final String s)
-        throws CertificateException {
-      return true;
     }
   }
 }

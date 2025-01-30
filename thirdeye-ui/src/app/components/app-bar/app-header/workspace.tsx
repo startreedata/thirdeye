@@ -89,11 +89,7 @@ export const WorkspaceSwitcher = ({
                     SelectProps={{
                         open,
                         // eslint-disable-next-line react/display-name
-                        renderValue: () => (
-                            <Typography variant="subtitle1">
-                                {selectedWorkspace.id}
-                            </Typography>
-                        ),
+                        renderValue: () => <div>{selectedWorkspace.id}</div>,
                     }}
                     value={selectedWorkspace.id || ""}
                     onClick={() => setOpen(!open)}

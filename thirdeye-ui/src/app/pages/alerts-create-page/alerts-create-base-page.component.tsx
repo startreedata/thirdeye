@@ -15,7 +15,7 @@
 import { AxiosError } from "axios/index";
 import React, { FunctionComponent, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { validateSubscriptionGroup } from "../../components/subscription-group-wizard/subscription-group-wizard.utils";
 import { useNotificationProviderV1 } from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
@@ -25,10 +25,7 @@ import { createSubscriptionGroup } from "../../rest/subscription-groups/subscrip
 import { handleCreateAlertClickGenerator } from "../../utils/anomalies/anomalies.util";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
-import {
-    getAlertsAlertPath,
-    getHomePath,
-} from "../../utils/routes/routes.util";
+import { getAlertsAlertPath } from "../../utils/routes/routes.util";
 import { createEmptySubscriptionGroup } from "../../utils/subscription-groups/subscription-groups.util";
 import { AlertsEditCreateBasePageComponent } from "../alerts-edit-create-common/alerts-edit-create-base-page.component";
 import {
@@ -36,7 +33,6 @@ import {
     QUERY_PARAM_KEY_ANOMALIES_RETRY,
 } from "../alerts-view-page/alerts-view-page.utils";
 import { AlertsCreatePageProps } from "./alerts-create-page.interfaces";
-import { QUERY_PARAM_KEYS } from "../../utils/constants/constants.util";
 import { useAppBarConfigProvider } from "../../components/app-bar/app-bar-config-provider/app-bar-config-provider.component";
 
 export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
@@ -44,9 +40,7 @@ export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
 }) => {
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const location = useLocation();
     const { notify } = useNotificationProviderV1();
-    const [searchParams] = useSearchParams();
     const { setShowAppNavBar } = useAppBarConfigProvider();
     const [subscriptionGroups, setSubscriptionGroups] = useState<
         SubscriptionGroup[]
@@ -58,24 +52,12 @@ export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
 
     const createAlertAndUpdateSubscriptionGroups = useMemo(() => {
         return handleCreateAlertClickGenerator(notify, t, (savedAlert) => {
-            const isNewCreateEasyAlert =
-                location.pathname.includes("easy-alert");
-            if (
-                isNewCreateEasyAlert &&
-                searchParams.get(QUERY_PARAM_KEYS.IS_FIRST_ALERT)
-            ) {
-                const queryParams = new URLSearchParams([
-                    [QUERY_PARAM_KEYS.SHOW_FIRST_ALERT_SUCCESS, "true"],
-                ]);
-                setShowAppNavBar(true);
-                navigate(`${getHomePath()}?${queryParams.toString()}`);
-            } else {
-                const searchParamsToSet = new URLSearchParams([
-                    [QUERY_PARAM_KEY_ANOMALIES_RETRY, "true"],
-                    [QUERY_PARAM_KEY_ALERT_TYPE, "create"],
-                ]);
-                navigate(getAlertsAlertPath(savedAlert.id, searchParamsToSet));
-            }
+            const searchParamsToSet = new URLSearchParams([
+                [QUERY_PARAM_KEY_ANOMALIES_RETRY, "true"],
+                [QUERY_PARAM_KEY_ALERT_TYPE, "create"],
+            ]);
+            setShowAppNavBar(true);
+            navigate(getAlertsAlertPath(savedAlert.id, searchParamsToSet));
         });
     }, [navigate, notify, t]);
 

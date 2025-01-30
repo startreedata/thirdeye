@@ -16,6 +16,7 @@ package ai.startree.thirdeye.scheduler.job;
 import static ai.startree.thirdeye.scheduler.JobUtils.BACKPRESSURE_COUNTERS;
 import static ai.startree.thirdeye.scheduler.JobUtils.FAILED_TASK_CREATION_COUNTERS;
 import static ai.startree.thirdeye.scheduler.JobUtils.getIdFromJobKey;
+import static ai.startree.thirdeye.spi.task.TaskSubType.NOTIFICATION_TRIGGERED_BY_CRON;
 import static ai.startree.thirdeye.spi.task.TaskType.NOTIFICATION;
 
 import ai.startree.thirdeye.spi.datalayer.bao.SubscriptionGroupManager;
@@ -67,7 +68,7 @@ public class NotificationPipelineJob implements Job {
         BACKPRESSURE_COUNTERS.get(NOTIFICATION).increment();
         return;
       }
-      final TaskDTO t = taskManager.createTaskDto(taskInfo, NOTIFICATION, subscriptionGroup.getAuth());
+      final TaskDTO t = taskManager.createTaskDto(taskInfo, NOTIFICATION, NOTIFICATION_TRIGGERED_BY_CRON, subscriptionGroup.getAuth());
       LOG.info("Created {} task {}. taskInfo: {}", NOTIFICATION, t.getId(), t);
     } catch (Exception e) {
       LOG.error("Exception running notification pipeline job {}. Notification task will not be scheduled.",  ctx.getJobDetail().getKey().getName(), e);

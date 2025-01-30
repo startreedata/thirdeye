@@ -18,6 +18,7 @@ export enum TaskStatus {
     FAILED = "FAILED",
     WAITING = "WAITING",
     TIMEOUT = "TIMEOUT",
+    RUNNING = "RUNNING",
 }
 
 export enum TaskType {
@@ -25,11 +26,20 @@ export enum TaskType {
     NOTIFICATION = "NOTIFICATION",
 }
 
+export enum TaskSubtype {
+    DETECTION_HISTORICAL_DATA_AFTER_CREATE = "DETECTION_HISTORICAL_DATA_AFTER_CREATE",
+    DETECTION_HISTORICAL_DATA_AFTER_UPDATE = "DETECTION_HISTORICAL_DATA_AFTER_UPDATE",
+    DETECTION_HISTORICAL_DATA_MANUAL = "DETECTION_HISTORICAL_DATA_MANUAL",
+    DETECTION_TRIGGERED_BY_CRON = "DETECTION_TRIGGERED_BY_CRON",
+    NOTIFICATION_TRIGGERED_BY_CRON = "NOTIFICATION_TRIGGERED_BY_CRON",
+}
+
 export interface Task {
     id: number;
     created: number;
     updated: number;
     taskType: TaskType;
+    taskSubType?: TaskSubtype;
     workerId: number;
     job: {
         jobName: string;

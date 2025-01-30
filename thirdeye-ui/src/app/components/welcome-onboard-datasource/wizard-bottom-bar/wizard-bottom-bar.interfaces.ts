@@ -22,4 +22,5 @@ export interface WizardBottomBarProps {
     nextBtnLink?: string;
     nextButtonIsDisabled?: boolean;
     doNotWrapInContainer?: boolean;
+    isLoading?: boolean;
 }

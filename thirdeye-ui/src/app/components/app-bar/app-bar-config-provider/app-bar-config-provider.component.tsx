@@ -28,7 +28,10 @@ import {
 } from "./app-bar-config-provider.interface";
 import { Appheader } from "../app-header/app-header.component";
 import { useStyle } from "./app-bar.styles";
-import { useGetWorkspaces } from "../../../rest/workspace/workspace-action";
+import {
+    useGetWorkspaceConfiguration,
+    useGetWorkspaces,
+} from "../../../rest/workspace/workspace-action";
 import { useAuthV1 } from "../../../platform/stores/auth-v1/auth-v1.store";
 import { ActionStatus } from "../../../rest/actions.interfaces";
 import { notifyIfErrors } from "../../../utils/notifications/notifications.util";
@@ -36,6 +39,12 @@ import { useTranslation } from "react-i18next";
 import { useNotificationProviderV1 } from "../../../platform/components";
 import { useUserPreferences } from "../../../utils/user-preferences/user-preferences";
 import { UserPreferencesKeys } from "../../../utils/user-preferences/user-preferences.interfaces";
+import { TaskQuotasConfiguration } from "../../../rest/dto/workspace.interfaces";
+import { getTaskCount } from "../../../rest/tasks/tasks.rest";
+import { DateTime } from "luxon";
+import { TaskType } from "../../../rest/dto/taks.interface";
+import { getErrorMessages } from "../../../utils/rest/rest.util";
+import { AxiosError } from "axios";
 
 export const AppBarConfigProvider: FunctionComponent<AppBarConfigProviderProps> =
     ({ children }) => {
@@ -44,6 +53,12 @@ export const AppBarConfigProvider: FunctionComponent<AppBarConfigProviderProps> 
         const { setWorkspace, workspace } = useAuthV1();
         const { setPreference, localPreferences } = useUserPreferences();
         const [showAppNavBar, setShowAppNavBar] = useState(true);
+        const [taskQuotasConfiguration, setTaskQuotasConfiguration] =
+            useState<TaskQuotasConfiguration | null>(null);
+        const [remainingQuota, setRemainingQuota] = useState<{
+            notification: number;
+            detection: number;
+        } | null>(null);
         const [okToRender, setOkToRender] = useState(false);
         const [mainViewKey, setMainViewKey] = useState<string | null>(
             "default"
@@ -54,12 +69,93 @@ export const AppBarConfigProvider: FunctionComponent<AppBarConfigProviderProps> 
 
         const { workspaces, getWorkspaces, status, errorMessages } =
             useGetWorkspaces();
+        const { workspaceConfiguration, getWorkspaceConfiguration } =
+            useGetWorkspaceConfiguration();
         const isLoading =
             status === ActionStatus.Initial || status === ActionStatus.Working;
 
         useEffect(() => {
             getWorkspaces();
         }, []);
+
+        useEffect(() => {
+            setTimeout(() => {
+                getWorkspaceConfiguration();
+            }, 1000);
+        }, [workspace.id]);
+
+        const fetchAndSetQuota = async (
+            taskQuotasConfiguration: TaskQuotasConfiguration
+        ): Promise<void> => {
+            try {
+                const startOfMonth = DateTime.local()
+                    .startOf("month")
+                    .toSeconds();
+                const detectionUsage = await getTaskCount({
+                    type: TaskType.DETECTION,
+                    startTime: startOfMonth,
+                });
+                const notificationUsage = await getTaskCount({
+                    type: TaskType.NOTIFICATION,
+                    startTime: startOfMonth,
+                });
+                setRemainingQuota({
+                    notification: Math.max(
+                        taskQuotasConfiguration.maximumNotificationTasksPerMonth! -
+                            notificationUsage.count,
+                        0
+                    ),
+                    detection: Math.max(
+                        taskQuotasConfiguration.maximumDetectionTasksPerMonth! -
+                            detectionUsage.count,
+                        0
+                    ),
+                });
+            } catch (e) {
+                notifyIfErrors(
+                    ActionStatus.Error,
+                    getErrorMessages(e as AxiosError),
+                    notify,
+                    t("message.error-while-fetching", {
+                        entity: t("label.tasks-quota"),
+                    })
+                );
+            }
+        };
+
+        useEffect(() => {
+            let interval: string | number | NodeJS.Timeout | undefined;
+            if (
+                taskQuotasConfiguration?.maximumNotificationTasksPerMonth &&
+                taskQuotasConfiguration?.maximumDetectionTasksPerMonth
+            ) {
+                fetchAndSetQuota(taskQuotasConfiguration);
+                interval = setInterval(() => {
+                    fetchAndSetQuota(taskQuotasConfiguration);
+                }, 15000);
+            }
+
+            return () => {
+                clearInterval(interval);
+            };
+        }, [taskQuotasConfiguration]);
+
+        useEffect(() => {
+            const detectionQuota =
+                workspaceConfiguration?.namespaceQuotasConfiguration
+                    .taskQuotasConfiguration.maximumDetectionTasksPerMonth;
+            const notificationQuota =
+                workspaceConfiguration?.namespaceQuotasConfiguration
+                    .taskQuotasConfiguration.maximumNotificationTasksPerMonth;
+            if (detectionQuota && notificationQuota) {
+                setTaskQuotasConfiguration(
+                    workspaceConfiguration?.namespaceQuotasConfiguration
+                        .taskQuotasConfiguration
+                );
+            } else {
+                setTaskQuotasConfiguration(null);
+            }
+        }, [workspaceConfiguration]);
 
         useEffect(() => {
             if (!isEmpty(workspaces)) {
@@ -145,11 +241,26 @@ export const AppBarConfigProvider: FunctionComponent<AppBarConfigProviderProps> 
         const showNavbar = okToRender && showAppNavBar;
 
         return (
-            <AppBarConfigProviderContext.Provider value={{ setShowAppNavBar }}>
+            <AppBarConfigProviderContext.Provider
+                value={{ setShowAppNavBar, remainingQuota }}
+            >
                 {showNavbar && <AppBar />}
                 <div className={compoenentStyles.rightView}>
                     <Appheader
                         isFullScreen={!showNavbar}
+                        quota={
+                            taskQuotasConfiguration && remainingQuota
+                                ? {
+                                      remainingQuota,
+                                      totalQuota: {
+                                          detection:
+                                              taskQuotasConfiguration?.maximumDetectionTasksPerMonth,
+                                          notification:
+                                              taskQuotasConfiguration?.maximumNotificationTasksPerMonth,
+                                      },
+                                  }
+                                : null
+                        }
                         selectedWorkspace={mappedSelectedWorkspace}
                         workspaces={mappedWorkspaces}
                         onWorkspaceChange={handleWorkspaceChange}

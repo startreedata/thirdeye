@@ -34,6 +34,7 @@ export const WelcomeStepCard: FunctionComponent<WelcomeStepCardProps> = ({
 
     return (
         <Box
+            alignContent="center"
             alignItems="center"
             border="1px solid"
             borderColor="secondary.light"
@@ -41,8 +42,8 @@ export const WelcomeStepCard: FunctionComponent<WelcomeStepCardProps> = ({
             className={styles.box}
             display="flex"
             flexDirection="column"
-            pb={2}
-            pt={4}
+            pb={3}
+            pt={3}
             px={4}
             textAlign="center"
             width={400}
@@ -57,10 +58,12 @@ export const WelcomeStepCard: FunctionComponent<WelcomeStepCardProps> = ({
                     </Typography>
                 </Link>
             </Box>
-            <Box clone m="auto" py={2}>
-                <Typography variant="body2">{subtitle}</Typography>
+            <Box clone m="auto">
+                <Typography color="primary" variant="body2">
+                    {subtitle}
+                </Typography>
             </Box>
-            <Box clone width="80%">
+            <Box clone marginTop="8px" width="80%">
                 {isComplete ? (
                     <CheckCircleIcon
                         className={styles.tickIcon}

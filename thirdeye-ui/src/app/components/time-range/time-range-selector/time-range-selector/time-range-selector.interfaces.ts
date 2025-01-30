@@ -27,7 +27,7 @@ export interface TimeRangeSelectorProps {
 
 export const TIME_SELECTOR_TEST_IDS = {
     TIME_RANGE_SELECTOR: "time-range-selector",
-    OPEN_BUTTON: "open-button",
+    OPEN_BUTTON: "open-calendar-button",
     APPLY_BUTTON: "apply-button",
     MONTH_LINK: "month-link",
     DATE_LINK: "date-link",

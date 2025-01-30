@@ -38,6 +38,7 @@ public class ThresholdRuleDetectorTest {
   private static final long JANUARY_3_2021 = 1609632000000L;
   private static final long JANUARY_4_2021 = 1609718400000L;
   private static final long JANUARY_5_2021 = 1609804800000L;
+  private static final long JANUARY_6_2021 = 1609891200000L;
 
   @Test
   public void testNoAnomalies() {
@@ -129,22 +130,24 @@ public class ThresholdRuleDetectorTest {
   public void testAnomaliesUpAndDown() {
     Interval interval = new Interval(JANUARY_1_2021, JANUARY_5_2021, DateTimeZone.UTC);
     Map<String, DataTable> timeSeriesMap = new HashMap<>();
+    double minValue = 150;
+    double maxValue = 350.;
     DataFrame currentDf = new DataFrame()
         .addSeries(Constants.COL_TIME,
             JANUARY_1_2021,
             JANUARY_2_2021,
             JANUARY_3_2021,
             JANUARY_4_2021,
-            JANUARY_5_2021)
-        .addSeries(Constants.COL_VALUE, 100., 200., 300., 400., 500.);
+            JANUARY_5_2021,
+            JANUARY_6_2021)
+        .addSeries(Constants.COL_VALUE, 100., minValue, 200., 300., maxValue, 500.);
     timeSeriesMap.put(AnomalyDetector.KEY_CURRENT, SimpleDataTable.fromDataFrame(currentDf));
 
     ThresholdRuleDetectorSpec spec = new ThresholdRuleDetectorSpec();
     spec.setMonitoringGranularity("P1D");
-    double minValue = 150;
-    double maxValue = 350.;
     spec.setMin(minValue);
     spec.setMax(maxValue);
+    spec.setMaxInclusive(false);
     ThresholdRuleDetector detector = new ThresholdRuleDetector();
     detector.init(spec);
 
@@ -153,6 +156,7 @@ public class ThresholdRuleDetectorTest {
 
     DoubleSeries outputValueSeries = outputDf.getDoubles(Constants.COL_VALUE);
     DoubleSeries expectedValueSeries = DoubleSeries.buildFrom(
+        minValue,
         minValue,
         200,
         300,
@@ -163,9 +167,10 @@ public class ThresholdRuleDetectorTest {
     BooleanSeries outputAnomalySeries = outputDf.getBooleans(Constants.COL_ANOMALY);
     BooleanSeries expectedAnomalySeries = BooleanSeries.buildFrom(
         BooleanSeries.TRUE,
+        BooleanSeries.FALSE, // not an anomaly because equal to minValue and default is to be inclusive of the min
         BooleanSeries.FALSE,
         BooleanSeries.FALSE,
-        BooleanSeries.TRUE,
+        BooleanSeries.TRUE, // anomaly because equal to maxValue maxInclusive is set to false
         BooleanSeries.TRUE);
     assertThat(outputAnomalySeries).isEqualTo(expectedAnomalySeries);
   }

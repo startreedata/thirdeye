@@ -65,14 +65,22 @@ public class ThresholdRuleDetector implements AnomalyDetector<ThresholdRuleDetec
     if (Double.isNaN(spec.getMax())) {
       return BooleanSeries.fillValues(values.size(), false);
     }
-    return values.gt(spec.getMax());
+    if (spec.isMaxInclusive()) {
+      return values.gt(spec.getMax());
+    } else {
+      return values.gte(spec.getMax());
+    }
   }
 
   private BooleanSeries valueTooLow(DoubleSeries values) {
     if (Double.isNaN(spec.getMin())) {
       return BooleanSeries.fillValues(values.size(), false);
     }
-    return values.lt(spec.getMin());
+    if (spec.isMinInclusive()) {
+      return values.lt(spec.getMin()); 
+    } else {
+      return values.lte(spec.getMin());
+    }
   }
 
   private AnomalyDetectorResult runDetectionOnSingleDataTable(final DataFrame inputDf,

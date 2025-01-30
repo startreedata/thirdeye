@@ -34,6 +34,7 @@ import {
 // sections
 import { SqlQueryView } from "./sql-query-view";
 import { DimensionRecommendorView } from "./dimension-recommendaor-view";
+import { RecommendedDimesnionsModal } from "./recommended-dimesions-modal";
 
 export const MultipleDimensionView = (): JSX.Element => {
     const { t } = useTranslation();
@@ -42,6 +43,8 @@ export const MultipleDimensionView = (): JSX.Element => {
         setMultipleDimensionEnumeratorType,
         selectedEnumerationItems,
         setEnumeratorQuery,
+        showDimensionRecommendorModal,
+        setShowDimensionRecommendorModal,
     } = useCreateAlertStore();
 
     const handleMultipleDimensionEnumeratorSelect = (
@@ -92,6 +95,13 @@ export const MultipleDimensionView = (): JSX.Element => {
                 isEmpty(selectedEnumerationItems) && (
                     <DimensionRecommendorView />
                 )}
+            {showDimensionRecommendorModal && (
+                <RecommendedDimesnionsModal
+                    onCancel={() => {
+                        setShowDimensionRecommendorModal(false);
+                    }}
+                />
+            )}
         </>
     );
 };

@@ -97,7 +97,11 @@ export const RequiredProperties = (): JSX.Element => {
 
     return (
         <Box display="flex" flexDirection="column">
-            <Box display="flex" flexDirection="row">
+            <Box
+                data-testId="required-properties"
+                display="flex"
+                flexDirection="row"
+            >
                 {inputFieldConfigs.length > 0 &&
                     inputFieldConfigs.map((config) => {
                         return (

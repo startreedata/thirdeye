@@ -63,6 +63,7 @@ type CreateAlertStore = {
     multipleDimensionEnumeratorType: MultipleDimensionEnumeratorOptions | null;
     enumeratorQuery: string | "";
     alertRecommendations: AlertRecommendations | null;
+    showDimensionRecommendorModal: boolean;
     selectedEnumerationItems: EnumerationItem[] | null;
     selectedEnumerationItemsCohortsTable: CohortTableRowData[] | [];
     selectedDetectionAlgorithm: AvailableAlgorithmOption | null;
@@ -92,6 +93,7 @@ type CreateAlertStore = {
     setAlertRecommendations: (
         alertRecommendations: AlertRecommendations
     ) => void;
+    setShowDimensionRecommendorModal: (show: boolean) => void;
     setSelectedEnumerationItems: (enumerationItems: EnumerationItem[]) => void;
     setSelectedEnumerationItemsCohortsTable: (
         selectedEnumerationItemsCohortsTable: CohortTableRowData[]
@@ -126,6 +128,7 @@ export const useCreateAlertStore = create<CreateAlertStore>((set) => ({
     multipleDimensionEnumeratorType: null,
     enumeratorQuery: "",
     alertRecommendations: null,
+    showDimensionRecommendorModal: false,
     dimensionRecommendor: {
         selectedDimensions: [],
         queryFilter: "",
@@ -248,6 +251,8 @@ export const useCreateAlertStore = create<CreateAlertStore>((set) => ({
         set({
             alertRecommendations: alertRecommendations,
         }),
+    setShowDimensionRecommendorModal: (show: boolean) =>
+        set({ showDimensionRecommendorModal: show }),
     setSelectedEnumerationItems: (enumerationItems: EnumerationItem[]) =>
         set({
             selectedEnumerationItems: enumerationItems,

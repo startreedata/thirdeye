@@ -28,13 +28,7 @@ export const CreateAlertHeader = (): JSX.Element => {
         <Grid item xs={12}>
             <Box display="flex">
                 <Typography className={componentStyles.header} variant="h5">
-                    {/* {t("label.alert-wizard")} */}
-                    Create Alert
-                </Typography>
-            </Box>
-            <Box>
-                <Typography variant="body2">
-                    {t("message.lets-get-started")}
+                    {t("label.simple-alert-setup")}
                 </Typography>
             </Box>
         </Grid>

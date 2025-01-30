@@ -34,7 +34,8 @@ import { useCreateAlertStore } from "./hooks/state";
 import { MainLayout } from "../../platform/components/layout/main/page.component";
 
 export const CreateAlert = (): JSX.Element => {
-    const { setAlertTemplates, selectedMetric } = useCreateAlertStore();
+    const { setAlertTemplates, selectedMetric, resetCreateAlertState } =
+        useCreateAlertStore();
     const { alertTemplates, getAlertTemplates } = useGetAlertTemplates();
 
     useEffect(() => {
@@ -44,6 +45,12 @@ export const CreateAlert = (): JSX.Element => {
     useEffect(() => {
         setAlertTemplates(alertTemplates);
     }, [alertTemplates]);
+
+    useEffect(() => {
+        return () => {
+            resetCreateAlertState();
+        };
+    }, []);
 
     return (
         <MainLayout>

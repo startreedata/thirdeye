@@ -83,7 +83,10 @@ export const SelectDatasetAndMetric = (): JSX.Element => {
                                             </Typography>
                                             <Typography variant="caption">
                                                 {t("message.num-metrics", {
-                                                    num: option.metrics.length,
+                                                    num: option.metrics.filter(
+                                                        (metric) =>
+                                                            metric.id !== -1
+                                                    ).length,
                                                 })}
                                             </Typography>
                                         </Box>

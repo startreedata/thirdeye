@@ -29,7 +29,8 @@ import { useGetDatasets } from "../../../rest/datasets/datasets.actions";
 import {
     getDataConfigurationCreatePath,
     getHomePath,
-    getAlertsEasyCreatePath,
+    // getAlertsEasyCreatePath,
+    getAlertsCeateUpdatedPath,
 } from "../../../utils/routes/routes.util";
 import { useGetAlertsCount } from "../../../rest/alerts/alerts.actions";
 import { useNavigate } from "react-router-dom";
@@ -132,7 +133,7 @@ export const WelcomeLandingPage: FunctionComponent = () => {
                                         entity: t("label.alert"),
                                     })}
                                     disabled={!hasDatasets}
-                                    link={getAlertsEasyCreatePath(
+                                    link={getAlertsCeateUpdatedPath(
                                         new URLSearchParams([
                                             [
                                                 QUERY_PARAM_KEYS.IS_FIRST_ALERT,

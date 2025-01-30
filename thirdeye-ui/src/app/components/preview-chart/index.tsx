@@ -54,6 +54,7 @@ type PreviewChartProps = {
     dateRange: { startTime: number; endTime: number; timezone: string };
     showOnlyActivity?: boolean;
     children?: ReactNode;
+    additionalCTA: ReactNode;
 };
 
 export const PreviewChartMain: FunctionComponent<PreviewChartProps> = ({
@@ -71,6 +72,7 @@ export const PreviewChartMain: FunctionComponent<PreviewChartProps> = ({
     dateRange,
     onAlertPropertyChange,
     showOnlyActivity = false,
+    additionalCTA,
 }) => {
     const classes = usePreviewChartStyles();
     const { t } = useTranslation();
@@ -121,7 +123,9 @@ export const PreviewChartMain: FunctionComponent<PreviewChartProps> = ({
                     }
                 >
                     <ChartContentV2
+                        isSearchEnabled
                         showLoadButton
+                        additionalCTA={additionalCTA}
                         alert={alert}
                         alertEvaluation={alertEvaluation}
                         evaluationTimeRange={{

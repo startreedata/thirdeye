@@ -13,8 +13,9 @@
  * the License.
  */
 // external
-import React, { useEffect, useMemo } from "react";
-import { Box, Divider, Grid, Typography } from "@material-ui/core";
+import React, { ReactNode, useEffect, useMemo } from "react";
+import { Box, Button, Divider, Grid, Typography } from "@material-ui/core";
+import { Edit } from "@material-ui/icons";
 import { useTranslation } from "react-i18next";
 import { cloneDeep } from "lodash";
 
@@ -61,6 +62,7 @@ export const GraphPlot = (): JSX.Element => {
         setApiState,
         isEvaluationDataStale,
         setIsEvaluationDataStale,
+        setShowDimensionRecommendorModal,
     } = useCreateAlertStore();
     const { notify } = useNotificationProviderV1();
     const { evaluation, getEvaluation, status, errorMessages } =
@@ -140,6 +142,21 @@ export const GraphPlot = (): JSX.Element => {
         }
     }, [evaluation]);
 
+    const editDimesnionsCTA = (): ReactNode => {
+        return (
+            <Button
+                color="primary"
+                startIcon={<Edit />}
+                variant="outlined"
+                onClick={() => {
+                    setShowDimensionRecommendorModal(true);
+                }}
+            >
+                {t("label.edit-entity", { entity: t("label.dimensions") })}
+            </Button>
+        );
+    };
+
     return (
         <PageContentsCardV1>
             {selectedDetectionAlgorithm && (
@@ -187,6 +204,7 @@ export const GraphPlot = (): JSX.Element => {
             )}
             <PreviewChartMain
                 hideCallToActionPrompt
+                additionalCTA={editDimesnionsCTA()}
                 alert={workingAlert as EditableAlert}
                 alertEvaluation={workingAlertEvaluation as AlertEvaluation}
                 dateRange={{

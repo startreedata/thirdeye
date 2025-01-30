@@ -15,7 +15,7 @@
 
 // external
 import React, { FunctionComponent, useEffect, useMemo } from "react";
-import { Box, Grid, TextField, Typography } from "@material-ui/core";
+import { Grid, TextField } from "@material-ui/core";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { cloneDeep, isEmpty } from "lodash";
@@ -345,18 +345,6 @@ export const ConfirmationModal: FunctionComponent<CreateAlertModalModalProps> =
                     />
                 </Grid>
                 <Grid container>
-                    <Grid item xs={12}>
-                        <Box marginBottom={2}>
-                            <Typography variant="h6">
-                                {t("label.dimensions-recommender")}
-                            </Typography>
-                            <Typography variant="body2">
-                                {t(
-                                    "message.automatically-detects-dimensions-based-on-your-selection"
-                                )}
-                            </Typography>
-                        </Box>
-                    </Grid>
                     <CronEditor
                         fullWidth
                         cron={workingAlert.cron!}

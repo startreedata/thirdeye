@@ -29,6 +29,12 @@ const AlertsCreateEasyPage = lazy(() =>
     ).then((module) => ({ default: module.AlertsCreateEasyPage }))
 );
 
+// const AlertsCreateEasyPage = lazy(() =>
+//     import(
+//         /* webpackChunkName: "alerts-create-easy-page" */ "../../pages/create-alert/"
+//     ).then((module) => ({ default: module.CreateAlert }))
+// );
+
 const CreateAlertGuidedPage = lazy(() =>
     import(
         /* webpackChunkName: "create-alert-guided-page" */ "../../pages/alerts-create-guided-page/alerts-create-guided-page.component"

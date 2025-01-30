@@ -13,7 +13,7 @@
  * the License.
  */
 // external
-import React, { useState } from "react";
+import React from "react";
 import { Box, Button, Grid, Typography } from "@material-ui/core";
 import { useTranslation } from "react-i18next";
 import { AddCircleOutline } from "@material-ui/icons";
@@ -24,15 +24,13 @@ import { multipleDimensionStyle } from "./styles";
 // assets
 import DimensionImage from "../../../../../../../assets/images/dimensions.png";
 
-// section
-import { RecommendedDimesnionsModal } from "./recommended-dimesions-modal";
+// state
+import { useCreateAlertStore } from "../../../../hooks/state";
 
 export const DimensionRecommendorView = (): JSX.Element => {
     const { t } = useTranslation();
     const componentStyles = multipleDimensionStyle();
-
-    const [openCompositeFilterModal, setOpenCompositeFilterModal] =
-        useState(false);
+    const { setShowDimensionRecommendorModal } = useCreateAlertStore();
 
     return (
         <>
@@ -57,7 +55,9 @@ export const DimensionRecommendorView = (): JSX.Element => {
                             color="primary"
                             startIcon={<AddCircleOutline />}
                             variant="outlined"
-                            onClick={() => setOpenCompositeFilterModal(true)}
+                            onClick={() =>
+                                setShowDimensionRecommendorModal(true)
+                            }
                         >
                             {t("label.add-dimensions")}
                         </Button>
@@ -67,11 +67,6 @@ export const DimensionRecommendorView = (): JSX.Element => {
                     </Grid>
                 </Box>
             </Grid>
-            {openCompositeFilterModal && (
-                <RecommendedDimesnionsModal
-                    onCancel={() => setOpenCompositeFilterModal(true)}
-                />
-            )}
         </>
     );
 };

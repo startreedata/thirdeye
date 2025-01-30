@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
+import { ReactNode } from "react";
 import {
     AlertEvaluation,
     EditableAlert,
@@ -31,4 +32,5 @@ export interface ChartContentProps {
     onAlertPropertyChange?: (contents: Partial<EditableAlert>) => void;
     evaluationTimeRange: TimeRange;
     legendsPlacement?: `${LegendPlacement}`;
+    additionalCTA?: ReactNode;
 }

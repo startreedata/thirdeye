@@ -128,6 +128,11 @@ const AlertsCreateEasyPage = lazy(() =>
         /* webpackChunkName: "alerts-create-advanced-page" */ "../../pages/alerts-create-page/alerts-create-easy-page/alerts-create-easy-page.component"
     ).then((module) => ({ default: module.AlertsCreateEasyPage }))
 );
+// const AlertsCreateEasyPage = lazy(() =>
+//     import(
+//         /* webpackChunkName: "alerts-create-easy-page" */ "../../pages/create-alert/"
+//     ).then((module) => ({ default: module.CreateAlert }))
+// );
 
 const CreateAlertGuidedPage = lazy(() =>
     import(
@@ -172,7 +177,7 @@ export const AlertsRouter: FunctionComponent = () => {
                                 <AlertsCreateUpdated />
                             </CancelAPICallsOnPageUnload>
                         }
-                        path="updated"
+                        path="easy"
                     />
                     <Route
                         index

@@ -100,14 +100,6 @@ export const RecommendedDimesnionsModal = ({
     const { notify } = useNotificationProviderV1();
 
     useEffect(() => {
-        if (evaluation) {
-            localEnumerationItems &&
-                setSelectedEnumerationItems(localEnumerationItems);
-            setWorkingAlertEvaluation(evaluation);
-        }
-    }, [evaluation]);
-
-    useEffect(() => {
         notifyIfErrors(
             status,
             errorMessages,
@@ -131,6 +123,9 @@ export const RecommendedDimesnionsModal = ({
             setIsLoading(false);
         }
         if (evaluationStatus === ActionStatus.Done) {
+            localEnumerationItems &&
+                setSelectedEnumerationItems(localEnumerationItems);
+            setWorkingAlertEvaluation(evaluation);
             onCancel();
         }
     }, [evaluationStatus]);

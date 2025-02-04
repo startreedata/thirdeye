@@ -22,9 +22,10 @@ import {
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import {
+    getAlertsCeateUpdatedPath,
     getAlertsCreateAdvancePath,
     getAlertsCreateNewJsonEditorPath,
-    getAlertsEasyCreatePath,
+    // getAlertsEasyCreatePath,
 } from "../../../../utils/routes/routes.util";
 
 export const Header = (): JSX.Element => {
@@ -46,8 +47,8 @@ export const Header = (): JSX.Element => {
     ];
     const handleAlertRedirect = (alertType: string | number): void => {
         if (alertType === "easyAlert") {
-            navigate(getAlertsEasyCreatePath());
-            // navigate(getAlertsCreatePath());
+            navigate(getAlertsCeateUpdatedPath());
+            // navigate(getAlertsEasyCreatePath());
         } else if (alertType === "advancedAlert") {
             navigate(getAlertsCreateAdvancePath());
         } else if (alertType === "jsonAlert") {

@@ -26,4 +26,5 @@ export interface RadioSectionProps {
     options: RadioSectionOptions[];
     subText?: string;
     value?: string | null;
+    preventDoubleTrigger?: boolean;
 }

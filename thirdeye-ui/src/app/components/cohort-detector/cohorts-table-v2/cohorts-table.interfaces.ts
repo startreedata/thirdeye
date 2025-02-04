@@ -21,7 +21,7 @@ import {
 export interface CohortsTableProps {
     getCohortsRequestStatus: ActionStatus;
     cohortsData: CohortDetectionResponse | null;
-    onSelectionChange?: (cohorts: CohortResult[]) => void;
+    onSelectionChange?: (cohorts: CohortTableRowData[]) => void;
     initiallySelectedCohorts: CohortTableRowData[];
 }
 

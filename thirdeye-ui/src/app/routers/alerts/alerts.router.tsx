@@ -32,6 +32,12 @@ import {
 // /*webpackChunkName:"alerts-all-page"*/"../../pages/alerts-all-page-v2/alerts-all-page.component"
 // ).then((module) => ({ default: module.AlertsAllPage }))
 // );
+const AlertsCreateUpdated = lazy(() =>
+    import(
+        /* webpackChunkName: "alerts-all-page" */ "../../pages/create-alert"
+    ).then((module) => ({ default: module.CreateAlert }))
+);
+
 const AlertsAllPage = lazy(() =>
     import(
         /* webpackChunkName: "alerts-all-page" */ "../../pages/revamp/alert-list"
@@ -127,6 +133,11 @@ const AlertsCreateEasyPage = lazy(() =>
         /* webpackChunkName: "alerts-create-advanced-page" */ "../../pages/alerts-create-page/alerts-create-easy-page/alerts-create-easy-page.component"
     ).then((module) => ({ default: module.AlertsCreateEasyPage }))
 );
+// const AlertsCreateEasyPage = lazy(() =>
+//     import(
+//         /* webpackChunkName: "alerts-create-easy-page" */ "../../pages/create-alert/"
+//     ).then((module) => ({ default: module.CreateAlert }))
+// );
 
 const CreateAlertGuidedPage = lazy(() =>
     import(
@@ -163,6 +174,16 @@ export const AlertsRouter: FunctionComponent = () => {
 
                 {/* Alerts create path */}
                 <Route path={`${AppRouteRelative.ALERTS_CREATE}/*`}>
+                    <Route
+                        element={
+                            <CancelAPICallsOnPageUnload
+                                key={AppRouteRelative.ALERTS_ALL}
+                            >
+                                <AlertsCreateUpdated />
+                            </CancelAPICallsOnPageUnload>
+                        }
+                        path="easy"
+                    />
                     <Route
                         index
                         element={

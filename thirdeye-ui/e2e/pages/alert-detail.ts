@@ -181,6 +181,7 @@ export class AlertDetailsPage extends BasePage {
                         this.alertsApiResponseData.length - 1
                     ]?.name,
             })
+            .nth(0)
             .click();
     }
 

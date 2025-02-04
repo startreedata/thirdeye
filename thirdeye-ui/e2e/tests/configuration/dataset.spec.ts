@@ -14,7 +14,7 @@
  */
 import { test } from "@playwright/test";
 import { ConfigurationDataSetPage } from "../../pages/configuration/dataset";
-
+test.describe.configure({ mode: "serial" });
 test("Dataset List", async ({ page }) => {});
 
 test("Dataset Delete", async ({ page }) => {

@@ -74,7 +74,7 @@ export const ConfirmationModal: FunctionComponent<CreateAlertModalModalProps> =
         const { t } = useTranslation();
         const navigate = useNavigate();
         const { notify } = useNotificationProviderV1();
-        const { setShowAppNavBar } = useAppBarConfigProvider();
+        const { setShowAppNavBar, remainingQuota } = useAppBarConfigProvider();
         const { alertsCount, getAlertsCount } = useGetAlertsCount();
         useEffect(() => {
             getAlertsCount();
@@ -267,13 +267,40 @@ export const ConfirmationModal: FunctionComponent<CreateAlertModalModalProps> =
             }
         };
 
+        const checkQuota = (): void => {
+            if (remainingQuota && remainingQuota?.detection <= 0) {
+                showDialog({
+                    type: DialogType.ALERT,
+                    contents: (
+                        <>
+                            <div>{t("message.quota-expired-detection")}</div>
+                            <div>
+                                {t("message.contact-support", {
+                                    message:
+                                        "For questions or to request a higher quota,",
+                                })}
+                            </div>
+                        </>
+                    ),
+                    okButtonText: t("label.confirm"),
+                    cancelButtonText: t("label.cancel"),
+                    onOk: () => handleCreateAlertClick(),
+                    onCancel: onCancel,
+                });
+            } else {
+                handleCreateAlertClick();
+            }
+        };
+
         const onCreateAlertClick: () => void = async () => {
             if (
                 workingAlert.templateProperties?.monitoringGranularity &&
                 (workingAlert.templateProperties?.monitoringGranularity ===
                     GranularityValue.ONE_MINUTE ||
                     workingAlert.templateProperties?.monitoringGranularity ===
-                        GranularityValue.FIVE_MINUTES)
+                        GranularityValue.FIVE_MINUTES ||
+                    workingAlert.templateProperties?.monitoringGranularity ===
+                        GranularityValue.TEN_MINUTES)
             ) {
                 showDialog({
                     type: DialogType.ALERT,
@@ -282,12 +309,17 @@ export const ConfirmationModal: FunctionComponent<CreateAlertModalModalProps> =
                     ),
                     okButtonText: t("label.confirm"),
                     cancelButtonText: t("label.cancel"),
-                    onOk: () => handleCreateAlertClick(),
+                    onOk: () => checkQuota(),
+                    keepDialogOnOk: !!(
+                        remainingQuota && remainingQuota?.detection <= 0
+                    ),
+                    onCancel: onCancel,
                 });
             } else {
-                handleCreateAlertClick();
+                checkQuota();
             }
-            onCancel();
+
+            return false;
         };
 
         return (

@@ -281,6 +281,7 @@ export class CreateAlertPage extends BasePage {
 
     async addDimensions() {
         await this.page.getByRole("button", { name: "Add dimensions" }).click();
+        await this.page.waitForTimeout(1000);
         await this.page.getByPlaceholder("Select dimensions").click();
         await this.page
             .getByRole("option", {

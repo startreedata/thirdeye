@@ -16,6 +16,7 @@ import React, { FunctionComponent } from "react";
 import { Helmet } from "react-helmet-async";
 import { PageV1Props } from "./page.interfaces";
 import { useStyles } from "./page.styles";
+import { NotificationDisplayV1 } from "../../notification-provider-v1/notification-display-v1";
 
 export const MainLayout: FunctionComponent<PageV1Props> = ({
     documentTitle,
@@ -29,7 +30,7 @@ export const MainLayout: FunctionComponent<PageV1Props> = ({
             <Helmet>
                 <title>{documentTitle}</title>
             </Helmet>
-
+            <NotificationDisplayV1 className="page-header-v1-notification-display" />
             {children}
         </div>
     );

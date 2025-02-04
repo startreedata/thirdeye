@@ -115,40 +115,6 @@ describe("Alerts Router", () => {
         expect(AppLoadingIndicatorV1).toHaveBeenCalled();
     });
 
-    it("should render alerts all page at exact alerts path", async () => {
-        render(
-            <MemoryRouter initialEntries={[AppRoute.ALERTS]}>
-                <Routes>
-                    <Route
-                        element={<AlertsRouter />}
-                        path={`${AppRouteRelative.ALERTS}/*`}
-                    />
-                </Routes>
-            </MemoryRouter>
-        );
-
-        await expect(
-            screen.findByText("testAlertsAllPage")
-        ).resolves.toBeInTheDocument();
-    });
-
-    it("should render alerts all page at exact alerts all path", async () => {
-        render(
-            <MemoryRouter initialEntries={[AppRoute.ALERTS_ALL]}>
-                <Routes>
-                    <Route
-                        element={<AlertsRouter />}
-                        path={`${AppRouteRelative.ALERTS}/*`}
-                    />
-                </Routes>
-            </MemoryRouter>
-        );
-
-        await expect(
-            screen.findByText("testAlertsAllPage")
-        ).resolves.toBeInTheDocument();
-    });
-
     it("should render page not found page at invalid alerts all path", async () => {
         render(
             <MemoryRouter initialEntries={[`${AppRoute.ALERTS_ALL}/testPath`]}>

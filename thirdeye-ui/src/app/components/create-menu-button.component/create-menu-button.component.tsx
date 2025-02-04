@@ -21,7 +21,8 @@ import {
     DropdownMenuItemV1,
 } from "../../platform/components";
 import {
-    getAlertsCreatePath,
+    getAlertsCeateUpdatedPath,
+    // getAlertsCreatePath,
     getAlertTemplatesCreatePath,
     getAnomaliesCreatePath,
     getDatasetsOnboardPath,
@@ -35,7 +36,7 @@ export const CreateMenuButton: FunctionComponent = () => {
     const navigate = useNavigate();
 
     const handleCreateAlert = (): void => {
-        navigate(getAlertsCreatePath());
+        navigate(getAlertsCeateUpdatedPath());
     };
 
     const handleCreateSubscriptionGroup = (): void => {

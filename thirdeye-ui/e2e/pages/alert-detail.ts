@@ -323,8 +323,7 @@ export class AlertDetailsPage extends BasePage {
         const count = await availableDates.count();
         const newStartDate = availableDates.nth(1);
         const newEndDate = availableDates.nth(count - 2);
-        newStartDate.click();
-        newEndDate.click();
+        await Promise.all([newStartDate.click(), newEndDate.click()]);
         const applyDateBtn = this.page.getByTestId("apply-button");
         applyDateBtn.click();
         await Promise.all([

@@ -161,7 +161,7 @@ export class AnomalyListPage extends BasePage {
             const alert = this.alertResponseData.find(
                 (alert) => alert.id === anomaly.alert.id
             );
-            await expect(allCoulmns[2]).toHaveText(alert.name);
+            await expect(allCoulmns[2]).toHaveText(alert?.name || "-");
             await expect(allCoulmns[3]).toHaveText(
                 anomaly.metadata.metric.name
             );

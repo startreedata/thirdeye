@@ -80,6 +80,11 @@ export const AdditonalFiltersDrawer: FunctionComponent<AdditonalFiltersDrawerPro
             onApply(localCopyOfProperties);
         };
 
+        const handleClose = (): void => {
+            setLocalCopyOfProperties({ ...defaultValues });
+            onClose();
+        };
+
         const orderedGroupedProperties: Record<
             string,
             Record<string, PropertyRenderConfig[]>
@@ -89,6 +94,7 @@ export const AdditonalFiltersDrawer: FunctionComponent<AdditonalFiltersDrawerPro
             we push it at the second last place, just before the properties of "OTHER" step
         */
         const keysPresent = Object.keys(availableConfigurations);
+
         ALERT_PROPERTIES_DEFAULT_ORDER.forEach((alertProperty) => {
             if (alertProperty !== ALERT_PROPERTIES_DEFAULT_STEP.STEP) {
                 if (availableConfigurations[alertProperty]) {
@@ -117,7 +123,7 @@ export const AdditonalFiltersDrawer: FunctionComponent<AdditonalFiltersDrawerPro
                 }}
                 anchor="right"
                 open={isOpen}
-                onClose={onClose}
+                onClose={handleClose}
             >
                 <form onSubmit={onSubmit}>
                     <Box
@@ -133,7 +139,7 @@ export const AdditonalFiltersDrawer: FunctionComponent<AdditonalFiltersDrawerPro
                             cursor="pointer"
                             fontSize={24}
                             icon="ic:round-close"
-                            onClick={onClose}
+                            onClick={handleClose}
                         />
                     </Box>
                     {emptyMessage ? (
@@ -364,7 +370,7 @@ export const AdditonalFiltersDrawer: FunctionComponent<AdditonalFiltersDrawerPro
                                     className={classes.actionSecondary}
                                     size="medium"
                                     variant="contained"
-                                    onClick={onClose}
+                                    onClick={handleClose}
                                 >
                                     {t("label.close")}
                                 </Button>

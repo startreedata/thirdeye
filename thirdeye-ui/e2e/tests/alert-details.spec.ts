@@ -22,6 +22,7 @@ test("View anomalies for alerts", async ({ page }) => {
     await alertDetailsPage.checkHeader();
     await alertDetailsPage.openFirstAlert();
     await alertDetailsPage.resolveDetailsPageApis();
+    await page.waitForTimeout(1000);
     await alertDetailsPage.checkAlertHeader();
     const anomalyDisabled = await alertDetailsPage.checkAnomaliesCount();
     if (anomalyDisabled) {
@@ -33,13 +34,14 @@ test("View anomalies for alerts", async ({ page }) => {
     await alertDetailsPage.assertPageComponents();
 });
 
-test.skip("Active and Deactivate alerts", async ({ page }) => {
+test("Active and Deactivate alerts", async ({ page }) => {
     const alertDetailsPage = new AlertDetailsPage(page);
     await alertDetailsPage.goToAlertDetailsPage();
     await alertDetailsPage.resolveApis();
     await alertDetailsPage.checkHeader();
     await alertDetailsPage.openFirstAlert();
     await alertDetailsPage.resolveDetailsPageApis();
+    await page.waitForTimeout(1000);
     await alertDetailsPage.checkAlertHeader();
     const anomalyDisabled = await alertDetailsPage.checkAnomaliesCount();
     if (anomalyDisabled) {
@@ -54,11 +56,12 @@ test.skip("Active and Deactivate alerts", async ({ page }) => {
     await alertDetailsPage.checkAlertIsActiveOrDeactive(true);
 });
 
-test.skip("User can select date range for anomalies", async ({ page }) => {
+test("User can select date range for anomalies", async ({ page }) => {
     const alertDetailsPage = new AlertDetailsPage(page);
     await alertDetailsPage.goToAlertDetailsPage();
     await alertDetailsPage.resolveApis();
     await alertDetailsPage.openFirstAlert();
     await alertDetailsPage.resolveDetailsPageApis();
+    await page.waitForTimeout(1000);
     await alertDetailsPage.applyDateChange();
 });

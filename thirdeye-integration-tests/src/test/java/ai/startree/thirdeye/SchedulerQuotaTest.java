@@ -39,7 +39,6 @@ import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
@@ -132,7 +131,7 @@ public class SchedulerQuotaTest {
 
   @Test(dependsOnMethods = "testVerifyTaskQuotas")
   public void testTaskIsCreated() {
-    CLOCK.useMockTime(new DateTime(2025, 1, 1, 0, 0, DateTimeZone.UTC).getMillis()); 
+    CLOCK.useMockTime(new DateTime(2025, 1, 1, 0, 0, 1, DateTimeZone.UTC).getMillis()); 
     // create alert that schedules every 10 seconds
     final Response response = client.request("api/alerts")
         .post(Entity.json(List.of(ALERT_API)));
@@ -151,7 +150,7 @@ public class SchedulerQuotaTest {
   }
 
   @Test(dependsOnMethods = "testSubscriptionGroupIsCreated")
-  public void testTasksAfterEntityCreation() {
+  public void testTasksAfterEntityCreation() throws InterruptedException {
     final List<TaskApi> tasks = getTasks();
     assertThat(tasks).hasSize(1);
     TaskApi task = tasks.getFirst();
@@ -161,8 +160,10 @@ public class SchedulerQuotaTest {
     // ensure the task completes
     while (task.getStatus() == TaskStatus.WAITING || task.getStatus() == TaskStatus.RUNNING) {
       task = getTasks().getFirst();
+      Thread.sleep(500);
     }
     assertThat(task.getStatus()).isEqualTo(TaskStatus.COMPLETED);
+    System.out.println("First task is FINISHED CYRIL ");
   }
 
   @Test(dependsOnMethods = "testTasksAfterEntityCreation")
@@ -170,12 +171,14 @@ public class SchedulerQuotaTest {
     // give thread to detectionCronScheduler and notificationTaskScheduler
     // both schedulers run every second
     // both alert and subscription group has cron for every 10 seconds
-    CLOCK.tick(10000);
-    // give thread to detectionCronScheduler and to quartz scheduler - (quartz idle time is weaved to 100 ms for test speed)
-    Thread.sleep(1000);
-
-    // no more than 3 detection tasks and 2 notification tasks must've been scheduled
-    // due to detection quota of 3 and notification quota of 2
+    for (int i = 0; i < 10; i++) {
+      CLOCK.tick(10000);
+      // give thread to detectionCronScheduler and to quartz scheduler - (quartz idle time is weaved to 100 ms for test speed)
+      Thread.sleep(1100);
+    }
+    
+    // no more than 2 detection tasks and 1 notification tasks must've been scheduled
+    // due to detection quota of 2 and notification quota of 1
     final List<TaskApi> tasks = getTasks();
     final long detectionTasksCount = tasks.stream()
         .filter(e -> e.getTaskType() == TaskType.DETECTION).count();
@@ -218,16 +221,12 @@ public class SchedulerQuotaTest {
     // which is created through crud service flow and doesn't have quota control
     // regular cron tasks stop creating because quota for both has already crossed
     final List<TaskApi> tasks = getTasks();
-    final AtomicInteger detectionTasksCount = new AtomicInteger();
-    final AtomicInteger notificationTasksCount = new AtomicInteger();
-    tasks.forEach(task -> {
-      switch (task.getTaskType()) {
-        case DETECTION -> detectionTasksCount.getAndIncrement();
-        case NOTIFICATION -> notificationTasksCount.getAndIncrement();
-      }
-    });
-    assertThat(detectionTasksCount.get()).isEqualTo(3);
-    assertThat(notificationTasksCount.get()).isEqualTo(1);
+    final long detectionTasksCount = tasks.stream()
+        .filter(e -> e.getTaskType() == TaskType.DETECTION).count();
+    final long notificationTasksCount = tasks.stream()
+        .filter(e -> e.getTaskType() == TaskType.NOTIFICATION).count();
+    assertThat(detectionTasksCount).isEqualTo(3);
+    assertThat(notificationTasksCount).isEqualTo(1);
     assertThat(tasks).hasSize(4);
   }
 

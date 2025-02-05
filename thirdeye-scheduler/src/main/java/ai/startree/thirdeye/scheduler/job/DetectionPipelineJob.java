@@ -80,7 +80,7 @@ public class DetectionPipelineJob implements Job {
       final String jobName = jobKey.getName();
       if (taskManager.isAlreadyInQueue(jobName)) {
         LOG.warn(
-            "Skipped scheduling detection task for {} with start time {} and end time {}. A task for the same entity is already in the queue.",
+            "Skipped creating detection task for {} with start time {} and end time {}. A task for the same entity is already in the queue.",
             jobName,
             taskInfo.getStart(),
             taskInfo.getEnd());

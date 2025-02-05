@@ -64,6 +64,7 @@ taskDriver:
   randomDelayCap: 1
   taskFailureDelay: 1
   newAcquisitionLogic: true
+  maxParallelTasks: 1
 
 scheduler:
   # Run the Quartz Scheduler.

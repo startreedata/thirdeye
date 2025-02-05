@@ -29,6 +29,7 @@ import ai.startree.thirdeye.spi.api.NamespaceConfigurationApi;
 import ai.startree.thirdeye.spi.api.NotificationSchemesApi;
 import ai.startree.thirdeye.spi.api.SubscriptionGroupApi;
 import ai.startree.thirdeye.spi.api.TaskApi;
+import ai.startree.thirdeye.spi.task.TaskStatus;
 import ai.startree.thirdeye.spi.task.TaskSubType;
 import ai.startree.thirdeye.spi.task.TaskType;
 import jakarta.ws.rs.client.Entity;
@@ -39,6 +40,8 @@ import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
@@ -129,6 +132,7 @@ public class SchedulerQuotaTest {
 
   @Test(dependsOnMethods = "testVerifyTaskQuotas")
   public void testTaskIsCreated() {
+    CLOCK.useMockTime(new DateTime(2025, 1, 1, 0, 0, DateTimeZone.UTC).getMillis()); 
     // create alert that schedules every 10 seconds
     final Response response = client.request("api/alerts")
         .post(Entity.json(List.of(ALERT_API)));
@@ -150,9 +154,15 @@ public class SchedulerQuotaTest {
   public void testTasksAfterEntityCreation() {
     final List<TaskApi> tasks = getTasks();
     assertThat(tasks).hasSize(1);
-    final TaskApi task = tasks.getFirst();
+    TaskApi task = tasks.getFirst();
     assertThat(task.getTaskType()).isEqualTo(TaskType.DETECTION);
     assertThat(task.getTaskSubType()).isEqualTo(TaskSubType.DETECTION_HISTORICAL_DATA_AFTER_CREATE);
+    
+    // ensure the task completes
+    while (task.getStatus() == TaskStatus.WAITING || task.getStatus() == TaskStatus.RUNNING) {
+      task = getTasks().getFirst();
+    }
+    assertThat(task.getStatus()).isEqualTo(TaskStatus.COMPLETED);
   }
 
   @Test(dependsOnMethods = "testTasksAfterEntityCreation")
@@ -160,21 +170,19 @@ public class SchedulerQuotaTest {
     // give thread to detectionCronScheduler and notificationTaskScheduler
     // both schedulers run every second
     // both alert and subscription group has cron for every 10 seconds
-    Thread.sleep(20000);
+    CLOCK.tick(10000);
+    // give thread to detectionCronScheduler and to quartz scheduler - (quartz idle time is weaved to 100 ms for test speed)
+    Thread.sleep(1000);
 
     // no more than 3 detection tasks and 2 notification tasks must've been scheduled
     // due to detection quota of 3 and notification quota of 2
     final List<TaskApi> tasks = getTasks();
-    final AtomicInteger detectionTasksCount = new AtomicInteger();
-    final AtomicInteger notificationTasksCount = new AtomicInteger();
-    tasks.forEach(task -> {
-      switch (task.getTaskType()) {
-        case DETECTION -> detectionTasksCount.getAndIncrement();
-        case NOTIFICATION -> notificationTasksCount.getAndIncrement();
-      }
-    });
-    assertThat(detectionTasksCount.get()).isEqualTo(2);
-    assertThat(notificationTasksCount.get()).isEqualTo(1);
+    final long detectionTasksCount = tasks.stream()
+        .filter(e -> e.getTaskType() == TaskType.DETECTION).count();
+    final long notificationTasksCount = tasks.stream()
+        .filter(e -> e.getTaskType() == TaskType.NOTIFICATION).count();
+    assertThat(detectionTasksCount).isEqualTo(2);
+    assertThat(notificationTasksCount).isEqualTo(1);
     assertThat(tasks).hasSize(3);
   }
 

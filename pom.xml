@@ -842,6 +842,13 @@
         <groupId>org.apache.calcite</groupId>
         <artifactId>calcite-core</artifactId>
         <version>${calcite.version}</version>
+        <exclusions>
+          <!-- not used and could conflict with usage of newer versions under apache datasketches -->
+          <exclusion>
+            <groupId>com.yahoo.datasketches</groupId>
+            <artifactId>sketches-core</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.apache.calcite</groupId>

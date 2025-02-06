@@ -207,7 +207,12 @@ export class AlertListPage extends BasePage {
 
         const jsonEditor = this.page.locator(".CodeMirror");
         await jsonEditor.click();
-        const editedAlert = `{"id": ${topAlert.id}, "name": "Clicks_SUM_mean-variance-rule-dup-edit","description": "","template": {"name": "startree-mean-variance"},"templateProperties": {"dataSource": "pinot","dataset": "AdCampaignData","aggregationColumn": "Clicks","aggregationFunction": "SUM","monitoringGranularity": "P1D","timezone": "UTC","queryFilters": "","sensitivity": "-6","lookback": "P21D"},"cron": "0 0 5 ? * MON-FRI *","auth": {"namespace": null}}`;
+        const date = new Date();
+        const granularity = Math.ceil(Math.random() * 100);
+        const lookback = granularity * 6;
+        const editedAlert = `{"id": ${
+            topAlert.id
+        }, "name": "Clicks_SUM_mean-variance-rule-dup-edit${date.getTime()}","description": "","template": {"name": "startree-mean-variance"},"templateProperties": {"dataSource": "pinot","dataset": "AdCampaignData","aggregationColumn": "Clicks","aggregationFunction": "SUM","monitoringGranularity": "P${granularity}D","timezone": "UTC","queryFilters": "","sensitivity": "-6","lookback": "P${lookback}D"},"cron": "0 0 5 ? * MON-FRI *","auth": {"namespace": null}}`;
         await this.page.evaluate((editedAlert) => {
             const editor = document.querySelector(".CodeMirror")?.CodeMirror;
             editor.setValue(editedAlert);
@@ -232,7 +237,7 @@ export class AlertListPage extends BasePage {
         const evaluateApiResponse = this.page.waitForResponse(
             "/api/alerts/evaluate"
         );
-        await this.page.getByTestId("preview-chart-button").click();
+        this.page.getByTestId("preview-chart-button").click();
 
         const insightRequest = await insightApiRequest;
 
@@ -247,16 +252,20 @@ export class AlertListPage extends BasePage {
         const evaluateReq = JSON.parse(editedAlert);
         delete evaluateReq.id;
         expect(evaluateRequest.postDataJSON().alert).toEqual(evaluateReq);
+        this.page.waitForTimeout(1000);
         const saveButtonAfterLoadChart = this.page.locator(
             "#next-bottom-bar-btn"
         );
         await expect(saveButtonAfterLoadChart).toBeEnabled();
         await expect(saveButtonAfterLoadChart).toHaveText("Update Alert");
 
-        const updateApiRequest = this.page.waitForRequest("/api/alerts");
-        const updateApiResponse = this.page.waitForResponse("/api/alerts");
         saveButtonAfterLoadChart.click();
 
+        const updateButtonModal = this.page.locator(`.MuiDialog-paper button`);
+        const updateBtn = updateButtonModal.nth(1);
+        const updateApiRequest = this.page.waitForRequest("/api/alerts");
+        const updateApiResponse = this.page.waitForResponse("/api/alerts");
+        updateBtn.click();
         const updateAlertRequest = await updateApiRequest;
 
         const updateAlertResponse = await updateApiResponse;

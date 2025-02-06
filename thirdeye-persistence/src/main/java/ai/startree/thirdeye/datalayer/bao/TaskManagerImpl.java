@@ -29,6 +29,7 @@ import ai.startree.thirdeye.spi.datalayer.dto.AuthorizationConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import ai.startree.thirdeye.spi.task.TaskInfo;
 import ai.startree.thirdeye.spi.task.TaskStatus;
+import ai.startree.thirdeye.spi.task.TaskSubType;
 import ai.startree.thirdeye.spi.task.TaskType;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.inject.Inject;
@@ -70,8 +71,8 @@ public class TaskManagerImpl implements TaskManager {
   }
 
   @Override
-  public TaskDTO createTaskDto(final TaskInfo taskInfo, final TaskType taskType, final
-  AuthorizationConfigurationDTO auth) {
+  public TaskDTO createTaskDto(final TaskInfo taskInfo, final TaskType taskType, 
+      final TaskSubType taskSubType, final AuthorizationConfigurationDTO auth) {
     final String taskInfoJson;
     try {
       taskInfoJson = VANILLA_OBJECT_MAPPER.writeValueAsString(taskInfo);
@@ -81,6 +82,7 @@ public class TaskManagerImpl implements TaskManager {
 
     final TaskDTO task = new TaskDTO()
         .setTaskType(taskType)
+        .setTaskSubType(taskSubType)
         .setJobName(taskType.toString() + "_" + taskInfo.getRefId())
         .setStatus(TaskStatus.WAITING)
         .setTaskInfo(taskInfoJson)

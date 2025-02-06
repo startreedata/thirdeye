@@ -104,6 +104,7 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
         if (!getEvaluationQuery.data) {
             return;
         }
+
         const tsData = generateChartOptionsForAlert(
             Object.values(getEvaluationQuery.data?.detectionEvaluations)[0],
             showOnlyActivity
@@ -119,6 +120,7 @@ export const EnumerationItemRow: FunctionComponent<EnumerationItemRowProps> = ({
             false,
             showOnlyActivity
         );
+
         const tsDataForExpanded = {
             ...tsData,
         };

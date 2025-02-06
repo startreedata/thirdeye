@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 StarTree Inc
+ * Copyright 2025 StarTree Inc
  *
  * Licensed under the StarTree Community License (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -8,22 +8,20 @@
  * Unless required by applicable law or agreed to in writing, software distributed under the
  * License is distributed on an "AS IS" BASIS, WITHOUT * WARRANTIES OF ANY KIND,
  * either express or implied.
+ *
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package ai.startree.thirdeye;
+import React from "react";
+import { Header } from "./sections/header";
+import { AlertTable } from "./sections/alert-table";
+import { MainLayout } from "../../../platform/components/layout/main/page.component";
 
-public class DataProviderException extends RuntimeException {
-
-  public DataProviderException() {
-    super();
-  }
-
-  public DataProviderException(final String msg, final Exception e) {
-    super(msg, e);
-  }
-
-  public DataProviderException(final Throwable e) {
-    super(e);
-  }
-}
+export const AlertListPage = (): JSX.Element => {
+    return (
+        <MainLayout>
+            <Header />
+            <AlertTable />
+        </MainLayout>
+    );
+};

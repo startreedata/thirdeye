@@ -143,6 +143,7 @@ export const AppRoute = {
     ALERTS: `/${AppRouteRelative.ALERTS}`,
     ALERTS_ALL: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_ALL}`,
     ALERTS_CREATE: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}`,
+    ALERTS_CREATE_UPDATED: `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/easy`,
     ALERTS_CREATE_EASY:
         `/${AppRouteRelative.ALERTS}/${AppRouteRelative.ALERTS_CREATE}/${AppRouteRelative.ALERTS_CREATE_NEW}/${AppRouteRelative.ALERTS_CREATE_NEW_USER}` +
         `/${AppRouteRelative.ALERTS_CREATE_EASY_ALERT}/`,
@@ -303,6 +304,15 @@ export const getAlertsEasyCreatePath = (
 ): string => {
     return createPathWithRecognizedQueryString(
         AppRoute.ALERTS_CREATE_EASY,
+        additionalParams
+    );
+};
+
+export const getAlertsCeateUpdatedPath = (
+    additionalParams?: URLSearchParams
+): string => {
+    return createPathWithRecognizedQueryString(
+        AppRoute.ALERTS_CREATE_UPDATED,
         additionalParams
     );
 };

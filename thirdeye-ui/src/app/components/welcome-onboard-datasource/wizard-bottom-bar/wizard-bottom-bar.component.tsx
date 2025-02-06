@@ -13,7 +13,7 @@
  * the License.
  */
 
-import { Box, Button, Grid } from "@material-ui/core";
+import { Box, Button, CircularProgress, Grid } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { Link as RouterLink } from "react-router-dom";
@@ -30,6 +30,7 @@ export const WizardBottomBar: FunctionComponent<WizardBottomBarProps> = ({
     nextButtonIsDisabled,
     children,
     doNotWrapInContainer,
+    isLoading,
 }) => {
     const { t } = useTranslation();
 
@@ -66,6 +67,14 @@ export const WizardBottomBar: FunctionComponent<WizardBottomBarProps> = ({
                             color="primary"
                             disabled={nextButtonIsDisabled}
                             id="next-bottom-bar-btn"
+                            startIcon={
+                                isLoading ? (
+                                    <CircularProgress
+                                        color="inherit"
+                                        size={20}
+                                    />
+                                ) : null
+                            }
                             onClick={handleNextClick}
                         >
                             {nextButtonLabel || t("label.next")}

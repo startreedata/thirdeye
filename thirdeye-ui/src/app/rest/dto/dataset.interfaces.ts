@@ -25,6 +25,13 @@ export interface Dataset {
     dataSource: Datasource;
 }
 
+export interface DemoDataset {
+    id: string;
+    name: string;
+    description: string;
+    dimensions?: string[];
+}
+
 export interface TimeColumn {
     name: string;
     interval: number;

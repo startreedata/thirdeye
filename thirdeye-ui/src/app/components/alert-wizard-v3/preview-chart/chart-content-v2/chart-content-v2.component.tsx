@@ -54,6 +54,7 @@ export const ChartContentV2: FunctionComponent<ChartContentProps> = ({
     legendsPlacement,
     showDeleteIcon = true,
     isSearchEnabled = false,
+    additionalCTA,
 }) => {
     const sharedWizardClasses = useAlertWizardV2Styles();
     const previewChartClasses = usePreviewChartStyles();
@@ -109,7 +110,7 @@ export const ChartContentV2: FunctionComponent<ChartContentProps> = ({
         }
 
         return timeseriesConfiguration;
-    }, [workingDetectionEvaluations]);
+    }, [workingDetectionEvaluations, showOnlyActivity]);
 
     const handleDeleteEnumerationItemClick = (
         detectionEvaluation: DetectionEvaluation
@@ -209,10 +210,10 @@ export const ChartContentV2: FunctionComponent<ChartContentProps> = ({
                         </Box>
                     )}
 
-                {isSearchEnabled && workingDetectionEvaluations?.length > 0 && (
+                {isSearchEnabled && workingDetectionEvaluations?.length > 1 && (
                     <Box
                         display="flex"
-                        justifyContent="flex-end"
+                        justifyContent="space-between"
                         marginTop={1}
                         ml={2}
                         mr={1}
@@ -247,6 +248,7 @@ export const ChartContentV2: FunctionComponent<ChartContentProps> = ({
                                 setSearchTerm(e.target.value);
                             }}
                         />
+                        {additionalCTA}
                     </Box>
                 )}
 

@@ -21,6 +21,8 @@ test("View anomalies for alerts", async ({ page }) => {
     await alertDetailsPage.resolveApis();
     await alertDetailsPage.checkHeader();
     await alertDetailsPage.openFirstAlert();
+    await alertDetailsPage.resolveDetailsPageApis();
+    await page.waitForTimeout(1000);
     await alertDetailsPage.checkAlertHeader();
     const anomalyDisabled = await alertDetailsPage.checkAnomaliesCount();
     if (anomalyDisabled) {
@@ -38,6 +40,8 @@ test("Active and Deactivate alerts", async ({ page }) => {
     await alertDetailsPage.resolveApis();
     await alertDetailsPage.checkHeader();
     await alertDetailsPage.openFirstAlert();
+    await alertDetailsPage.resolveDetailsPageApis();
+    await page.waitForTimeout(1000);
     await alertDetailsPage.checkAlertHeader();
     const anomalyDisabled = await alertDetailsPage.checkAnomaliesCount();
     if (anomalyDisabled) {
@@ -50,4 +54,14 @@ test("Active and Deactivate alerts", async ({ page }) => {
     await alertDetailsPage.activeDeactiveAlert(true);
     await alertDetailsPage.resolveApis();
     await alertDetailsPage.checkAlertIsActiveOrDeactive(true);
+});
+
+test("User can select date range for anomalies", async ({ page }) => {
+    const alertDetailsPage = new AlertDetailsPage(page);
+    await alertDetailsPage.goToAlertDetailsPage();
+    await alertDetailsPage.resolveApis();
+    await alertDetailsPage.openFirstAlert();
+    await alertDetailsPage.resolveDetailsPageApis();
+    await page.waitForTimeout(1000);
+    await alertDetailsPage.applyDateChange();
 });

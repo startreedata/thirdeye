@@ -21,6 +21,10 @@ public class ThresholdRuleDetectorSpec extends AbstractSpec {
 
   private double min = Double.NaN;
   private double max = Double.NaN;
+  
+  private boolean maxInclusive = true;
+
+  private boolean minInclusive = true;
 
   public double getMin() {
     return min;
@@ -37,6 +41,24 @@ public class ThresholdRuleDetectorSpec extends AbstractSpec {
 
   public ThresholdRuleDetectorSpec setMax(final double max) {
     this.max = max;
+    return this;
+  }
+
+  public boolean isMaxInclusive() {
+    return maxInclusive;
+  }
+
+  public ThresholdRuleDetectorSpec setMaxInclusive(final boolean maxInclusive) {
+    this.maxInclusive = maxInclusive;
+    return this;
+  }
+
+  public boolean isMinInclusive() {
+    return minInclusive;
+  }
+
+  public ThresholdRuleDetectorSpec setMinInclusive(final boolean minInclusive) {
+    this.minInclusive = minInclusive;
     return this;
   }
 }

@@ -59,7 +59,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -218,7 +217,7 @@ public class AlertResourceTest {
   }
 
   @Test(expectedExceptions = ForbiddenException.class)
-  public void testEvaluate_withNoAccessToTemplate() throws ExecutionException {
+  public void testEvaluate_withNoAccessToTemplate() throws Exception {
     final AlertTemplateManager alertTemplateManager = mock(AlertTemplateManager.class);
     when(alertTemplateManager.findById(1L)).thenReturn(
         (AlertTemplateDTO) new AlertTemplateDTO().setId(
@@ -235,7 +234,7 @@ public class AlertResourceTest {
   }
 
   @Test(expectedExceptions = ForbiddenException.class)
-  public void testEvaluate_withExistingAlertAndNoAccessToAlert() throws ExecutionException {
+  public void testEvaluate_withExistingAlertAndNoAccessToAlert() throws Exception {
     final var alertTemplateManager = mock(AlertTemplateManager.class);
     final var alertEvaluator = mock(AlertEvaluator.class);
     final var alertManager = mock(AlertManager.class);
@@ -275,7 +274,7 @@ public class AlertResourceTest {
   }
 
   @Test(expectedExceptions = ForbiddenException.class)
-  public void testEvaluate_withNewAlertAndNoWriteAccess() throws ExecutionException {
+  public void testEvaluate_withNewAlertAndNoWriteAccess() throws Exception {
     final var alertTemplateManager = mock(AlertTemplateManager.class);
     final var alertEvaluator = mock(AlertEvaluator.class);
 

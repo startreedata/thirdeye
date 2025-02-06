@@ -52,8 +52,11 @@ import { getErrorMessages } from "../../utils/rest/rest.util";
 import {
     getAlertsCreateAdvanceV2Path,
     getAlertsCreateNewJsonEditorV2Path,
+    getAlertsCeateUpdatedPath,
+    // getAlertsCreateAdvancePath,
+    // getAlertsCreateNewJsonEditorPath,
     getAlertsCreatePath,
-    getAlertsEasyCreatePath,
+    // getAlertsEasyCreatePath,
 } from "../../utils/routes/routes.util";
 
 export const AlertsAllPage: FunctionComponent = () => {
@@ -223,7 +226,7 @@ export const AlertsAllPage: FunctionComponent = () => {
 
     const handleAlertRedirect = (alertType: string | number): void => {
         if (alertType === "easyAlert") {
-            navigate(getAlertsEasyCreatePath());
+            navigate(getAlertsCeateUpdatedPath());
             // navigate(getAlertsCreatePath());
         } else if (alertType === "advancedAlert") {
             navigate(getAlertsCreateAdvanceV2Path());
@@ -345,7 +348,7 @@ export const AlertsAllPage: FunctionComponent = () => {
                         setCreateId(null);
                     }}
                     onGotItClick={() => {
-                        navigate(getAlertsEasyCreatePath());
+                        navigate(getAlertsCeateUpdatedPath());
                     }}
                 />
             )}

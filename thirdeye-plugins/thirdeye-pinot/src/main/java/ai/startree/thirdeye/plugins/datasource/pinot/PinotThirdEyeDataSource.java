@@ -14,11 +14,15 @@
 package ai.startree.thirdeye.plugins.datasource.pinot;
 
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
+import static com.google.common.base.Preconditions.checkArgument;
 
+import ai.startree.thirdeye.plugins.datasource.pinot.DemoConfigs.DemoDatasetConfig;
 import ai.startree.thirdeye.plugins.datasource.pinot.resultset.ThirdEyeResultSet;
 import ai.startree.thirdeye.plugins.datasource.pinot.resultset.ThirdEyeResultSetGroup;
 import ai.startree.thirdeye.spi.Constants;
 import ai.startree.thirdeye.spi.ThirdEyeException;
+import ai.startree.thirdeye.spi.ThirdEyeStatus;
+import ai.startree.thirdeye.spi.api.DemoDatasetApi;
 import ai.startree.thirdeye.spi.datalayer.dto.DataSourceDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
 import ai.startree.thirdeye.spi.datasource.DataSourceRequest;
@@ -46,6 +50,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.FileUtils;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -156,11 +161,10 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
    *
    * @param pinotQuery the query that is specifically constructed for Pinot.
    * @return the corresponding ResultSetGroup to the given Pinot query.
-   * @throws ExecutionException is thrown if failed to connect to Pinot or gets results from
+   * @throws ThirdEyeException is thrown if failed to connect to Pinot or gets results from
    *     Pinot.
    */
-  private ThirdEyeResultSetGroup executeSQL(final PinotQuery pinotQuery) throws ExecutionException,
-      ThirdEyeException {
+  private ThirdEyeResultSetGroup executeSQL(final PinotQuery pinotQuery) throws ThirdEyeException {
     try {
       final ThirdEyeResultSetGroup thirdEyeResultSetGroup = queryCache.get(pinotQuery);
       final long current = System.currentTimeMillis();
@@ -171,12 +175,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
         queryCacheTs = current;
       }
       return thirdEyeResultSetGroup;
-    } catch (final ExecutionException e) {
-      LOG.error("Failed to execute SQL: {} with options {}", pinotQuery.getQuery(),
-          pinotQuery.getOptions(), e);
-      LOG.error("queryCache.stats: {}", queryCache.stats());
-      throw e;
-    } catch (UncheckedExecutionException e) {
+    } catch (ExecutionException | UncheckedExecutionException e) {
       LOG.error("Failed to execute SQL: {} with options {}", pinotQuery.getQuery(),
           pinotQuery.getOptions(), e);
       LOG.error("queryCache.stats: {}", queryCache.stats());
@@ -184,7 +183,7 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
       if (cause instanceof ThirdEyeException) {
         throw (ThirdEyeException) cause;
       } else {
-        throw new ExecutionException(e.getMessage(), e);
+        throw new ThirdEyeException(e, ThirdEyeStatus.ERR_PINOT_QUERY_EXECUTION, e.getMessage(), pinotQuery.getQuery());  
       }
     }
   }
@@ -208,14 +207,14 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   public boolean validate() {
     try {
       return validate0();
-    } catch (final ExecutionException | IOException | ArrayIndexOutOfBoundsException | ThirdEyeException e) {
+    } catch (final IOException | ArrayIndexOutOfBoundsException | ThirdEyeException e) {
       LOG.error("Exception while performing pinot datasource validation.", e);
     }
     return false;
   }
 
   // todo cyril healthcheck should be abstracted by the controller
-  private boolean validate0() throws IOException, ExecutionException, ThirdEyeException {
+  private boolean validate0() throws IOException, ThirdEyeException {
     final PinotHealthCheckConfiguration healthCheck = config.getHealthCheck();
     if (healthCheck == null || !healthCheck.isEnabled()) {
       return true;
@@ -291,5 +290,22 @@ public class PinotThirdEyeDataSource implements ThirdEyeDataSource {
   @Override
   public SqlExpressionBuilder getSqlExpressionBuilder() {
     return sqlExpressionBuilder;
+  }
+
+
+  @Override
+  public @NonNull List<DemoDatasetApi> availableDemoDatasets() {
+    return DemoConfigs.DEMO_DATASETS;
+  }
+
+  @Override
+  public @NonNull String createDemoDataset(final @NonNull String identifier) {
+    final DemoDatasetConfig config = DemoConfigs.DEMO_DATASET_CONFIGS.get(identifier);
+    checkArgument(config != null, "Invalid demo dataset identifier: %s", identifier);
+    try {
+      return datasetReader.createDemoDataset(config);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 }

@@ -135,5 +135,11 @@ public class IntegrationTestUtils {
         expected.getTimeConfiguration().getDateTimePattern());
     assertThat(actual.getTimeConfiguration().getMinimumOnboardingStartTime()).isEqualTo(
         expected.getTimeConfiguration().getMinimumOnboardingStartTime());
+    assertThat(actual.getTemplateConfiguration().getSqlLimitStatement()).isEqualTo(
+        expected.getTemplateConfiguration().getSqlLimitStatement());
+    assertThat(actual.getNamespaceQuotasConfiguration().getTaskQuotasConfiguration().getMaximumDetectionTasksPerMonth()).isEqualTo(
+        expected.getNamespaceQuotasConfiguration().getTaskQuotasConfiguration().getMaximumDetectionTasksPerMonth());
+    assertThat(actual.getNamespaceQuotasConfiguration().getTaskQuotasConfiguration().getMaximumNotificationTasksPerMonth()).isEqualTo(
+        expected.getNamespaceQuotasConfiguration().getTaskQuotasConfiguration().getMaximumNotificationTasksPerMonth());
   }
 }

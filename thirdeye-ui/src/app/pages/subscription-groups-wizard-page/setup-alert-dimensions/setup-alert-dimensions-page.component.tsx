@@ -81,6 +81,7 @@ export const SetupAlertDimensionsPage: FunctionComponent = () => {
             okButtonText: t("label.yes"),
             cancelButtonText: t("label.no"),
             onOk: () => onFinish(subscriptionGroup),
+            keepDialogOnOk: true,
         });
     };
 

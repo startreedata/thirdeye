@@ -13,6 +13,8 @@
  * the License.
  */
 
+import { TimeRange } from "../time-range-provider/time-range-provider.interfaces";
+
 export interface TimeRangeButtonWithContextProps {
     btnGroupColor?: "secondary" | "inherit" | "primary" | "default";
     onTimeRangeChange?: (start: number, end: number) => void;
@@ -20,4 +22,9 @@ export interface TimeRangeButtonWithContextProps {
     minDate?: number;
     hideQuickExtend?: boolean;
     timezone?: string;
+    defaultTimeRange?: {
+        startTime: number;
+        endTime: number;
+        timeRange: TimeRange;
+    };
 }

@@ -13,7 +13,7 @@
  * the License.
  */
 import { ActionHook } from "../actions.interfaces";
-import { Dataset } from "../dto/dataset.interfaces";
+import { Dataset, DemoDataset } from "../dto/dataset.interfaces";
 
 export interface GetDataset extends ActionHook {
     dataset: Dataset | null;
@@ -23,4 +23,9 @@ export interface GetDataset extends ActionHook {
 export interface GetDatasets extends ActionHook {
     datasets: Dataset[] | null;
     getDatasets: () => Promise<Dataset[] | undefined>;
+}
+
+export interface GetDemoDatasets extends ActionHook {
+    datasets: DemoDataset[] | null;
+    getDemoDatasets: (id: number) => Promise<DemoDataset[] | undefined>;
 }

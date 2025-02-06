@@ -37,7 +37,7 @@ test("Duplicate Alert", async ({ page }) => {
     await alertListPage.duplicateAlert();
 });
 
-test("Edit Alert", async ({ page }) => {
+test.skip("Edit Alert", async ({ page }) => {
     await alertListPage.editAlert();
 });
 

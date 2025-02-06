@@ -16,17 +16,33 @@ package ai.startree.thirdeye.scheduler;
 import static ai.startree.thirdeye.scheduler.JobUtils.currentCron;
 import static ai.startree.thirdeye.scheduler.JobUtils.getIdFromJobKey;
 import static ai.startree.thirdeye.spi.Constants.CRON_TIMEZONE;
+import static ai.startree.thirdeye.spi.util.MetricsUtils.scheduledRefreshSupplier;
 import static ai.startree.thirdeye.spi.util.TimeUtils.maximumTriggersPerMinute;
 import static com.google.common.base.Preconditions.checkArgument;
 
+import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.bao.AbstractManager;
+import ai.startree.thirdeye.spi.datalayer.bao.NamespaceConfigurationManager;
+import ai.startree.thirdeye.spi.datalayer.bao.TaskManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.NamespaceConfigurationDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.NamespaceQuotasConfigurationDTO;
 import ai.startree.thirdeye.spi.task.TaskType;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.Job;
 import org.quartz.JobBuilder;
@@ -42,7 +58,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnable {
-  
+
+  private static final String NULL_NAMESPACE_KEY = "__NULL_NAMESPACE_" +
+      RandomStringUtils.randomAlphanumeric(10).toUpperCase();
+
   private final Logger log;
   private final Scheduler scheduler;
   private final TaskType taskType;
@@ -53,6 +72,9 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
   private final Class<? extends Job> jobClazz;
   private final CronGetter<E> cronGetter;
   private final isActiveGetter<E> isActiveGetter;
+  private final TaskManager taskManager;
+  private final NamespaceConfigurationManager namespaceConfigurationManager;
+  private final Supplier<Map<String, Boolean>> namespaceToQuotaExceededSupplier;
 
   public TaskCronSchedulerRunnable(
       final AbstractManager<E> entityDao,
@@ -63,7 +85,10 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
       final Class<? extends Job> jobClazz,
       final GuiceJobFactory guiceJobFactory,
       final int cronMaxTriggersPerMinute,
-      final Class<?> loggerClass) {
+      final Class<?> loggerClass,
+      final TaskManager taskManager,
+      final NamespaceConfigurationManager namespaceConfigurationManager,
+      final long namespaceQuotaCacheDurationSeconds) {
     try {
       scheduler = StdSchedulerFactory.getDefaultScheduler();
       scheduler.setJobFactory(guiceJobFactory);
@@ -80,6 +105,10 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
     this.cronMaxTriggersPerMinute = cronMaxTriggersPerMinute;
     this.log = LoggerFactory.getLogger(loggerClass);
     this.groupMatcher = GroupMatcher.jobGroupEquals(taskType.toString());
+    this.taskManager = taskManager;
+    this.namespaceConfigurationManager = namespaceConfigurationManager;
+    this.namespaceToQuotaExceededSupplier = scheduledRefreshSupplier(
+        this::getNamespaceToQuotaExceededMap, Duration.ofSeconds(namespaceQuotaCacheDurationSeconds));
   }
 
   @Override
@@ -103,10 +132,14 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
     //   also only fetch only active entities directly and remove is active from Schedulable interface 
     final List<E> allEntities = entityDao.findAll();
 
+    final Map<String, Boolean>
+        cachedNamespaceToQuotaExceeded = namespaceToQuotaExceededSupplier.get();
+
     // schedule active entities
-    allEntities.forEach(this::schedule);
+    allEntities.forEach(e -> schedule(e, cachedNamespaceToQuotaExceeded));
 
     // cleanup schedules of deleted and deactivated entities
+    // or entities whose workspace has exceeded quotas
     final Map<Long, E> idToEntity = allEntities.stream()
         .collect(Collectors.toMap(AbstractDTO::getId, e -> e));
     final Set<JobKey> scheduledJobKeys = scheduler.getJobKeys(groupMatcher);
@@ -121,6 +154,10 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
         } else if (!isActive(entity)) {
           log.info("{} with id {} is deactivated. Stopping the scheduled {} job.", entityName, id, taskType);
           stopJob(jobKey);
+        } else if (cachedNamespaceToQuotaExceeded.getOrDefault(nonNullNamespace(entity.namespace()), false)) {
+          log.info("workspace {} corresponding to {} with id {} has exceeded monthly quota. Stopping scheduled {} job.",
+              nonNullNamespace(entity.namespace()), entityName, id, taskType);
+          stopJob(jobKey);
         }
       } catch (final Exception e) {
         log.error("Error removing job key {}", jobKey, e);
@@ -128,9 +165,55 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
     }
   }
 
-  private void schedule(final E entity) {
+  private Map<String, Boolean> getNamespaceToQuotaExceededMap() {
+    final HashMap<String, Boolean> m = new HashMap<>();
+    final List<NamespaceConfigurationDTO> namespaceCfgs = namespaceConfigurationManager.findAll();
+
+    for (NamespaceConfigurationDTO namespaceCfg : namespaceCfgs) {
+      final Long monthlyTasksLimit = getMonthlyTasksLimit(namespaceCfg);
+      if (monthlyTasksLimit == null || monthlyTasksLimit <= 0) {
+        continue;
+      }
+      final String namespace = namespaceCfg.namespace();
+      final long taskCount = getTasksCountForNamespace(namespaceCfg.namespace());
+      m.put(nonNullNamespace(namespace), taskCount >= monthlyTasksLimit);
+    }
+
+    return Map.copyOf(m);
+  }
+
+  private Long getMonthlyTasksLimit(final @NonNull NamespaceConfigurationDTO config) {
+    return Optional.of(config)
+        .map(NamespaceConfigurationDTO::getNamespaceQuotasConfiguration)
+        .map(NamespaceQuotasConfigurationDTO::getTaskQuotasConfiguration)
+        .map(taskQuotasConfig -> switch (taskType) {
+          case DETECTION -> taskQuotasConfig.getMaximumDetectionTasksPerMonth();
+          case NOTIFICATION -> taskQuotasConfig.getMaximumNotificationTasksPerMonth();
+        })
+        .orElse(null);
+  }
+
+  private long getTasksCountForNamespace(final String namespace) {
+    final LocalDateTime startOfMonth = LocalDate.now(ZoneOffset.UTC).withDayOfMonth(1).atStartOfDay();
+    final Predicate predicate = Predicate.AND(
+        Predicate.EQ("namespace", namespace),
+        Predicate.EQ("type", taskType),
+        Predicate.GE("createTime", startOfMonth)
+    );
+    return taskManager.count(predicate);
+  }
+
+  private void schedule(final E entity,
+      final Map<String, Boolean> namespaceToQuotaExceededMap) {
     if (!isActive(entity)) {
       log.debug("{}: {} is inactive. Skipping.", entityName, entity.getId());
+      return;
+    }
+
+    final String entityNamespace = nonNullNamespace(entity.namespace());
+    if (namespaceToQuotaExceededMap.getOrDefault(entityNamespace, false)) {
+      log.info("workspace {} corresponding to {} with id {} has exceeded monthly quota. Skipping scheduling {} job.",
+          entityNamespace, entityName, entity.getId(), taskType);
       return;
     }
 
@@ -173,7 +256,6 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
     log.info("Stopped {} job {}", taskType, jobKey.getName());
   }
 
-
   private Trigger buildTrigger(final E config) {
     final String cron = cronOf(config);
     final int maxTriggersPerMinute = maximumTriggersPerMinute(cron);
@@ -194,6 +276,10 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
   
   private boolean isActive(final E entity) {
     return isActiveGetter.isActive(entity);
+  }
+
+  private static @NonNull String nonNullNamespace(@Nullable String namespace) {
+    return namespace == null ? NULL_NAMESPACE_KEY : namespace;
   }
 
   private String cronOf(final E entity) {

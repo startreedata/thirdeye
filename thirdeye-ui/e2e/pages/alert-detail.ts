@@ -39,6 +39,41 @@ export class AlertDetailsPage extends BasePage {
         this.alertsApiResponseData = await alertsApiResponse.json();
     }
 
+    async resolveDetailsPageApis() {
+        await Promise.all([
+            this.page.waitForResponse(
+                (response) =>
+                    response.url().includes("/api/alerts/insights") &&
+                    response.status() === 200
+            ),
+            this.page.waitForResponse(
+                (response) =>
+                    response.url().includes("/api/alerts") &&
+                    response.status() === 200
+            ),
+            this.page.waitForResponse(
+                (response) =>
+                    response.url().includes("/api/enumeration-items") &&
+                    response.status() === 200
+            ),
+            this.page.waitForResponse(
+                (response) =>
+                    response.url().includes("/api/anomalies") &&
+                    response.status() === 200
+            ),
+            this.page.waitForResponse(
+                (response) =>
+                    response.url().includes("/stats") &&
+                    response.status() === 200
+            ),
+            this.page.waitForResponse(
+                (response) =>
+                    response.url().includes("/api/alerts/evaluate") &&
+                    response.status() === 200
+            ),
+        ]);
+    }
+
     async resolveAnomaliesApis() {
         const [anomaliesApiResponse] = await Promise.all([
             this.page.waitForResponse(
@@ -146,6 +181,7 @@ export class AlertDetailsPage extends BasePage {
                         this.alertsApiResponseData.length - 1
                     ]?.name,
             })
+            .nth(0)
             .click();
     }
 
@@ -276,5 +312,36 @@ export class AlertDetailsPage extends BasePage {
                 .locator("h5")
                 .filter({ hasText: "Heatmap & Dimension Drills" })
         ).toBeDefined();
+    }
+
+    async applyDateChange() {
+        const calnedarButton = this.page.getByTestId("open-calendar-button");
+        await calnedarButton.click();
+        const availableDates = this.page.locator(
+            ".MuiPickersDay-day:not(.MuiPickersDay-daySelected):not(.MuiPickersDay-dayDisabled)"
+        );
+        const count = await availableDates.count();
+        const newStartDate = availableDates.nth(1);
+        const newEndDate = availableDates.nth(count - 2);
+        await Promise.all([newStartDate.click(), newEndDate.click()]);
+        const applyDateBtn = this.page.getByTestId("apply-button");
+        applyDateBtn.click();
+        await Promise.all([
+            this.page.waitForResponse(
+                (response) =>
+                    response.url().includes(`/api/anomalies`) &&
+                    response.status() === 200
+            ),
+            this.page.waitForResponse(
+                (response) =>
+                    response.url().includes(`/stats`) &&
+                    response.status() === 200
+            ),
+            this.page.waitForResponse(
+                (response) =>
+                    response.url().includes(`/api/alerts/evaluate`) &&
+                    response.status() === 200
+            ),
+        ]);
     }
 }

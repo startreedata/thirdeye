@@ -202,7 +202,7 @@ export class CreateAlertPage extends BasePage {
         if (!isMultiDimensional) {
             await this.page
                 .locator("div")
-                .filter({ hasText: /^Single metric$/ })
+                .locator("span", { hasText: /^Single metric$/ })
                 .click();
             return;
         }
@@ -236,19 +236,28 @@ export class CreateAlertPage extends BasePage {
             .click();
     }
 
+    async setRequiredProperties() {
+        await this.page
+            .getByTestId("min-container")
+            .locator("input")
+            .fill("100");
+        await this.page
+            .getByTestId("max-container")
+            .locator("input")
+            .fill("10000");
+    }
+
     async goToCreateAlertPage() {
         await this.page.goto("http://localhost:7004/#access_token=''");
         await this.page.waitForSelector("h4:has-text('StarTree ThirdEye')", {
             timeout: 10000,
             state: "visible",
         });
-        await this.page.goto(
-            "http://localhost:7004/alerts/create/new/new-user/easy-alert/"
-        );
+        await this.page.goto("http://localhost:7004/alerts/create/easy/");
     }
 
     async checkHeader() {
-        await expect(this.page.locator("h5")).toHaveText("Alert wizard");
+        await expect(this.page.locator("h5")).toHaveText("Simple Alert Setup");
     }
 
     async clickLoadChartButton() {
@@ -272,6 +281,7 @@ export class CreateAlertPage extends BasePage {
 
     async addDimensions() {
         await this.page.getByRole("button", { name: "Add dimensions" }).click();
+        await this.page.waitForTimeout(1000);
         await this.page.getByPlaceholder("Select dimensions").click();
         await this.page
             .getByRole("option", {
@@ -341,7 +351,7 @@ export class CreateAlertPage extends BasePage {
         await this.page.getByRole("option", { name: "Daily" }).click();
         await this.page
             .locator("div")
-            .filter({ hasText: /^Single metric$/ })
+            .locator("span", { hasText: /^Single metric$/ })
             .click();
     }
 }

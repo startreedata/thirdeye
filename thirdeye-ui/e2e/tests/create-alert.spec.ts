@@ -54,6 +54,7 @@ test("Create Multi Dimensions SQL Alert", async ({ page }) => {
     await createAlertPage.addSQLQuery();
     await createAlertPage.resolveRecommendApis();
     await createAlertPage.selectDetectionAlgorithm(true);
+    await createAlertPage.setRequiredProperties();
     await createAlertPage.clickLoadChartButton();
     await createAlertPage.resolveEvaluateApis();
     await createAlertPage.createAlert();

@@ -73,7 +73,7 @@ export const Modal: FunctionComponent<ModalProps> = ({
             <Dialog
                 maxWidth={maxWidth}
                 open={isOpen}
-                onClose={() => setIsOpen(false)}
+                onClose={handleCancelClick}
             >
                 {title && <DialogTitle>{title}</DialogTitle>}
                 {customTitle}

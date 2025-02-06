@@ -13,9 +13,10 @@
  * the License.
  */
 import { AxiosError } from "axios/index";
-import React, { FunctionComponent, useMemo, useState } from "react";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { useAppBarConfigProvider } from "../../components/app-bar/app-bar-config-provider/app-bar-config-provider.component";
 import { validateSubscriptionGroup } from "../../components/subscription-group-wizard/subscription-group-wizard.utils";
 import { useNotificationProviderV1 } from "../../platform/components";
 import { ActionStatus } from "../../rest/actions.interfaces";
@@ -33,7 +34,6 @@ import {
     QUERY_PARAM_KEY_ANOMALIES_RETRY,
 } from "../alerts-view-page/alerts-view-page.utils";
 import { AlertsCreatePageProps } from "./alerts-create-page.interfaces";
-import { useAppBarConfigProvider } from "../../components/app-bar/app-bar-config-provider/app-bar-config-provider.component";
 
 export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
     startingAlertConfiguration,
@@ -49,6 +49,20 @@ export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
 
     const [singleNewSubscriptionGroup, setSingleNewSubscriptionGroup] =
         useState<SubscriptionGroup>(createEmptySubscriptionGroup());
+    const [pageTitle, setPageTitle] = useState("");
+    useEffect(() => {
+        setPageTitle(
+            location.pathname.includes("advanced-v2")
+                ? t("label.advanced-alert")
+                : location.pathname.includes("easy-alert")
+                ? t("label.simple-alert-setup")
+                : location.pathname.includes("json-editor-v2")
+                ? t("label.json-alert-setup")
+                : t("label.create-entity", {
+                      entity: t("label.alert"),
+                  })
+        );
+    }, []);
 
     const createAlertAndUpdateSubscriptionGroups = useMemo(() => {
         return handleCreateAlertClickGenerator(notify, t, (savedAlert) => {
@@ -100,9 +114,7 @@ export const AlertsCreateBasePage: FunctionComponent<AlertsCreatePageProps> = ({
         <AlertsEditCreateBasePageComponent
             isEditRequestInFlight={isEditRequestInFlight}
             newSubscriptionGroup={singleNewSubscriptionGroup}
-            pageTitle={t("label.create-entity", {
-                entity: t("label.alert"),
-            })}
+            pageTitle={pageTitle}
             selectedSubscriptionGroups={subscriptionGroups}
             startingAlertConfiguration={startingAlertConfiguration}
             onNewSubscriptionGroupChange={setSingleNewSubscriptionGroup}

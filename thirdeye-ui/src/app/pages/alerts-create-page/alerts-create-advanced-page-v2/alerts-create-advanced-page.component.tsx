@@ -18,6 +18,7 @@ import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
 import { useOutletContext } from "react-router-dom";
 import { AlertDetails } from "../../../components/alert-wizard-v2/alert-details/alert-details-v2.component";
+import { AlertNotifications } from "../../../components/alert-wizard-v2/alert-notifications/alert-notifications.component";
 import { AlertTemplate } from "../../../components/alert-wizard-v2/alert-template/alert-template-v2.component";
 import { PageContentsGridV1 } from "../../../platform/components";
 import { AlertsSimpleAdvancedJsonContainerPageOutletContextProps } from "../../alerts-edit-create-common/alerts-edit-create-common-page.interfaces";
@@ -33,6 +34,7 @@ export const AlertsCreateAdvancedPage: FunctionComponent = () => {
     const {
         alert,
         handleAlertPropertyChange: onAlertPropertyChange,
+        handleSubscriptionGroupChange: onSubscriptionGroupsChange,
         selectedAlertTemplate,
         setSelectedAlertTemplate,
         alertTemplateOptions,
@@ -53,10 +55,26 @@ export const AlertsCreateAdvancedPage: FunctionComponent = () => {
                     <Grid item xs={12}>
                         <AlertTemplate
                             alert={alert}
-                            alertTemplateOptions={alertTemplateOptions}
+                            alertTemplateOptions={alertTemplateOptions.sort(
+                                (a, b) =>
+                                    a.name < b.name
+                                        ? -1
+                                        : a.name > b.name
+                                        ? 1
+                                        : 0
+                            )}
                             selectedAlertTemplate={selectedAlertTemplate}
                             setSelectedAlertTemplate={setSelectedAlertTemplate}
                             onAlertPropertyChange={onAlertPropertyChange}
+                        />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <AlertNotifications
+                            alert={alert}
+                            initiallySelectedSubscriptionGroups={[]}
+                            onSubscriptionGroupsChange={
+                                onSubscriptionGroupsChange
+                            }
                         />
                     </Grid>
                     <Box

@@ -18,6 +18,7 @@ import React, { FunctionComponent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { AlertJson } from "../../../components/alert-wizard-v2/alert-json-v2/alert-json.component";
+import { AlertNotifications } from "../../../components/alert-wizard-v2/alert-notifications/alert-notifications.component";
 import {
     determinePropertyFieldConfiguration,
     hasRequiredPropertyValuesSet,
@@ -41,6 +42,7 @@ export const AlertsCreateJSONPage: FunctionComponent = () => {
         alert,
         handleAlertPropertyChange: onAlertPropertyChange,
         selectedAlertTemplate,
+        handleSubscriptionGroupChange: onSubscriptionGroupsChange,
         handleSubmitAlertClick,
     } = useOutletContext<AlertsSimpleAdvancedJsonContainerPageOutletContextProps>();
 
@@ -89,6 +91,15 @@ export const AlertsCreateJSONPage: FunctionComponent = () => {
                             </Box>
                             <Box marginBottom={3} marginTop={3}>
                                 <Divider />
+                            </Box>
+                            <Box>
+                                <AlertNotifications
+                                    alert={alert}
+                                    initiallySelectedSubscriptionGroups={[]}
+                                    onSubscriptionGroupsChange={
+                                        onSubscriptionGroupsChange
+                                    }
+                                />
                             </Box>
                             <Box
                                 display="flex"

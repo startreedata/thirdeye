@@ -23,8 +23,10 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import {
     getAlertsCeateUpdatedPath,
-    getAlertsCreateAdvancePath,
-    getAlertsCreateNewJsonEditorPath,
+    getAlertsCreateAdvanceV2Path,
+    getAlertsCreateNewJsonEditorV2Path,
+    // getAlertsCreateAdvancePath,
+    // getAlertsCreateNewJsonEditorPath,
     // getAlertsEasyCreatePath,
 } from "../../../../utils/routes/routes.util";
 
@@ -50,9 +52,11 @@ export const Header = (): JSX.Element => {
             navigate(getAlertsCeateUpdatedPath());
             // navigate(getAlertsEasyCreatePath());
         } else if (alertType === "advancedAlert") {
-            navigate(getAlertsCreateAdvancePath());
+            navigate(getAlertsCreateAdvanceV2Path());
+            // navigate(getAlertsCreateAdvancePath());
         } else if (alertType === "jsonAlert") {
-            navigate(getAlertsCreateNewJsonEditorPath());
+            navigate(getAlertsCreateNewJsonEditorV2Path());
+            // navigate(getAlertsCreateNewJsonEditorPath());
         }
     };
     const creatAlertButton = (

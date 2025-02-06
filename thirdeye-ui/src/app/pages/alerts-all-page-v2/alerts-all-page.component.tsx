@@ -50,9 +50,11 @@ import { getUiAlerts } from "../../utils/alerts/alerts.util";
 import { notifyIfErrors } from "../../utils/notifications/notifications.util";
 import { getErrorMessages } from "../../utils/rest/rest.util";
 import {
+    getAlertsCreateAdvanceV2Path,
+    getAlertsCreateNewJsonEditorV2Path,
     getAlertsCeateUpdatedPath,
-    getAlertsCreateAdvancePath,
-    getAlertsCreateNewJsonEditorPath,
+    // getAlertsCreateAdvancePath,
+    // getAlertsCreateNewJsonEditorPath,
     getAlertsCreatePath,
     // getAlertsEasyCreatePath,
 } from "../../utils/routes/routes.util";
@@ -214,11 +216,11 @@ export const AlertsAllPage: FunctionComponent = () => {
         },
         {
             id: "advancedAlert",
-            text: t("label.advanced-alert"),
+            text: t("label.advanced-setup"),
         },
         {
             id: "jsonAlert",
-            text: t("label.json-alert"),
+            text: t("label.json-setup"),
         },
     ];
 
@@ -227,9 +229,11 @@ export const AlertsAllPage: FunctionComponent = () => {
             navigate(getAlertsCeateUpdatedPath());
             // navigate(getAlertsCreatePath());
         } else if (alertType === "advancedAlert") {
-            navigate(getAlertsCreateAdvancePath());
+            navigate(getAlertsCreateAdvanceV2Path());
+            // navigate(getAlertsCreateAdvancePath());
         } else if (alertType === "jsonAlert") {
-            navigate(getAlertsCreateNewJsonEditorPath());
+            navigate(getAlertsCreateNewJsonEditorV2Path());
+            // navigate(getAlertsCreateNewJsonEditorPath());
         }
     };
 
@@ -318,7 +322,9 @@ export const AlertsAllPage: FunctionComponent = () => {
                             type={DropdownButtonTypeV1.Regular}
                             onClick={handleAlertRedirect}
                         >
-                            {t("label.create")}
+                            {t("label.create-entity", {
+                                entity: t("label.alert"),
+                            })}
                         </DropdownButtonV1>
                     </PageHeaderActionsV1>
                 }

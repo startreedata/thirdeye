@@ -17,6 +17,8 @@ import React, { FunctionComponent, lazy, Suspense } from "react";
 import { Route, Routes } from "react-router-dom";
 import { CancelAPICallsOnPageUnload } from "../../components/cancel-api-calls-on-page-unload/cancel-api-calls-on-page-unload.component";
 import { AppCrashPage } from "../../pages/app-crash-page/app-crash-page.component";
+import {ErrorListPage} from "../../pages/errors"
+import {ErrorView} from "../../pages/errors/view"
 import {
     AppLoadingIndicatorV1,
     useAuthProviderV1,
@@ -111,6 +113,15 @@ export const AppRouter: FunctionComponent = () => {
                     <Route
                         element={<WelcomeRouter />}
                         path={`${AppRoute.WELCOME}/*`}
+                    />
+
+                    <Route
+                        element={<ErrorListPage/>}
+                        path={`/errors`}
+                    />
+                    <Route
+                        element={<ErrorView/>}
+                        path={`/errors/:id/view`}
                     />
 
                     {/* Direct all other paths to general authenticated router */}

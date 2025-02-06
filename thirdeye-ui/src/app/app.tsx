@@ -22,7 +22,7 @@ import { AnalyticsAndErrorReportingProviderV1 } from "./components/third-party-l
 import { AppCrashPage } from "./pages/app-crash-page/app-crash-page.component";
 import { AppContainerV1, useAuthProviderV1 } from "./platform/components";
 import { AppRouter } from "./routers/app/app.router";
-
+import ErrorBoundary from '../app/routers/app/error-boundary'
 const queryClient = new QueryClient({
     defaultOptions: {
         queries: {
@@ -49,9 +49,11 @@ export const App: FunctionComponent = () => {
             <AnalyticsAndErrorReportingProviderV1>
                 <AppContainerV1 name={t("label.thirdeye")}>
                     <Sentry.ErrorBoundary fallback={<AppCrashPage />}>
+                    <ErrorBoundary>
                         <AppBarConfigProvider>
                             <AppRouter />
                         </AppBarConfigProvider>
+                    </ErrorBoundary>
                     </Sentry.ErrorBoundary>
                 </AppContainerV1>
             </AnalyticsAndErrorReportingProviderV1>

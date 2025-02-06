@@ -57,6 +57,11 @@ export const HomePage: FunctionComponent = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const style = useHomePageStyles();
 
+    // useEffect(()=>{
+    //     const a = null
+    //     const b = a.name
+    // }, [])
+
     const getAlertsQuery = useFetchQuery<Alert[], AxiosError>({
         queryKey: ["alerts"],
         queryFn: () => {

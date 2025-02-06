@@ -16,6 +16,8 @@ package ai.startree.thirdeye.aspect;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import org.quartz.SchedulerException;
+import org.quartz.impl.StdSchedulerFactory;
 
 // use this class to controle the value returned by System.currentTimeMillis()
 // thread safety has not been thoroughly tested
@@ -68,6 +70,7 @@ public class TimeProvider {
     // could be any value - using same as currentTime to simplify debugging
     nanoTime.set(currentTime * 1000_000);  
     mockTime.set(true);
+    notifyQuartzSchedulerThreads();
   }
 
   /**
@@ -87,12 +90,22 @@ public class TimeProvider {
   /**
    * Advance mock time and returns it
    */
-  public synchronized long tick(long tick) {
+  public synchronized void tick(long tick) {
     nanoTime.addAndGet(tick * 1_000_000);
-    return currentTimeMillis.addAndGet(tick);
+    currentTimeMillis.addAndGet(tick);
+    notifyQuartzSchedulerThreads();
   }
 
   public long nanoTime() {
     return nanoTime.get();
+  }
+
+
+  private static void notifyQuartzSchedulerThreads() {
+    try {
+      StdSchedulerFactory.getDefaultScheduler().resumeAll();
+    } catch (SchedulerException e) {
+      throw new RuntimeException(e);
+    }
   }
 }

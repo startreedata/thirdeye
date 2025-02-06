@@ -122,6 +122,12 @@
       <artifactId>aspectjweaver</artifactId>
       <scope>test</scope>
     </dependency>
+    
+    <dependency>
+      <groupId>org.quartz-scheduler</groupId>
+      <artifactId>quartz</artifactId>
+      <scope>test</scope>
+    </dependency>
 
 
   </dependencies>

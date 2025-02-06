@@ -43,7 +43,9 @@ public class TestDatasetConfigManager {
 
   @AfterClass(alwaysRun = true)
   void clean() {
-    datasetConfigDAO.findAll().forEach(datasetConfigDAO::delete);
+    if (datasetConfigDAO != null) {
+      datasetConfigDAO.findAll().forEach(datasetConfigDAO::delete); 
+    }
   }
 
   @Test

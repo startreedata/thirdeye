@@ -79,7 +79,9 @@ public class TestAnomalyTaskManager {
   @AfterClass(alwaysRun = true)
   public void afterClass() {
     CLOCK.useSystemTime();
-    taskDAO.filter(ALL_IN_NULL_NAMESPACE).forEach(taskDAO::delete);
+    if (taskDAO != null) {
+      taskDAO.filter(ALL_IN_NULL_NAMESPACE).forEach(taskDAO::delete); 
+    }
   }
 
   @Test

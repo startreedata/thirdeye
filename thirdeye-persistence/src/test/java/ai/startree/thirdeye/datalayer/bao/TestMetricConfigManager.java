@@ -43,7 +43,9 @@ public class TestMetricConfigManager {
 
   @AfterClass(alwaysRun = true)
   void afterClass() {
-    metricConfigDAO.findAll().forEach(metricConfigDAO::delete);
+    if (metricConfigDAO != null) {
+      metricConfigDAO.findAll().forEach(metricConfigDAO::delete); 
+    }
   }
 
   @Test

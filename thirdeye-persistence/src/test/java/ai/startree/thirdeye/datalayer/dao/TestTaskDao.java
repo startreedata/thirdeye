@@ -41,7 +41,9 @@ public class TestTaskDao {
 
   @AfterClass(alwaysRun = true)
   public void afterClass() {
-    dao.filter(ALL_IN_NULL_NAMESPACE).forEach(task -> dao.delete(task.getId()));
+    if (dao != null) {
+      dao.filter(ALL_IN_NULL_NAMESPACE).forEach(task -> dao.delete(task.getId())); 
+    }
   }
 
   private TaskDTO buildTask() {

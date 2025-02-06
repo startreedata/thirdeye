@@ -24,8 +24,8 @@ import {
     Typography,
 } from "@material-ui/core";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import { isEmpty } from "lodash";
-import React, { FunctionComponent, useState } from "react";
+import { cloneDeep, isEmpty } from "lodash";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
     PropertyConfigValueTypes,
@@ -64,6 +64,10 @@ export const AdditonalFiltersDrawer: FunctionComponent<AdditonalFiltersDrawerPro
             useState<TemplatePropertiesObject>({
                 ...defaultValues,
             });
+
+        useEffect(() => {
+            setLocalCopyOfProperties({ ...defaultValues });
+        }, [defaultValues]);
 
         const handleOnChange = (
             key: string,

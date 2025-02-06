@@ -53,7 +53,9 @@ public class TestNamespaceConfigurationDao {
 
   @AfterClass(alwaysRun = true)
   public void afterClass() {
-    dao.getAll().forEach(task -> dao.delete(task.getId()));
+    if (dao != null) {
+      dao.getAll().forEach(task -> dao.delete(task.getId())); 
+    }
   }
 
   @Test

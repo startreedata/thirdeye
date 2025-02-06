@@ -61,9 +61,11 @@ public class TestGenericPojoDao {
 
   @AfterClass(alwaysRun = true)
   public void afterClass() {
-    // clean up entries created during the tests
-    dao.deleteByPredicate(Predicate.NEQ(NAME, "null"), DataSourceDTO.class);
-    dao.deleteByPredicate(Predicate.NEQ(BASE_ID, 0), AnomalyDTO.class);
+    if (dao != null) {
+      // clean up entries created during the tests
+      dao.deleteByPredicate(Predicate.NEQ(NAME, "null"), DataSourceDTO.class);
+      dao.deleteByPredicate(Predicate.NEQ(BASE_ID, 0), AnomalyDTO.class); 
+    }
   }
 
   @Test(expectedExceptions = IllegalArgumentException.class)

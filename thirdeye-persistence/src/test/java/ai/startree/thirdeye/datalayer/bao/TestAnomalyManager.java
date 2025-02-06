@@ -140,8 +140,12 @@ public class TestAnomalyManager {
 
   @AfterClass(alwaysRun = true)
   void afterClass() {
-    detectionConfigDAO.findAll().forEach(detectionConfigDAO::delete);
-    anomalyManager.findAll().forEach(anomalyManager::delete);
+    if (detectionConfigDAO != null) {
+      detectionConfigDAO.findAll().forEach(detectionConfigDAO::delete); 
+    }
+    if (anomalyManager != null) {
+      anomalyManager.findAll().forEach(anomalyManager::delete); 
+    }
   }
 
   @Test

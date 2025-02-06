@@ -45,7 +45,9 @@ public class TestNamespaceConfigurationManager {
 
   @AfterClass(alwaysRun = true)
   void afterClass() {
-    namespaceConfigurationDao.findAll().forEach(namespaceConfigurationDao::delete);
+    if (namespaceConfigurationDao != null) {
+      namespaceConfigurationDao.findAll().forEach(namespaceConfigurationDao::delete); 
+    }
   }
 
   @Test

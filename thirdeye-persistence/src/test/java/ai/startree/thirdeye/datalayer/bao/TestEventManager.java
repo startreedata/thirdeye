@@ -37,7 +37,9 @@ public class TestEventManager {
 
   @AfterClass
   void clean() {
-    eventDAO.findAll().forEach(eventDAO::delete);
+    if (eventDAO != null) {
+      eventDAO.findAll().forEach(eventDAO::delete); 
+    }
   }
 
   @Test

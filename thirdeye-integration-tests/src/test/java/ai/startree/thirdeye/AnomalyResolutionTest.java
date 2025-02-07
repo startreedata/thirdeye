@@ -90,17 +90,6 @@ public class AnomalyResolutionTest {
     return localDateTime.toInstant(UTC).toEpochMilli();
   }
 
-  private static long jumpToTime(final String dateTime) throws InterruptedException {
-    final long jumpTime = epoch(dateTime);
-    CLOCK.useMockTime(jumpTime);
-    CLOCK.tick(5); // simulate move time forward
-
-    // give thread to detectionCronScheduler and to quartz scheduler -
-    // (quartz idle time is weaved to 100 ms for test speed)
-    Thread.sleep(1000);
-    return jumpTime;
-  }
-
   @BeforeClass
   public void beforeClass() throws Exception {
     // ensure time is controlled via the TimeProvider CLOCK - ie weaving is working correctly
@@ -195,134 +184,111 @@ public class AnomalyResolutionTest {
     assertThat(alertLastTimestamp).isEqualTo(epoch("2020-02-16 00:00"));
   }
 
+  /**
+   * the alert detects anomalies on [feb 3 , feb6), [feb 10, feb 13), [feb 17, feb 20), [feb 24, feb
+   * 27), etc...
+   * this test checks the behaviour for the anomaly on [feb 17, feb 20)
+   * time is currently "2020-02-16 15:00". time is increased day by day from feb 16 to feb 24, and
+   * the state is checked every day
+   * the max merge gap is P3D, so once there is no anomaly detected on [feb 23, feb 24), the
+   * completed anomaly notification should be sent
+   */
   @Test(dependsOnMethods = "testOnboardingTaskRun", timeOut = TEST_IMEOUT)
-  public void testDailyFeb21() throws InterruptedException {
-    // get current number of anomalies
-    final int numAnomaliesBeforeDetectionRun = client.getAnomalies().size();
-
-    final List<AnomalyApi> parentAnomalies = client.getParentAnomalies();
-    assertThat(parentAnomalies).hasSize(1);
-
-    // No notifications sent yet.
-    assertThat(nsf.getCount()).isZero();
-    long jumpTime = jumpToTime("2020-02-21 00:00");
-
-    waitForDetectionRun();
-    // wait for new anomalies to be created
-    while (client.getAnomalies().size() == numAnomaliesBeforeDetectionRun) {
-      Thread.sleep(1000);
-    }
-
-    // check that lastTimestamp after detection is the runTime of the cron
-    assertThat(getAlertLastTimestamp()).isEqualTo(jumpTime);
-
+  public void testCompletedAnomalyIsSentCorrectly() throws InterruptedException {
+    // sanity checks after the onboarding task 
     assertThat(client.getParentAnomalies()).hasSize(2);
+    // no notification happened yet - time has not increased since subscription group creation
+    assertThat(nsf.notificationSentCount()).isZero();
 
-    // There is at least 1 successful subscription group task
+    // run the detections every day and check the results
+    // the cron is at 5 am, so moving to 6 means the cron at 5 will be triggered
+    // no anomaly on [Feb 16, Feb 17)
+    CLOCK.useMockTime(epoch("2020-02-17 06:00"));
+    waitForDetectionRun();
+    // notification cron is every day at 7 am, so moving to 8 will trigger a notification
+    CLOCK.useMockTime(epoch("2020-02-17 08:00"));
     waitForNotificationTaskRun();
-    assertThat(nsf.getCount()).isEqualTo(0);
+    assertThat(nsf.notificationSentCount()).isZero();
 
-    // Move time forward by 5 minutes to make subscription group task run again
-    jumpToTime("2020-02-21 00:05");
-
+    // anomaly on [Feb 17, Feb 18)
+    CLOCK.useMockTime(epoch("2020-02-18 06:00"));
+    assertThat(nsf.notificationSentCount()).isZero();
+    waitForDetectionRun();
+    CLOCK.useMockTime(epoch("2020-02-18 08:00"));
     waitForNotificationTaskRun();
-    assertThat(nsf.getCount()).isEqualTo(1);
-
-    final NotificationPayloadApi notificationPayload = nsf.getNotificationPayload();
+    assertThat(nsf.notificationSentCount()).isEqualTo(1); // a new anomaly is detected and notified
+    final NotificationPayloadApi notificationPayload = nsf.lastNotificationPayload();
     assertThat(notificationPayload.getAnomalyReports()).hasSize(1);
-
     final AnomalyApi anomalyApi = notificationPayload.getAnomalyReports().getFirst().getAnomaly();
     assertThat(anomalyApi.getStartTime()).isEqualTo(new Date(epoch("2020-02-17 00:00")));
-    assertThat(anomalyApi.getEndTime()).isEqualTo(new Date(epoch("2020-02-21 00:00")));
-  }
+    assertThat(anomalyApi.getEndTime()).isEqualTo(new Date(epoch("2020-02-18 00:00")));
 
-  @Test(dependsOnMethods = "testDailyFeb21", timeOut = TEST_IMEOUT)
-  public void testDailyFeb22() throws InterruptedException {
-    jumpToTimeAndWait("2020-02-22 00:06");
-    assertThat(client.getParentAnomalies()).hasSize(2);
-    assertThat(nsf.getCount()).isEqualTo(1); // no new notifications
-  }
+    // anomaly on [Feb 18, Feb 19)
+    CLOCK.useMockTime(epoch("2020-02-19 06:00"));
+    waitForDetectionRun();
+    CLOCK.useMockTime(epoch("2020-02-19 08:00"));
+    waitForNotificationTaskRun();
+    assertThat(nsf.notificationSentCount()).isEqualTo(
+        1); // this point is anomalous but merged in current anomaly
 
-  @Test(dependsOnMethods = "testDailyFeb22", timeOut = TEST_IMEOUT)
-  public void testDailyFeb23() throws InterruptedException {
-    jumpToTimeAndWait("2020-02-23 00:06");
-    assertThat(client.getParentAnomalies()).hasSize(2);
-    assertThat(nsf.getCount()).isEqualTo(1); // no new notifications
-  }
+    // anomaly on [Feb 19, Feb 20)
+    CLOCK.useMockTime(epoch("2020-02-20 06:00"));
+    waitForDetectionRun();
+    CLOCK.useMockTime(epoch("2020-02-20 08:00"));
+    waitForNotificationTaskRun();
+    assertThat(nsf.notificationSentCount()).isEqualTo(
+        1); // this point is anomalous but merged in current anomaly
 
-  @Test(dependsOnMethods = "testDailyFeb23", timeOut = TEST_IMEOUT)
-  public void testDailyFeb24() throws InterruptedException {
-    jumpToTimeAndWait("2020-02-24 00:06");
-    assertThat(client.getParentAnomalies()).hasSize(2);
-    assertThat(nsf.getCount()).isEqualTo(1); // no new notifications
-  }
-
-  @Test(dependsOnMethods = "testDailyFeb24", timeOut = TEST_IMEOUT)
-  public void testDailyFeb25() throws InterruptedException {
-    jumpToTimeAndWait("2020-02-25 00:06");
-
-    final List<AnomalyApi> parentAnomalies = client.getParentAnomalies();
-    assertThat(parentAnomalies).hasSize(2);
-
-    final AnomalyApi ongoingAnomaly = parentAnomalies.stream()
-        .filter(a -> a.getStartTime().equals(new Date(epoch("2020-02-17 00:00"))))
-        .findFirst()
-        .orElseThrow(() -> new AssertionError("Anomaly not found"));
-
-    // anomalies are merged here
-    assertThat(ongoingAnomaly.getEndTime()).isEqualTo(new Date(epoch("2020-02-25 00:00")));
-
-    // No new notifications yet
-    assertThat(nsf.getCount()).isEqualTo(1);
-  }
-
-  @Test(dependsOnMethods = "testDailyFeb25", timeOut = TEST_IMEOUT)
-  public void testDailyMar3() throws InterruptedException {
-    jumpToTimeAndWait("2020-03-03 00:06");
+    // sanity checks on the detection state
+    // check that lastTimestamp after detection is the expected runTime of the cron, floored to alert granularity 2020-02-20 06:00 --> 2020-02-20 00:00
+    assertThat(getAlertLastTimestamp()).isEqualTo(epoch("2020-02-20 00:00"));
     assertThat(client.getParentAnomalies()).hasSize(3);
-    assertThat(nsf.getCount()).isEqualTo(1);
-  }
+    final int anomaliesCurrentCount = client.getAnomalies().size();
 
-  @Test(dependsOnMethods = "testDailyMar3", timeOut = TEST_IMEOUT)
-  public void testDailyMar4() throws InterruptedException {
-    jumpToTimeAndWait("2020-03-04 00:06");
+    // no anomaly on [Feb 20, Feb 21)
+    CLOCK.useMockTime(epoch("2020-02-21 06:00"));
+    waitForDetectionRun();
+    // ensure the number of anomalies hasn't changed 
+    assertThat(client.getAnomalies()).hasSize(anomaliesCurrentCount);
+    CLOCK.useMockTime(epoch("2020-02-21 08:00"));
+    waitForNotificationTaskRun();
+    // ensure the number of notification hasn't changed
+    assertThat(nsf.notificationSentCount()).isEqualTo(1);
 
-    final List<AnomalyApi> parentAnomalies = client.getParentAnomalies();
-    assertThat(parentAnomalies).hasSize(3);
+    // no anomaly on [Feb 21, Feb 22) - same checks as above
+    CLOCK.useMockTime(epoch("2020-02-22 06:00"));
+    waitForDetectionRun();
+    assertThat(client.getAnomalies()).hasSize(anomaliesCurrentCount);
+    CLOCK.useMockTime(epoch("2020-02-22 08:00"));
+    waitForNotificationTaskRun();
+    assertThat(nsf.notificationSentCount()).isEqualTo(1);
 
-    // No new notifications yet
-    assertThat(nsf.getCount()).isEqualTo(2);
+    // no anomaly on [Feb 22, Feb 23) - same checks as above
+    CLOCK.useMockTime(epoch("2020-02-23 06:00"));
+    waitForDetectionRun();
+    assertThat(client.getAnomalies()).hasSize(anomaliesCurrentCount);
+    CLOCK.useMockTime(epoch("2020-02-23 08:00"));
+    waitForNotificationTaskRun();
+    assertThat(nsf.notificationSentCount()).isEqualTo(1);
 
-    final NotificationPayloadApi notificationPayload = nsf.getNotificationPayload();
-    assertThat(notificationPayload.getAnomalyReports()).hasSize(1);
-
-    final AnomalyApi anomalyApi = notificationPayload.getAnomalyReports().getFirst().getAnomaly();
-    assertThat(anomalyApi.getStartTime()).isEqualTo(new Date(epoch("2020-03-02 00:00")));
-    assertThat(anomalyApi.getEndTime()).isEqualTo(new Date(epoch("2020-03-03 00:00")));
-  }
-
-  @Test(dependsOnMethods = "testDailyMar4", timeOut = TEST_IMEOUT)
-  public void testDailyMar5() throws InterruptedException {
-    jumpToTimeAndWait("2020-03-05 00:06");
+    // no anomaly on [Feb 23, Feb 24)
+    CLOCK.useMockTime(epoch("2020-02-24 06:00"));
+    waitForDetectionRun();
+    assertThat(client.getAnomalies()).hasSize(anomaliesCurrentCount);
+    CLOCK.useMockTime(epoch("2020-02-24 08:00"));
+    waitForNotificationTaskRun();
+    // maxMergeGap is P3D, so a notification for completed anomaly can be sent now
+    assertThat(nsf.notificationSentCount()).isEqualTo(2);
+    // sanity check on number of anomalies
     assertThat(client.getParentAnomalies()).hasSize(3);
-    assertThat(nsf.getCount()).isEqualTo(3);
-
-    final NotificationPayloadApi payload = nsf.getNotificationPayload();
+    // ensure the completed anomaly notification was sent
+    final NotificationPayloadApi payload = nsf.lastNotificationPayload();
     assertThat(payload.getAnomalyReports()).hasSize(0);
     assertThat(payload.getCompletedAnomalyReports()).hasSize(1);
   }
 
-  private void jumpToTimeAndWait(final String dateTime) throws InterruptedException {
-    jumpToTime(dateTime); // allow both detection and notification to run
-    waitForDetectionRun();
-    waitForNotificationTaskRun();
-  }
-
   private void waitForDetectionRun() throws InterruptedException {
     nDetectionTaskRuns = waitFor(alertId, nDetectionTaskRuns);
-
-    // Even after the task is complete, anomalies are persisted async. Giving another sec
-    Thread.sleep(1000);
   }
 
   private void waitForNotificationTaskRun() throws InterruptedException {
@@ -333,11 +299,11 @@ public class AnomalyResolutionTest {
     int nTasks;
     do {
       nTasks = client.getSuccessfulTasks(refId).size();
-      if (!(nTasks <= currentCount)) {
+      if (nTasks > currentCount) {
         break;
       }
-      // should trigger another task after time jump
-      Thread.sleep(1000);
+      // should give time to run tasks
+      Thread.sleep(500);
     } while (true);
 
     return nTasks;

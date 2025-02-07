@@ -193,6 +193,9 @@ public class NotificationTaskFilter {
     final AlertDTO alert = alertManager.findById(alertId);
     final AlertTemplateDTO renderedTemplate = alertTemplateRenderer.renderAlert(alert);
     final Period mergeMaxGap = AlertUtils.getMergeMaxGap(renderedTemplate);
+    // note: a ThirdEye anomaly could also be completed if its mergeMaxDuration is reached, 
+    // but in this case a new ThirdEye anomaly would be created for the same data anomaly just after
+    // we don't call out these anomalies as completed
     final long endTimeIsLt = alert.getLastTimestamp() - mergeMaxGap.toStandardDuration().getMillis();
 
     return new AnomalyFilter()

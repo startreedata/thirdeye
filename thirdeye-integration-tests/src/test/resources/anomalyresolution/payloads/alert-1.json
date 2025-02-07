@@ -1,7 +1,7 @@
 {
   "name": "threshold-pageviews-daily-merge-3-15",
   "description": "Daily Threshold Alert with mergeMaxGap = 3 days and mergeMaxDuration = 15 days",
-  "cron": "0 0 5 1/1 * ? *",
+  "cron": "0 0 5 * * ? *",
   "template": {
     "nodes": [
       {
@@ -74,9 +74,9 @@
     "monitoringGranularity": "P1D",
     "timeColumn": "AUTO",
     "timeColumnFormat": "",
-    "max": "600000",
+    "max": "680000",
     "min": "250000",
     "mergeMaxGap": "P3D",
-    "mergeMaxDuration": "P15D"
+    "mergeMaxDuration": "P6D"
   }
 }

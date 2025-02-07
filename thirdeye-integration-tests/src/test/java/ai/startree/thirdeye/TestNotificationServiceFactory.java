@@ -43,11 +43,11 @@ public class TestNotificationServiceFactory implements NotificationServiceFactor
     };
   }
 
-  public int getCount() {
+  public int notificationSentCount() {
     return count;
   }
 
-  public NotificationPayloadApi getNotificationPayload() {
+  public NotificationPayloadApi lastNotificationPayload() {
     return f.get();
   }
 

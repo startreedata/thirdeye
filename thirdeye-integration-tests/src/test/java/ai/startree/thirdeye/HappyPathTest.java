@@ -419,7 +419,7 @@ public class HappyPathTest implements ITest {
     List<AnomalyApi> anomalies = List.of();
     while (anomalies.size() == 0) {
       // see taskDriver server config for optimization
-      Thread.sleep(1000);
+      Thread.sleep(500);
       final Response response = request("api/anomalies?isChild=false").get();
       assert200(response);
       anomalies = response.readEntity(ANOMALIES_LIST_TYPE);
@@ -448,7 +448,7 @@ public class HappyPathTest implements ITest {
     long newAlertLastUpdateTime = alertLastUpdateTime;
     while (newAlertLastUpdateTime == alertLastUpdateTime) {
       // see taskDriver server config for optimization
-      Thread.sleep(1000);
+      Thread.sleep(500);
       newAlertLastUpdateTime = getAlertLastUpdatedTime();
     }
     final Response response = request("api/anomalies?isChild=false").get();
@@ -595,7 +595,7 @@ public class HappyPathTest implements ITest {
     assertThat(replayResponse.getStatus()).isEqualTo(200);
 
     while (getAlertLastUpdatedTime() == lastUpdatedTime) {
-      Thread.sleep(1000);
+      Thread.sleep(500);
     }
 
     final Response afterReplayResponse = request(alertAnomaliesRoute).get();
@@ -867,7 +867,7 @@ public class HappyPathTest implements ITest {
   private void waitForAnyAnomalies(final long alertId) throws InterruptedException {
     List<AnomalyApi> gotAnomalies = mustGetAnomaliesForAlert(alertId);
     while (gotAnomalies.size() == 0) {
-      Thread.sleep(1000);
+      Thread.sleep(500);
       gotAnomalies = mustGetAnomaliesForAlert(alertId);
     }
   }

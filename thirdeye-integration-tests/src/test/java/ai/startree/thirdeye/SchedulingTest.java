@@ -38,7 +38,6 @@ import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
@@ -168,7 +167,7 @@ public class SchedulingTest {
     TaskApi onboardingTask = getTask(onboardingTaskId);
     while (TASK_PENDING_STATUSES.contains(onboardingTask.getStatus())) {
       // see taskDriver server config for optimization
-      Thread.sleep(1000);
+      Thread.sleep(500);
       onboardingTask = getTask(onboardingTaskId); 
     }
 
@@ -185,12 +184,12 @@ public class SchedulingTest {
     // not exact time should not impact lastTimestamp
     CLOCK.tick(5);
     // give thread to detectionCronScheduler and to quartz scheduler - (quartz idle time is weaved to 100 ms for test speed)
-    Thread.sleep(1000);
+    Thread.sleep(500);
 
     // wait for the new task to be created - proxy to know when the detection is triggered
     List<TaskApi> tasks = getTasks();
     while (tasks.size() == 1 || TASK_PENDING_STATUSES.contains(tasks.getLast().getStatus())) {
-      Thread.sleep(1000);
+      Thread.sleep(500);
       tasks = getTasks();
     }
      assertThat(tasks.getLast().getTaskSubType()).isEqualTo(TaskSubType.DETECTION_TRIGGERED_BY_CRON);
@@ -211,11 +210,11 @@ public class SchedulingTest {
     // not exact time should not impact lastTimestamp
     CLOCK.tick(5);
     // give thread to quartz scheduler - (quartz idle time is weaved to 1000 ms for test speed)
-    Thread.sleep(1000);
+    Thread.sleep(500);
 
     // wait for a new anomaly to be created - proxy to know when the detection has run
     while (anomalies.size() == numAnomaliesBeforeDetectionRun) {
-      Thread.sleep(1000);
+      Thread.sleep(500);
       anomalies = getAnomalies();
     }
 
@@ -226,7 +225,7 @@ public class SchedulingTest {
     // find anomalies starting on MARCH 21 - there should be 2
     final List<AnomalyApi> march21Anomalies = anomalies.stream()
         .filter(a -> a.getStartTime().getTime() == MARCH_21_2020_00H00)
-        .collect(Collectors.toList());
+        .toList();
     assertThat(march21Anomalies.size()).isEqualTo(2);
     // check that one anomaly finishes on MARCH 22: the child anomaly
     assertThat(march21Anomalies.stream()

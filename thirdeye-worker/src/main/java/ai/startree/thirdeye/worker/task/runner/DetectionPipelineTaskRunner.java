@@ -134,6 +134,7 @@ public class DetectionPipelineTaskRunner implements TaskRunner {
         .forEach(anomalyManager::save);
     alertManager.update(alert);
 
+    // TODO CYRIL - improve this log compute stats: new anomalies: child, parent, existing anomalies, child, parent
     LOG.info("Completed detection task for id {} between {} and {}. Detected {} anomalies.",
         alert.getId(),
         detectionInterval.getStart(),

@@ -39,6 +39,7 @@ import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Stream;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
@@ -131,7 +132,7 @@ public class SchedulerQuotaTest {
 
   @Test(dependsOnMethods = "testVerifyTaskQuotas")
   public void testTaskIsCreated() {
-    CLOCK.useMockTime(new DateTime(2025, 1, 1, 0, 0, 1, DateTimeZone.UTC).getMillis()); 
+    CLOCK.useMockTime(new DateTime(2025, 1, 1, 0, 0, 1, DateTimeZone.UTC).getMillis());
     // create alert that schedules every 10 seconds
     final Response response = client.request("api/alerts")
         .post(Entity.json(List.of(ALERT_API)));
@@ -143,7 +144,8 @@ public class SchedulerQuotaTest {
   public void testSubscriptionGroupIsCreated() {
     // create subscription group that notifies every 10 seconds
     final SubscriptionGroupApi subscriptionGroupApi = getSubscriptionGroupApi(
-        "testSubscriptionFirst", alertId);;
+        "testSubscriptionFirst", alertId);
+    ;
     final Response response = client.request("api/subscription-groups").post(
         Entity.json(List.of(subscriptionGroupApi)));
     assert200(response);
@@ -156,37 +158,50 @@ public class SchedulerQuotaTest {
     TaskApi task = tasks.getFirst();
     assertThat(task.getTaskType()).isEqualTo(TaskType.DETECTION);
     assertThat(task.getTaskSubType()).isEqualTo(TaskSubType.DETECTION_HISTORICAL_DATA_AFTER_CREATE);
-    
+
     // ensure the task completes
     while (task.getStatus() == TaskStatus.WAITING || task.getStatus() == TaskStatus.RUNNING) {
       task = getTasks().getFirst();
       Thread.sleep(500);
     }
     assertThat(task.getStatus()).isEqualTo(TaskStatus.COMPLETED);
-    System.out.println("First task is FINISHED CYRIL ");
   }
 
   @Test(dependsOnMethods = "testTasksAfterEntityCreation")
   public void testTasksAfterDelay() throws InterruptedException {
-    // give thread to detectionCronScheduler and notificationTaskScheduler
-    // both schedulers run every second
-    // both alert and subscription group has cron for every 10 seconds
-    for (int i = 0; i < 10; i++) {
-      CLOCK.tick(10000);
-      // give thread to detectionCronScheduler and to quartz scheduler - (quartz idle time is weaved to 100 ms for test speed)
-      Thread.sleep(1100);
+    // the registration of the quartz cron jobs for the detection and notification have not happened yet because time has not been ticked yet 
+    // the crons schedulers are configure to update the quartz cron jobs every 1 second - 
+    // tick 1 second to get the alert and subscription group quartz cron jobs created 
+    CLOCK.tick(1000);
+    // both alert and subscription group has cron for every 10 seconds - cron jobs are live but tasks should not exist yet
+    assertThat(getTasks()).hasSize(1);
+
+    // ticket by 9 seconds --> the alert and subscription should trigger
+    CLOCK.tick(9000);
+    // give thread to detectionCronScheduler and to quartz scheduler - 500 ms should be enough for task creation - quartz scheduler is notified of the clock increase
+    List<TaskApi> tasks = getTasks();
+    while (tasks.size() < 3) {
+      // FIXME ANSHUL add timeout to the tests
+      Thread.sleep(500);
+      tasks = getTasks();
     }
-    
-    // no more than 2 detection tasks and 1 notification tasks must've been scheduled
-    // due to detection quota of 2 and notification quota of 1
-    final List<TaskApi> tasks = getTasks();
-    final long detectionTasksCount = tasks.stream()
-        .filter(e -> e.getTaskType() == TaskType.DETECTION).count();
-    final long notificationTasksCount = tasks.stream()
-        .filter(e -> e.getTaskType() == TaskType.NOTIFICATION).count();
-    assertThat(detectionTasksCount).isEqualTo(2);
-    assertThat(notificationTasksCount).isEqualTo(1);
     assertThat(tasks).hasSize(3);
+    final Stream<TaskApi> detectionTasks = tasks.stream()
+        .filter(e -> e.getTaskType() == TaskType.DETECTION);
+    assertThat(detectionTasks).hasSize(2);
+    final Stream<TaskApi> notificationTasks = tasks.stream()
+        .filter(e -> e.getTaskType() == TaskType.NOTIFICATION);
+    assertThat(notificationTasks).hasSize(1);
+
+    // trigger cron schedule update again - quotas should be reached now and no new tasks should be created
+    CLOCK.tick(1001);
+
+    // ensure now new tasks are created in the next 30 seconds 
+    for (int i = 0; i < 3; i++) {
+      CLOCK.tick(10000);
+      Thread.sleep(500);
+      assertThat(getTasks()).hasSize(3);
+    }
   }
 
   @Test(dependsOnMethods = "testTasksAfterDelay")
@@ -196,7 +211,9 @@ public class SchedulerQuotaTest {
         .post(Entity.json(List.of(ALERT_API.setName("simple-threshold-pageviews-second"))));
     assert200(response);
 
+    // ensure the onboarding task is created
     final List<TaskApi> tasks = getTasks();
+    assertThat(tasks).hasSize(4);
     final TaskApi task = tasks.getLast();
     assertThat(task.getTaskType()).isEqualTo(TaskType.DETECTION);
     assertThat(task.getTaskSubType()).isEqualTo(TaskSubType.DETECTION_HISTORICAL_DATA_AFTER_CREATE);
@@ -214,20 +231,12 @@ public class SchedulerQuotaTest {
 
   @Test(dependsOnMethods = "testAnotherSubscriptionGroupIsCreated")
   public void testTasksAfterSecondDelay() throws InterruptedException {
-    // give thread to detectionCronScheduler and notificationTaskScheduler again
-    Thread.sleep(10000);
-
-    // no new task will be created except the historical after create detection type
-    // which is created through crud service flow and doesn't have quota control
-    // regular cron tasks stop creating because quota for both has already crossed
-    final List<TaskApi> tasks = getTasks();
-    final long detectionTasksCount = tasks.stream()
-        .filter(e -> e.getTaskType() == TaskType.DETECTION).count();
-    final long notificationTasksCount = tasks.stream()
-        .filter(e -> e.getTaskType() == TaskType.NOTIFICATION).count();
-    assertThat(detectionTasksCount).isEqualTo(3);
-    assertThat(notificationTasksCount).isEqualTo(1);
-    assertThat(tasks).hasSize(4);
+    // ensure now new tasks are created in the next 30 seconds 
+    for (int i = 0; i < 3; i++) {
+      CLOCK.tick(10000);
+      Thread.sleep(500);
+      assertThat(getTasks()).hasSize(4);
+    }
   }
 
   private List<TaskApi> getTasks() {

@@ -20,6 +20,8 @@
     <aspect name="ai.startree.thirdeye.aspect.DateMockAspect"/>
     <aspect name="ai.startree.thirdeye.aspect.CronTriggerImplAspect"/>
     <aspect name="ai.startree.thirdeye.aspect.QuartzRandomizedIdleWaitTimeMockAspect"/>
+    <aspect name="ai.startree.thirdeye.aspect.ExecutorsAspect"/>
+    <aspect name="ai.startree.thirdeye.aspect.LocalDateAspect"/>
     <weaver options="-showWeaveInfo">
     </weaver>
   </aspects>

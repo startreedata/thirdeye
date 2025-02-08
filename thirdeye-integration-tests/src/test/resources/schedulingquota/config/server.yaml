@@ -76,7 +76,7 @@ scheduler:
   detectionPipeline: true
   detectionAlert: true
 
-  namespaceQuotaCacheDurationSeconds: 1
+  namespaceQuotaCacheDurationSeconds: 0
 
 defaultWorkspaceConfiguration:
   timeConfiguration:

@@ -107,8 +107,8 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
     this.groupMatcher = GroupMatcher.jobGroupEquals(taskType.toString());
     this.taskManager = taskManager;
     this.namespaceConfigurationManager = namespaceConfigurationManager;
-    this.namespaceToQuotaExceededSupplier = scheduledRefreshSupplier(
-        this::getNamespaceToQuotaExceededMap, Duration.ofSeconds(namespaceQuotaCacheDurationSeconds));
+    this.namespaceToQuotaExceededSupplier = namespaceQuotaCacheDurationSeconds > 0 ? scheduledRefreshSupplier(
+        this::getNamespaceToQuotaExceededMap, Duration.ofSeconds(namespaceQuotaCacheDurationSeconds)): this::getNamespaceToQuotaExceededMap;
   }
 
   @Override

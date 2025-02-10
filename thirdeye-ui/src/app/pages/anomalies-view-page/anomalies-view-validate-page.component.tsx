@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and limitations under
  * the License.
  */
-import { Box, Button, Grid } from "@material-ui/core";
+import { Grid } from "@material-ui/core";
 import React, { FunctionComponent, useMemo } from "react";
-import { useTranslation } from "react-i18next";
 import { useOutletContext, useSearchParams } from "react-router-dom";
 import { Chart } from "../../components/anomalies-view/chart/chart.component";
 import { TimeRangeQueryStringKey } from "../../components/time-range/time-range-provider/time-range-provider.interfaces";
@@ -30,7 +29,6 @@ export const AnomaliesViewValidatePage: FunctionComponent = () => {
     const { anomaly, alertInsight } =
         useOutletContext<AnomalyViewContainerPageOutletContext>();
     const [searchParams, setSearchParams] = useSearchParams();
-    const { t } = useTranslation();
 
     // Array of strings in ISO-8601 format
     const additionalCharts: string[] = useMemo(() => {
@@ -55,24 +53,6 @@ export const AnomaliesViewValidatePage: FunctionComponent = () => {
 
         return [Number(start), Number(end)];
     }, [searchParams]);
-
-    const handleAddChartClick = (): void => {
-        const newState = [...additionalCharts];
-
-        // Use the last previous period as the new previous period
-        if (newState.length > 0) {
-            newState.push(newState[newState.length - 1]);
-        } else {
-            // Default to no offset from the start and end
-            newState.push("P1W");
-        }
-
-        searchParams.set(
-            ADDITIONAL_CHARTS_QUERY_PARAM_KEY,
-            JSON.stringify(newState)
-        );
-        setSearchParams(searchParams);
-    };
 
     const handleDeleteChartClick = (idx: number): void => {
         const removedElement = [...additionalCharts];
@@ -158,19 +138,6 @@ export const AnomaliesViewValidatePage: FunctionComponent = () => {
                         </Grid>
                     );
                 })}
-                <Grid item xs={12}>
-                    <Box textAlign="right">
-                        <Button
-                            color="primary"
-                            data-testid="add-previous-period"
-                            style={{ backgroundColor: "#FFF" }}
-                            variant="outlined"
-                            onClick={handleAddChartClick}
-                        >
-                            {t("label.add-previous-period-to-compare")}
-                        </Button>
-                    </Box>
-                </Grid>
             </Grid>
         </Grid>
     );

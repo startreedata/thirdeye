@@ -77,9 +77,9 @@ export const AnomaliesAllPage: FunctionComponent = () => {
     const anomalyFilters = useMemo(() => {
         const params: GetAnomaliesProps = {};
         if (searchParams.has(AnomalyFilterQueryStringKey.ALERT)) {
-            params.alertId = parseInt(
-                searchParams.get(AnomalyFilterQueryStringKey.ALERT) || ""
-            );
+            const alertIds =
+                searchParams.getAll(AnomalyFilterQueryStringKey.ALERT) || [];
+            params.alertIds = alertIds.map((id) => parseInt(id));
         }
 
         if (searchParams.has(AnomalyFilterQueryStringKey.DATASET)) {

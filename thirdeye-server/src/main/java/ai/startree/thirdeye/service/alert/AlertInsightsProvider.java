@@ -101,6 +101,8 @@ public class AlertInsightsProvider {
   public AlertInsightsApi getInsights(final ThirdEyePrincipal principal,
       final AlertInsightsRequestApi request) {
     final AlertApi alertApi = request.getAlert();
+    // TODO CYRIL around March 1 2025 - ensure the id of the alert is not set - only support alerts configuration - this endpoint is not responsible for fetching an existing alert - it should run a a full valid alert configuration
+
     // creating a dummy entity to check access then inject namespace - rewrite this - todo authz possible to redesign this?
     final AlertDTO alertDto = toAlertDto(alertApi);
     authorizationManager.enrichNamespace(principal, alertDto);

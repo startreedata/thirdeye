@@ -203,13 +203,6 @@ public class AlertService extends CrudService<AlertApi, AlertDTO> {
     return ApiBeanMapper.toApi(dto);
   }
 
-  public AlertInsightsApi getInsightsById(final ThirdEyeServerPrincipal principal, final Long id) {
-    final AlertDTO dto = getDto(id);
-    authorizationManager.ensureNamespace(principal, dto);
-    authorizationManager.ensureCanRead(principal, dto);
-    return alertInsightsProvider.getInsights(principal, dto);
-  }
-
   public AlertInsightsApi getInsights(final ThirdEyeServerPrincipal principal,
       final AlertInsightsRequestApi request) {
     return alertInsightsProvider.getInsights(principal, request);

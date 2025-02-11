@@ -70,7 +70,9 @@ public class ThirdEyeIntegrationTestSupport {
 
   public void tearDown() {
     log.info("Stopping Thirdeye at port: {}", support.getLocalPort());
-    support.after();
+    if (support != null) {
+      support.after(); 
+    }
     MySqlTestDatabase.cleanSharedDatabase();
   }
 

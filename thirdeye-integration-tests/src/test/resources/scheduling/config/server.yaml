@@ -69,7 +69,8 @@ scheduler:
   # Run the Quartz Scheduler.
   # Only 1 instance of scheduler should run. This responsibility is currently on the user!!
   enabled: true
-  alertUpdateDelay: 1
+  # time is mocked - made big to avoid useless work when time is advanced 
+  alertUpdateDelay: 1000
 
   detectionPipeline: true
   detectionAlert: true

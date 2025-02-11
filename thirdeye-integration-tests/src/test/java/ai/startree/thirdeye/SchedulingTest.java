@@ -183,8 +183,6 @@ public class SchedulingTest {
     CLOCK.useMockTime(MARCH_25_2020_05H00);
     // not exact time should not impact lastTimestamp
     CLOCK.tick(5);
-    // give thread to detectionCronScheduler and to quartz scheduler - (quartz idle time is weaved to 100 ms for test speed)
-    Thread.sleep(500);
 
     // wait for the new task to be created - proxy to know when the detection is triggered
     List<TaskApi> tasks = getTasks();
@@ -209,8 +207,6 @@ public class SchedulingTest {
     CLOCK.useMockTime(MARCH_26_2020_05H00);
     // not exact time should not impact lastTimestamp
     CLOCK.tick(5);
-    // give thread to quartz scheduler - (quartz idle time is weaved to 1000 ms for test speed)
-    Thread.sleep(500);
 
     // wait for a new anomaly to be created - proxy to know when the detection has run
     while (anomalies.size() == numAnomaliesBeforeDetectionRun) {

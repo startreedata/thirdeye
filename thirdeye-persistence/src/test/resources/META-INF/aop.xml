@@ -16,7 +16,6 @@
 <aspectj>
   <aspects>
     <aspect name="ai.startree.thirdeye.aspect.SystemTimeMockAspect"/>
-    <aspect name="ai.startree.thirdeye.aspect.NanoTimeAspect"/>
     <aspect name="ai.startree.thirdeye.aspect.DateMockAspect"/>
     <aspect name="ai.startree.thirdeye.aspect.CronTriggerImplAspect"/>
     <aspect name="ai.startree.thirdeye.aspect.QuartzRandomizedIdleWaitTimeMockAspect"/>

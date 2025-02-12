@@ -14,7 +14,6 @@
 package ai.startree.thirdeye.aspect;
 
 import ai.startree.thirdeye.aspect.utils.DeterministicScheduler;
-import java.util.concurrent.ScheduledExecutorService;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -31,11 +30,35 @@ public class ExecutorsAspect {
   void newSingleThreadScheduledExecutor() {
   }
 
-  @Around("newSingleThreadScheduledExecutor()")
-  public ScheduledExecutorService disableUpdateAfterMisfire(ProceedingJoinPoint pjp) throws Throwable {
-    LOG.debug("CYRIL - Mocking the scheduled executor.");
-    final DeterministicScheduler deterministicScheduler = new DeterministicScheduler();
-    TimeProvider.registerScheduler(deterministicScheduler);
-    return deterministicScheduler;
+  @Pointcut("call(public static java.util.concurrent.ScheduledExecutorService java.util.concurrent.Executors.newScheduledThreadPool(..))")
+  void newScheduledThreadPool() {
+  }
+
+  // most ScheduledExecutorServices are created around the start of the application
+  // make sure to mock the time before creating the test support to enable this 
+  @Around("newSingleThreadScheduledExecutor() || newScheduledThreadPool()")
+  public Object deterministicScheduler(ProceedingJoinPoint pjp) throws Throwable {
+    if (TimeProvider.instance().isTimedMocked()) {
+      LOG.warn("Time is mocked - Mocking scheduled executor.");
+      final DeterministicScheduler deterministicScheduler = new DeterministicScheduler();
+      TimeProvider.registerScheduler(deterministicScheduler);
+      return deterministicScheduler;
+    }
+    
+    return pjp.proceed();
+  }
+  
+  @Pointcut("call(public static * ai.startree.thirdeye.spi.util.MetricsUtils.scheduledRefreshSupplier(..))")
+  void scheduledRefreshSupplier() {
+  }
+  
+  @Around("scheduledRefreshSupplier()")
+  public Object scheduledRefresh(ProceedingJoinPoint pjp) throws Throwable {
+    if (TimeProvider.instance().isTimedMocked()) {
+      LOG.warn("Time is mocked - Mocking the scheduledRefreshSupplier to not cache and not schedule.");
+      return pjp.getArgs()[0];
+    }
+
+    return pjp.proceed();
   }
 }

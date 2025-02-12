@@ -18,6 +18,13 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 
+/**
+ * Note about nanoTime: 
+ * Mocking System.nanoTime is most likely not a good idea because it is used in complex codepaths 
+ * related to futures and threading. Mocking it correctly and anticipating all side effects is tricky.
+ * Please mock higher level methods.
+ * For instance, try to mock the method that is using nanoTime instead of nanoTime itself.
+ **/
 @Aspect
 public class SystemTimeMockAspect {
 

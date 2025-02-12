@@ -75,8 +75,10 @@ scheduler:
 
   detectionPipeline: true
   detectionAlert: true
-
-  namespaceQuotaCacheDurationSeconds: 0
+  
+  # disable task clean up 
+  taskCleanUp:
+    intervalInMinutes: 0
 
 defaultWorkspaceConfiguration:
   timeConfiguration:

@@ -85,6 +85,8 @@ public class SchedulerQuotaTest {
   public void beforeClass() throws Exception {
     // ensure time is controlled via the TimeProvider CLOCK - ie weaving is working correctly
     assertThat(CLOCK.isTimeMockWorking()).isTrue();
+    // mock time before the support is created to mock time in the ScheduledExecutors 
+    CLOCK.useMockTime(new DateTime(2025, 1, 1, 0, 0, 1, DateTimeZone.UTC).getMillis());
 
     support.setup();
     pinotDataSourceApi = support.getPinotDataSourceApi();
@@ -132,7 +134,7 @@ public class SchedulerQuotaTest {
 
   @Test(dependsOnMethods = "testVerifyTaskQuotas")
   public void testTaskIsCreated() {
-    CLOCK.useMockTime(new DateTime(2025, 1, 1, 0, 0, 1, DateTimeZone.UTC).getMillis());
+    // current time is 2025/1/1 00:00:01
     // create alert that schedules every 10 seconds
     final Response response = client.request("api/alerts")
         .post(Entity.json(List.of(ALERT_API)));

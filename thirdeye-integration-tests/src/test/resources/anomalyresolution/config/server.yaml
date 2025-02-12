@@ -76,9 +76,9 @@ scheduler:
   detectionPipeline: true
   detectionAlert: true
   
-  # disable task clean up by making the interval big - FIXME CYRIL introduce special value 0 instead
+  # disable task clean up 
   taskCleanUp:
-    intervalInMinutes: 2147483647
+    intervalInMinutes: 0
 
 ui:
   externalUrl: http://localhost:7004

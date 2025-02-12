@@ -99,6 +99,8 @@ public class SchedulingTest {
   public void beforeClass() throws Exception {
     // ensure time is controlled via the TimeProvider CLOCK - ie weaving is working correctly
     assertThat(CLOCK.isTimeMockWorking()).isTrue();
+    // mock time before support creation to mock time in ScheduledExecutors
+    CLOCK.useMockTime(MARCH_24_2020_15H33);
 
     support.setup();
     pinotDataSourceApi = support.getPinotDataSourceApi();
@@ -134,8 +136,7 @@ public class SchedulingTest {
 
   @Test(dependsOnMethods = "setUpData")
   public void testCreateAlertLastTimestamp() {
-    // fix clock : time is now controlled manually
-    CLOCK.useMockTime(MARCH_24_2020_15H33);
+    // current time is  MARCH_24_2020_15H33
 
     final Response createResponse = client.request("api/alerts")
         .post(Entity.json(List.of(ALERT_API)));

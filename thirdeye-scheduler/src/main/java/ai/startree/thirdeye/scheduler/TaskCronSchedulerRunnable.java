@@ -107,8 +107,9 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
     this.groupMatcher = GroupMatcher.jobGroupEquals(taskType.toString());
     this.taskManager = taskManager;
     this.namespaceConfigurationManager = namespaceConfigurationManager;
-    this.namespaceToQuotaExceededSupplier = namespaceQuotaCacheDurationSeconds > 0 ? scheduledRefreshSupplier(
-        this::getNamespaceToQuotaExceededMap, Duration.ofSeconds(namespaceQuotaCacheDurationSeconds)): this::getNamespaceToQuotaExceededMap;
+    this.namespaceToQuotaExceededSupplier = scheduledRefreshSupplier(
+        this::getNamespaceToQuotaExceededMap,
+        Duration.ofSeconds(namespaceQuotaCacheDurationSeconds));
   }
 
   @Override
@@ -152,10 +153,13 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
               entityName, id, taskType);
           stopJob(jobKey);
         } else if (!isActive(entity)) {
-          log.info("{} with id {} is deactivated. Stopping the scheduled {} job.", entityName, id, taskType);
+          log.info("{} with id {} is deactivated. Stopping the scheduled {} job.", entityName, id,
+              taskType);
           stopJob(jobKey);
-        } else if (cachedNamespaceToQuotaExceeded.getOrDefault(nonNullNamespace(entity.namespace()), false)) {
-          log.info("workspace {} corresponding to {} with id {} has exceeded monthly quota. Stopping scheduled {} job.",
+        } else if (cachedNamespaceToQuotaExceeded.getOrDefault(nonNullNamespace(entity.namespace()),
+            false)) {
+          log.info(
+              "workspace {} corresponding to {} with id {} has exceeded monthly quota. Stopping scheduled {} job.",
               nonNullNamespace(entity.namespace()), entityName, id, taskType);
           stopJob(jobKey);
         }
@@ -194,7 +198,9 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
   }
 
   private long getTasksCountForNamespace(final String namespace) {
-    final LocalDateTime startOfMonth = LocalDate.now(ZoneOffset.UTC).withDayOfMonth(1).atStartOfDay();
+    final LocalDateTime startOfMonth = LocalDate.now(ZoneOffset.UTC)
+        .withDayOfMonth(1)
+        .atStartOfDay();
     final Predicate predicate = Predicate.AND(
         Predicate.EQ("namespace", namespace),
         Predicate.EQ("type", taskType),
@@ -212,7 +218,8 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
 
     final String entityNamespace = nonNullNamespace(entity.namespace());
     if (namespaceToQuotaExceededMap.getOrDefault(entityNamespace, false)) {
-      log.info("workspace {} corresponding to {} with id {} has exceeded monthly quota. Skipping scheduling {} job.",
+      log.info(
+          "workspace {} corresponding to {} with id {} has exceeded monthly quota. Skipping scheduling {} job.",
           entityNamespace, entityName, entity.getId(), taskType);
       return;
     }
@@ -250,7 +257,9 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
 
   private void stopJob(final JobKey jobKey) throws SchedulerException {
     if (!scheduler.checkExists(jobKey)) {
-      log.error("Could not find job to delete {}, {} in the job scheduler. This should never happen. Please reach out to StarTree support.", jobKey.getName(), jobKey.getGroup());
+      log.error(
+          "Could not find job to delete {}, {} in the job scheduler. This should never happen. Please reach out to StarTree support.",
+          jobKey.getName(), jobKey.getGroup());
     }
     scheduler.deleteJob(jobKey);
     log.info("Stopped {} job {}", taskType, jobKey.getName());
@@ -262,7 +271,7 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
     checkArgument(maxTriggersPerMinute <= cronMaxTriggersPerMinute,
         "Attempting to schedule a %s job for %s %s that can trigger up to %s times per minute. The limit is %s. Please update the cron %s",
         taskType,
-        entityName, 
+        entityName,
         config.getId(),
         maxTriggersPerMinute, cronMaxTriggersPerMinute, cron
     );
@@ -273,7 +282,7 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
         .withSchedule(cronScheduleBuilder)
         .build();
   }
-  
+
   private boolean isActive(final E entity) {
     return isActiveGetter.isActive(entity);
   }
@@ -285,12 +294,14 @@ public class TaskCronSchedulerRunnable<E extends AbstractDTO> implements Runnabl
   private String cronOf(final E entity) {
     return cronGetter.getCron(entity);
   }
-  
+
   public interface CronGetter<E extends AbstractDTO> {
+
     String getCron(final E entity);
   }
 
   public interface isActiveGetter<E extends AbstractDTO> {
+
     boolean isActive(final E entity);
   }
 }

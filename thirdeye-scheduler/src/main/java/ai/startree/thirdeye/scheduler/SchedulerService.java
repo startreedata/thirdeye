@@ -122,11 +122,14 @@ public class SchedulerService implements Managed {
 
     // schedule task maintenance operations
     final TaskCleanUpConfiguration taskCleanUpConfiguration = config.getTaskCleanUpConfiguration();
-    oldTasksExecutorService.scheduleWithFixedDelay(this::purgeOldTasks,
-        1,
-        taskCleanUpConfiguration.getIntervalInMinutes(),
-        TimeUnit.MINUTES);
-    if (taskDriverConfiguration.isRandomWorkerIdEnabled()) {
+    if (taskCleanUpConfiguration.getIntervalInMinutes() > 0) {
+      oldTasksExecutorService.scheduleWithFixedDelay(this::purgeOldTasks,
+          1,
+          taskCleanUpConfiguration.getIntervalInMinutes(),
+          TimeUnit.MINUTES);
+    }
+    
+    if (taskDriverConfiguration.isRandomWorkerIdEnabled() && taskCleanUpConfiguration.getOrphanIntervalInSeconds() > 0) {
       orphanTasksExecutorService.scheduleWithFixedDelay(this::handleOrphanTasks,
           0,
           taskCleanUpConfiguration.getOrphanIntervalInSeconds(),

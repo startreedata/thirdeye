@@ -69,11 +69,16 @@ scheduler:
   # Run the Quartz Scheduler.
   # Only 1 instance of scheduler should run. This responsibility is currently on the user!!
   enabled: true
-  alertUpdateDelay: 1
-  subscriptionGroupUpdateDelay: 1
+  # cron job update every 12 hours is enough for the simulated scenario
+  alertUpdateDelay: 43200
+  subscriptionGroupUpdateDelay: 43200
 
   detectionPipeline: true
   detectionAlert: true
+  
+  # disable task clean up by making the interval big - FIXME CYRIL introduce special value 0 instead
+  taskCleanUp:
+    intervalInMinutes: 2147483647
 
 ui:
   externalUrl: http://localhost:7004

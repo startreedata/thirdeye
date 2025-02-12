@@ -107,8 +107,8 @@ public class SchedulingTest {
 
   @AfterClass(alwaysRun = true)
   public void afterClass() {
-    CLOCK.useSystemTime();
     support.tearDown();
+    CLOCK.useSystemTime();
   }
 
   @Test

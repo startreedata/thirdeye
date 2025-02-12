@@ -93,8 +93,8 @@ public class SchedulerQuotaTest {
 
   @AfterClass(alwaysRun = true)
   public void afterClass() {
-    CLOCK.useSystemTime();
     support.tearDown();
+    CLOCK.useSystemTime();
   }
 
   @Test

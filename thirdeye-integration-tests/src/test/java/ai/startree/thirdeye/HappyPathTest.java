@@ -40,6 +40,7 @@ import ai.startree.thirdeye.plugins.postprocessor.AnomalyMergerPostProcessor;
 import ai.startree.thirdeye.spi.api.AlertApi;
 import ai.startree.thirdeye.spi.api.AlertEvaluationApi;
 import ai.startree.thirdeye.spi.api.AlertInsightsApi;
+import ai.startree.thirdeye.spi.api.AlertInsightsRequestApi;
 import ai.startree.thirdeye.spi.api.AlertTemplateApi;
 import ai.startree.thirdeye.spi.api.AnomalyApi;
 import ai.startree.thirdeye.spi.api.AnomalyFeedbackApi;
@@ -176,6 +177,7 @@ public class HappyPathTest implements ITest {
   private long anomalyId;
   private long alertLastUpdateTime;
   private long alertId;
+  private AlertApi alertApi;
   private long namespaceConfigurationId;
 
   @BeforeClass
@@ -335,7 +337,8 @@ public class HappyPathTest implements ITest {
 
     assert200(response);
     final List<AlertApi> alerts = response.readEntity(ALERT_LIST_TYPE);
-    alertId = alerts.getFirst().getId();
+    alertApi = alerts.getFirst();
+    alertId = alertApi.getId();
     UPDATE_ALERT_API.setId(alertId);
   }
 
@@ -387,8 +390,24 @@ public class HappyPathTest implements ITest {
   }
 
   @Test(dependsOnMethods = "testCreateAlert")
-  public void testAlertInsights() {
-    final Response response = request("api/alerts/" + alertId + "/insights").get();
+  public void testAlertInsightsWithId() {
+    final AlertApi alertApi = new AlertApi().setId(alertId);
+    final Response response = request("api/alerts/insights").post(
+        Entity.json(new AlertInsightsRequestApi().setAlert(alertApi)));
+    assert200(response);
+    final AlertInsightsApi insights = response.readEntity(AlertInsightsApi.class);
+    assertThat(insights.getTemplateWithProperties().getMetadata().getGranularity()).isEqualTo(
+        "P1D");
+    assertThat(insights.getDefaultStartTime()).isEqualTo(PAGEVIEWS_DATASET_START_TIME_PLUS_ONE_DAY);
+    assertThat(insights.getDefaultEndTime()).isEqualTo(PAGEVIEWS_DATASET_END_TIME_PLUS_ONE_DAY);
+    assertThat(insights.getDatasetStartTime()).isEqualTo(PAGEVIEWS_DATASET_START_TIME);
+    assertThat(insights.getDatasetEndTime()).isEqualTo(PAGEVIEWS_DATASET_END_TIME);
+  }
+
+  @Test(dependsOnMethods = "testCreateAlert")
+  public void testAlertInsightsWithoutId() {
+    final Response response = request("api/alerts/insights").post(
+        Entity.json(new AlertInsightsRequestApi().setAlert(alertApi)));
     assert200(response);
     final AlertInsightsApi insights = response.readEntity(AlertInsightsApi.class);
     assertThat(insights.getTemplateWithProperties().getMetadata().getGranularity()).isEqualTo(

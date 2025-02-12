@@ -17,9 +17,12 @@ import static ai.startree.thirdeye.ResourceUtils.ensureExists;
 import static ai.startree.thirdeye.mapper.ApiBeanMapper.toAlertDto;
 import static ai.startree.thirdeye.mapper.ApiBeanMapper.toAlertTemplateApi;
 import static ai.startree.thirdeye.spi.Constants.UTC_TIMEZONE;
+import static ai.startree.thirdeye.spi.ThirdEyeException.checkThirdEye;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_ALERT_INSIGHTS;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_DATASET_NOT_FOUND_IN_NAMESPACE;
 import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_CONFIGURATION_FIELD;
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_MISSING_ID;
+import static ai.startree.thirdeye.spi.ThirdEyeStatus.ERR_OBJECT_DOES_NOT_EXIST;
 import static ai.startree.thirdeye.spi.util.AlertMetadataUtils.getDelay;
 import static ai.startree.thirdeye.spi.util.AlertMetadataUtils.getGranularity;
 import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
@@ -38,6 +41,7 @@ import ai.startree.thirdeye.spi.api.AlertInsightsRequestApi;
 import ai.startree.thirdeye.spi.api.AnalysisRunInfo;
 import ai.startree.thirdeye.spi.api.AuthorizationConfigurationApi;
 import ai.startree.thirdeye.spi.auth.ThirdEyePrincipal;
+import ai.startree.thirdeye.spi.datalayer.bao.AlertManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DataSourceManager;
 import ai.startree.thirdeye.spi.datalayer.bao.DatasetConfigManager;
 import ai.startree.thirdeye.spi.datalayer.dto.AlertDTO;
@@ -84,27 +88,33 @@ public class AlertInsightsProvider {
   private final DatasetConfigManager datasetConfigManager;
   private final DataSourceManager dataSourceDao;
   private final MinMaxTimeLoader minMaxTimeLoader;
-  final AuthorizationManager authorizationManager;
+  private final AuthorizationManager authorizationManager;
+  private final AlertManager alertManager;
 
   @Inject
   public AlertInsightsProvider(final AlertTemplateRenderer alertTemplateRenderer,
       final DatasetConfigManager datasetConfigManager, final DataSourceManager dataSourceManager,
       final MinMaxTimeLoader minMaxTimeLoader,
-      final AuthorizationManager authorizationManager) {
+      final AuthorizationManager authorizationManager,
+      final AlertManager alertManager) {
     this.alertTemplateRenderer = alertTemplateRenderer;
     this.datasetConfigManager = datasetConfigManager;
     this.dataSourceDao = dataSourceManager;
     this.minMaxTimeLoader = minMaxTimeLoader;
     this.authorizationManager = authorizationManager;
+    this.alertManager = alertManager;
   }
 
   public AlertInsightsApi getInsights(final ThirdEyePrincipal principal,
       final AlertInsightsRequestApi request) {
     final AlertApi alertApi = request.getAlert();
-    // TODO CYRIL around March 1 2025 - ensure the id of the alert is not set - only support alerts configuration - this endpoint is not responsible for fetching an existing alert - it should run a a full valid alert configuration
-
-    // creating a dummy entity to check access then inject namespace - rewrite this - todo authz possible to redesign this?
-    final AlertDTO alertDto = toAlertDto(alertApi);
+    final AlertDTO alertDto;
+    if (alertApi.getId() != null) {
+      alertDto = alertManager.findById(alertApi.getId());
+      checkThirdEye(alertDto != null, ERR_OBJECT_DOES_NOT_EXIST, "alert not found for id: " + alertApi.getId());
+    } else {
+      alertDto = toAlertDto(alertApi);
+    }
     authorizationManager.enrichNamespace(principal, alertDto);
     authorizationManager.ensureCanRead(principal, alertDto);
     alertApi.setAuth(new AuthorizationConfigurationApi().setNamespace(alertDto.namespace()));

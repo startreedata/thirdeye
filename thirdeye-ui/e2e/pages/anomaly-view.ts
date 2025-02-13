@@ -195,9 +195,7 @@ export class AnomalyViewPage extends BasePage {
     async checkConfirmAnomalyActions() {
         await expect(
             this.page.getByTestId("feedback-collector-text")
-        ).toHaveText(
-            "Confirm anomalyCompare with previous time period to confirm this is an anomaly"
-        );
+        ).toHaveText("Confirm anomaly");
         await expect(this.page.getByTestId("not-an-anomaly")).toHaveText(
             "No, this is not an anomaly"
         );
@@ -206,9 +204,6 @@ export class AnomalyViewPage extends BasePage {
         );
         await expect(this.page.getByTestId("investigate-anomaly")).toHaveText(
             "Investigate Anomaly"
-        );
-        await expect(this.page.getByTestId("add-previous-period")).toHaveText(
-            "Add previous period to compare"
         );
     }
 }

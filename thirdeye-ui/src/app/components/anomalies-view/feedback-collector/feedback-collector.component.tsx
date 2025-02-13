@@ -52,11 +52,6 @@ export const FeedbackCollector: FunctionComponent<FeedbackCollectorProps> = ({
                     <Typography variant="h4">
                         {t("label.confirm-anomaly")}
                     </Typography>
-                    <Typography variant="body1">
-                        {t(
-                            "message.compare-with-previous-time-period-to-confirm-this"
-                        )}
-                    </Typography>
                 </Grid>
                 <Grid
                     item

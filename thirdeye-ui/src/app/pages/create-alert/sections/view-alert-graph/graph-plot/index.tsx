@@ -208,8 +208,8 @@ export const GraphPlot = (): JSX.Element => {
                 alert={workingAlert as EditableAlert}
                 alertEvaluation={workingAlertEvaluation as AlertEvaluation}
                 dateRange={{
-                    startTime: alertInsight!.datasetStartTime!,
-                    endTime: alertInsight!.datasetEndTime!,
+                    startTime: alertInsight!.defaultStartTime!,
+                    endTime: alertInsight!.defaultEndTime!,
                     timezone: determineTimezoneFromAlertInEvaluation(
                         alertInsight?.templateWithProperties
                     )!,

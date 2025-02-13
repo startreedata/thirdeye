@@ -128,8 +128,8 @@ export const SelectGranularity = (): JSX.Element => {
                 if (newAlertInsight) {
                     setAlertInsight(newAlertInsight);
                     setSelectedTimeRange({
-                        startTime: newAlertInsight.datasetStartTime,
-                        endTime: newAlertInsight.datasetEndTime,
+                        startTime: newAlertInsight.defaultStartTime,
+                        endTime: newAlertInsight.defaultEndTime,
                     });
                 }
                 setWorkingAlert(workingAlertUpdated);

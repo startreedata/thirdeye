@@ -129,8 +129,8 @@ export const SelectDetection = (): JSX.Element => {
                 if (updatedAlertInsight) {
                     setAlertInsight(updatedAlertInsight);
                     setSelectedTimeRange({
-                        startTime: updatedAlertInsight.datasetStartTime,
-                        endTime: updatedAlertInsight.datasetEndTime,
+                        startTime: updatedAlertInsight.defaultStartTime,
+                        endTime: updatedAlertInsight.defaultEndTime,
                     });
                 }
             }

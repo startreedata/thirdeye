@@ -35,6 +35,7 @@ export const getAnomaly = async (id: number): Promise<Anomaly> => {
 
 export const getAnomalies = async ({
     alertId,
+    alertIds,
     startTime,
     endTime,
     dataset,
@@ -46,6 +47,9 @@ export const getAnomalies = async ({
 
     if (alertId) {
         queryParams.set("alert.id", alertId.toString());
+    }
+    if (alertIds) {
+        queryParams.set("alert.id", `[in]${alertIds.join(",")}`);
     }
 
     if (startTime) {

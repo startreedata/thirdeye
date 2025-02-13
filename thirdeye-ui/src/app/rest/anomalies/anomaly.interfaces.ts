@@ -32,6 +32,7 @@ export interface GetAnomalies extends ActionHook {
 
 export interface GetAnomaliesProps {
     alertId?: number | string;
+    alertIds?: number[] | string[];
     startTime?: number;
     endTime?: number;
     dataset?: string;

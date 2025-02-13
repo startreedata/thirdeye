@@ -14,7 +14,13 @@
  */
 // external
 import React, { useEffect } from "react";
-import { Box, Button, Grid, TextareaAutosize } from "@material-ui/core";
+import {
+    Box,
+    Button,
+    CircularProgress,
+    Grid,
+    TextareaAutosize,
+} from "@material-ui/core";
 import { useTranslation } from "react-i18next";
 
 // styles
@@ -39,6 +45,7 @@ import {
     NotificationTypeV1,
     useNotificationProviderV1,
 } from "../../../../../../platform/components";
+import { ActionStatus } from "../../../../../../rest/actions.interfaces";
 
 const ALERT_TEMPLATE_FOR_EVALUATE_QUERY_DX = "startree-threshold-query-dx";
 
@@ -164,7 +171,20 @@ export const SqlQueryView = (): JSX.Element => {
                             justifyContent="space-between"
                         >
                             <Button
+                                disabled={
+                                    apiState.evaluationState?.status ===
+                                    ActionStatus.Working
+                                }
                                 size="small"
+                                startIcon={
+                                    apiState.evaluationState?.status ===
+                                    ActionStatus.Working ? (
+                                        <CircularProgress
+                                            color="inherit"
+                                            size={20}
+                                        />
+                                    ) : null
+                                }
                                 variant="contained"
                                 onClick={() => handleRunEnumerations()}
                             >

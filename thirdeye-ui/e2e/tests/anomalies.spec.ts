@@ -21,6 +21,8 @@ test("Investigate Anomaly", async ({ page }) => {
     await alertDetailsPage.resolveApis();
     await alertDetailsPage.checkHeader();
     await alertDetailsPage.openFirstAlert();
+    await alertDetailsPage.resolveDetailsPageApis();
+    await page.waitForTimeout(1000);
     await alertDetailsPage.checkAlertHeader();
     const anomalyDisabled = await alertDetailsPage.checkAnomaliesCount();
     if (anomalyDisabled) {

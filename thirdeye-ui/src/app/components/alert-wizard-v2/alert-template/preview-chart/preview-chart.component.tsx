@@ -13,7 +13,7 @@
  * the License.
  */
 import { Box } from "@material-ui/core";
-import { isEqual } from "lodash";
+import { cloneDeep, isEqual } from "lodash";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
@@ -154,9 +154,12 @@ export const PreviewChart: FunctionComponent<PreviewChartProps> = ({
     const handleAutoRangeClick = (): void => {
         if (
             getAlertInsightStatus === ActionStatus.Initial ||
-            getAlertInsightStatus === ActionStatus.Error
+            getAlertInsightStatus === ActionStatus.Error ||
+            !isEqual(alertForCurrentEvaluation, alert)
         ) {
-            getAlertInsight({ alert }).then(
+            const copiedAlert = cloneDeep(alert);
+            delete copiedAlert.id;
+            getAlertInsight({ alert: copiedAlert }).then(
                 (insights) => {
                     if (insights) {
                         searchParams.set(

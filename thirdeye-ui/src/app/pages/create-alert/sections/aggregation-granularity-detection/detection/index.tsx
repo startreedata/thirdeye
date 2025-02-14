@@ -48,6 +48,7 @@ import { MultipleDimensionView } from "./multiple-dimension";
 // utils
 import { defaultStartingAlert, getWorkingAlert } from "../../../utils";
 import { notifyIfErrors } from "../../../../../utils/notifications/notifications.util";
+import { ActionStatus } from "../../../../../rest/actions.interfaces";
 
 export const SelectDetection = (): JSX.Element => {
     const { t } = useTranslation();
@@ -100,6 +101,13 @@ export const SelectDetection = (): JSX.Element => {
     const handleAnomalyDetectionChange = async (
         item: string
     ): Promise<void> => {
+        setApiState({
+            ...apiState,
+            alertRecommedationState: {
+                ...apiState.alertRecommedationState,
+                status: ActionStatus.Working,
+            },
+        });
         setAnomalyDetectionType(item);
         let updatedAlert = workingAlert;
         if (item === AnomalyDetectionOptions.SINGLE) {
@@ -137,12 +145,26 @@ export const SelectDetection = (): JSX.Element => {
             getAlertRecommendation(workingAlert as EditableAlert)
                 .then((recommendations) => {
                     setAlertRecommendations(recommendations);
+                    setApiState({
+                        ...apiState,
+                        alertRecommedationState: {
+                            ...apiState.alertRecommedationState,
+                            status: ActionStatus.Done,
+                        },
+                    });
                 })
                 .catch(() => {
                     notify(
                         NotificationTypeV1.Error,
                         t("errors.could-not-compute-detection-recommendations")
                     );
+                    setApiState({
+                        ...apiState,
+                        alertRecommedationState: {
+                            ...apiState.alertRecommedationState,
+                            status: ActionStatus.Error,
+                        },
+                    });
                 });
             const start = updatedAlertInsight?.defaultStartTime;
             const end = updatedAlertInsight?.defaultEndTime;

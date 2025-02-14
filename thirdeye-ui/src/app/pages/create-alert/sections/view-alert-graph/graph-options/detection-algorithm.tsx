@@ -54,6 +54,7 @@ import { EditableAlert } from "../../../../../rest/dto/alert.interfaces";
 
 // apis
 import { useGetEvaluation } from "../../../../../rest/alerts/alerts.actions";
+import { ActionStatus } from "../../../../../rest/actions.interfaces";
 
 export const DetectionAlgorithms = (): JSX.Element => {
     const { t } = useTranslation();
@@ -80,7 +81,10 @@ export const DetectionAlgorithms = (): JSX.Element => {
         apiState,
         setApiState,
     } = useCreateAlertStore();
-    const isGetAlertRecommendationLoading = false;
+    const isGetAlertRecommendationLoading =
+        apiState.alertRecommedationState?.status === ActionStatus.Working;
+    const errorFetchingAlertRecommendation =
+        apiState.alertRecommedationState?.status === ActionStatus.Error;
     const { evaluation, getEvaluation, status, errorMessages } =
         useGetEvaluation();
     useEffect(() => {
@@ -206,6 +210,53 @@ export const DetectionAlgorithms = (): JSX.Element => {
         setWorkingAlert(clonedAlert);
     };
 
+    const getCmputationProgressView = (): JSX.Element => {
+        if (isGetAlertRecommendationLoading) {
+            return (
+                <Box display="flex">
+                    <CircularProgress color="primary" size={15} />
+                    <Typography style={{ marginLeft: "4px" }} variant="caption">
+                        {t("label.computing-detection-recommendations")}
+                    </Typography>
+                </Box>
+            );
+        }
+        if (!isEmpty(alertRecommendations)) {
+            return (
+                <Box alignItems="center" display="flex">
+                    <CheckCircle className={componentStyles.checkCircleIcon} />
+                    <Typography
+                        className={
+                            componentStyles.detectionRecommendationsReadyText
+                        }
+                        variant="caption"
+                    >
+                        {t("label.detection-recommendations-ready")}
+                    </Typography>
+                </Box>
+            );
+        }
+        if (errorFetchingAlertRecommendation) {
+            return (
+                <Box alignItems="center" display="flex">
+                    <Cancel className={componentStyles.cancelIcon} />
+                    <Typography
+                        className={
+                            componentStyles.detectionRecommendationsFailedText
+                        }
+                        variant="caption"
+                    >
+                        {t(
+                            "errors.could-not-compute-detection-recommendations"
+                        )}
+                    </Typography>
+                </Box>
+            );
+        }
+
+        return <></>;
+    };
+
     return (
         <InputSectionV2
             inputComponent={
@@ -270,49 +321,7 @@ export const DetectionAlgorithms = (): JSX.Element => {
                             componentStyles.detectionRecommendationsContainer
                         }
                     >
-                        {isGetAlertRecommendationLoading ? (
-                            <Box display="flex">
-                                <CircularProgress color="primary" size={15} />
-                                <Typography
-                                    style={{ marginLeft: "4px" }}
-                                    variant="caption"
-                                >
-                                    {t(
-                                        "label.computing-detection-recommendations"
-                                    )}
-                                </Typography>
-                            </Box>
-                        ) : !isEmpty(alertRecommendations) ? (
-                            <Box alignItems="center" display="flex">
-                                <CheckCircle
-                                    className={componentStyles.checkCircleIcon}
-                                />
-                                <Typography
-                                    className={
-                                        componentStyles.detectionRecommendationsReadyText
-                                    }
-                                    variant="caption"
-                                >
-                                    {t("label.detection-recommendations-ready")}
-                                </Typography>
-                            </Box>
-                        ) : (
-                            <Box alignItems="center" display="flex">
-                                <Cancel
-                                    className={componentStyles.cancelIcon}
-                                />
-                                <Typography
-                                    className={
-                                        componentStyles.detectionRecommendationsFailedText
-                                    }
-                                    variant="caption"
-                                >
-                                    {t(
-                                        "errors.could-not-compute-detection-recommendations"
-                                    )}
-                                </Typography>
-                            </Box>
-                        )}
+                        {getCmputationProgressView()}
                     </Box>
                 </Box>
             }

@@ -39,6 +39,7 @@ type RequestState = { status?: ActionStatus; errorMessages?: ErrorMessage[] };
 type ApiState = {
     evaluationState: RequestState | null;
     insightState: RequestState | null;
+    alertRecommedationState: RequestState | null;
 };
 
 export type MultipleDimensionEnumeratorOptions =
@@ -112,6 +113,7 @@ export const useCreateAlertStore = create<CreateAlertStore>((set) => ({
     apiState: {
         evaluationState: null,
         insightState: null,
+        alertRecommedationState: null,
     },
     alertTemplates: null,
     selectedDataset: null,
@@ -157,6 +159,7 @@ export const useCreateAlertStore = create<CreateAlertStore>((set) => ({
             granularity: undefined,
             anomalyDetectionType: null,
             workingAlert: {},
+            alertRecommendations: null,
             selectedDetectionAlgorithm: null,
             enumeratorQuery: "",
             selectedEnumerationItems: null,
@@ -170,6 +173,7 @@ export const useCreateAlertStore = create<CreateAlertStore>((set) => ({
             editedDatasourceFieldValue: "",
             anomalyDetectionType: null,
             workingAlert: {},
+            alertRecommendations: null,
             selectedDetectionAlgorithm: null,
             enumeratorQuery: "",
             selectedEnumerationItems: null,
@@ -181,6 +185,7 @@ export const useCreateAlertStore = create<CreateAlertStore>((set) => ({
             granularity: undefined,
             anomalyDetectionType: null,
             workingAlert: {},
+            alertRecommendations: null,
             selectedDetectionAlgorithm: null,
             enumeratorQuery: "",
             selectedEnumerationItems: null,
@@ -192,12 +197,14 @@ export const useCreateAlertStore = create<CreateAlertStore>((set) => ({
             anomalyDetectionType: null,
             selectedDetectionAlgorithm: null,
             enumeratorQuery: "",
+            alertRecommendations: null,
             selectedEnumerationItems: null,
             workingAlertEvaluation: null,
         }),
     setQueryFilters: (queryFilters: string) =>
         set({
             queryFilters: queryFilters,
+            alertRecommendations: null,
             selectedDetectionAlgorithm: null,
             enumeratorQuery: "",
         }),
@@ -213,6 +220,7 @@ export const useCreateAlertStore = create<CreateAlertStore>((set) => ({
             anomalyDetectionType: anomalyDetectionType,
             multipleDimensionEnumeratorType: null,
             enumeratorQuery: "",
+            alertRecommendations: null,
             selectedDetectionAlgorithm: null,
             selectedEnumerationItems: null,
             workingAlertEvaluation: null,
@@ -236,6 +244,7 @@ export const useCreateAlertStore = create<CreateAlertStore>((set) => ({
     ) =>
         set({
             multipleDimensionEnumeratorType: multipleDimensionEnumeratorType,
+            alertRecommendations: null,
             selectedDetectionAlgorithm: null,
             selectedEnumerationItems: null,
             enumeratorQuery: "",
@@ -244,6 +253,7 @@ export const useCreateAlertStore = create<CreateAlertStore>((set) => ({
     setEnumeratorQuery: (enumeratorQuery: string) =>
         set({
             enumeratorQuery: enumeratorQuery,
+            alertRecommendations: null,
             selectedDetectionAlgorithm: null,
             selectedEnumerationItems: null,
         }),
@@ -291,6 +301,7 @@ export const useCreateAlertStore = create<CreateAlertStore>((set) => ({
             apiState: {
                 evaluationState: null,
                 insightState: null,
+                alertRecommedationState: null,
             },
             alertTemplates: null,
             selectedDataset: null,

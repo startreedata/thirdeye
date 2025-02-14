@@ -56,24 +56,19 @@ public class AnomalyResolutionTest {
   private static final ZoneOffset UTC = ZoneOffset.UTC;
   private static final long TEST_IMEOUT = 60_000L;
   private static final AlertApi ALERT_API;
-  private static final SubscriptionGroupApi SUBSCRIPTION_GROUP_API;
   private static final TimeProvider CLOCK = TimeProvider.instance();
   private static final long T_PAGEVIEWS_DATASET_START = epoch("2020-02-02 00:00");
 
   static {
     try {
       ALERT_API = loadAlertApi("/anomalyresolution/payloads/alert-1.json");
-      SUBSCRIPTION_GROUP_API = loadApi(
-          "/anomalyresolution/payloads/subscription-group.json",
-          SubscriptionGroupApi.class);
     } catch (final IOException e) {
       throw new RuntimeException(String.format("Could not load json: %s", e));
     }
   }
 
   private final ThirdEyeIntegrationTestSupport support = new ThirdEyeIntegrationTestSupport(
-      "anomalyresolution/config/server.yaml"
-  );
+      "anomalyresolution/config/server.yaml");
   private int nDetectionTaskRuns = 0;
   private int nNotificationTaskRuns = 0;
   private ThirdEyeTestClient client;
@@ -94,6 +89,8 @@ public class AnomalyResolutionTest {
   public void beforeClass() throws Exception {
     // ensure time is controlled via the TimeProvider CLOCK - ie weaving is working correctly
     assertThat(CLOCK.isTimeMockWorking()).isTrue();
+    // time is mocked - needs to be enabled before the support is started to enable mocked ScheduledExecutorService 
+    CLOCK.useMockTime(epoch("2020-02-16 15:00"));
 
     // Initialize the test support
     support.setup();
@@ -106,15 +103,13 @@ public class AnomalyResolutionTest {
     alertManager = injector.getInstance(AlertManager.class);
 
     nsf = new TestNotificationServiceFactory();
-    injector
-        .getInstance(NotificationServiceRegistry.class)
-        .addNotificationServiceFactory(nsf);
+    injector.getInstance(NotificationServiceRegistry.class).addNotificationServiceFactory(nsf);
   }
 
   @AfterClass(alwaysRun = true)
   public void afterClass() {
-    CLOCK.useSystemTime();
     support.tearDown();
+    CLOCK.useSystemTime();
   }
 
   @Test
@@ -123,8 +118,7 @@ public class AnomalyResolutionTest {
     assert200(response);
 
     // create datasource
-    response = client.request("api/data-sources")
-        .post(Entity.json(List.of(pinotDataSourceApi)));
+    response = client.request("api/data-sources").post(Entity.json(List.of(pinotDataSourceApi)));
     assert200(response);
     final DataSourceApi dataSourceInResponse = response.readEntity(DATASOURCE_LIST_TYPE).getFirst();
     pinotDataSourceApi.setId(dataSourceInResponse.getId());
@@ -133,16 +127,13 @@ public class AnomalyResolutionTest {
     final MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
     formData.add("dataSourceId", String.valueOf(pinotDataSourceApi.getId()));
     formData.add("datasetName", PINOT_DATASET_NAME);
-    response = client.request("api/data-sources/onboard-dataset/")
-        .post(Entity.form(formData));
+    response = client.request("api/data-sources/onboard-dataset/").post(Entity.form(formData));
     assert200(response);
   }
 
   @Test(dependsOnMethods = "setUpData")
   public void testCreateAlertLastTimestamp() {
-    // fix clock : time is now controlled manually
-    CLOCK.useMockTime(epoch("2020-02-16 15:00"));
-
+    // current time is "2020-02-16 15:00"
     final Response createResponse = client.request("api/alerts")
         .post(Entity.json(List.of(ALERT_API)));
     assertThat(createResponse.getStatus()).isEqualTo(200);
@@ -154,7 +145,8 @@ public class AnomalyResolutionTest {
     final Period mergeMaxGap = AlertUtils.getMergeMaxGap(renderedTemplate);
     assertThat(mergeMaxGap).isEqualTo(Period.days(3));
 
-    // time advancing should not impact lastTimestamp
+    // trigger cron job creation and task creation 
+    // also time advancing should not impact lastTimestamp value
     CLOCK.tick(5);
 
     // check that lastTimestamp just after creation is set to the start of the dataset
@@ -163,13 +155,14 @@ public class AnomalyResolutionTest {
   }
 
   @Test(dependsOnMethods = "setUpData")
-  public void testCreateSubscriptionGroup() {
-    // TODO spyne fix. This does modify the constant SUBSCRIPTION_GROUP_API
-    SUBSCRIPTION_GROUP_API.setAlertAssociations(
+  public void testCreateSubscriptionGroup() throws IOException {
+    final SubscriptionGroupApi subscriptionGroupApi = loadApi(
+        "/anomalyresolution/payloads/subscription-group.json", SubscriptionGroupApi.class);
+    subscriptionGroupApi.setAlertAssociations(
         List.of(new AlertAssociationApi().setAlert(new AlertApi().setId(alertId))));
 
     try (final Response r = client.request("api/subscription-groups")
-        .post(Entity.json(List.of(SUBSCRIPTION_GROUP_API)))) {
+        .post(Entity.json(List.of(subscriptionGroupApi)))) {
       assertThat(r.getStatus()).isEqualTo(200);
       subscriptionGroupId = r.readEntity(SUBSCRIPTION_GROUP_LIST_TYPE).getFirst().getId();
     }
@@ -194,7 +187,7 @@ public class AnomalyResolutionTest {
    * completed anomaly notification should be sent
    */
   @Test(dependsOnMethods = "testOnboardingTaskRun", timeOut = TEST_IMEOUT)
-  public void testCompletedAnomalyIsSentCorrectly() throws InterruptedException {
+  public void   testCompletedAnomalyIsSentCorrectly() throws InterruptedException {
     // sanity checks after the onboarding task 
     assertThat(client.getParentAnomalies()).hasSize(2);
     // no notification happened yet - time has not increased since subscription group creation
@@ -205,8 +198,8 @@ public class AnomalyResolutionTest {
     // no anomaly on [Feb 16, Feb 17)
     CLOCK.useMockTime(epoch("2020-02-17 06:00"));
     waitForDetectionRun();
-    // notification cron is every day at 7 am, so moving to 8 will trigger a notification
-    CLOCK.useMockTime(epoch("2020-02-17 08:00"));
+    // notification cron is every day at 5 pm, so moving to 8 will trigger a notification
+    CLOCK.useMockTime(epoch("2020-02-17 18:00"));
     waitForNotificationTaskRun();
     assertThat(nsf.notificationSentCount()).isZero();
 
@@ -214,7 +207,7 @@ public class AnomalyResolutionTest {
     CLOCK.useMockTime(epoch("2020-02-18 06:00"));
     assertThat(nsf.notificationSentCount()).isZero();
     waitForDetectionRun();
-    CLOCK.useMockTime(epoch("2020-02-18 08:00"));
+    CLOCK.useMockTime(epoch("2020-02-18 18:00"));
     waitForNotificationTaskRun();
     assertThat(nsf.notificationSentCount()).isEqualTo(1); // a new anomaly is detected and notified
     final NotificationPayloadApi notificationPayload = nsf.lastNotificationPayload();
@@ -226,7 +219,7 @@ public class AnomalyResolutionTest {
     // anomaly on [Feb 18, Feb 19)
     CLOCK.useMockTime(epoch("2020-02-19 06:00"));
     waitForDetectionRun();
-    CLOCK.useMockTime(epoch("2020-02-19 08:00"));
+    CLOCK.useMockTime(epoch("2020-02-19 18:00"));
     waitForNotificationTaskRun();
     assertThat(nsf.notificationSentCount()).isEqualTo(
         1); // this point is anomalous but merged in current anomaly
@@ -234,7 +227,7 @@ public class AnomalyResolutionTest {
     // anomaly on [Feb 19, Feb 20)
     CLOCK.useMockTime(epoch("2020-02-20 06:00"));
     waitForDetectionRun();
-    CLOCK.useMockTime(epoch("2020-02-20 08:00"));
+    CLOCK.useMockTime(epoch("2020-02-20 18:00"));
     waitForNotificationTaskRun();
     assertThat(nsf.notificationSentCount()).isEqualTo(
         1); // this point is anomalous but merged in current anomaly
@@ -250,7 +243,7 @@ public class AnomalyResolutionTest {
     waitForDetectionRun();
     // ensure the number of anomalies hasn't changed 
     assertThat(client.getAnomalies()).hasSize(anomaliesCurrentCount);
-    CLOCK.useMockTime(epoch("2020-02-21 08:00"));
+    CLOCK.useMockTime(epoch("2020-02-21 18:00"));
     waitForNotificationTaskRun();
     // ensure the number of notification hasn't changed
     assertThat(nsf.notificationSentCount()).isEqualTo(1);
@@ -259,7 +252,7 @@ public class AnomalyResolutionTest {
     CLOCK.useMockTime(epoch("2020-02-22 06:00"));
     waitForDetectionRun();
     assertThat(client.getAnomalies()).hasSize(anomaliesCurrentCount);
-    CLOCK.useMockTime(epoch("2020-02-22 08:00"));
+    CLOCK.useMockTime(epoch("2020-02-22 18:00"));
     waitForNotificationTaskRun();
     assertThat(nsf.notificationSentCount()).isEqualTo(1);
 
@@ -267,7 +260,7 @@ public class AnomalyResolutionTest {
     CLOCK.useMockTime(epoch("2020-02-23 06:00"));
     waitForDetectionRun();
     assertThat(client.getAnomalies()).hasSize(anomaliesCurrentCount);
-    CLOCK.useMockTime(epoch("2020-02-23 08:00"));
+    CLOCK.useMockTime(epoch("2020-02-23 18:00"));
     waitForNotificationTaskRun();
     assertThat(nsf.notificationSentCount()).isEqualTo(1);
 
@@ -275,7 +268,7 @@ public class AnomalyResolutionTest {
     CLOCK.useMockTime(epoch("2020-02-24 06:00"));
     waitForDetectionRun();
     assertThat(client.getAnomalies()).hasSize(anomaliesCurrentCount);
-    CLOCK.useMockTime(epoch("2020-02-24 08:00"));
+    CLOCK.useMockTime(epoch("2020-02-24 18:00"));
     waitForNotificationTaskRun();
     // maxMergeGap is P3D, so a notification for completed anomaly can be sent now
     assertThat(nsf.notificationSentCount()).isEqualTo(2);

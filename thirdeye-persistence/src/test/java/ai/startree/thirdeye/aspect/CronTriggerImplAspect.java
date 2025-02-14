@@ -25,8 +25,10 @@ public class CronTriggerImplAspect {
   private static final Logger LOG = LoggerFactory.getLogger(CronTriggerImplAspect.class);
 
   @Around("execution(* org.quartz.impl.triggers.CronTriggerImpl.updateAfterMisfire(..))")
-  public void disableUpdateAfterMisfire(ProceedingJoinPoint joinPoint) throws Throwable {
-    LOG.debug("Time is mocked, skipping misfire update in quartz trigger.");
-    return;
+  public void disableUpdateAfterMisfire(ProceedingJoinPoint pjp) throws Throwable {
+    if (TimeProvider.instance().isTimedMocked()) {
+      LOG.debug("Time is mocked, skipping misfire update in quartz trigger.");
+    }
+    pjp.proceed();
   }
 }

@@ -13,7 +13,11 @@
  */
 package ai.startree.thirdeye.aspect;
 
+import ai.startree.thirdeye.aspect.utils.DeterministicScheduler;
 import java.util.Date;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import org.quartz.SchedulerException;
@@ -22,7 +26,9 @@ import org.quartz.impl.StdSchedulerFactory;
 // use this class to controle the value returned by System.currentTimeMillis()
 // thread safety has not been thoroughly tested
 public class TimeProvider {
-
+  
+  private static final Queue<DeterministicScheduler> schedulers = new ConcurrentLinkedQueue<>();
+  
   private final static TimeProvider instance = new TimeProvider();
 
   public static TimeProvider instance() {
@@ -30,32 +36,27 @@ public class TimeProvider {
   }
 
   private final AtomicLong currentTimeMillis = new AtomicLong();
-  private final AtomicLong nanoTime = new AtomicLong();
   private final AtomicBoolean mockTime = new AtomicBoolean(false);
 
   public boolean isTimeMockWorking() {
     // setting before the test
     boolean originalMockTime = mockTime.get();
     final long originalCurrentTimeMillis = currentTimeMillis.get();
-    final long originalNanoTime = nanoTime.get();
 
     useMockTime(0);
     final boolean systemMockWorks = System.currentTimeMillis() == 0;
     final boolean dateMockWorks = new Date().getTime() == 0;
-    final long nanoTimeBeforeTick = System.nanoTime();
     final int tickTestValue = 20;
     tick(tickTestValue);
     final boolean systemChangeWorks = System.currentTimeMillis() == tickTestValue;
     final boolean dateChangeWorks = new Date().getTime() == tickTestValue;
-    final long nanoTimeAfterTick = System.nanoTime();
-    final boolean nanoTimeWorks = (nanoTimeAfterTick -  nanoTimeBeforeTick) / 1000_000 == tickTestValue;
+    
 
     // set back to the setting before the test
     mockTime.set(originalMockTime);
     currentTimeMillis.set(originalCurrentTimeMillis);
-    nanoTime.set(originalNanoTime);
 
-    return systemMockWorks && dateMockWorks && systemChangeWorks && dateChangeWorks && nanoTimeWorks;
+    return systemMockWorks && dateMockWorks && systemChangeWorks && dateChangeWorks;
   }
 
   public boolean isTimedMocked() {
@@ -66,10 +67,15 @@ public class TimeProvider {
    * Set mock time and enable time mocking
    */
   public synchronized void useMockTime(long currentTime) {
-    currentTimeMillis.set(currentTime);
+    final long previousTime = currentTimeMillis.getAndSet(currentTime);
     // could be any value - using same as currentTime to simplify debugging
-    nanoTime.set(currentTime * 1000_000);  
     mockTime.set(true);
+    for (final DeterministicScheduler e : schedulers) {
+      if (previousTime > 0) {
+        e.tick(currentTime - previousTime, TimeUnit.MILLISECONDS);
+      }
+      e.runUntilIdle();
+    }
     notifyQuartzSchedulerThreads();
   }
 
@@ -91,13 +97,16 @@ public class TimeProvider {
    * Advance mock time and returns it
    */
   public synchronized void tick(long tick) {
-    nanoTime.addAndGet(tick * 1_000_000);
     currentTimeMillis.addAndGet(tick);
+    for (final DeterministicScheduler e : schedulers) {
+      e.tick(tick, TimeUnit.MILLISECONDS);
+      e.runUntilIdle();
+    }
     notifyQuartzSchedulerThreads();
   }
-
-  public long nanoTime() {
-    return nanoTime.get();
+  
+  public static void registerScheduler(DeterministicScheduler scheduler) {
+    schedulers.add(scheduler);
   }
 
 

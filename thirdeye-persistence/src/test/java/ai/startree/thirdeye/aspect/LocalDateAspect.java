@@ -13,22 +13,27 @@
  */
 package ai.startree.thirdeye.aspect;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 
 @Aspect
-public class NanoTimeAspect {
-
-  @Pointcut("call(public long java.lang.System.nanoTime())")
-  void nanoTime() {
+public class LocalDateAspect {
+  
+  @Pointcut("call(public static java.time.LocalDate java.time.LocalDate.now(..))")
+  void localDateNow() {
   }
 
-  @Around("nanoTime()")
-  public Object aroundSystemNanoTime(ProceedingJoinPoint pjp) throws Throwable {
+  @Around("localDateNow()")
+  public Object aroundLocalDateNow(ProceedingJoinPoint pjp) throws Throwable {
     if (TimeProvider.instance().isTimedMocked()) {
-      return TimeProvider.instance().nanoTime();
+      // assume localDate now is always called in a UTC context
+      return LocalDate.ofInstant(Instant.ofEpochMilli(TimeProvider.instance().currentTimeMillis()),
+          ZoneId.of("UTC"));
     }
     return pjp.proceed();
   }

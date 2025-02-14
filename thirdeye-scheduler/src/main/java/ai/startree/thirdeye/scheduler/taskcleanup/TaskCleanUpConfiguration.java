@@ -17,9 +17,11 @@ import static ai.startree.thirdeye.spi.Constants.TASK_MAX_DELETES_PER_CLEANUP;
 
 public class TaskCleanUpConfiguration {
 
+  // 0 can be used as a special value to disable old tasks clean up
   private Integer intervalInMinutes = 5;
   private Integer retentionInDays = 30;
   private Integer maxEntriesToDelete = TASK_MAX_DELETES_PER_CLEANUP;
+  // 0 can be used a special value to disable orphan tasks clean up
   private Integer orphanIntervalInSeconds = 30;
 
   public Integer getIntervalInMinutes() {

@@ -13,7 +13,7 @@
 #
 
 ######################################################
-# ThirdEye Single Node integration test config
+# ThirdEye Coordinator integration test config
 ######################################################
 
 server:
@@ -64,14 +64,14 @@ taskDriver:
   randomDelayCap: 1
   taskFailureDelay: 1
   newAcquisitionLogic: true
+  maxParallelTasks: 1
 
 scheduler:
   # Run the Quartz Scheduler.
   # Only 1 instance of scheduler should run. This responsibility is currently on the user!!
   enabled: true
-  # cron job update every 12 hours is enough for the simulated scenario
-  alertUpdateDelay: 43200
-  subscriptionGroupUpdateDelay: 43200
+  alertUpdateDelay: 1
+  subscriptionGroupUpdateDelay: 1
 
   detectionPipeline: true
   detectionAlert: true
@@ -80,5 +80,19 @@ scheduler:
   taskCleanUp:
     intervalInMinutes: 0
 
-ui:
-  externalUrl: http://localhost:7004
+defaultWorkspaceConfiguration:
+  timeConfiguration:
+    # notification timezone
+    timezone: UTC
+    # notification time format pattern - see https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html
+    dateTimePattern: "MMM dd, yyyy HH:mm"
+    # Limit onboarding alert replay back to JAN_1_2000_UTC
+    minimumOnboardingStartTime: 946684800000
+  templateConfiguration:
+    # alert templates generate queries with a LIMIT statement - this is the default value of the limit statement
+    sqlLimitStatement: 100_000_001
+  namespaceQuotasConfiguration:
+    taskQuotasConfiguration:
+      maximumDetectionTasksPerMonth: 2
+      maximumNotificationTasksPerMonth: 1
+

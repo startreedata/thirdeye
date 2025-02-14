@@ -1,6 +1,6 @@
 {
   "name": "sg-anomalyresolution",
-  "cron": "0 0 7 * * ? *",
+  "cron": "0 0 17 * * ? *",
   "active": true,
   "notifyHistoricalAnomalies": false,
   "specs": [

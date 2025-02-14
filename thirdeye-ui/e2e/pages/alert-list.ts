@@ -148,24 +148,26 @@ export class AlertListPage extends BasePage {
 
         const jsonEditor = this.page.locator(".CodeMirror");
         await jsonEditor.click();
-
-        await this.page.evaluate(() => {
+        const date = new Date();
+        await this.page.evaluate((date) => {
             const editor = document.querySelector(".CodeMirror")?.CodeMirror;
             editor.setValue(
-                '{"name": "Clicks_SUM_mean-variance-rule-dup","description": "","template": {"name": "startree-mean-variance"},"templateProperties": {"dataSource": "pinot","dataset": "AdCampaignData","aggregationColumn": "Clicks","aggregationFunction": "SUM","monitoringGranularity": "P1D","timezone": "UTC","queryFilters": "","sensitivity": "-6","lookback": "P21D"},"cron": "0 0 5 ? * MON-FRI *","auth": {"namespace": null}}'
+                `{"name": "Clicks_SUM_mean-variance-rule-dup${date.getTime()}","description": "","template": {"name": "startree-mean-variance"},"templateProperties": {"dataSource": "pinot","dataset": "AdCampaignData","aggregationColumn": "Clicks","aggregationFunction": "SUM","monitoringGranularity": "P1D","timezone": "UTC","queryFilters": "","sensitivity": "-6","lookback": "P21D"},"cron": "0 0 5 ? * MON-FRI *","auth": {"namespace": null}}`
             );
-        });
+        }, date);
         const createBtn = this.page.locator("#next-bottom-bar-btn");
         await expect(createBtn).toHaveText("Create Alert");
         const createAlertApiRequest = this.page.waitForRequest("/api/alerts");
         const createAlertApiResponse = this.page.waitForResponse("/api/alerts");
         createBtn.click({ force: true });
-        const createAlertRequest = await createAlertApiRequest;
-        const createAlertResponse = await createAlertApiResponse;
+        const [createAlertRequest, createAlertResponse] = await Promise.all([
+            createAlertApiRequest,
+            createAlertApiResponse,
+        ]);
 
         expect(createAlertRequest.method()).toBe("POST");
         expect(createAlertRequest.postDataJSON()[0]).toEqual({
-            name: "Clicks_SUM_mean-variance-rule-dup",
+            name: `Clicks_SUM_mean-variance-rule-dup${date.getTime()}`,
             description: "",
             template: { name: "startree-mean-variance" },
             templateProperties: {

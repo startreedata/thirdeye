@@ -40,6 +40,7 @@ import { EditableAlert } from "../../../../rest/dto/alert.interfaces";
 
 // apis
 import { getAlertInsight } from "../../../../rest/alerts/alerts.rest";
+import { ActionStatus } from "../../../../rest/actions.interfaces";
 
 export const SelectGranularity = (): JSX.Element => {
     const { t } = useTranslation();
@@ -56,6 +57,8 @@ export const SelectGranularity = (): JSX.Element => {
         setSelectedTimeRange,
         setWorkingAlert,
         queryFilters,
+        apiState,
+        setApiState,
     } = useCreateAlertStore();
 
     const GRANULARITY_OPTIONS = [
@@ -116,6 +119,13 @@ export const SelectGranularity = (): JSX.Element => {
                     min: 0,
                     max: 1,
                 });
+                setApiState({
+                    ...apiState,
+                    insightState: {
+                        ...apiState.insightState,
+                        status: ActionStatus.Working,
+                    },
+                });
 
                 const newAlertInsight = await getAlertInsight({
                     alert: {
@@ -123,6 +133,13 @@ export const SelectGranularity = (): JSX.Element => {
                         templateProperties:
                             workingAlertUpdated.templateProperties,
                     } as EditableAlert,
+                });
+                setApiState({
+                    ...apiState,
+                    insightState: {
+                        ...apiState.insightState,
+                        status: ActionStatus.Done,
+                    },
                 });
 
                 if (newAlertInsight) {
@@ -140,6 +157,13 @@ export const SelectGranularity = (): JSX.Element => {
                         entity: t("label.alert-insight"),
                     })
                 );
+                setApiState({
+                    ...apiState,
+                    insightState: {
+                        ...apiState.insightState,
+                        status: ActionStatus.Error,
+                    },
+                });
             }
         }
     };

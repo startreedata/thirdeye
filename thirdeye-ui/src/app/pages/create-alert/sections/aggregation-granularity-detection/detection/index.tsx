@@ -13,7 +13,7 @@
  * the License.
  */
 // external
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Box, CircularProgress, Grid, Typography } from "@material-ui/core";
 import { useTranslation } from "react-i18next";
 
@@ -72,7 +72,8 @@ export const SelectDetection = (): JSX.Element => {
         setApiState,
     } = useCreateAlertStore();
     const { notify } = useNotificationProviderV1();
-    const [alertInsightLoading] = useState(false);
+    const alertInsightLoading =
+        apiState.insightState?.status === ActionStatus.Working;
 
     const { getEvaluation, evaluation, status, errorMessages } =
         useGetEvaluation();
@@ -219,7 +220,7 @@ export const SelectDetection = (): JSX.Element => {
                             style={{ marginLeft: "4px" }}
                             variant="caption"
                         >
-                            {t("label.loading-insights")}
+                            {t("label.setting-up-detection")}
                         </Typography>
                     </Box>
                 )}

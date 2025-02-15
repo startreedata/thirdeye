@@ -21,12 +21,14 @@ import { GetDatasources } from "../../rest/datasources/datasources.interfaces";
 import { useGetMetrics } from "../../rest/metrics/metrics.actions";
 import { GetMetrics } from "../../rest/metrics/metrics.interface";
 import { buildPinotDatasourcesTree, DatasetInfo } from "./datasources.util";
+import { ActionStatus } from "../../rest/actions.interfaces";
 
 export interface UseGetDatasourcesTreeHook {
     datasetsInfo: DatasetInfo[] | null;
     getDatasourcesHook: GetDatasources;
     getDatasetsHook: GetDatasets;
     getMetricsHook: GetMetrics;
+    isDatasourcesTreeLoading?: boolean;
 }
 
 function useGetDatasourcesTree(): UseGetDatasourcesTreeHook {
@@ -81,12 +83,17 @@ function useGetDatasourcesTree(): UseGetDatasourcesTreeHook {
         getDatasetsHook.datasets,
         getDatasourcesHook.datasources,
     ]);
+    const isLoading =
+        getDatasetsHook.status === ActionStatus.Working ||
+        getMetricsHook.status === ActionStatus.Working ||
+        getDatasourcesHook.status === ActionStatus.Working;
 
     return {
         datasetsInfo,
         getDatasourcesHook,
         getDatasetsHook,
         getMetricsHook,
+        isDatasourcesTreeLoading: isLoading,
     };
 }
 

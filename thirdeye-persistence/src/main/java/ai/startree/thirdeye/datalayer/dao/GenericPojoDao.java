@@ -423,9 +423,14 @@ public class GenericPojoDao {
         daoFilter.getLimit(),
         daoFilter.getOffset(),
         indexClass);
-    final String parameterizedSQL = String.format("WHERE %s in ( %s )",
-        databaseOrm.getIdColumnName(GenericJsonEntity.class),
-        matchingIdsQuery);
+    final String parameterizedSQL = String.format("""
+            JOIN (
+                %s
+            ) subquery ON generic_json_entity.%s = subquery.%s
+            """,
+        matchingIdsQuery,
+        databaseOrm.getIdColumnSQLName(GenericJsonEntity.class),
+        databaseOrm.getIdColumnSQLName(indexClass));
 
     try {
       final List<GenericJsonEntity> entities = databaseClient.executeTransaction(

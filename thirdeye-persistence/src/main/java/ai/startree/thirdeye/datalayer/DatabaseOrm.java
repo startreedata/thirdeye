@@ -27,6 +27,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.math3.analysis.function.Abs;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Singleton
@@ -146,6 +147,11 @@ public class DatabaseOrm {
 
   public <E extends AbstractEntity> String getIdColumnName(final Class<E> clazz) {
     return AbstractIndexEntity.class.isAssignableFrom(clazz) ? "baseId" : "id";
+  }
+
+  public <E extends AbstractEntity> String getIdColumnSQLName(final Class<E> clazz) {
+    final String idColName = getIdColumnName(clazz);
+    return sqlQueryBuilder.getColumnSQLName(clazz, idColName);
   }
 
   public Integer delete(final Predicate predicate,

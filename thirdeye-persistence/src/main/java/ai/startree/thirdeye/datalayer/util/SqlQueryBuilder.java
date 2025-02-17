@@ -28,6 +28,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.sql.Types;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -243,6 +246,21 @@ public class SqlQueryBuilder {
     return prepareStatement;
   }
 
+  public String getColumnSQLName(final Class<? extends AbstractEntity> entityClass,
+      final String column) {
+    final String tableName = entityMappingHolder.tableToEntityNameMap.inverse()
+        .get(entityClass.getSimpleName());
+    final BiMap<String, String> entityNameToDBNameMapping =
+        entityMappingHolder.columnMappingPerTable.get(tableName).inverse();
+
+    final String columnName = entityNameToDBNameMapping.get(column);
+    checkNotNull(columnName, String
+        .format("Found field '%s' but expected %s", column,
+            entityNameToDBNameMapping.keySet()));
+
+    return columnName;
+  }
+
   public String createFindColumnByParamsStatementWithLimitQuery(
       final Class<? extends AbstractEntity> entityClass, final String column,
       final Predicate predicate, final Long limit, final Long offset) {
@@ -423,7 +441,7 @@ public class SqlQueryBuilder {
         } else {
           // duplicated code with NEQ and LIKE/GT/GE/... - ok for the moment, this needs to be migrated to JOOQ anyway
           whereClause.append(columnName).append(" ").append(predicate.getOper().toString())
-              .append(" ").append(predicate.getRhs());
+              .append(" ").append(getPredicateValStr(predicate.getRhs()));
         }
         break;
       case NEQ:
@@ -431,7 +449,7 @@ public class SqlQueryBuilder {
           whereClause.append(columnName).append(" IS NOT NULL ");
         } else {
           whereClause.append(columnName).append(" ").append(predicate.getOper().toString())
-              .append(" ").append(predicate.getRhs());
+              .append(" ").append(getPredicateValStr(predicate.getRhs()));
         }
         break;
       case LIKE:
@@ -440,7 +458,7 @@ public class SqlQueryBuilder {
       case LE:
       case GE:
         whereClause.append(columnName).append(" ").append(predicate.getOper().toString())
-            .append(" ").append(predicate.getRhs());
+            .append(" ").append(getPredicateValStr(predicate.getRhs()));
         break;
       case IN:
         Object rhs = predicate.getRhs();
@@ -454,7 +472,7 @@ public class SqlQueryBuilder {
           final int length = Array.getLength(rhs);
           if (length > 0) {
             for (int i = 0; i < length; i++) {
-              whereClause.append(delim).append(Array.get(rhs, i));
+              whereClause.append(delim).append(getPredicateValStr(Array.get(rhs, i)));
               delim = ",";
             }
           } else {
@@ -466,13 +484,48 @@ public class SqlQueryBuilder {
       case BETWEEN:
         final ImmutablePair<Object, Object> pair = (ImmutablePair<Object, Object>) predicate.getRhs();
         whereClause.append(columnName).append(predicate.getOper().toString())
-            .append(pair.getLeft())
+            .append(getPredicateValStr(pair.getLeft()))
             .append(" AND ")
-            .append(pair.getRight());
+            .append(getPredicateValStr(pair.getRight()));
         break;
       default:
         throw new RuntimeException("Unsupported predicate type:" + predicate.getOper());
     }
+  }
+
+  private String getPredicateValStr(Object val) {
+    if (checkIfValidDateTime(val)) {
+      return "'" + val + "'";
+    } else {
+      return val.toString();
+    }
+  }
+
+  private boolean checkIfValidDateTime(Object val) {
+    // List of possible patterns
+    String[] patterns = {
+        "yyyy-MM-dd HH:mm:ss.SSS",    // e.g. 2025-02-17 17:45:06.493
+        "yyyy-MM-dd HH:mm:ss.S",      // e.g. 2020-02-17 23:30:00.0
+        "yyyy-MM-dd HH:mm:ss",        // e.g. 2025-02-17 17:45:06
+        "yyyy-MM-dd'T'HH:mm:ss.SSS",  // e.g. 2025-02-17T17:45:06.493
+        "yyyy-MM-dd'T'HH:mm:ss.S",    // e.g. 2020-02-17T23:30:00.0
+        "yyyy-MM-dd'T'HH:mm:ss",      // e.g. 2025-02-17T17:45:06
+        "yyyy/MM/dd HH:mm:ss",        // e.g. 2025/02/17 17:45:06
+        "yyyy/MM/dd",                 // e.g. 2025/02/17
+        "MM/dd/yyyy HH:mm:ss"         // e.g. 02/17/2025 17:45:06
+    };
+
+    for (String pattern : patterns) {
+      try {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+        LocalDateTime.parse(val.toString(), formatter);
+        return true; // If parsing is successful with any pattern
+      } catch (DateTimeParseException e) {
+        // If parsing fails, continue with next pattern
+      }
+    }
+
+    return false;
   }
 
   public PreparedStatement createStatementFromSQL(final Connection connection, String parameterizedSQL,
@@ -480,7 +533,7 @@ public class SqlQueryBuilder {
       throws Exception {
     final String tableName =
         entityMappingHolder.tableToEntityNameMap.inverse().get(entityClass.getSimpleName());
-    parameterizedSQL = "select * from " + tableName + " " + parameterizedSQL;
+    parameterizedSQL = "select " + tableName + ".* from " + tableName + " " + parameterizedSQL;
     parameterizedSQL = parameterizedSQL.replace(entityClass.getSimpleName(), tableName);
     final StringBuilder psSql = new StringBuilder();
     final List<String> paramNames = new ArrayList<>();

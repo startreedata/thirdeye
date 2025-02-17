@@ -150,6 +150,10 @@ public abstract class AbstractManagerImpl<E extends AbstractDTO> implements Abst
     return genericPojoDao.get(daoFilter.setBeanClass(dtoClass));
   }
 
+  public List<E> filterV2(final DaoFilter daoFilter) {
+    return genericPojoDao.getV2(daoFilter.setBeanClass(dtoClass));
+  }
+
   @Override
   public long count() {
     return genericPojoDao.count(dtoClass);

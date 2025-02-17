@@ -195,7 +195,7 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
 
   @Override
   public List<AnomalyDTO> filter(final DaoFilter daoFilter) {
-    final List<AnomalyDTO> anomalies = super.filter(daoFilter);
+    final List<AnomalyDTO> anomalies = super.filterV2(daoFilter);
     // FIXME CYRIL this filter is only decorating with feedback - while some others decorate with feedback and children
     return decorateWithFeedback(anomalies);
   }

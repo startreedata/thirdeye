@@ -148,6 +148,11 @@ public class DatabaseOrm {
     return AbstractIndexEntity.class.isAssignableFrom(clazz) ? "baseId" : "id";
   }
 
+  public <E extends AbstractEntity> String getIdColumnSQLName(final Class<E> clazz) {
+    final String idColName = getIdColumnName(clazz);
+    return sqlQueryBuilder.getColumnSQLName(clazz, idColName);
+  }
+
   public Integer delete(final Predicate predicate,
       final Class<? extends AbstractEntity> entityClass, final Connection connection)
       throws Exception {
@@ -202,5 +207,11 @@ public class DatabaseOrm {
     } finally {
       sample.stop(dbCrudTimerOfRead);
     }
+  }
+
+  public <E extends AbstractEntity> String generateMatchingIdsQuery(
+      final Predicate predicate, final Long limit, final Long offset, final Class<E> clazz) {
+    return sqlQueryBuilder.createFindColumnByParamsStatementWithLimitQuery(
+        clazz, getIdColumnName(clazz), predicate, limit, offset);
   }
 }

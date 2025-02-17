@@ -43,6 +43,7 @@ import com.google.inject.Singleton;
 import java.lang.reflect.Field;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
@@ -398,5 +399,59 @@ public class GenericPojoDao {
     final List<Long> idsToDelete = fetchIds(
         new DaoFilter().setPredicate(predicate).setBeanClass(pojoClass));
     return delete(idsToDelete, pojoClass);
+  }
+
+  /**
+   * Use this method when you want to fetch entities out a subset of the entities based on predicates,
+   * limits, offsets, etc.
+   *
+   * This method is an optimized version of get(final DaoFilter daoFilter)
+   * where we make a single combined query of the form
+   *
+   * select generic_json_entity.* from generic_json_entity
+   * JOIN (select base_id from index_class where CONDITIONS)
+   * subquery ON generic_json_entity.id = subquery.base_id
+   *
+   * @param daoFilter required filters to fetch the result.
+   */
+  public <E extends AbstractDTO> List<E> getV2(final DaoFilter daoFilter) {
+    final Class<? extends AbstractIndexEntity> indexClass = BEAN_INDEX_MAP.get(
+        daoFilter.getBeanClass());
+    validate(daoFilter);
+
+    final String matchingIdsQuery = databaseOrm.generateMatchingIdsQuery(
+        daoFilter.getPredicate(),
+        daoFilter.getLimit(),
+        daoFilter.getOffset(),
+        indexClass);
+    final String parameterizedSQL = String.format("""
+            JOIN (
+                %s
+            ) subquery ON generic_json_entity.%s = subquery.%s
+            """,
+        matchingIdsQuery,
+        databaseOrm.getIdColumnSQLName(GenericJsonEntity.class),
+        databaseOrm.getIdColumnSQLName(indexClass));
+
+    try {
+      final List<GenericJsonEntity> entities = databaseClient.executeTransaction(
+          (connection) -> databaseOrm.runSQL(
+              parameterizedSQL,
+              Collections.emptyMap(),
+              GenericJsonEntity.class,
+              connection));
+      final List<E> results = new ArrayList<>();
+      if (CollectionUtils.isNotEmpty(entities)) {
+        for (final GenericJsonEntity entity : entities) {
+          final E e = toDto(entity, (Class<E>) daoFilter.getBeanClass());
+          results.add(e);
+        }
+      }
+      return results;
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      // TODO ANSHUL design - surface exception ?
+      return Collections.emptyList();
+    }
   }
 }

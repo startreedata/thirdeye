@@ -74,12 +74,9 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
   private static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(10,
       new ThreadFactoryBuilder().setNameFormat("anomaly-manager-%d").build());
 
-  protected final GenericPojoDao genericPojoDao;
-
   @Inject
   public AnomalyManagerImpl(final GenericPojoDao genericPojoDao) {
     super(AnomalyDTO.class, genericPojoDao);
-    this.genericPojoDao = genericPojoDao;
   }
 
   @Override

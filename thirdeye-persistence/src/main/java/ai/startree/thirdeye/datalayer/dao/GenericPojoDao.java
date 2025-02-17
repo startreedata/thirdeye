@@ -417,6 +417,7 @@ public class GenericPojoDao {
   public <E extends AbstractDTO> List<E> getV2(final DaoFilter daoFilter) {
     final Class<? extends AbstractIndexEntity> indexClass = BEAN_INDEX_MAP.get(
         daoFilter.getBeanClass());
+    validate(daoFilter);
 
     final String matchingIdsQuery = databaseOrm.generateMatchingIdsQuery(
         daoFilter.getPredicate(),

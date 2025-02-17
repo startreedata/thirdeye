@@ -494,7 +494,10 @@ public class SqlQueryBuilder {
   }
 
   private String getPredicateValStr(Object val) {
-    if (checkIfValidDateTime(val)) {
+    if (checkIfValidBoolean(val)) {
+      return val.toString();
+    }
+    else if (val instanceof String || checkIfValidDateTime(val)) {
       return "'" + val + "'";
     } else {
       return val.toString();
@@ -505,9 +508,11 @@ public class SqlQueryBuilder {
     // List of possible patterns
     String[] patterns = {
         "yyyy-MM-dd HH:mm:ss.SSS",    // e.g. 2025-02-17 17:45:06.493
+        "yyyy-MM-dd HH:mm:ss.SS",     // e.g. 2020-02-17 23:30:00.28
         "yyyy-MM-dd HH:mm:ss.S",      // e.g. 2020-02-17 23:30:00.0
         "yyyy-MM-dd HH:mm:ss",        // e.g. 2025-02-17 17:45:06
         "yyyy-MM-dd'T'HH:mm:ss.SSS",  // e.g. 2025-02-17T17:45:06.493
+        "yyyy-MM-dd'T'HH:mm:ss.SS",   // e.g. 2025-02-17T17:45:06.49
         "yyyy-MM-dd'T'HH:mm:ss.S",    // e.g. 2020-02-17T23:30:00.0
         "yyyy-MM-dd'T'HH:mm:ss",      // e.g. 2025-02-17T17:45:06
         "yyyy/MM/dd HH:mm:ss",        // e.g. 2025/02/17 17:45:06
@@ -526,6 +531,10 @@ public class SqlQueryBuilder {
     }
 
     return false;
+  }
+
+  private boolean checkIfValidBoolean(Object val) {
+    return "true".equalsIgnoreCase(val.toString()) || "false".equalsIgnoreCase(val.toString());
   }
 
   public PreparedStatement createStatementFromSQL(final Connection connection, String parameterizedSQL,

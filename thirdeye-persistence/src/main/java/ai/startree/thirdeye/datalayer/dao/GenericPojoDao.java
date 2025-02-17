@@ -407,7 +407,10 @@ public class GenericPojoDao {
    *
    * This method is an optimized version of get(final DaoFilter daoFilter)
    * where we make a single combined query of the form
-   * select * from generic_json_entity where id in (select based_id from index_class where CONDITIONS)
+   *
+   * select generic_json_entity.* from generic_json_entity
+   * JOIN (select base_id from index_class where CONDITIONS)
+   * subquery ON generic_json_entity.id = subquery.base_id
    *
    * @param daoFilter required filters to fetch the result.
    */

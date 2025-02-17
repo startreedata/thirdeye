@@ -506,7 +506,7 @@ public class SqlQueryBuilder {
 
   private boolean checkIfValidDateTime(Object val) {
     // List of possible patterns
-    String[] patterns = {
+    final String[] patterns = {
         "yyyy-MM-dd HH:mm:ss.SSS",    // e.g. 2025-02-17 17:45:06.493
         "yyyy-MM-dd HH:mm:ss.SS",     // e.g. 2020-02-17 23:30:00.28
         "yyyy-MM-dd HH:mm:ss.S",      // e.g. 2020-02-17 23:30:00.0
@@ -522,7 +522,7 @@ public class SqlQueryBuilder {
 
     for (String pattern : patterns) {
       try {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
         LocalDateTime.parse(val.toString(), formatter);
         return true; // If parsing is successful with any pattern
       } catch (DateTimeParseException e) {

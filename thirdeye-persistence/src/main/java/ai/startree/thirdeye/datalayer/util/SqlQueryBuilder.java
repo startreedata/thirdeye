@@ -243,6 +243,37 @@ public class SqlQueryBuilder {
     return prepareStatement;
   }
 
+  public String createFindColumnByParamsStatementWithLimitQuery(
+      final Class<? extends AbstractEntity> entityClass, final String column,
+      final Predicate predicate, final Long limit, final Long offset) {
+    final String tableName = entityMappingHolder.tableToEntityNameMap.inverse()
+        .get(entityClass.getSimpleName());
+    final BiMap<String, String> entityNameToDBNameMapping =
+        entityMappingHolder.columnMappingPerTable.get(tableName).inverse();
+
+    final String columnName = entityNameToDBNameMapping.get(column);
+    checkNotNull(columnName, String
+        .format("Found field '%s' but expected %s", column,
+            entityNameToDBNameMapping.keySet()));
+
+    final StringBuilder sqlBuilder = new StringBuilder(String.format(
+        "SELECT %s FROM %s", columnName, tableName));
+
+    if(predicate != null) {
+      final StringBuilder whereClause = new StringBuilder(" WHERE ");
+      createWhereClause(entityNameToDBNameMapping, predicate, whereClause);
+      sqlBuilder.append(whereClause);
+    }
+    if (limit != null) {
+      sqlBuilder.append(" LIMIT ").append(limit);
+    }
+    if (offset != null) {
+      sqlBuilder.append(" OFFSET ").append(offset);
+    }
+    return sqlBuilder.toString();
+  }
+
+
   public PreparedStatement createCountStatement(final Connection connection, final @Nullable Predicate predicate,
       final Class<? extends AbstractEntity> entityClass) throws Exception {
     final String tableName =
@@ -357,6 +388,87 @@ public class SqlQueryBuilder {
         final ImmutablePair<Object, Object> pair = (ImmutablePair<Object, Object>) predicate.getRhs();
         parametersList.add(ImmutablePair.of(columnName, pair.getLeft()));
         parametersList.add(ImmutablePair.of(columnName, pair.getRight()));
+        break;
+      default:
+        throw new RuntimeException("Unsupported predicate type:" + predicate.getOper());
+    }
+  }
+
+  private void createWhereClause(final BiMap<String, String> entityNameToDBNameMapping,
+      final Predicate predicate, final StringBuilder whereClause) {
+    String columnName = null;
+
+    if (predicate.getLhs() != null) {
+      columnName = entityNameToDBNameMapping.get(predicate.getLhs());
+      checkNotNull(columnName, String
+          .format("Found field '%s' but expected %s", predicate.getLhs(),
+              entityNameToDBNameMapping.keySet()));
+    }
+
+    switch (predicate.getOper()) {
+      case AND:
+      case OR:
+        whereClause.append("(");
+        String delim = "";
+        for (final Predicate childPredicate : predicate.getChildPredicates()) {
+          whereClause.append(delim);
+          createWhereClause(entityNameToDBNameMapping, childPredicate, whereClause);
+          delim = "  " + predicate.getOper().toString() + " ";
+        }
+        whereClause.append(")");
+        break;
+      case EQ:
+        if (predicate.getRhs() == null) {
+          whereClause.append(columnName).append(" IS NULL ");
+        } else {
+          // duplicated code with NEQ and LIKE/GT/GE/... - ok for the moment, this needs to be migrated to JOOQ anyway
+          whereClause.append(columnName).append(" ").append(predicate.getOper().toString())
+              .append(" ").append(predicate.getRhs());
+        }
+        break;
+      case NEQ:
+        if (predicate.getRhs() == null) {
+          whereClause.append(columnName).append(" IS NOT NULL ");
+        } else {
+          whereClause.append(columnName).append(" ").append(predicate.getOper().toString())
+              .append(" ").append(predicate.getRhs());
+        }
+        break;
+      case LIKE:
+      case GT:
+      case LT:
+      case LE:
+      case GE:
+        whereClause.append(columnName).append(" ").append(predicate.getOper().toString())
+            .append(" ").append(predicate.getRhs());
+        break;
+      case IN:
+        Object rhs = predicate.getRhs();
+        if (rhs != null) {
+          if (!rhs.getClass().isArray()) {
+            rhs = rhs.toString().split(",");
+          }
+          whereClause.append(columnName).append(" ").append(Predicate.OPER.IN)
+              .append("(");
+          delim = "";
+          final int length = Array.getLength(rhs);
+          if (length > 0) {
+            for (int i = 0; i < length; i++) {
+              whereClause.append(delim).append(Array.get(rhs, i));
+              delim = ",";
+            }
+          } else {
+            whereClause.append("null");
+          }
+          whereClause.append(")");
+        }
+        break;
+      case BETWEEN:
+        final ImmutablePair<Object, Object> pair = (ImmutablePair<Object, Object>) predicate.getRhs();
+        whereClause.append(columnName).append(predicate.getOper().toString())
+            .append(pair.getLeft())
+            .append(" AND ")
+            .append(pair.getRight());
         break;
       default:
         throw new RuntimeException("Unsupported predicate type:" + predicate.getOper());

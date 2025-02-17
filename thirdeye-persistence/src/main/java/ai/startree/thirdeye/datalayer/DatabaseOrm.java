@@ -203,4 +203,10 @@ public class DatabaseOrm {
       sample.stop(dbCrudTimerOfRead);
     }
   }
+
+  public <E extends AbstractEntity> String generateMatchingIdsQuery(
+      final Predicate predicate, final Long limit, final Long offset, final Class<E> clazz) {
+    return sqlQueryBuilder.createFindColumnByParamsStatementWithLimitQuery(
+        clazz, getIdColumnName(clazz), predicate, limit, offset);
+  }
 }

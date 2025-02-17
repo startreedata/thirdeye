@@ -32,18 +32,22 @@ import ai.startree.thirdeye.datalayer.DatabaseOrm;
 import ai.startree.thirdeye.datalayer.entity.AbstractIndexEntity;
 import ai.startree.thirdeye.datalayer.entity.GenericJsonEntity;
 import ai.startree.thirdeye.datalayer.entity.SubEntityType;
+import ai.startree.thirdeye.datalayer.entity.TaskEntity;
 import ai.startree.thirdeye.spi.ThirdEyeException;
 import ai.startree.thirdeye.spi.ThirdEyeStatus;
 import ai.startree.thirdeye.spi.datalayer.DaoFilter;
 import ai.startree.thirdeye.spi.datalayer.Predicate;
 import ai.startree.thirdeye.spi.datalayer.dto.AbstractDTO;
+import ai.startree.thirdeye.spi.datalayer.dto.TaskDTO;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.lang.reflect.Field;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -398,5 +402,50 @@ public class GenericPojoDao {
     final List<Long> idsToDelete = fetchIds(
         new DaoFilter().setPredicate(predicate).setBeanClass(pojoClass));
     return delete(idsToDelete, pojoClass);
+  }
+
+  /**
+   * Use this method when you want to fetch entities out a subset of the entities based on predicates,
+   * limits, offsets, etc.
+   *
+   * This method is an optimized version of get(final DaoFilter daoFilter)
+   * where we make a single combined query of the form
+   * select * from generic_json_entity where id in (select based_id from index_class where CONDITIONS)
+   *
+   * @param daoFilter required filters to fetch the result.
+   */
+  public <E extends AbstractDTO> List<E> getV2(final DaoFilter daoFilter) {
+    final Class<? extends AbstractIndexEntity> indexClass = BEAN_INDEX_MAP.get(
+        daoFilter.getBeanClass());
+
+    final String matchingIdsQuery = databaseOrm.generateMatchingIdsQuery(
+        daoFilter.getPredicate(),
+        daoFilter.getLimit(),
+        daoFilter.getOffset(),
+        indexClass);
+    final String parameterizedSQL = String.format("WHERE %s in ( %s )",
+        databaseOrm.getIdColumnName(GenericJsonEntity.class),
+        matchingIdsQuery);
+
+    try {
+      final List<GenericJsonEntity> entities = databaseClient.executeTransaction(
+          (connection) -> databaseOrm.runSQL(
+              parameterizedSQL,
+              Collections.emptyMap(),
+              GenericJsonEntity.class,
+              connection));
+      final List<E> results = new ArrayList<>();
+      if (CollectionUtils.isNotEmpty(entities)) {
+        for (final GenericJsonEntity entity : entities) {
+          final E e = toDto(entity, (Class<E>) daoFilter.getBeanClass());
+          results.add(e);
+        }
+      }
+      return results;
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      // TODO ANSHUL design - surface exception ?
+      return Collections.emptyList();
+    }
   }
 }

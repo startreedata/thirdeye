@@ -74,9 +74,12 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
   private static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(10,
       new ThreadFactoryBuilder().setNameFormat("anomaly-manager-%d").build());
 
+  protected final GenericPojoDao genericPojoDao;
+
   @Inject
   public AnomalyManagerImpl(final GenericPojoDao genericPojoDao) {
     super(AnomalyDTO.class, genericPojoDao);
+    this.genericPojoDao = genericPojoDao;
   }
 
   @Override
@@ -195,7 +198,8 @@ public class AnomalyManagerImpl extends AbstractManagerImpl<AnomalyDTO>
 
   @Override
   public List<AnomalyDTO> filter(final DaoFilter daoFilter) {
-    final List<AnomalyDTO> anomalies = super.filter(daoFilter);
+    final List<AnomalyDTO> anomalies = genericPojoDao.getV2(
+        daoFilter.setBeanClass(AnomalyDTO.class));
     // FIXME CYRIL this filter is only decorating with feedback - while some others decorate with feedback and children
     return decorateWithFeedback(anomalies);
   }

@@ -27,7 +27,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.math3.analysis.function.Abs;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Singleton

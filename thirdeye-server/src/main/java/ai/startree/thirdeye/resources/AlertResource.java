@@ -97,17 +97,6 @@ public class AlertResource extends CrudResource<AlertApi, AlertDTO> {
     this.alertService = alertService;
   }
 
-  @Path("{id}/insights")
-  @GET
-  @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})
-  @Produces(MediaType.APPLICATION_JSON)
-  @Deprecated(forRemoval = true)
-  public Response getInsights(
-      @Parameter(hidden = true) @Auth final ThirdEyeServerPrincipal principal,
-      @PathParam("id") final Long id) {
-    return Response.ok(alertService.getInsightsById(principal, id)).build();
-  }
-
   @Path("insights")
   @POST
   @Timed(percentiles = {0.5, 0.75, 0.90, 0.95, 0.98, 0.99, 0.999})

@@ -120,15 +120,36 @@ export const SqlQueryView = (): JSX.Element => {
             isMultiDimensionAlert: true,
         });
         setWorkingAlert(workingAlertUpdated);
+        setApiState({
+            ...apiState,
+            alertRecommedationState: {
+                ...apiState.alertRecommedationState,
+                status: ActionStatus.Working,
+            },
+        });
         getAlertRecommendation(workingAlertUpdated as EditableAlert)
             .then((recommendations) => {
                 setAlertRecommendations(recommendations);
+                setApiState({
+                    ...apiState,
+                    alertRecommedationState: {
+                        ...apiState.alertRecommedationState,
+                        status: ActionStatus.Done,
+                    },
+                });
             })
             .catch(() => {
                 notify(
                     NotificationTypeV1.Error,
                     t("errors.could-not-compute-detection-recommendations")
                 );
+                setApiState({
+                    ...apiState,
+                    alertRecommedationState: {
+                        ...apiState.alertRecommedationState,
+                        status: ActionStatus.Error,
+                    },
+                });
             });
         const start = alertInsight?.defaultStartTime;
         const end = alertInsight?.defaultEndTime;

@@ -33,7 +33,7 @@ import { useCreateAlertStore } from "../../hooks/state";
 
 export const SelectDatasetAndMetric = (): JSX.Element => {
     const { t } = useTranslation();
-    const { datasetsInfo } = useGetDatasourcesTree();
+    const { datasetsInfo, isDatasourcesTreeLoading } = useGetDatasourcesTree();
     const {
         selectedDataset,
         selectedMetric,
@@ -54,6 +54,7 @@ export const SelectDatasetAndMetric = (): JSX.Element => {
                                 getOptionLabel={(option) =>
                                     option.dataset.name as string
                                 }
+                                loading={isDatasourcesTreeLoading}
                                 noOptionsText={t(
                                     "message.no-options-available-entity",
                                     { entity: t("label.dataset") }

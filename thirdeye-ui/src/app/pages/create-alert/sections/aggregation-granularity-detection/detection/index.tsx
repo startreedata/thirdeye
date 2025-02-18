@@ -13,7 +13,7 @@
  * the License.
  */
 // external
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Box, CircularProgress, Grid, Typography } from "@material-ui/core";
 import { useTranslation } from "react-i18next";
 
@@ -48,6 +48,7 @@ import { MultipleDimensionView } from "./multiple-dimension";
 // utils
 import { defaultStartingAlert, getWorkingAlert } from "../../../utils";
 import { notifyIfErrors } from "../../../../../utils/notifications/notifications.util";
+import { ActionStatus } from "../../../../../rest/actions.interfaces";
 
 export const SelectDetection = (): JSX.Element => {
     const { t } = useTranslation();
@@ -71,7 +72,8 @@ export const SelectDetection = (): JSX.Element => {
         setApiState,
     } = useCreateAlertStore();
     const { notify } = useNotificationProviderV1();
-    const [alertInsightLoading] = useState(false);
+    const alertInsightLoading =
+        apiState.insightState?.status === ActionStatus.Working;
 
     const { getEvaluation, evaluation, status, errorMessages } =
         useGetEvaluation();
@@ -100,6 +102,13 @@ export const SelectDetection = (): JSX.Element => {
     const handleAnomalyDetectionChange = async (
         item: string
     ): Promise<void> => {
+        setApiState({
+            ...apiState,
+            alertRecommedationState: {
+                ...apiState.alertRecommedationState,
+                status: ActionStatus.Working,
+            },
+        });
         setAnomalyDetectionType(item);
         let updatedAlert = workingAlert;
         if (item === AnomalyDetectionOptions.SINGLE) {
@@ -137,12 +146,26 @@ export const SelectDetection = (): JSX.Element => {
             getAlertRecommendation(workingAlert as EditableAlert)
                 .then((recommendations) => {
                     setAlertRecommendations(recommendations);
+                    setApiState({
+                        ...apiState,
+                        alertRecommedationState: {
+                            ...apiState.alertRecommedationState,
+                            status: ActionStatus.Done,
+                        },
+                    });
                 })
                 .catch(() => {
                     notify(
                         NotificationTypeV1.Error,
                         t("errors.could-not-compute-detection-recommendations")
                     );
+                    setApiState({
+                        ...apiState,
+                        alertRecommedationState: {
+                            ...apiState.alertRecommedationState,
+                            status: ActionStatus.Error,
+                        },
+                    });
                 });
             const start = updatedAlertInsight?.defaultStartTime;
             const end = updatedAlertInsight?.defaultEndTime;
@@ -197,7 +220,7 @@ export const SelectDetection = (): JSX.Element => {
                             style={{ marginLeft: "4px" }}
                             variant="caption"
                         >
-                            {t("label.loading-insights")}
+                            {t("label.setting-up-detection")}
                         </Typography>
                     </Box>
                 )}

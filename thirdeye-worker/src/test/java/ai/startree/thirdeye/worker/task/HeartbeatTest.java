@@ -67,8 +67,7 @@ public class HeartbeatTest {
   public void setUp() {
     config = new TaskDriverConfiguration()
         .setRandomWorkerIdEnabled(true)
-        .setHeartbeatInterval(HEARTBEAT_INTERVAL)
-        .setNewAcquisitionLogic(true);
+        .setHeartbeatInterval(HEARTBEAT_INTERVAL);
 
     taskManager = Mockito.mock(TaskManager.class);
 

@@ -440,10 +440,11 @@ public class GenericPojoDao {
               Collections.emptyMap(),
               GenericJsonEntity.class,
               connection));
-      final List<E> results = new ArrayList<>();
+      final List<E> results = new ArrayList<>(entities.size());
       if (CollectionUtils.isNotEmpty(entities)) {
+        Class<E> beanClass = (Class<E>) daoFilter.getBeanClass();
         for (final GenericJsonEntity entity : entities) {
-          final E e = toDto(entity, (Class<E>) daoFilter.getBeanClass());
+          final E e = toDto(entity, beanClass);
           results.add(e);
         }
       }

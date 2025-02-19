@@ -442,7 +442,7 @@ public class GenericPojoDao {
               connection));
       final List<E> results = new ArrayList<>(entities.size());
       if (CollectionUtils.isNotEmpty(entities)) {
-        Class<E> beanClass = (Class<E>) daoFilter.getBeanClass();
+        final Class<E> beanClass = (Class<E>) daoFilter.getBeanClass();
         for (final GenericJsonEntity entity : entities) {
           final E e = toDto(entity, beanClass);
           results.add(e);

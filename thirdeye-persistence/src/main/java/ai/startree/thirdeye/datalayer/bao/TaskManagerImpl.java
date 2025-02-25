@@ -235,7 +235,16 @@ public class TaskManagerImpl implements TaskManager {
     final List<TaskDTO> orphanTasks = findByPredicate(
         Predicate.AND(
             Predicate.EQ("status", TaskStatus.RUNNING.toString()),
-            Predicate.LT("lastActive", activeThreshold)
+            Predicate.OR(
+                // tasks for which the worker is not sending heartbeats anymore
+                Predicate.LT("lastActive", activeThreshold),
+                // tasks that are stuck with no heartbeat - can only happen with the legacy task execution logic, in the new task execution logic lastActive is set at the same time a task is set to RUNNING status  
+                // can be removed around July 2025
+                Predicate.AND(
+                    Predicate.EQ("lastActive", null),
+                    Predicate.LT("updateTime", activeThreshold)
+                )
+            )
         )
     );
     orphanTasksGauge.set(orphanTasks.size());

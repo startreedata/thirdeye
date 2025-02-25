@@ -115,7 +115,6 @@ data:
       {{- end }}
       heartbeatInterval: {{ .Values.worker.config.heartbeatInterval | default 30 }}
       activeThresholdMultiplier: {{ .Values.worker.config.activeThresholdMultiplier | default 30 }}
-      newAcquisitionLogic: {{ .Values.worker.config.newAcquisitionLogic | default false }}
     
     defaultWorkspaceConfiguration:
       timeConfiguration:

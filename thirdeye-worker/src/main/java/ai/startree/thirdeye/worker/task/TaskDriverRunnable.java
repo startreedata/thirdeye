@@ -22,7 +22,6 @@ import ai.startree.thirdeye.spi.task.TaskInfo;
 import ai.startree.thirdeye.spi.task.TaskStatus;
 import ai.startree.thirdeye.spi.task.TaskType;
 import com.google.inject.Singleton;
-import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.Timer;
 import io.micrometer.core.instrument.Timer.Sample;
@@ -52,7 +51,6 @@ public class TaskDriverRunnable implements Runnable {
   private final Timer taskRunTimerOfSuccess;
   private final Timer taskRunTimerOfException;
   private final Timer taskWaitTimer;
-  private final Counter taskConcurrentAcquisition;
 
   public TaskDriverRunnable(final TaskContext taskContext) {
     this.taskContext = taskContext;
@@ -79,15 +77,12 @@ public class TaskDriverRunnable implements Runnable {
         .description(
             "Start: a task is created in the persistence layer. End: the task is picked by a task runner for execution.")
         .register(Metrics.globalRegistry);
-    taskConcurrentAcquisition = Counter.builder("thirdeye_task_concurrent_acquisition")
-        .description("Count the number of time a worker fails to take a lock on a task because the task is locked by another process (most likely another worker).")
-        .register(Metrics.globalRegistry);
   }
 
   public void run() {
     while (!isShutdown()) {
       // select a task to execute, and update it to RUNNING
-      final TaskDTO taskDTO = config.isNewAcquisitionLogic() ? waitForTask() : waitForTaskLegacy();
+      final TaskDTO taskDTO = waitForTask();
       if (taskDTO == null) {
         continue;
       }
@@ -158,52 +153,6 @@ public class TaskDriverRunnable implements Runnable {
     // execute the selected task asynchronously
     return taskDriverThreadPoolManager.getTaskExecutorService()
         .submit(() -> taskRunner.execute(taskInfo, taskContext, taskDTO.namespace()));
-  }
-
-  /**
-   * Returns a TaskDTO if a task is successfully acquired; returns null if system is shutting down.
-   *
-   * @return null if system is shutting down.
-   */
-  @Deprecated
-  private TaskDTO waitForTaskLegacy() {
-    while (!isShutdown()) {
-      final TaskDTO nextTask;
-      try {
-        nextTask = taskManager.findNextTaskToRun();
-      } catch (Exception e) {
-        LOG.error("Failed to fetch a new task to run", e);
-        idleTimer().record(() -> sleep(true));
-        continue;
-      }
-      if (nextTask == null) {
-        // no task found
-        idleTimer().record(() -> sleep(false));
-        continue;
-      }
-      if (isShutdown()) {
-        break;
-      }
-      try {
-        boolean success = taskManager.acquireTaskToRun(nextTask, workerId);
-        if (success) {
-          final long waitTime = System.currentTimeMillis() - nextTask.getCreateTime().getTime();
-          taskWaitTimer.record(waitTime, TimeUnit.MILLISECONDS);
-          return nextTask;
-        } else {
-          taskConcurrentAcquisition.increment();
-          LOG.debug("Failed to acquire task {} referencing {} from worker id {}. Task was locked, or edited by another transaction.)", nextTask.getId(),
-              nextTask.getRefId(), workerId);
-          // don't sleep - look for a next task
-          continue;  
-        }
-      } catch (Exception e) {
-        LOG.warn("Failed to acquire task {} from worker id {})", nextTask, workerId, e);
-        idleTimer().record(() -> sleep(true));
-        continue;
-      }
-    }
-    return null;
   }
 
   /**

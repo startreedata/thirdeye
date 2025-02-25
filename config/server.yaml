@@ -96,8 +96,8 @@ taskDriver:
   # must be a non-negative integer unique per instance/worker
   # must be omitted when `randomWorkerIdEnabled` is set `true`
   id: 0
-  # whether to use the new task acquisition logic (beta) or the old one (slow) 
-  newAcquisitionLogic: false
+  # deprecated enabled by default - kept to ensure it's not breaking config parsing - can be removed July 2025 
+  newAcquisitionLogic: true
 
 rca:
   # default values - structure example

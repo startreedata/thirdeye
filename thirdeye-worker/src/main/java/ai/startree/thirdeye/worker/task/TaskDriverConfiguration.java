@@ -13,6 +13,7 @@
  */
 package ai.startree.thirdeye.worker.task;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.Duration;
 
 public class TaskDriverConfiguration {
@@ -31,8 +32,8 @@ public class TaskDriverConfiguration {
   private int taskFetchSizeCap = 50;
   private int maxParallelTasks = 5;
   
-  // still experimental -- TODO CYRIL - set to true once validated and stable - then remove
-  private boolean newAcquisitionLogic = false;
+  @JsonIgnore // not used anymore - newAcquisitionLogic is enabled by default now - can be removed July 2025
+  private boolean newAcquisitionLogic = true;
 
   public Long getId() {
     return id;
@@ -133,10 +134,12 @@ public class TaskDriverConfiguration {
     return this;
   }
 
+  @Deprecated(forRemoval = true)  // can be removed July 2025
   public boolean isNewAcquisitionLogic() {
     return newAcquisitionLogic;
   }
 
+  @Deprecated(forRemoval = true) // can be removed July 2025
   public TaskDriverConfiguration setNewAcquisitionLogic(
       final boolean newAcquisitionLogic) {
     this.newAcquisitionLogic = newAcquisitionLogic;

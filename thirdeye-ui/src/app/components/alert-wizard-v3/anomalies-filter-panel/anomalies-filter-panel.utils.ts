@@ -53,6 +53,18 @@ export const getAvailableFilterOptions = (
                     filteringPropertiesBySubStep;
             }
         }
+        if (property.step === "DETECTION") {
+            if (
+                property.name !== "lookback" &&
+                property.name !== "sensitivity"
+            ) {
+                const bucket = filteringPropertiesBySubStep["DETECTION"] || [];
+                bucket.push(property);
+                filteringPropertiesBySubStep["DETECTION"] = bucket;
+                filteringPropertiesByStep[property.step] =
+                    filteringPropertiesBySubStep;
+            }
+        }
         // const bucket = filteringPropertiesBySubStep[property.subStep] || [];
         // bucket.push(property);
         // filteringPropertiesBySubStep[property.subStep] = bucket;

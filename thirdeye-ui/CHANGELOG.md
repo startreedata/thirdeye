@@ -1,3 +1,10 @@
+### [2.52.8](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.52.7...thirdeye-ui-2.52.8) (2024-10-24)
+
+
+### Bug Fixes
+
+* [TE-2492](https://cortexdata.atlassian.net/browse/TE-2492) redirect loop from home page fixed ([0a1bd3059](https://github.com/startreedata/thirdeye/commit/0a1bd3059142ab36ffec98ae3b6b7f10128c312b))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

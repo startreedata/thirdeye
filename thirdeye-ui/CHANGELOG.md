@@ -1,3 +1,16 @@
+## [2.55.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.54.8...thirdeye-ui-2.55.0) (2024-11-25)
+
+
+### Features
+
+* [TE-2531](https://cortexdata.atlassian.net/browse/TE-2531) update workspace selector ([b902c29b0](https://github.com/startreedata/thirdeye/commit/b902c29b0c27c2168a49fdfdbe9f7462710e1d6f))
+
+
+### Bug Fixes
+
+* [TE-2551](https://cortexdata.atlassian.net/browse/TE-2551) load all tasks in admin page ([318ac7f3d](https://github.com/startreedata/thirdeye/commit/318ac7f3d88a786393f199c3e8c06e715b3e432d))
+* TE-XX fixed regression issues in create alert ([bbedea0b3](https://github.com/startreedata/thirdeye/commit/bbedea0b3b4bb2f8d98ed7067658d59cf3864870))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

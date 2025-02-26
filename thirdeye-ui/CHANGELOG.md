@@ -1,3 +1,16 @@
+## [2.57.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.56.1...thirdeye-ui-2.57.0) (2024-12-17)
+
+
+### Features
+
+* [TE-2550](https://cortexdata.atlassian.net/browse/TE-2550) allow user to add anomaly duration in subscription groups ([e3b32e4df](https://github.com/startreedata/thirdeye/commit/e3b32e4df12a9eacd0457cc96d8b1e45dad101de))
+
+
+### Bug Fixes
+
+* [TE-2544](https://cortexdata.atlassian.net/browse/TE-2544) impact dashbaord feedback ([becb31303](https://github.com/startreedata/thirdeye/commit/becb31303bd91dc09f83b02f2f7089fc1fad79a5))
+* [TE-2572](https://cortexdata.atlassian.net/browse/TE-2572) fix radio options not showing in anomaly confirmation modal ([21335273b](https://github.com/startreedata/thirdeye/commit/21335273b10da93f4d12ff2a5968b32620cb2259))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

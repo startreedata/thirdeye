@@ -1,3 +1,11 @@
+### [2.61.4](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.61.3...thirdeye-ui-2.61.4) (2025-02-05)
+
+
+### Bug Fixes
+
+* TE-XX create alert refactor ([64da9bbca](https://github.com/startreedata/thirdeye/commit/64da9bbcaa8682ffcce0504d753e45b87ce68dd0))
+* TE-XXXX alert list refactor ([f9e0a63b5](https://github.com/startreedata/thirdeye/commit/f9e0a63b50327440d178404d1b88d36981d55958))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

@@ -1,3 +1,10 @@
+### [2.60.2](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.60.1...thirdeye-ui-2.60.2) (2025-01-21)
+
+
+### Bug Fixes
+
+* TE-XXX quota notif modal fix ([b3ef7cda8](https://github.com/startreedata/thirdeye/commit/b3ef7cda89940f96151a99872b82d308114658a6))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

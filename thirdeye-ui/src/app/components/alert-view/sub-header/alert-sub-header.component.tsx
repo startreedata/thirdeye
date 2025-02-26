@@ -46,7 +46,7 @@ export const AlertViewSubHeader: FunctionComponent<AlertViewSubHeaderProps> = ({
     const getAlertInsightQuery = useFetchQuery({
         queryKey: ["alertInsight", alert.id],
         queryFn: () => {
-            return getAlertInsight({ alertId: alert.id });
+            return getAlertInsight({ alert });
         },
     });
 

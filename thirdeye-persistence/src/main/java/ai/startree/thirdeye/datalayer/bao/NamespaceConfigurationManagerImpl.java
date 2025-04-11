@@ -29,6 +29,8 @@ import ai.startree.thirdeye.spi.datalayer.dto.TemplateConfigurationDTO;
 import ai.startree.thirdeye.spi.datalayer.dto.TimeConfigurationDTO;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.Metrics;
 import java.util.List;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -40,6 +42,8 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
   private final @Nullable TimeConfiguration timeConfiguration;
   private final NamespaceConfigurationDTO defaultNamespaceConfiguration;
 
+  private final Counter namespaceConfigurationInvalidStateCounter;
+
   @Inject
   public NamespaceConfigurationManagerImpl(final NamespaceConfigurationDao dao,
       final @Nullable TimeConfiguration timeConfiguration,
@@ -47,6 +51,9 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
     this.dao = dao;
     this.timeConfiguration = timeConfiguration;
     this.defaultNamespaceConfiguration = defaultNamespaceConfiguration;
+    this.namespaceConfigurationInvalidStateCounter = Counter.builder(
+            "thirdeye_invalid_namespace_configuration_state_total")
+        .register(Metrics.globalRegistry);
   }
 
   public @NonNull NamespaceConfigurationDTO getNamespaceConfiguration(final String namespace) {
@@ -137,6 +144,9 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
         "namespace", namespace));
     final List<NamespaceConfigurationDTO> results = filter(daoFilter);
     if (results != null && !results.isEmpty()) {
+      if (results.size() != 1) {
+        namespaceConfigurationInvalidStateCounter.increment();
+      }
       checkState(results.size() == 1,
           "Invalid state. Multiple namespace configuration exist for namespace %s. Contact support",
           namespace);

@@ -51,7 +51,7 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
     this.dao = dao;
     this.timeConfiguration = timeConfiguration;
     this.defaultNamespaceConfiguration = defaultNamespaceConfiguration;
-    this.namespaceConfigurationInvalidStateCounter = io.micrometer.core.instrument.Counter.builder(
+    this.namespaceConfigurationInvalidStateCounter = Counter.builder(
             "thirdeye_invalid_namespace_configuration_state_total")
         .register(Metrics.globalRegistry);
   }

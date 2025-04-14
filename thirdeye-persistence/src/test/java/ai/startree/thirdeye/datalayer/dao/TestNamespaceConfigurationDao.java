@@ -150,7 +150,7 @@ public class TestNamespaceConfigurationDao {
 
   @Test
   public void deleteTest() {
-    final NamespaceConfigurationDTO dto = buildNamespaceConfiguration(null);
+    final NamespaceConfigurationDTO dto = buildNamespaceConfiguration("__NULL__");
     Long id = dao.put(dto);
     assertThat(id).isGreaterThan(0L);
     dto.setId(id);

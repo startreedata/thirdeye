@@ -14,7 +14,7 @@ jobs:
         name: Validate PR title
         permissions:
             pull-requests: read
-        runs-on: ubuntu-latest
+        runs-on: 2vcpu-8gb-on-demand-runner
         timeout-minutes: 5
         steps:
             - id: filter
@@ -50,7 +50,7 @@ jobs:
         permissions:
             contents: read
             pull-requests: write
-        runs-on: ubuntu-latest
+        runs-on: 2vcpu-8gb-on-demand-runner
         timeout-minutes: 5
         steps:
             - name: Assign labels

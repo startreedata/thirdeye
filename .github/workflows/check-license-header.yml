@@ -8,7 +8,7 @@ on:
 
 jobs:
   header-check:
-    runs-on: ubuntu-latest
+    runs-on: 2vcpu-8gb-on-demand-runner
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4

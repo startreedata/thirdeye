@@ -1,3 +1,13 @@
+### [2.61.5](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.61.4...thirdeye-ui-2.61.5) (2025-02-13)
+
+
+### Bug Fixes
+
+* [TE-2643](https://cortexdata.atlassian.net/browse/TE-2643) remove previous period compare btn ([52cb350e4](https://github.com/startreedata/thirdeye/commit/52cb350e485df2c305b2c19e1fe2a99593ca0c0d))
+* [TE-2647](https://cortexdata.atlassian.net/browse/TE-2647) anomaly list filter with multiple alert fix ([8e07c3c49](https://github.com/startreedata/thirdeye/commit/8e07c3c496005450c5b0cb9219b429bca1fe8fb2))
+* TE-XX redirect to new json and advanced editors ([25a8dba67](https://github.com/startreedata/thirdeye/commit/25a8dba67a74ec9ecf96d4efb3821e30fbb9b4dd))
+* TE-XXXX fix required properties getting reset on applying advanced properties ([85278ac76](https://github.com/startreedata/thirdeye/commit/85278ac763007b42d01df0ad7dc4af7b043cf31d))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

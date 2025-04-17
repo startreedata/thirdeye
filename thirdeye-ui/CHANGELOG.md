@@ -1,3 +1,10 @@
+### [2.52.5](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.52.4...thirdeye-ui-2.52.5) (2024-10-24)
+
+
+### Bug Fixes
+
+* TE-XX redirect to new create easy alert page ([623003e33](https://github.com/startreedata/thirdeye/commit/623003e339dab1f20dac0b73af80534dd2f96777))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

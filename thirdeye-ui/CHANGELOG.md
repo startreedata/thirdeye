@@ -1,3 +1,11 @@
+### [2.52.3](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.52.2...thirdeye-ui-2.52.3) (2024-10-23)
+
+
+### Bug Fixes
+
+* [TE-2492](https://cortexdata.atlassian.net/browse/TE-2492) fix sidebar and app header not showing ([bb5f2026b](https://github.com/startreedata/thirdeye/commit/bb5f2026b0516e462c065dfbeb8bd59981e91f55))
+* [TE-2492](https://cortexdata.atlassian.net/browse/TE-2492) remove auth check for sidebar and header ([f9e73da74](https://github.com/startreedata/thirdeye/commit/f9e73da74220b5542e2a7360fafea9ea5c6b0894))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

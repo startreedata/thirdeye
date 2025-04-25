@@ -1,3 +1,10 @@
+### [2.52.2](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.52.1...thirdeye-ui-2.52.2) (2024-10-22)
+
+
+### Bug Fixes
+
+* [TE-2442](https://cortexdata.atlassian.net/browse/TE-2442) auto create recommended datasource ([2feb12c57](https://github.com/startreedata/thirdeye/commit/2feb12c57f05dee3deceb2a1d560c38a52aa0024))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

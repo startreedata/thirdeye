@@ -16,4 +16,5 @@ import { Alert } from "../../../rest/dto/alert.interfaces";
 
 export interface AlertStatusProps {
     alert: Alert;
+    isLoading?: boolean;
 }

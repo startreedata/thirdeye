@@ -17,11 +17,19 @@ import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import HighlightOffIcon from "@material-ui/icons/HighlightOff";
 import React, { FunctionComponent } from "react";
 import { useTranslation } from "react-i18next";
+import { SkeletonV1 } from "../../../platform/components/skeleton-v1/skeleton-v1.component";
 import { AlertStatusProps } from "./alert-status.interfaces";
 
-export const AlertStatus: FunctionComponent<AlertStatusProps> = ({ alert }) => {
+export const AlertStatus: FunctionComponent<AlertStatusProps> = ({
+    alert,
+    isLoading,
+}) => {
     const theme = useTheme();
     const { t } = useTranslation();
+
+    if (isLoading) {
+        return <SkeletonV1 width="100px" />;
+    }
 
     return (
         <>

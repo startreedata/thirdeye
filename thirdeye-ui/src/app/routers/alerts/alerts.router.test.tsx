@@ -18,6 +18,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { AppLoadingIndicatorV1 } from "../../platform/components/app-loading-indicator-v1/app-loading-indicator-v1.component";
 import { AppRoute, AppRouteRelative } from "../../utils/routes/routes.util";
 import { AlertsRouter } from "./alerts.router";
+import axios from "axios";
 
 jest.mock("react-i18next", () => ({
     useTranslation: jest.fn().mockReturnValue({
@@ -133,6 +134,9 @@ describe("Alerts Router", () => {
     });
 
     it("should render alerts view page at exact alerts view path", async () => {
+        jest.spyOn(axios, "get").mockResolvedValueOnce({
+            data: {},
+        });
         render(
             <MemoryRouter initialEntries={[`/alerts/1234`]}>
                 <Routes>

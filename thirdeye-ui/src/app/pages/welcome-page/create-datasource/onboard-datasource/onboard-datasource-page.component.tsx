@@ -110,7 +110,7 @@ export const WelcomeSelectDatasource: FunctionComponent = () => {
     }, []);
 
     useEffect(() => {
-        if (datasourcesStatus === ActionStatus.Done && isEmpty(datasources)) {
+        if (datasourcesStatus === ActionStatus.Done) {
             getRecommendedDatasource();
         }
     }, [datasourcesStatus, datasources]);
@@ -132,6 +132,7 @@ export const WelcomeSelectDatasource: FunctionComponent = () => {
                     );
                 });
         }
+        recommendedDatasource && setEditedDatasource(recommendedDatasource);
     }, [recommendedDatasource, datasources]);
 
     useEffect(() => {

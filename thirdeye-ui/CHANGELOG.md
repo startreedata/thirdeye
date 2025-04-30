@@ -1,3 +1,11 @@
+### [2.54.8](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.54.7...thirdeye-ui-2.54.8) (2024-11-22)
+
+
+### Bug Fixes
+
+* [TE-2556](https://cortexdata.atlassian.net/browse/TE-2556) show alert name on anomaly details page ([29c1bcbf0](https://github.com/startreedata/thirdeye/commit/29c1bcbf065d9a0c3468ff176fa6c97a06194f15))
+* TE-XX fixed query filters for multi dimensional alert ([e61af3d3b](https://github.com/startreedata/thirdeye/commit/e61af3d3be37cba02ea658fcc67baec8d8425ab2))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

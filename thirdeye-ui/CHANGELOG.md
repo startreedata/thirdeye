@@ -1,3 +1,10 @@
+### [2.61.2](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.61.1...thirdeye-ui-2.61.2) (2025-01-24)
+
+
+### Bug Fixes
+
+* [TE-2635](https://cortexdata.atlassian.net/browse/TE-2635) fix chart load issue on date change in alert details ([aec90e092](https://github.com/startreedata/thirdeye/commit/aec90e092eb934cce112482d03f27984148a20bf))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

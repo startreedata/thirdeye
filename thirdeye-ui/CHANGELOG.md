@@ -1,3 +1,12 @@
+### [2.51.3](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.51.2...thirdeye-ui-2.51.3) (2024-10-09)
+
+
+### Bug Fixes
+
+* [TE-0](https://cortexdata.atlassian.net/browse/TE-0) fix typos in impact dashboard ([ced43078a](https://github.com/startreedata/thirdeye/commit/ced43078a939b9503f5e43e065701c80305394f6))
+* [TE-2461](https://cortexdata.atlassian.net/browse/TE-2461) send datasetEndTime in rerun anomaly detection ([2bf2a03d6](https://github.com/startreedata/thirdeye/commit/2bf2a03d6b6627570abbdd906644ebb37e41823e))
+* [TE-2471](https://cortexdata.atlassian.net/browse/TE-2471) close sections in swagger ui by default ([ea32f999d](https://github.com/startreedata/thirdeye/commit/ea32f999ddbfb6ba0fe0ef77b166c473656ce65f))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

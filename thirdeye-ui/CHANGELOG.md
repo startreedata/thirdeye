@@ -1,3 +1,11 @@
+### [2.61.7](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.61.6...thirdeye-ui-2.61.7) (2025-02-17)
+
+
+### Bug Fixes
+
+* TE-XXX remove alertId in insight call on edit page && call insight if config changes ([91ea06905](https://github.com/startreedata/thirdeye/commit/91ea0690539d4d3651839bb212e416ba6402ab12))
+* TE-XXXX flaky tests fix ([c346f16c6](https://github.com/startreedata/thirdeye/commit/c346f16c6e7a44433096de7955e9e70793f58871))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

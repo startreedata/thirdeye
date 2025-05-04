@@ -1,3 +1,10 @@
+### [2.61.6](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.61.5...thirdeye-ui-2.61.6) (2025-02-13)
+
+
+### Bug Fixes
+
+* TE-XXXX show loader when evaluation is running for enum query ([fa23026d0](https://github.com/startreedata/thirdeye/commit/fa23026d010ed1adca12b3abee72d5653c67ae13))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

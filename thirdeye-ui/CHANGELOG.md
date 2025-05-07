@@ -1,3 +1,10 @@
+### [2.61.8](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.61.7...thirdeye-ui-2.61.8) (2025-02-18)
+
+
+### Bug Fixes
+
+* TE-XXXX show loader for alert recommendations ([fbca0f1e3](https://github.com/startreedata/thirdeye/commit/fbca0f1e3434e3a1935d4f35e6e30c94d10f055b))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

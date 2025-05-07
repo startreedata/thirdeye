@@ -296,4 +296,4 @@ $ npm run ci-check
 
 ## Contributing
 
-[Coding standards, conventions and other things.](./CONTRIBUTING.md)
+[Coding standards, conventions and other guidelines.](./CONTRIBUTING.md)

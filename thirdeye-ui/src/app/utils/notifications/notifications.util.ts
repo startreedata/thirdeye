@@ -62,5 +62,5 @@ export const convertSlackConfigurationToSlackFormEntries = (
 };
 
 export const validateSlackMemberIDFormat = (memberId: string): boolean => {
-    return /^U[0-9A-Z]{10}$/.test(memberId);
+    return /^[US][0-9A-Z]{8,}$/.test(memberId);
 };

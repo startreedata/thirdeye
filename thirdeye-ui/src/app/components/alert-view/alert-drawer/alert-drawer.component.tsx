@@ -14,20 +14,25 @@
  */
 import {
     Box,
+    Button,
     Card,
+    ClickAwayListener,
     List,
     ListItem,
     ListItemText,
+    Popper,
+    PopperProps,
     Tooltip,
     Typography,
 } from "@material-ui/core";
 import { ChevronRight } from "@material-ui/icons";
-import { Alert } from "@material-ui/lab";
+import { Alert as MUIAlert } from "@material-ui/lab";
 import { useMutation } from "@tanstack/react-query";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
+    JSONEditorV2,
     NotificationTypeV1,
     useNotificationProviderV1,
 } from "../../../platform/components";
@@ -36,11 +41,15 @@ import {
     getAlertInsight,
     rerunAnomalyDetectionForAlert,
 } from "../../../rest/alerts/alerts.rest";
+import { Alert } from "../../../rest/dto/alert.interfaces";
 import {
+    AppRoute,
+    AppRouteRelative,
     createPathWithRecognizedQueryString,
     getAlertsAllPath,
     getAlertsCreateCopyPath,
     getAlertsUpdatePath,
+    getAlertsUpdatePathWithType,
     getAnomaliesCreatePath,
 } from "../../../utils/routes/routes.util";
 import { Modal } from "../../modal/modal.component";
@@ -54,12 +63,14 @@ const AlertDrawer: React.FC<AlertDrawerProps> = ({
     alert,
     onChange,
     onDetectionRerunSuccess,
+    handleAlertResetClick,
 }) => {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const { notify } = useNotificationProviderV1();
     const [isModalOpen, setIsModalOpen] = useState<boolean | string>("");
+    const [isTooltipOpen, setIsTooltipOpen] = useState("");
 
     const { mutateAsync, isLoading, isError } = useMutation({
         mutationFn: async (alertId: number) => {
@@ -72,6 +83,23 @@ const AlertDrawer: React.FC<AlertDrawerProps> = ({
             });
         },
     });
+
+    const CustomPopper = (popperProps: PopperProps): JSX.Element => {
+        const { anchorEl, open, disablePortal, modifiers, ...other } =
+            popperProps;
+
+        return (
+            <ClickAwayListener onClickAway={() => setIsTooltipOpen("")}>
+                <Popper
+                    anchorEl={anchorEl}
+                    disablePortal={disablePortal}
+                    modifiers={modifiers}
+                    open={open}
+                    {...other}
+                />
+            </ClickAwayListener>
+        );
+    };
 
     const handleAlertStateToggle = (): void => {
         if (!alert || !alert) {
@@ -91,12 +119,12 @@ const AlertDrawer: React.FC<AlertDrawerProps> = ({
         navigate(getAlertsCreateCopyPath(alert.id));
     };
 
-    const handleAlertEdit = (): void => {
+    const handleAlertEdit = (path: string): void => {
         if (!alert) {
             return;
         }
 
-        navigate(getAlertsUpdatePath(alert.id));
+        navigate(getAlertsUpdatePathWithType(alert.id, path));
     };
 
     const handleCreateAlertAnomaly = (): void => {
@@ -159,17 +187,26 @@ const AlertDrawer: React.FC<AlertDrawerProps> = ({
                         {
                             id: "alertWizard",
                             label: t("label.alert-wizard"),
-                            onClick: () => handleAlertEdit(),
+                            onClick: () =>
+                                handleAlertEdit(
+                                    `${AppRoute.ALERTS_UPDATE}/${AppRouteRelative.ALERTS_UPDATE_SIMPLE}/${AppRouteRelative.ALERTS_CREATE_EASY_ALERT}`
+                                ),
                         },
                         {
                             id: "advancedJsonEditor",
                             label: t("label.advanced-json-editor"),
-                            onClick: () => handleAlertEdit(),
+                            onClick: () =>
+                                handleAlertEdit(
+                                    AppRoute.ALERTS_UPDATE_JSON_EDITOR_V2
+                                ),
                         },
                         {
                             id: "advancedOld",
                             label: t("label.advanced-old"),
-                            onClick: () => handleAlertEdit(),
+                            onClick: () =>
+                                handleAlertEdit(
+                                    `${AppRoute.ALERTS_UPDATE}/${AppRouteRelative.ALERTS_CREATE_ADVANCED_V2}`
+                                ),
                         },
                     ],
                 },
@@ -222,7 +259,18 @@ const AlertDrawer: React.FC<AlertDrawerProps> = ({
                             onClick: () =>
                                 setIsModalOpen("viewTaskStatusesForAlert"),
                         },
+                        {
+                            id: "resetAnomaliesForAlert",
+                            label: t("label.reset-anomalies-for-alert"),
+                            onClick: () =>
+                                setIsModalOpen("resetAnomaliesForAlert"),
+                        },
                     ],
+                },
+                {
+                    id: "viewDetectionConfiguration",
+                    label: t("message.view-detection-configuration"),
+                    onClick: () => setIsModalOpen("viewDetectionConfiguration"),
                 },
             ],
         },
@@ -245,8 +293,11 @@ const AlertDrawer: React.FC<AlertDrawerProps> = ({
             {optionsList.map((option) => (
                 <ListItem button key={option.id} onClick={option.onClick}>
                     <Tooltip
+                        disableHoverListener
                         interactive
+                        PopperComponent={CustomPopper}
                         classes={{ tooltip: classes.tooltip }}
+                        open={isTooltipOpen === option.id}
                         placement="right"
                         title={
                             option.subOptions ? (
@@ -258,7 +309,11 @@ const AlertDrawer: React.FC<AlertDrawerProps> = ({
                                             <ListItem
                                                 button
                                                 key={subOption.id}
-                                                onClick={subOption.onClick}
+                                                onClick={() => {
+                                                    subOption.onClick &&
+                                                        subOption.onClick();
+                                                    setIsTooltipOpen("");
+                                                }}
                                             >
                                                 <ListItemText
                                                     primary={subOption.label}
@@ -275,16 +330,34 @@ const AlertDrawer: React.FC<AlertDrawerProps> = ({
                                 ""
                             )
                         }
+                        onClose={() => setIsTooltipOpen("")}
+                        onOpen={() => setIsTooltipOpen(option.id)}
                     >
-                        <ListItemText
-                            primary={option.label}
-                            primaryTypographyProps={{
-                                variant: "body2",
-                                noWrap: true,
+                        <Box
+                            alignItems="space-between"
+                            display="flex"
+                            width="100%"
+                            onClick={() => {
+                                if (!option.subOptions) {
+                                    option.onClick && option.onClick();
+                                }
+                                if (isTooltipOpen === option.id) {
+                                    setIsTooltipOpen("");
+                                } else {
+                                    setIsTooltipOpen(option.id);
+                                }
                             }}
-                        />
+                        >
+                            <ListItemText
+                                primary={option.label}
+                                primaryTypographyProps={{
+                                    variant: "body2",
+                                    noWrap: true,
+                                }}
+                            />
+                            {option.subOptions && <ChevronRight />}
+                        </Box>
                     </Tooltip>
-                    {option.subOptions && <ChevronRight />}
                 </ListItem>
             ))}
         </List>
@@ -313,6 +386,43 @@ const AlertDrawer: React.FC<AlertDrawerProps> = ({
                         headerName={t("label.subscription-groups")}
                     />
                 </Box>
+            </Modal>
+            <Modal
+                isOpen={isModalOpen === "resetAnomaliesForAlert"}
+                setIsOpen={setIsModalOpen}
+                submitButtonLabel={t("label.confirm")}
+                onSubmit={handleAlertResetClick}
+            >
+                <p>{t("message.reset-alert-information")}</p>
+                <p>
+                    {t("message.reset-alert-confirmation-prompt", {
+                        alertName: alert?.name,
+                    })}
+                </p>
+            </Modal>
+            <Modal
+                cancelButtonLabel={t("label.close")}
+                footerActions={
+                    <Button
+                        className="dialog-provider-v1-cancel-button"
+                        onClick={() => {
+                            navigate(getAlertsUpdatePath(alert.id));
+                        }}
+                    >
+                        {t("label.edit")}
+                    </Button>
+                }
+                isOpen={isModalOpen === "viewDetectionConfiguration"}
+                maxWidth="md"
+                setIsOpen={setIsModalOpen}
+                title={t("message.view-detection-configuration")}
+            >
+                <JSONEditorV2<Alert>
+                    disableValidation
+                    readOnly
+                    actions={[]}
+                    value={alert}
+                />
             </Modal>
             <Modal
                 cancelButtonLabel={t("label.close")}
@@ -346,9 +456,9 @@ const AlertDrawer: React.FC<AlertDrawerProps> = ({
                 onSubmit={handleRerunAlert}
             >
                 {isError && (
-                    <Alert severity="error" variant="outlined">
+                    <MUIAlert severity="error" variant="outlined">
                         {t("message.an-error-was-experienced-while-trying-to")}
-                    </Alert>
+                    </MUIAlert>
                 )}
                 <p>
                     {t(

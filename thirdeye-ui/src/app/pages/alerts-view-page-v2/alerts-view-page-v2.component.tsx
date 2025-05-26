@@ -120,6 +120,7 @@ export const AlertsViewPageV2: FunctionComponent = () => {
         alert: alertThatWasReset,
         status: resetAlertRequestStatus,
         errorMessages: resetAlertRequestErrors,
+        resetAlert,
     } = useResetAlert();
 
     const getAlertQuery = useFetchQuery({
@@ -336,31 +337,33 @@ export const AlertsViewPageV2: FunctionComponent = () => {
         setExpanded(newExpanded);
     };
 
-    const handleAlertChange = (updatedAlert: Alert): void => {
+    const [isUpdating, setIsUpdating] = useState(false);
+
+    const handleAlertChange = async (updatedAlert: Alert): Promise<void> => {
         if (!updatedAlert) {
             return;
         }
 
-        updateAlert(updatedAlert).then(
-            () => {
-                notify(
-                    NotificationTypeV1.Success,
-                    t("message.update-success", { entity: t("label.alert") })
-                );
-
-                getAlertQuery.refetch();
-            },
-            (error) => {
-                notifyIfErrors(
-                    ActionStatus.Error,
-                    getErrorMessages(error),
-                    notify,
-                    t("message.update-error", {
-                        entity: t("label.alert"),
-                    })
-                );
-            }
-        );
+        setIsUpdating(true);
+        try {
+            await updateAlert(updatedAlert);
+            notify(
+                NotificationTypeV1.Success,
+                t("message.update-success", { entity: t("label.alert") })
+            );
+            await getAlertQuery.refetch();
+        } catch (error) {
+            notifyIfErrors(
+                ActionStatus.Error,
+                getErrorMessages(error as AxiosError),
+                notify,
+                t("message.update-error", {
+                    entity: t("label.alert"),
+                })
+            );
+        } finally {
+            setIsUpdating(false);
+        }
     };
 
     const handleSearchTermChange = (newTerm: string): void => {
@@ -452,6 +455,7 @@ export const AlertsViewPageV2: FunctionComponent = () => {
                                 <Grid item>
                                     <AlertStatus
                                         alert={getAlertQuery.data as Alert}
+                                        isLoading={isUpdating}
                                     />
                                 </Grid>
                                 <Grid item>
@@ -479,6 +483,19 @@ export const AlertsViewPageV2: FunctionComponent = () => {
                     <Grid item xs={2}>
                         <AlertDrawer
                             alert={getAlertQuery.data as Alert}
+                            handleAlertResetClick={() => {
+                                resetAlert(Number(alertId)).then(() => {
+                                    getAnomaliesQuery.refetch();
+
+                                    searchParams.set(
+                                        QUERY_PARAM_KEY_ANOMALIES_RETRY,
+                                        "true"
+                                    );
+                                    setSearchParams(searchParams, {
+                                        replace: true,
+                                    });
+                                });
+                            }}
                             onChange={handleAlertChange}
                             onDetectionRerunSuccess={
                                 handleAnomalyDetectionRerun

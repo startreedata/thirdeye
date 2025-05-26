@@ -1,3 +1,10 @@
+### [2.59.2](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.59.1...thirdeye-ui-2.59.2) (2025-01-16)
+
+
+### Bug Fixes
+
+* [TE-2625](https://cortexdata.atlassian.net/browse/TE-2625) property values in advanced drawer should be filled with the recommended values ([5a816740f](https://github.com/startreedata/thirdeye/commit/5a816740fd576a6718fe9d595223c82641d012af))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

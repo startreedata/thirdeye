@@ -1,3 +1,10 @@
+### [2.54.6](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.54.5...thirdeye-ui-2.54.6) (2024-11-21)
+
+
+### Bug Fixes
+
+* TE-XX fix query filters in simple alert ([9e6720e77](https://github.com/startreedata/thirdeye/commit/9e6720e77651abd2438749360950f7af550e6c88))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

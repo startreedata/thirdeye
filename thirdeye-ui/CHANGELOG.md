@@ -1,3 +1,10 @@
+## [2.60.0](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.59.2...thirdeye-ui-2.60.0) (2025-01-21)
+
+
+### Features
+
+* [TE-2626](https://cortexdata.atlassian.net/browse/TE-2626) free tier ui changes ([6f218a58b](https://github.com/startreedata/thirdeye/commit/6f218a58b84922d5f7ed35abb3c23988c369db52))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

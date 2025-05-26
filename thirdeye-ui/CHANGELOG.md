@@ -1,3 +1,10 @@
+### [2.53.1](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.53.0...thirdeye-ui-2.53.1) (2024-11-08)
+
+
+### Bug Fixes
+
+* TE-XX change default algorithm for simple alerts from mean variance to threshold ([4a34b7dc5](https://github.com/startreedata/thirdeye/commit/4a34b7dc582329cb718133ed8631233bb9bc18df))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

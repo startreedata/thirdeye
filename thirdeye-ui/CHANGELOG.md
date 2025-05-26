@@ -1,3 +1,10 @@
+### [2.61.1](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.61.0...thirdeye-ui-2.61.1) (2025-01-23)
+
+
+### Bug Fixes
+
+* TE-XXXX redirect to alert details after first alert ([6ecce8ce6](https://github.com/startreedata/thirdeye/commit/6ecce8ce60723c0a7adf1782bf1a7d495ea0b38c))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

@@ -25,7 +25,10 @@ import {
     TimeRangeQueryStringKey,
 } from "../../../components/time-range/time-range-provider/time-range-provider.interfaces";
 import { AppLoadingIndicatorV1 } from "../../../platform/components";
-import { useGetAlertInsight } from "../../../rest/alerts/alerts.actions";
+import {
+    useGetAlert,
+    useGetAlertInsight,
+} from "../../../rest/alerts/alerts.actions";
 import { useLastUsedSearchParams } from "../../../stores/last-used-params/last-used-search-params.store";
 import { AlertFetchRedirectParamsProps } from "./alert-fetch-redirect-params.interfaces";
 
@@ -34,6 +37,7 @@ export const AlertFetchRedirectParams: FunctionComponent<AlertFetchRedirectParam
         const [isLoading, setIsLoading] = useState(true);
         const { id: alertId } = useParams();
         const { alertInsight, getAlertInsight } = useGetAlertInsight();
+        const { alert, getAlert } = useGetAlert();
         const location = useLocation();
         const navigate = useNavigate();
         const [searchParams] = useSearchParams();
@@ -41,14 +45,16 @@ export const AlertFetchRedirectParams: FunctionComponent<AlertFetchRedirectParam
         let searchString: string | undefined;
 
         useEffect(() => {
-            if (alertId) {
-                getAlertInsight({ alertId: Number(alertId) }).finally(() =>
+            getAlert(Number(alertId));
+        }, [alertId]);
+
+        useEffect(() => {
+            if (alert) {
+                getAlertInsight({ alert: alert }).finally(() =>
                     setIsLoading(false)
                 );
-            } else {
-                setIsLoading(false);
             }
-        }, []);
+        }, [alert]);
 
         useEffect(() => {
             if (isLoading) {

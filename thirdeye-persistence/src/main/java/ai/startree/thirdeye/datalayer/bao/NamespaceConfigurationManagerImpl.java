@@ -38,6 +38,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 @Singleton
 public class NamespaceConfigurationManagerImpl implements NamespaceConfigurationManager {
 
+  private static final String NULL_NAMESPACE_KEY = "__NULL__";
+
   private final NamespaceConfigurationDao dao;
   private final @Nullable TimeConfiguration timeConfiguration;
   private final NamespaceConfigurationDTO defaultNamespaceConfiguration;
@@ -58,7 +60,7 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
 
   public @NonNull NamespaceConfigurationDTO getNamespaceConfiguration(final String namespace) {
     final NamespaceConfigurationDTO existingNamespaceConfig = fetchExistingNamespaceConfiguration(
-        namespace);
+        nonNullNamespace(namespace));
 
     // namespace config exists, update if components are empty
     if (existingNamespaceConfig != null) {
@@ -73,7 +75,7 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
       return existingNamespaceConfig;
     }
 
-    return createNewNamespaceConfiguration(namespace);
+    return createNewNamespaceConfiguration(nonNullNamespace(namespace));
   }
 
   /*
@@ -109,7 +111,7 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
       final NamespaceConfigurationDTO updatedNamespaceConfiguration) {
     final String namespace = updatedNamespaceConfiguration.namespace();
     final NamespaceConfigurationDTO existingNamespaceConfig = fetchExistingNamespaceConfiguration(
-        namespace);
+        nonNullNamespace(namespace));
     checkState(existingNamespaceConfig != null,
         "Trying to update non-existent namespace configuration for namespace %s",
         namespace);
@@ -124,7 +126,7 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
 
   public @NonNull NamespaceConfigurationDTO resetNamespaceConfiguration(final String namespace) {
     final NamespaceConfigurationDTO existingNamespaceConfig = fetchExistingNamespaceConfiguration(
-        namespace);
+        nonNullNamespace(namespace));
 
     // namespace config exists, update values to default
     if (existingNamespaceConfig != null) {
@@ -136,12 +138,12 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
       return existingNamespaceConfig;
     }
 
-    return createNewNamespaceConfiguration(namespace);
+    return createNewNamespaceConfiguration(nonNullNamespace(namespace));
   }
 
-  private NamespaceConfigurationDTO fetchExistingNamespaceConfiguration(String namespace) {
+  private NamespaceConfigurationDTO fetchExistingNamespaceConfiguration(final String namespace) {
     final DaoFilter daoFilter = new DaoFilter().setPredicate(Predicate.EQ(
-        "namespace", namespace));
+        "namespace", nonNullNamespace(namespace)));
     final List<NamespaceConfigurationDTO> results = filter(daoFilter);
     if (results != null && !results.isEmpty()) {
       if (results.size() != 1) {
@@ -158,7 +160,7 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
   private @NonNull NamespaceConfigurationDTO createNewNamespaceConfiguration(
       final String namespace) {
     final NamespaceConfigurationDTO namespaceConfigurationDTO = defaultNamespaceConfiguration(
-        namespace);
+        nonNullNamespace(namespace));
 
     final Long namespaceConfigurationId = save(namespaceConfigurationDTO);
     checkState(namespaceConfigurationId != null,
@@ -173,7 +175,7 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
         .setTimeConfiguration(defaultTimeConfiguration())
         .setTemplateConfiguration(defaultTemplateConfiguration())
         .setNamespaceQuotasConfiguration(defaultNamespaceQuotasConfiguration())
-        .setAuth(new AuthorizationConfigurationDTO().setNamespace(namespace));
+        .setAuth(new AuthorizationConfigurationDTO().setNamespace(nonNullNamespace(namespace)));
     return namespaceConfigurationDTO;
   }
 
@@ -241,5 +243,9 @@ public class NamespaceConfigurationManagerImpl implements NamespaceConfiguration
     return optional(defaultNamespaceConfiguration.getNamespaceQuotasConfiguration())
         .map(NamespaceQuotasConfigurationDTO::getTaskQuotasConfiguration)
         .orElse(new TaskQuotasConfigurationDTO());
+  }
+
+  private static @NonNull String nonNullNamespace(@Nullable String namespace) {
+    return namespace == null ? NULL_NAMESPACE_KEY : namespace;
   }
 }

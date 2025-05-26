@@ -121,8 +121,8 @@ export const LatestActiveAlerts: React.FunctionComponent<LatestActiveAlertsProps
                                                     )}
                                                     {t(
                                                         alert.active
-                                                            ? "label.healthy"
-                                                            : "label.unhealthy"
+                                                            ? "label.active"
+                                                            : "label.inactive"
                                                     )}
                                                 </Box>
                                             </TableCell>

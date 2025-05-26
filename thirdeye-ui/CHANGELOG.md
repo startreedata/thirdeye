@@ -1,3 +1,10 @@
+### [2.52.9](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.52.8...thirdeye-ui-2.52.9) (2024-10-25)
+
+
+### Bug Fixes
+
+* [TE-2492](https://cortexdata.atlassian.net/browse/TE-2492) redirect to home page after first alert creation ([ff78a8369](https://github.com/startreedata/thirdeye/commit/ff78a836974c2b4c0a2acfff930f3f7f222c7ec7))
+
 ### [2.45.19](https://github.com/startreedata/thirdeye/compare/thirdeye-ui-2.45.18...thirdeye-ui-2.45.19) (2024-05-06)
 
 

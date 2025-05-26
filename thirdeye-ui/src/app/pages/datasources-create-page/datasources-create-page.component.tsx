@@ -13,7 +13,7 @@
  * the License.
  */
 import { AxiosError } from "axios";
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { DatasourceWizard } from "../../components/datasource-wizard/datasource-wizard.component";
@@ -36,11 +36,39 @@ import {
     getDatasourcesAllPath,
     getDatasourcesViewPath,
 } from "../../utils/routes/routes.util";
+import { useGetRecommendedDatasources } from "../../rest/datasources/datasources.actions";
 
 export const DatasourcesCreatePage: FunctionComponent = () => {
     const navigate = useNavigate();
     const { t } = useTranslation();
     const { notify } = useNotificationProviderV1();
+    const [defaultDatasource, setDefaultDatasource] = useState<Datasource>(
+        createDefaultDatasource()
+    );
+
+    const {
+        recommendedDatasource,
+        getRecommendedDatasource,
+        status: recommendedDatasourcesStatus,
+        errorMessages: recommendedDatasourcesErrormessage,
+    } = useGetRecommendedDatasources();
+
+    useEffect(() => {
+        getRecommendedDatasource();
+    }, []);
+
+    useEffect(() => {
+        recommendedDatasource && setDefaultDatasource(recommendedDatasource);
+    }, [recommendedDatasource]);
+
+    useEffect(() => {
+        notifyIfErrors(
+            recommendedDatasourcesStatus,
+            recommendedDatasourcesErrormessage,
+            notify,
+            t("errors.pinot-instance-not-created")
+        );
+    }, [recommendedDatasourcesStatus]);
 
     const onDatasourceWizardFinish = (
         datasource: Datasource,
@@ -107,7 +135,7 @@ export const DatasourcesCreatePage: FunctionComponent = () => {
 
             <DatasourceWizard
                 isCreate
-                datasource={createDefaultDatasource()}
+                datasource={defaultDatasource}
                 submitBtnLabel={t("label.create-entity", {
                     entity: t("label.datasource"),
                 })}

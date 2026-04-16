@@ -42,7 +42,8 @@ public class PinotContainer extends GenericContainer<PinotContainer> {
     v0_12_1("0.12.1", "0.12.1"),
     v1_0_0("1.0.0", "1.0.0"),
     v1_1_0("1.1.0", "1.1.0"),
-    v1_2_0("1.2.0", "1.2.0");
+    v1_2_0("1.2.0", "1.2.0"),
+    v1_4_0("1.4.0", "1.4.0");
     
     private final String amdTag;
     private final String armTag;
@@ -61,7 +62,7 @@ public class PinotContainer extends GenericContainer<PinotContainer> {
     
     // if the test does not run for every supported Pinot version, use this version
     public static PinotVersion recommendedVersion() {
-      return v1_2_0;
+      return v1_4_0;
     }
   }
   

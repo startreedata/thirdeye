@@ -13,6 +13,7 @@
 #
 
 FROM eclipse-temurin:21-jdk-alpine AS builder
+RUN apk update && apk upgrade --no-cache
 # build jcmd tools to make them available at runtime
 RUN ${JAVA_HOME}/bin/jlink --module-path jmods --add-modules jdk.jcmd --output /jcmd
 WORKDIR /build
@@ -22,6 +23,7 @@ COPY ./ ./
 RUN if [[ ! -d thirdeye-distribution/target/thirdeye-distribution-*-dist/thirdeye-distribution-* ]]; then ./mvnw package -U -DskipTests; fi
 
 FROM eclipse-temurin:21-jre-alpine
+RUN apk update && apk upgrade --no-cache
 RUN addgroup -g 1000 thirdeye && \
   adduser -u 1000 thirdeye -G thirdeye -D
 

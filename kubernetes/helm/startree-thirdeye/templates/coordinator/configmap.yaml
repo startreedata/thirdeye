@@ -67,7 +67,7 @@ data:
       url: jdbc:mysql://{{- if .Values.mysql.enabled -}}{{- include "thirdeye.mysql.fullname" . -}}{{- else -}}{{- .Values.mysql.url -}}:{{- .Values.mysql.port -}}{{- end -}}/{{- .Values.mysql.mysqlDatabase -}}?autoReconnect=true&{{ .Values.config.jdbcParameters }}
       user: {{ .Values.mysql.mysqlUser }}
       password: {{ .Values.mysql.mysqlPassword }}
-      driver: com.mysql.cj.jdbc.Driver
+      driver: org.mariadb.jdbc.Driver
 
     swagger:
       # Enable/Disable the swagger resource. Helps in API documentation. Should be true by default

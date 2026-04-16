@@ -54,7 +54,7 @@ spec:
 {{ toYaml .Values.ui.tolerations | indent 8 }}
       initContainers:
       - name: init-config
-        image: alpine:3.18
+        image: alpine:3.21
         imagePullPolicy: {{ .Values.image.imagePullPolicy }}
         env:
         - name: NGINX_ENVSUBST_TEMPLATE_DIR

@@ -15,6 +15,8 @@
 
 FROM nginx:1.27-alpine
 
+RUN apk update && apk upgrade --no-cache libxml2 libxslt
+
 RUN addgroup -S thirdeye && \
     adduser -S thirdeye -G thirdeye && \
     chown thirdeye:thirdeye /home/thirdeye

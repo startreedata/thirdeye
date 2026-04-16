@@ -70,16 +70,14 @@
     <guice.version>6.0.0</guice.version>
     <hsqldb.version>2.7.1</hsqldb.version>
     <!-- should match dropwizard version - except for security issues -->
-    <jackson.version>2.18.1</jackson.version>
+    <jackson.version>2.18.6</jackson.version>
     <jodatime.version>2.12.7</jodatime.version>
     <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
     <mockito.version>5.12.0</mockito.version>
     <modelmapper.version>3.1.1</modelmapper.version>
-    <!-- WARNING do not upgrade before MySql regression is fixed: https://bugs.mysql.com/bug.php?id=113378 -->
-    <!-- See our internal ticket for more info https://startree.atlassian.net/browse/TE-1970 -->
-    <mysql.connector.version>8.0.28</mysql.connector.version>
+    <mariadb.jdbc.version>3.5.8</mariadb.jdbc.version>
     <org.mapstruct.version>1.5.5.Final</org.mapstruct.version>
-    <pinot.version>1.2.0</pinot.version>
+    <pinot.version>1.4.0</pinot.version>
     <prometheus.version>0.11.0</prometheus.version>
     <quartz.version>2.3.2</quartz.version>
     <reflections.version>0.10.2</reflections.version>
@@ -640,7 +638,7 @@
       <dependency>
         <groupId>io.dropwizard</groupId>
         <artifactId>dropwizard-bom</artifactId>
-        <version>4.0.11</version>
+        <version>4.0.17</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -812,9 +810,9 @@
 
       <!-- database -->
       <dependency>
-        <groupId>mysql</groupId>
-        <artifactId>mysql-connector-java</artifactId>
-        <version>${mysql.connector.version}</version>
+        <groupId>org.mariadb.jdbc</groupId>
+        <artifactId>mariadb-java-client</artifactId>
+        <version>${mariadb.jdbc.version}</version>
       </dependency>
       <dependency>
         <groupId>com.google.inject</groupId>

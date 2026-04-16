@@ -143,7 +143,7 @@ public class MySqlTestDatabase {
             + "?autoReconnect=true&allowPublicKeyRetrieval=true&sslMode=DISABLED")
         .setUser("test_user")
         .setPassword("pass")
-        .setDriver("com.mysql.cj.jdbc.Driver");
+        .setDriver("org.mariadb.jdbc.Driver");
   }
 
   public static DataSource newDataSource(final DatabaseConfiguration dbConfig) throws Exception {

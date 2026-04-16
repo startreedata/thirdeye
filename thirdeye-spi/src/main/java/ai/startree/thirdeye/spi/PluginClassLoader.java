@@ -36,7 +36,7 @@ public class PluginClassLoader extends URLClassLoader {
       .add("io.micrometer")
       .add("org.joda.time")
       .add("org.slf4j")
-      .add("com.mysql")
+      .add("org.mariadb.jdbc")
       .add("jakarta.activation")
       .add("com.fasterxml.jackson")
       .build();

@@ -13,7 +13,7 @@
  */
 package ai.startree.thirdeye.logging;
 
-import ch.qos.logback.access.spi.IAccessEvent;
+import ch.qos.logback.access.common.spi.IAccessEvent;
 import ch.qos.logback.core.filter.Filter;
 import ch.qos.logback.core.spi.FilterReply;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -22,8 +22,6 @@ import io.dropwizard.logging.common.filter.FilterFactory;
 import jakarta.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.Set;
-
-// TODO: shounak. Remove this class and META-INF/services/io.dropwizard.logging.filter.FilterFactory file once dropwizard is upgraded to v2.1.x
 
 @JsonTypeName("uri")
 public class UriFilterFactory implements FilterFactory<IAccessEvent> {

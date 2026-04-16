@@ -27,21 +27,21 @@ import java.util.regex.Pattern;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.containers.MariaDBContainer;
 
 public class MySqlTestDatabase {
 
   private static final Logger log = LoggerFactory.getLogger(MySqlTestDatabase.class);
   private static final String SYS_PROP_LOCAL_MYSQL_INSTANCE = "thirdeye.test.useLocalMysqlInstance";
   private static final AtomicInteger counter = new AtomicInteger(0);
-  private static final String MYSQL_DOCKER_IMAGE = "mysql:8.0";
+  private static final String MARIADB_DOCKER_IMAGE = "mariadb:11.4";
 
   private static final String USERNAME = "root";
   private static final String PASSWORD = "test";
   private static String jdbcUrl = null;
   private static String defaultDatabaseName = null;
 
-  private static MySQLContainer<?> persistenceDbContainer = null;
+  private static MariaDBContainer<?> persistenceDbContainer = null;
   private static DatabaseConfiguration sharedConfiguration = null;
 
   public static DatabaseConfiguration sharedDatabaseConfiguration() {
@@ -106,7 +106,7 @@ public class MySqlTestDatabase {
   public static synchronized DatabaseConfiguration newDatabaseConfiguration() {
     if (persistenceDbContainer == null) {
       // init docker container
-      persistenceDbContainer = new MySQLContainer<>(MYSQL_DOCKER_IMAGE).withPassword(PASSWORD);
+      persistenceDbContainer = new MariaDBContainer<>(MARIADB_DOCKER_IMAGE).withPassword(PASSWORD);
       persistenceDbContainer.start();
       jdbcUrl = persistenceDbContainer.getJdbcUrl();
       final String[] elements = jdbcUrl.split("/");
@@ -130,7 +130,7 @@ public class MySqlTestDatabase {
             + "?autoReconnect=true&allowPublicKeyRetrieval=true&sslMode=DISABLED")
         .setUser(USERNAME)
         .setPassword(PASSWORD)
-        .setDriver(persistenceDbContainer.getDriverClassName());
+        .setDriver("org.mariadb.jdbc.Driver");
   }
 
   private static DatabaseConfiguration localMysqlDatabaseConfiguration() {
@@ -143,7 +143,7 @@ public class MySqlTestDatabase {
             + "?autoReconnect=true&allowPublicKeyRetrieval=true&sslMode=DISABLED")
         .setUser("test_user")
         .setPassword("pass")
-        .setDriver("com.mysql.cj.jdbc.Driver");
+        .setDriver("org.mariadb.jdbc.Driver");
   }
 
   public static DataSource newDataSource(final DatabaseConfiguration dbConfig) throws Exception {

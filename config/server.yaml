@@ -77,7 +77,7 @@ database:
   url: jdbc:mysql://127.0.0.1:3306/thirdeye_test?autoReconnect=true&allowPublicKeyRetrieval=true&sslMode=DISABLED
   user: uthirdeye
   password: pass
-  driver: com.mysql.cj.jdbc.Driver
+  driver: org.mariadb.jdbc.Driver
 
 swagger:
   # Enable/Disable the swagger resource. Helps in API documentation. Should be true by default

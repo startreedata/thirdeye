@@ -119,6 +119,11 @@
           <groupId>org.mindrot</groupId>
           <artifactId>jbcrypt</artifactId>
         </exclusion>
+        <!-- only used by pinot server-side audit. Would be downgraded to the version managed in the root pom -->
+        <exclusion>
+          <groupId>com.nimbusds</groupId>
+          <artifactId>nimbus-jose-jwt</artifactId>
+        </exclusion>
         <!-- not excluded: com.github.seancfoley:ipaddress. It is required if the connection parses the query-->
         <exclusion>
           <groupId>com.yscope.clp</groupId>
@@ -220,6 +225,11 @@
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
+    </dependency>
+    <!-- used by PinotControllerRestClient - not brought transitively by pinot-java-client -->
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpmime</artifactId>
     </dependency>
 
     <!-- test dependencies -->

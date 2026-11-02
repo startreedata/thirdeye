@@ -79,7 +79,14 @@
     <!-- See our internal ticket for more info https://startree.atlassian.net/browse/TE-1970 -->
     <mysql.connector.version>8.0.28</mysql.connector.version>
     <org.mapstruct.version>1.5.5.Final</org.mapstruct.version>
-    <pinot.version>1.2.0</pinot.version>
+    <pinot.version>1.6.0</pinot.version>
+    <!-- transitive dependencies of pinot-java-client - pinned for security fixes -->
+    <async-http-client.version>3.0.14</async-http-client.version>
+    <!-- netty line async-http-client is built on -->
+    <netty.version>4.2.18.Final</netty.version>
+    <libthrift.version>0.25.0</libthrift.version>
+    <httpclient5.version>5.6.5</httpclient5.version>
+    <httpcore5.version>5.4.4</httpcore5.version>
     <prometheus.version>0.11.0</prometheus.version>
     <quartz.version>2.3.2</quartz.version>
     <reflections.version>0.10.2</reflections.version>
@@ -597,6 +604,43 @@
             <artifactId>jersey-server</artifactId>
           </exclusion>
         </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>io.netty</groupId>
+        <artifactId>netty-bom</artifactId>
+        <version>${netty.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.asynchttpclient</groupId>
+        <artifactId>async-http-client</artifactId>
+        <version>${async-http-client.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.thrift</groupId>
+        <artifactId>libthrift</artifactId>
+        <version>${libthrift.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents.client5</groupId>
+        <artifactId>httpclient5</artifactId>
+        <version>${httpclient5.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents.core5</groupId>
+        <artifactId>httpcore5</artifactId>
+        <version>${httpcore5.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents.core5</groupId>
+        <artifactId>httpcore5-h2</artifactId>
+        <version>${httpcore5.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpmime</artifactId>
+        <version>4.5.14</version>
       </dependency>
       <dependency>
         <groupId>org.apache.httpcomponents</groupId>

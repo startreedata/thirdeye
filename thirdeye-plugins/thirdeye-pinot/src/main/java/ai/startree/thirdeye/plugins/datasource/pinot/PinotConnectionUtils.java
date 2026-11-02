@@ -17,6 +17,7 @@ import static ai.startree.thirdeye.spi.util.SpiUtils.optional;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
+import static org.asynchttpclient.config.AsyncHttpClientConfigDefaults.defaultDisableHttpsEndpointIdentificationAlgorithm;
 
 import java.lang.reflect.Field;
 import java.security.NoSuchAlgorithmException;
@@ -107,10 +108,15 @@ public class PinotConnectionUtils {
       properties.setProperty("scheme", scheme);
       if ("https".equals(scheme)) {
         try {
-          factory.setSslContext(SSLContext.getDefault());
+          final SSLContext sslContext = SSLContext.getDefault();
+          // broker hostname verification honors the async-http-client opt-out:
+          // -Dorg.asynchttpclient.disableHttpsEndpointIdentificationAlgorithm=true
+          factory.setSslContext(defaultDisableHttpsEndpointIdentificationAlgorithm()
+              ? sslContext
+              : new HostnameVerifyingSslContext(sslContext));
         } catch (final NoSuchAlgorithmException e) {
-          // FIXME CYRIL - follow up PR --> throw an exception instead of not setting https
-          LOG.warn("SSL context not set for transport!");
+          // without a context, the pinot client builds one that does not verify the broker hostname
+          throw new IllegalStateException("Could not get the default SSL context for https", e);
         }
       }
     }

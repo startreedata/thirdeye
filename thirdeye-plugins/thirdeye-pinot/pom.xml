@@ -26,7 +26,31 @@
   <artifactId>thirdeye-pinot</artifactId>
 
   <properties>
+    <httpclient5.version>5.6.5</httpclient5.version>
+    <httpcore5.version>5.4.4</httpcore5.version>
   </properties>
+
+  <!-- pinned for security fixes. Scoped to this plugin: other modules get httpclient5 from dropwizard-client or calcite (avatica) and rely on its behavior -->
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.apache.httpcomponents.client5</groupId>
+        <artifactId>httpclient5</artifactId>
+        <version>${httpclient5.version}</version>
+      </dependency>
+      <!-- libthrift declares httpcore5 5.2, which would otherwise win dependency mediation -->
+      <dependency>
+        <groupId>org.apache.httpcomponents.core5</groupId>
+        <artifactId>httpcore5</artifactId>
+        <version>${httpcore5.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents.core5</groupId>
+        <artifactId>httpcore5-h2</artifactId>
+        <version>${httpcore5.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <dependency>
@@ -118,6 +142,11 @@
         <exclusion>
           <groupId>org.mindrot</groupId>
           <artifactId>jbcrypt</artifactId>
+        </exclusion>
+        <!-- only used by pinot server-side audit. Would be downgraded to the version managed in the root pom -->
+        <exclusion>
+          <groupId>com.nimbusds</groupId>
+          <artifactId>nimbus-jose-jwt</artifactId>
         </exclusion>
         <!-- not excluded: com.github.seancfoley:ipaddress. It is required if the connection parses the query-->
         <exclusion>
@@ -220,6 +249,11 @@
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
+    </dependency>
+    <!-- used by PinotControllerRestClient - not brought transitively by pinot-java-client -->
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpmime</artifactId>
     </dependency>
 
     <!-- test dependencies -->

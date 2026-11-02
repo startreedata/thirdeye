@@ -27,9 +27,9 @@ public class HostnameVerifyingSslContextTest {
 
   @Test
   public void testPinotClientBrokerEnginesVerifyHostname() throws Exception {
+    final SSLContext sslContext = new HostnameVerifyingSslContext(SSLContext.getDefault());
     final AsyncHttpClientConfig config = SslContextProviderFactory.create()
-        .configure(Dsl.config(), new HostnameVerifyingSslContext(SSLContext.getDefault()),
-            TlsProtocols.defaultProtocols(false))
+        .configure(Dsl.config(), sslContext, TlsProtocols.defaultProtocols(false))
         .build();
 
     final SSLEngine engine = config.getSslEngineFactory()
@@ -38,5 +38,7 @@ public class HostnameVerifyingSslContextTest {
     assertThat(engine.getSSLParameters().getEndpointIdentificationAlgorithm()).isEqualTo("HTTPS");
     assertThat(engine.getPeerHost()).isEqualTo("broker.example.com");
     assertThat(engine.getUseClientMode()).isTrue();
+    assertThat(sslContext.getDefaultSSLParameters().getEndpointIdentificationAlgorithm())
+        .isEqualTo("HTTPS");
   }
 }

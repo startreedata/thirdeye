@@ -34,6 +34,10 @@ import javax.net.ssl.TrustManager;
  * context passed to the client must enforce it. Trust and key material are those of the
  * delegate. Engines created without a peer host fail the handshake, because there is no hostname
  * to verify against.
+ *
+ * <p>Only {@link SSLEngine}s and the default/supported {@link SSLParameters} carry the hostname
+ * verification. Socket factories are the delegate's and do not verify the hostname. The wrapper
+ * cannot be (re-)initialized: initialize the delegate instead.
  */
 public class HostnameVerifyingSslContext extends SSLContext {
 
@@ -42,10 +46,13 @@ public class HostnameVerifyingSslContext extends SSLContext {
   }
 
   private static SSLEngine withHostnameVerification(final SSLEngine engine) {
-    final SSLParameters params = engine.getSSLParameters();
-    params.setEndpointIdentificationAlgorithm("HTTPS");
-    engine.setSSLParameters(params);
+    engine.setSSLParameters(withHostnameVerification(engine.getSSLParameters()));
     return engine;
+  }
+
+  private static SSLParameters withHostnameVerification(final SSLParameters params) {
+    params.setEndpointIdentificationAlgorithm("HTTPS");
+    return params;
   }
 
   private static class Spi extends SSLContextSpi {
@@ -59,7 +66,7 @@ public class HostnameVerifyingSslContext extends SSLContext {
     @Override
     protected void engineInit(final KeyManager[] km, final TrustManager[] tm,
         final SecureRandom sr) throws KeyManagementException {
-      delegate.init(km, tm, sr);
+      throw new UnsupportedOperationException("Initialize the delegate SSLContext instead");
     }
 
     @Override
@@ -94,12 +101,12 @@ public class HostnameVerifyingSslContext extends SSLContext {
 
     @Override
     protected SSLParameters engineGetDefaultSSLParameters() {
-      return delegate.getDefaultSSLParameters();
+      return withHostnameVerification(delegate.getDefaultSSLParameters());
     }
 
     @Override
     protected SSLParameters engineGetSupportedSSLParameters() {
-      return delegate.getSupportedSSLParameters();
+      return withHostnameVerification(delegate.getSupportedSSLParameters());
     }
   }
 }

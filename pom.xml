@@ -66,11 +66,11 @@
     <commons.email.version>1.5</commons.email.version>
     <flyway.version>8.5.13</flyway.version>
     <freemarker.version>2.3.32</freemarker.version>
-    <guava.version>33.3.0-jre</guava.version>
+    <guava.version>33.7.2-jre</guava.version>
     <guice.version>6.0.0</guice.version>
     <hsqldb.version>2.7.1</hsqldb.version>
     <!-- should match dropwizard version - except for security issues -->
-    <jackson.version>2.18.1</jackson.version>
+    <jackson.version>2.18.12</jackson.version>
     <jodatime.version>2.12.7</jodatime.version>
     <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
     <mockito.version>5.12.0</mockito.version>
@@ -573,6 +573,15 @@
         <groupId>ai.startree.thirdeye.plugins</groupId>
         <artifactId>thirdeye-postprocessors</artifactId>
         <version>${project.version}</version>
+      </dependency>
+
+      <!-- aligns jackson modules only brought transitively (e.g. by dropwizard) on jackson.version -->
+      <dependency>
+        <groupId>com.fasterxml.jackson</groupId>
+        <artifactId>jackson-bom</artifactId>
+        <version>${jackson.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
 
       <!-- project dependencies -->

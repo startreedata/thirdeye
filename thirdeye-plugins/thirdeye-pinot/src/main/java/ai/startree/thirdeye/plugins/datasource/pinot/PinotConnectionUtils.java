@@ -107,7 +107,7 @@ public class PinotConnectionUtils {
       properties.setProperty("scheme", scheme);
       if ("https".equals(scheme)) {
         try {
-          factory.setSslContext(SSLContext.getDefault());
+          factory.setSslContext(new HostnameVerifyingSslContext(SSLContext.getDefault()));
         } catch (final NoSuchAlgorithmException e) {
           // FIXME CYRIL - follow up PR --> throw an exception instead of not setting https
           LOG.warn("SSL context not set for transport!");

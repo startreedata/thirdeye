@@ -90,7 +90,7 @@
     <slf4j-api.version>2.0.16</slf4j-api.version>
     <snakeyaml.version>2.2</snakeyaml.version>
     <dropwizard.swagger.version>4.0.5-1</dropwizard.swagger.version>
-    <testcontainers.version>1.19.3</testcontainers.version>
+    <testcontainers.version>1.21.4</testcontainers.version>
     <micrometer.version>1.11.4</micrometer.version>
     <sentry.version>7.2.0</sentry.version>
   </properties>

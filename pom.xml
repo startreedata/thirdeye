@@ -575,7 +575,7 @@
         <version>${project.version}</version>
       </dependency>
 
-      <!-- imported before dropwizard-bom: between imported BOMs, the first one declared wins -->
+      <!-- aligns jackson modules only brought transitively (e.g. by dropwizard) on jackson.version -->
       <dependency>
         <groupId>com.fasterxml.jackson</groupId>
         <artifactId>jackson-bom</artifactId>

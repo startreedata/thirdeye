@@ -109,8 +109,8 @@ public class PinotConnectionUtils {
         try {
           factory.setSslContext(new HostnameVerifyingSslContext(SSLContext.getDefault()));
         } catch (final NoSuchAlgorithmException e) {
-          // FIXME CYRIL - follow up PR --> throw an exception instead of not setting https
-          LOG.warn("SSL context not set for transport!");
+          // without a context, the pinot client builds one that does not verify the broker hostname
+          throw new IllegalStateException("Could not get the default SSL context for https", e);
         }
       }
     }
